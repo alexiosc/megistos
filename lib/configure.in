@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  2003/09/28 22:23:59  alexios
+# Added conditional generation of documentation (via doxygen detection)
+# and locale directory.
+#
 # Revision 1.5  2003/09/28 13:14:32  alexios
 # Added gettext tests and support.
 #
@@ -41,6 +45,10 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+
+dnl Check for doxygen
+AC_PATH_PROG([DOXYGEN],[doxygen])
+AM_CONDITIONAL(HAVE_DOXYGEN,test .$DOXYGEN != .)
 
 dnl Use libtool to make a shared library.
 AC_PROG_LIBTOOL
@@ -178,6 +186,10 @@ BASEDIR=$p/lib/$BASENAME
 AC_SUBST(BASEDIR)
 AC_DEFINE_UNQUOTED(BASEDIR,"$BASEDIR",[The default base directory of the system's data files.])
 
+LOCALEDIR=$p/share/locale
+AC_SUBST(LOCALEDIR)
+AC_DEFINE_UNQUOTED(LOCALEDIR,"$LOCALEDIR",[The system's locale catalog directory.])
+
 PKGDATADIR=$datadir/$BASENAME
 PKGLIBDIR=$libdir/$BASENAME
 PKGINCLUDEDIR=$includedir/$BASENAME
@@ -188,4 +200,4 @@ AC_SUBST(PKGINCLUDEDIR)
 
 CFLAGS="$CFLAGS -Wall"
 
-AC_OUTPUT([Makefile src/Makefile src/megistos-config intl/Makefile po/Makefile.in m4/Makefile])
+AC_OUTPUT([Makefile src/Makefile src/megistos-config intl/Makefile po/Makefile.in m4/Makefile doc/Makefile])
