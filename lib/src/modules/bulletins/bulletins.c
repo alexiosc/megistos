@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:32:18  alexios
+ * Adjusted #includes. Removed bltcnv. Minor cosmetic changes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,9 +69,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_bulletins.h>
-#include <megistos/bltidx.h>
-#include <megistos/bulletins.h>
+#include "mbk_bulletins.h"
+#include "bltidx.h"
+#include "bulletins.h"
 
 
 promptblock_t *msg, *clubmsg;
@@ -263,7 +266,9 @@ done ()
 }
 
 
+#if 0
 int     bltcnv_main (int argc, char *argv[]);
+#endif
 
 
 int
@@ -284,25 +289,22 @@ mod_info_t mod_info_bulletins = {
 	"Permanent archive of interesting club articles et al",
 	RCS_VER,
 	"1.0",
-	{50, login}
-	,			/* Login handler */
-	{0, handler_run}
-	,			/* Interactive handler */
-	{0, NULL}
-	,			/* Install logout handler */
-	{0, NULL}
-	,			/* Hangup handler */
-	{50, cleanup}
-	,			/* Cleanup handler */
-	{0, NULL}		/* Delete user handler */
+	{50, login},		/* Login handler */
+	{0,  handler_run},	/* Interactive handler */
+	{0,  NULL},		/* Install logout handler */
+	{0,  NULL},		/* Hangup handler */
+	{50, cleanup},		/* Cleanup handler */
+	{0,  NULL}		/* Delete user handler */
 };
 
 
 int
 main (int argc, char *argv[])
 {
+#if 0
 	if (strstr (argv[0], "bltcnv"))
 		return bltcnv_main (argc, argv);
+#endif
 	if (argc == 3 && !strcmp (argv[1], "--insert")) {
 		init ();
 		return extins (argv[2]);
