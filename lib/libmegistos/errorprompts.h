@@ -54,6 +54,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 13:12:18  alexios
+ * Added support for I18N to this file (indeed, this is the main reason
+ * why I18N is necesary in libmegistos, as the fatal error messages are
+ * the only hardwired strings in the system that the users will ever see.
+ *
  * Revision 1.4  2003/09/27 20:30:08  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -85,6 +90,15 @@
 #define ERRORPROMPTS_H
 
 
+/* Fall back to locale-driven messages. The symbol GREEK is only kept
+ * here for traditional purposes. The Greek messages are in the CP737
+ * encoding and thus not very useful in this day and age. */
+
+#if ENABLE_NLS
+#  undef GREEK
+#endif
+
+
 /** Hard-wired, non-fatal error message.
 
     This message is issued whenever a non-fatal message occurs. Feel free to
@@ -100,11 +114,11 @@
 	"         «˜¢˜ §à¨å˜.\033[0;1m\n\n"
 #else
 #define ERRORMESSAGE \
-	"\033[0;1;31;5mCaution: \033[0;1;31m" \
-	"A non-fatal error has interrupted this process.\n" \
-	"         Please notify the Sysop about the conditions\n" \
-	"         that led to it. We apologise for the inconvenience." \
-	"\033[0;1m\n\n"
+	_("\033[0;1;31;5mCaution: \033[0;1;31m" \
+	  "A non-fatal error has interrupted this process.\n" \
+	  "         Please notify the Sysop about the conditions\n" \
+	  "         that led to it. We apologise for the inconvenience." \
+	  "\033[0;1m\n\n")
 #endif /* GREEK */
 
 
@@ -123,11 +137,11 @@
 	"         «˜¢˜ §à¨å˜.\033[0;1m\n\n"
 #else
 #define FATALMESSAGE \
-	"\033[0;1;31;5mCAUTION: \033[0;1;31m" \
-	"A fatal error has interrupted this process.\n" \
-	"         Please notify the Sysop about the conditions\n" \
-	"         that led to it. We apologise for the inconvenience." \
-	"\033[0;1m\n\n"
+	_("\033[0;1;31;5mCAUTION: \033[0;1;31m" \
+	  "A fatal error has interrupted this process.\n" \
+	  "         Please notify the Sysop about the conditions\n" \
+	  "         that led to it. We apologise for the inconvenience." \
+	  "\033[0;1m\n\n")
 #endif /* GREEK */
 
 
