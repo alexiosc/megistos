@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.10  2003/12/20 18:20:22  alexios
+# Added the mbk_*h files to the cleaned file list. Minor dependency fixes.
+#
 # Revision 1.9  2003/12/20 10:18:56  alexios
 # Added more MSG files needed to build the base system.
 #
@@ -86,6 +89,7 @@ libmegistos_la_SOURCES =						    \
 pkginclude_HEADERS = $(HDR)
 
 noinst_HEADERS = mbk_sysvar.h mbk_metabbs.h mbk_signup.h
+CLEANFILES     = mbk_sysvar.h mbk_metabbs.h mbk_signup.h
 
 libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info 3:5:1
 libmegistos_la_CFLAGS = @CFLAGS@ -Wall
@@ -118,5 +122,7 @@ mksysvar_LDADD = -lmegistos
 sysvar.mbk mbk_sysvar.h:	megistos-config msgidx sysvar.msg
 				$(MSGIDX) sysvar.msg
 
-mbk_%.h:			%.msg msgidx
+mbk_%.h:			%.msg
 				$(MSGIDX) $<
+
+# End of file
