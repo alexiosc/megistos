@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.0  1999/07/18 21:59:36  alexios
  * Initial revision
@@ -113,7 +112,7 @@ void init_non_megistos()
     non_megistos[i].bbs_uid=-1;
     non_megistos[i].bbs_gid=-1;
     non_megistos[i].bbsd_pid=(int)getpid();
-    non_megistos[i].prefix=strdup(BBSDIR);
+    non_megistos[i].prefix=strdup(mkfname(""));
 
 #ifdef DEBUG
     fprintf(stderr,
@@ -195,7 +194,7 @@ void register_with_metabbs()
   reg.bbs_uid=bbsuid;
   reg.bbs_gid=bbsgid;
   reg.bbsd_pid=(int)getpid();
-  reg.prefix=strdup(BBSDIR);
+  reg.prefix=strdup(mkfname(""));
 
   result=metabbs_register_1(&reg,cl);
 

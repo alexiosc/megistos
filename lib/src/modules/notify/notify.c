@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.4  1999/07/18 21:47:34  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -70,7 +69,7 @@ const char *__RCS=RCS_VER;
 #include "mbk_notify.h"
 
 
-#define NOTIFYDIR BBSDATADIR"/notify"
+#define NOTIFYDIR mkfname(BBSDATADIR"/notify")
 
 
 promptblock_t *msg;
@@ -138,7 +137,7 @@ loadlist(char *userid)
   FILE *fp;
 
   newlist();
-  sprintf(fname,"%s/%s",NOTIFYDIR,userid);
+  sprintf(fname,"%s/%s",mkfname(NOTIFYDIR),userid);
   if((fp=fopen(fname,"r"))==NULL){
     if(errno!=ENOENT){
       error_fatalsys("Unable to open %s (errno=%d)",fname);
@@ -164,7 +163,7 @@ savelist()
   FILE *fp;
   int i;
 
-  sprintf(fname,"%s/%s",NOTIFYDIR,thisuseracc.userid);
+  sprintf(fname,"%s/%s",mkfname(NOTIFYDIR),thisuseracc.userid);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create %s",fname);
   }
@@ -187,7 +186,7 @@ notifyothers()
   for(i=0;i<chan_count;i++){
     if(channel_getstatus(channels[i].ttyname,&status)){
       if(status.result==LSR_USER){
-	sprintf(fname,NOTIFYDIR"/%s",status.user);
+	sprintf(fname,"%s/%s",mkfname(NOTIFYDIR),status.user);
 	if(stat(fname,&st))continue;
 
 	/* Check for Notify invisibility */
@@ -200,9 +199,9 @@ notifyothers()
 
 	loadlist(status.user);
 	if(bsearch(&key,list,numusers,sizeof(struct listitem),listcmp)!=NULL){
-	  sprompt(out_buffer,INJMSG,
-		  msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
-		  thisuseracc.userid);
+	  sprompt_other(othrshm,out_buffer,INJMSG,
+			msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
+			thisuseracc.userid);
 	  usr_injoth(&othruseronl,out_buffer,0);
 	}
       }
@@ -428,7 +427,7 @@ int handler_userdel(int argc, char **argv)
     return 1;
   }
 
-  sprintf(fname,"%s/%s",NOTIFYDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(NOTIFYDIR),victim);
   unlink(fname);
 
   return 0;

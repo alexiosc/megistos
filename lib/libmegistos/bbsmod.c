@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.9  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out().
@@ -100,8 +99,11 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include "bbs.h"
-#include "ver.h"
+#include "systemversion.h"
 #include "mbk_sysvar.h"
+
+
+#define _(x) mkfname("%s%s",SYSVARFILE,x)
 
 
 struct sysvar        *sysvar=NULL;
@@ -145,6 +147,8 @@ void
 mod_setbot(int s)
 {
   mod_bot=(s!=0);
+  if(s)out_flags|=OFL_ISBOT;
+  else out_flags&=~OFL_ISBOT;
 }
 
 
@@ -195,7 +199,7 @@ loadsysvars()
 
   /* Is the sysvar file somewhere in shared memory? */
 
-  if((sysvarf=fopen(SYSVARSHMFILE,"r"))!=NULL){
+  if((sysvarf=fopen(mkfname(SYSVARSHMFILE),"r"))!=NULL){
     char magic[5];
     fscanf(sysvarf,"%d",&shmid);
 
@@ -231,7 +235,7 @@ loadsysvars()
   /* Allocate memory */  
   sysvar=(struct sysvar *)alcmem(sizeof(struct sysvar));
 
-  strcpy(fname,SYSVARFILE);
+  strcpy(fname,mkfname(SYSVARFILE));
   for(i=0;i<6;i++){
     if((sysvarf=fopen(fname,"r"))!=NULL){
       char magic[5];
@@ -277,29 +281,29 @@ savesysvars()
   /* Make a backup copy of the sysvar file and age it -- it tends to
      die at bad crashes and we need the backups */
 
-  if(!stat(SYSVARFILE".OOOO",&st))rename(SYSVARFILE".OOOO",SYSVARFILE".OOOOO");
-  if(!stat(SYSVARFILE".OOO",&st))rename(SYSVARFILE".OOO",SYSVARFILE".OOOO");
-  if(!stat(SYSVARFILE".OO",&st))rename(SYSVARFILE".OO",SYSVARFILE".OOO");
-  if(!stat(SYSVARFILE".O",&st))rename(SYSVARFILE".O",SYSVARFILE".OO");
-  if(!stat(SYSVARFILE,&st))fcopy(SYSVARFILE,SYSVARFILE".O");
+  if(!stat(_(".OOOO"),&st))rename(_(".OOOO"),_(".OOOOO"));
+  if(!stat(_(".OOO"),&st))rename(_(".OOO"),_(".OOOO"));
+  if(!stat(_(".OO"),&st))rename(_(".OO"),_(".OOO"));
+  if(!stat(_(".O"),&st))rename(_(".O"),_(".OO"));
+  if(!stat(_(""),&st))fcopy(_(""),_(".O"));
   
   /* Make sure the files have the right owners/permissions if we're root */
   if(!getuid()){
-    chown(SYSVARFILE,bbs_uid,bbs_gid);
-    chown(SYSVARFILE".O",bbs_uid,bbs_gid);
-    chown(SYSVARFILE".OO",bbs_uid,bbs_gid);
-    chown(SYSVARFILE".OOO",bbs_uid,bbs_gid);
-    chown(SYSVARFILE".OOOO",bbs_uid,bbs_gid);
-    chown(SYSVARFILE".OOOOO",bbs_uid,bbs_gid);
-    chmod(SYSVARFILE,0660);
-    chmod(SYSVARFILE".O",0660);
-    chmod(SYSVARFILE".OO",0660);
-    chmod(SYSVARFILE".OOO",0660);
-    chmod(SYSVARFILE".OOOO",0660);
-    chmod(SYSVARFILE".OOOOO",0660);
+    chown(_(""),bbs_uid,bbs_gid);
+    chown(_(".O"),bbs_uid,bbs_gid);
+    chown(_(".OO"),bbs_uid,bbs_gid);
+    chown(_(".OOO"),bbs_uid,bbs_gid);
+    chown(_(".OOOO"),bbs_uid,bbs_gid);
+    chown(_(".OOOOO"),bbs_uid,bbs_gid);
+    chmod(_(""),0660);
+    chmod(_(".O"),0660);
+    chmod(_(".OO"),0660);
+    chmod(_(".OOO"),0660);
+    chmod(_(".OOOO"),0660);
+    chmod(_(".OOOOO"),0660);
   }
 
-  sprintf(fname,SYSVARFILE".%d",(int)getpid());
+  sprintf(fname,mkfname("%s.%d",SYSVARFILE,(int)getpid()));
   if((sysvarf=fopen(fname,"w"))!=NULL){
     fwrite(sysvar,sizeof(struct sysvar),1,sysvarf);
   } else {
@@ -327,7 +331,7 @@ savesysvars()
 	lock_wait("LCK..sysvar",10);
 	if(lock_check("LCK..sysvar",dummy)<=0){
 	  lock_place("LCK..sysvar","writing");
-	  fcopy(fname,SYSVARFILE);
+	  fcopy(fname,_(""));
 	  unlink(fname);
 	  lock_rm("LCK..sysvar");
 	}
@@ -347,22 +351,22 @@ loadclasses()
   FILE *fp;
   struct stat s;
 
-  if((fp=fopen(CLASSFILE,"r"))==NULL){
-    error_fatalsys("Failed to open user class file %s.",CLASSFILE);
+  if((fp=fopen(mkfname(CLASSFILE),"r"))==NULL){
+    error_fatalsys("Failed to open user class file %s.",mkfname(CLASSFILE));
   }
   
-  stat(CLASSFILE,&s);
+  stat(mkfname(CLASSFILE),&s);
   if(!s.st_size){
-    error_fatal("User class file %s is emtpy.",CLASSFILE);
+    error_fatal("User class file %s is emtpy.",mkfname(CLASSFILE));
   }
   if(s.st_size%sizeof(classrec_t)){
-    error_fatal("User class file %s has bad format.",CLASSFILE);
+    error_fatal("User class file %s has bad format.",mkfname(CLASSFILE));
   }
  
   cls_classes=realloc(cls_classes,s.st_size);
   cls_count=s.st_size/sizeof(classrec_t);
   if(cls_count!=fread(cls_classes,sizeof(classrec_t),MAXCLASS,fp)){
-    error_fatalsys("Can't read user classes from %s.",CLASSFILE);
+    error_fatalsys("Can't read user classes from %s.",mkfname(CLASSFILE));
   }
 
   fclose(fp);
@@ -380,7 +384,7 @@ loaduser()
     error_fatal("Variable $USERID incorrectly set.");
   }
 
-  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,userid);
+  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),userid);
   if((fp=fopen(fname,"r"))==NULL){
     error_fatalsys("Unable to open file %s",fname);
   }
@@ -453,12 +457,16 @@ mod_init(uint32 f)
   mod_regpid(getenv("CHANNEL"));
   initialised|=f;
   if(f&INI_SYSVARS)loadsysvars();
-  if(f&INI_OUTPUT)out_init();
+  if(f&INI_OUTPUT){
+    out_init();
+    if(mod_isbot())out_setflags(OFL_ISBOT);
+  }
   if(f&INI_USER){
     loaduser();
-    if(thisshm!=NULL)
-      if((f&INI_OUTPUT) && 
-	 (thisuseronl.flags&OLF_AFTERINP))out_setflags(OFL_AFTERINPUT);
+    if((thisshm!=NULL) && (f&INI_OUTPUT)!=0){
+      if(thisuseronl.flags&OLF_AFTERINP)out_setflags(OFL_AFTERINPUT);
+      if(thisuseronl.flags&OLF_ISBOT)out_setflags(OFL_ISBOT);
+    }
   }
   error_setnotify(f&INI_ERRMSGS);
   if(f&INI_INPUT){
@@ -555,7 +563,7 @@ syschat()
     char fname[256],command[256];
     FILE *fp;
     
-    sprintf(fname,"%s/.emu-%s",EMULOGDIR,getenv("CHANNEL"));
+    sprintf(fname,"%s/.emu-%s",mkfname(EMULOGDIR),getenv("CHANNEL"));
     if((fp=fopen(fname,"w"))==NULL)return;
     fcntl(fileno(fp),F_SETFL,fcntl(fileno(fp),F_GETFL)|O_NONBLOCK);
     fprintf(fp,"\n");
@@ -576,7 +584,7 @@ mod_regpid(char *tty)
   char command[256];
 
   if(tty==NULL || !tty[0] || !strcmp(tty,"(null)"))return;
-  sprintf(fname,"%s/register-%s",BBSETCDIR,tty);
+  sprintf(fname,"%s/register-%s",mkfname(BBSETCDIR),tty);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Can't open %s for writing.",fname);
   }
@@ -650,17 +658,17 @@ mod_syntax()
 
 #define MOD_INSTALL_HANDLER(x) \
 if(__module.x.handler){ \
-printf("mkdir -p -m 0750 %s/%s;\n",BBSMODULEDIR,#x); \
-printf("ln -sf %s/%s %s/%s/%02d_%s;\n", \
-       BINDIR,__module.progname, \
-       BBSMODULEDIR,#x,__module.x.priority,__module.progname); \
+  printf("mkdir -p -m 0750 %s/%s;\n",mkfname(BBSMODULEDIR),#x); \
+  printf("ln -sf %s/%s ",mkfname(BINDIR),__module.progname);\
+  printf("%s/%s/%02d_%s;\n",\
+         mkfname(BBSMODULEDIR),#x,__module.x.priority,__module.progname); \
 }
   
 
 static void
 mod_uninstall()
 {
-  printf("rm -f %s/*/*_%s;\n",BBSMODULEDIR,__module.progname);
+  printf("rm -f %s/*/*_%s;\n",mkfname(BBSMODULEDIR),__module.progname);
 }
 
 

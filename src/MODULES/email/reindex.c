@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.3  1998/12/27 15:17:13  alexios
  * Added autoconf support.
@@ -78,8 +77,13 @@ doreindex()
   fflush(stdout);
   fflush(stderr);
   if(!getuid()){
-    system("su bbs -c "BINDIR"/mailfixup");
+    char cmd[1024];
+    strcat(cmd,"su bbs -c ");
+    strcat(cmd,mkfname(BINDIR"/mailfixup"));
+    system(cmd);
   } else {
-    system(BINDIR"/mailfixup");
+    char cmd[1024];
+    strcat(cmd,mkfname(BINDIR"/mailfixup"));
+    system(cmd);
   }
 }

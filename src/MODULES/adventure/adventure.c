@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.0  1999/08/10 00:46:33  alexios
  * Initial revision
@@ -102,8 +101,8 @@ gatherlist()
 
   numgames=0;
 
-  if((fp=fopen(GAMEINDEXFILE,"r"))==NULL){
-    error_fatalsys("Unable to open "GAMEINDEXFILE" for reading.");
+  if((fp=fopen(mkfname(GAMEINDEXFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s for reading.",mkfname(GAMEINDEXFILE));
   }
 
   linenum=0;
@@ -117,8 +116,8 @@ gatherlist()
       int n;
       char d[8192],f[1024];
       if(sscanf(&line[1],"%s %n",fname,&n)!=1){
-	error_fatal("line %d in"GAMEINDEXFILE" starts with : but has bad format!",
-	      linenum);
+	error_fatal("line %d in %s starts with : but has bad format!",
+	      linenum,mkfname(GAMEINDEXFILE));
       }
       strcpy(d,stripspace(&line[n]));
 
@@ -126,10 +125,10 @@ gatherlist()
       /* Check for the existence of the file. */
       
       
-      sprintf(f,GAMEDIR"/%s",fname);
+      sprintf(f,"%s/%s",mkfname(GAMEDIR),fname);
       if(stat(f,&st)){
 	strcat(fname,".gz");
-	sprintf(f,GAMEDIR"/%s",fname);
+	sprintf(f,"%s/%s",mkfname(GAMEDIR),fname);
 	if(stat(f,&st)) {
 	  ignore=1;
 	  continue;
@@ -245,7 +244,7 @@ play(char *gamename)
   
   /* Copy the game file there */
   
-  sprintf(fname,GAMEDIR"/%s",gamename);
+  sprintf(fname,"%s/%s",mkfname(GAMEDIR),gamename);
   sprintf(s,"%s/%s",tmpdir,gamename);
   if(fcopy(fname,s)){
     error_fatal("Unable to fcopy() %s -> %s",fname,s);
@@ -276,7 +275,7 @@ play(char *gamename)
   switch(fork()){
   case 0:
     chdir(tmpdir);
-    execl(BINDIR"/infoint","infoint",s);
+    execl(mkfname(BINDIR"/infoint"),"infoint",s);
     error_fatalsys("Unable to execl()"); /* Whoops, this doesn't look good. */
     break;
 
@@ -341,9 +340,9 @@ updatetop(int s, int n)
 
   /* Copy over the rest of the file, change the one entry we're interested in. */
 
-  fp=fopen(TOPFILE,"r");
+  fp=fopen(mkfname(TOPFILE),"r");
   
-  sprintf(fname,"%s~",TOPFILE);
+  sprintf(fname,"%s~",mkfname(TOPFILE));
   if((out=fopen(fname,"w"))==NULL){
     lock_rm(lock);
     error_fatalsys("Unable to create %s",fname);
@@ -369,9 +368,9 @@ updatetop(int s, int n)
   if(fp!=NULL)fclose(fp);
   fclose(out);
 
-  if(rename(fname,TOPFILE)){
+  if(rename(fname,mkfname(TOPFILE))){
     lock_rm(lock);
-    error_fatalsys("Unable to rename %s to "TOPFILE,fname);
+    error_fatalsys("Unable to rename %s to %s",fname,mkfname(TOPFILE));
   }
 
   lock_rm(lock);
@@ -431,7 +430,7 @@ top10()
 
   /* Read the accounting file, gather what information we need. */
 
-  if((fp=fopen(TOPFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(TOPFILE),"r"))==NULL){
     prompt(NOTOP);
     lock_rm(lock);
     return;

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 21:44:48  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -256,19 +255,19 @@ mkbody(int clubid, struct message *msg)
   char fname[256], *body=NULL;
   gzFile *zfp;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
-	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  (long)msg->msgno);
+  strcpy(fname,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,
+		       msg->club[0]?msg->club:EMAILDIRNAME,
+		       (long)msg->msgno));
   if((zfp=gzopen(fname,"rb"))==NULL){
     gzclose(zfp);
     error_fatalsys("Unable to open message %s/%d for reading",
-	  msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
+	  mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
   } else {
     struct message dummy;
     if(gzread(zfp,&dummy,sizeof(dummy))<=0){
       gzclose(zfp);
       error_fatalsys("Unable to fseek() message %s/%d",
-	    msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
+	    mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
     }
   }
   
@@ -304,19 +303,19 @@ mkbody(int clubid, struct message *msg)
   char fname[256], *body=NULL;
   FILE *fp;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
-	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  msg->msgno);
+  strcpy(fname,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,
+		       msg->club[0]?msg->club:EMAILDIRNAME,
+		       msg->msgno));
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
     error_fatalsys("Unable to open message %s/%d for reading",
-	     msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
+	     mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
   } else if(fseek(fp,sizeof(struct message),SEEK_SET)){
     int i=errno;
     fclose(fp);
     errno=i;
     error_fatalsys("Unable to fseek() message %s/%d",
-	  msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
+	  mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
   }
   while(!feof(fp)){
     char buffer[1025];
@@ -352,8 +351,8 @@ mkfooter(int clubid, struct message *msg)
     int res;
     struct stat st;
 
-    sprintf(fname,"%s/%s/"MSGATTDIR"/"FILEATTACHMENT,
-	    MSGSDIR,msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
+    strcpy(fname,mkfname("%s/%s/"MSGATTDIR"/"FILEATTACHMENT,MSGSDIR,
+			 msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
 
     /* Check if the file is there */
     
@@ -545,15 +544,14 @@ receipt(int clubdid, struct message *msg)
   fwrite(&rrr,sizeof(rrr),1,fp);
   fclose(fp);
 
-  sprintf(command,"%s %s %s",BBSMAILBIN,hdrname,fname);
+  sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),hdrname,fname);
   system(command);
   unlink(hdrname);
   unlink(fname);
 
   if(usr_insys(msg->from,1)){
     msg_set(mail_msg);
-    sprintf(out_buffer,msg_getl(RRRINJ,othruseracc.language-1),
-	    thisuseracc.userid);
+    sprompt_other(othrshm,out_buffer,RRRINJ,thisuseracc.userid);
     usr_injoth(&othruseronl,out_buffer,0);
   }
   

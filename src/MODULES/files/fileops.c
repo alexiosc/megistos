@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -78,22 +77,22 @@ static int *slowdevs[16];
 void
 saveslowdevs()
 {
-  FILE *fp=fopen(SLOWDEVFILE,"w");
+  FILE *fp=fopen(mkfname(SLOWDEVFILE),"w");
   int i;
 
   if(fp==NULL){
-    error_fatalsys("Unable to open "SLOWDEVFILE" for writing.");
+    error_fatalsys("Unable to open %s for writing.",mkfname(SLOWDEVFILE));
   }
   
   for(i=0;i<16;i++){
     if(fwrite(&numdevs[i],sizeof(int),1,fp)!=1){
-      error_fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
     }
 
     if(numdevs[i]==0)continue;
 
     if(fwrite(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      error_fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
     }
   }
 
@@ -120,16 +119,16 @@ saveslowdevs()
 void
 loadslowdevs()
 {
-  FILE *fp=fopen(SLOWDEVFILE,"r");
+  FILE *fp=fopen(mkfname(SLOWDEVFILE),"r");
   int i;
 
   if(fp==NULL){
-    error_fatalsys("Unable to open "SLOWDEVFILE" for reading.");
+    error_fatalsys("Unable to open %s for reading.",mkfname(SLOWDEVFILE));
   }
 
   for(i=0;i<16;i++){
     if(fread(&numdevs[i],sizeof(int),1,fp)!=1){
-      error_fatalsys("Unable to read from "SLOWDEVFILE);
+      error_fatalsys("Unable to read from %s",mkfname(SLOWDEVFILE));
     }
 
     if(numdevs[i]==0){
@@ -139,7 +138,7 @@ loadslowdevs()
 
     slowdevs[i]=alcmem(numdevs[i]*sizeof(int));
     if(fread(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      error_fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
     }
 
   }
@@ -174,12 +173,12 @@ initslowdevs()
 
   /* Check if we need to reprocess the table */
 
-  sprintf(fname,"%s/files.mbk",MBKDIR);
+  sprintf(fname,"%s/files.mbk",mkfname(MBKDIR));
   if(stat(fname,&st1)){
     error_fatalsys("Sanity check failed: unable to stat %s",fname);
   }
 
-  if(stat(SLOWDEVFILE,&st2))st2.st_mtime=0;
+  if(stat(mkfname(SLOWDEVFILE),&st2))st2.st_mtime=0;
 
   if(st1.st_mtime<st2.st_mtime){
     loadslowdevs();

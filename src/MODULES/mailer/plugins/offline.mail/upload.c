@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:44:48  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -638,7 +637,7 @@ processmsg()
 
   /* All is well, post it */
 
-  sprintf(command,"%s %s %s",BBSMAILBIN,headerfname,bodyfname);
+  sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),headerfname,bodyfname);
   if(system(command)){
     error_fatal("Command %s failed",command);
   }
@@ -664,13 +663,13 @@ processmsg()
   /* Notify the recipient, if on-line */
 
   if(!(thisuseronl.flags&OLF_INVISIBLE)&&usr_insys(msg.to,0)){
-    if(conf)sprintf(out_buffer,msg_get(SIGINJ),
-		    thisuseracc.userid,
-		    msg.subject,
-		    clubhdr.club);
-    else    sprintf(out_buffer,msg_get(EMLINJ),
-		    thisuseracc.userid,
-		    msg.subject);
+    if(conf)sprompt_other(othrshm,out_buffer,SIGINJ,
+			  thisuseracc.userid,
+			  msg.subject,
+			  clubhdr.club);
+    else    sprompt_other(othrshm,out_buffer,EMLINJ,
+			  thisuseracc.userid,
+			  msg.subject);
 
     usr_injoth(&othruseronl,out_buffer,0);
   }

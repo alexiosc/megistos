@@ -45,8 +45,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.3  2001/04/20 20:12:39  alexios
- * Fixed minor but annoying bug where BBSPREFIX wasn't always set.
+ * Revision 1.4  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.11  2000/01/06 11:44:46  alexios
  * Slight corrections to one comment. Reduced the buffer size from

@@ -44,9 +44,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  2000/01/06 11:40:19  alexios
  * Added field lastconsolepage to denote the time of the user's
@@ -1206,6 +1205,27 @@ extern struct shmuserrec *thisshm, *othrshm;
 
 /*@}*/
 
+
+/* Buffer used by injoth and friends. */
+
+struct injoth_buf {
+  long mtype;			/* One of the INJ_x constants */
+
+  union {
+    char simple[1];		/* Simple message (variable length) */
+
+    struct {
+      char   sender[24];	/* Sender of message */
+      uint32 ackofs;		/* Length of message+1 */
+      char   msg[1];		/* Message (variable length) */
+    } withack;
+  } m;
+};
+
+#define INJ_MESSAGE      1	/* Simple injected message */
+#define INJ_MESSAGE_ACK  2	/* Injected message with acknowledgement */
+
+
 extern classrec_t *cls_classes; /** Array of all defined user classes. */
 extern int         cls_count;   /** Number of classes in {\tt cls_classes}. */
 
@@ -1432,7 +1452,7 @@ int usr_insys(char *userid,int checkinvis);
 
 /** Page another user with a message.
 
-    `Injects' a string to another message (hence the name).
+    `Injects' a string to another user (hence the name).
 
     @param user A pointer to the other user's {\tt onlinerec_t}. You should
     obviously attach the other user's shared segment first, by calling {\tt
@@ -1460,9 +1480,65 @@ int usr_insys(char *userid,int checkinvis);
 
     @return Zero if the message could not be injected. One if it was
     successfully sent. This is asynchronous: the user may actually see the
-    message at a later time. */
+    message at a later time. 
+
+    @see {\tt usr_injoth_ack()}.
+*/
 
 int usr_injoth(onlinerec_t *user, char *msg, int force);
+
+
+/** Page another user with a message and acknowledgement
+
+    `Injects' a string to another user and sends back delivery ackowledgement
+    to the original user. Injected messages are displayed asynchronously. If
+    the recipient user is in the process of typing a line, the message will not
+    appear until the user has pressed Enter (there's a way to force synchronous
+    delivery, but it's not considered polite to the user because it disrupts
+    their typing). However, the user may be unable to receive the message for a
+    considerable length of time: maybe they're the Sysop and currently running
+    a UNIX shell, or in the full screen editor. In such cases, it may be
+    necessary to send an acknowledgement note back to the sender of the
+    injected message when that message finally gets delivered. The /p(age)
+    command does that if the recipient allows it.
+
+    @param user A pointer to the other user's {\tt onlinerec_t}. You should
+    obviously attach the other user's shared segment first, by calling {\tt
+    usr_insys()}. As a side effect, this will also make sure the other user is
+    actually on-line.
+
+    @param msg A null-terminated string holding the message to send to the
+    user. No need for the message to be fully formatted, but it should {\em in
+    the other user's language}. Having attached the other user's online record,
+    you know what language they're using. Use the function {\tt msg_getl()} to
+    obtain prompts in the other user's language, and {\tt sprintf()} to embed
+    information in them. Any substitution variables in the string will be
+    expanded in the other user's context. 
+
+    @param ack A null-terminated string holding the acknowledgement to be
+    injected back to the original user upon delivery of the injected
+    message. The total length of {\tt msg} and {\tt ack} must be less than the
+    maximum System V IPC message size, {\tt MSGMAX} (4080 bytes on Linux, your
+    mileage may vary). This is acceptable, though. You should aim to send
+    really small messages to other users. Large ones are bound to be annoying
+    in the superlative.
+
+    @param force If non-zero, the function will not respect the {\tt OLF_BUSY}
+    flag in the user's online record, sending the message even if the user is
+    unable to receive it. Never do this unless absolutely necessary. The system
+    does this to notify the user of imminent disconnections, but that's usually
+    an emergency for the user. Bear in mind that the user may not be able to
+    receive the message immediately. Stored pages work this way.
+
+    @return Zero if the message could not be injected. One if it was
+    successfully sent. This is asynchronous: the user may actually see the
+    message at a later time. An acknowledgement will eventually be injected
+    back to the sender {\em only} if the return value is 1 (i.e. no errors have
+    occurred).
+
+    @see {\tt usr_injoth()}.  */
+
+int usr_injoth_ack(onlinerec_t *user, char *msg, char *ack, int force);
 
 
 /** User ID completion.

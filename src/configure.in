@@ -201,6 +201,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(\
 	getcwd \
 	gethostname \
+	getpt \
 	memcpy \
 	mkdir \
 	mkfifo \

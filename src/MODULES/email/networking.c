@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.2  2000/01/06 11:41:02  alexios
  * Small bug fixes.
@@ -87,10 +86,10 @@ list_import_points()
   int n,i,numexp,delta=0;
 
   prompt(DIPLSTH);
-  n=scandir(MSGSDIR"/..netimport",&systems,rsysselect,alphasort);
+  n=scandir(mkfname(MSGSDIR"/..netimport"),&systems,rsysselect,alphasort);
   for(i=0;i<n;free(systems[i]),i++){
     char *cp=systems[i]->d_name;
-    sprintf(fname,MSGSDIR"/..netimport/%s",cp);
+    sprintf(fname,mkfname(MSGSDIR"/..netimport/%s",cp));
     if((fp=fopen(fname,"r"))==NULL){
       error_logsys("Unable to open %s",fname);
       continue;
@@ -278,7 +277,7 @@ import_point_exists(char *sys)
 {
   char fname[512];
   struct stat st;
-  sprintf(fname,MSGSDIR"/..netimport/%s",sys);
+  strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",sys));
   *(strrchr(fname,'/'))=':';
   return stat(fname,&st)==0;
 }
@@ -304,7 +303,7 @@ add_import_point()
     error_fatal("Address sanity check failed.");
   } else *cp=':';
 
-  sprintf(fname,MSGSDIR"/..netimport/%s",addr);
+  strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",addr));
   if((fp=fopen(fname,"w"))==NULL) error_fatalsys("Unable to create %s",fname);
   fprintf(fp,"delta: %d\nlast-update: %ld\nlast-ihave-time: %ld\n",
 	  delta,time(0),time(0));
@@ -330,7 +329,7 @@ del_import_point()
     error_fatal("Address sanity check failed.");
   } else *cp=':';
 
-  sprintf(fname,MSGSDIR"/..netimport/%s",addr);
+  strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",addr));
   if(unlink(fname)<0)error_fatalsys("Unable to unlink() %s",fname);
 
   *(strrchr(addr,':'))='/';
@@ -360,7 +359,7 @@ mod_import_point()
 
   /* Open the file */
 
-  sprintf(fname,MSGSDIR"/..netimport/%s",addr);
+  strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",addr));
   *(strrchr(addr,':'))='/';
   if((fp=fopen(fname,"r"))==NULL) error_fatalsys("Unable to open %s",fname);
 
@@ -471,7 +470,7 @@ import_club()
   /* Fine, add this to the import spec */
 
   *(strrchr(addr,'/'))=':';
-  sprintf(fname,MSGSDIR"/..netimport/%s",addr);
+  strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",addr));
   sprintf(fname2,"%s~",fname);
   *(strrchr(addr,':'))='/';
   if((fp=fopen(fname,"r"))==NULL) error_fatalsys("Unable to open %s",fname);
@@ -520,7 +519,7 @@ listexports()
   int n,i,j,in_accept=1;
   char tmp[512], tmp2[512], *cp;
 
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   prompt(EXPLSTH);
   for(i=0;i<n;free(clubs[i]),i++){
     cp=&clubs[i]->d_name[1];
@@ -697,7 +696,7 @@ export_club()
     struct dirent **clubs;
     int n,i;
     
-    n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+    n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
     for(i=0;i<n;free(clubs[i]),i++){
       char *cp=&clubs[i]->d_name[1];
       if(!loadclubhdr(cp))continue;
@@ -731,10 +730,10 @@ club_status()
 
   prompt(NETST1);
 
-  n=scandir(MSGSDIR"/..netimport",&systems,rsysselect,alphasort);
+  n=scandir(mkfname(MSGSDIR"/..netimport"),&systems,rsysselect,alphasort);
   for(i=0;i<n;free(systems[i]),i++){
     char *cp=systems[i]->d_name;
-    sprintf(fname,MSGSDIR"/..netimport/%s",cp);
+    sprintf(fname,mkfname(MSGSDIR"/..netimport/%s",cp));
     if((fp=fopen(fname,"r"))==NULL){
       error_logsys("Unable to open %s",fname);
       continue;

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -194,8 +193,9 @@ clubwrite()
   }
   fclose(fp);
       
-  if(!attfile[0])sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
-  else sprintf(command,"%s %s %s -%c %s",BBSMAILBIN,header,body,'c',attfile);
+  if(!attfile[0])sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
+  else sprintf(command,"%s %s %s -%c %s",
+	       mkfname(BBSMAILBIN),header,body,'c',attfile);
   system(command);
       
       
@@ -216,7 +216,7 @@ clubwrite()
     prompt(WECONFS,checkmsg.club,checkmsg.msgno);
 	
     if(usr_insys(checkmsg.to,1)){
-      sprintf(out_buffer,msg_getl(WCRNOT,othruseracc.language-1),
+      sprompt_other(othrshm,out_buffer,WCRNOT,
 	      checkmsg.from,checkmsg.club,checkmsg.subject);
       if(usr_injoth(&othruseronl,out_buffer,0))
 	prompt(WENOTFD,othruseronl.userid);
@@ -232,7 +232,7 @@ clubwrite()
   if(attfile[0] && cleanupattachment){
     unlink(attfile);
     sprintf(attfile,"%s/%s/"MSGATTDIR"/"FILEATTACHMENT,
-	    MSGSDIR,
+	    mkfname(MSGSDIR),
 	    clubmsg?clubhdr.club:EMAILDIRNAME,
 	    original);
   }

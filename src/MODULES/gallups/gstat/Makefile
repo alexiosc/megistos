@@ -1,13 +1,11 @@
 include ../../../CONFIG/Make.config
 
 
-DEFINES		+= -D__USE_GNU
 IOCFILE		= ../io.c
 IOOFILE		= ../io.o
 
 CFILES		= gstat.c $(IOCFILE) tree.c handler.c templates.c \
-		selout.c comout.c \
-		gprintf.c 
+		gprintf.c selout.c comout.c
 
 BINARY		= gstat
 LIBS		+= -lm

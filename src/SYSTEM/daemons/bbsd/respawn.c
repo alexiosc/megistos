@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 22:00:00  alexios
  * Paranoia additions to prevent premature death of bbsd.
@@ -114,7 +113,7 @@ spawn(struct getty *g)
 
   /* Only the child reaches this point -- spawn a bbsgetty */
 
-  execl(BINDIR"/"BBSGETTY,BBSGETTY,g->ttyname,NULL);
+  execl(mkfname(BINDIR"/"BBSGETTY),BBSGETTY,g->ttyname,NULL);
 }
 
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -102,7 +101,7 @@ globalqsc(int add, char *club)
 
   strcpy(clubtmp,club);
 
-  n=scandir(QSCDIR,&qscs,qscselect,ncsalphasort);
+  n=scandir(mkfname(QSCDIR),&qscs,qscselect,ncsalphasort);
   if(n)doneqsc();
   for(i=0;i<n;i++){
     ustartqsc(qscs[i]->d_name);
@@ -127,7 +126,7 @@ listclubs()
   struct dirent **clubs;
   int n,i;
 
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   prompt(LCHDR);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
@@ -151,7 +150,7 @@ longlistclubs()
   char date[256];
 
   prompt(LC2HDR);
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
@@ -175,7 +174,7 @@ modifybanner()
   char fname[256], temp[256];
   struct stat st;
 
-  sprintf(fname,"%s/b%s",CLUBHDRDIR,clubhdr.club);
+  sprintf(fname,"%s/b%s",mkfname(CLUBHDRDIR),clubhdr.club);
   sprintf(temp,TMPDIR"/mb%05d",getpid());
   symlink(fname,temp);
 
@@ -268,16 +267,16 @@ newclub()
   lock_rm(lock);
   prompt(CRCCNF,new.club);
 
-  sprintf(fname,"%s/%s",MSGSDIR,new.club);
+  sprintf(fname,"%s/%s",mkfname(MSGSDIR),new.club);
   mkdir(fname,0770);
 
   strcpy(thisuseracc.lastclub,new.club);
   enterdefaultclub();
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGATTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGATTDIR);
   mkdir(fname,0770);
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGBLTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGBLTDIR);
   mkdir(fname,0770);
 
 
@@ -371,16 +370,16 @@ delclub()
   sprintf(lock,CLUBLOCK,clubhdr.club);
   lock_wait(lock,60);
   lock_place(lock,"deleting");
-  sprintf(command,"\\rm -rf %s/?%s %s/%s >&/dev/null &",
-	  CLUBHDRDIR,clubhdr.club,
-	  MSGSDIR,clubhdr.club);
+  sprintf(command,"\\rm -rf %s/?%s ",mkfname(CLUBHDRDIR),clubhdr.club);
+  strcat(command,mkfname("%s/%s",MSGSDIR,clubhdr.club));
+  strcat(command," >&/dev/null &");
   system(command);
 
 
   /* Delete all special user accesses to the club */
   
 
-  if((dp=opendir(CLUBAXDIR))!=NULL){
+  if((dp=opendir(mkfname(CLUBAXDIR)))!=NULL){
     while((dir=readdir(dp))!=NULL){
       useracc_t usracc, *uacc=&usracc;
       
@@ -638,7 +637,7 @@ configureuser()
 
   if(cur>=CAX_COOP){
     if(usr_insys(uid,1)){
-      sprintf(out_buffer,msg_getl(CUCNOT,othruseracc.language-1),clubhdr.club);
+      sprompt_other(othrshm,out_buffer,CUCNOT,clubhdr.club);
       usr_injoth(&othruseronl,out_buffer,0);
     }
   }

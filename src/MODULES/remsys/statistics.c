@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/08/07 02:18:29  alexios
  * Slight optimisation in calling df(1) in rsys_linstats().
@@ -91,7 +90,7 @@ rsys_agestats()
 {
   char command[256];
 
-  sprintf(command,"%s -demog",STATSBIN);
+  sprintf(command,"%s -demog",mkfname(STATSBIN));
   system(command);
 }
 
@@ -105,9 +104,9 @@ rsys_clsstats()
   classrec_t *class;
   int dummy;
   
-  sprintf(fname,"%s/EVER/clsstats",STATDIR);
+  sprintf(fname,"%s/EVER/clsstats",mkfname(STATDIR));
   if(stat(fname,&st)){
-    sprintf(fname,"%s/%ld/clsstats",STATDIR,tdyear(today()));
+    sprintf(fname,"%s/%ld/clsstats",mkfname(STATDIR),tdyear(today()));
     if(stat(fname,&st)){
       prompt(RSCLSSTR);
       return;
@@ -152,9 +151,9 @@ rsys_modstats()
   int dummy, pass;
   int tcreds=0,tmins=0;
   
-  sprintf(fname,"%s/EVER/modstats",STATDIR);
+  sprintf(fname,"%s/EVER/modstats",mkfname(STATDIR));
   if(stat(fname,&st)){
-    sprintf(fname,"%s/%ld/modstats",STATDIR,tdyear(today()));
+    sprintf(fname,"%s/%ld/modstats",mkfname(STATDIR),tdyear(today()));
     if(stat(fname,&st)){
       prompt(RSMODSTR);
       return;
@@ -381,7 +380,7 @@ rsys_genstats()
     if(state==4)break;
   }
   for(i=0;i<4;i++)opts[i]=tolower(opts[i]);
-  sprintf(command,"%s -%s",STATSBIN,opts);
+  sprintf(command,"%s -%s",mkfname(STATSBIN),opts);
   print("\n");
   system(command);
 }
@@ -435,7 +434,7 @@ rsys_top()
   if(isalpha(opt))opt-='A';
   else if(isdigit(opt))opt=opt-'0'+26;
   
-  sprintf(fname,"%s/%s",STATDIR,fnames[opt]);
+  sprintf(fname,"%s/%s",mkfname(STATDIR),fnames[opt]);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
     return;

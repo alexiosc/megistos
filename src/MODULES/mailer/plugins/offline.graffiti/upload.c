@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:44:25  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -103,15 +102,15 @@ checkfile()
   FILE           *fp;
   struct wallmsg header;
 
-  if(stat(WALLFILE,&buf)){
+  if(stat(mkfname(WALLFILE),&buf)){
     if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
       error_log("Timed out waiting for lock %s",WALLLOCK);
       return 0;
     }
     lock_place(WALLLOCK,"creating");
     
-    if((fp=fopen(WALLFILE,"w"))==NULL){
-      error_fatalsys("Unable to create file %s",WALLFILE);
+    if((fp=fopen(mkfname(WALLFILE),"w"))==NULL){
+      error_fatalsys("Unable to create file %s",mkfname(WALLFILE));
     }
     memset(&header,0,sizeof(header));
     strcpy(header.userid,SYSOP);
@@ -119,7 +118,7 @@ checkfile()
     fwrite(&header,sizeof(header),1,fp);
 
     fclose(fp);
-    chmod(WALLFILE,0666);
+    chmod(mkfname(WALLFILE),0666);
     lock_rm(WALLLOCK);
   }
   return 1;
@@ -145,14 +144,14 @@ drawmessage(char *text)
 
   lock_place(WALLLOCK,"checking");
   
-  if((fp=fopen(WALLFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
     lock_rm(WALLLOCK);
-    error_fatalsys("Unable to open file %s",WALLFILE);
+    error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
   }
   
   if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
     lock_rm(WALLLOCK);
-    error_fatalsys("Unable to read file %s",WALLFILE);
+    error_fatalsys("Unable to read file %s",mkfname(WALLFILE));
   }
   
   numlines=atoi(wallmsg.message);
@@ -168,9 +167,9 @@ drawmessage(char *text)
   
   lock_place(WALLLOCK,"writing");
 
-  if((fp=fopen(WALLFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
     lock_rm(WALLLOCK);
-    error_fatalsys("Unable to open file %s",WALLFILE);
+    error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
   }
   
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -200,9 +199,9 @@ drawmessage(char *text)
   fclose(out);
   fclose(fp);
 
-  if(fcopy(fname,WALLFILE)){
+  if(fcopy(fname,mkfname(WALLFILE))){
     lock_rm(WALLLOCK);
-    error_fatal("Unable to fcopy() %s to %s",fname,WALLFILE);
+    error_fatal("Unable to fcopy() %s to %s",fname,mkfname(WALLFILE));
     return 0;
   }
   unlink(fname);

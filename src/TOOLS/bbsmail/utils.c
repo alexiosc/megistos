@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.7  2000/01/08 12:47:02  alexios
  * Fixed bug that got the originating BBS field wrong in the
@@ -105,9 +104,9 @@ addihave(struct message *msg)
 {
   struct ihaverec ihave;
 
-  mkdir(IHAVEDIR,0777);		/* Paranoia mode and a silly thing to do */
-  d_dbfpath(IHAVEDIR);
-  d_dbdpath(IHAVEDIR);
+  mkdir(mkfname(IHAVEDIR),0777); /* Paranoia mode and a silly thing to do */
+  d_dbfpath(mkfname(IHAVEDIR));
+  d_dbdpath(mkfname(IHAVEDIR));
   if(d_open("ihavedb","s")!=S_OKAY){
     error_log("Cannot open ihave database (db_status %d)\n",db_status);
     return;
@@ -150,9 +149,10 @@ copyatt(int copymode, struct message *msg, int email, char *attachment)
 
     /* Generate the attachment name */
 
-    if(email)sprintf(attname,EMAILATTDIR"/"FILEATTACHMENT,msg->msgno);
-    else sprintf(attname,"%s/%s/%s/"FILEATTACHMENT,MSGSDIR,msg->club,
-		 MSGATTDIR,msg->msgno);
+    if(email)strcpy(attname,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg->msgno));
+    else strcpy(attname,
+		mkfname("%s/%s/%s/"FILEATTACHMENT,MSGSDIR,msg->club,MSGATTDIR,
+			msg->msgno));
 
 
     /* Debugging info */

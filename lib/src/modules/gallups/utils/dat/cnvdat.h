@@ -1,7 +1,7 @@
 #ifndef __GALLUPS_H
 #define __GALLUPS_H
 
-#define GALLUPSDIR BBSDATADIR"/gallups/.old"
+#define GALLUPSDIR mkfname(BBSDATADIR"/gallups/.old")
 
 #define GQ_NUMBER           0
 #define GQ_FREETEXT         1

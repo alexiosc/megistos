@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -76,8 +75,8 @@ findclub(char *club)
   if(*club=='/')club++;
   if(!isalpha(*club))return 0;
 
-  if((dp=opendir(CLUBHDRDIR))==NULL){
-    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
+  if((dp=opendir(mkfname(CLUBHDRDIR)))==NULL){
+    error_fatalsys("Unable to open directory %s",mkfname(CLUBHDRDIR));
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
@@ -323,9 +322,10 @@ do_message(CLIENT *cl, char *host, char *codename, char *club, ihave_list_p p)
   /* Final step: call bbsmail to file the message */
   
   if((hdr.flags&MSF_FILEATT)==0){
-    sprintf(command,"%s %s %s",BBSMAILBIN,fname_h,fname_b);
+    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),fname_h,fname_b);
   } else {
-    sprintf(command,"%s %s %s -c %s",BBSMAILBIN,fname_h,fname_b,fname_a);
+    sprintf(command,"%s %s %s -c %s",mkfname(BBSMAILBIN),
+	    fname_h,fname_b,fname_a);
   }
   system(command);
   

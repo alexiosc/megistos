@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -85,7 +84,7 @@ modifybody(struct message *msg)
   decompress(msg);
 #endif
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,
 	  msg->msgno);
 
@@ -214,7 +213,7 @@ modifymail()
     /* Be paranoid about it, check if the mail itself exists, too. */
 
     if(ok){
-      sprintf(fname,EMAILDIR"/"MESSAGEFILE,msgno);
+      strcpy(fname,mkfname(EMAILDIR"/"MESSAGEFILE,msgno));
       ok=(stat(fname,&st)==0);
     }
 

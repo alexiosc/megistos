@@ -1,4 +1,5 @@
 #define I_AM_VERSION_C
+#include "version.h"
 #include "systemversion.h"
 
 char bbs_shortversion[]  = SHORTVERSION;

@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -54,7 +53,7 @@ __INIT_GCS__()
   if(margc==1 && sameas(margv[0],"/cookie") && sysvar->glockie){
     char command[256];
 
-    sprintf(command,"%s/cookie --run",BINDIR);
+    sprintf(command,"%s/cookie --run",mkfname(BINDIR));
     system(command);
     return 1;
   } else return 0;

@@ -32,9 +32,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -93,10 +92,10 @@ warn(int line, int n)
      (!usr_insys(status.user,0)))exit(0);
   
   if(warntype==LNCHGW1){
-    sprintf(msg_buffer,msg_getl(warntype,othruseracc.language-1),h,m);
+    sprompt_other(othrshm,msg_buffer,warntype,h,m);
   } else {
-    sprintf(msg_buffer,msg_getl(warntype,othruseracc.language-1),n,
-	    msg_getunitl(MINSING,n,othruseracc.language-1));
+    sprompt_other(othrshm,msg_buffer,warntype,n,
+		  msg_getunitl(MINSING,n,othruseracc.language-1));
   }
   if(usr_insys(status.user,0))usr_injoth(&othruseronl,msg_buffer,0);
 }

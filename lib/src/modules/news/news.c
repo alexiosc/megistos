@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.8  2000/01/06 11:41:35  alexios
  * Made main() return a value.
@@ -163,13 +162,13 @@ shownews(int lin, int sop)
   struct newsbulletin blt, *showlist=NULL, *tmp;
   int numblt=0,i,shownheader=0;
 
-  if((dp=opendir(NEWSDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",NEWSDIR);
+  if((dp=opendir(mkfname(NEWSDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(NEWSDIR));
   }
 
   while((dirent=readdir(dp))!=NULL){
     if(!sameto("hdr-",dirent->d_name))continue;
-    sprintf(fname,"%s/%s",NEWSDIR,dirent->d_name);
+    sprintf(fname,"%s/%s",mkfname(NEWSDIR),dirent->d_name);
 
     if((fp=fopen(fname,"r"))==NULL)continue;
     if(fread(&blt,sizeof(blt),1,fp)!=1){
@@ -243,7 +242,7 @@ shownews(int lin, int sop)
       }
     } else if(thisuseracc.datelast<=showlist[i].date)prompt(NEWBLT);
     
-    sprintf(fname,NEWSFNAME,showlist[i].num);
+    strcpy(fname,mkfname(NEWSFNAME,showlist[i].num));
     print("\n");
     if(fmt_lastresult==PAUSE_QUIT)break;
     out_printfile(fname);
@@ -264,15 +263,15 @@ listblts()
   struct newsbulletin blt;
   
 
-  if((dp=opendir(NEWSDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",NEWSDIR);
+  if((dp=opendir(mkfname(NEWSDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(NEWSDIR));
   }
 
   prompt(LSTHDR);
 
   while((dirent=readdir(dp))!=NULL){
     if(!sameto("hdr-",dirent->d_name))continue;
-    sprintf(fname,"%s/%s",NEWSDIR,dirent->d_name);
+    sprintf(fname,"%s/%s",mkfname(NEWSDIR),dirent->d_name);
 
     if((fp=fopen(fname,"r"))==NULL)continue;
     if(fread(&blt,sizeof(blt),1,fp)!=1){
@@ -307,12 +306,12 @@ askbltnum(int pr)
       listblts();
       continue;
     } else {
-      sprintf(fname,NEWSHDR,i);
+      strcpy(fname,mkfname(NEWSHDR,i));
       if(stat(fname,&st)){
 	prompt(NUMERR,i);
 	continue;
       }
-      sprintf(fname,NEWSFNAME,i);
+      strcpy(fname,mkfname(NEWSFNAME,i));
       if(stat(fname,&st)){
 	prompt(NUMERR,i);
 	continue;
@@ -331,9 +330,9 @@ getbltnum()
 
   char fname[256];
   for(i=1;;i++){
-    sprintf(fname,NEWSFNAME,i);
+    strcpy(fname,mkfname(NEWSFNAME,i));
     if(!stat(fname,&st))continue;
-    sprintf(fname,NEWSHDR,i);
+    strcpy(fname,mkfname(NEWSHDR,i));
     if(!stat(fname,&st))continue;
     return i;
   }
@@ -402,7 +401,7 @@ insert(int num)
   struct newsbulletin blt;
 
   if(num){
-    sprintf(fname,NEWSHDR,num);
+    strcpy(fname,mkfname(NEWSHDR,num));
     if((fp=fopen(fname,"r"))==NULL){
       prompt(NUMERR,num);
       return;
@@ -478,9 +477,9 @@ insert(int num)
 
   if(!num)blt.num=num=getbltnum();
 
-  sprintf(fname2,NEWSFNAME,num);
+  strcpy(fname2,mkfname(NEWSFNAME,num));
   
-  sprintf(fname,NEWSHDR,num);
+  strcpy(fname,mkfname(NEWSHDR,num));
   if((fp=fopen(fname,"w"))==NULL){
     prompt(IOERR);
     unlink(fname2);
@@ -494,21 +493,21 @@ insert(int num)
   case 'N':
     break;
   case 'Y':
-    sprintf(fname,NEWSFNAME,num);
+    strcpy(fname,mkfname(NEWSFNAME,num));
     upload(fname);
 
-    sprintf(fname,NEWSFNAME,num);
+    strcpy(fname,mkfname(NEWSFNAME,num));
     if(!stat(fname,&st)){
       prompt(BLTOK,num);
       return;
     } else {
-      sprintf(fname,NEWSHDR,num);
+      strcpy(fname,mkfname(NEWSHDR,num));
       if(check)prompt(IOERR);
       unlink(fname);
     }
     break;
   case 'E':
-    sprintf(fname,NEWSFNAME,num);
+    strcpy(fname,mkfname(NEWSFNAME,num));
     sprintf(fname2,TMPDIR"/filedes%08lx",time(0));
     unlink(fname2);
     fcopy(fname,fname2);
@@ -540,9 +539,9 @@ delete()
   int num=askbltnum(DELBLT);
   if(num){
     char fname[256];
-    sprintf(fname,NEWSFNAME,num);
+    strcpy(fname,mkfname(NEWSFNAME,num));
     unlink(fname);
-    sprintf(fname,NEWSHDR,num);
+    strcpy(fname,mkfname(NEWSHDR,num));
     unlink(fname);
     prompt(DELOK);
   }
@@ -562,7 +561,7 @@ cleanup()
 
   printf("News cleanup\n\n");
 
-  sprintf(fname,"%s/.LAST.CLEANUP",NEWSDIR);
+  sprintf(fname,"%s/.LAST.CLEANUP",mkfname(NEWSDIR));
   if((fp=fopen(fname,"r"))!=NULL){
     int i;
     if(fscanf(fp,"%d\n",&i)==1){
@@ -579,13 +578,13 @@ cleanup()
   printf("Days since last cleanup: %d\n\n",dayssince);
 
 
-  if((dp=opendir(NEWSDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",NEWSDIR);
+  if((dp=opendir(mkfname(NEWSDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(NEWSDIR));
   }
 
   while((dirent=readdir(dp))!=NULL){
     if(!sameto("hdr-",dirent->d_name))continue;
-    sprintf(fname,"%s/%s",NEWSDIR,dirent->d_name);
+    sprintf(fname,"%s/%s",mkfname(NEWSDIR),dirent->d_name);
 
     if((fp=fopen(fname,"r"))==NULL)continue;
     if(fread(&blt,sizeof(blt),1,fp)!=1){

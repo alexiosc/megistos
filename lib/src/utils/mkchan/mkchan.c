@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.5  1999/07/18 22:11:13  alexios
  * Added code to grok the new M flag that enables the MetaBBS
@@ -95,8 +94,8 @@ int main(int argc, char **argv)
   int linenum=0,errors=0;
 
   mod_setprogname(argv[0]);
-  if((fpin=fopen(CHANDEFSRCFILE,"r"))==NULL){
-    fprintf(stderr,"mkchan: Unable to open %s\n",CHANDEFSRCFILE);
+  if((fpin=fopen(mkfname(CHANDEFSRCFILE),"r"))==NULL){
+    fprintf(stderr,"mkchan: Unable to open %s\n",mkfname(CHANDEFSRCFILE));
     exit(1);
   }
 
@@ -243,23 +242,23 @@ int main(int argc, char **argv)
     }
   }
 
-  if((fpout=fopen(CHANDEFFILE,"w"))==NULL){
-    fprintf(stderr,"mkchan: Unable to open %s for writing.\n",CHANDEFFILE);
+  if((fpout=fopen(mkfname(CHANDEFFILE),"w"))==NULL){
+    fprintf(stderr,"mkchan: Unable to open %s for writing.\n",mkfname(CHANDEFFILE));
     exit(1);
   }
 
   fputs(CHANNEL_MAGIC,fpout);	/* Stamp the magic "number". */
 
   if(fwrite(&chan_count,sizeof(chan_count),1,fpout)!=1){
-    fprintf(stderr,"mkchan: Unable to write to %s.\n",CHANDEFFILE);
+    fprintf(stderr,"mkchan: Unable to write to %s.\n",mkfname(CHANDEFFILE));
     exit(1);
   }
   if(fwrite(channels,sizeof(struct channeldef),chan_count,fpout)!=chan_count){
-    fprintf(stderr,"mkchan: Unable to write to %s.\n",CHANDEFFILE);
+    fprintf(stderr,"mkchan: Unable to write to %s.\n",mkfname(CHANDEFFILE));
     exit(1);
   }
 
   fclose(fpout);
-  chmod(CHANDEFFILE,0660);
+  chmod(mkfname(CHANDEFFILE),0660);
   exit(0);
 }

@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.5  1999/07/28 23:19:38  alexios
  * Refuse to touch the date and time of creation of a message
@@ -185,8 +184,9 @@ writemessage(char *srcname, struct message *msg, int email)
 
   /* Generate the filename */
 
-  if(email)sprintf(msgname,EMAILDIR"/"MESSAGEFILE,msg->msgno);
-  else sprintf(msgname,"%s/%s/"MESSAGEFILE,MSGSDIR,msg->club,msg->msgno);
+  if(email)strcpy(msgname,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
+  else strcpy(msgname,
+	      mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,msg->club,msg->msgno));
 
 
   /* Write the message header */

@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.9  1999/08/04 01:00:13  alexios
  * Fixed silly bug that caused exits from menuman-handled submenus
@@ -330,17 +329,22 @@ showfile (union menumanpage *p)
   else if((cp=strstr(rawname,".asc"))!=NULL)*cp=0;
   
   for(i=thisuseracc.language-1;i>=0;i--){
-    sprintf(fname,"%s/%s-%d.%s",MENUMANDIR,rawname,i,ansi?"ans":"asc");
+    sprintf(fname,"%s/%s-%d.%s",
+	    mkfname(MENUMANDIR),rawname,i,ansi?"ans":"asc");
     if(out_printfile(fname))return;
-    sprintf(fname,"%s/%s-%d.%s",MENUMANDIR,rawname,i,(!ansi)?"ans":"asc");
+    sprintf(fname,"%s/%s-%d.%s",
+	    mkfname(MENUMANDIR),rawname,i,(!ansi)?"ans":"asc");
     if(out_printfile(fname))return;
   }
-  sprintf(fname,"%s/%s.%s",MENUMANDIR,rawname,ansi?"ans":"asc");
+  sprintf(fname,"%s/%s.%s",
+	  mkfname(MENUMANDIR),rawname,ansi?"ans":"asc");
   if(out_printfile(fname))return;
-  sprintf(fname,"%s/%s.%s",MENUMANDIR,rawname,(!ansi)?"ans":"asc");
+  sprintf(fname,"%s/%s.%s",
+	  mkfname(MENUMANDIR),rawname,(!ansi)?"ans":"asc");
   if(out_printfile(fname))return;
   out_printfile(rawname);
-  error_log("Unable to locate page file similar to %s/%s",MENUMANDIR,rawname);
+  error_log("Unable to locate page file similar to %s/%s",
+	    mkfname(MENUMANDIR),rawname);
 }
 
 
@@ -374,10 +378,10 @@ byebye(int relog)
   char fname[256];
 
   if(relog){
-    sprintf(fname,"%s/.relog-%s",ONLINEDIR,thisuseronl.channel);
+    sprintf(fname,"%s/.relog-%s",mkfname(ONLINEDIR),thisuseronl.channel);
     close(creat(fname,0660));
   }
-  sprintf(fname,"%s/.logout-%s",ONLINEDIR,thisuseronl.channel);
+  sprintf(fname,"%s/.logout-%s",mkfname(ONLINEDIR),thisuseronl.channel);
   close(creat(fname,0660));
 }
 
@@ -524,7 +528,7 @@ handleexecpage()
   if(thisuseronl.input[0])thisuseronl.flags|=OLF_MMCONCAT;
 
   mod_done(INI_ALL);
-  sprintf(fname,BINDIR"/%s",curpage.e.fname);
+  strcpy(fname,mkfname(BINDIR"/%s",curpage.e.fname));
   execlp(fname,fname,"--run",NULL);
   prompt(CANTXEC,curpage.e.name);
   exit(0);

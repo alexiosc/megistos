@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
  * Just a slight addition (made "-" and "*" work same as "ALL"
@@ -140,7 +139,7 @@ showbanner()
   struct stat st;
   
   if(cnc_more())return;
-  sprintf(fname,"%s/b%s",CLUBHDRDIR,clubhdr.club);
+  sprintf(fname,"%s/b%s",mkfname(CLUBHDRDIR),clubhdr.club);
   if(stat(fname,&st))return;
   prompt(BANNERH);
   out_printfile(fname);
@@ -159,7 +158,7 @@ checkinclub(char *club)
   for(i=0;i<chan_count;i++){
     if(channel_getstatus(channels[i].ttyname,&status)){
       if(status.result==LSR_USER){
-	sprintf(lock,LOCKDIR"/"INCLUBLOCK,channels[i].ttyname,club);
+	strcpy(lock,mkfname(LOCKDIR"/"INCLUBLOCK,channels[i].ttyname,club));
 	if(!stat(lock,&st))return 0;
       }
     }
@@ -313,10 +312,9 @@ thread(struct message *msg, char defopt)
       }
 
       if(ok){
-	sprintf(fname,"%s/%s/"MESSAGEFILE,
-		MSGSDIR,
-		msg->club[0]?msg->club:EMAILDIR EMAILDIRNAME,
-		msgno);
+	if(msg->club[0])
+	  strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,msg->club,msgno));
+	else strcpy(fname,mkfname(MSGSDIR"/"EMAILDIRNAME"/"MESSAGEFILE,msgno));
 	ok=(stat(fname,&st)==0);
       }
 

@@ -105,9 +105,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.9  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out().
@@ -170,9 +169,7 @@ const char *__RCS=RCS_VER;
 
 
 #define INHIBIT_FORMATTING (inhibit||IS_BOT)
-#define IS_BOT \
-(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
-
+#define IS_BOT (out_flags&OFL_ISBOT)
 
 #define FFL_FORMAT     0x0000000f
 #define FFL_FLUSHLEFT  0x00000000
@@ -648,8 +645,7 @@ int
 fmt_screenpause()
 {
   /* Bots don't need to pause */
-  if(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
-    return 0;
+  if(IS_BOT)return 0;
 
   screenvpos++;
   if(screenvpos>=fmt_screenheight-2){

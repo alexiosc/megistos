@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:29  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:05  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/18 21:01:53  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Fixed a slight
@@ -89,18 +88,18 @@ chan_init()
   FILE *fp;
   char magic[256];
 
-  if((fp=fopen(CHANDEFFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s",CHANDEFFILE);
+  if((fp=fopen(mkfname(CHANDEFFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s",mkfname(CHANDEFFILE));
   }
 
   /* Check the magic number */
   bzero(magic,sizeof(magic));
   if(fread(magic,strlen(CHANNEL_MAGIC),1,fp)!=1){
-    error_fatalsys("Unable to read magic number from %s",CHANDEFFILE);
+    error_fatalsys("Unable to read magic number from %s",mkfname(CHANDEFFILE));
   }
   if(strcmp(magic,CHANNEL_MAGIC)){
     error_fatal("Corrupted channel table file (%s), use mkchan to recreate it.",
-	  CHANDEFFILE);
+	  mkfname(CHANDEFFILE));
   }
 
   if(channels){
@@ -108,16 +107,16 @@ chan_init()
     chan_count=0;
   }
   if(fread(&chan_count,sizeof(chan_count),1,fp)!=1){
-    error_fatalsys("Unable to read %s",CHANDEFFILE);
+    error_fatalsys("Unable to read %s",mkfname(CHANDEFFILE));
   }
 
   if((channels=alcmem(sizeof(struct channeldef)*chan_count))==NULL){
     error_fatalsys("Unable to allocate memory for channel table.",
-	  CHANDEFFILE);
+	  mkfname(CHANDEFFILE));
   }
 
   if(fread(channels,sizeof(struct channeldef),chan_count,fp)!=chan_count){
-    error_fatalsys("Unable to read %s",CHANDEFFILE);
+    error_fatalsys("Unable to read %s",mkfname(CHANDEFFILE));
   }
 
   fclose(fp);

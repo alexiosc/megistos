@@ -115,6 +115,9 @@
 /* Define if you have the vhangup function.  */
 #define HAVE_VHANGUP 1
 
+/* Define if you have the getpt function.  */
+#define HAVE_GETPT 1
+
 /* Define if you have the <arpa/telnet.h> header file.  */
 #define HAVE_ARPA_TELNET_H 1
 
@@ -191,7 +194,7 @@
 #define HAVE_SIGNAL_H 1
 
 /* Define if you have the <slang.h> header file.  */
-#define HAVE_SLANG_H 1
+/* #undef HAVE_SLANG_H */
 
 /* Define if you have the <slang/slang.h> header file.  */
 /* #undef HAVE_SLANG_SLANG_H */
@@ -200,7 +203,7 @@
 /* #undef HAVE_SLANG_SLCURSES_H */
 
 /* Define if you have the <slcurses.h> header file.  */
-#define HAVE_SLCURSES_H 1
+/* #undef HAVE_SLCURSES_H */
 
 /* Define if you have the <stdarg.h> header file.  */
 #define HAVE_STDARG_H 1
@@ -308,7 +311,7 @@
 #define HAVE_VARARGS_H 1
 
 /* Define if you have the <zlib.h> header file.  */
-#define HAVE_ZLIB_H 1
+/* #undef HAVE_ZLIB_H */
 
 /* Define if you have the <zlib/zlib.h> header file.  */
 /* #undef HAVE_ZLIB_ZLIB_H */
@@ -335,13 +338,13 @@
 /* #undef HAVE_LIBSLANG */
 
 /* Define if you have the termcap library (-ltermcap).  */
-#define HAVE_LIBTERMCAP 1
+/* #undef HAVE_LIBTERMCAP */
 
 /* Define if you have the typhoon library (-ltyphoon).  */
 /* #undef HAVE_LIBTYPHOON */
 
 /* Define if you have the z library (-lz).  */
-#define HAVE_ZLIB 1
+/* #undef HAVE_ZLIB */
 
 
 

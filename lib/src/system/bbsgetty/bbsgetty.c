@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  1999/07/18 21:54:26  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Added config
@@ -75,7 +74,7 @@ startemud()
     debug(D_RUN,"Done running postconnect command.");
   }
   
-  sprintf(fname,"%s/.emu-%s",EMUFIFODIR,device);
+  sprintf(fname,"%s/.emu-%s",mkfname(EMUFIFODIR),device);
   unlink(fname);
 
   if(mkfifo(fname,0660)){
@@ -86,7 +85,7 @@ startemud()
   }
 
   debug(D_RUN,"Turning into emud. Bye!");
-  execl(EMUDBIN,EMUDBIN,NULL);
+  execl(mkfname(EMUDBIN),EMUDBIN,NULL);
   i=errno;
 
   /* If we get to this point, something's gone wrong */

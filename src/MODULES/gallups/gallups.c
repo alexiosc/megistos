@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.5  2000/10/01 10:10:19  bbs
  * added options to log user age and sex (used for statistics)
@@ -1337,7 +1336,7 @@ void gallup_statistics(void)
 	if(sameas(margv[10], "OK") || sameas(margv[10], margv[8])) {
 	  char cmd[128], out[128];
 
-		sprintf(cmd, "%s/gstat ", BINDIR);
+		sprintf(cmd, "%s/gstat ", mkfname(BINDIR));
 		if(sinf.t_sexage)strcat(cmd, "-t4 ");
 		if(sinf.t_sex)strcat(cmd, "-t2 ");
 		if(sinf.t_age)strcat(cmd, "-t3 ");

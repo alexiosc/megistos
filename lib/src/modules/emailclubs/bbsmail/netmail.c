@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -99,7 +98,7 @@ handlenetmail(struct message *msg, char *srcname)
 	    msg->to);
   }else{
     char tmp[256];
-    sprintf(tmp,EMAILATTDIR"/"FILEATTACHMENT,msg->msgno);
+    sprintf(tmp,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg->msgno));
     sprintf(command,"uuencode <%s %s >/tmp/mailatt%05d",tmp,fatt,getpid());
     system(command);
     sprintf(command,"cat - %s /tmp/mailatt%05d|%s %s",

@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1999/07/18 21:21:38  alexios
  * Updated code to read the move BBSCOD(E) variable.
@@ -171,13 +170,13 @@ makeheaderless(char *rec)
 
   saveclubhdr(&new);
 
-  sprintf(fname,"%s/%s",MSGSDIR,new.club);
+  sprintf(fname,"%s/%s",mkfname(MSGSDIR),new.club);
   mkdir(fname,0770);
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGATTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGATTDIR);
   mkdir(fname,0770);
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGBLTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGBLTDIR);
   mkdir(fname,0770);
 
 
@@ -271,13 +270,13 @@ newclub(char *rec)
 
   saveclubhdr(&new);
 
-  sprintf(fname,"%s/%s",MSGSDIR,new.club);
+  sprintf(fname,"%s/%s",mkfname(MSGSDIR),new.club);
   mkdir(fname,0770);
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGATTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGATTDIR);
   mkdir(fname,0770);
 
-  sprintf(fname,"%s/%s/%s",MSGSDIR,new.club,MSGBLTDIR);
+  sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),new.club,MSGBLTDIR);
   mkdir(fname,0770);
 
 
@@ -290,7 +289,7 @@ newclub(char *rec)
       FILE *fp;
       cp+=strlen(thoughts);
       nl2cr(cp);
-      sprintf(fname,"%s/b%s",CLUBHDRDIR,new.club);
+      sprintf(fname,"%s/b%s",mkfname(CLUBHDRDIR),new.club);
       if((fp=fopen(fname,"w"))==NULL){
 	fprintf(stderr,"Oops, unable to write to banner file %s\n",fname);
 	exit(1);
@@ -315,7 +314,7 @@ addihave(struct message *msg)
   int i=today();
 
   sprintf(fname,"%s/ihave.%04d-%02d-%02d",
-	  IHAVEDIR,tdyear(i),tdmonth(i)+1,tdday(i));
+	  mkfname(IHAVEDIR),tdyear(i),tdmonth(i)+1,tdday(i));
   
   if((fp=fopen(fname,"a"))==NULL)return;
   fprintf(fp,"%s/%s/%s %s/%d\n",
@@ -348,8 +347,9 @@ writemsg(struct message *msg, char *rec, int len)
     
   /* Generate the filename */
 
-  if(!msg->club[0])sprintf(msgname,EMAILDIR"/"MESSAGEFILE,msg->msgno);
-  else sprintf(msgname,"%s/%s/"MESSAGEFILE,MSGSDIR,msg->club,msg->msgno);
+  if(!msg->club[0])strcpy(msgname,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
+  else sprintf(msgname,
+	       mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,msg->club,msg->msgno));
   
   
   /* Write the message header */
@@ -435,10 +435,10 @@ addmsg(FILE *fp,char *club,int msgno,int fpos,int flen)
     sprintf(source,"%s/%s/%u.att",dir,club,*((unsigned int*)&rec[0]));
 
     if(!strcmp(club,"Email")){
-      sprintf(target,EMAILATTDIR"/"FILEATTACHMENT,msg.msgno);
+      strcpy(target,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg.msgno));
     } else {
-      sprintf(target,"%s/%s/%s/"FILEATTACHMENT,MSGSDIR,msg.club,
-	      MSGATTDIR,msg.msgno);
+      strcpy(target,mkfname("%s/%s/%s/"FILEATTACHMENT,MSGSDIR,msg.club,
+	      MSGATTDIR,msg.msgno));
     }
     fcopy(source,target);
   }

@@ -13,9 +13,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -264,7 +263,7 @@ doscan()
       int lines=0;
       FILE *fp;
       char fname[256], line[1024], c;
-      sprintf(fname,MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname);
+      strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname));
       startind();
       if((fp=fopen(fname,"r"))!=NULL){
 	while(fgets(line,sizeof(line),fp)){

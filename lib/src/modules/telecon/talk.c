@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -147,8 +146,10 @@ whisper(char *s)
     return;
   }
   if(usr_insys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
-    usr_injoth(&othruseronl,msg_get(TDELIM),0);
-    sprintf(out_buffer,msg_get(TFROMP),getcolour(),thisuseracc.userid,cp);
+    sprompt_other(othrshm,out_buffer,TDELIM);
+    usr_injoth(&othruseronl,out_buffer,0);
+    sprompt_other(othrshm,out_buffer,TFROMP,
+		  getcolour(),thisuseracc.userid,cp);
     usr_injoth(&othruseronl,out_buffer,0);
     prompt(TSENTP,othruseronl.userid);
   }
@@ -161,13 +162,14 @@ static char *fxuser, *fxmsg;
 static char *
 fx_sayto(struct chanusr *u)
 {
-  usr_injoth(&othruseronl,msg_get(TDELIM),0);
+  sprompt_other(othrshm,out_buffer,TDELIM);
+  usr_injoth(&othruseronl,out_buffer,0);
   if(sameas(u->userid,fxuser)){
-    sprintf(out_buffer,msg_getl(TFROM2U,othruseracc.language-1),
-	    getcolour(),thisuseracc.userid,fxmsg);
+    sprompt_other(othrshm,out_buffer,TFROM2U,
+		  getcolour(),thisuseracc.userid,fxmsg);
   } else {
-    sprintf(out_buffer,msg_getl(TFROMT,othruseracc.language-1),
-	    getcolour(),thisuseracc.userid,fxuser,fxmsg);
+    sprompt_other(othrshm,out_buffer,TFROMT,
+		  getcolour(),thisuseracc.userid,fxuser,fxmsg);
   }
   return out_buffer;
 }

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:44:48  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -124,8 +123,8 @@ findclub(char *club)
   if(*club=='/')club++;
   if(!isalpha(*club))return 0;
 
-  if((dp=opendir(CLUBHDRDIR))==NULL){
-    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
+  if((dp=opendir(mkfname(CLUBHDRDIR)))==NULL){
+    error_fatalsys("Unable to open directory %s",mkfname(CLUBHDRDIR));
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
@@ -148,7 +147,7 @@ loadclubhdr(char *club)
   struct stat st;
 
   if(*club=='/')club++;
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,club);
+  sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),club);
   if(stat(fname,&st)){
     clubhdrtime=0;
     return 0;
@@ -208,7 +207,7 @@ getclubax(useracc_t *uacc, char *club)
   if(key_owns(uacc,sopkey))return CAX_SYSOP;
   else if(!strcmp(uacc->userid,clubhdr.clubop))return CAX_CLUBOP;
 
-  sprintf(fname,"%s/%s",CLUBAXDIR,uacc->userid);
+  sprintf(fname,"%s/%s",mkfname(CLUBAXDIR),uacc->userid);
   strcpy(tmp,club);
   if((fp=fopen(fname,"r"))==NULL){
     strcpy(club,tmp);

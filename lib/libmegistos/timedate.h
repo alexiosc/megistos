@@ -66,9 +66,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.3  1998/12/27 15:19:19  alexios
  * Made sure Megistos is Y2K compliant (it is, but you can

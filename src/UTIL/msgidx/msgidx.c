@@ -6,9 +6,12 @@
  **            D, August 96, Version 2.0                                    **
  **            E, July 97, Version 3.0  (makes better header files)         **
  **            F, December 98, Version 4.0  (added magic number)            **
+ **            G, December 2000, Version 5.0  (added ID table to index)     **
  **  PURPOSE:  Compile a MajorBBS(R)-compatible message block file into a   **
  **            Megistos BBS binary, indexed prompt file + a C header file   **
- **            with prompt #defines.                                        **
+ **            with prompt #defines. NB: As of Megistos 0.6,                **
+ **            all semblance of MajorBBS MSG-level compatibility has been   **
+ **            dropped.                                                     **
  **  NOTES:    msgidx *.msg compiles everything into *.mbk, mbk_*.h         **
  **            Input file format:                                           **
  **                                                                         **
@@ -103,9 +106,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.3  1998/12/27 16:40:08  alexios
  * Added autoconf support. Added code to stamp the magic number
@@ -146,6 +148,10 @@ const char *__RCS=RCS_VER;
 
 #include "config.h"
 #include "prompts.h"
+#include "miscfx.h"
+
+static char *_hdir;
+#define HEADERDIR _hdir
 
 #define err(s)     fprintf(stderr,s)
 #define errp(s,p)  fprintf(stderr,s,p)
@@ -165,7 +171,7 @@ const char *__RCS=RCS_VER;
 void
 help()
 {
-  err("\nMSGIDX (Morgul)\n\n");
+  err("\nMSGIDX\n\n");
   err("Syntax: msgidx message-block-file ...\n\n");
   exit(-1);
 }
@@ -187,16 +193,22 @@ void
 adjustindex(FILE *fp,long from)
 {
   struct stat s;
-  long i,l;
+  long i;
+  idx_t idx;
   
   fflush(fp);
   fstat(fileno(fp),&s);
   fseek(fp,from,SEEK_SET);
-  for(i=from;i<s.st_size;i+=sizeof(long)){
-    fread(&l,sizeof(l),1,fp);
-    l+=s.st_size;
-    fseek(fp,i,SEEK_SET);	/* Incredibly inefficient */
-    fwrite(&l,sizeof(l),1,fp);
+  for(i=from;i<s.st_size;i+=sizeof(idx)){
+    fread(&idx,sizeof(idx),1,fp);
+
+    /* Nota Bene: Kludge city. The +sizeof(idx)-sizeof(idx.offset) is there to
+       adjust the indices so they account for an off-by-28 bug. I can't find
+       where it is, but I can always adjust it here. :-) */
+
+    idx.offset+=s.st_size+sizeof(idx)-sizeof(idx.offset);
+    fseek(fp,i,SEEK_SET);
+    fwrite(&idx,sizeof(idx),1,fp);
   }
 }
 
@@ -236,13 +248,13 @@ parse(char *filename)
 
   /* Create C header file */
 
-  sprintf(hdrname,"%s/mbk_%s.h",HDIR,rawname);
-  sprintf(hdrtname,"%s/mbk_%s.h1~",HDIR,rawname);
+  strcpy(hdrname,mkfname("%s/mbk_%s.h",HEADERDIR,rawname));
+  strcpy(hdrtname,mkfname("%s/mbk_%s.h1~",HEADERDIR,rawname));
   if((header1=fopen(hdrtname,"w"))==NULL){
     errp("MSGIDX: Unable to open %s\n",hdrtname);
     exit(-1);
   }
-  sprintf(hdrtname,"%s/mbk_%s.h2~",HDIR,rawname);
+  strcpy(hdrtname,mkfname("%s/mbk_%s.h2~",HEADERDIR,rawname));
   if((header2=fopen(hdrtname,"w"))==NULL){
     errp("MSGIDX: Unable to open %s\n",hdrtname);
     exit(-1);
@@ -254,8 +266,8 @@ parse(char *filename)
 
   /* Create output binary file and temporary index file */
 
-  sprintf(outname,"%s/%s.mbk",MBKDIR,rawname);
-  sprintf(tmpoutname,"%s/%s.tmp",MBKDIR,rawname);
+  strcpy(outname,mkfname("%s/%s.mbk",MBKDIR,rawname));
+  strcpy(tmpoutname,mkfname("%s/%s.tmp",MBKDIR,rawname));
   if((output=fopen(tmpoutname,"w+"))==NULL){
     errp("MSGIDX: Unable to open %s\n",tmpoutname);
     exit(-1);
@@ -269,7 +281,7 @@ parse(char *filename)
     exit(-1);
   }
 
-  sprintf(idxname,"%s/%s.idx",MBKDIR,rawname);
+  strcpy(idxname,mkfname("%s/%s.idx",MBKDIR,rawname));
   if((index=fopen(idxname,"w+"))==NULL){
     errp("MSGIDX: Unable to open %s\n",outname);
     exit(-1);
@@ -292,7 +304,7 @@ parse(char *filename)
   fwrite(MBK_MAGIC,strlen(MBK_MAGIC),1,index);
   indexsize=0;
   memset(langoffs,0,sizeof(langoffs));
-  fwrite(&indexsize,sizeof(long),1,index);
+  fwrite(&indexsize,sizeof(indexsize),1,index);
   fwrite(langoffs,sizeof(langoffs),1,index);
 
   while(!feof(inp_buffer)){
@@ -348,18 +360,18 @@ parse(char *filename)
 	      /* If different keywords, just copy the indices */
 	      
 	      if(strcmp(shouldbe,keyword)){
-		long l;
+		idx_t idx;
 
 		fseek(index,sourceidx,SEEK_SET);
-		fread(&l,sizeof(l),1,index);
+		fread(&idx,sizeof(idx),1,index);
 		fseek(index,0,SEEK_END);
-		fwrite(&l,sizeof(l),1,index);
+		fwrite(&idx,sizeof(idx),1,index);
 
 #ifdef DEBUG
 		PRINT("  SRC=%ld  L=%ld\n",sourceidx,l);
 #endif
 		
-		sourceidx+=sizeof(l);
+		sourceidx+=sizeof(idx);
 		indexsize++;
 	      } else {
 		indexsize++;
@@ -378,7 +390,7 @@ parse(char *filename)
 	  if(curlang)while(!feof(dict)){
 	    char shouldbe[256];
 	    char *nlp;
-	    long l;
+	    idx_t idx;
 	    
 	    if(!fgets(shouldbe,256,dict))continue;
 	    for(nlp=shouldbe;*nlp;nlp++)if(*nlp==10||*nlp==13){
@@ -391,10 +403,10 @@ parse(char *filename)
 #endif
 
 	    fseek(index,sourceidx,SEEK_SET);
-	    fread(&l,sizeof(l),1,index);
+	    fread(&idx,sizeof(idx),1,index);
 	    fseek(index,0,SEEK_END);
-	    fwrite(&l,sizeof(l),1,index);
-	    sourceidx+=sizeof(l);
+	    fwrite(&idx,sizeof(idx),1,index);
+	    sourceidx+=sizeof(idx);
 	    indexsize++;
 	  }
 
@@ -415,15 +427,20 @@ parse(char *filename)
 	/* Add an index entry pointing to start of text block */
 	
 	if(!special(keyword)){
-	  long fpos=ftell(output);
+	  idx_t idx;
 
 #ifdef DEBUG
 	  PRINT("KEYWORD %s  IDX=%ld  OUT=%ld  SRC=%ld\n",keyword,ftell(index),ftell(output),sourceidx);
 #endif
 
-	  sourceidx+=sizeof(long);
+	  bzero(&idx,sizeof(idx));
+	  strncpy(idx.id,keyword,sizeof(idx.id)-1);
+	  idx.id[sizeof(idx.id)-1]=0;
+	  idx.offset=ftell(output);
+
+	  sourceidx+=sizeof(idx);
 	  fseek(index,0,SEEK_END);
-	  fwrite(&fpos,sizeof(fpos),1,index);
+	  fwrite(&idx,sizeof(idx),1,index);
 	}
 
 	/* Begin reading text block */
@@ -484,11 +501,13 @@ parse(char *filename)
   /* Add a dummy index entry pointing to the end of the file */
 
   {
-    long l;
+    idx_t idx;
+
+    bzero(&idx,sizeof(idx));
     fseek(output,0,SEEK_END);
-    l=ftell(output);
+    idx.offset=ftell(output);
     fseek(index,strlen(MBK_MAGIC),SEEK_END);
-    fwrite(&l,sizeof(l),1,index);
+    fwrite(&idx,sizeof(idx),1,index);
   }
 
   /*  Adjust index for concatenation with output file */
@@ -504,14 +523,14 @@ parse(char *filename)
 
   {
     char command[256];
-    sprintf(hdrtname,"%s/mbk_%s.h~",HDIR,rawname);
-    sprintf(command,"cat %s/mbk_%s.h1~ %s/mbk_%s.h2~ >%s",
-	    HDIR,rawname,HDIR,rawname,hdrtname);
+    char fname1[2048],fname2[2048];
+    strcpy(hdrtname,mkfname("%s/mbk_%s.h~",HEADERDIR,rawname));
+    strcpy(fname1,mkfname("%s/mbk_%s.h1~",HEADERDIR,rawname));
+    strcpy(fname2,mkfname("%s/mbk_%s.h2~",HEADERDIR,rawname));
+    sprintf(command,"cat %s %s >%s",fname1,fname2,hdrtname);
     system(command);
-    sprintf(command,"%s/mbk_%s.h1~",HDIR,rawname);
-    unlink(command);
-    sprintf(command,"%s/mbk_%s.h2~",HDIR,rawname);
-    unlink(command);
+    unlink(fname1);
+    unlink(fname2);
   }
 
 
@@ -559,6 +578,8 @@ int
 main(int argc, char **argv)
 {
   int i;
+
+  _hdir=strdup(&(HDIR[strlen(__BASEDIR)+1])); /* Set the prefix */
 
   if(argc==1)help();
   for(i=1;i<argc;i++) parse(argv[i]);

@@ -43,9 +43,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 21:13:24  alexios
  * Supplied own version of usleep for borken (sic) bastard
@@ -508,6 +507,24 @@ int fcopy(char *source, char *target);
 #ifndef HAVE_USLEEP
 extern void usleep ((unsigned long __usec));
 #endif /* HAVE_USLEEP */
+
+
+
+/** Format a filename.
+
+    This function formats a filename string for a subdirectory under the BBS
+    prefix. The environment variables {\tt BBSPREFIX} and {\tt PREFIX} are
+    first checked, followed by the BBS prefix defined at compile time.
+
+    @param fmt A {\tt printf()}-like format string, followed by any necessary
+    parameters. The prefix will be automatically prepended to the format string
+    to form the fully qualified filename.
+    
+    @return The fully qualified filename. */
+
+#ifndef MISCFX_O
+char *mkfname(char *fmt,...);
+#endif /* MISCFX_O */
 
 
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:29  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:05  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  1999/07/28 23:06:34  alexios
  * No changes, effectively.
@@ -86,6 +85,9 @@ const char *__RCS=RCS_VER;
 #endif
 
 
+#define MISCFX_O
+
+
 #define WANT_SYS_SHM_H 1
 #define WANT_SYS_MSG_H 1
 #define WANT_TERMIOS_H 1
@@ -94,6 +96,7 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_TYPES_H 1
 #define WANT_SYS_STAT_H 1
 #define WANT_FCNTL_H 1
+#define WANT_VARARGS_H 1
 #include <bbsinclude.h>
 
 #include "config.h"
@@ -117,6 +120,44 @@ alcmem(size_t size)
   if(ptr)return ptr;
   error_fatal("Failed to allocate %08d bytes",size);
   return NULL; /* Get rid of warning -- we're not returning anyway */
+}
+
+
+static char *bbsprefix=NULL;
+
+
+char *
+mkfname(fmt,va_alist)
+char *fmt;
+va_dcl
+{
+  va_list args;
+  char tmp[2048];
+  static char buf[2048];
+
+  /* Find out our prefix */
+
+  if(bbsprefix==NULL){
+    if(getenv("BBSPREFIX")) bbsprefix=strdup(getenv("BBSPREFIX"));
+    else if(getenv("PREFIX")) bbsprefix=strdup(getenv("PREFIX"));
+    else bbsprefix=strdup(__BASEDIR);
+  }
+
+  /* Prepend the prefix to the format. Chop double slashes */
+  
+  strcpy(tmp,bbsprefix);
+  if(tmp[strlen(tmp)-1]=='/')tmp[strlen(tmp)-1]=0;
+  strcat(tmp,"/");
+  if(fmt[0]=='/')strcat(tmp,&(fmt[1]));
+  else strcat(tmp,fmt);
+
+  /* And format the string */
+
+  va_start(args);
+  vsprintf(buf,tmp,args);
+  va_end(args);
+
+  return buf;
 }
 
 
@@ -192,7 +233,7 @@ bbsdcommand(char *command, char *tty, char *arg)
   FILE *fp;
   char fname[256];
   
-  sprintf(fname,BBSDPIPEFILE);
+  sprintf(fname,mkfname(BBSDPIPEFILE));
   if((fp=fopen(fname,"w"))==NULL){
     return 0;
   }
@@ -244,7 +285,8 @@ dialog_run(char *msg, int visual, int linear, char *data, size_t len)
 
   /* Run the dialogue */
 
-  sprintf(command,"%s %s %d %d %s",BBSDIALOGBIN,msg,visual,linear,fname);
+  sprintf(command,"%s %s %d %d %s",
+	  mkfname(BBSDIALOGBIN),msg,visual,linear,fname);
   result=runcommand(command);
 
 
@@ -339,10 +381,10 @@ editor(char *fname,int limit)
   char command[256];
 
   if(thisuseracc.prefs&UPF_VISUAL && thisuseronl.flags&OLF_ANSION){
-    sprintf(command,"%s %s %d",VISEDBIN,fname,limit);
+    sprintf(command,"%s %s %d",mkfname(VISEDBIN),fname,limit);
     return runcommand(command);
   } else {
-    sprintf(command,"%s %s %d",LINEDBIN,fname,limit);
+    sprintf(command,"%s %s %d",mkfname(LINEDBIN),fname,limit);
     return runcommand(command);
   }
 }
@@ -403,7 +445,8 @@ _gopage(char *s, int is_menuman)
   thisuseronl.flags&=~OLF_MMCALLING;
   fflush(stdout);
 
-  if(/*!*/is_menuman)execl(BINDIR"/menuman","menuman",NULL);	/* patched by Valis */
+  /* patched by Valis */
+  if(/*!*/is_menuman)execl(mkfname(BINDIR"/menuman"),"menuman",NULL);
 
   exit(0); /* Do it the slow, ugly way if execl() fails */
 }

@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  1999/07/18 21:01:53  alexios
  * Minor paranoia modifications to channel_setstatus() (unlink line
@@ -82,7 +81,7 @@ channel_getstatus(char *tty, channel_status_t *status)
   
   /* Open the status file. If it doesn't exist, return sane defaults */
 
-  sprintf(fname,"%s/.status-%s",CHANDEFDIR,tty);
+  sprintf(fname,"%s/.status-%s",mkfname(CHANDEFDIR),tty);
   if((i=open(fname,O_RDONLY))<0){
     memcpy(status,&channel_default_status,sizeof(channel_status_t));
     return -1;
@@ -141,7 +140,7 @@ channel_setstatus(char *tty, channel_status_t *status)
   
   /* Create the status file. */
 
-  sprintf(fname,"%s/.status-%s",CHANDEFDIR,tty);
+  sprintf(fname,"%s/.status-%s",mkfname(CHANDEFDIR),tty);
   unlink(fname);		/* Just in case */
   if((i=creat(fname,0666))<0){
     error_fatalsys("Unable to creat(\"%s\",0666).",fname);

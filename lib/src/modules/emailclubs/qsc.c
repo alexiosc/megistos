@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -130,7 +129,7 @@ ustartqsc(char *uid)
   if(uqscp)uqscp=NULL;
   numclubs=clubp=0;
 
-  sprintf(fname,"%s/%s",QSCDIR,uid);
+  sprintf(fname,"%s/%s",mkfname(QSCDIR),uid);
   if(stat(fname,&st))return NULL;
 
   if((fp=fopen(fname,"r"))==NULL){
@@ -251,7 +250,7 @@ usaveqsc(char *uid)
 
   sortqsc();
 
-  sprintf(fname,"%s/%s",QSCDIR,uid);
+  sprintf(fname,"%s/%s",mkfname(QSCDIR),uid);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create quickscan configuration %s",fname);
   }
@@ -347,7 +346,7 @@ all(int add)
   struct dirent **clubs;
   int n,i;
 
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     struct lastread *p;
@@ -376,7 +375,7 @@ initialise()
   struct dirent **clubs;
   int n,i;
 
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;

@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  2000/01/06 11:42:07  alexios
  * Various small bug fixes. The channel list now flags users who have
@@ -300,7 +299,7 @@ getchkname(char *checkname,char *tty)
   int pid;
 
   pid=0;
-  sprintf(s,"%s/register-%s",BBSETCDIR,tty);
+  sprintf(s,"%s/register-%s",mkfname(BBSETCDIR),tty);
   if((fp=fopen(s,"r"))!=NULL){
     fgets(s,sizeof(s),fp);
     fclose(fp);
@@ -337,7 +336,7 @@ rsys_emulate()
       int  pid, ok=0;
       char s[256];
 
-      sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+      sprintf(fname,"%s/emud-%s.pid",mkfname(BBSETCDIR),tty);
       if((fp=fopen(fname,"r"))!=NULL){
 	if(fscanf(fp,"%d",&pid)==1){
 	  fclose(fp);
@@ -392,7 +391,7 @@ rsys_emulate()
 
   /* Begin emulation */
 
-  sprintf(fname,"%s/.shmid-%s",EMULOGDIR,tty);
+  sprintf(fname,"%s/.shmid-%s",mkfname(EMULOGDIR),tty);
 
   if((fp=fopen(fname,"r"))==NULL){
     error_fatalsys("Error opening %s\n",fname);
@@ -409,7 +408,7 @@ rsys_emulate()
     err=1;
   }
 
-  sprintf(fname,"%s/.emu-%s",EMULOGDIR,tty);
+  sprintf(fname,"%s/.emu-%s",mkfname(EMULOGDIR),tty);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Error opening %s\n",fname);
     err=1;
@@ -487,7 +486,7 @@ rsys_monitor()
   int oldmark=0;
 
   prompt(RSMONITORHDR,NULL);
-  if((fp=fopen(MONITORFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(MONITORFILE),"r"))==NULL){
     prompt(RSMONITORERR,NULL);
     return;
   }
@@ -523,7 +522,7 @@ void
 rsys_send()
 {
   char tty[32];
-  char fname[256],msg[2050],tmp[2048],buf[MSGBUFSIZE];
+  char fname[256],msg[2050],buf[MSGBUFSIZE];
   FILE *fp;
   channel_status_t status;
 
@@ -553,8 +552,7 @@ rsys_send()
       prompt(RSSENDD);
       return;
     }
-    strcpy(tmp,msg_getl(RSSENDINH,othruseracc.language-1));
-    sprintf(msg_buffer,"%s%s\n\n",tmp,msg);
+    sprompt_other(othrshm,msg_buffer,RSSENDINH,msg);
     if(!usr_injoth(&othruseronl,msg_buffer,0)){
       prompt(RSSENDX,othruseronl.userid);
     } else prompt(RSSEND1,chan_getnum(tty));
@@ -564,8 +562,7 @@ rsys_send()
       channel_getstatus(channels[i].ttyname,&status);
       if(status.result!=LSR_USER){
 	if(usr_insys(status.user,0)){
-	  strcpy(tmp,msg_getl(RSSENDINH,othruseracc.language-1));
-	  sprintf(buf,"%s%s\n\n",tmp,msg);
+	  sprompt_other(othrshm,buf,RSSENDINH,msg);
 	  if(usr_insys(status.user,0)){
 	    n++;
 	    if(!usr_injoth(&othruseronl,buf,0)){

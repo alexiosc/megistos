@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 22:00:00  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Added MetaBBS
@@ -181,7 +180,7 @@ cmd_delete(int chan, char *tty, char *arg)
 
   if(fork())return;
 
-  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,arg);
+  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),arg);
     
   while(!stat(fname,&st)){
     if(!kicked){
@@ -200,11 +199,12 @@ cmd_delete(int chan, char *tty, char *arg)
     }
   }
   
-  chdir(BINDIR);
+  chdir(mkfname(BINDIR));
   {
     char command[256];
-    sprintf(command,"%s %s",USERDELBIN,arg);
-    setenv("PREFIX",BBSDIR,1);
+    sprintf(command,"%s %s",mkfname(USERDELBIN),arg);
+    setenv("PREFIX",mkfname(""),1);
+    setenv("BBSPREFIX",mkfname(""),1);
     execl("/bin/sh","sh","-c",command,NULL);
     error_logsys("failed to execl() %s",command);
   }
@@ -221,7 +221,7 @@ cmd_chat(int chan, char *tty, char *arg)
 
   /*  if(fork())return; */
 
-  sprintf(s,"%s/register-%s",BBSETCDIR,tty);
+  sprintf(s,"%s/register-%s",mkfname(BBSETCDIR),tty);
   if((fp=fopen(s,"r"))==NULL){
     error_logsys("cmd_chat(): Unable to open %s",s);
     /*    exit(0);*/
@@ -254,7 +254,7 @@ cmd_user2(int chan, char *tty, char *arg)
 
   /*  if(fork())return; */
 
-  sprintf(s,"%s/register-%s",BBSETCDIR,tty);
+  sprintf(s,"%s/register-%s",mkfname(BBSETCDIR),tty);
   if((fp=fopen(s,"r"))==NULL){
     error_logsys("cmd_chat(): Unable to open %s",s);
     /*    exit(0); */
@@ -371,7 +371,7 @@ cmd_event(int chan, char *tty, char *arg)
   /*  if(fork())return; */
 
   bzero(&event,sizeof(event));
-  sprintf(s,"%s/%s",EVENTDIR,arg);
+  sprintf(s,"%s/%s",mkfname(EVENTDIR),arg);
   if((fp=fopen(s,"r"))==NULL)return;
   fread(&event,sizeof(event),1,fp);
   fclose(fp);

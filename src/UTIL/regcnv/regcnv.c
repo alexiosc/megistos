@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.2  1998/12/27 16:40:53  alexios
  * Added autoconf support.
@@ -160,7 +159,7 @@ main(int argc, char **argv)
 
   printf("\nREMEMBER:\n\n"\
 	 "  * It's entirely your responsibility to physically copy\n"\
-	 "    the user registry files to %s.\n\n",REGISTRYDIR);
+	 "    the user registry files to %s.\n\n",mkfname(REGISTRYDIR));
 
   return 0;
 }

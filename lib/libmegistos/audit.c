@@ -28,12 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.3  2001/04/17 18:36:02  alexios
- * Minor changes.
- *
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.4  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 14:31:16  alexios
  * Added autoconf support. Made allowances for new getlinestatus().
@@ -88,10 +84,12 @@ const char *__RCS=RCS_VER;
 #include "ttynum.h"
 #include "channels.h"
 #include "security.h"
+#include "miscfx.h"
 #include "mbk_sysvar.h"
 
 
-static char auditfile[256]=AUDITFILE;
+static char *auditfile=NULL;
+static char *orig_auditfile=NULL;
 
 
 void
@@ -124,8 +122,8 @@ char *channel, *summary, *detailed;
 	   ((flags&ushm->acc.auditfiltering)&~AUF_SEVERITY)&&
 	   ((flags&ushm->acc.auditfiltering)&AUF_SEVERITY)){
 	  msg_set(msg_sys);
-	  sprintf(buf,msg_getl(AUDINJI+GETSEVERITY(flags),ushm->acc.language-1),
-		  channel,summary,detailed);
+	  sprompt_other(ushm,buf,AUDINJI+GETSEVERITY(flags),
+			channel,summary,detailed);
 	  msg_reset();
 	  usr_injoth(&ushm->onl,buf,0);
 	}
@@ -146,6 +144,8 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
   char    entry[132]={0};
   int     c;
 
+  if(auditfile==NULL)audit_setfile(NULL);
+
   va_start(args,format);
 
   if((fp=fopen(auditfile,"a"))==NULL)return 0;
@@ -155,7 +155,6 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
   c=chan_getnum(channel);
   if(c!=-1)sprintf(chanstr,"CHANNEL %02x",c);
   else sprintf(chanstr,"%-10s",channel);
-
   fflush(stdout);
 
   vsprintf(s,format,args);
@@ -168,7 +167,7 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
   fclose(fp);
   chmod(auditfile,0666);
 
-  if(!strcmp(AUDITFILE,auditfile))audnotify(flags,chanstr,summary,s);
+  if(!strcmp(orig_auditfile,auditfile))audnotify(flags,chanstr,summary,s);
 
   return 1;
 }
@@ -177,12 +176,17 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
 void
 audit_setfile(char *s)
 {
-  strcpy(auditfile,s!=NULL?s:AUDITFILE);
+  if(auditfile==NULL){
+    auditfile=strdup(mkfname(AUDITFILE));
+    orig_auditfile=strdup(auditfile);
+  }
+  free(auditfile);
+  auditfile=strdup(s!=NULL?s:orig_auditfile);
 }
 
 
 void
 audit_resetfile()
 {
-  strcpy(auditfile,AUDITFILE);
+  strcpy(auditfile,orig_auditfile);
 }

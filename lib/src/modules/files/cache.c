@@ -32,9 +32,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support. Added support for new channel_getstatus().
@@ -73,7 +72,7 @@ const char *__RCS=RCS_VER;
 
 
 #define mkcachename(s,l,u,f) \
-sprintf(s,"%s/%s:%d:%s",LIBCACHEDIR,u,l->libnum,f)
+sprintf(s,"%s/%s:%d:%s",mkfname(LIBCACHEDIR),u,l->libnum,f)
 
 
 static char *convertfname(struct libidx *lib, char *fname)
@@ -158,7 +157,7 @@ static char *linkfile(struct libidx *lib, char *fname)
 
   converted_fname=fname;
   libnum=lib->libnum;
-  if((j=scandir(LIBCACHEDIR,&d,cachesel,alphasort))==0){
+  if((j=scandir(mkfname(LIBCACHEDIR),&d,cachesel,alphasort))==0){
     if(d)free(d);
     return NULL;
   }
@@ -166,7 +165,7 @@ static char *linkfile(struct libidx *lib, char *fname)
   /* Any of these will do, they're all hard links to the same inode anyway. So
      we pick the first one (obviously). */
 
-  sprintf(source,"%s/%s",LIBCACHEDIR,d[0]->d_name);
+  sprintf(source,"%s/%s",mkfname(LIBCACHEDIR),d[0]->d_name);
   for(i=0;i<j;i++)free(d[i]);	/* Clean up */
   mkcachename(target,lib,thisuseracc.userid,fname);
   if(link(source, target))return NULL;
@@ -248,13 +247,13 @@ static int cachesize()		/* Also unlinks expired files */
   char fname[512];
   int i, j, s=0, t=time(NULL)-sldctim*60;
 
-  if((j=scandir(LIBCACHEDIR,&d,allsel,alphasort))==0){
+  if((j=scandir(mkfname(LIBCACHEDIR),&d,allsel,alphasort))==0){
     if(d)free(d);
     return 0;
   }
 
   for(i=0;i<j;i++){
-    sprintf(fname,"%s/%s",LIBCACHEDIR,d[i]->d_name);
+    sprintf(fname,"%s/%s",mkfname(LIBCACHEDIR),d[i]->d_name);
     st.st_size=0;
     stat(fname,&st);
     if((stat(fname,&st)==0) && st.st_mtime<t){

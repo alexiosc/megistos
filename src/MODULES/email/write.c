@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.10  1999/08/13 17:00:25  alexios
  * Fixed silly reprompt bug when asking for recipient name.
@@ -316,9 +315,10 @@ emailwrite()
       }
       fclose(fp);
 
-      if(!attfile[0])sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
+      if(!attfile[0])sprintf(command,"%s %s %s",
+			     mkfname(BBSMAILBIN),header,body);
       else {
-	sprintf(command,"%s %s %s -%c %s",BBSMAILBIN,header,body,
+	sprintf(command,"%s %s %s -%c %s",mkfname(BBSMAILBIN),header,body,
 		numcopies?'h':'c',attfile);
 	if(numcopies)cleanupattachment=0;
       }
@@ -354,13 +354,11 @@ emailwrite()
 	  
 	  if(usr_insys(checkmsg.to,1)){
 	    if(!clubmsg){
-	      sprintf(out_buffer,msg_getl(numcopies?WERNOTC:WERNOT,
-					  othruseracc.language-1),
-		      checkmsg.from,checkmsg.subject);
+	      sprompt_other(othrshm,out_buffer,numcopies?WERNOTC:WERNOT,
+			    checkmsg.from,checkmsg.subject);
 	    } else {
-	      sprintf(out_buffer,msg_getl(numcopies?WCRNOTC:WCRNOT,
-					  othruseracc.language-1),
-		      checkmsg.from,checkmsg.club,checkmsg.subject);
+	      sprompt_other(othrshm,out_buffer,numcopies?WCRNOTC:WCRNOT,
+			    checkmsg.from,checkmsg.club,checkmsg.subject);
 	    }
 	    if(usr_injoth(&othruseronl,out_buffer,0))
 	      prompt(WENOTFD,othruseronl.userid);
@@ -381,10 +379,9 @@ emailwrite()
       unlink(header);
       if(attfile[0] && cleanupattachment){
 	unlink(attfile);
-	sprintf(attfile,"%s/%s/"MSGATTDIR"/"FILEATTACHMENT,
-		MSGSDIR,
+	strcpy(attfile,mkfname("%s/%s/"MSGATTDIR"/"FILEATTACHMENT,MSGSDIR,
 		clubmsg?clubhdr.club:EMAILDIRNAME,
-		original);
+		original));
       }
     } else {
       closedistribution();
@@ -451,14 +448,14 @@ recipienthelp()
     }
   }
 
-  if((dp=opendir(MSGSDISTDIR))==NULL)return;
+  if((dp=opendir(mkfname(MSGSDISTDIR)))==NULL)return;
   while((dir=readdir(dp))!=NULL){
     if(sameas(dir->d_name,".")||sameas(dir->d_name,".."))continue;
     if(fmt_lastresult==PAUSE_QUIT){
       closedir(dp);
       return;
     }
-    sprintf(fname,"%s/%s",MSGSDISTDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),dir->d_name);
     if((fp=fopen(fname,"r"))==NULL)continue;
     if(fscanf(fp,"%d",&key)!=1){
       fclose(fp);
@@ -508,11 +505,11 @@ checklistname(char *name)
   
   if(!strcmp(name,"!"))sprintf(name,"!.%s",thisuseracc.userid);
 
-  if((dp=opendir(MSGSDISTDIR))==NULL)return 0;
+  if((dp=opendir(mkfname(MSGSDISTDIR)))==NULL)return 0;
   while((dir=readdir(dp))!=NULL){
     if(sameas(dir->d_name,".")||sameas(dir->d_name,".."))continue;
 
-    sprintf(fname,"%s/%s",MSGSDISTDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),dir->d_name);
     if((fp=fopen(fname,"r"))==NULL)continue;
     if(fscanf(fp,"%d",&key)!=1){
       fclose(fp);

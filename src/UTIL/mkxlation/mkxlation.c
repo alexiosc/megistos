@@ -47,9 +47,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.4  1998/12/27 16:39:15  alexios
  * Added autoconf support.
@@ -100,12 +99,12 @@ void
 parse(int n, int kbd)
 {
   FILE *fp;
-  char fname[256], line[1024], *cp;
+  char *fname, line[1024], *cp;
   int i=0;
   int errors=0;
 
-  if(kbd) sprintf(fname,XLATIONDIR"/"KBDXLATIONSRC,n);
-  else sprintf(fname,XLATIONDIR"/"XLATIONSRC,n);
+  if(kbd) fname=mkfname(XLATIONDIR"/"KBDXLATIONSRC,n);
+  else fname=mkfname(XLATIONDIR"/"XLATIONSRC,n);
 
   if((fp=fopen(fname,"r"))==NULL){
     fprintf(stderr,"%s: cannot open (one-to-one mapping assumed).\n",fname);
@@ -172,26 +171,33 @@ main(int argc, char **argv)
   for(i=0;i<NUMXLATIONS;i++)parse(i,0);	/* Output mapping */
   for(i=0;i<NUMXLATIONS;i++)parse(i,1);	/* Keyboard (inp_buffer) mapping */
 
-  if((fp=fopen(XLATIONFILE"~","w"))==NULL){
-    fprintf(stderr,"Unable to open %s for writing!\n",XLATIONFILE"~");
+  if((fp=fopen(mkfname(XLATIONFILE"~"),"w"))==NULL){
+    fprintf(stderr,"Unable to open %s for writing!\n",mkfname(XLATIONFILE"~"));
     exit(1);
   }
 
   if(fwrite(xlate,sizeof(xlate),1,fp)!=1){
     int i=errno;
-    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",XLATIONFILE"~",i);
+    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",
+	    mkfname(XLATIONFILE"~"),i);
     exit(1);
   }
 
   if(fwrite(kbdxlate,sizeof(kbdxlate),1,fp)!=1){
     int i=errno;
-    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",XLATIONFILE"~",i);
+    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",
+	    mkfname(XLATIONFILE"~"),i);
     exit(1);
   }
 
   fclose(fp);
-  rename(XLATIONFILE"~",XLATIONFILE);
-  chmod(XLATIONFILE,0660);
+  {
+    char old[2048];
+    strcpy(old,mkfname(XLATIONFILE"~"));
+    rename(old,mkfname(XLATIONFILE));
+  }
+  chmod(mkfname(XLATIONFILE),0660);
+
   fprintf(stderr,"Tables compiled.\n");
   fprintf(stderr,"NB: if you want your changes to take effect immediately,\n");
   fprintf(stderr,"    consider saying: su -c \"killall -SIGUSR1 emud\"\n");

@@ -29,13 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.3  2001/04/21 22:43:41  alexios
- * Fixed insidious little bug that caused SIGSEGVs when a message couldn't be
- * found (cause of SF bug #416802).
- *
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.4  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -94,7 +89,7 @@ getmsgheader(int msgno,struct message *msg)
   if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
   lock_place(lock,"reading");
 
-  sprintf(fname,"%s/"MESSAGEFILE,dbclubdir,msgno);
+  sprintf(fname,"%s/"MESSAGEFILE,mkfname(dbclubdir),msgno);
   if((fp=fopen(fname,"r"))==NULL){
     lock_rm(lock);
     return BSE_OPEN;
@@ -120,9 +115,8 @@ writemsgheader(struct message *msg)
   if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
   lock_place(lock,"writing");
 
-  sprintf(fname,"%s/"MESSAGEFILE,dbclubdir,msg->msgno);
+  sprintf(fname,"%s/"MESSAGEFILE,mkfname(dbclubdir),msg->msgno);
   if((fp=fopen(fname,"r+"))==NULL){
-    fclose(fp);
     lock_rm(lock);
     return BSE_OPEN;
   } else if(fwrite(msg,sizeof(struct message),1,fp)!=1){
@@ -183,10 +177,10 @@ opendb()
 
     /* Open the new one */
     strcpy(dbcur,dbclubname);
-    sprintf(fname,"%s/%s",dbclubdir,DBDIR);
+    sprintf(fname,"%s/%s",mkfname(dbclubdir),DBDIR);
     mkdir(fname,0777);
     d_dbfpath(fname);
-    d_dbdpath(DBDDIR);
+    d_dbdpath(mkfname(DBDDIR));
     if(d_open(".ecdb","s")!=S_OKAY){
       error_fatal("Cannot open database for %s (db_status %d).",
 	    dbclubname,db_status);

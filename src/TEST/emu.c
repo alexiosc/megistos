@@ -37,7 +37,7 @@ emulate(char *dev)
 
   /* Begin output emulation */
 
-  sprintf(fname,"%s/.log-%s",EMULOGDIR,dev);
+  sprintf(fname,"%s/.log-%s",mkfname(EMULOGDIR),dev);
   if((fp=fopen(fname,"r"))==NULL){
     fprintf(stderr,"Error opening %s\n",fname);
   } else {

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -148,9 +147,9 @@ insatt(struct message *msg)
   }
 
   sprintf(fnamei,"%s/%s/%s/"FILEATTACHMENT,
-	  MSGSDIR,msg->club,MSGATTDIR,msg->msgno);
+	  mkfname(MSGSDIR),msg->club,MSGATTDIR,msg->msgno);
   sprintf(fnameo,"%s/%s/"MESSAGEFILE,
-	  MSGSDIR,msg->club,msg->msgno);
+	  mkfname(MSGSDIR),msg->club,msg->msgno);
 
   if((fpi=fopen(fnamei,"r"))==NULL){
     fclose(fpi);
@@ -209,7 +208,8 @@ insblt(struct message *msg)
   if(!msg->club[0]){
     error_fatal("Sanity check failed: club message with no set club.");
   }
-  sprintf(command,"%s --insert %s/%d",BULLETINBIN,msg->club,msg->msgno);
+  sprintf(command,"%s --insert %s/%d",
+	  mkfname(BULLETINBIN),msg->club,msg->msgno);
   runcommand(command);
 }
 

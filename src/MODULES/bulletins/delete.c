@@ -13,9 +13,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -76,7 +75,7 @@ checklocks(struct bltidx *blt)
   int i,j;
   struct dirent **d=NULL;
   tmpblt=blt;
-  i=scandir(LOCKDIR,&d,lockselect,alphasort);
+  i=scandir(mkfname(LOCKDIR),&d,lockselect,alphasort);
   for(j=0;j<i;j++)free(d[j]);
   free(d);
   return i;
@@ -129,7 +128,7 @@ bltdel()
 
   /* Delete the file */
 
-  sprintf(fname,MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname);
+  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname));
   if(unlink(fname)){
     prompt(DBERR);
     return;

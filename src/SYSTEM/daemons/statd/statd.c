@@ -33,9 +33,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/18 22:07:05  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -123,7 +122,7 @@ storepid()
   FILE *fp;
   char fname[256];
   
-  sprintf(fname,"%s/statd.pid",BBSETCDIR);
+  sprintf(fname,"%s/statd.pid",mkfname(BBSETCDIR));
   if((fp=fopen(fname,"w"))==NULL)return;
   fprintf(fp,"%d",getpid());
   fclose(fp);
@@ -136,7 +135,7 @@ void
 refreshclasses()
 {
   struct stat s;
-  stat(CLASSFILE,&s);
+  stat(mkfname(CLASSFILE),&s);
   if (s.st_ctime!=classtime) {
     debug("REFRESHING CLASSES...\n");
     classtime=s.st_ctime;
@@ -149,7 +148,7 @@ void
 refreshchannels()
 {
   struct stat s;
-  if(stat(CHANDEFFILE,&s))return;
+  if(stat(mkfname(CHANDEFFILE),&s))return;
   if (s.st_ctime!=channeltime) {
     debug("REFRESHING CHANNELS...\n");
     channeltime=s.st_ctime;
@@ -165,14 +164,14 @@ readdaystats()
   int i;
   struct stat s;
 
-  if(stat(DAYSTATFILE,&s)){
+  if(stat(mkfname(DAYSTATFILE),&s)){
     memset(daystats,0,sizeof(daystats));
     return;
   }
   if (s.st_ctime==daystattime)return;
   debug("READING DAY STATS...\n");
   memset(daystats,0,sizeof(daystats));
-  if((fp=fopen(DAYSTATFILE,"r"))==NULL)return;
+  if((fp=fopen(mkfname(DAYSTATFILE),"r"))==NULL)return;
   for(i=0;i<24;i++){
     fscanf(fp,"%d %d\n",&daystats[i].credits,&daystats[i].minutes);
   }
@@ -188,15 +187,15 @@ writedaystats()
   struct stat s;
 
   debug("WRITING DAY STATS...\n");
-  if((fp=fopen(DAYSTATFILE,"w"))==NULL){
-    error_intsys("Unable to write %s",DAYSTATFILE);
+  if((fp=fopen(mkfname(DAYSTATFILE),"w"))==NULL){
+    error_intsys("Unable to write %s",mkfname(DAYSTATFILE));
     return;
   }
   for(i=0;i<24;i++){
     fprintf(fp,"%d %d\n",daystats[i].credits,daystats[i].minutes);
   }
   fclose(fp);
-  if(!stat(DAYSTATFILE,&s))daystattime=s.st_ctime;
+  if(!stat(mkfname(DAYSTATFILE),&s))daystattime=s.st_ctime;
 }
 
 
@@ -206,14 +205,14 @@ readttystats()
   FILE *fp;
   struct stat s;
 
-  if(stat(TTYSTATFILE,&s)){
+  if(stat(mkfname(TTYSTATFILE),&s)){
     numttystats=0;
     return;
   }
   if (s.st_ctime==ttystattime)return;
   debug("READING TTY STATS...\n");
   numttystats=0;
-  if((fp=fopen(TTYSTATFILE,"r"))==NULL)return;
+  if((fp=fopen(mkfname(TTYSTATFILE),"r"))==NULL)return;
   while(!feof(fp)){
     struct ttystats *tty=&ttystats[numttystats];
     int i=fscanf(fp,"%s %x %d %d %d\n",tty->name,&tty->channel,
@@ -233,8 +232,8 @@ writettystats()
   struct stat s;
 
   debug("WRITING TTY STATS...\n");
-  if((fp=fopen(TTYSTATFILE,"w"))==NULL){
-    error_intsys("Unable to write %s",TTYSTATFILE);
+  if((fp=fopen(mkfname(TTYSTATFILE),"w"))==NULL){
+    error_intsys("Unable to write %s",mkfname(TTYSTATFILE));
     return;
   }
   for(i=0;i<numttystats;i++){
@@ -243,7 +242,7 @@ writettystats()
 	    ttystats[i].minutes,ttystats[i].calls);
   }
   fclose(fp);
-  if(!stat(TTYSTATFILE,&s))ttystattime=s.st_ctime;
+  if(!stat(mkfname(TTYSTATFILE),&s))ttystattime=s.st_ctime;
 }
 
 
@@ -277,7 +276,7 @@ readclsstats()
   FILE *fp;
   struct stat s;
 
-  if(stat(CLSSTATFILE,&s)){
+  if(stat(mkfname(CLSSTATFILE),&s)){
     if(clsstats)free(clsstats);
     numclsstats=0;
     return;
@@ -285,7 +284,7 @@ readclsstats()
   if (s.st_ctime==clsstattime)return;
   debug("READING CLASS STATS...\n");
   numclsstats=0;
-  if((fp=fopen(CLSSTATFILE,"r"))==NULL)return;
+  if((fp=fopen(mkfname(CLSSTATFILE),"r"))==NULL)return;
   while(!feof(fp)){
     int i=fscanf(fp,"%s %d %d\n",
 		 clsstats[numclsstats].name,
@@ -307,8 +306,8 @@ writeclsstats()
   struct stat s;
 
   debug("WRITING CLASS STATS...\n");
-  if((fp=fopen(CLSSTATFILE,"w"))==NULL){
-    error_intsys("Unable to write %s",CLSSTATFILE);
+  if((fp=fopen(mkfname(CLSSTATFILE),"w"))==NULL){
+    error_intsys("Unable to write %s",mkfname(CLSSTATFILE));
     return;
   }
   for(i=0;i<numclsstats;i++){
@@ -316,7 +315,7 @@ writeclsstats()
 	    clsstats[i].minutes);
   }
   fclose(fp);
-  if(!stat(CLSSTATFILE,&s))clsstattime=s.st_ctime;
+  if(!stat(mkfname(CLSSTATFILE),&s))clsstattime=s.st_ctime;
 }
 
 
@@ -350,14 +349,14 @@ readbaudstats()
   FILE *fp;
   struct stat s;
 
-  if(stat(BAUDSTATFILE,&s)){
+  if(stat(mkfname(BAUDSTATFILE),&s)){
     numbaudstats=0;
     return;
   }
   if (s.st_ctime==baudstattime)return;
   debug("READING BAUD STATS...\n");
   numbaudstats=0;
-  if((fp=fopen(BAUDSTATFILE,"r"))==NULL)return;
+  if((fp=fopen(mkfname(BAUDSTATFILE),"r"))==NULL)return;
   while(!feof(fp)){
     int i=fscanf(fp,"%d %d %d %d\n",
 		 &baudstats[numbaudstats].baud,
@@ -379,8 +378,8 @@ writebaudstats()
   struct stat s;
 
   debug("WRITING BAUD STATS...\n");
-  if((fp=fopen(BAUDSTATFILE,"w"))==NULL){
-    error_intsys("Unable to write %s",BAUDSTATFILE);
+  if((fp=fopen(mkfname(BAUDSTATFILE),"w"))==NULL){
+    error_intsys("Unable to write %s",mkfname(BAUDSTATFILE));
     return;
   }
   for(i=0;i<numbaudstats;i++){
@@ -388,7 +387,7 @@ writebaudstats()
 	    baudstats[i].minutes,baudstats[i].calls);
   }
   fclose(fp);
-  if(!stat(BAUDSTATFILE,&s))baudstattime=s.st_ctime;
+  if(!stat(mkfname(BAUDSTATFILE),&s))baudstattime=s.st_ctime;
 }
 
 
@@ -422,14 +421,14 @@ readmodstats()
   struct stat s;
   struct modstats mod;
 
-  if(stat(MODSTATFILE,&s)){
+  if(stat(mkfname(MODSTATFILE),&s)){
     nummodstats=0;
     return;
   }
   if (s.st_ctime==modstattime)return;
   debug("READING MOD STATS...\n");
   nummodstats=0;
-  if((fp=fopen(MODSTATFILE,"r"))==NULL)return;
+  if((fp=fopen(mkfname(MODSTATFILE),"r"))==NULL)return;
   while(!feof(fp)){
     char line[1024],*cp;
     int len,ptr;
@@ -460,8 +459,8 @@ writemodstats()
   struct stat s;
 
   debug("WRITING MOD STATS...\n");
-  if((fp=fopen(MODSTATFILE,"w"))==NULL){
-    error_intsys("Unable to write %s",MODSTATFILE);
+  if((fp=fopen(mkfname(MODSTATFILE),"w"))==NULL){
+    error_intsys("Unable to write %s",mkfname(MODSTATFILE));
     return;
   }
   for(i=0;i<nummodstats;i++){
@@ -469,7 +468,7 @@ writemodstats()
 	    modstats[i].credits,modstats[i].minutes);
   }
   fclose(fp);
-  if(!stat(MODSTATFILE,&s))modstattime=s.st_ctime;
+  if(!stat(mkfname(MODSTATFILE),&s))modstattime=s.st_ctime;
 }
 
 

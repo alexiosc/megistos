@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Modified mklib() to accept a third argument, allowing the
@@ -167,6 +166,6 @@ makemainlib()
   bzero(&mainlib,sizeof(mainlib));
   strcpy(mainlib.fullname,libmain);
   strcpy(mainlib.descr,msg_get(MAINDESCR));
-  sprintf(mainlib.dir,"%s/%s",FILELIBDIR,libmain);
+  sprintf(mainlib.dir,"%s/%s",mkfname(FILELIBDIR),libmain);
   mklib(&mainlib,0,0);
 }

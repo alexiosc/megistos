@@ -46,9 +46,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  2000/01/06 11:37:41  alexios
  * Added declaration for send_out(), a wrapper for write(2) that
@@ -90,6 +89,9 @@
 
 #define _ASCIIVARCHAR '@'
 #define _VARCHAR      0x7f
+
+
+#include "useracc.h"
 
 
 extern char   out_buffer[8192];	/** Temporary output buffer */
@@ -136,6 +138,11 @@ extern uint32 out_flags;	/** Output flags ({\tt OFL_x} flags) */
     flag to partially inhibit variable substitution to {\em only} system
     prompts. Expansion in user-contributed material will not occur.
 
+    \item[{\tt OFL_ISBOT}] Set to mark a non-human user of the system. Output
+    is reformatted for easier parsing by scripts, AIs etc and output in a nice,
+    easily parsable format. You shouldn't need to touch this flag. It's set by
+    the BBS library whenever needed.
+
     \end{description} */
 /*@{*/
 
@@ -144,6 +151,7 @@ extern uint32 out_flags;	/** Output flags ({\tt OFL_x} flags) */
 #define OFL_AFTERINPUT  0x04	/** First output after an input */
 #define OFL_INHIBITVARS 0x08	/** Do not interpret substitution variables */
 #define OFL_PROTECTVARS 0x10	/** Only interpret subst vars inside prompts */
+#define OFL_ISBOT       0x20	/** Output is for a bot/AI/script */
 
 /*@}*/
 
@@ -279,14 +287,14 @@ void out_setxlation(int mode);
 
 /** Format and display a prompt.
 
-    Ah, the building block of every module in the system. This is the function
-    that performs almost all of the output of your average module. It works in
-    much the same was as {\tt printf()}. Unlike the omnipresent C function,
-    however, {\tt prompt()} doesn't use a string format string, but a {\tt
-    number}. The number indices one of the prompts inside the currently active
-    prompt block. These indices have symbolic names attached to them, that are
-    also defined in C headers. A prompt block called {\tt test.mbk} containing
-    a prompt called HELLO would thus have an include file {\tt test.h} with
+    Ah, the building block of every module in the system. This function
+    performs almost all of the output of your average module. It works in much
+    the same was as {\tt printf()}. Unlike the omnipresent C function, however,
+    {\tt prompt()} doesn't use a string format string, but a {\tt number}. The
+    number indices one of the prompts inside the currently active prompt
+    block. These indices have symbolic names attached to them, that are also
+    defined in C headers. A prompt block called {\tt test.mbk} containing a
+    prompt called HELLO would thus have an include file {\tt test.h} with
     something like {\tt #define HELLO 4}.
 
     The {\tt prompt()} function takes just this symbolic name for a prompt,
@@ -309,24 +317,55 @@ void out_setxlation(int mode);
     using the Menu Manager, which prints out the contents of entire files
     without size limitations).
 
-    @param num The prompt number to use.
+    @param num The prompt number to use, followed by any arguments needed by
+    the prompt in question.
 
-    @see printf(), sprompt(), print(), sprint(). */
+    @see printf(), sprompt(), sprompt_other(), print(), sprint(),
+    sprint_other(). */
 
-void prompt (int num,...);
+void prompt(int num,...);
 
 
 /** Format a prompt and store it in a string. 
 
-    This function behaves in exactly the same way as {\tt prompt()}, but stores
-    the formatted text in a string, instead of printing it out directly. All
-    formatting is performed, as per {\tt prompt()}. The string is suitably
-    formatted based on the current user's preferences (e.e. screen width and
-    height).
+    This function behaves somewhat like {\tt prompt()}, but stores the
+    formatted text in a string, instead of printing it out directly. There are
+    a few subtle but important differences, due to the way {\tt sprint()}
+    works. See the documentation for {\tt sprint()} for a list of the
+    differences in formatting.
 
-    @see prompt(), printf(), print(), sprint(). */
+    @param buf The buffer to hold the resultant prompt string.
 
-void sprompt (char *stg, int num,...);
+    @param num The prompt number to use, followed by any arguments needed by
+    the prompt in question.
+
+    @see prompt(), sprompt_other(), printf(), print(), sprint(),
+    sprint_other(). */
+
+void sprompt(char *buf, int num,...);
+
+
+/** Format a prompt for another user and store it in a string. 
+
+    This function behaves just like like {\tt sprompt()}, but takes into
+    account the other user's ({\tt othruser}) setup. If the other user is a
+    bot, the string will be in a suitable format. It will also be in the other
+    user's language. Other than that, semantics are identical to those of {\tt
+    sprint()}.
+
+    @param ushm The {\tt struct shmuserrec} structure for the other user.
+    This will almost always be {\tt othrshm}).
+
+    @param buf The buffer to hold the resultant prompt string.
+
+    @param num The prompt number to use, followed by any arguments needed by
+    the prompt in question.
+
+    @return A pointer to the resultant {\tt buf}.
+
+    @see prompt(), sprompt(), printf(), print(), sprint(), sprint_other(). */
+
+char *sprompt_other(struct shmuserrec *ushm, char *buf, int num,...);
 
 
 /** Format and print a string.
@@ -361,8 +400,38 @@ void print (char *buf,...);
 
 /** Format and store a string.
 
-    This function works exactly like {\tt print()}, but stores its results in a
-    string instead of printing them.
+    This function resembles {\tt print()}, but stores its results in a
+    string instead of printing them. Its workings are {\em not}
+    identical! There are subtle but important differences in
+    semantics. Unlike {\tt print()}, {\tt sprint()}:
+
+    \begin{itemize}
+
+    \item Does not offer page breaks.
+
+    \item Does not interpret, expand or translate ANSI directives.
+
+    \item Does not interpret or act on formatting directives.
+
+    \item Does not consult or alter the output flags.
+
+    \item Generally alters no state.
+
+    \end{itemize}
+
+    Like {\tt print()}, {\tt print()} {\em does} expand substitution variables.
+
+    This function is useful for delayed evaluation of user prompts. Strings
+    created with {\tt sprint()} can be stored and later shown to the user with
+    {\tt print()}, which will take care of page breaks, ANSI and formatting
+    directives. Substitution variables will be expanded at the time {\tt
+    sprint()} was called.
+
+    Alternatively, you can prepare a message using {\tt msg_getu()} and {\tt
+    sprint()}. Then invoke {\tt usr_injoth()} to send the string to another
+    user. The string will be formatted {\em locally} for that user's terminal
+    and preferences. Substitution variables will reflect the state of affairs
+    of the user calling {\tt sprint()}.
 
     @param stg The string to store the formatted text in.
     
@@ -373,6 +442,8 @@ void print (char *buf,...);
     @see printf(), print(), prompt(), sprompt(). */
 
 void sprint (char *stg,char *buf,...);
+
+
 
 #endif /* OUTPUT_O */
 

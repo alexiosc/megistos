@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.10  1999/07/18 21:42:47  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Made QWK packets
@@ -142,10 +141,10 @@ static void
 copyfiles(char *dir)
 {
   struct dirent **d=NULL;
-  int i,j=scandir(MAILERFILESDIR,&d,filesel,alphasort);
+  int i,j=scandir(mkfname(MAILERFILESDIR),&d,filesel,alphasort);
   for(i=0;i<j;i++){
     char fname1[256], fname2[256];
-    sprintf(fname1,"%s/%s",MAILERFILESDIR,d[i]->d_name);
+    sprintf(fname1,"%s/%s",mkfname(MAILERFILESDIR),d[i]->d_name);
     sprintf(fname2,"%s/%s",dir,d[i]->d_name);
     unix2dos(fname1,fname2);
     free(d[i]);

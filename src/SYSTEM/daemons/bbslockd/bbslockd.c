@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  1999/07/18 22:03:05  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Minor fixes.
@@ -113,14 +112,15 @@ mksocket()
 static void
 storepid()
 {
-  FILE *fp=fopen(BBSETCDIR"/bbslockd.pid","w");
+  FILE *fp=fopen(mkfname(BBSETCDIR"/bbslockd.pid"),"w");
   if(fp==NULL){
-    error_fatalsys("Unable to open "BBSETCDIR"/bbslockd.pid for writing.");
+    error_fatalsys("Unable to open %s/bbslockd.pid for writing.",
+		   mkfname(BBSETCDIR));
   }
   fprintf(fp,"%d",getpid());
   fclose(fp);
-  chmod(BBSETCDIR"/bbslockd.pid",0600);
-  chown(BBSETCDIR"/bbslockd.pid",0,0);
+  chmod(mkfname(BBSETCDIR"/bbslockd.pid"),0600);
+  chown(mkfname(BBSETCDIR"/bbslockd.pid"),0,0);
 }
 
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -210,7 +209,7 @@ checkselectname(char *name)
   closedir(dp);
   
   strcpy(name,&name[1]);
-  sprintf(fname,"%s/%s",MSGSDISTDIR,name);
+  sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),name);
   if((fp=fopen(fname,"r"))==NULL)return 1;
   if(fscanf(fp,"%d",&p)==1){
     if(!key_owns(&thisuseracc,p)){
@@ -242,7 +241,7 @@ listlists()
     prompt(LSTLST,s);
   }
 
-  if((dp=opendir(MSGSDISTDIR))==NULL)return;
+  if((dp=opendir(mkfname(MSGSDISTDIR)))==NULL)return;
   while((dir=readdir(dp))!=NULL){
     if(sameas(dir->d_name,".")||sameas(dir->d_name,".."))continue;
     if(fmt_lastresult==PAUSE_QUIT){
@@ -311,7 +310,7 @@ loadlist()
   int i;
   FILE *fp;
 
-  sprintf(fname,"%s/%s",MSGSDISTDIR,current);
+  sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),current);
 
   initlist();
 
@@ -344,7 +343,7 @@ savelist()
   int i;
   FILE *fp;
 
-  sprintf(fname,"%s/%s",MSGSDISTDIR,current);
+  sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),current);
 
   if(!inspoint)unlink(fname);
   sortlist();
@@ -528,7 +527,7 @@ confdistlist()
 	if(get_bool(&yes,DLKASK,DLKERR,0,0)){
 	  if(yes){
 	    char fname[256];
-	    sprintf(fname,"%s/%s",MSGSDISTDIR,current);
+	    sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),current);
 	    unlink(fname);
 	    return;
 	  }
@@ -556,7 +555,7 @@ opendistribution(char *dist)
     int i;
 
     initlist();
-    inspoint=scandir(USRDIR,&d,usrselect,ncsalphasort);
+    inspoint=scandir(mkfname(USRDIR),&d,usrselect,ncsalphasort);
 
     if(inspoint<0){
       error_fatalsys("I/O error occured!");

@@ -1,8 +1,6 @@
 include ../../../CONFIG/Make.config
 
 
-DEFINES		+= -D__USE_GNU
-
 IOCFILE		= ../io.c
 IOOFILE		= ../io.o
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.7  2000/01/06 11:35:56  alexios
  * Event names may now comprise a wider range of characters, not
@@ -180,7 +179,7 @@ newevent()
 	}
       }
       if(!ok)continue;
-      sprintf(fname,"%s/.%s",EVENTDIR,s);
+      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
       if(!stat(fname,&st)){
 	prompt(EVNALRX);
 	cnc_end();
@@ -236,7 +235,7 @@ newevent()
   if(!get_bool(&bool,EVNWARN,ERRSEL,0,0))return;
   if(bool)event.flags|=EVF_WARN;
 
-  sprintf(fname,"%s/.%s",EVENTDIR,s);
+  sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create file %s",fname);
   }
@@ -254,8 +253,8 @@ listevents()
   struct dirent *dirent;
   char *asap=msg_string(EVLASAP);
   
-  if((dp=opendir(EVENTDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",EVENTDIR);
+  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
   }
   prompt(EVLHDR); 
   while((dirent=readdir(dp))!=NULL){
@@ -266,7 +265,7 @@ listevents()
       char time[10];
 
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",EVENTDIR,dirent->d_name);
+      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -288,8 +287,8 @@ listprototypes()
   DIR    *dp;
   struct dirent *dirent;
 
-  if((dp=opendir(EVENTDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",EVENTDIR);
+  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
   }
   prompt(EVPHDR); 
   while((dirent=readdir(dp))!=NULL){
@@ -301,7 +300,7 @@ listprototypes()
       if((!strcmp(".",dirent->d_name))||(!strcmp("..",dirent->d_name)))
 	continue;
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",EVENTDIR,dirent->d_name);
+      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -343,7 +342,7 @@ delevent()
 
       s=cnc_word();
       for(;(*cp=tolower(*cp))!=0;cp++);
-      sprintf(fname,"%s/.%s",EVENTDIR,s);
+      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVDNEXS);
 	cnc_end();
@@ -357,7 +356,7 @@ delevent()
     prompt(CANCEL);
     return;
   } else if (bool){
-    sprintf(fname,"%s/.%s",EVENTDIR,s);
+    sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
     unlink(fname);
     prompt(EVDOK,s);
     audit(thisuseronl.channel,AUDIT(EVDEL),thisuseracc.userid,s);
@@ -393,7 +392,7 @@ makevent(char *name)
   struct stat st;
   
   for(i=0;i<99;i++){
-    sprintf(fname,"%s/%s-%02d",EVENTDIR,name,i);
+    sprintf(fname,"%s/%s-%02d",mkfname(EVENTDIR),name,i);
     if(!stat(fname,&st)){
       prompt(EVAUNI,name);
       return;
@@ -447,7 +446,7 @@ makevent(char *name)
       /* scheduling done here */
 
       memset(&event,0,sizeof(event));
-      sprintf(fname,"%s/.%s",EVENTDIR,name);
+      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),name);
       if((fp=fopen(fname,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -482,7 +481,7 @@ makevent(char *name)
       }
 
       for(i=0,en=-1;i<99;i++){
-	sprintf(fname,"%s/%s-%02d",EVENTDIR,name,i);
+	sprintf(fname,"%s/%s-%02d",mkfname(EVENTDIR),name,i);
 	if(stat(fname,&st)){
 	  en=i;
 	  break;
@@ -543,7 +542,7 @@ addevent()
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
       }
-      sprintf(fname,"%s/.%s",EVENTDIR,s);
+      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
       if(stat(fname,&st)){
 	prompt(EVANEX);
 	cnc_end();
@@ -568,7 +567,7 @@ undoevent (char *name)
     prompt(CANCEL);
     return;
   }
-  sprintf(fname,"%s/%s",EVENTDIR,name);
+  sprintf(fname,"%s/%s",mkfname(EVENTDIR),name);
   unlink(fname);
   prompt(EVCAN,name);
   audit(thisuseronl.channel,AUDIT(EVCAN),thisuseracc.userid,name);
@@ -601,7 +600,7 @@ cancelevent()
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
       }
-      sprintf(fname,"%s/%s",EVENTDIR,s);
+      sprintf(fname,"%s/%s",mkfname(EVENTDIR),s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVCNEX);
 	cnc_end();

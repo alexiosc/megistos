@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -125,11 +124,11 @@ static char *
 fx_msg(struct chanusr *u)
 {
   tmp[0]=out_buffer[0]=0;
-  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
-
-  sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
-	  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
-	  thisuseracc.userid);
+  sprompt_other(othrshm,tmp,TDELIM);
+  sprompt_other(othrshm,out_buffer,fxprompt,
+		msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
+			     othruseracc.language-1),
+		thisuseracc.userid);
   strcat(tmp,out_buffer);
   return tmp;
 }
@@ -139,16 +138,16 @@ static char *
 fx_enter(struct chanusr *u)
 {
   tmp[0]=out_buffer[0]=0;
-  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
+  sprompt_other(othrshm,tmp,TDELIM);
 
   if(tlcu.entrystg[0]){
-    sprintf(out_buffer,msg_getl(ENTEXTS,othruseracc.language-1),
-	    getcolour(),tlcu.entrystg);
+    sprompt_other(othrshm,out_buffer,ENTEXTS,getcolour(),tlcu.entrystg);
     strcat(tmp,out_buffer);
   } else {
-    sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
-	    msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
-	    thisuseracc.userid);
+    sprompt_other(othrshm,out_buffer,fxprompt,
+		  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
+			       othruseracc.language-1),
+		  thisuseracc.userid);
     strcat(tmp,out_buffer);
   }
   return tmp;
@@ -158,16 +157,16 @@ fx_enter(struct chanusr *u)
 static char *
 fx_leave(struct chanusr *u)
 {
-  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
+  sprompt_other(othrshm,tmp,TDELIM);
 
   if(tlcu.exitstg[0]){
-    sprintf(out_buffer,msg_getl(ENTEXTS,othruseracc.language-1),
-	    getcolour(),tlcu.exitstg);
+    sprompt_other(othrshm,out_buffer,ENTEXTS,getcolour(),tlcu.exitstg);
     strcat(tmp,out_buffer);
   } else {
-    sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
-	    msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
-	    thisuseracc.userid);
+    sprompt_other(othrshm,out_buffer,fxprompt,
+		  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
+			       othruseracc.language-1),
+		  thisuseracc.userid);
     strcat(tmp,out_buffer);
   }
   return tmp;

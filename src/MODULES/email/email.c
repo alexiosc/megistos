@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
  * Changed return value of main() from void (silly) to int.
@@ -191,7 +190,7 @@ newclubmsgs()
 
   bzero(&ecuser,sizeof(ecuser));
   if(!readecuser(thisuseracc.userid,&ecuser))bzero(&ecuser,sizeof(ecuser));
-  sprintf(fname,"%s/%s",QSCDIR,thisuseracc.userid);
+  sprintf(fname,"%s/%s",mkfname(QSCDIR),thisuseracc.userid);
   if(stat(fname,&st)||st.st_size==0||(ecuser.flags&ECF_QSCCFG)==0){
     makenewqsc();
     return;
@@ -207,7 +206,7 @@ newclubmsgs()
 
   /* Old user, scan for new messages */
 
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,ncsalphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
 
   prompt(CHKNCLB);
   for(i=0;i<n;free(clubs[i]),i++){
@@ -343,15 +342,15 @@ int handler_userdel(int argc, char **argv)
     return 1;
   }
 
-  sprintf(fname,"%s/%s",MSGUSRDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(MSGUSRDIR),victim);
   unlink(fname);
-  sprintf(fname,"%s/%s",MSGSDISTDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),victim);
   unlink(fname);
-  sprintf(fname,"%s/%s",MSGSIGDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(MSGSIGDIR),victim);
   unlink(fname);
-  sprintf(fname,"%s/%s",CLUBAXDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(CLUBAXDIR),victim);
   unlink(fname);
-  sprintf(fname,"%s/%s",QSCDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(QSCDIR),victim);
   unlink(fname);
 
   return 0;

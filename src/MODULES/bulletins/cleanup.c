@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1999/07/18 21:19:18  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -84,14 +83,14 @@ static void resetclubs()
   struct clubheader club;
   FILE *fp;
 
-  strcpy(fname,CLUBHDRDIR);
+  strcpy(fname,mkfname(CLUBHDRDIR));
   if((dp=opendir(fname))==NULL){
     error_fatalsys("Can't open directory %s\n",fname);
   }
 
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
-    sprintf(fname,"%s/%s",CLUBHDRDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(CLUBHDRDIR),dir->d_name);
     if((fp=fopen(fname,"r"))==NULL){
       error_fatalsys("Error while opening club header %s",fname);
       continue;
@@ -137,7 +136,7 @@ static void updateheader(char *oldclub, int count)
   
   /* Open the header of the club */
   
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,oldclub);
+  sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),oldclub);
   if((fp=fopen(fname,"r+"))==NULL){
     printf("Error while opening club header %s (errno=%d)\n",fname,errno);
     return;
@@ -182,7 +181,7 @@ cleanup(int argc, char **argv)
   printf("Bulletin cleanup\n\n");
 
   oldclub[0]=0;
-  sprintf(fname,"%s/..LAST.CLEANUP.BULLETINS",MSGSDIR);
+  sprintf(fname,"%s/..LAST.CLEANUP.BULLETINS",mkfname(MSGSDIR));
   if((fp=fopen(fname,"r"))!=NULL){
     int i;
     if(fscanf(fp,"%d\n",&i)==1){

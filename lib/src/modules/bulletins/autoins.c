@@ -13,9 +13,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/18 21:19:18  alexios
  * One minor change to a scandir() call to ensure a cleaner
@@ -97,7 +96,7 @@ autoins()
   } else strcpy(insclub,club);
   prompt(BGNAINS,insclub);
 
-  sprintf(dir,MSGSDIR"/%s/"MSGATTDIR,insclub);
+  strcpy(dir,mkfname(MSGSDIR"/%s/"MSGATTDIR,insclub));
   i=scandir(dir,&files,attsel,numsort);
 
   if(i<0){
@@ -119,7 +118,8 @@ autoins()
     sprintf(fname,"%s/%s",dir,files[j]->d_name);
     if(stat(fname,&st))continue;
 
-    prompt(FNDFILE,files[j]->d_name,st.st_size,msg_getunit(BYTESNG,st.st_size));
+    prompt(FNDFILE,
+	   files[j]->d_name,st.st_size,msg_getunit(BYTESNG,st.st_size));
 
     strncpy(fname,files[j]->d_name,strlen(files[j]->d_name)-4);
     fname[strlen(files[j]->d_name)-4]=0;
@@ -160,8 +160,8 @@ autoins()
 
 	/* Link or copy the file */
 
-	sprintf(source,MSGSDIR"/%s/%s/%d.att",insclub,MSGATTDIR,msgno);
-	sprintf(target,MSGSDIR"/%s/%s/%s",insclub,MSGBLTDIR,blt.fname);
+	strcpy(source,mkfname(MSGSDIR"/%s/%s/%d.att",insclub,MSGATTDIR,msgno));
+	strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",insclub,MSGBLTDIR,blt.fname));
 
 	if(link(source,target)<0){
 	  if(fcopy(source,target)<0){

@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -99,7 +98,7 @@ getemsgnum(struct message *msg)
 
   do{
     sysvar->emessages++;
-    sprintf(chkname,"%s/"MESSAGEFILE,EMAILDIR,sysvar->emessages);
+    strcpy(chkname,mkfname("%s/"MESSAGEFILE,EMAILDIR,sysvar->emessages));
   } while (!stat(chkname,&st));
 
   
@@ -132,7 +131,7 @@ getcmsgnum(struct message *msg)
 
   /* Read the club header */
     
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,msg->club);
+  strcpy(fname,mkfname("%s/h%s",CLUBHDRDIR,msg->club));
   if((fp=fopen(fname,"r"))==NULL){
     error_logsys("Unable to open %s",fname);
     exit(1);
@@ -169,7 +168,8 @@ getcmsgnum(struct message *msg)
   
   do{
     clubhdr.msgno++;
-    sprintf(chkname,"%s/%s/"MESSAGEFILE,MSGSDIR,clubhdr.club,clubhdr.msgno);
+    strcpy(chkname,
+	   mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,clubhdr.club,clubhdr.msgno));
   }while(!stat(chkname,&st));
 
   
@@ -184,7 +184,7 @@ getcmsgnum(struct message *msg)
 
   /* And write the club header back */
   
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,msg->club);
+  strcpy(fname,mkfname("%s/h%s",CLUBHDRDIR,msg->club));
   if((fp=fopen(fname,"w"))==NULL){
     error_logsys("Unable to create %s",fname);
     exit(1);

@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  2000/01/08 12:17:03  alexios
  * Added an alarm() call to set a timeout, just in case.
@@ -166,9 +165,12 @@ distclub_request_message_1_svc(message_request_t *msgreq, struct svc_req *req)
   /* Strategy: we're given the local club name and message number. We'll read
      the message in, compress it (if zlib is available) and build the reply
      structure. Same for any attachment. */
-  
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+
+#error "mkfname() not available here, but function obsoleted anyway"
+#if 0
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msgreq->targetclub,(long)msgreq->msgno);
+#endif
   if(stat(fname,&st)){
     retstuff.result_code=errno;
     return &retstuff;
@@ -246,10 +248,12 @@ distclub_request_message_1_svc(message_request_t *msgreq, struct svc_req *req)
   /* Do we have to read in an attachment as well? */
 
   if(msg.flags&MSF_FILEATT){
-    sprintf(fname,"%s/%s/"MSGATTDIR"/%d.att", 
-	    MSGSDIR,
-	    msgreq->targetclub,
-	    msgreq->msgno);
+#error "mkfname() not defined here, but function obsoleted anyway"
+#if 0
+    strcpy(fname,mkfname("%s/%s/"MSGATTDIR"/%d.att",MSGSDIR,
+			 msgreq->targetclub,
+			 msgreq->msgno));
+#endif
     if(stat(fname,&st)){
       retstuff.result_code=errno;
       return &retstuff;

@@ -42,9 +42,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.6  1999/07/18 22:09:11  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -130,7 +129,7 @@ cleanup()
 
   mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES);
 
-  audit_setfile(CLNUPAUDITFILE);
+  audit_setfile(mkfname(CLNUPAUDITFILE));
   audit("CLEANUP",AUDIT(CKIECUB));
 
   printf("\nMegistos BBS cookie database index.\n");
@@ -141,8 +140,8 @@ cleanup()
     char cookiefile[512], cookieidxfile[512];
     entries=0;
 
-    sprintf(cookiefile,COOKIEFILE,i);
-    sprintf(cookieidxfile,COOKIEIDXFILE,i);
+    sprintf(cookiefile,mkfname(COOKIEFILE),i);
+    sprintf(cookieidxfile,mkfname(COOKIEIDXFILE),i);
 
     if ((qdb=fopen(cookiefile,"r")) == NULL) {
       /*fprintf(stderr,"\nError occurred while opening %s\n",cookiefile);*/
@@ -211,10 +210,10 @@ run(int begin, int end)
   struct dirent **d;
   int n;
 
-  n=scandir(COOKIEDIR,&d,cookiesel,alphasort);
+  n=scandir(mkfname(COOKIEDIR),&d,cookiesel,alphasort);
 
   if(n==0){
-    error_log("Didn't find any cookie files in "COOKIEDIR);
+    error_log("Didn't find any cookie files in %s",mkfname(COOKIEDIR));
   }
 
   /* Choose a file at random. Every file has an equal chance of being
@@ -224,7 +223,7 @@ run(int begin, int end)
   randomize();
   choice=rnd(n);
   
-  sprintf(idxfn,COOKIEDIR"/%s",d[choice]->d_name);
+  strcpy(idxfn,mkfname(COOKIEDIR"/%s",d[choice]->d_name));
   strcpy(dat,idxfn);
   {
     char *cp=strstr(dat,".idx");

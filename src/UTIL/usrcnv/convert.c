@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.2  1999/08/13 17:11:32  alexios
  * Ugly-looking changes to accommodate no-UNIX account policy.
@@ -130,7 +129,7 @@ adduser(char *usrdir, FILE *passwd, FILE *shadow)
     }
 
     printf("Add UNIX record. ");fflush(stdout);
-    sprintf(fname,"%s %s",USERADDBIN,uid2);
+    sprintf(fname,"%s %s",mkfname(USERADDBIN),uid2);
     if(system(fname)){
       fprintf(stderr,"Failed to add UNIX user %s.",uid);
       exit(1);

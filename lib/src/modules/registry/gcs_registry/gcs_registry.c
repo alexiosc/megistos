@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -81,7 +80,7 @@ __INIT_GCS__()
       msg_reset();
       return 1;
     }
-    sprintf(fname,"%s/%s",REGISTRYDIR,userid);
+    sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
     if(stat(fname,&st)){
       prompt(REGERR);
       msg_reset();
@@ -97,9 +96,9 @@ __INIT_GCS__()
       msg_set(regmsg);
       memset(&registry,0,sizeof(registry));
 
-      sprintf(fname,"%s/%s",REGISTRYDIR,userid);
+      sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
       if((fp=fopen(fname,"r"))==NULL){
-	sprompt(out_buffer,UIDERR);
+	sprompt_other(othrshm,out_buffer,UIDERR);
 	usr_injoth(&othruseronl,out_buffer,0);
 	return 1;
       }

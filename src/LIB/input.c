@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out().
@@ -117,6 +116,7 @@ const char *__RCS=RCS_VER;
 #include "sysstruct.h"
 #include "bbsmod.h"
 #include "security.h"
+#include "bots.h"
 #define __SYSVAR_UNAMBIGUOUS__
 #include "mbk_sysvar.h"
 
@@ -154,8 +154,8 @@ initmonitor()
 
   strcpy(montty,getenv("CHANNEL"));
 
-  if((fp=fopen(MONITORFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s",MONITORFILE);
+  if((fp=fopen(mkfname(MONITORFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s",mkfname(MONITORFILE));
   }
 
   fscanf(fp,"%d",&shmid);
@@ -195,7 +195,7 @@ int
 inp_acceptinjoth()
 {
   char dummy[MSGMAX+sizeof(long)];
-  struct injothbuf *buf=(struct injothbuf*)(&dummy);
+  struct injoth_buf *buf=(struct injoth_buf*)(&dummy);
   int i=0;
 
   if(thisshm==NULL)return 0;
@@ -208,12 +208,52 @@ inp_acceptinjoth()
     if(msgrcv(thisuseronl.injothqueue,buf,MSGMAX,0,IPC_NOWAIT)<0)return i>0;
     i++;
 
-    if(mod_isbot() || 
-       (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
-      print("630 %d byte injected message follows.\n",strlen(buf->mtext));
-    }
+    switch(buf->mtype){
+    case INJ_MESSAGE:		/* A simple injoth message. */
+      if(mod_isbot() || 
+	 (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
+	print("%03d %d byte injected message follows.\n",
+	      BTS_INJECTED_PROMPT,
+	      strlen(buf->m.simple));
+      }
+      print(buf->m.simple);
+      break;
 
-    print(buf->mtext);
+    case INJ_MESSAGE_ACK:	/* Injoth message with acknowledgement */
+      if(mod_isbot() || 
+	 (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
+	print("%03d %d byte injected message follows.\n",
+	      BTS_INJECTED_PROMPT,
+	      strlen(buf->m.withack.msg));
+      }
+      
+      print(buf->m.withack.msg);
+
+      /* We don't use usr_insys() here so as not to clobber any work the caller
+         function is in the process of performing. */
+
+      {
+	onlinerec_t onl;
+
+	if(usr_loadonlrec(buf->m.withack.sender,&onl)){
+	  char *ack=&(buf->m.withack.msg[buf->m.withack.ackofs]);
+	  int  qid=onl.injothqueue;
+
+	  if(strlen(ack)){
+	    buf->mtype=INJ_MESSAGE;
+	    strcpy(buf->m.simple,ack);
+	    
+	    /* We don't really care if this goes through or not */
+	    msgsnd(qid,buf,strlen(buf->m.simple)+1,IPC_NOWAIT);
+	  }
+	}
+      }
+
+      break;
+
+    default:
+      error_log("Invalid injoth message type %d received",buf->mtype);
+    }
   }
 
   return 1;
@@ -231,7 +271,7 @@ inp_readstring(int maxlen)
 
   if(mod_isbot() || 
      (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
-    print("650 %d Input expected now.\n",maxlen);
+    print("%03d %d Input expected now.\n",BTS_INPUT_EXPECTED,maxlen);
   }
 
   cancel=0;

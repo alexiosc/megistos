@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 2.5  1999/07/18 21:47:54  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -91,7 +90,7 @@ loadregistry(char *userid)
   char fname[256];
 
   memset(&registry,0,sizeof(registry));
-  sprintf(fname,"%s/%s",REGISTRYDIR,userid);
+  sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
   if((fp=fopen(fname,"r"))==NULL)return -1;
   if(fread(&registry,sizeof(struct registry),1,fp)!=1){
     error_fatalsys("Unable to read registry %s",fname);
@@ -108,7 +107,7 @@ saveregistry(char *userid)
   FILE *fp;
   char fname[256];
 
-  sprintf(fname,"%s/%s",REGISTRYDIR,userid);
+  sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
   if((fp=fopen(fname,"w"))==NULL)return -1;
   if(fwrite(&registry,sizeof(struct registry),1,fp)!=1){
     error_fatalsys("Unable to write registry %s",fname);
@@ -185,9 +184,9 @@ directory()
 
   prompt(DIRHDR);
 
-  sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",REGISTRYDIR,c);
+  sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",mkfname(REGISTRYDIR),c);
   if((pipe=popen(command,"r"))==NULL){
-    error_fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
+    error_fatalsys("Unable to spawn ls|grep pipe for %s",mkfname(REGISTRYDIR));
   }
   
   for(;;){
@@ -276,9 +275,9 @@ scan()
   thisuseronl.flags|=OLF_BUSY;
   prompt(DIRHDR);
 
-  sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",REGISTRYDIR,c);
+  sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",mkfname(REGISTRYDIR),c);
   if((pipe=popen(command,"r"))==NULL){
-    error_fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
+    error_fatalsys("Unable to spawn ls|grep pipe for %s",mkfname(REGISTRYDIR));
   }
   
   for(;;){
@@ -556,7 +555,7 @@ int handler_userdel(int argc, char **argv)
     return 1;
   }
 
-  sprintf(fname,"%s/%s",REGISTRYDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),victim);
   unlink(fname);
 
   return 0;

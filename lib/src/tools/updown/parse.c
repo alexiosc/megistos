@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 22:09:33  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -127,8 +126,8 @@ readprotocols()
   int             linenum=0;
   struct protocol prot;
 
-  if ((fp=fopen(PROTOCOLFILE,"r"))==NULL) {
-    error_fatalsys("Unable to open %s",PROTOCOLFILE);
+  if ((fp=fopen(mkfname(PROTOCOLFILE),"r"))==NULL) {
+    error_fatalsys("Unable to open %s",mkfname(PROTOCOLFILE));
   }
 
   memset(&prot,0,sizeof(prot));
@@ -161,7 +160,7 @@ readprotocols()
     }
     if(!directive){
       error_fatal("Unknown directive (%s) in %s (line %d)",
-	    keyword,PROTOCOLFILE,linenum);
+	    keyword,mkfname(PROTOCOLFILE),linenum);
     }
 
     switch(directive){
@@ -174,7 +173,7 @@ readprotocols()
     case PRT_DIR:
       if((!sameto("U",value)) && (!sameto("D",value))){
 	error_fatal("Bad value (%s) for DIR directive in %s (line %d)",
-	      value,PROTOCOLFILE,linenum);
+	      value,mkfname(PROTOCOLFILE),linenum);
       } else if (sameto("U",value)) prot.flags|=PRF_UPLOAD;
       else prot.flags&=~PRF_UPLOAD;
       break;
@@ -187,36 +186,36 @@ readprotocols()
     case PRT_BATCH:
       if((!sameto("Y",value)) && (!sameto("N",value))){
 	error_fatal("Bad value (%s) for BATCH directive in %s (line %d)",
-	      value,PROTOCOLFILE,linenum);
+	      value,mkfname(PROTOCOLFILE),linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_BATCH;
       else prot.flags&=~PRF_BATCH;
       break;
     case PRT_NEEDN:
       if((!sameto("Y",value)) && (!sameto("N",value))){
 	error_fatal("Bad value (%s) for NEEDN directive in %s (line %d)",
-	      value,PROTOCOLFILE,linenum);
+	      value,mkfname(PROTOCOLFILE),linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_NEEDN;
       else prot.flags&=~PRF_NEEDN;
       break;
     case PRT_BIN:
       if((!sameto("Y",value)) && (!sameto("N",value))){
 	error_fatal("Bad value (%s) for BIN directive in %s (line %d)",
-	      value,PROTOCOLFILE,linenum);
+	      value,mkfname(PROTOCOLFILE),linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_BINARY;
       else prot.flags&=~PRF_BINARY;
       break;
     case PRT_END:
       if(!prot.name[0]){
 	error_fatal("Missing NAME directive in %s (line %d)",
-	      PROTOCOLFILE,linenum);
+	      mkfname(PROTOCOLFILE),linenum);
       }
       if(!prot.select[0]){
 	error_fatal("Missing SELECT directive in %s (line %d)",
-	      PROTOCOLFILE,linenum);
+	      mkfname(PROTOCOLFILE),linenum);
       }
       if(!prot.command[0]){
 	error_fatal("Missing SELECT directive in %s (line %d)",
-	      PROTOCOLFILE,linenum);
+	      mkfname(PROTOCOLFILE),linenum);
       }
 
       numprotocols++;

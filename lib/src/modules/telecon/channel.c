@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 21:48:36  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -122,7 +121,7 @@ enterchannel(char *channel)
 
   if(*channel=='.')return -2;
 
-  sprintf(fname,"%s/%s",TELEDIR,mkchfn(channel));
+  sprintf(fname,"%s/%s",mkfname(TELEDIR),mkchfn(channel));
 
   sprintf(lock,CHANLOCK,mkchfn(channel));
   lock_wait(lock,10);
@@ -211,10 +210,10 @@ killpersonalchannel()
   if((hdr=begscan(thisuseracc.userid,TSM_PRESENT))==NULL)return;
   while((usr=getscan())!=NULL){
     if(usr_insys(usr->userid,0)){
-      sprintf(out_buffer,msg_getl(DISCDROP,othruseracc.language-1),
-	      msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
-			  othruseracc.language-1),
-	      thisuseracc.userid);
+      sprompt_other(othrshm,out_buffer,DISCDROP,
+		    msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
+				 othruseracc.language-1),
+		    thisuseracc.userid);
 
       usr_injoth(&othruseronl,out_buffer,0);
 
@@ -233,16 +232,16 @@ leavechannels()
   struct dirent **channels;
   int i,j;
 
-  sprintf(fname,"%s/%s",TELEDIR,thisuseracc.userid);
+  sprintf(fname,"%s/%s",mkfname(TELEDIR),thisuseracc.userid);
   unlink(fname);
 
-  i=scandir(TELEDIR,&channels,chanselect,alphasort);
+  i=scandir(mkfname(TELEDIR),&channels,chanselect,alphasort);
   
   for(j=0;j<i;j++){
     int k;
     struct dirent **tmp;
 
-    sprintf(fname,"%s/%s",TELEDIR,channels[j]->d_name);
+    sprintf(fname,"%s/%s",mkfname(TELEDIR),channels[j]->d_name);
 
     sprintf(lock,CHANLOCK,channels[j]->d_name);
     lock_wait(lock,10);
@@ -281,7 +280,7 @@ readchanhdr(char *channel)
   lock_wait(lock,10);
   lock_place(lock,"reading");
 
-  sprintf(fname,"%s/%s/.header",TELEDIR,mkchfn(channel));
+  sprintf(fname,"%s/%s/.header",mkfname(TELEDIR),mkchfn(channel));
 
   if((fp=fopen(fname,"r"))==NULL){
     lock_rm(lock);
@@ -316,7 +315,7 @@ writechanhdr(char *channel, struct chanhdr *c)
 
   /* Make the directory */
 
-  sprintf(fname,"%s/%s",TELEDIR,mkchfn(channel));
+  sprintf(fname,"%s/%s",mkfname(TELEDIR),mkchfn(channel));
   mkdir(fname,0770);
   if(stat(fname,&st)){
     int i=errno;
@@ -354,7 +353,7 @@ makechannel(char *channel, char *userid)
   struct stat st;
   struct chanhdr chanhdr;
 
-  sprintf(fname,"%s/%s/.header",TELEDIR,mkchfn(channel));
+  sprintf(fname,"%s/%s/.header",mkfname(TELEDIR),mkchfn(channel));
   if(!stat(fname,&st))return 0;
 
   memset(&chanhdr,0,sizeof(chanhdr));
@@ -389,7 +388,7 @@ void
 chanscan()
 {
   struct dirent **channels;
-  int i=scandir(TELEDIR,&channels,chanselect,alphasort),j;
+  int i=scandir(mkfname(TELEDIR),&channels,chanselect,alphasort),j;
   
   prompt(SCANHDR);
   

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	
 	if(!quiet) printf("fixemail utility for Megistos BBS\n");
 
-	sprintf(fname, "%s/%s", MSGUSRDIR, userid);
+	sprintf(fname, "%s/%s", mkfname(MSGUSRDIR), userid);
 	if((fp=fopen(fname, "r"))==NULL) error("cannot open user file for reading");
 	if(fread(&eu, sizeof(struct emailuser), 1, fp)!=1) error("cannot read user file");
 	fclose(fp);

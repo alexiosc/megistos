@@ -33,9 +33,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.4  1998/12/27 15:17:13  alexios
  * Added autoconf support.
@@ -108,7 +107,7 @@ cleanup_init()
 
   msg_close(msg);
 
-  sprintf(fname,"%s/%s",MSGSDIR,DAYSSINCEFILE);
+  sprintf(fname,"%s/%s",mkfname(MSGSDIR),DAYSSINCEFILE);
   if((fp=fopen(fname,"r"))!=NULL){
     int i;
     if(fscanf(fp,"%d\n",&i)==1){
@@ -144,7 +143,7 @@ emailcleanup()
     return;
   } else printf("E-Mail cleanup...\n");
 
-  strcpy(fname,EMAILDIR);
+  strcpy(fname,mkfname(EMAILDIR));
   if((dp=opendir(fname))==NULL){
     printf("emailcleanup(): can't open directory %s, cleanup not done\n",fname);
     return;
@@ -153,7 +152,7 @@ emailcleanup()
   sysvar->emsgslive=0;
   while((dir=readdir(dp))!=NULL){
     if(!isdigit(dir->d_name[0]))continue;
-    sprintf(fname,"%s/%s",EMAILDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(EMAILDIR),dir->d_name);
 
     if((fp=fopen(fname,"r"))==NULL)continue;
 
@@ -170,7 +169,7 @@ emailcleanup()
 	if(!stat(fname,&st))emldelb+=st.st_size;
 	emldel++;
 	unlink(fname);
-	sprintf(fname,EMAILATTDIR"/"FILEATTACHMENT,msg.msgno);
+	strcpy(fname,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg.msgno));
 	if(!stat(fname,&st))if(st.st_nlink==1)emldelb+=st.st_size;
 	unlink(fname);
       } else sysvar->emsgslive++;

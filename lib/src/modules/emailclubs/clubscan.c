@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/08/13 17:00:25  alexios
  * Fixed scan-for-keyword bug that caused fatal errors due to
@@ -317,7 +316,7 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
 	FILE *fp;
 	char fname[256], line[1024];
 	
-	sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,msg.club,msg.msgno);
+	sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),msg.club,msg.msgno);
 	if((fp=fopen(fname,"r"))!=NULL){
 	  while(fgets(line,sizeof(line),fp)){
 	    if(keycmp(line)){

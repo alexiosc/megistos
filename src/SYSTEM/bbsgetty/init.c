@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.2  1999/07/18 21:54:26  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Added support
@@ -105,7 +104,7 @@ cleanonline()
   FILE *fp=NULL;
   char fname[256];
   
-  sprintf(fname,"%s/.%s",ONLINEDIR,device);
+  strcpy(fname,mkfname("%s/.%s",mkfname(ONLINEDIR),device));
   if((fp=fopen(fname,"r"))!=NULL){
     char onlrec[256];
     if(fscanf(fp,"%s",onlrec)==1)unlink(onlrec);
@@ -141,7 +140,7 @@ storepid()
   char fname[256];
   pid_t pid;
 
-  sprintf(fname,CHANDEFDIR"/.pid-%s",device);
+  strcpy(fname,mkfname(CHANDEFDIR"/.pid-%s",device));
 
   debug(D_RUN,"Writing PID file (%s).",fname);
 
@@ -171,8 +170,10 @@ checkbbschannel()
   mod_init(INI_TTYNUM);
   chanidx=chan_getindex(device);
   if(chanidx<0){
-    debug(D_OPT,"Device %s is not defined in "CHANDEFSRCFILE,device);
-    error_fatal("Device %s is not defined in "CHANDEFSRCFILE,device);
+    debug(D_OPT,"Device %s is not defined in %s",
+	  device,mkfname(CHANDEFSRCFILE));
+    error_fatal("Device %s is not defined in %s",
+		device,mkfname(CHANDEFSRCFILE));
   }
   debug(D_INIT,"Ok, device %s is known as channel %x in the BBS.",
 	device,channels[chanidx].channel);

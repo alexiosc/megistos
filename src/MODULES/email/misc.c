@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -164,8 +163,8 @@ erasemsg(int forward, struct message *msg)
 
   /* Remove the message files */
 
-  if(msg->club[0])sprintf(clubdir,"%s/%s",MSGSDIR,msg->club);
-  else strcpy(clubdir,EMAILDIR);
+  if(msg->club[0])sprintf(clubdir,"%s/%s",mkfname(MSGSDIR),msg->club);
+  else strcpy(clubdir,mkfname(EMAILDIR));
 
   sprintf(fname,"%s/"MESSAGEFILE,clubdir,msg->msgno);
   unlink(fname);
@@ -226,7 +225,7 @@ erasemsg(int forward, struct message *msg)
     /* And update it */
     
     decompressmsg(msg);
-    sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,club,msg->replyto);
+    sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),club,msg->replyto);
     if((fp=fopen(fname,"r+"))!=NULL){
       if(fread(&replied,sizeof(replied),1,fp)){
 	int i=replied.replies;
@@ -346,9 +345,9 @@ copymsg(struct message *msg)
   msg->period=0;
 
   if(!origdir[0]){
-    sprintf(source,EMAILDIR"/"MESSAGEFILE,msg->msgno);
+    strcpy(source,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
   } else {
-    sprintf(source,"%s/%s/"MESSAGEFILE,MSGSDIR,origdir,msg->msgno);
+    strcpy(source,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,origdir,msg->msgno));
   }
 
   if((fp1=fopen(source,"r"))==NULL){
@@ -385,16 +384,16 @@ copymsg(struct message *msg)
   lock_rm(lock);
 
   if(!origdir[0]){
-    sprintf(fatt,EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno);
+    strcpy(fatt,mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno));
   } else {
     sprintf(fatt,"%s/%s/%s/"FILEATTACHMENT,
-	    MSGSDIR,origdir,MSGATTDIR,msg->msgno);
+	    mkfname(MSGSDIR),origdir,MSGATTDIR,msg->msgno);
   }
 
   if(!(msg->flags&MSF_FILEATT)){
-    sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
+    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
   }else {
-    sprintf(command,"%s %s %s -h %s",BBSMAILBIN,header,body,fatt);
+    sprintf(command,"%s %s %s -h %s",mkfname(BBSMAILBIN),header,body,fatt);
   }
   system(command);
 
@@ -417,13 +416,14 @@ copymsg(struct message *msg)
       
   if(usr_insys(checkmsg.to,1)){
     if(!clubmsg){
-      sprintf(out_buffer,msg_getl(WERNOTC,othruseracc.language-1),
-	      checkmsg.from,checkmsg.subject);
+      sprompt_other(othrshm,out_buffer,WERNOTC,
+		    checkmsg.from,checkmsg.subject);
     } else {
-      sprintf(out_buffer,msg_getl(WERNOTCC,othruseracc.language-1),
-	      checkmsg.from,checkmsg.club,checkmsg.subject);
+      sprompt_other(othrshm,out_buffer,WERNOTCC,
+		    checkmsg.from,checkmsg.club,checkmsg.subject);
     }
-    if(usr_injoth(&othruseronl,out_buffer,0))prompt(WENOTFD,othruseronl.userid);
+    if(usr_injoth(&othruseronl,out_buffer,0))
+      prompt(WENOTFD,othruseronl.userid);
   }
 
 
@@ -545,9 +545,9 @@ forwardmsg(struct message *msg)
   msg->period=0;
 
   if(!origdir[0]){
-    sprintf(source,EMAILDIR"/"MESSAGEFILE,msg->msgno);
+    strcpy(source,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
   } else {
-    sprintf(source,"%s/%s/"MESSAGEFILE,MSGSDIR,origdir,msg->msgno);
+    sprintf(source,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),origdir,msg->msgno);
   }
 
   if((fp1=fopen(source,"r"))==NULL){
@@ -584,16 +584,16 @@ forwardmsg(struct message *msg)
   lock_rm(lock);
 
   if(!origdir[0]){
-    sprintf(fatt,EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno);
+    strcpy(fatt,mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno));
   } else {
     sprintf(fatt,"%s/%s/%s/"FILEATTACHMENT,
-	    MSGSDIR,origdir,MSGATTDIR,msg->msgno);
+	    mkfname(MSGSDIR),origdir,MSGATTDIR,msg->msgno);
   }
 
   if(!(msg->flags&MSF_FILEATT)){
-    sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
+    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
   }else {
-    sprintf(command,"%s %s %s -h %s",BBSMAILBIN,header,body,fatt);
+    sprintf(command,"%s %s %s -h %s",mkfname(BBSMAILBIN),header,body,fatt);
   }
   system(command);
     
@@ -615,13 +615,14 @@ forwardmsg(struct message *msg)
       
   if(usr_insys(checkmsg.to,1)){
     if(!clubmsg){
-      sprintf(out_buffer,msg_getl(WERNOTC,othruseracc.language-1),
+      sprompt_other(othrshm,out_buffer,WERNOTC,
 	      checkmsg.from,checkmsg.subject);
     } else {
-      sprintf(out_buffer,msg_getl(WERNOTFW,othruseracc.language-1),
-	      checkmsg.from,checkmsg.club,checkmsg.subject);
+      sprompt_other(othrshm,out_buffer,WERNOTFW,
+		    checkmsg.from,checkmsg.club,checkmsg.subject);
     }
-    if(usr_injoth(&othruseronl,out_buffer,0))prompt(WENOTFD,othruseronl.userid);
+    if(usr_injoth(&othruseronl,out_buffer,0))
+      prompt(WENOTFD,othruseronl.userid);
   }
 
 
@@ -669,7 +670,7 @@ backtrack(struct message *msg)
   }
 
   if(ok){
-    sprintf(fname,EMAILDIR"/"MESSAGEFILE,msgno);
+    strcpy(fname,mkfname(EMAILDIR"/"MESSAGEFILE,msgno));
     ok=(stat(fname,&st)==0);
   }
 
@@ -740,10 +741,10 @@ rmlocks()
   sprintf(lockchk,MSGREADLOCK,thisuseronl.channel,"*","*");
   if((cp=strchr(lockchk,'*'))!=NULL)*cp=0;
 
-  n=scandir(LOCKDIR,&locks,lockselect,ncsalphasort);
+  n=scandir(mkfname(LOCKDIR),&locks,lockselect,ncsalphasort);
 
   for(i=0;i<n;i++){
-    sprintf(fname,"%s/%s",LOCKDIR,locks[i]->d_name);
+    sprintf(fname,"%s/%s",mkfname(LOCKDIR),locks[i]->d_name);
     unlink(fname);
     free(locks[i]);
   }

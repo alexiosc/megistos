@@ -49,10 +49,19 @@
 		101	: enable color insertion (default)
 */
 
+
+#define __USE_GNU 1
+#define __USE_UNIX98 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <printf.h>
+
+
+extern int asprintf __P ((char **__restrict __ptr,
+			  __const char *__restrict __fmt, ...))
+     __attribute__ ((__format__ (__printf__, 2, 3)));
+
 
 #include "bbs.h"
 #include "gstat.h"
@@ -252,9 +261,6 @@ void init_printf(void)
 	/* a warning will be produced when compiling with libc5 for arg 2
 	   glibc2 will compile without warning. This has no consequences,
 	   cause gallup_print_arginfo() will never be called libc5 */
-
-#if 0	   
+	   
 	register_printf_function ('F', (printf_function)gallup_print, gallup_print_arginfo);
-#endif
-	register_printf_function ('F', gallup_print, gallup_print_arginfo);
 }

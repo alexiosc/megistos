@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.3  1998/12/27 16:10:27  alexios
  * Added autoconf support. One slight bug fix.
@@ -104,17 +103,16 @@ invite(char *s)
 
     strcpy(article,msg_getunit(IRECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(out_buffer,msg_getl(IRECIP,othruseracc.language-1),
-	    article,thisuseracc.userid,
-	    msg_getunit(IRECHIS,thisuseracc.sex==USX_MALE));
+    sprompt_other(othrshm,out_buffer,IRECIP,
+		  article,thisuseracc.userid,
+		  msg_getunit(IRECHIS,thisuseracc.sex==USX_MALE));
 
     if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
     
     if(othruseronl.flags&OLF_INTELECON){
-      sprintf(out_buffer,msg_getl(IJOIN,othruseracc.language-1),
-	      thisuseracc.userid);
+      sprompt_other(othrshm,out_buffer,IJOIN,thisuseracc.userid);
       usr_injoth(&othruseronl,out_buffer,0);
     }
   }
@@ -178,10 +176,10 @@ uninvite(char *s)
 
     strcpy(article,msg_getunit(URECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(out_buffer,msg_getl(URECIP,othruseracc.language-1),
-	    article,thisuseracc.userid,
-	    msg_getunit(URECHIS,thisuseracc.sex==USX_MALE));
-
+    sprompt_other(othrshm,out_buffer,URECIP,
+		  article,thisuseracc.userid,
+		  msg_getunit(URECHIS,thisuseracc.sex==USX_MALE));
+    
     if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
@@ -244,17 +242,16 @@ invitero(char *s)
 
     strcpy(article,msg_getunit(RRECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(out_buffer,msg_getl(RRECIP,othruseracc.language-1),
-	    article,thisuseracc.userid,
-	    msg_getunit(RRECHIS,thisuseracc.sex==USX_MALE));
-
+    sprompt_other(othrshm,out_buffer,RRECIP,
+		  article,thisuseracc.userid,
+		  msg_getunit(RRECHIS,thisuseracc.sex==USX_MALE));
+    
     if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
     
     if(othruseronl.flags&OLF_INTELECON){
-      sprintf(out_buffer,msg_getl(RJOIN,othruseracc.language-1),
-	      thisuseracc.userid);
+      sprompt_other(othrshm,out_buffer,RJOIN,thisuseracc.userid);
       usr_injoth(&othruseronl,out_buffer,0);
     }
   }

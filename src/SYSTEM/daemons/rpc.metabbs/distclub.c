@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.0  1999/07/28 23:15:45  alexios
  * Initial revision
@@ -78,9 +77,8 @@ apply_prefix(char *fname)
     return fname;
   }
 
-  /* First remove the prefix hard-wired in the config.h file we're including */
-  if(strstr(fname,BBSDIR)!=fname)return fname; /* Oops... Fname isn't absolute */
-  sans_prefix=&fname[strlen(BBSDIR)];
+#error "mkfname() not available here, but function probably obsoleted anyway"
+  /*  sans_prefix=&fname[strlen(mkfname(""))];*/
   
   /* Now prepend this_system's prefix (an extra slash won't hurt) */
   sprintf(buf,"%s/%s",this_system->prefix,sans_prefix);
@@ -275,6 +273,7 @@ distclub_request_list_1_svc (struct club_list_request_t *bbs, struct svc_req *re
   /* Ok, there's no escaping this request. :-)  Form the club list. */
 
   this_system=&registered_systems[i];
+
   n=scandir(apply_prefix(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];

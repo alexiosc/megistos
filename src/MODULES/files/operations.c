@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  2000/01/06 10:37:25  alexios
  * Added command entries for ADDTREE and DELTREE.
@@ -140,14 +139,32 @@ operations()
       int i, found=0,execute=-1;
       
       command=cnc_word();
+
+      /* Do we have the full command name? */
+
       for(i=0;i<numops;i++){
-	if(sameto(command,ops[i].command)){
+	if(sameas(command,ops[i].command)){
 	  if((ops[i].restricted==0)||masterlibop){
 	    found++;
 	    execute=i;
+	    break;
 	  }
 	}
       }
+
+      /* No, check for a partial match */
+
+      if(!found){
+	for(i=0;i<numops;i++){
+	  if(sameto(command,ops[i].command)){
+	    if((ops[i].restricted==0)||masterlibop){
+	      found++;
+	      execute=i;
+	    }
+	  }
+	}
+      }
+
       if(!found){
 	prompt(OPRERR);
 	cnc_end();

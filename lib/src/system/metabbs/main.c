@@ -27,9 +27,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.2  1999/08/07 02:20:41  alexios
  * Added code to store daemon PID to a file.
@@ -178,12 +177,18 @@ rpc_svc_run()
 static void
 storepid()
 {
-  FILE *fp=fopen(BBSETCDIR"/rpc.metabbs.pid","w");
+#error "mkfname() not defined here, but function obsoleted anyway"
+#if 0
+  FILE *fp=fopen(mkfname(BBSETCDIR"/rpc.metabbs.pid"),"w");
+#endif
   if(fp!=NULL){
     fprintf(fp,"%d",getpid());
     fclose(fp);
-    chmod(BBSETCDIR"/rpc.metabbs.pid",0600);
-    chown(BBSETCDIR"/rpc.metabbs.pid",0,0);
+#error "mkfname() not defined here, but function obsoleted anyway"
+#if 0
+    chmod(mkfname(BBSETCDIR"/rpc.metabbs.pid"),0600);
+    chown(mkfname(BBSETCDIR"/rpc.metabbs.pid"),0,0);
+#endif
   }
 }
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.6  1999/07/18 21:42:37  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -123,15 +122,15 @@ checkfile()
   FILE           *fp;
   struct wallmsg header;
 
-  if(stat(WALLFILE,&buf)){
+  if(stat(mkfname(WALLFILE),&buf)){
     if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
       error_log("Timed out waiting for lock %s",WALLLOCK);
       return 0;
     }
     lock_place(WALLLOCK,"creating");
     
-    if((fp=fopen(WALLFILE,"w"))==NULL){
-      error_fatalsys("Unable to create file %s",WALLFILE);
+    if((fp=fopen(mkfname(WALLFILE),"w"))==NULL){
+      error_fatalsys("Unable to create file %s",mkfname(WALLFILE));
     }
     memset(&header,0,sizeof(header));
     strcpy(header.userid,SYSOP);
@@ -139,7 +138,7 @@ checkfile()
     fwrite(&header,sizeof(header),1,fp);
 
     fclose(fp);
-    chmod(WALLFILE,0666);
+    chmod(mkfname(WALLFILE),0666);
     lock_rm(WALLLOCK);
   }
   return 1;
@@ -170,14 +169,14 @@ drawmessage()
     }
     lock_place(WALLLOCK,"checking");
     
-    if((fp=fopen(WALLFILE,"r"))==NULL){
+    if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
       lock_rm(WALLLOCK);
-      error_fatalsys("Unable to open file %s",WALLFILE);
+      error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
     }
     
     if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
       lock_rm(WALLLOCK);
-      error_fatalsys("Unable to read file %s",WALLFILE);
+      error_fatalsys("Unable to read file %s",mkfname(WALLFILE));
     }
 
     numlines=atoi(wallmsg.message);
@@ -212,11 +211,11 @@ drawmessage()
   prompt(WALLSAV);
 
   lock_place(WALLLOCK,"writing");
-  if((fp=fopen(WALLFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
     int i=errno;
     lock_rm(WALLLOCK);
     errno=i;
-    error_fatalsys("Unable to open file %s",WALLFILE);
+    error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
   }
   
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -248,7 +247,7 @@ drawmessage()
   fclose(out);
   fclose(fp);
 
-  if(fcopy(fname,WALLFILE)){
+  if(fcopy(fname,mkfname(WALLFILE))){
     prompt(OOPS);
     lock_rm(WALLLOCK);
     return;
@@ -266,15 +265,15 @@ readwall()
   struct wallmsg wallmsg;
   struct stat    buf;
   
-  if(stat(WALLFILE,&buf)){
+  if(stat(mkfname(WALLFILE),&buf)){
     prompt(EMPTY);
     return;
   }
 
   prompt(WALLHEAD);
   
-  if((fp=fopen(WALLFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",WALLFILE);
+  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s for reading.",mkfname(WALLFILE));
   }
 
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -302,15 +301,15 @@ listwall()
   struct wallmsg wallmsg;
   struct stat    buf;
   
-  if(stat(WALLFILE,&buf)){
+  if(stat(mkfname(WALLFILE),&buf)){
     prompt(EMPTY);
     return;
   }
 
   prompt(WALLHEAD);
   
-  if((fp=fopen(WALLFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",WALLFILE);
+  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s for reading.",mkfname(WALLFILE));
   }
 
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -339,13 +338,13 @@ cleanwall()
   struct stat    buf;
   int            linenum;
   
-  if(stat(WALLFILE,&buf) || (buf.st_size/sizeof(wallmsg))<2){
+  if(stat(mkfname(WALLFILE),&buf) || (buf.st_size/sizeof(wallmsg))<2){
     prompt(WALLEMPTY);
     return;
   }
 
-  if((fp=fopen(WALLFILE,"r+"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",WALLFILE);
+  if((fp=fopen(mkfname(WALLFILE),"r+"))==NULL){
+    error_fatalsys("Unable to open %s for reading.",mkfname(WALLFILE));
   }
 
   for(;;){
@@ -369,13 +368,13 @@ cleanwall()
 	int i=errno;
 	lock_rm(WALLLOCK);
 	errno=i;
-	error_fatalsys("Unable to seek %s",WALLFILE);
+	error_fatalsys("Unable to seek %s",mkfname(WALLFILE));
       }
       if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
 	int i=errno;
 	lock_rm(WALLLOCK);
 	errno=i;
-	error_fatalsys("Unable to read %s",WALLFILE);
+	error_fatalsys("Unable to read %s",mkfname(WALLFILE));
       }
       if(!wallmsg.userid[0]){
 	lock_rm(WALLLOCK);
@@ -386,13 +385,13 @@ cleanwall()
 	  int i=errno;
 	  lock_rm(WALLLOCK);
 	  errno=i;
-	  error_fatalsys("Unable to seek %s",WALLFILE);
+	  error_fatalsys("Unable to seek %s",mkfname(WALLFILE));
 	}
 	if(!fwrite(&wallmsg,sizeof(wallmsg),1,fp)){
 	  int i=errno;
 	  lock_rm(WALLLOCK);
 	  errno=i;
-	  error_fatalsys("Unable to write %s",WALLFILE);
+	  error_fatalsys("Unable to write %s",mkfname(WALLFILE));
 	}
 	fclose(fp);
 	lock_rm(WALLLOCK);

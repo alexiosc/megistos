@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -99,7 +98,7 @@ quotemessage(struct message *msg, char *quotefn)
 
   if(!yes)return 1;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,
 	  (long)msg->msgno);
   if((zfp=gzopen(fname,"rb"))==NULL){
@@ -171,7 +170,7 @@ quotemessage(struct message *msg, char *quotefn)
 
   if(!yes)return 1;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,
 	  msg->msgno);
   if((fp=fopen(fname,"r"))==NULL){
@@ -366,9 +365,9 @@ reply(struct message *org, int forceemail)
     }
     fclose(fp);
     
-    if(!attfile[0])sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
+    if(!attfile[0])sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
     else {
-      sprintf(command,"%s %s %s -%c %s",BBSMAILBIN,header,body,
+      sprintf(command,"%s %s %s -%c %s",mkfname(BBSMAILBIN),header,body,
 	      numcopies?'h':'c',attfile);
       if(numcopies)cleanupattachment=0;
     }
@@ -397,12 +396,11 @@ reply(struct message *org, int forceemail)
       
       if(usr_insys(checkmsg.to,1)){
 	if(!msg.club[0]){
-	  sprintf(out_buffer,msg_getl(numcopies?WERNOTC:WERNOT,
-				    othruseracc.language-1),
-		  checkmsg.from,checkmsg.subject);
+	  sprompt_other(othrshm,out_buffer,numcopies?WERNOTC:WERNOT,
+			checkmsg.from,checkmsg.subject);
 	} else {
-	  sprintf(out_buffer,msg_getl(WCRNOT,othruseracc.language-1),
-		  checkmsg.from,checkmsg.club,checkmsg.subject);
+	  sprompt_other(othrshm,out_buffer,WCRNOT,
+			checkmsg.from,checkmsg.club,checkmsg.subject);
 	}
 	if(usr_injoth(&othruseronl,out_buffer,0))
 	  prompt(WENOTFD,othruseronl.userid);
@@ -419,10 +417,11 @@ reply(struct message *org, int forceemail)
     if(attfile[0] && cleanupattachment){
       unlink(attfile);
       if(!msg.club[0]){
-	sprintf(attfile,EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,original);
+	strcpy(attfile,
+	       mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,original));
       } else {
-	sprintf(attfile,"%s/%s/"MSGATTDIR"/"FILEATTACHMENT,
-		MSGSDIR,clubhdr.club,original);
+	strcpy(attfile,mkfname("%s/%s/"MSGATTDIR"/"FILEATTACHMENT,MSGSDIR,
+			       clubhdr.club,original));
       }
     }
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.0  1999/08/13 17:03:41  alexios
  * Initial revision
@@ -123,9 +122,11 @@ controllingpart()
 	/* Notify the other user. */
 
 	strcpy(fmt,msg_getl(BGREQ,othruseracc.language));
-	sprintf(buf,fmt,
-		msg_getunitl(SEXM,thisuseracc.sex==USX_MALE,othruseracc.language),
-		thisuseracc.userid,thisuseracc.userid);
+	sprompt_other(othrshm,buf,BGREQ,
+		      msg_getunitl(SEXM,
+				   thisuseracc.sex==USX_MALE,
+				   othruseracc.language),
+		      thisuseracc.userid,thisuseracc.userid);
 	usr_injoth(&othruseronl,buf,0);
 
 
@@ -190,9 +191,11 @@ wait_for_acceptance()
 	if(sameas(p.text,"?") || sameas(p.text,"help")){
 	  sprintf(out_buffer,msg_getl(HELP1,othruseracc.language));
 	} else {
-	  sprintf(out_buffer,msg_getl(ACCPAT,othruseracc.language),
-		  msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language),
-		  player[1]);
+	  sprompt_other(othrshm,out_buffer,ACCPAT,
+			msg_getunitl(SEXML,
+				     sex[1]==USX_MALE,
+				     othruseracc.language),
+			player[1]);
 	}
 	usr_injoth(&othruseronl,out_buffer,0);
       }
@@ -203,12 +206,12 @@ wait_for_acceptance()
       else if(sameas(p.userid,player[1])){
 	if(!usr_insys(player[1],0))exit(0);
 	if(sameas(p.text,"?") || sameas(p.text,"help")){
-	  sprintf(out_buffer,msg_getl(HELP1,othruseracc.language));
+	  sprompt_other(othrshm,out_buffer,HELP1);
 	} else if(sameas(p.text,player[0])){
 	  print("challengee accepted challenge.\n");
 	  return;
 	} else {
-	  sprintf(out_buffer,msg_getl(REQPAT,othruseracc.language),player[0]);
+	  sprompt_other(othrshm,out_buffer,REQPAT,player[0]);
 	}
 	usr_injoth(&othruseronl,out_buffer,0);
       }
@@ -218,7 +221,7 @@ wait_for_acceptance()
 
       else {
 	usr_insys(p.userid,0);
-	sprintf(out_buffer,msg_getl(BGALR,othruseracc.language));
+	sprompt_other(othrshm,out_buffer,BGALR);
 	usr_injoth(&othruseronl,out_buffer,0);
       }
     }
@@ -229,13 +232,13 @@ wait_for_acceptance()
   /* Timed out. Notify both parties. */
 
   if(usr_insys(player[0],0)){
-    sprintf(out_buffer,msg_getl(ACCTMOUT,othruseracc.language),
-	    msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language),
-	    player[1]);
+    sprompt_other(othrshm,out_buffer,ACCTMOUT,
+		  msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language),
+		  player[1]);
     usr_injoth(&othruseronl,out_buffer,0);
   }
   if(usr_insys(player[1],0)){
-    sprintf(out_buffer,msg_getl(REQTMOUT,othruseracc.language));
+    sprompt_other(othrshm,out_buffer,REQTMOUT);
     usr_injoth(&othruseronl,out_buffer,0);
   }
 

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/28 23:13:16  alexios
  * Made the aux structure non-volatile by saving it before
@@ -303,7 +302,8 @@ logout()
   char command[256];
   killpersonalchannel();
   leavechannels();
-  sprintf(command,"\\rm -rf %s/%s >&/dev/null",TELEDIR,thisuseracc.userid);
+  sprintf(command,"\\rm -rf %s/%s >&/dev/null",
+	  mkfname(TELEDIR),thisuseracc.userid);
   system(command);
   dont_write_aux=1;
 }
@@ -349,7 +349,7 @@ int handler_userdel(int argc, char **argv)
     return 1;
   }
 
-  sprintf(fname,"%s/%s",TELEUSRDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(TELEUSRDIR),victim);
   unlink(fname);
 
   return 0;

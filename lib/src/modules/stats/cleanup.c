@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/12/27 16:09:37  alexios
  * Added autoconf support.
@@ -80,7 +79,7 @@ init()
 
   printf("Statistics Cleanup\n\n");
 
-  sprintf(fname,"%s/%s",STATDIR,DAYSSINCEFILE);
+  sprintf(fname,"%s/%s",mkfname(STATDIR),DAYSSINCEFILE);
   if((fp=fopen(fname,"r"))!=NULL){
     int i;
     if(fscanf(fp,"%d\n",&i)==1){
@@ -96,9 +95,9 @@ init()
   chmod(fname,0660);
   printf("Days since last cleanup: %d\n",dayssince);
   
-  sprintf(oldstatsdir,"%s/%d",STATDIR,(int)tdyear(today()));
+  sprintf(oldstatsdir,"%s/%d",mkfname(STATDIR),(int)tdyear(today()));
   mkdir(oldstatsdir,0750);
-  sprintf(everdir,"%s/EVER",STATDIR);
+  sprintf(everdir,"%s/EVER",mkfname(STATDIR));
   mkdir(everdir,0750);
 }
 
@@ -113,7 +112,7 @@ mergedaystats(char *dir, char *name)
   sprintf(fname1,"%s/tmp%d~",dir,getpid());
   sprintf(fname2,"%s/%s",dir,name);
   if((out=fopen(fname1,"w"))==NULL)return;
-  if((in1=fopen(DAYSTATFILE,"a+"))==NULL)return;
+  if((in1=fopen(mkfname(DAYSTATFILE),"a+"))==NULL)return;
   if((in2=fopen(fname2,"a+"))==NULL)return;
   rewind(in1);
   rewind(in2);
@@ -166,7 +165,7 @@ mergettystats(char *dir, char *name)
   sprintf(fname1,"%s/tmp%d~",dir,getpid());
   sprintf(fname2,"%s/%s",dir,name);
   if((out=fopen(fname1,"w"))==NULL)return;
-  if((in1=fopen(TTYSTATFILE,"a+"))==NULL)return;
+  if((in1=fopen(mkfname(TTYSTATFILE),"a+"))==NULL)return;
   if((in2=fopen(fname2,"a+"))==NULL)return;
   rewind(in1);
   rewind(in2);
@@ -255,7 +254,7 @@ mergebaudstats(char *dir, char *name)
   sprintf(fname1,"%s/tmp%d~",dir,getpid());
   sprintf(fname2,"%s/%s",dir,name);
   if((out=fopen(fname1,"w"))==NULL)return;
-  if((in1=fopen(BAUDSTATFILE,"a+"))==NULL)return;
+  if((in1=fopen(mkfname(BAUDSTATFILE),"a+"))==NULL)return;
   if((in2=fopen(fname2,"a+"))==NULL)return;
   rewind(in1);
   rewind(in2);
@@ -344,7 +343,7 @@ mergeclsstats(char *dir, char *name)
   sprintf(fname1,"%s/tmp%d~",dir,getpid());
   sprintf(fname2,"%s/%s",dir,name);
   if((out=fopen(fname1,"w"))==NULL)return;
-  if((in1=fopen(CLSSTATFILE,"a+"))==NULL)return;
+  if((in1=fopen(mkfname(CLSSTATFILE),"a+"))==NULL)return;
   if((in2=fopen(fname2,"a+"))==NULL)return;
   rewind(in1);
   rewind(in2);
@@ -429,7 +428,7 @@ mergemodstats(char *dir, char *name)
   sprintf(fname1,"%s/tmp%d~",dir,getpid());
   sprintf(fname2,"%s/%s",dir,name);
   if((out=fopen(fname1,"w"))==NULL)return;
-  if((in1=fopen(MODSTATFILE,"a+"))==NULL)return;
+  if((in1=fopen(mkfname(MODSTATFILE),"a+"))==NULL)return;
   if((in2=fopen(fname2,"a+"))==NULL)return;
   rewind(in1);
   rewind(in2);
@@ -525,7 +524,7 @@ getstats()
 {
   char fname[256];
 
-  audit_setfile(CLNUPAUDITFILE);
+  audit_setfile(mkfname(CLNUPAUDITFILE));
   audit("CLEANUP",AUDIT(STATCUB),dayssince);
 
   printf("\nCalculating daily usage statistics.\n");
@@ -533,35 +532,35 @@ getstats()
   mergedaystats(oldstatsdir,fname);
   mergedaystats(oldstatsdir,"daystats");
   mergedaystats(everdir,"daystats");
-  clear(DAYSTATFILE);
+  clear(mkfname(DAYSTATFILE));
 
   printf("\nCalculating channel usage statistics.\n");
   sprintf(fname,"ttystats.month-%02ld",tdmonth(today())+1);
   mergettystats(oldstatsdir,fname);
   mergettystats(oldstatsdir,"ttystats");
   mergettystats(everdir,"ttystats");
-  clear(TTYSTATFILE);
+  clear(mkfname(TTYSTATFILE));
 
   printf("\nCalculating connection speed statistics.\n");
   sprintf(fname,"baudstats.month-%02ld",tdmonth(today())+1);
   mergebaudstats(oldstatsdir,fname);
   mergebaudstats(oldstatsdir,"baudstats");
   mergebaudstats(everdir,"baudstats");
-  clear(BAUDSTATFILE);
+  clear(mkfname(BAUDSTATFILE));
 
   printf("\nCalculating user class usage statistics.\n");
   sprintf(fname,"clsstats.month-%02ld",tdmonth(today())+1);
   mergeclsstats(oldstatsdir,fname);
   mergeclsstats(oldstatsdir,"clsstats");
   mergeclsstats(everdir,"clsstats");
-  clear(CLSSTATFILE);
+  clear(mkfname(CLSSTATFILE));
 
   printf("\nCalculating module usage statistics.\n");
   sprintf(fname,"modstats.month-%02ld",tdmonth(today())+1);
   mergemodstats(oldstatsdir,fname);
   mergemodstats(oldstatsdir,"modstats");
   mergemodstats(everdir,"modstats");
-  clear(MODSTATFILE);
+  clear(mkfname(MODSTATFILE));
 
   printf("\nDone generating statistics!\n\n");
 

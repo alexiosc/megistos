@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.6  1998/12/27 15:18:42  alexios
  * One minor fix.
@@ -167,7 +166,7 @@ init()
 
   printf("User account cleanup\n\n");
 
-  sprintf(fname,"%s/%s",USRDIR,DAYSSINCEFILE);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),DAYSSINCEFILE);
   if((fp=fopen(fname,"r"))!=NULL){
     int i;
     if(fscanf(fp,"%d\n",&i)==1){
@@ -204,7 +203,7 @@ usercleanup()
   int        agestats[5][8];
 
   bzero(agestats,sizeof(agestats));
-  audit_setfile(CLNUPAUDITFILE);
+  audit_setfile(mkfname(CLNUPAUDITFILE));
   audit("CLEANUP",AUDIT(USERCUB),dayssince);
 
   inittop(&topcreds);
@@ -219,7 +218,7 @@ usercleanup()
   inittop(&topconn);
   inittop(&topold);
 
-  sprintf(command,"\\ls %s",USRDIR);
+  sprintf(command,"\\ls %s",mkfname(USRDIR));
   if((fp=popen(command,"r"))==NULL)return;
 
   for(i=0;i<cls_count;i++)cls_classes[i].users=0;
@@ -233,7 +232,7 @@ usercleanup()
 
       uacc=&usracc;
       if(!usr_insys(name,0)){
-	sprintf(fname,"%s/%s",USRDIR,name);
+	sprintf(fname,"%s/%s",mkfname(USRDIR),name);
 	if((ufp=fopen(fname,"r"))==NULL){
 	  fclose(ufp);
 	  continue;
@@ -366,7 +365,7 @@ usercleanup()
       }
 
       if(save){
-	sprintf(fname,"%s/%s",USRDIR,name);
+	sprintf(fname,"%s/%s",mkfname(USRDIR),name);
 	if((ufp=fopen(fname,"w"))==NULL){
 	  fclose(ufp);
 	  continue;
@@ -400,8 +399,8 @@ usercleanup()
   for(pass=0;pass<2;pass++){
     char dir[256];
     
-    if(!pass)strcpy(dir,STATDIR);
-    else sprintf(dir,"%s/%d",STATDIR,(uint32)tdyear(today()));
+    if(!pass)strcpy(dir,mkfname(STATDIR));
+    else sprintf(dir,"%s/%d",mkfname(STATDIR),(uint32)tdyear(today()));
     
     savetop(topcreds,dir,"top-credits");
     savetop(toppaid,dir,"top-paidcreds");
@@ -416,7 +415,7 @@ usercleanup()
     savetop(topold,dir,"top-oldestsignups");
   }
 
-  if((fp=fopen(DEMOSTATFILE,"w"))!=NULL){
+  if((fp=fopen(mkfname(DEMOSTATFILE),"w"))!=NULL){
     int i,j;
     
     for(i=0;i<NUMLANGUAGES;i++)fprintf(fp,"%d\n",langstats[i]);
@@ -434,7 +433,7 @@ usercleanup()
   }
   fclose(fp);
 
-  if((fp=fopen(CLASSFILE,"w"))!=NULL)
+  if((fp=fopen(mkfname(CLASSFILE),"w"))!=NULL)
     fwrite(cls_classes,sizeof(classrec_t),cls_count,fp);
   fclose(fp);
 

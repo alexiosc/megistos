@@ -50,9 +50,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  1999/08/13 16:58:25  alexios
  * Delete BBSTERM and made provisions for BBSUSERNAME to be
@@ -161,13 +160,15 @@ typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
 
 /*@{*/
 
+#if 0
 #define BBSDIR         __BASEDIR
-#define BBSDATADIR     BBSDIR"/data"
-#define BBSETCDIR      BBSDIR"/etc"
+#endif
+#define BBSDATADIR     "data"
+#define BBSETCDIR      "etc"
 #define BBSFILEDIR     BBSDATADIR"/files"
-#define BBSLIBDIR      BBSDIR"/lib"
+#define BBSLIBDIR      "lib"
 #define BBSMODULEDIR   BBSLIBDIR"/modules"
-#define BINDIR         BBSDIR"/bin"
+#define BINDIR         "bin"
 #define BLTDBDIR       MSGSDIR"/..bltdb"
 #define CHANDEFDIR     BBSETCDIR"/channel.defs"
 #define CLUBAXDIR      MSGSDIR"/..access"
@@ -175,18 +176,18 @@ typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
 #define CONFIGDIR      BBSETCDIR"/config"
 #define COOKIEDIR      BBSDATADIR"/cookie"
 #define DEVDIR         "/dev"
-#define DOCDIR         BBSDIR"/doc"
+#define DOCDIR         "doc"
 #define EMAILATTDIR    EMAILDIR"/"MSGATTDIR
 #define EMAILDIR       MSGSDIR"/"EMAILDIRNAME
-#define EMUFIFODIR     BBSDIR"/etc"
-#define EMULOGDIR      BBSDIR"/etc"
+#define EMUFIFODIR     "etc"
+#define EMULOGDIR      "etc"
 #define EVENTDIR       BBSDATADIR"/events"
 #define FILELIBDBDIR   BBSFILEDIR"/.DB"
 #define FILELIBDIR     BBSDATADIR"/files"
 #define GCSDIR         BBSLIBDIR"/gcs"
 #define IHAVEDIR       MSGSDIR"/..ihave"
-#define LOCKDIR        BBSDIR"/lock"
-#define LOGDIR         BBSDIR"/log"
+#define LOCKDIR        "lock"
+#define LOGDIR         "log"
 #define MAILERDIR      BBSDATADIR"/mailer"
 #define MAILERFILESDIR MAILERDIR"/QWKfiles"
 #define MAILERREQDIR   MAILERDIR"/requests"

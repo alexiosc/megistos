@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:48:36  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -110,9 +109,9 @@ readchanusr(char *channel, char *userid)
   
   /* Locate channel user file, return NULL if doesn't exist */
 
-  sprintf(fname,"%s/%s/%s-",TELEDIR,mkchfn(channel),userid);
+  sprintf(fname,"%s/%s/%s-",mkfname(TELEDIR),mkchfn(channel),userid);
   if(stat(fname,&st)){
-    sprintf(fname,"%s/%s/%s+",TELEDIR,mkchfn(channel),userid);
+    sprintf(fname,"%s/%s/%s+",mkfname(TELEDIR),mkchfn(channel),userid);
     if(stat(fname,&st))return NULL;
   }
 
@@ -145,14 +144,14 @@ writechanusr(char *channel, struct chanusr *wusr)
 
   /* Unlink old channel user file, if available */
 
-  sprintf(fname,"%s/%s/%s%s",TELEDIR,mkchfn(channel),wusr->userid,
+  sprintf(fname,"%s/%s/%s%s",mkfname(TELEDIR),mkchfn(channel),wusr->userid,
 	  wusr->flags&CUF_PRESENT?"-":"+");
   unlink(fname);
 
 
   /* Create the new one */
 
-  sprintf(fname,"%s/%s/%s%s",TELEDIR,mkchfn(channel),wusr->userid,
+  sprintf(fname,"%s/%s/%s%s",mkfname(TELEDIR),mkchfn(channel),wusr->userid,
 	  wusr->flags&CUF_PRESENT?"+":"-");
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to open channel user file %s",fname);

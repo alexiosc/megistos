@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 16:37:59  alexios
  * Added autoconf support. Fixed slight bugs.
@@ -94,11 +93,11 @@ int
 loadclubhdr(char *club)
 {
   FILE *fp;
-  char fname[256];
+  char *fname;
   struct stat st;
 
   if(*club=='/')club++;
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,club);
+  fname=mkfname("%s/h%s",mkfname(CLUBHDRDIR),club);
   if(stat(fname,&st)){
     return 0;
   }
@@ -121,10 +120,9 @@ loadclubhdr(char *club)
 int
 saveclubhdr(struct clubheader *hdr)
 {
-  char fname[256];
+  char *fname=mkfname("%s/h%s",mkfname(CLUBHDRDIR),hdr->club);
   FILE *fp;
 
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,hdr->club);
   if((fp=fopen(fname,"w"))==NULL)return 0;
   fwrite(hdr,sizeof(struct clubheader),1,fp);
   fclose(fp);
@@ -150,7 +148,7 @@ doindex(char *clubname, char *clubdir)
 
   /* Set directory */
 
-  if(!email)sprintf(dir,"%s/%s",MSGSDIR,clubdir);
+  if(!email)strcpy(dir,mkfname("%s/%s",mkfname(MSGSDIR),clubdir));
   else strcpy(dir,clubdir);
 
 
@@ -172,7 +170,7 @@ doindex(char *clubname, char *clubdir)
   sprintf(fname,"%s/%s",dir,DBDIR);
   mkdir(fname,0777);
   d_dbfpath(fname);
-  d_dbdpath(DBDDIR);
+  d_dbdpath(mkfname(DBDDIR));
   if(d_open(".ecdb","s")!=S_OKAY){
     fprintf(stderr, "Cannot open database for %s (db_status %d)\n",
 	    clubname,db_status);
@@ -304,9 +302,9 @@ main(int argc, char **argv)
   int i,j;
   
   mod_setprogname(argv[0]);
-  doindex(EMAILCLUBNAME,EMAILDIR);
+  doindex(EMAILCLUBNAME,mkfname(EMAILDIR));
   
-  i=scandir(MSGSDIR,&clubs,msgselect,alphasort);
+  i=scandir(mkfname(MSGSDIR),&clubs,msgselect,alphasort);
   
   for(j=0;j<i;j++){
     doindex(clubs[j]->d_name,clubs[j]->d_name);

@@ -34,9 +34,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  2000/01/06 11:44:10  alexios
  * Corrected name of rpc.metabbs PID lock file.
@@ -88,14 +87,14 @@ getpwbbs()
 static void
 storepid()
 {
-  FILE *fp=fopen(BBSETCDIR"/bbsinit.pid","w");
+  FILE *fp=fopen(mkfname(BBSETCDIR"/bbsinit.pid"),"w");
   if(fp==NULL){
-    error_fatalsys("Unable to open "BBSETCDIR"/bbsinit.pid for writing.");
+    error_fatalsys("Unable to open %s/bbsinit.pid for writing.",mkfname(""));
   }
   fprintf(fp,"%d",(int)getpid());
   fclose(fp);
-  chmod(BBSETCDIR"/bbsinit.pid",0600);
-  chown(BBSETCDIR"/bbsinit.pid",0,0);
+  chmod(mkfname(BBSETCDIR"/bbsinit.pid"),0600);
+  chown(mkfname(BBSETCDIR"/bbsinit.pid"),0,0);
 }
 
 
@@ -107,6 +106,8 @@ struct daemon {
   int   pid;
 };
 
+
+#define _(x,y,z) {x,BINDIR"/"x,BBSETCDIR"/"x".pid",y,z}
 
 struct daemon daemons[] = {
   {"rpc.metabbs", BINDIR"/rpc.metabbs", BBSETCDIR"/rpc.metabbs.pid",  0, 0},
@@ -157,7 +158,7 @@ mainloop()
       int fd;
       char spid[80];
       
-      if((fd=open(daemons[i].pidfile,O_RDONLY))<0)continue;
+      if((fd=open(mkfname(daemons[i].pidfile),O_RDONLY))<0)continue;
       bzero(spid,sizeof(spid));
       read(fd,spid,sizeof(spid)-1);
       close(fd);
@@ -194,9 +195,9 @@ mainloop()
 	  error_logsys("Unable to fork() while spawning daemon %s",daemons[i].name);
 	  break;
 	case 0:
-	  execl(daemons[i].binary,daemons[i].binary,NULL);
+	  execl(mkfname(daemons[i].binary),daemons[i].binary,NULL);
 	  error_fatalsys("Unable to spawn daemon %s (%s)",
-		   daemons[i].name,daemons[i].binary);
+		   daemons[i].name,mkfname(daemons[i].binary));
 	  break;
 	default:
 	  daemons[i].pid=pid;

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1998/12/27 16:07:28  alexios
  * Added autoconf support. Added support for new channel_getstatus().
@@ -225,9 +224,10 @@ void rsys_post()
       prompt(RSPOSTOK2,uacc->curclss);
 
       if (usr_insys(userid,0)) {
-	sprintf(out_buffer,msg_getl(RSPOSTNOT3,othruseracc.language-1),
-		amount,msg_getunitl(CRDSING,amount==1,othruseracc.language-1),
-		uacc->curclss);
+	sprompt_other(othrshm,out_buffer,RSPOSTNOT3,
+		      amount,msg_getunitl(CRDSING,amount==1,
+					  othruseracc.language-1),
+		      uacc->curclss);
 	if(usr_injoth(&othruseronl,out_buffer,0))
 	  prompt(NOTIFIED,othruseronl.userid);
       }
@@ -238,9 +238,9 @@ void rsys_post()
     prompt(RSPOSTOK);
     
     if (usr_insys(userid,0)) {
-      sprintf(out_buffer,
-	      msg_getl(RSPOSTNOT1+(fop=='P'),othruseracc.language-1),
-	      amount,msg_getunitl(CRDSING,amount==1,othruseracc.language-1));
+      sprompt_other(othrshm,out_buffer,RSPOSTNOT1+(fop=='P'),
+		    amount,
+		    msg_getunitl(CRDSING,amount==1,othruseracc.language-1));
       if(usr_injoth(&othruseronl,out_buffer,0))
 	prompt(NOTIFIED,othruseronl.userid);
     }
@@ -414,7 +414,7 @@ rsys_search()
 
   for(i=0;i<15;i++)strcpy(data[i*2+1],phonetic(data[i*2+1]));
 
-  sprintf(command,"\\ls %s",USRDIR);
+  sprintf(command,"\\ls %s",mkfname(USRDIR));
   if((fp=popen(command,"r"))==NULL)return;
 
   inp_nonblock();

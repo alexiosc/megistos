@@ -58,9 +58,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 15:19:19  alexios
  * Added the message block magic number.
@@ -102,6 +101,12 @@
 
 #define MBK_MAGIC "MMBK"
 
+typedef struct {
+    uint32 offset;		/* Offset to the prompt string */
+    char   id[28];		/* String ID of the prompt */
+} idx_t;
+
+
 /** A prompt block descriptor.
 
     This is the structure used to hold state et cetera for an open prompt
@@ -112,12 +117,12 @@
     this structure. */
 
 struct promptblock {
-     char fname[64];		  /** Filename of the prompt block  */
-     FILE *handle;		  /** Open prompt block file */
-     long indexsize;		  /** Size of prompt index */
-     long *index;		  /** Pointer to index array */
-     int  language;		  /** Currently active language */
-     int  langoffs[NUMLANGUAGES]; /** Indices to where languages start */
+  char  fname[64];		/** Filename of the prompt block  */
+  FILE  *handle;		/** Open prompt block file */
+  long  indexsize;		/** Size of prompt index */
+  int   language;		/** Currently active language */
+  int   langoffs[NUMLANGUAGES];	/** Indices to where languages start */
+  idx_t *index;			/** Prompt index structure */
 };
 
 
@@ -210,14 +215,28 @@ void msg_reset();
     This is the generic prompt access function. It's used by most other
     prompt access functions.
 
-    @param num The prompt index. You will want to use the symbolic name here.
+    @param num The symbolic ID of the prompt.
 
     @param language The language you want to access.
 
     @return A null terminated string pointer to the prompt. */
 
-#define msg_getl(num,lang) msg_getl_bot((num),lang,1)
+#define msg_getl(num,lang) msg_getl_bot(num,lang,0)
 
+
+/** Low level function to access a prompt by ID and language.
+
+    This is the low level function to read a prompt by its ID {\em
+    and} index.
+
+    @deprecated Don't use this one, use the macro {\tt msg_getl}
+    instead. It'll save you some effort.
+
+    @param num The numeric index of the prompt.
+
+    @param language The language you want to access.
+
+    @return A null terminated string pointer to the prompt. */
 
 char *msg_getl_bot(int num, int language, int checkbot);
 
@@ -231,7 +250,7 @@ char *msg_getl_bot(int num, int language, int checkbot);
 
     @return A null terminated string pointer to the prompt. */
 
-#define msg_get(num)  msg_getl_bot((num),(msg_cur->language),1)
+#define msg_get(num)  msg_getl_bot(num,(msg_cur->language),0)
 
 
 /** Get the name of a unit.
@@ -257,22 +276,22 @@ char *msg_getl_bot(int num, int language, int checkbot);
 
     @return A null terminated string pointer to the prompt. */
 
-char *msg_getunitl(int num,int value,int language);
+char *msg_getunitl(int num, int value, int language);
 
 
 /** Get the name of a unit in the current language.
 
-    This is a macro that calls {\tt msg_getunitl()}. It retrieves a unit name,
-    but uses the currently active language to save you a lot of typing.
+    This is a macro that calls {\tt msg_getunitl()}. It retrieves a unit
+    name, but uses the currently active language to save you a lot of typing.
 
     @param num The prompt index. You will want to use the symbolic name here.
 
-    @param value The value mentioned above. If {\tt value} is anything but one,
-    {\tt num} will be increased by one.
+    @param val The value mentioned above. If {\tt val} is anything but
+    one, string {\tt num+1} will be retrieved instead.
 
     @return A null terminated string pointer to the prompt. */
 
-#define msg_getunit(num,value) msg_getunitl((num),(value),msg_cur->language)
+#define msg_getunit(n,val) msg_getunitl((n),(val),msg_cur->language)
 
 
 /** Close a prompt block
@@ -294,7 +313,7 @@ void msg_close(promptblock_t *blk);
     prompts. The number is checked to ensure it's within a user-defined range
     of values. If not, a fatal error is issued.
 
-    @param num The prompt index. You will want to use the symbolic name here.
+    @param num The prompt ID.
 
     @param floor The minimum acceptable value.
 
@@ -302,7 +321,7 @@ void msg_close(promptblock_t *blk);
 
     @return The parsed value. */
 
-long msg_long(int num,long floor,long ceiling);
+long msg_long(int num, long floor, long ceiling);
 
 
 /** Parse a base-16 {\tt unsigned int} in a prompt.
@@ -312,7 +331,7 @@ long msg_long(int num,long floor,long ceiling);
     from prompts. The number is checked to ensure it's within a user-defined
     range of values. If not, a fatal error is issued.
 
-    @param num The prompt index. You will want to use the symbolic name here.
+    @param num The prompt ID as a symbolic name (constant).
 
     @param floor The minimum acceptable value.
 
@@ -320,7 +339,7 @@ long msg_long(int num,long floor,long ceiling);
 
     @return The parsed value. */
 
-unsigned msg_hex(int num,unsigned floor,unsigned ceiling);
+unsigned msg_hex(int num, unsigned floor, unsigned ceiling);
 
 
 /** Parse an {\tt int} in a prompt.
@@ -341,13 +360,13 @@ unsigned msg_hex(int num,unsigned floor,unsigned ceiling);
 int msg_int(int num, int floor, int ceiling);
 
 
-/** Parse an yes/no configuration prompt.
+/** Parse a yes/no configuration prompt.
 
     Retrieves the requested prompt and parses a yes/no boolean value contained
     therein. This function is used to extract configuration options from
     prompts.
 
-    @param num The prompt index. You will want to use the symbolic name here.
+    @param id The prompt index as a symbolic name (constant).
 
     @return The parsed value: non-zero if `yes', zero if `no'. */
 

@@ -20,7 +20,7 @@ main(int argc, char **argv)
   int i=1;
   struct ihavelistc c;
 
-  mkdir(IHAVEDIR,0777);		/* Paranoia mode and a silly thing to do */
+  mkdir(mkfname(IHAVEDIR),0777); /* Paranoia mode and a silly thing to do */
   d_dbfpath(".");
   d_dbdpath(".");
   if(d_open("ihavedb","s")!=S_OKAY){

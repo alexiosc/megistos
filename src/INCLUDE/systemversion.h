@@ -31,9 +31,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/07/26 21:17:06  alexios
  * Made version more complete and OS-like.
@@ -56,7 +55,16 @@
 #endif
 
 
-#include "ver.h"
+
+extern char bbs_shortversion[];
+extern char bbs_systemversion[];
+extern char bbs_compiledby[];
+extern char bbs_compiledon[];
+extern char bbs_majorversion[];
+extern char bbs_minorversion[];
+extern char bbs_patchlevel[];
+extern char bbs_makenumber[];
+
 
 #ifdef I_AM_VERSION_C
 #ifndef SYSTEMVERSION

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.0  1999/08/13 17:03:41  alexios
  * Initial revision
@@ -132,20 +131,20 @@ bg_firstroll()
   /* Notify winner */
 
   if(!usr_insys(player[0],0))exit(0);
-  sprintf(out_buffer,msg_getl(ROLL1WIN,othruseracc.language),
-	  msg_getunitl(SEXM,sex[1]==USX_MALE,othruseracc.language),
-	  player[1],
-	  d2,d1);
+  sprompt_other(othrshm,out_buffer,ROLL1WIN,
+		msg_getunitl(SEXM,sex[1]==USX_MALE,othruseracc.language),
+		player[1],
+		d2,d1);
   usr_injoth(&othruseronl,out_buffer,0);
 	  
 
   /* Notify loser */
 
   if(!usr_insys(player[1],0))exit(0);
-  sprintf(out_buffer,msg_getl(ROLL1LOS,othruseracc.language),
-	  msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language),
-	  player[0],
-	  d1,d2);
+  sprompt_other(othrshm,out_buffer,ROLL1LOS,
+		msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language),
+		player[0],
+		d1,d2);
   usr_injoth(&othruseronl,out_buffer,0);
 	  
 

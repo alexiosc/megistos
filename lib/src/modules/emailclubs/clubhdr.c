@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Fixed weird
@@ -131,8 +130,8 @@ findclub(char *club)
   if(*club=='/')club++;
   if(!isalpha(*club))return 0;
 
-  if((dp=opendir(CLUBHDRDIR))==NULL){
-    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
+  if((dp=opendir(mkfname(CLUBHDRDIR)))==NULL){
+    error_fatalsys("Unable to open directory %s",mkfname(CLUBHDRDIR));
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
@@ -157,12 +156,12 @@ getclubid()
   struct clubheader hdr;
   int id=0;
   
-  if((dp=opendir(CLUBHDRDIR))==NULL){
-    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
+  if((dp=opendir(mkfname(CLUBHDRDIR)))==NULL){
+    error_fatalsys("Unable to open directory %s",mkfname(CLUBHDRDIR));
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
-    sprintf(fname,"%s/%s",CLUBHDRDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(CLUBHDRDIR),dir->d_name);
     if((fp=fopen(fname,"r"))==NULL){
       error_fatalsys("Unable to open club header %s",fname);
     }
@@ -185,7 +184,7 @@ loadclubhdr(char *club)
   struct stat st;
 
   if(*club=='/')club++;
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,club);
+  sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),club);
   if(stat(fname,&st)){
     clubhdrtime=0;
     return 0;
@@ -216,7 +215,7 @@ saveclubhdr(struct clubheader *hdr)
   char fname[256];
   FILE *fp;
 
-  sprintf(fname,"%s/h%s",CLUBHDRDIR,hdr->club);
+  sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),hdr->club);
   if((fp=fopen(fname,"w"))==NULL)return 0;
   fwrite(hdr,sizeof(struct clubheader),1,fp);
   fclose(fp);
@@ -259,7 +258,7 @@ getclubax(useracc_t *uacc, char *club)
   if(key_owns(uacc,sopkey))return CAX_SYSOP;
   else if(!strcmp(uacc->userid,clubhdr.clubop))return CAX_CLUBOP;
 
-  sprintf(fname,"%s/%s",CLUBAXDIR,uacc->userid);
+  sprintf(fname,"%s/%s",mkfname(CLUBAXDIR),uacc->userid);
   strcpy(tmp,club);
   if((fp=fopen(fname,"r"))==NULL){
     strcpy(club,tmp);
@@ -312,7 +311,7 @@ setclubax(useracc_t *uacc, char *club, int ax)
   FILE *fp1, *fp2;
   int done=(ax==CAX_DEFAULT), i;
 
-  sprintf(fname1,"%s/%s",CLUBAXDIR,uacc->userid);
+  sprintf(fname1,"%s/%s",mkfname(CLUBAXDIR),uacc->userid);
   sprintf(fname2,TMPDIR"/ax%05d",getpid());
 
   fp1=fopen(fname1,"r");

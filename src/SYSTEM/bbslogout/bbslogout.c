@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1998/12/27 16:20:53  alexios
  * Added autoconf support. Added support for new channel_getstatus().
@@ -115,7 +114,7 @@ main(int argc, char *argv[])
   mod_done(INI_ALL);
   channel_disconnect(thisuseronl.emupty);
 
-  sprintf(fname,"%s/%s",ONLINEDIR,thisuseracc.userid);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),thisuseracc.userid);
   unlink(fname);
 
   resetlinestatus();

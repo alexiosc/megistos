@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1998/12/27 16:09:37  alexios
  * Added autoconf support.
@@ -101,7 +100,7 @@ drawgraph(int type1, int type2, int type3, int type4)
   bc=msg_char(BARCHR);
   hbc=msg_char(HLFCHR);
 
-  strcpy(fname,STATDIR);
+  strcpy(fname,mkfname(STATDIR));
   strcat(fname,"/");
   switch(type4){
   case FORTODAY:
@@ -276,10 +275,10 @@ demographics()
   else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
   mod_init(init);
 
-  stat(DEMOSTATFILE,&st);
+  stat(mkfname(DEMOSTATFILE),&st);
   tm=localtime(&st.st_mtime);
   
-  if((fp=fopen(DEMOSTATFILE,"r"))!=NULL){
+  if((fp=fopen(mkfname(DEMOSTATFILE),"r"))!=NULL){
     int i,j;
     
     for(i=0;i<NUMLANGUAGES;i++)fscanf(fp,"%d\n",&langstats[i]);
@@ -432,4 +431,6 @@ main(int argc, char **argv)
 
     drawgraph(type1,type2,type3,type4);
   }
+
+  return 0;
 }

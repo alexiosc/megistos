@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -74,10 +73,10 @@ iterate()
   char   fname[512];
   int    n,i;
 
-  n=scandir(MSGSDIR"/..netimport",&systems,rsysselect,alphasort);
+  n=scandir(mkfname(MSGSDIR"/..netimport"),&systems,rsysselect,alphasort);
   for(i=0;i<n;free(systems[i]),i++){
     char *cp=systems[i]->d_name;
-    sprintf(fname,MSGSDIR"/..netimport/%s",cp);
+    strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",cp));
     *(strrchr(cp,':'))='/';
 
     if(debug)fprintf(stderr,"System: fname=(%s) sysname=(%s)\n",fname,cp);

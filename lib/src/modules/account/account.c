@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:30  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.9  1999/07/18 21:19:02  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -295,7 +294,7 @@ stupidpass(char *pass)
   char line[256];
 
   if(sameas(pass,uacc->userid))return 1;
-  if((fp=fopen(BADPASSFILE,"r"))==NULL)return 0;
+  if((fp=fopen(mkfname(BADPASSFILE),"r"))==NULL)return 0;
   while(!feof(fp)){
     if(fgets(line,256,fp)){
       int i;
@@ -627,7 +626,7 @@ transfercredits()
     if(usr_insys(userid,0)){
       char injbuf[16384];
 
-      sprintf(injbuf,msg_getl(CXFINJ,othruseracc.language-1),uacc->userid,num);
+      sprompt_other(othrshm,injbuf,CXFINJ,uacc->userid,num);
       if(usr_injoth(&othruseronl,injbuf,0))prompt(NOTICE,ruacc->userid);
     }
   }
@@ -645,9 +644,9 @@ showstats()
   prompt(ACCST1);
 
   if(uacc->datecre!=today()){
-    strcpy(p1,msg_get(DAYSNG+(nod!=1)));
-    strcpy(p2,msg_get(TIMSNG+(uacc->connections!=1)));
-    strcpy(p3,msg_get(DAYSNG+(uacc->passexp!=1)));
+    sprompt(p1,DAYSNG+(nod!=1));
+    sprompt(p2,TIMSNG+(uacc->connections!=1));
+    sprompt(p3,DAYSNG+(uacc->passexp!=1));
     sprompt(out_buffer,ACCST2,nod,p1,p2,p3);
   } else sprompt(out_buffer,ACCST2A,msg_getunit(DAYSNG,uacc->passexp));
   strcat(buf,out_buffer);
@@ -685,7 +684,7 @@ showstats()
 
   if(class->crdperweek){
     char hoften[80];
-    strcpy(hoften,msg_get(WEEKLY));
+    sprompt(hoften,WEEKLY);
     sprompt(out_buffer,ACCST5D,class->crdperweek,
 	    msg_getunit(CRDSNG,class->crdperweek),hoften);
     strcat(buf,out_buffer);
@@ -693,7 +692,7 @@ showstats()
 
   if(class->crdpermonth){
     char hoften[80];
-    strcpy(hoften,msg_get(MNTHLY));
+    sprompt(hoften,MNTHLY);
     sprompt(out_buffer,ACCST5D,class->crdpermonth,
 	    msg_getunit(CRDSNG,class->crdpermonth),
 	    hoften);
@@ -872,9 +871,9 @@ int handler_userdel(int argc, char **argv)
     return 1;
   }
 
-  sprintf(fname,"%s/%s",USRDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),victim);
   unlink(fname);
-  sprintf(fname,"%s/%s",RECENTDIR,victim);
+  sprintf(fname,"%s/%s",mkfname(RECENTDIR),victim);
   unlink(fname);
 
   return 0;

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.11  1999/08/07 02:20:09  alexios
  * Very slight paranoia changes.
@@ -171,27 +170,29 @@ static void
 dorecent()
 {
   FILE *fp;
+  char *recentdir=mkfname(RECENTDIR);
   char fname[256],command[256];
   int i;
 
   i=time(0);
-  fp=fopen(RECENTFILE,"a");
+  fp=fopen(mkfname(RECENTFILE),"a");
   fprintf(fp,"%s %s %08x %08x\n",thisuseronl.userid,
 	  thisuseronl.channel,thisuseronl.loggedin,i);
   fclose(fp);
   
-  sprintf(fname,"%s/%s",RECENTDIR,thisuseronl.userid);
+  sprintf(fname,"%s/%s",recentdir,thisuseronl.userid);
   fp=fopen(fname,"a");
   fprintf(fp,"%s %08x %08x\n",thisuseronl.channel,thisuseronl.loggedin,i);
   fclose(fp);
   
-  sprintf(command,"tail -%d %s >%s/tmp%08x;\\mv %s/tmp%08x %s;chown bbs.bbs %s",
-	  RECENT_ENTRIES,fname,RECENTDIR,i,RECENTDIR,i,fname,fname);
+  sprintf(command,
+	  "tail -%d %s >%s/tmp%08x;\\mv %s/tmp%08x %s;chown bbs.bbs %s",
+	  RECENT_ENTRIES,fname,recentdir,i,recentdir,i,fname,fname);
   system(command);
 
   chown(fname,bbsuid,bbsgid);
   chmod(fname,0660);
-  sprintf(fname,"%s/.%s",ONLINEDIR,thisuseronl.channel);
+  sprintf(fname,"%s/.%s",mkfname(ONLINEDIR),thisuseronl.channel);
   unlink(fname);
 }
 
@@ -267,8 +268,8 @@ void
 refreshsysvars()
 {
   struct stat s;
-  if(stat(SYSVARFILE,&s)){
-    error_fatalsys("Unable to stat() sysvar file (%s)!",SYSVARFILE);
+  if(stat(mkfname(SYSVARFILE),&s)){
+    error_fatalsys("Unable to stat() sysvar file (%s)!",mkfname(SYSVARFILE));
   }
 
   if (s.st_ctime!=sysvartime && sysvar) {
@@ -276,7 +277,7 @@ refreshsysvars()
 
     sysvartime=s.st_ctime;
     
-    if((sysvarf=fopen(SYSVARFILE,"r"))!=NULL){
+    if((sysvarf=fopen(mkfname(SYSVARFILE),"r"))!=NULL){
       fread(sysvar,sizeof(struct sysvar),1,sysvarf);
     }
 
@@ -289,8 +290,8 @@ void
 refreshclasses()
 {
   struct stat s;
-  if(stat(CLASSFILE,&s)){
-    error_fatalsys("Unable to stat() class file (%s)!",CLASSFILE);
+  if(stat(mkfname(CLASSFILE),&s)){
+    error_fatalsys("Unable to stat() class file (%s)!",mkfname(CLASSFILE));
   }
   if (s.st_ctime!=classtime) {
     classtime=s.st_ctime;

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/08/13 17:06:02  alexios
  * Removed the FORCEIDLE condition. Telnet line timeouts are now
@@ -104,7 +103,7 @@ suptimeouts(char *tty)
   char supid[256];
   FILE *fp;
 
-  sprintf(supid,"%s/.shmid-[SIGNUP-%s]",ONLINEDIR,tty);
+  sprintf(supid,"%s/.shmid-[SIGNUP-%s]",mkfname(ONLINEDIR),tty);
 
   if((fp=fopen(supid,"r"))==NULL) return;
   if(!fscanf(fp,"%d",&shmid)) {
@@ -139,7 +138,7 @@ suptimeouts(char *tty)
 
       channel_disconnect(tty);
 
-      sprintf(supid,"%s/.shmid-[SIGNUP-%s]",ONLINEDIR,tty);
+      sprintf(supid,"%s/.shmid-[SIGNUP-%s]",mkfname(ONLINEDIR),tty);
       unlink(supid);
     }
   }
@@ -212,7 +211,8 @@ charge()
 	    if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
 	  } else if((float)((float)ushm->acc.credits -
 			    (float)((float)ushm->onl.credspermin/100.0))<=0.0){
-	    usr_injoth(&(ushm->onl),msg_getl(NOCREDS,ushm->acc.language-1),0);
+	    sprompt_other(ushm,out_buffer,NOCREDS);
+	    usr_injoth(&(ushm->onl),out_buffer,0);
 	  }
 	}
       }
@@ -225,7 +225,8 @@ charge()
 	  byebye(ushm,NOCTIMBYE);
 	  if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
 	} else if(ushm->onl.onlinetime+1>=class->limpercall){
-	  usr_injoth(&(ushm->onl),msg_getl(NOCTIM,ushm->acc.language-1),0);
+	  sprompt_other(ushm,out_buffer,NOCTIM);
+	  usr_injoth(&(ushm->onl),out_buffer,0);
 	}
       }
       
@@ -237,7 +238,8 @@ charge()
 	  byebye(ushm,NODTIMBYE);
 	  if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
 	} else if(ushm->acc.timetdy+1>=class->limperday){
-	  usr_injoth(&(ushm->onl),msg_getl(NODTIM,ushm->acc.language-1),0);
+	  sprompt_other(ushm,out_buffer,NODTIM);
+	  usr_injoth(&(ushm->onl),out_buffer,0);
 	}
       }
     }
@@ -254,8 +256,8 @@ charge()
 	  ushm->onl.lastpage=EXIT_TIMEOUT;
 	  byebye(ushm,IDLEBYE);
 	} else if(ushm->onl.timeoutticks==((ushm->onl.idlezap-1)*JIFFIESPERMIN)){
-	  sprintf(msg_buffer,msg_getl(IDLEWRN,ushm->acc.language-1),
-		  ushm->onl.timeoutticks/JIFFIESPERMIN);
+	  sprompt_other(ushm,msg_buffer,IDLEWRN,
+			ushm->onl.timeoutticks/JIFFIESPERMIN);
 	  usr_injoth(&(ushm->onl),msg_buffer,0);
 	}
       }

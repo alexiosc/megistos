@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.1  1999/07/18 22:03:05  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -100,7 +99,7 @@ lockd_checklock(char *name,int caller_pid)
 
   /* If the lock file isn't there, return immediately */
 
-  sprintf(fname,"%s/%s",LOCKDIR,name);
+  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
   if(stat(fname,&st)) return sendresult(LKR_OK);
 
   if((fd=open(fname,O_RDONLY))<0){
@@ -143,7 +142,7 @@ lockd_checklock_quietly(char *name,int caller_pid)
 
   /* If the lock file isn't there, return immediately */
 
-  sprintf(fname,"%s/%s",LOCKDIR,name);
+  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
   if(stat(fname,&st)) return LKR_OK;
 
   if((fd=open(fname,O_RDONLY))<0){
@@ -190,7 +189,7 @@ lockd_placelock(char *name,char *info,int pid)
 
   /* Create the lock */
 
-  sprintf(fname,"%s/%s",LOCKDIR,name);
+  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
   unlink(fname); /* Just in case */
   if((fd=creat(fname,0660))<0){
     error_intsys("Unable to creat() lock file %s",fname);
@@ -212,7 +211,7 @@ static int
 lockd_rmlock(char *name)
 {
   char fname[256];
-  sprintf(fname,"%s/%s",LOCKDIR,name);
+  sprintf(fname,"%s/%s",mkfname(LOCKDIR),name);
   return sendresult(unlink(fname)?LKR_ERROR:LKR_OK);
 }
 

@@ -32,9 +32,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.10  1999/07/18 22:00:00  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Added support
@@ -134,15 +133,15 @@ getpwbbs()
 static void
 mkpipe()
 {
-  unlink(BBSDPIPEFILE);
-  if(mkfifo(BBSDPIPEFILE,0220)){
-    error_fatalsys("Unable to mkfifo(\"%s\",0220)",BBSDPIPEFILE);
+  unlink(mkfname(BBSDPIPEFILE));
+  if(mkfifo(mkfname(BBSDPIPEFILE),0220)){
+    error_fatalsys("Unable to mkfifo(\"%s\",0220)",mkfname(BBSDPIPEFILE));
   }
-  if(chown(BBSDPIPEFILE,bbsuid,bbsgid)){
-    error_fatalsys("Unable to chown() %s",BBSDPIPEFILE);
+  if(chown(mkfname(BBSDPIPEFILE),bbsuid,bbsgid)){
+    error_fatalsys("Unable to chown() %s",mkfname(BBSDPIPEFILE));
   }
-  if(chmod(BBSDPIPEFILE,0220)){
-    error_fatalsys("Unable to chmod(\"%s\",0220)",BBSDPIPEFILE);
+  if(chmod(mkfname(BBSDPIPEFILE),0220)){
+    error_fatalsys("Unable to chmod(\"%s\",0220)",mkfname(BBSDPIPEFILE));
   }
 }
 
@@ -150,15 +149,16 @@ mkpipe()
 static void
 storepid()
 {
-  FILE *fp=fopen(BBSETCDIR"/bbsd.pid","w");
+  FILE *fp=fopen(mkfname(BBSETCDIR"/bbsd.pid"),"w");
   if(fp==NULL){
-    error_fatalsys("Unable to open "BBSETCDIR"/bbsd.pid for writing.");
+    error_fatalsys("Unable to open %s/bbsd.pid for writing.",
+		   mkfname(BBSETCDIR));
     exit(1);
   }
   fprintf(fp,"%d",getpid());
   fclose(fp);
-  chmod(BBSETCDIR"/bbsd.pid",0600);
-  chown(BBSETCDIR"/bbsd.pid",0,0);
+  chmod(mkfname(BBSETCDIR"/bbsd.pid"),0600);
+  chown(mkfname(BBSETCDIR"/bbsd.pid"),0,0);
 }
 
 
@@ -166,13 +166,13 @@ static void
 mainloop()
 {
   int killed=0;
-  int fd=open(BBSDPIPEFILE,O_RDONLY|O_NONBLOCK);
+  int fd=open(mkfname(BBSDPIPEFILE),O_RDONLY|O_NONBLOCK);
   int ticks=0, jiffies=0;
   int t, sec, min, oldmin=-1;
   int timestarted=time(NULL);
 
   if(fd<0){
-    error_fatalsys("Unable to open() %s",BBSDPIPEFILE);
+    error_fatalsys("Unable to open() %s",mkfname(BBSDPIPEFILE));
     exit(1);
   }
 

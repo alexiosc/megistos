@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:48:04  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -93,7 +92,7 @@ rsys_event()
 {
   char command[256];
 
-  sprintf(command,"%s/%s",BINDIR,"eventman");
+  sprintf(command,"%s/%s",mkfname(BINDIR),"eventman");
   runmodule(command);
 }
 
@@ -304,7 +303,8 @@ rsys_sysop()
     usr_saveaccount(&temp);
   } else {
     memcpy(othruseracc.sysaxs,uacc.sysaxs,sizeof(othruseracc.sysaxs));
-    if(usr_injoth(&othruseronl,msg_getl(RSSYSOPNOT,othruseracc.language-1),0))
+    if(usr_injoth(&othruseronl,
+		  sprompt_other(othrshm,out_buffer,RSSYSOPNOT),0))
       prompt(NOTIFIED,othruseracc.userid);
   }
   prompt(RSSYSOPUPD,NULL);
@@ -362,14 +362,14 @@ showlog(char *fname,int p1,int p2,int p3,int err)
 void
 rsys_audit()
 {
-  showlog(AUDITFILE,RSAUDIT1,RSAUDIT2,RSAUDIT3,RSAUDITR);
+  showlog(mkfname(AUDITFILE),RSAUDIT1,RSAUDIT2,RSAUDIT3,RSAUDITR);
 }
 
 
 void
 rsys_cleanup()
 {
-  showlog(CLNUPAUDITFILE,RSCLEANUP1,RSCLEANUP2,RSCLEANUP3,RSCLEANUPR);
+  showlog(mkfname(CLNUPAUDITFILE),RSCLEANUP1,RSCLEANUP2,RSCLEANUP3,RSCLEANUPR);
 }
 
 
@@ -406,9 +406,9 @@ rsys_logon()
       int i;
       
       prompt(RSLOGONL1);
-      if(!stat(LOGINMSGFILE,&st))prompt(RSLOGONL2A,st.st_size);
+      if(!stat(mkfname(LOGINMSGFILE),&st))prompt(RSLOGONL2A,st.st_size);
       for(i=0;i<chan_count;i++){
-	sprintf(fname,TTYINFOFILE,channels[i].ttyname);
+	sprintf(fname,mkfname(TTYINFOFILE),channels[i].ttyname);
 	if(!stat(fname,&st))prompt(RSLOGONL2B,channels[i].channel,st.st_size);
       }
       prompt(RSLOGONL3);
@@ -440,8 +440,8 @@ rsys_logon()
     }
   }
 
-  if(sameas(dev,"*"))strcpy(fname,LOGINMSGFILE);
-  else sprintf(fname,TTYINFOFILE,dev);
+  if(sameas(dev,"*"))strcpy(fname,mkfname(LOGINMSGFILE));
+  else sprintf(fname,mkfname(TTYINFOFILE),dev);
 
   if(!stat(fname,&st)){
     char opt;
@@ -537,12 +537,15 @@ filter_audit(char *keyword, int filtering, int reverse)
   /* Open the file, in reverse if required */
 
   if(!reverse){
-    if((fp=fopen(AUDITFILE,"r"))==NULL){
+    if((fp=fopen(mkfname(AUDITFILE),"r"))==NULL){
       error_logsys("Unable to open Audit Trail!");
       return;
     }
   } else {
-    if((fp=popen("tac 2>/dev/null "AUDITFILE,"r"))==NULL){
+    char cmd[2048];
+    strcpy(cmd,"tac 2>/dev/null ");
+    strcat(cmd,mkfname(AUDITFILE));
+    if((fp=popen(cmd,"r"))==NULL){
       error_logsys("Unable to popen() Audit Trail with tac!");
       return;
     }

@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -104,7 +103,7 @@ gcs_hash()
     char fname[256], line[256];
     FILE *fp;
 
-    sprintf(fname,"%s/.status-%s",CHANDEFDIR,channels[i].ttyname);
+    sprintf(fname,"%s/.status-%s",mkfname(CHANDEFDIR),channels[i].ttyname);
     if((fp=fopen(fname,"r"))==NULL) {
       /*int i=errno;*/
       continue;
@@ -186,7 +185,7 @@ gcs_recent()
     } else if(margc==1||(margc==2 && (limit=atoi(margv[1]))!=0)){
       msg_set(msg_sys);
       prompt(LSTHDR);
-      sprintf(command,"tac %s 2>/dev/null",RECENTFILE);
+      sprintf(command,"tac %s 2>/dev/null",mkfname(RECENTFILE));
       if((fp=popen(command,"r"))==NULL)return 0;
       line=0;
       while(!feof(fp)){
@@ -223,7 +222,7 @@ gcs_recent()
       struct stat st;
       useracc_t user;
 
-      sprintf(command,"%s/%s",RECENTDIR,margv[1]);
+      sprintf(command,"%s/%s",mkfname(RECENTDIR),margv[1]);
       if(stat(command,&st)){
 	msg_set(msg_sys);
 	prompt(UNKUSR,margv[1]);
@@ -235,7 +234,7 @@ gcs_recent()
       msg_set(msg_sys);
       cnc_end();
       prompt(USRHDR,margv[1],user.connections);
-      sprintf(command,"tac %s/%s 2>/dev/null",RECENTDIR,margv[1]);
+      sprintf(command,"tac %s/%s 2>/dev/null",mkfname(RECENTDIR),margv[1]);
       if((fp=popen(command,"r"))==NULL)return 0;
       line=0;
       while(!feof(fp)){
@@ -280,12 +279,12 @@ gcs_license()
   if(!margc) return 0;
   else if(margc==1 && (sameas(margv[0],"/license")||sameas(margv[0],"/gpl"))){
     char fname[256];
-    strcpy(fname,DOCDIR"/COPYING");
+    strcpy(fname,mkfname(DOCDIR"/COPYING"));
     out_printfile(fname);
     return 1;
   } else if(margc==1 && (sameas(margv[0],"/rules")||sameas(margv[0],"/conditions"))){
     char fname[256];
-    strcpy(fname,DOCDIR"/RULES");
+    strcpy(fname,mkfname(DOCDIR"/RULES"));
     out_printfile(fname);
     return 1;
   } else return 0;
@@ -319,16 +318,14 @@ dopage()
       prompt(URINVS,NULL);
       return 0;
     } else if (margc==2) {
-      sprintf(injbuf,msg_getl(othruseronl.flags&OLF_BUSY?PAGMSG1:PAGMSG2,
-			      othruseracc.language-1),
-	      msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
-	      thisuseracc.userid,pgfrom);
+      sprompt_other(othrshm,injbuf,othruseronl.flags&OLF_BUSY?PAGMSG1:PAGMSG2,
+		    msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
+		    thisuseracc.userid,pgfrom);
     } else {
       inp_raw();
-      sprintf(injbuf,msg_getl(othruseronl.flags&OLF_BUSY?PAGNOT1:PAGNOT2,
-			      othruseracc.language-1),
-	      msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
-	      thisuseracc.userid,pgfrom,margv[2]);
+      sprompt_other(othrshm,injbuf,othruseronl.flags&OLF_BUSY?PAGNOT1:PAGNOT2,
+		    msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
+		    thisuseracc.userid,pgfrom,margv[2]);
     }
 
     if (!(othruseronl.flags&OLF_BUSY)) {
@@ -339,10 +336,14 @@ dopage()
       return 1;
     } else if (othruseronl.pagestate==PGS_STORE||
 	       key_owns(&thisuseracc,sysvar->pgovkey)){
+      char ack[MSGBUFSIZE];
       prompt(PAGNPST,
 	     msg_getunit(NOMM,othruseracc.sex==USX_MALE),
 	     othruseracc.userid);
-      usr_injoth(&othruseronl,injbuf,1);
+      sprompt(ack,PAGSTOK,
+	      msg_getunit(SEXM,othruseracc.sex==USX_MALE),
+	      othruseracc.userid);
+      usr_injoth_ack(&othruseronl,injbuf,ack,1);
       othruseronl.lastpage=othruseronl.onlinetime;
       return 1;
     } else prompt(PAGNPS,

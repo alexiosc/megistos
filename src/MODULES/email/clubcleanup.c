@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.5  1999/07/18 21:12:42  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -185,8 +184,8 @@ cleanup_erasemsg(struct message *msg)
   
   /* Not necessary here, but here goes... */
 
-  if(msg->club[0])sprintf(clubdir,"%s/%s",MSGSDIR,msg->club);
-  else strcpy(clubdir,EMAILDIR);
+  if(msg->club[0])sprintf(clubdir,"%s/%s",mkfname(MSGSDIR),msg->club);
+  else strcpy(clubdir,mkfname(EMAILDIR));
 
 
   /* Delete files and count space freed */
@@ -224,7 +223,7 @@ cleanup_erasemsg(struct message *msg)
     if(lock_wait(lock,10)==LKR_TIMEOUT)return retval;
     lock_place(lock,"updating");
 
-    sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,club,msg->replyto);
+    sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),club,msg->replyto);
     if((fp=fopen(fname,"r+"))!=NULL){
       if(fread(&replied,sizeof(replied),1,fp)){
 	int i=replied.replies;
@@ -278,9 +277,9 @@ fwperiodic(struct message *msg)
   sprintf(original,"%s/%d",clubdir,msg->msgno);
 
   if(!origdir[0]){
-    sprintf(source,EMAILDIR"/"MESSAGEFILE,msg->msgno);
+    strcpy(source,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
   } else {
-    sprintf(source,"%s/%s/"MESSAGEFILE,MSGSDIR,clubdir,msg->msgno);
+    sprintf(source,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),clubdir,msg->msgno);
   }
 
   if((fp1=fopen(source,"r"))==NULL){
@@ -314,16 +313,16 @@ fwperiodic(struct message *msg)
   lock_rm(lock);
 
   if(!origdir[0]){
-    sprintf(fatt,EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno);
+    strcpy(fatt,mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno));
   } else {
-    sprintf(fatt,"%s/%s/%s/"FILEATTACHMENT,
-	    MSGSDIR,origdir,MSGATTDIR,msg->msgno);
+    strcpy(fatt,mkfname("%s/%s/%s/"FILEATTACHMENT,MSGSDIR,
+			origdir,MSGATTDIR,msg->msgno));
   }
 
   if(!(msg->flags&MSF_FILEATT)){
-    sprintf(command,"%s %s %s",BBSMAILBIN,header,body);
+    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
   }else {
-    sprintf(command,"%s %s %s -h %s",BBSMAILBIN,header,body,fatt);
+    sprintf(command,"%s %s %s -h %s",mkfname(BBSMAILBIN),header,body,fatt);
   }
   system(command);
 
@@ -379,7 +378,7 @@ clubcleanup()
   inittop(&topblts);
   inittop(&topdnl);
 
-  strcpy(fname,CLUBHDRDIR);
+  strcpy(fname,mkfname(CLUBHDRDIR));
   if((dp=opendir(fname))==NULL){
     printf("clubcleanup(): can't open directory %s, cleanup not done\n",fname);
     return;
@@ -399,7 +398,7 @@ clubcleanup()
 
     /* Open the header of the club */
 
-    sprintf(fname,"%s/%s",CLUBHDRDIR,dir->d_name);
+    sprintf(fname,"%s/%s",mkfname(CLUBHDRDIR),dir->d_name);
     if((fp=fopen(fname,"r"))==NULL){
       printf("Error while opening header (errno=%d)\n",errno);
       continue;
@@ -420,7 +419,7 @@ clubcleanup()
 
     /* Open the club's directory */
 
-    sprintf(fname,"%s/%s",MSGSDIR,club.club);
+    sprintf(fname,"%s/%s",mkfname(MSGSDIR),club.club);
     if((n=scandir(fname,&msgs,msgselect,alphasort))<0){
       printf("Error while reading directory %s\n",fname);
       continue;
@@ -433,7 +432,7 @@ clubcleanup()
 
     for(i=0;i<n;i++){
       dir=msgs[i];
-      sprintf(fname,"%s/%s/%s",MSGSDIR,club.club,dir->d_name);
+      sprintf(fname,"%s/%s/%s",mkfname(MSGSDIR),club.club,dir->d_name);
       
       if((fp=fopen(fname,"r"))==NULL)continue;
       
@@ -522,7 +521,7 @@ clubcleanup()
 
     /* Save club header */
 
-    sprintf(fname,"%s/h%s",CLUBHDRDIR,club.club);
+    sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),club.club);
     if((fp=fopen(fname,"w"))==NULL){
       printf("Error while opening header (errno=%d)\n",errno);
       continue;
@@ -552,8 +551,8 @@ clubcleanup()
   for(pass=0;pass<2;pass++){
     char dir[256];
     
-    if(!pass)strcpy(dir,STATDIR);
-    else sprintf(dir,"%s/%ld",STATDIR,tdyear(today()));
+    if(!pass)strcpy(dir,mkfname(STATDIR));
+    else sprintf(dir,"%s/%ld",mkfname(STATDIR),tdyear(today()));
     
     savetop(toppop,dir,"top-club-readings");
     savetop(topmsgs,dir,"top-club-messages");

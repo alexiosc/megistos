@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.4  1998/12/27 16:28:24  alexios
  * Added autoconf support.
@@ -168,9 +167,9 @@ postmessage(char *userid, char *body)
   fclose(fp);
 
   if(!attdir[0]){
-    sprintf(command,"%s %s %s",BBSMAILBIN,fname,body);
+    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),fname,body);
   } else {
-    sprintf(command,"%s %s %s -c %s/*",BBSMAILBIN,fname,body,attdir);
+    sprintf(command,"%s %s %s -c %s/*",mkfname(BBSMAILBIN),fname,body,attdir);
   }
 
   sysvar->incnetmsgs++;

@@ -20,9 +20,9 @@ main()
   int i=1;
   struct netqueryc c;
 
-  mkdir(IHAVEDIR,0777);		/* Paranoia mode and a silly thing to do */
-  d_dbfpath(IHAVEDIR);
-  d_dbdpath(IHAVEDIR);
+  mkdir(mkfname(IHAVEDIR),0777); /* Paranoia mode and a silly thing to do */
+  d_dbfpath(mkfname(IHAVEDIR));
+  d_dbdpath(mkfname(IHAVEDIR));
   if(d_open("ihavedb","s")!=S_OKAY){
     fprintf(stderr,"error %d\n",db_status);
     exit(1);

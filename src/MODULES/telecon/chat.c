@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.7  1999/07/18 21:48:36  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -168,9 +167,9 @@ chat(char *s)
       int lang=othruseracc.language-1;
 
       his=strdup(msg_getunit(CHTHIS,thisuseracc.sex==USX_MALE));
-      sprintf(out_buffer,msg_getl(CHTREQ,lang),
-	      msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
-	      thisuseracc.userid,his,thisuseracc.userid);
+      sprompt_other(othrshm,out_buffer,CHTREQ,
+		    msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
+		    thisuseracc.userid,his,thisuseracc.userid);
       if(!usr_injoth(&othruseronl,out_buffer,0)){
 	prompt(CHTUNOT,othruseronl.userid);
 	free(his);
@@ -216,9 +215,9 @@ static void notify()
 
   prompt(CHTENT);
   
-  sprintf(out_buffer,msg_get(CHTACC),
-	  msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
-	  thisuseracc.userid);
+  sprompt_other(othrshm,out_buffer,CHTACC,
+		msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
+		thisuseracc.userid);
   usr_injoth(&othruseronl,out_buffer,0);
 
   if(!strcmp(thisuseronl.telechan,othruseronl.telechan)){

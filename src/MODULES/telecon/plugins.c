@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.8  1999/08/13 17:03:06  alexios
  * Various bug fixes and improvements of the interface between
@@ -119,18 +118,18 @@ void
 initplugins()
 {
   FILE *fp;
-  if((fp=fopen(TELEPLUGINFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s",TELEPLUGINFILE);
+  if((fp=fopen(mkfname(TELEPLUGINFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s",mkfname(TELEPLUGINFILE));
   }
   if(!fread(&numplugins,sizeof(int),1,fp)){
-    error_fatalsys("Unable to read %s",TELEPLUGINFILE);
+    error_fatalsys("Unable to read %s",mkfname(TELEPLUGINFILE));
   }
 
   if(plugins)free(plugins);
   plugins=alcmem(sizeof(struct plugin)*numplugins);
 
   if(fread(plugins,sizeof(struct plugin),numplugins,fp)!=numplugins){
-    error_fatalsys("Unable to read plugins from %s",TELEPLUGINFILE);
+    error_fatalsys("Unable to read plugins from %s",mkfname(TELEPLUGINFILE));
   }
   fclose(fp);
 }
@@ -174,7 +173,7 @@ getid(char *plugin, char *channel, int *pid)
 
   *pid=-1;
   strcpy(thisuseraux.plugin,plugin);
-  sprintf(qname,PLUGINQ,plugin,curchannel);
+  sprintf(qname,mkfname(PLUGINQ,plugin,curchannel));
   debug("plugin queue = (%s)\n",qname);
   if((fp=fopen(qname,"r"))==NULL)return -1;
   debug("plugin queue opened\n");
@@ -204,7 +203,7 @@ makequeue(char *keyword, char *channel)
 
   thisuseraux.pluginq=id;
 
-  sprintf(qname,PLUGINQ,keyword,channel);
+  sprintf(qname,mkfname(PLUGINQ,keyword,channel));
   if((fp=fopen(qname,"w"))==NULL){
     error_fatalsys("Unable to create %s",qname);
   }
@@ -376,7 +375,7 @@ writepid()
   char fname[256];
   FILE *fp;
 
-  sprintf(fname,PLUGINQ,keyword,channel);
+  sprintf(fname,mkfname(PLUGINQ,keyword,channel));
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Plugin %s: Unable to create %s",keyword,fname);
   }
@@ -411,7 +410,7 @@ initplugin(int argc, char **argv)
 
   /* Sanity checks */
 
-  sprintf(fname,"%s/%s",TELEDIR,channel);
+  sprintf(fname,"%s/%s",mkfname(TELEDIR),channel);
   if(stat(fname,&st)){
     error_fatalsys("Plugin %s: channel %s doesn't exist.",
 	  keyword,channel);
@@ -435,7 +434,7 @@ initplugin(int argc, char **argv)
 void
 becomeserver()
 {
-  /*mod_done();*/
+  /*mod_done(INI_ALL);*/
 
   if(fork())exit(0);
 
@@ -444,11 +443,10 @@ becomeserver()
   writepid();
 
   ioctl(0,TIOCNOTTY,NULL);
-  /*
 
   close(0);
   close(1);
-  close(2); */
+  close(2);
 }
 
 
@@ -472,6 +470,6 @@ doneserver()
     circular=1;
     error_fatalsys("Plugin %s: couldn't destroy msg queue id=%d.",keyword,qid);
   }
-  sprintf(fname,PLUGINQ,keyword,channel);
+  sprintf(fname,mkfname(PLUGINQ,keyword,channel));
   unlink(fname);
 }

@@ -13,9 +13,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/28 23:10:22  alexios
  * Added support for downloading bulletins.
@@ -159,8 +158,9 @@ offerblt(struct bltidx *blt)
 
   prompt(BLTHDR);
 
-  sprintf(fname,MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname);
-  sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
+  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname));
+  sprintf(lock,"%s-%s-%s-%s",
+	  BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
 
   lock_place(lock,"downloading");
   fmt_lastresult=PAUSE_CONTINUE;
@@ -206,7 +206,7 @@ showblt(struct bltidx *blt)
   char fname[256], lock[256];
   prompt(BLTHDR);
 
-  sprintf(fname,MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname);
+  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname));
   sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
 
   thisuseronl.flags|=OLF_BUSY;

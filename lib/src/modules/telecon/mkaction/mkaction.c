@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -257,17 +256,18 @@ main(int argc, char *argv[])
   union action a;
 
   mod_setprogname(argv[0]);
-  if((fin=fopen(TELEACTSRCFILE,"r"))==NULL){
-    fprintf(stderr,"%s: Unable to open %s\n",argv[0],TELEACTSRCFILE);
+  if((fin=fopen(mkfname(TELEACTSRCFILE),"r"))==NULL){
+    fprintf(stderr,"%s: Unable to open %s\n",argv[0],mkfname(TELEACTSRCFILE));
     exit(1);
   }
 
-  if((fout=fopen(TELEACTMSGFILE,"w"))==NULL){
-    fprintf(stderr,"%s: Unable to create %s\n",argv[0],TELEACTMSGFILE);
+  if((fout=fopen(mkfname(TELEACTMSGFILE),"w"))==NULL){
+    fprintf(stderr,"%s: Unable to create %s\n",argv[0],
+	    mkfname(TELEACTMSGFILE));
     exit(1);
   }
 
-  printf("\nParsing %s\n",TELEACTSRCFILE);
+  printf("\nParsing %s\n",mkfname(TELEACTSRCFILE));
 
   for(i=0;keywords[i].code>=0;i++)nkeywords++;
 
@@ -430,9 +430,9 @@ main(int argc, char *argv[])
   printf("\n\n* Locked/Restricted actions\n\n");
 
   printf("%s is %d line(s) long and defines %d verb(s).\n\n",
-	 TELEACTSRCFILE,num,verbs);
+	 mkfname(TELEACTSRCFILE),num,verbs);
 
-  printf("Outputting to %s in MSG format.\n",TELEACTMSGFILE);
+  printf("Outputting to %s in MSG format.\n",mkfname(TELEACTMSGFILE));
 
   fprintf(fout,PREAMBLE,verbs);
 
@@ -479,7 +479,8 @@ main(int argc, char *argv[])
   printf("\n");
   {
     char command[256];
-    sprintf(command,BBSDIR"/bin/msgidx %s",TELEACTMSGFILE);
+    strcpy(command,mkfname("%s/msgidx ",BINDIR));
+    strcat(command,mkfname(TELEACTMSGFILE));
     system(command);
   }
   printf("\n");

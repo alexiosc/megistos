@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.10  1999/07/18 22:00:00  alexios
  * Changed a few error_fatal() calls to error_fatalsys(). Other minor
@@ -124,10 +123,10 @@ eventexec(char *command, char *name)
     setuid(bbsuid);
     
     /*    error_log("executing event (%s)",command); */
-    if(!chdir(BINDIR))res=system(command);
+    if(!chdir(mkfname(BINDIR)))res=system(command);
     else {
       error_logsys("eventexec(): unable to chdir(\"%s\") to run event",
-	       BINDIR);
+	       mkfname(BINDIR));
       exit(0);
     }
 
@@ -156,8 +155,8 @@ asapevents()
     return;
   }
   
-  if((dp=opendir(EVENTDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",EVENTDIR);
+  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -168,7 +167,7 @@ asapevents()
       int i;
 	
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",EVENTDIR,dirent->d_name);
+      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -226,8 +225,8 @@ events()
   fprintf(stderr,"Handling events.\n");
 #endif
 
-  if((dp=opendir(EVENTDIR))==NULL){
-    error_fatalsys("Unable to opendir %s",EVENTDIR);
+  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
+    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -241,7 +240,7 @@ events()
       char s[256];
 	
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",EVENTDIR,dirent->d_name);
+      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);

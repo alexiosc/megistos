@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:29  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:05  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:01:53  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -76,9 +75,12 @@ const char *__RCS=RCS_VER;
 #include "miscfx.h"
 #include "prompts.h"
 #include "bbsmod.h"
+#include "output.h"
+#include "bots.h"
 
 
-#define msg_get_nobot(x) msg_getl_bot((x),(msg_cur->language),0)
+#define msg_get_nobot(num) msg_getl_bot((num),(msg_cur->language),0)
+
 
 
 char           *msg_buffer;
@@ -99,7 +101,7 @@ msg_init()
   FILE *langfp;
 
   msg_numlangs=0;
-  if((langfp=fopen(LANGUAGEFILE,"r"))!=NULL){
+  if((langfp=fopen(mkfname(LANGUAGEFILE),"r"))!=NULL){
     while(!feof(langfp)){
       char line[1024];
       
@@ -126,29 +128,40 @@ msg_open(char *name)
   msg_last=msg_cur;
   msg_cur=(promptblock_t *)alcmem(sizeof(promptblock_t));
 
-  sprintf(fname,"%s/%s.mbk", MBKDIR, name);
+  sprintf(fname,"%s/%s.mbk", mkfname(MBKDIR), name);
   if((msg_cur->handle=fopen(fname,"r"))==NULL){
     error_fatalsys("Unable to open prompt file %s",fname);
   }
+
   if (fread(magic,sizeof(magic),1,msg_cur->handle)!=1){
     error_fatalsys("Unable to read magic number from prompt file %s",fname);
   }
+
   if(strncmp(magic,MBK_MAGIC,4)){
-    error_fatal("Corrupted file %s. Remove it and use msgidx to recreate.",fname);
+    error_fatal("Corrupted file %s. Remove it and use msgidx to recreate.",
+		fname);
   }
+
   if (fread(&(msg_cur->indexsize),sizeof(long),1,msg_cur->handle)!=1){
     error_fatalsys("Corrupted prompt file %s (indexcount)",fname);
   }
-  if (fread(&(msg_cur->langoffs),sizeof(msg_cur->langoffs),1,msg_cur->handle)!=1){
+
+  if (fread(&(msg_cur->langoffs),
+	    sizeof(msg_cur->langoffs),1,
+	    msg_cur->handle)!=1){
     error_fatalsys("Corrupted prompt file %s (langoffs)",fname);
   }
 
   msg_cur->indexsize++;
-  msg_cur->index=(long *)alcmem(msg_cur->indexsize*sizeof(long));
-  result=fread(msg_cur->index,sizeof(long),msg_cur->indexsize,msg_cur->handle);
+  msg_cur->index=(idx_t *)alcmem(msg_cur->indexsize*sizeof(idx_t));
+  result=fread(msg_cur->index,
+	       sizeof(idx_t),
+	       msg_cur->indexsize,
+	       msg_cur->handle);
   if(result!=msg_cur->indexsize){
     error_fatal("Corrupted prompt file %s (index)",fname);
   }
+
   msg_cur->indexsize--;
   msg_cur->language=0;
   sprintf(msg_cur->fname,"%s.mbk",name);
@@ -178,11 +191,12 @@ msg_reset()
 }
 
 
+
 static char *
-msg_botprocess(int num, int lang, char *s)
+msg_botprocess(char *id, int num, int lang, char *s)
 {
   static char *botbuf=NULL;
-  char tmp[32];
+  char tmp[80];
   char *cp=s;
   int count=0;
 
@@ -193,10 +207,14 @@ msg_botprocess(int num, int lang, char *s)
   bzero(botbuf,sizeof(botbuf));
   
   /* xxx will be updated later */
-  sprintf(botbuf,"601 xxx %s %d %d\n",msg_cur->fname,num,lang);
+  sprintf(botbuf,"%03d xxx %s %s %d %d\n",
+	  BTS_PROMPT_STARTS,
+	  msg_cur->fname,id,num,lang);
+
+  bot_escape(s);		/* Escape result code-like sequences */
 
   for(cp=s;*cp;cp++){
-    if(*cp=='%'){
+    if(*cp=='%'){		/* Escape format specifiers */
       char *sp=cp;
     
       if(*(cp+1)=='%'){
@@ -208,7 +226,8 @@ msg_botprocess(int num, int lang, char *s)
       
       if(*cp){
 	count++;
-	strcat(botbuf,"602 ");
+	sprintf(tmp,"%03d ",BTS_PROMPT_ARGUMENT);
+	strcat(botbuf,tmp);
 	strncat(botbuf,sp,cp-sp+1);
 	strcat(botbuf,"\n");
       }
@@ -217,11 +236,13 @@ msg_botprocess(int num, int lang, char *s)
     }
   }
 
-  sprintf(tmp,"601 %3d",count);
-  memcpy(botbuf,tmp,7);		/* Copy just the "601 xxx" part */
-  strcat(botbuf,"603 ");
+  sprintf(tmp,"%03d %03d",BTS_PROMPT_STARTS,count);
+  memcpy(botbuf,tmp,strlen(tmp)); /* Copy just the "601 xxx" part */
+  sprintf(tmp,"%03d ",BTS_PROMPT_TEXT);
+  strcat(botbuf,tmp);
   strcat(botbuf,s);
-  strcat(botbuf,"\n699\n");
+  sprintf(tmp,"\n%03d\n",BTS_PROMPT_ENDS);
+  strcat(botbuf,tmp);
 
   return botbuf;
 }
@@ -232,6 +253,7 @@ msg_getl_bot(int num, int language, int checkbot)
 {
   long offset=0,size;
   int oldnum;
+  char *id=NULL;
 
   language=language%(NUMLANGUAGES);
 
@@ -243,33 +265,35 @@ msg_getl_bot(int num, int language, int checkbot)
   if(!msg_buffer)msg_buffer=alcmem(MSGBUFSIZE);
 
   if(num<0||num>msg_cur->indexsize){
-    error_fatal("Prompt %d (lang %d) out of range (1-%d) in %s",
-		(void *)num,(void *)language,
-		(void *)msg_cur->indexsize,msg_cur->fname);
+    error_fatal("Prompt %s (lang %d, index %d) out of range (1-%d) in %s",
+		id,num,language,msg_cur->indexsize,msg_cur->fname);
   }
 
-  offset=msg_cur->index[num-1];
+  id=msg_cur->index[num-1].id;
+  offset=msg_cur->index[num-1].offset;
   if(fseek(msg_cur->handle,offset,SEEK_SET)){
-    error_fatalsys("Failed to fseek() prompt #%d location %ld in %s",
-		   (void *)oldnum,(void *)offset,msg_cur->fname);
+    error_fatalsys("Failed to fseek() prompt %s (#%d) location %ld in %s",
+		   id,oldnum,offset,msg_cur->fname);
   }
-  size=msg_cur->index[num]-offset;
+  size=msg_cur->index[num].offset-offset;
   if(size>=MSGBUFSIZE)size=MSGBUFSIZE-1;
   size=MSGBUFSIZE-1;
   if(fread(msg_buffer,size,1,msg_cur->handle)!=1){
-/*    error_fatal("Error reading prompt %d (lang %d) in %s (s=%ld i=%ld o=%ld)",
-	  (void *)oldnum,(void *)language,
-	  msg_cur->fname,(void *)size,
-	  (void *)msg_cur->index[num],(void *)offset); */
+#if 0
+    error_fatal("Error reading prompt %s (index %d, lang %d) in %s (s=%ld i=%ld o=%ld)",
+		msg_cur->index[num].id,
+		oldnum,language,
+		msg_cur->fname,(void *)size,
+		msg_cur->index[num].offset,offset);
+#endif
   }
   lastprompt=num;
 
   /* If this is a bot, format the prompt for it. */
 
-  if(mod_isbot() || 
-     (thisshm!=NULL && checkbot!=0 && (thisuseronl.flags&OLF_ISBOT))){
+  if(checkbot && (out_flags&OFL_ISBOT)){
     lastprompt=-1;
-    return msg_botprocess(num,language,msg_buffer);
+    return msg_botprocess(id,num,language,msg_buffer);
   }
 
   return msg_buffer;
@@ -280,22 +304,28 @@ char *
 msg_getunitl(int num,int value,int language)
 {
   long offset,size;
+  char *id=NULL;
 
   postfix[0]=0;
   num+=(value!=1)+msg_cur->langoffs[language];
   if(num<1||num>msg_cur->indexsize){
-    error_fatal("Prompt number %d out of range (1-%d) in file %s",
-	  (void *)num,(void *)msg_cur->indexsize,msg_cur->fname,0,0,0);
+    error_fatal("Prompt %s (#%d) out of range (1-%d) in file %s",
+	  id,num,msg_cur->indexsize,msg_cur->fname,0,0,0);
   }
-  offset=msg_cur->index[num-1];
-  if((size=msg_cur->index[num]-offset)>79)return postfix;
+  offset=msg_cur->index[num-1].offset;
+  if((size=msg_cur->index[num].offset-offset)>79)return postfix;
   if(fseek(msg_cur->handle,offset,SEEK_SET)){
-    error_fatalsys("Failed to fseek() prompt location %ld in file %s",
-	  (void *)offset,msg_cur->fname);
+    error_fatalsys("Failed to fseek() prompt %s location %ld in file %s",
+	  msg_cur->index[num].id,offset,msg_cur->fname);
   }
   if(fread(postfix,size,1,msg_cur->handle)!=1){
-    error_fatalsys("Error reading prompt %d in file %s %ld %ld %ld",
-	  (void *)num,msg_cur->fname,(void *)size,(void *)msg_cur->index[num],(void *)offset,0);
+    error_fatalsys("Error reading prompt %s (#%d) in file %s %d %d %d",
+		   msg_cur->index[num].id,
+		   num,
+		   msg_cur->fname,
+		   size,
+		   msg_cur->index[num].offset,
+		   offset,0);
   }
   return postfix;
 }
@@ -339,14 +369,16 @@ long
 msg_long(int num,long floor,long ceiling)
 {
   long temp;
-  
+  char *id;
+
+  id=msg_cur->index[num].id;
   if(sscanf(lastwd(msg_get_nobot(num)),"%ld",&temp)){
     if(temp>=floor && temp<=ceiling)return(temp);
-    error_fatal("Long numeric option %d in file %s is out of range",
-	   (void *)num,msg_cur->fname,0,0,0,0);
+    error_fatal("Long numeric option %s (#%d) in file %s is out of range",
+	   id,num,msg_cur->fname);
   }
-  error_fatal("Long numeric option %d in file %s has bad value",
-	(void *)num,msg_cur->fname,0,0,0,0);
+  error_fatal("Long numeric option %s (#%d) in file %s has bad value",
+	      id,num,msg_cur->fname);
   return -1;
 }
 
@@ -355,14 +387,16 @@ unsigned
 msg_hex(int num,unsigned floor,unsigned ceiling)
 {
   long temp;
+  char *id;
   
+  id=msg_cur->index[num].id;
   if(sscanf(lastwd(msg_get_nobot(num)),"%lx",&temp)){
     if(temp>=floor && temp<=ceiling)return((unsigned)temp);
-    error_fatal("Hex numeric option %d in file %s is out of range",
-	  (void *)num,msg_cur->fname,0,0,0,0);
+    error_fatal("Hex numeric option %s (#%d) in file %s is out of range",
+	  id,num,msg_cur->fname);
   }
-  error_fatal("Hex numeric option %d in file %s has bad value",
-	(void *)num,msg_cur->fname,0,0,0,0);
+  error_fatal("Hex numeric option %s (#%d) in file %s has bad value",
+	id,num,msg_cur->fname);
   return -1;
 }
 
@@ -378,15 +412,17 @@ int
 msg_bool(int num)                           
 {
   int rc=0;
+  char *id;
 
+  id=msg_cur->index[num].id;
   switch(toupper(*lastwd(msg_get_nobot(num)))){
   case 'Y':
     rc=1;
   case 'N':
     return(rc);
   }
-  error_fatal("Yes/No option %d in file %s has bad value",
-	(void *)num,msg_cur->fname,0,0,0,0);
+  error_fatal("Yes/No option %s (#%d) in file %s has bad value",
+	id,num,msg_cur->fname,0,0,0,0);
   return -1;
 }
 

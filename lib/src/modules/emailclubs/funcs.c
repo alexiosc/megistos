@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/28 23:11:36  alexios
  * Added a history entry for networked messages.
@@ -329,7 +328,7 @@ writeecuser(char *uid, struct emailuser *user)
   char fname[256], lock[256];
   FILE *fp;
 
-  sprintf(fname,"%s/%s",MSGUSRDIR,uid);
+  sprintf(fname,"%s/%s",mkfname(MSGUSRDIR),uid);
   sprintf(lock,ECUSERLOCK,uid);
 
   if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
@@ -357,7 +356,7 @@ readecuser(char *uid, struct emailuser *user)
   char fname[256], lock[256];
   FILE *fp;
 
-  sprintf(fname,"%s/%s",MSGUSRDIR,uid);
+  sprintf(fname,"%s/%s",mkfname(MSGUSRDIR),uid);
   sprintf(lock,ECUSERLOCK,uid);
 
   if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
@@ -389,7 +388,7 @@ appendsignature(char *into)
   char fname[256],buffer[1024];
   int bytes;
 
-  sprintf(fname,"%s/%s",MSGSIGDIR,thisuseracc.userid);
+  sprintf(fname,"%s/%s",mkfname(MSGSIGDIR),thisuseracc.userid);
 
   if((fp=fopen(fname,"r"))!=NULL){
     if((fp2=fopen(into,"a"))==NULL){
@@ -476,9 +475,9 @@ decompressmsg(struct message *msg)
   char fname1[256];
   char fname2[256];
 
-  sprintf(fname1,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname1,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
-  sprintf(fname2,"%s/%s/.tmp-%ld",MSGSDIR,
+  sprintf(fname2,"%s/%s/.tmp-%ld",mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
 
   if((zfp=gzopen(fname1,"rb"))==NULL){
@@ -517,9 +516,9 @@ compressmsg(struct message *msg)
   char fname1[256];
   char fname2[256];
 
-  sprintf(fname1,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname1,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
-  sprintf(fname2,"%s/%s/.tmp-%ld",MSGSDIR,
+  sprintf(fname2,"%s/%s/.tmp-%ld",mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
 
   if((fp=fopen(fname1,"r"))==NULL){

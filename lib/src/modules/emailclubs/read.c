@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -92,7 +91,7 @@ readmsg(struct message *msg)
   char fname[256];
   gzFile *zfp;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,
 	  (long)msg->msgno);
   if((zfp=gzopen(fname,"rb"))==NULL){
@@ -149,7 +148,7 @@ readmsg(struct message *msg)
   char fname[256];
   FILE *fp;
 
-  sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
+  sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),
 	  msg->club[0]?msg->club:EMAILDIRNAME,
 	  msg->msgno);
   if((fp=fopen(fname,"r"))==NULL){

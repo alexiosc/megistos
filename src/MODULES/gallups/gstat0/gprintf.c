@@ -49,6 +49,7 @@
 		101	: enable color insertion (default)
 */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -61,6 +62,11 @@
 #define FLT	"%3.0f"
 
 int insert_color_dir=0;
+
+
+/*
+int asprintf(char **, char *, ...);
+*/
 
 
 char dumpstr[16384];
@@ -252,9 +258,6 @@ void init_printf(void)
 	/* a warning will be produced when compiling with libc5 for arg 2
 	   glibc2 will compile without warning. This has no consequences,
 	   cause gallup_print_arginfo() will never be called libc5 */
-
-#if 0	   
-	register_printf_function ('F', (printf_function)gallup_print, gallup_print_arginfo);
-#endif
-	register_printf_function ('F', gallup_print, gallup_print_arginfo);
+	   
+	register_printf_function ('F', (printf_function)gallup_print, NULL /*gallup_print_arginfo*/);
 }

@@ -41,13 +41,21 @@ clean:		.dirdep
 		$(RM) -f .dirdep
 		@set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
 
-ci:		.rcsdep
-		@$(SHOWSTATUS) RCS CHECKING IN ALL SOURCE CODE.
-		@set -e; for i in $(RCSSUBDIRS); do $(MAKE) -C $$i ci; done
+ci:           
+		CVS_RSH=ssh \
+		cvs -z9 -d:ext:alexios@cvs.megistos.sourceforge.net:/cvsroot/megistos commit
 
-co:		.rcsdep
-		@$(SHOWSTATUS) CHECKING OUT ALL SOURCE CODE.
-		@set -e; for i in $(RCSSUBDIRS); do $(MAKE) -C $$i co; done
+co:           
+		CVS_RSH=ssh \
+		cvs -z9 -d:ext:alexios@cvs.megistos.sourceforge.net:/cvsroot/megistos update
+
+#ci:		.rcsdep
+#		@$(SHOWSTATUS) RCS CHECKING IN ALL SOURCE CODE.
+#		@set -e; for i in $(RCSSUBDIRS); do $(MAKE) -C $$i ci; done
+
+#co:		.rcsdep
+#		@$(SHOWSTATUS) CHECKING OUT ALL SOURCE CODE.
+#		@set -e; for i in $(RCSSUBDIRS); do $(MAKE) -C $$i co; done
 
 .dirdep:
 		@$(SHOWSTATUS) LOCATING SUBDIRECTORIES.

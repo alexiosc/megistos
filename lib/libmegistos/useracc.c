@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:29  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:05  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/08/13 16:56:08  alexios
  * Fixed error reporting when injoth() fails.
@@ -87,10 +86,10 @@ usr_exists(char *uid)
   char fname[256];
   struct stat s;
 
-  sprintf(fname,"%s/%s",USRDIR,uid);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),uid);
   if(!stat(fname,&s))return 1;
 
-  if((dp=opendir(USRDIR))==NULL) return 0;
+  if((dp=opendir(mkfname(USRDIR)))==NULL) return 0;
   while((de=readdir(dp))!=NULL){
     if(sameas(de->d_name,uid)){
       closedir(dp);
@@ -121,7 +120,7 @@ usr_loadaccount (char *whose, useracc_t *uacc)
   int result;
   FILE *fp;
 
-  sprintf(fname,"%s/%s",USRDIR,whose);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),whose);
   if((fp=fopen(fname,"r"))==NULL) return 0;
   result=fread(uacc,sizeof(useracc_t),1,fp);
   fclose(fp);
@@ -141,7 +140,7 @@ usr_loadonlrec (char *whose, onlinerec_t *onlrec)
   int        result;
   FILE       *fp;
 
-  sprintf(fname,"%s/%s",ONLINEDIR,whose);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),whose);
   if((fp=fopen(fname,"r"))==NULL) return 0;
   result=fread(onlrec,sizeof(onlinerec_t),1,fp);
   fclose(fp);
@@ -157,8 +156,8 @@ usr_saveaccount (useracc_t *uacc)
   int        result;
   FILE       *fp;
   
-  sprintf(fname,"%s/%s",USRDIR,uacc->userid);
-  sprintf(fname2,"%s/.%05d.%s",USRDIR,(int)getpid(),uacc->userid);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),uacc->userid);
+  sprintf(fname2,"%s/.%05d.%s",mkfname(USRDIR),(int)getpid(),uacc->userid);
   if((fp=fopen(fname2,"w"))==NULL) return 0;
   result=fwrite(uacc,sizeof(useracc_t),1,fp);
   fclose(fp);
@@ -176,9 +175,10 @@ usr_saveonlrec (onlinerec_t *usronl)
   FILE        *fp;
   struct stat st;
 
-  sprintf(fname,"%s/%s",ONLINEDIR,usronl->userid);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),usronl->userid);
   if(!stat(fname,&st))return 1;
-  sprintf(fname2,"%s/.%05d.%s",ONLINEDIR,(int)getpid(),usronl->userid);
+  sprintf(fname2,"%s/.%05d.%s",
+	  mkfname(ONLINEDIR),(int)getpid(),usronl->userid);
   if((fp=fopen(fname2,"w"))==NULL) return 0;
   result=fwrite(usronl,sizeof(onlinerec_t),1,fp);
   fclose(fp);
@@ -260,7 +260,7 @@ usr_insystem(char *userid, int checkinvis, struct shmuserrec **buf)
   FILE *fp;
   int shmid;
 
-  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,userid);
+  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),userid);
   if((fp=fopen(fname,"r"))==NULL)return 0;
 /*  if(buf && !strcmp((*buf)->onl.userid,userid)){
     fclose(fp);
@@ -294,23 +294,63 @@ int
 usr_injoth(onlinerec_t *user,char *msg,int force)
 {
   char dummy[MSGMAX+sizeof(long)];
-  struct injothbuf *buf=(struct injothbuf*)(&dummy);
+  struct injoth_buf *buf=(struct injoth_buf*)(&dummy);
 
   if(!force)if(user->flags&OLF_BUSY)return 0;
   
   if(user->injothqueue<0)return 0;
 
   bzero(&dummy,sizeof(dummy));
-  buf->mtype=1;
-  strncpy(buf->mtext,msg,MSGMAX-1);
-  buf->mtext[MSGMAX-1]=0;
+  buf->mtype=INJ_MESSAGE;
+  strncpy(buf->m.simple,msg,MSGMAX-1);
+  buf->m.simple[MSGMAX-1]=0;
 
   if(strlen(msg)+1>MSGMAX){
     error_int("Message len (%d) exceeded size of injoth buf (%d).",
-	      strlen(msg), MSGMAX);
+	      strlen(msg), MSGMAX-1);
   }
 
   if(msgsnd(user->injothqueue,buf,strlen(msg)+1,IPC_NOWAIT)<0){
+    error_intsys("Failed to injoth() to %s",user->userid,i,strerror(i));
+    return 0;
+  }
+  
+  return 1;
+}
+
+
+
+int
+usr_injoth_ack(onlinerec_t *user,char *msg,char *ack,int force)
+{
+  char dummy[MSGMAX+sizeof(long)];
+  struct injoth_buf *buf=(struct injoth_buf*)(&dummy);
+  int len=sizeof(buf->m.withack.sender)+
+    sizeof(buf->m.withack.ackofs)+
+    strlen(msg)+1+strlen(ack)+1;
+
+  /* If no ACK given, fall back to a simple msg_injoth() */
+  
+  if(ack==NULL)return usr_injoth(user,msg,force);
+
+
+  if(!force)if(user->flags&OLF_BUSY)return 0;
+  
+  if(user->injothqueue<0)return 0;
+
+  if(len>MSGMAX-1){
+    error_int("Message+Ack len (%d) exceeded size of injoth buf (%d).",
+	      len, MSGMAX-1);
+  }
+  
+  bzero(&dummy,sizeof(dummy));
+  buf->mtype=INJ_MESSAGE_ACK;
+  strcpy(buf->m.withack.sender,thisuseracc.userid);
+  buf->m.withack.ackofs=strlen(msg)+1;
+  strcpy(buf->m.withack.msg,msg);
+  strcpy(&(buf->m.withack.msg[strlen(msg)+1]),ack);
+
+  if(msgsnd(user->injothqueue,buf,len,IPC_NOWAIT)<0){
     error_intsys("Failed to injoth() to %s",user->userid,i,strerror(i));
     return 0;
   }
@@ -392,7 +432,7 @@ usr_uidxref(char *userid, int online)
     FILE *fp;
     char command[256],uid[256];
     
-    sprintf(command,"\\ls %s",USRDIR);
+    sprintf(command,"\\ls %s",mkfname(USRDIR));
     if((fp=popen(command,"r"))==NULL){
       pclose(fp);
       return 0;

@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.7  1999/07/18 21:11:35  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -105,7 +104,7 @@ readclasses()
   FILE *fp;
   classrec_t classdel=CLASSDEL;
 
-  if((fp=fopen(CLASSFILE,"r"))!=NULL){
+  if((fp=fopen(mkfname(CLASSFILE),"r"))!=NULL){
     numclasses=fread(classes,sizeof(classrec_t),MAXCLASS,fp);
   } else numclasses=0;
   fclose(fp);
@@ -119,13 +118,13 @@ saveclasses()
   FILE *fp;
 
   qsort(classes,numclasses,sizeof(classrec_t),classcompare);
-  if((fp=fopen(CLASSFILE,"w"))==NULL){
-    error_logsys("Failed to create %s",CLASSFILE);
+  if((fp=fopen(mkfname(CLASSFILE),"w"))==NULL){
+    error_logsys("Failed to create %s",mkfname(CLASSFILE));
     prompt(IOERROR);
     return;
   }
   if(fwrite(classes,sizeof(classrec_t),numclasses,fp)!=numclasses){
-    error_logsys("Failed to write %s",CLASSFILE);
+    error_logsys("Failed to write %s",mkfname(CLASSFILE));
     prompt(IOERROR);
     return;
   }
@@ -563,8 +562,8 @@ moveclass()
     struct dirent *file;
     int           counter=0;
     
-    if((dp=opendir(USRDIR))==NULL){
-      error_fatalsys("Unable to diropen %s",ONLINEDIR);
+    if((dp=opendir(mkfname(USRDIR)))==NULL){
+      error_fatalsys("Unable to diropen %s",mkfname(ONLINEDIR));
     }
 
     prompt(MOVING,source,target);

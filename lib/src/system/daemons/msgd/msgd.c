@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 22:04:23  alexios
  * Removed periodic reindexing of message base -- not needed.
@@ -91,7 +90,7 @@ storepid()
   FILE *fp;
   char fname[256];
   
-  sprintf(fname,"%s/msgd.pid",BBSETCDIR);
+  sprintf(fname,"%s/msgd.pid",mkfname(BBSETCDIR));
   if((fp=fopen(fname,"w"))==NULL)return;
   fprintf(fp,"%d",getpid());
   fclose(fp);

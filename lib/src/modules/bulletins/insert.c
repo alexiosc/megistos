@@ -13,9 +13,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1998/12/27 15:27:54  alexios
  * Added autoconf support. Minor fixes.
@@ -112,7 +111,7 @@ askfile(char *club)
       if(inp_isX(margv[0]))return 0;
     }
 
-    sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)i);
+    strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)i));
     if(stat(fname,&st)){
       prompt(NBMSGNR,club,i);
       cnc_end();
@@ -136,7 +135,7 @@ getmsgheader(char *club, int msgno,struct message *msg)
   if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
   lock_place(lock,"reading");
 
-  sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno);
+  strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno));
   if((zfp=gzopen(fname,"rb"))==NULL){
     gzclose(zfp);
     lock_rm(lock);
@@ -218,7 +217,7 @@ getmsgheader(char *club, int msgno,struct message *msg)
   if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
   lock_place(lock,"reading");
 
-  sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)msgno);
+  strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)msgno));
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
     lock_rm(lock);
@@ -319,8 +318,8 @@ insmsg(char *club, uint32 msgno)
 
   /* Set the source and target files for linking/copying the bulletin */
 
-  sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,msgno);
-  sprintf(target,MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname);
+  strcpy(source,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,msgno));
+  strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname));
 
 
   /* Check if the article already exists in the database */
@@ -340,8 +339,8 @@ insmsg(char *club, uint32 msgno)
     char fatt[256];
     struct stat st1, st2;
 
-    sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,msgno);
-    sprintf(fatt,MSGSDIR"/%s/%s/%d.att",club,MSGATTDIR,msgno);
+    strcpy(source,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,msgno));
+    strcpy(fatt,mkfname(MSGSDIR"/%s/%s/%d.att",club,MSGATTDIR,msgno));
 
     if(stat(fatt,&st1)){
       prompt(NBATTR,club,msgno);
@@ -522,7 +521,7 @@ insupl(char *club)
     }
     sprintf(blt.fname,"%s.%s",cp,(sp&&*sp)?sp:"blt");
     for(i=1;;i++){
-      sprintf(target,MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname);
+      strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname));
       if(stat(target,&st))break;
       sprintf(blt.fname,"%s.%d",cp,i);
     }

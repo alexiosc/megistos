@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:32  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.6  1999/07/18 21:42:47  alexios
  * Changed a few error_fatal() calls to error_fatalsys().
@@ -88,8 +87,8 @@ parseplugindef()
   numplugins=0;
   bzero(&p,sizeof(p));
 
-  if((fp=fopen(PLUGINDEFFILE,"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",PLUGINDEFFILE);
+  if((fp=fopen(mkfname(PLUGINDEFFILE),"r"))==NULL){
+    error_fatalsys("Unable to open %s for reading.",mkfname(PLUGINDEFFILE));
   }
 
   while(!feof(fp)){
@@ -113,7 +112,7 @@ parseplugindef()
     } else if(sameas(keyword,"descr")){
       if(d>=NUMLANGUAGES){
 	error_fatal("Too many 'descr' keywords in %s line %d",
-	      PLUGINDEFFILE,lines);
+	      mkfname(PLUGINDEFFILE),lines);
       }
       strncpy(p.descr[d],cp,DESCRLEN);
       p.descr[d++][DESCRLEN-1]=0;
@@ -135,7 +134,7 @@ parseplugindef()
 	  break;
 	default:
 	  error_fatal("Bad flag %c in %s line %d",
-		*cp,PLUGINDEFFILE,lines);
+		*cp,mkfname(PLUGINDEFFILE),lines);
 	}
       }
     } else if(sameas(keyword,"end")){
@@ -156,7 +155,7 @@ parseplugindef()
       bzero(&p,sizeof(p));
       d=0;
     } else error_fatal("Unrecognised keyword %s in %s line %d.",
-		 keyword,PLUGINDEFFILE,lines);
+		 keyword,mkfname(PLUGINDEFFILE),lines);
   }
 
   fclose(fp);

@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:28  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -66,7 +65,7 @@ waitchannels()
   for(j=0;j<30;j++){
     usleep(100000);		/* .1 sec */
     for(i=0;i<chan_count;i++){
-      sprintf(fname,"%s/.status-%s",CHANDEFDIR,channels[i].ttyname);
+      sprintf(fname,"%s/.status-%s",mkfname(CHANDEFDIR),channels[i].ttyname);
       bzero(&st,sizeof(st));
       stat(fname,&st);
       if(st.st_mtime>t){

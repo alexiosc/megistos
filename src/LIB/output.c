@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:29  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:05  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.10  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out(). Added send_out(),
@@ -114,6 +113,8 @@ const char *__RCS=RCS_VER;
 #include "output.h"
 #include "channels.h"
 #include "systemversion.h"
+#include "bots.h"
+#include "useracc.h"
 
 #include "mbk_sysvar.h"
 
@@ -121,8 +122,7 @@ char out_buffer [8192];
 uint32 out_flags=OFL_WAITTOCLEAR|OFL_ANSIENABLE;
 
 
-#define IS_BOT \
-(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
+#define IS_BOT (out_flags&OFL_ISBOT)
 
 
 struct substvar *substvars=NULL, *lastsubstvar=NULL;
@@ -171,7 +171,7 @@ out_setxlation(int i)
   /* This is going to be tedious. Ok, here goes. */
   /* Get the shared memory ID of our emud's emuqueue */
 
-  sprintf(fname,"%s/.shmid-%s",EMULOGDIR,getenv("CHANNEL"));
+  sprintf(fname,"%s/.shmid-%s",mkfname(EMULOGDIR),getenv("CHANNEL"));
 
   if((fp=fopen(fname,"r"))==NULL){
     error_fatalsys("Unable to open %s",fname);
@@ -432,36 +432,20 @@ char *stg;
 char *buf;
 void *parmlist;
 {
-  char *p1=buf,format[16384]={0},newbuf[16384]={0};
-  int count=0,found,ansistate=0;
-  char *bufptr;
-
-  stg[0]=0;
+  char *p1=buf,format[16384]={0};
+  int count=0,found;
 
   while(*p1 && count<16383){
     while (*p1 && !isvarchar(*p1)){
       format[count]=*p1;
-      if(!(out_flags&OFL_ANSIENABLE)){
-	if(!ansistate && *p1==27 && *(p1+1)!='!')ansistate=1;
-	else if((ansistate==1) && (*p1=='['))ansistate=2;
-	else if((ansistate==2) && (isdigit(*p1) || (*p1==';')));
-	else if(ansistate==2){
-	  char ansicommands[16];
-	  
-	  strcpy(ansicommands,"ABCDHJKmsu");
-	  ansistate=0;
-	  if(!strchr(ansicommands,*p1))count++;
-	  if(*p1=='J')format[count-1]=12;
-	} else {
- 	  ansistate=0;
-	  count++;
-	}
-      } else count++;
+      count++;
       p1++;
     }
+
     format[count]=0;
-    if(!(*p1))break;
-    else if(isvarchar(*(p1+1))) {
+
+    if(!(*p1))break;		/* End of the format string? */
+    else if(isvarchar(*(p1+1))) { /* No, just another variable */
       p1+=2;
       format[count++]='@';
     } else {
@@ -487,76 +471,7 @@ void *parmlist;
     }
   }
 
-  vsprintf(newbuf,format,parmlist);
-
-  bufptr=newbuf;
-  if((!IS_BOT) && (out_flags&OFL_WAITTOCLEAR))while(*bufptr){
-    char *clp=strstr(bufptr,"\033[2J");
-    int  len=clp-bufptr;
-    
-    if(!clp) break;
-    
-    if(len){
-      char c=bufptr[len];
-      bufptr[len]=0;
-      strcat(stg,bufptr);
-      bufptr[len]=c;
-      out_clearflags(OFL_AFTERINPUT);
-    }
-
-    bufptr+=len;
-
-    if(!(out_flags&OFL_AFTERINPUT)){
-      char c, *msgp;
-      char clrscr[32]="\033[2J\033[1;1H\0";
-
-      bufptr+=4;
-
-      msg_set(msg_sys);
-      msgp=msg_get(W2CLR);
-      out_send(fileno(stdout),msgp,strlen(msgp));
-      msg_reset();
-
-      read(0,&c,1);
-      inp_resetidle();
-      if(!(out_flags&OFL_ANSIENABLE)){
-	c=12;
-	out_send(fileno(stdout),&c,1);
-      }else{
-	out_send(fileno(stdout),clrscr,strlen(clrscr));
-      }
-    } else {
-      char homestg[10]="\033[1;1H\0";
-      out_send(fileno(stdout),bufptr,4);
-      out_send(fileno(stdout),homestg,strlen(homestg));
-      bufptr+=4;
-    }
-    fmt_resetvpos(0);
-  } else {
-    char homestg[10]="\033[1;1H\0";
-    
-    while(*bufptr){
-      char *clp=strstr(bufptr,"\033[2J");
-      int  len=clp-bufptr;
-
-      if(!clp) break;
-    
-      if(len){
-	char c=bufptr[len];
-	bufptr[len]=0;
-	strcat(stg,bufptr);
-	bufptr[len]=c;
-	out_clearflags(OFL_AFTERINPUT);
-      }
-      out_send(fileno(stdout),bufptr,4);
-      out_send(fileno(stdout),homestg,strlen(homestg));
-      bufptr+=4+len;
-    }
-  }
-  if(strlen(bufptr)){
-    strcat(stg,bufptr);
-    out_clearflags(OFL_AFTERINPUT);
-  }
+  vsprintf(stg,format,parmlist);
 }
 
 
@@ -593,9 +508,8 @@ int num;
 va_dcl
 {
   va_list args;
-  char *s=msg_get(num);
+  char *s=msg_getl_bot(num,(msg_cur->language),1);
 
-  inp_acceptinjoth();
   va_start(args);
   printexpand(s,args);
   va_end(args);
@@ -609,12 +523,36 @@ int num;
 va_dcl
 {
   va_list args;
-  char *s=msg_get(num);
+  char *s=msg_getl_bot(num,(msg_cur->language),1);
 
   inp_acceptinjoth();
   va_start(args);
   sprintexpand(stg,s,args);
   va_end(args);
+}
+
+
+char *
+sprompt_other(ushm,stg,num,va_alist)
+struct shmuserrec *ushm;
+char *stg;
+int num;
+va_dcl
+{
+  va_list args;
+  char *s;
+  uint32 old_flags=out_flags;
+
+  if(ushm->onl.flags&OLF_ISBOT) out_flags|=OFL_ISBOT;
+  else out_flags&=~OFL_ISBOT;
+
+  s=msg_getl_bot(num,ushm->acc.language-1,1);
+  va_start(args);
+  sprintexpand(stg,s,args);
+  va_end(args);
+  out_flags=old_flags;
+
+  return stg;
 }
 
 
@@ -626,6 +564,8 @@ int out_printfile(char *fname)
     int oldprotect=out_flags&OFL_PROTECTVARS;
     out_clearflags(OFL_PROTECTVARS);
 
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
+
     while(!feof(fp)){
       char line[MSGBUFSIZE];
       int  num=fread(line,1,sizeof(line)-1,fp);
@@ -636,6 +576,9 @@ int out_printfile(char *fname)
     }
     oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
     fclose(fp);
+
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+
     return 1;
   } else return 0;
 }
@@ -646,6 +589,8 @@ int out_catfile(char *fname)
   FILE *fp;
 
   if((fp=fopen(fname,"r"))!=NULL){
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
+
     while(!feof(fp)){
       char line[MSGBUFSIZE];
       if(fgets(line,1024,fp)){
@@ -653,6 +598,9 @@ int out_catfile(char *fname)
 	out_send(fileno(stdout),line,strlen(line));
       }
     }
+
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+
     fclose(fp);
     return 1;
   } else return 0;
@@ -666,6 +614,8 @@ int out_printlongfile(char *fname)
 
   if((fp=fopen(fname,"r"))!=NULL){
     int oldprotect=out_flags&OFL_PROTECTVARS;
+
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
 
     inp_nonblock();
     while(!feof(fp)){
@@ -682,6 +632,9 @@ int out_printlongfile(char *fname)
     }
     inp_resetblocking();
     oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
+
+    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+
     fclose(fp);
     return 1;
   } else return 0;

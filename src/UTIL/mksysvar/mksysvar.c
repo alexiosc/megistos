@@ -38,9 +38,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:08  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 1.6  1999/08/13 17:11:01  alexios
  * Cosmetic changes, mostly, plus a clean return from main().
@@ -96,16 +95,16 @@ main()
   int exists=0;
   sysvars=msg_open("sysvar");
 
-  if((sysvarf=fopen(SYSVARFILE,"r+"))!=NULL)exists=1;
-  else if((sysvarf=fopen(SYSVARFILE,"w+"))!=NULL)exists=0;
-  else error_fatalsys("Unable to open/create %s.",SYSVARFILE,0);
+  if((sysvarf=fopen(mkfname(SYSVARFILE),"r+"))!=NULL)exists=1;
+  else if((sysvarf=fopen(mkfname(SYSVARFILE),"w+"))!=NULL)exists=0;
+  else error_fatalsys("Unable to open/create %s.",mkfname(SYSVARFILE),0);
 
   if(!exists){
-    fprintf(stderr,"%s does not exist, creating it.\n",SYSVARFILE);
+    fprintf(stderr,"%s does not exist, creating it.\n",mkfname(SYSVARFILE));
     memset(&sysvar,0x00,sizeof(struct sysvar));
   } else {
     if(fread(&sysvar,sizeof(struct sysvar),1,sysvarf)!=1){
-      error_fatalsys("Error reading %s.",SYSVARFILE,0);
+      error_fatalsys("Error reading %s.",mkfname(SYSVARFILE),0);
     }
   }
 
@@ -139,10 +138,10 @@ main()
   memcpy(sysvar.magic,SYSVAR_MAGIC,sizeof(sysvar.magic));
 
   if(fseek(sysvarf,0,SEEK_SET)){
-    error_fatalsys("Error seeking %s.",SYSVARFILE,0);
+    error_fatalsys("Error seeking %s.",mkfname(SYSVARFILE),0);
   }
   if(fwrite(&sysvar,sizeof(struct sysvar),1,sysvarf)!=1){
-    error_fatalsys("Error writing %s.",SYSVARFILE,0);
+    error_fatalsys("Error writing %s.",mkfname(SYSVARFILE),0);
   }
   fclose(sysvarf);
 

@@ -29,9 +29,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:34  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.9  1999/08/13 17:07:21  alexios
  * Starting in this version of signup, the program refrains from
@@ -183,7 +182,7 @@ registerbbsd()
   struct stat s;
   int i;
   
-  sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
+  sprintf(fname,"%s/[SIGNUP-%s]",mkfname(ONLINEDIR),getenv("CHANNEL"));
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create file %s",fname);
   }
@@ -195,11 +194,11 @@ registerbbsd()
 
   /* Notify BBSD of the new online record */
 
-  if((fp=fopen(BBSDPIPEFILE,"w"))==NULL)return;
+  if((fp=fopen(mkfname(BBSDPIPEFILE),"w"))==NULL)return;
   fprintf(fp,"connect %s [SIGNUP-%s]\n",getenv("CHANNEL"),getenv("CHANNEL"));
   fclose(fp);
 
-  sprintf(fname,"%s/.shmid-[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
+  sprintf(fname,"%s/.shmid-[SIGNUP-%s]",mkfname(ONLINEDIR),getenv("CHANNEL"));
   for(i=0;i<20;i++){
     usleep(100000);
     if(!stat(fname,&s)){
@@ -220,7 +219,7 @@ registerbbsd()
       return;
     }
   }
-  sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
+  sprintf(fname,"%s/[SIGNUP-%s]",mkfname(ONLINEDIR),getenv("CHANNEL"));
   unlink(fname);
   error_fatal("Timed out waiting for bbsd registration");
 }	       
@@ -231,7 +230,7 @@ trap()
 {
   char fname[256];
 
-  sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
+  sprintf(fname,"%s/[SIGNUP-%s]",mkfname(ONLINEDIR),getenv("CHANNEL"));
   unlink(fname);
   channel_hangup();
   exit(1);
@@ -314,14 +313,14 @@ askxlation()
 
   if(chan_getnum(getenv("CHANNEL"))<0){
     error_fatal("%s has not been registered in %s",
-	  getenv("CHANNEL"),CHANDEFFILE);
+	  getenv("CHANNEL"),mkfname(CHANDEFFILE));
   }
 
   /* Check the available translation tables and make the first one the
      default */
 
   for(i=0;i<NUMXLATIONS;i++){
-    sprintf(fname,XLATIONDIR"/"XLATIONSRC,i);
+    strcpy(fname,mkfname(XLATIONDIR"/"XLATIONSRC,i));
     xltmap[i]=(stat(fname,&st)==0);
     if(xltmap[i]&&def<0)def=i;
   }
@@ -611,7 +610,7 @@ checkbaduid(char *uid)
   FILE *fp;
   char line[256];
 
-  if((fp=fopen(BADUIDFILE,"r"))==NULL)return 1;
+  if((fp=fopen(mkfname(BADUIDFILE),"r"))==NULL)return 1;
   while(!feof(fp)){
     if(fgets(line,256,fp)){
       int i;
@@ -773,7 +772,7 @@ stupidpass(char *pass)
   char line[256];
 
   if(sameas(pass,uacc.userid))return 1;
-  if((fp=fopen(BADPASSFILE,"r"))==NULL)return 0;
+  if((fp=fopen(mkfname(BADPASSFILE),"r"))==NULL)return 0;
   while(!feof(fp)){
     if(fgets(line,256,fp)){
       int i;
@@ -944,21 +943,23 @@ adduser()
 
   um=umask(0022);
   sprintf(fname,"%s %s %d %d \"%s\" %s/%s %s >&/dev/null",
-	  USERADDBIN,uid,uidn,newgidn,newnam,newhome,uid,newshl);
-  if(system(fname))error_fatal("%s failed to add user.",USERADDBIN);
+	  mkfname(USERADDBIN),uid,uidn,newgidn,newnam,newhome,uid,newshl);
+  if(system(fname))error_fatal("%s failed to add user.",mkfname(USERADDBIN));
   umask(um);
 #endif
 
   /* Run a script with additional user adding commands */
 
   um=umask(0022);
-  sprintf(fname,"%s %s >&/dev/null",USERADDBIN,uid);
-  if(system(fname))error_fatal("%s failed to execute additional signup script.",USERADDBIN);
+  sprintf(fname,"%s %s >&/dev/null",mkfname(USERADDBIN),uid);
+  if(system(fname))
+    error_fatal("%s failed to execute additional signup script.",
+		mkfname(USERADDBIN));
   umask(um);
 
   /* Add the user's record */
 
-  sprintf(fname,"%s/%s",USRDIR,uacc.userid);
+  sprintf(fname,"%s/%s",mkfname(USRDIR),uacc.userid);
   if((user=fopen(fname,"w"))==NULL){
     error_fatalsys("Failed to create user account %s",fname);
   }
@@ -972,7 +973,8 @@ adduser()
   #if 0
   if((!getuid())||(!getgid())){
     char command[256];
-    sprintf(command,"chown bbs.bbs %s/%s >&/dev/null",USRDIR,uacc.userid);
+    sprintf(command,"chown bbs.bbs %s/%s >&/dev/null",mkfname(USRDIR),
+	    uacc.userid);
     system(command);
   }
   #endif

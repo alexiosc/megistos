@@ -26,9 +26,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  *
  */
@@ -162,7 +161,7 @@ gcs_remsys()
 	msg_reset();
 	return 1;
       }
-      runmodule(REMSYSBIN);
+      runmodule(mkfname(REMSYSBIN));
       lock_rm(lock);
       return 1;
     }

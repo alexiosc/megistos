@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.5  1999/07/28 23:13:16  alexios
  * Made main() return an int, as required.
@@ -140,17 +139,17 @@ main(int argc, char *argv[])
   struct plugin p;
 
   mod_setprogname(argv[0]);
-  if((fin=fopen(TELEPISRCFILE,"r"))==NULL){
-    fprintf(stderr,"%s: Unable to open %s\n",argv[0],TELEPISRCFILE);
+  if((fin=fopen(mkfname(TELEPISRCFILE),"r"))==NULL){
+    fprintf(stderr,"%s: Unable to open %s\n",argv[0],mkfname(TELEPISRCFILE));
     exit(1);
   }
 
-  if((fout=fopen(TELEPLUGINFILE,"w"))==NULL){
-    fprintf(stderr,"%s: Unable to create %s\n",argv[0],TELEPLUGINFILE);
+  if((fout=fopen(mkfname(TELEPLUGINFILE),"w"))==NULL){
+    fprintf(stderr,"%s: Unable to create %s\n",argv[0],mkfname(TELEPLUGINFILE));
     exit(1);
   }
 
-  printf("\nParsing %s\n",TELEPISRCFILE);
+  printf("\nParsing %s\n",mkfname(TELEPISRCFILE));
 
   for(i=0;keywords[i].code>=0;i++)nkeywords++;
 
@@ -246,9 +245,9 @@ main(int argc, char *argv[])
   }
 
   printf("\n%s is %d line(s) long and defines %d plugins(s).\n\n",
-	 TELEPISRCFILE,num,numplugins);
+	 mkfname(TELEPISRCFILE),num,numplugins);
 
-  printf("Writing compiled file to %s\n",TELEPLUGINFILE);
+  printf("Writing compiled file to %s\n",mkfname(TELEPLUGINFILE));
 
   fwrite(&numplugins,sizeof(int),1,fout);
   fwrite(plugins,sizeof(struct plugin),numplugins,fout);

@@ -28,9 +28,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:31  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/22 14:49:06  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -101,7 +100,7 @@ listclubs()
   int n,i;
   
   msg_set(clubmsg);
-  n=scandir(CLUBHDRDIR,&clubs,hdrselect,alphasort);
+  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,alphasort);
   prompt(LCHDR);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
