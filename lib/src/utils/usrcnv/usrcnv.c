@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:05  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -46,10 +49,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -66,144 +66,155 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 
-void convert(char *, char *, char *, int, int);
+void    convert (char *, char *, char *, int, int);
 
 
 
-static int bigendian=0;
+static int bigendian = 0;
 
 
 static void
-print_endian_warning()
+print_endian_warning ()
 {
-  short int eat=0xbeef; /* moo */
-  unsigned char  *tmp2=(char*)&eat;
-  if(*tmp2==0xbe){
-    printf("Argh, this is a big endian machine! This won't work properly.\n");
-    bigendian=1;
-    exit(1);
-  }
+	short int eat = 0xbeef;	/* moo */
+	unsigned char *tmp2 = (char *) &eat;
+
+	if (*tmp2 == 0xbe) {
+		printf
+		    ("Argh, this is a big endian machine! This won't work properly.\n");
+		bigendian = 1;
+		exit (1);
+	}
 }
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"usrcnv: convert MajorBBS 5.xx user account database to Megistos format.\n\n"\
-	  "Syntax: usrcnv options.\n\nOptions:\n"\
-	  "  -u dir   or  --userdir dir:  put user account files under the supplied\n"\
-	  "        directory. By default, accounts are made in the current directory.\n\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n"\
-	  "  -c class or  --class class:  set initial user class (default: MAJOR)\n\n"\
-	  "  -f       or  --fast:         fast user conversion: does not make home\n"\
-	  "         directories, does not call bbsuseracc. Superuser must append\n"\
-	  "         local files .passwd and .shadow to the respective files in /etc.\n"\
-	  "         This method is a lot faster than the normal way of operation, but\n"\
-	  "         it needs more operator intervention and is shadow-password specific.\n\n"\
-	  "  -U uid   or  --uid uid:      set the first numeric uid to be used for UNIX\n"\
-	  "         user records. The default behaviour is that of (bbs)adduser.\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "usrcnv: convert MajorBBS 5.xx user account database to Megistos format.\n\n"
+		 "Syntax: usrcnv options.\n\nOptions:\n"
+		 "  -u dir   or  --userdir dir:  put user account files under the supplied\n"
+		 "        directory. By default, accounts are made in the current directory.\n\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n"
+		 "  -c class or  --class class:  set initial user class (default: MAJOR)\n\n"
+		 "  -f       or  --fast:         fast user conversion: does not make home\n"
+		 "         directories, does not call bbsuseracc. Superuser must append\n"
+		 "         local files .passwd and .shadow to the respective files in /etc.\n"
+		 "         This method is a lot faster than the normal way of operation, but\n"
+		 "         it needs more operator intervention and is shadow-password specific.\n\n"
+		 "  -U uid   or  --uid uid:      set the first numeric uid to be used for UNIX\n"
+		 "         user records. The default behaviour is that of (bbs)adduser.\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"userdir",  1, 0, 'u'},
-  {"majordir", 1, 0, 'm'},
-  {"class",    1, 0, 'c'},
-  {"fast",     0, 0, 'f'},
-  {"uid",      1, 0, 'U'},
-  {0, 0, 0, 0}
+	{"userdir", 1, 0, 'u'},
+	{"majordir", 1, 0, 'm'},
+	{"class", 1, 0, 'c'},
+	{"fast", 0, 0, 'f'},
+	{"uid", 1, 0, 'U'},
+	{0, 0, 0, 0}
 };
 
 
-static char *arg_usrdir=".";
-static char *arg_majordir=".";
-static char *arg_class="MAJOR";
-static int   arg_fast=0;
-static int   arg_uid=-1;
+static char *arg_usrdir = ".";
+static char *arg_majordir = ".";
+static char *arg_class = "MAJOR";
+static int arg_fast = 0;
+static int arg_uid = -1;
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "u:m:c:fU:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "u:m:c:fU:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'u':
-      arg_usrdir=strdup(optarg);
-      break;
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    case 'c':
-      arg_class=strdup(optarg);
-      break;
-    case 'U':
-      arg_uid=atoi(optarg);
-      break;
-    case 'f':
-      arg_fast=1;
-      break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'u':
+			arg_usrdir = strdup (optarg);
+			break;
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		case 'c':
+			arg_class = strdup (optarg);
+			break;
+		case 'U':
+			arg_uid = atoi (optarg);
+			break;
+		case 'f':
+			arg_fast = 1;
+			break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
-  print_endian_warning();
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
+	print_endian_warning ();
 
-  if(getuid()){
-    fprintf(stderr,"Error: this program will create UNIX users as well as\n"\
-	    "Megistos ones (actually it'll do whatever bbsuseradd does, but\n"\
-	    "we're trying to be on the safe side). You must run usrcnv as\n"\
-	    "the superuser.\n\n");
-    fflush(stderr);
-    exit(1);
-  }
+	if (getuid ()) {
+		fprintf (stderr,
+			 "Error: this program will create UNIX users as well as\n"
+			 "Megistos ones (actually it'll do whatever bbsuseradd does, but\n"
+			 "we're trying to be on the safe side). You must run usrcnv as\n"
+			 "the superuser.\n\n");
+		fflush (stderr);
+		exit (1);
+	}
 
-  if(isatty(fileno(stdout))||isatty(fileno(stderr))){
-    fprintf(stderr,"\nWARNING: "\
-	    "Please keep BOTH standard output and standard error of this\n"\
-	    "program by logging to a file. For example, run:\n\n"\
-	    "usrcnv 2>&1 |tee usrcnv.log\n\n"\
-	    "A lot of warnings and information that you WILL need to\n"\
-	    "complete the conversion will be in there.\n"\
-	    "If you're sure you're doing the right thing, press Enter.\n");
-    {
-      char s[256];
-      fgets(s,sizeof(s),stdin);
-    }
-  }
-  
-  convert(arg_usrdir, arg_majordir, arg_class, arg_fast, arg_uid);
-  
-  printf("Syncing disks...\n");
-  fflush(stdout);
-  system("sync");
+	if (isatty (fileno (stdout)) || isatty (fileno (stderr))) {
+		fprintf (stderr, "\nWARNING: "
+			 "Please keep BOTH standard output and standard error of this\n"
+			 "program by logging to a file. For example, run:\n\n"
+			 "usrcnv 2>&1 |tee usrcnv.log\n\n"
+			 "A lot of warnings and information that you WILL need to\n"
+			 "complete the conversion will be in there.\n"
+			 "If you're sure you're doing the right thing, press Enter.\n");
+		{
+			char    s[256];
 
-  printf("\nREMEMBER:\n\n"\
-	 "  * It's entirely your responsibility to physically copy\n"\
-	 "    the user account files to %s.\n\n",mkfname(USRDIR));
+			fgets (s, sizeof (s), stdin);
+		}
+	}
 
-  printf("  * Please MAKE SURE that the user class %s exists, or you\n"\
-	 "    will get fatal errors every time someone tries to log in!\n\n",arg_class);
+	convert (arg_usrdir, arg_majordir, arg_class, arg_fast, arg_uid);
 
-  return 0;
+	printf ("Syncing disks...\n");
+	fflush (stdout);
+	system ("sync");
+
+	printf ("\nREMEMBER:\n\n"
+		"  * It's entirely your responsibility to physically copy\n"
+		"    the user account files to %s.\n\n", mkfname (USRDIR));
+
+	printf ("  * Please MAKE SURE that the user class %s exists, or you\n"
+		"    will get fatal errors every time someone tries to log in!\n\n",
+		arg_class);
+
+	return 0;
 }
+
+
+/* End of File */

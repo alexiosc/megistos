@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:06  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -61,7 +61,7 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
+#include <megistos/bbs.h>
 #include <registry.h>
 
 
@@ -71,75 +71,90 @@ const char *__RCS=RCS_VER;
 
 
 void
-convert(char *arg_dir, char *arg_majordir, int arg_templ)
+convert (char *arg_dir, char *arg_majordir, int arg_templ)
 {
-  FILE       *fp;
-  char        rec[16384], c, *fname=rec;
-  int         reclen;
-  int         num=0;
-  struct registry reg;
+	FILE   *fp;
+	char    rec[16384], c, *fname = rec;
+	int     reclen;
+	int     num = 0;
+	struct registry reg;
 
-  /* Start conversion */
+	/* Start conversion */
 
-  sprintf(fname,"%s/registry.txt",arg_majordir?arg_majordir:".");
-  fp=fopen(fname,"r");
-  if(fp==NULL){
-    sprintf(fname,"%s/REGISTRY.TXT",arg_majordir?arg_majordir:".");
-    if((fp=fopen(fname,"r"))==NULL){
-      fprintf(stderr,
-	      "regcnv: convert(): unable to find registry.txt or REGISTRY.TXT.\n");
-      exit(1);
-    }
-  }
+	sprintf (fname, "%s/registry.txt", arg_majordir ? arg_majordir : ".");
+	fp = fopen (fname, "r");
+	if (fp == NULL) {
+		sprintf (fname, "%s/REGISTRY.TXT",
+			 arg_majordir ? arg_majordir : ".");
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fprintf (stderr,
+				 "regcnv: convert(): unable to find registry.txt or REGISTRY.TXT.\n");
+			exit (1);
+		}
+	}
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%d\n",&reclen)==0){
-      if(feof(fp))break;
-      fprintf(stderr,"regcnv: convert(): unable to parse record length. Corrupted file?\n");
-      exit(1);
-    }
-    if(feof(fp))break;
-    fgetc(fp);			/* Get rid of the comma after the record length */
+	while (!feof (fp)) {
+		if (fscanf (fp, "%d\n", &reclen) == 0) {
+			if (feof (fp))
+				break;
+			fprintf (stderr,
+				 "regcnv: convert(): unable to parse record length. Corrupted file?\n");
+			exit (1);
+		}
+		if (feof (fp))
+			break;
+		fgetc (fp);	/* Get rid of the comma after the record length */
 
-    if(reclen!=REGISTRY_RECLEN){
-      fprintf(stderr,"regcnv: convert(): record length isn't %d. "\
-	      "Is this a v5.31 file?\n",REGISTRY_RECLEN);
-      exit(1);
-    }
+		if (reclen != REGISTRY_RECLEN) {
+			fprintf (stderr,
+				 "regcnv: convert(): record length isn't %d. "
+				 "Is this a v5.31 file?\n", REGISTRY_RECLEN);
+			exit (1);
+		}
 
-    if(fread(rec,reclen,1,fp)!=1){
-      fprintf(stderr,"regcnv: convert(): unable to read record around pos=%ld.\n",ftell(fp));
-      exit(1);
-    }
+		if (fread (rec, reclen, 1, fp) != 1) {
+			fprintf (stderr,
+				 "regcnv: convert(): unable to read record around pos=%ld.\n",
+				 ftell (fp));
+			exit (1);
+		}
 
-    bzero(&reg,sizeof(reg));
+		bzero (&reg, sizeof (reg));
 
-    reg.template=arg_templ;
-    strcpy(reg.summary,&rec[10]);
-    memcpy(reg.registry,&rec[50],sizeof(reg.registry));
-
-
-    /* Now add the registry */
-    {
-      FILE *fp;
-      char fname[256];
-      sprintf(fname,"%s/%s",arg_dir,rec);
-      if((fp=fopen(fname,"w"))==NULL){
-	fprintf(stderr,"Oops, unable to create %s\n",rec);
-	exit(1);
-      }
-      fwrite(&reg,sizeof(reg),1,fp);
-      fclose(fp);
-    }
-    
-    putchar('.');fflush(stdout);
+		reg.template = arg_templ;
+		strcpy (reg.summary, &rec[10]);
+		memcpy (reg.registry, &rec[50], sizeof (reg.registry));
 
 
-    /* DONE! */
-    num++;
-    do c=fgetc(fp); while(c=='\n' || c=='\r' || c==26);
-    ungetc(c,fp);
-  }
+		/* Now add the registry */
+		{
+			FILE   *fp;
+			char    fname[256];
 
-  printf("\n\nCreated %d user registries.\n",num);
+			sprintf (fname, "%s/%s", arg_dir, rec);
+			if ((fp = fopen (fname, "w")) == NULL) {
+				fprintf (stderr, "Oops, unable to create %s\n",
+					 rec);
+				exit (1);
+			}
+			fwrite (&reg, sizeof (reg), 1, fp);
+			fclose (fp);
+		}
+
+		putchar ('.');
+		fflush (stdout);
+
+
+		/* DONE! */
+		num++;
+		do
+			c = fgetc (fp);
+		while (c == '\n' || c == '\r' || c == 26);
+		ungetc (c, fp);
+	}
+
+	printf ("\n\nCreated %d user registries.\n", num);
 }
+
+
+/* End of File */

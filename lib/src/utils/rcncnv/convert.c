@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:06  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -61,7 +61,7 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 
@@ -70,89 +70,108 @@ const char *__RCS=RCS_VER;
 
 
 void
-convert(char *arg_dir, char *arg_majordir)
+convert (char *arg_dir, char *arg_majordir)
 {
-  FILE      *fp;
-  char       rec[16384], c, *fname=rec;
-  int        reclen;
-  int        num=0;
-  useracc_t  uacc;
-  char       uid[32];
+	FILE   *fp;
+	char    rec[16384], c, *fname = rec;
+	int     reclen;
+	int     num = 0;
+	useracc_t uacc;
+	char    uid[32];
 
-  /* Start conversion */
+	/* Start conversion */
 
-  sprintf(fname,"%s/recent.txt",arg_majordir?arg_majordir:".");
-  fp=fopen(fname,"r");
-  if(fp==NULL){
-    sprintf(fname,"%s/RECENT.TXT",arg_majordir?arg_majordir:".");
-    if((fp=fopen(fname,"r"))==NULL){
-      fprintf(stderr,
-	      "rcncnv: convert(): unable to find recent.txt or "\
-	      "RECENT.TXT.\n");
-      exit(1);
-    }
-  }
+	sprintf (fname, "%s/recent.txt", arg_majordir ? arg_majordir : ".");
+	fp = fopen (fname, "r");
+	if (fp == NULL) {
+		sprintf (fname, "%s/RECENT.TXT",
+			 arg_majordir ? arg_majordir : ".");
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fprintf (stderr,
+				 "rcncnv: convert(): unable to find recent.txt or "
+				 "RECENT.TXT.\n");
+			exit (1);
+		}
+	}
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%d\n",&reclen)==0){
-      if(feof(fp))break;
-      fprintf(stderr,"rcncnv: convert(): unable to parse record length. "\
-	      "Corrupted file?\n");
-      exit(1);
-    }
-    if(feof(fp))break;
-    fgetc(fp);	/* Get rid of the comma after the record length */
+	while (!feof (fp)) {
+		if (fscanf (fp, "%d\n", &reclen) == 0) {
+			if (feof (fp))
+				break;
+			fprintf (stderr,
+				 "rcncnv: convert(): unable to parse record length. "
+				 "Corrupted file?\n");
+			exit (1);
+		}
+		if (feof (fp))
+			break;
+		fgetc (fp);	/* Get rid of the comma after the record length */
 
-    if(reclen!=RECENT_RECLEN){
-      fprintf(stderr,"rcncnv: convert(): record length isn't %d. "\
-	      "Is this a v5.31 file?\n",RECENT_RECLEN);
-      exit(1);
-    }
+		if (reclen != RECENT_RECLEN) {
+			fprintf (stderr,
+				 "rcncnv: convert(): record length isn't %d. "
+				 "Is this a v5.31 file?\n", RECENT_RECLEN);
+			exit (1);
+		}
 
-    if(fread(rec,reclen,1,fp)!=1){
-      fprintf(stderr,"rcncnv: convert(): unable to read record around "\
-	      "pos=%ld.\n",ftell(fp));
-      exit(1);
-    }
+		if (fread (rec, reclen, 1, fp) != 1) {
+			fprintf (stderr,
+				 "rcncnv: convert(): unable to read record around "
+				 "pos=%ld.\n", ftell (fp));
+			exit (1);
+		}
 
-    strcpy(uid,rec);
+		strcpy (uid, rec);
 
-    {
-      char fname[256];
-      FILE *fp;
-      sprintf(fname,"%s/%s",arg_dir,uid);
-      if((fp=fopen(fname,"r"))==NULL)continue;
-      if(fread(&uacc,sizeof(uacc),1,fp)!=1){
-	int i=errno;
-	fprintf(stderr,"rcncnv: unable to read %s (errno=%d)\n",
-		fname,i);
-	exit(1);
-      }
-      fclose(fp);
+		{
+			char    fname[256];
+			FILE   *fp;
 
-      uacc.connections=*((int*)(&rec[10]));
+			sprintf (fname, "%s/%s", arg_dir, uid);
+			if ((fp = fopen (fname, "r")) == NULL)
+				continue;
+			if (fread (&uacc, sizeof (uacc), 1, fp) != 1) {
+				int     i = errno;
 
-      if((fp=fopen(fname,"w"))==NULL){
-	int i=errno;
-	fprintf(stderr,"rcncnv: unable to open %s (errno=%d)\n",
-		fname,i);
-	exit(1);
-      }
-      if(fwrite(&uacc,sizeof(uacc),1,fp)!=1){
-	int i=errno;
-	fprintf(stderr,"rcncnv: unable to write %s (errno=%d)\n",
-		fname,i);
-	exit(1);
-      }
-      fclose(fp);
-    }
+				fprintf (stderr,
+					 "rcncnv: unable to read %s (errno=%d)\n",
+					 fname, i);
+				exit (1);
+			}
+			fclose (fp);
+
+			uacc.connections = *((int *) (&rec[10]));
+
+			if ((fp = fopen (fname, "w")) == NULL) {
+				int     i = errno;
+
+				fprintf (stderr,
+					 "rcncnv: unable to open %s (errno=%d)\n",
+					 fname, i);
+				exit (1);
+			}
+			if (fwrite (&uacc, sizeof (uacc), 1, fp) != 1) {
+				int     i = errno;
+
+				fprintf (stderr,
+					 "rcncnv: unable to write %s (errno=%d)\n",
+					 fname, i);
+				exit (1);
+			}
+			fclose (fp);
+		}
 
 
-    /* DONE! */
-    num++;
-    do c=fgetc(fp); while(c=='\n' || c=='\r' || c==26);
-    ungetc(c,fp);
-  }
+		/* DONE! */
+		num++;
+		do
+			c = fgetc (fp);
+		while (c == '\n' || c == '\r' || c == 26);
+		ungetc (c, fp);
+	}
 
-  printf("\n\nUpdated %d users.\n",num);
+	printf ("\n\nUpdated %d users.\n", num);
 }
+
+
+/* End of File */

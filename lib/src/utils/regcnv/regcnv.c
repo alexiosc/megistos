@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:06  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -63,103 +63,114 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 
-void convert(char *, char *, int);
+void    convert (char *, char *, int);
 
 
 
-static int bigendian=0;
+static int bigendian = 0;
 
 
 static void
-print_endian_warning()
+print_endian_warning ()
 {
-  short int eat=0xbeef; /* moo */
-  unsigned char  *tmp2=(char*)&eat;
-  if(*tmp2==0xbe){
-    printf("Argh, this is a big endian machine! This won't work properly.\n");
-    bigendian=1;
-    exit(1);
-  }
+	short int eat = 0xbeef;	/* moo */
+	unsigned char *tmp2 = (char *) &eat;
+
+	if (*tmp2 == 0xbe) {
+		printf
+		    ("Argh, this is a big endian machine! This won't work properly.\n");
+		bigendian = 1;
+		exit (1);
+	}
 }
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"regcnv: convert MajorBBS 5.xx user registry database to Megistos format.\n\n"\
-	  "Syntax: regcnv options.\n\nOptions:\n"\
-	  "  -u dir   or  --regdir dir:   put registry files under the supplied\n"\
-	  "        directory. By default, entries are made in the current directory.\n\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n"\
-	  "  -t temp or  --temp templ:    set registry template number (0-2, default: 0)\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "regcnv: convert MajorBBS 5.xx user registry database to Megistos format.\n\n"
+		 "Syntax: regcnv options.\n\nOptions:\n"
+		 "  -u dir   or  --regdir dir:   put registry files under the supplied\n"
+		 "        directory. By default, entries are made in the current directory.\n\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n"
+		 "  -t temp or  --temp templ:    set registry template number (0-2, default: 0)\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"regdir",   1, 0, 'u'},
-  {"majordir", 1, 0, 'm'},
-  {"templ",    1, 0, 't'},
-  {0, 0, 0, 0}
+	{"regdir", 1, 0, 'u'},
+	{"majordir", 1, 0, 'm'},
+	{"templ", 1, 0, 't'},
+	{0, 0, 0, 0}
 };
 
 
-static char *arg_usrdir=".";
-static char *arg_majordir=".";
-static int   arg_templ=0;
+static char *arg_usrdir = ".";
+static char *arg_majordir = ".";
+static int arg_templ = 0;
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "u:m:c:fU:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "u:m:c:fU:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'u':
-      arg_usrdir=strdup(optarg);
-      break;
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    case 't':
-      arg_templ=atoi(optarg);
-      if(arg_templ<0||arg_templ>2){
-	fprintf(stderr,"Template number should be between 0 and 2.\n");
-      } else break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'u':
+			arg_usrdir = strdup (optarg);
+			break;
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		case 't':
+			arg_templ = atoi (optarg);
+			if (arg_templ < 0 || arg_templ > 2) {
+				fprintf (stderr,
+					 "Template number should be between 0 and 2.\n");
+			} else
+				break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
-  print_endian_warning();
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
+	print_endian_warning ();
 
-  convert(arg_usrdir, arg_majordir, arg_templ);
-  
-  printf("Syncing disks...\n");
-  fflush(stdout);
-  system("sync");
+	convert (arg_usrdir, arg_majordir, arg_templ);
 
-  printf("\nREMEMBER:\n\n"\
-	 "  * It's entirely your responsibility to physically copy\n"\
-	 "    the user registry files to %s.\n\n",mkfname(REGISTRYDIR));
+	printf ("Syncing disks...\n");
+	fflush (stdout);
+	system ("sync");
 
-  return 0;
+	printf ("\nREMEMBER:\n\n"
+		"  * It's entirely your responsibility to physically copy\n"
+		"    the user registry files to %s.\n\n",
+		mkfname (REGISTRYDIR));
+
+	return 0;
 }
+
+
+/* End of File */

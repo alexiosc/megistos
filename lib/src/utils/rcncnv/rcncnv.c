@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:06  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -60,93 +60,101 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 
-void convert(char *, char *);
+void    convert (char *, char *);
 
 
 
-static int bigendian=0;
+static int bigendian = 0;
 
 
 static void
-print_endian_warning()
+print_endian_warning ()
 {
-  short int eat=0xbeef; /* moo */
-  unsigned char  *tmp2=(char*)&eat;
-  if(*tmp2==0xbe){
-    printf("Argh, this is a big endian machine! This won't work properly.\n");
-    bigendian=1;
-    exit(1);
-  }
+	short int eat = 0xbeef;	/* moo */
+	unsigned char *tmp2 = (char *) &eat;
+
+	if (*tmp2 == 0xbe) {
+		printf
+		    ("Argh, this is a big endian machine! This won't work properly.\n");
+		bigendian = 1;
+		exit (1);
+	}
 }
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"rcncnv: convert MajorBBS 5.xx recent database to Megistos format.\n\n"\
-	  "Syntax: rcncnv options.\n\nOptions:\n"\
-	  "  -u dir   or  --usrdir dir:   modify user accounts in given directory\n"\
-	  "        By default, the BBS user directory is used.\n\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "rcncnv: convert MajorBBS 5.xx recent database to Megistos format.\n\n"
+		 "Syntax: rcncnv options.\n\nOptions:\n"
+		 "  -u dir   or  --usrdir dir:   modify user accounts in given directory\n"
+		 "        By default, the BBS user directory is used.\n\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"usrdir",   1, 0, 'u'},
-  {"majordir", 1, 0, 'm'},
-  {0, 0, 0, 0}
+	{"usrdir", 1, 0, 'u'},
+	{"majordir", 1, 0, 'm'},
+	{0, 0, 0, 0}
 };
 
 
 static char *arg_usrdir;
-static char *arg_majordir=".";
+static char *arg_majordir = ".";
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "u:m:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "u:m:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'u':
-      arg_usrdir=strdup(optarg);
-      break;
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'u':
+			arg_usrdir = strdup (optarg);
+			break;
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  arg_usrdir=strdup(mkfname(USRDIR));
+	arg_usrdir = strdup (mkfname (USRDIR));
 
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
-  print_endian_warning();
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
+	print_endian_warning ();
 
-  convert(arg_usrdir, arg_majordir);
-  
-  printf("Syncing disks...\n");
-  fflush(stdout);
-  system("sync");
+	convert (arg_usrdir, arg_majordir);
 
-  return 0;
+	printf ("Syncing disks...\n");
+	fflush (stdout);
+	system ("sync");
+
+	return 0;
 }
+
+
+/* End of File */

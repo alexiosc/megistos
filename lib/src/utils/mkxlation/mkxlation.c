@@ -47,6 +47,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:14:06  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -71,10 +74,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -86,123 +86,158 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
-#include "mbk_sysvar.h"
+#include <megistos/mbk_sysvar.h>
 
 
-char xlate[NUMXLATIONS][256];
-char kbdxlate[NUMXLATIONS][256];
+char    xlate[NUMXLATIONS][256];
+char    kbdxlate[NUMXLATIONS][256];
 
 
 void
-parse(int n, int kbd)
+parse (int n, int kbd)
 {
-  FILE *fp;
-  char *fname, line[1024], *cp;
-  int i=0;
-  int errors=0;
+	FILE   *fp;
+	char   *fname, line[1024], *cp;
+	int     i = 0;
+	int     errors = 0;
 
-  if(kbd) fname=mkfname(XLATIONDIR"/"KBDXLATIONSRC,n);
-  else fname=mkfname(XLATIONDIR"/"XLATIONSRC,n);
+	if (kbd)
+		fname = mkfname (XLATIONDIR "/" KBDXLATIONSRC, n);
+	else
+		fname = mkfname (XLATIONDIR "/" XLATIONSRC, n);
 
-  if((fp=fopen(fname,"r"))==NULL){
-    fprintf(stderr,"%s: cannot open (one-to-one mapping assumed).\n",fname);
-    for(i=0;i<256;i++)xlate[n][i]=i;
-    return;
-  }
-
-  fprintf(stderr,"%s: Reading...\n",fname);
-
-  while(!feof(fp)){
-    if(!fgets(line,sizeof(line),fp))break;
-    if((cp=strchr(line,'#'))!=NULL)*cp=0;
-    for(cp=strtok(line," \n\r\t");cp;cp=strtok(NULL," \n\r\t")){
-      if(strlen(cp)>2){
-	fprintf(stderr,"  Syntax error for ASCII %d (0x%x,0%o): `%s'\n",
-		i,i,i,cp);
-	errors++;
-      } else if(strlen(cp)==1){
-	if(kbd){
-	  if(i<256)kbdxlate[n][i]=(*cp)?*cp:i;
-	} else {
-	  if(i<256)xlate[n][i]=(*cp)?*cp:i;
+	if ((fp = fopen (fname, "r")) == NULL) {
+		fprintf (stderr,
+			 "%s: cannot open (one-to-one mapping assumed).\n",
+			 fname);
+		for (i = 0; i < 256; i++)
+			xlate[n][i] = i;
+		return;
 	}
-	i++;
-      } else {
-	if(isxdigit(*cp)&&isxdigit(*(cp+1))){
-	  int c;
-	  sscanf(cp,"%x",&c);
-	  if(kbd){
-	    if(i<256)kbdxlate[n][i]=c?(c&0xff):i;
-	  } else {
-	    if(i<256)xlate[n][i]=c?(c&0xff):i;
-	  }
-	  i++;
-	} else {
-	  fprintf(stderr,"  Syntax error for ASCII %d (0x%x,0%o): `%s'\n",
-		  i,i,i,cp);
+
+	fprintf (stderr, "%s: Reading...\n", fname);
+
+	while (!feof (fp)) {
+		if (!fgets (line, sizeof (line), fp))
+			break;
+		if ((cp = strchr (line, '#')) != NULL)
+			*cp = 0;
+		for (cp = strtok (line, " \n\r\t"); cp;
+		     cp = strtok (NULL, " \n\r\t")) {
+			if (strlen (cp) > 2) {
+				fprintf (stderr,
+					 "  Syntax error for ASCII %d (0x%x,0%o): `%s'\n",
+					 i, i, i, cp);
+				errors++;
+			} else if (strlen (cp) == 1) {
+				if (kbd) {
+					if (i < 256)
+						kbdxlate[n][i] =
+						    (*cp) ? *cp : i;
+				} else {
+					if (i < 256)
+						xlate[n][i] = (*cp) ? *cp : i;
+				}
+				i++;
+			} else {
+				if (isxdigit (*cp) && isxdigit (*(cp + 1))) {
+					int     c;
+
+					sscanf (cp, "%x", &c);
+					if (kbd) {
+						if (i < 256)
+							kbdxlate[n][i] =
+							    c ? (c & 0xff) : i;
+					} else {
+						if (i < 256)
+							xlate[n][i] =
+							    c ? (c & 0xff) : i;
+					}
+					i++;
+				} else {
+					fprintf (stderr,
+						 "  Syntax error for ASCII %d (0x%x,0%o): `%s'\n",
+						 i, i, i, cp);
+				}
+			}
+		}
 	}
-      }
-    }
-  }
 
-  fclose(fp);
+	fclose (fp);
 
-  if(errors){
-    fprintf(stderr,"  %d errors detected. Please check the file.\n",errors);
-    exit(1);
-  } else if(i!=256){
-    fprintf(stderr,"  %d characters specified (was expecting 256)\n",i);
-  }
-  fprintf(stderr,"  Ok.\n");
+	if (errors) {
+		fprintf (stderr,
+			 "  %d errors detected. Please check the file.\n",
+			 errors);
+		exit (1);
+	} else if (i != 256) {
+		fprintf (stderr,
+			 "  %d characters specified (was expecting 256)\n", i);
+	}
+	fprintf (stderr, "  Ok.\n");
 }
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  int  i,j;
-  FILE *fp;
+	int     i, j;
+	FILE   *fp;
 
-  mod_setprogname(argv[0]);
-  for(i=0;i<NUMXLATIONS;i++)for(j=0;j<256;j++)xlate[i][j]=kbdxlate[i][j]=j;
+	mod_setprogname (argv[0]);
+	for (i = 0; i < NUMXLATIONS; i++)
+		for (j = 0; j < 256; j++)
+			xlate[i][j] = kbdxlate[i][j] = j;
 
-  for(i=0;i<NUMXLATIONS;i++)parse(i,0);	/* Output mapping */
-  for(i=0;i<NUMXLATIONS;i++)parse(i,1);	/* Keyboard (inp_buffer) mapping */
+	for (i = 0; i < NUMXLATIONS; i++)
+		parse (i, 0);	/* Output mapping */
+	for (i = 0; i < NUMXLATIONS; i++)
+		parse (i, 1);	/* Keyboard (inp_buffer) mapping */
 
-  if((fp=fopen(mkfname(XLATIONFILE"~"),"w"))==NULL){
-    fprintf(stderr,"Unable to open %s for writing!\n",mkfname(XLATIONFILE"~"));
-    exit(1);
-  }
+	if ((fp = fopen (mkfname (XLATIONFILE "~"), "w")) == NULL) {
+		fprintf (stderr, "Unable to open %s for writing!\n",
+			 mkfname (XLATIONFILE "~"));
+		exit (1);
+	}
 
-  if(fwrite(xlate,sizeof(xlate),1,fp)!=1){
-    int i=errno;
-    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",
-	    mkfname(XLATIONFILE"~"),i);
-    exit(1);
-  }
+	if (fwrite (xlate, sizeof (xlate), 1, fp) != 1) {
+		int     i = errno;
 
-  if(fwrite(kbdxlate,sizeof(kbdxlate),1,fp)!=1){
-    int i=errno;
-    fprintf(stderr,"Unable to write to %s! (errno=%d)\n",
-	    mkfname(XLATIONFILE"~"),i);
-    exit(1);
-  }
+		fprintf (stderr, "Unable to write to %s! (errno=%d)\n",
+			 mkfname (XLATIONFILE "~"), i);
+		exit (1);
+	}
 
-  fclose(fp);
-  {
-    char old[2048];
-    strcpy(old,mkfname(XLATIONFILE"~"));
-    rename(old,mkfname(XLATIONFILE));
-  }
-  chmod(mkfname(XLATIONFILE),0660);
+	if (fwrite (kbdxlate, sizeof (kbdxlate), 1, fp) != 1) {
+		int     i = errno;
 
-  fprintf(stderr,"Tables compiled.\n");
-  fprintf(stderr,"NB: if you want your changes to take effect immediately,\n");
-  fprintf(stderr,"    consider saying: su -c \"killall -SIGUSR1 emud\"\n");
-  fprintf(stderr,"    This will cause any emu daemons running to reload the\n");
-  fprintf(stderr,"    translation table from disk.\n");
+		fprintf (stderr, "Unable to write to %s! (errno=%d)\n",
+			 mkfname (XLATIONFILE "~"), i);
+		exit (1);
+	}
 
-  return 0;
+	fclose (fp);
+	{
+		char    old[2048];
+
+		strcpy (old, mkfname (XLATIONFILE "~"));
+		rename (old, mkfname (XLATIONFILE));
+	}
+	chmod (mkfname (XLATIONFILE), 0660);
+
+	fprintf (stderr, "Tables compiled.\n");
+	fprintf (stderr,
+		 "NB: if you want your changes to take effect immediately,\n");
+	fprintf (stderr,
+		 "    consider saying: su -c \"killall -SIGUSR1 emud\"\n");
+	fprintf (stderr,
+		 "    This will cause any emu daemons running to reload the\n");
+	fprintf (stderr, "    translation table from disk.\n");
+
+	return 0;
 }
+
+
+/* End of File */
