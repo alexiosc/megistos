@@ -1,6 +1,7 @@
 Makefile
 Makefile.in
 aclocal.m4
+autom4te.cache
 bbsconfig.h
 bbsconfig.h.in
 build-stamp
