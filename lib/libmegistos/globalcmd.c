@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/09/30 15:10:18  alexios
+ * Changed Dynamic Library hadnling to use libtool's libltdl abstraction
+ * layer. This remains untested to date.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -106,7 +110,7 @@ static const char rcsinfo[] =
 #define WANT_UNISTD_H 1
 #define WANT_STRINGS_H 1
 #define WANT_DIRENT_H 1
-#define WANT_DLFCN_H 1
+#define WANT_LTDL_H 1
 #define WANT_SYS_STAT_H 1
 #define WANT_SYS_SHM_H 1
 #define WANT_TIME_H 1
@@ -150,26 +154,32 @@ gcs_init ()
 	if (gcsnum == 0)
 		return;
 
+	if (lt_dlinit ()) {
+		error_fatal (
+			"Unable to intialise dynamic loading: %s",
+			lt_dlerror ());
+	}
+	
 	gcservers = (gcs_t *) alcmem (sizeof (gcs_t) * gcsnum);
 
 	for (i = 0; i < gcsnum; i++) {
-		char    lib[256];
-		void   *handle;
-		char   *err;
+		char         lib[256];
+		lt_dlhandle  handle;
+		char        *err;
 
 		sprintf (lib, "%s/%s", mkfname (GCSDIR), d[i]->d_name);
 		free (d[i]);
 
-		handle = dlopen (lib, RTLD_LAZY);
+		handle = lt_dlopen (lib);
 
 		if (handle == NULL) {
-			error_fatal
-			    ("Unable to open GCS shared object %s (%s)", lib,
-			     dlerror ());
+			error_fatal (
+				"Unable to open GCS shared object %s (%s)",
+				lib, lt_dlerror ());
 		}
 
-		gcservers[i] = dlsym (handle, "__INIT_GCS__");
-		err = dlerror ();
+		gcservers[i] = (gcs_t) lt_dlsym (handle, "__INIT_GCS__");
+		err = (char *) lt_dlerror ();
 
 		if (gcservers[i] == NULL) {
 			error_fatal ("__INIT_GCS__ not found in %s", lib);
@@ -181,6 +191,11 @@ gcs_init ()
 			     err);
 		}
 	}
+
+	/* Modules are not dl_close()d here, because we need access to
+	 * their symbols throughout the execution of the module. The
+	 * reference counts are automatically decremented by the OS
+	 * when the module exits. */
 
 	free (d);
 }
