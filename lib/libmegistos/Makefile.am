@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.4  2003/08/15 20:40:04  alexios
+# Fixed slight dependency bug.
+#
 # Revision 1.3  2003/08/15 20:25:15  alexios
 # Added version.h to the list of distclean files. Added configure.in to
 # its dependencies to ensure it's recreated when the version changes
@@ -65,7 +68,8 @@ libmegistos_la_CFLAGS += -Wall -pedantic
 
 bin_SCRIPTS = megistos-config
 
-DISTCLEANFILES = version.h
+DISTCLEANFILES = version.mk
 
+version.mk \
 version.h:	version.mk $(libmegistos_la_SOURCES) ../configure.in
 		./mkversion.sh $(VERSION)
