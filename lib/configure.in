@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.7  2003/09/29 21:37:32  alexios
+# Renamed src/ directory to lib/ to accommodate more source code in this
+# tree.
+#
 # Revision 1.6  2003/09/28 22:23:59  alexios
 # Added conditional generation of documentation (via doxygen detection)
 # and locale directory.
@@ -25,7 +29,7 @@
 #
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/audit.c)
+AC_INIT(lib/audit.c)
 
 dnl Magic to obtain the version from debian/changelog, where it should
 dnl reside.
@@ -200,4 +204,4 @@ AC_SUBST(PKGINCLUDEDIR)
 
 CFLAGS="$CFLAGS -Wall"
 
-AC_OUTPUT([Makefile src/Makefile src/megistos-config intl/Makefile po/Makefile.in m4/Makefile doc/Makefile])
+AC_OUTPUT([Makefile lib/Makefile lib/megistos-config intl/Makefile po/Makefile.in m4/Makefile doc/Makefile])

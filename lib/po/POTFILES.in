@@ -1,9 +1,13 @@
 # $Id$
 # 
 # $Log$
+# Revision 1.2  2003/09/29 21:38:05  alexios
+# Renamed src/ directory to lib/ to accommodate more source code in this
+# tree.
+#
 # Revision 1.1  2003/09/28 12:59:00  alexios
 # Initial revision.
 #
 #
-src/bbsmod.c
-src/errorprompts.h
+lib/bbsmod.c
+lib/errorprompts.h

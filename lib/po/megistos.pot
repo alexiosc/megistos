@@ -7,6 +7,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/09/29 21:38:17  alexios
+# Renamed src/ directory to lib/ to accommodate more source code in this
+# tree.
+#
 # Revision 1.1  2003/09/28 13:10:22  alexios
 # Added CVS IDs.
 #
@@ -24,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/bbsmod.c:660
+#: lib/bbsmod.c:660
 #, c-format
 msgid ""
 "Megistos BBS\n"
@@ -39,12 +43,12 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/bbsmod.c:667
+#: lib/bbsmod.c:667
 #, c-format
 msgid "\t--%-20s %s\n"
 msgstr ""
 
-#: src/bbsmod.c:685
+#: lib/bbsmod.c:685
 #, c-format
 msgid ""
 "Syntax: %s command module_options\n"
@@ -52,47 +56,47 @@ msgid ""
 "Where command is one of:\n"
 msgstr ""
 
-#: src/bbsmod.c:690
+#: lib/bbsmod.c:690
 msgid "User login handler"
 msgstr ""
 
-#: src/bbsmod.c:693
+#: lib/bbsmod.c:693
 msgid "User-interactive handler"
 msgstr ""
 
-#: src/bbsmod.c:696
+#: lib/bbsmod.c:696
 msgid "User logout handler"
 msgstr ""
 
-#: src/bbsmod.c:699
+#: lib/bbsmod.c:699
 msgid "User hangup handler"
 msgstr ""
 
-#: src/bbsmod.c:702
+#: lib/bbsmod.c:702
 msgid "Cleanup handler"
 msgstr ""
 
-#: src/bbsmod.c:705
+#: lib/bbsmod.c:705
 msgid "User deletion handler"
 msgstr ""
 
-#: src/bbsmod.c:707
+#: lib/bbsmod.c:707
 msgid "You're reading it"
 msgstr ""
 
-#: src/bbsmod.c:709
+#: lib/bbsmod.c:709
 msgid "Issues installation script"
 msgstr ""
 
-#: src/bbsmod.c:711
+#: lib/bbsmod.c:711
 msgid "Issues uninstall script"
 msgstr ""
 
-#: src/bbsmod.c:713
+#: lib/bbsmod.c:713
 msgid "Module version and information"
 msgstr ""
 
-#: src/errorprompts.h:112
+#: lib/errorprompts.h:112
 msgid ""
 "[0;1;31;5mCaution: [0;1;31mA non-fatal error has interrupted this process.\n"
 "         Please notify the Sysop about the conditions\n"
@@ -100,7 +104,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/errorprompts.h:135
+#: lib/errorprompts.h:135
 msgid ""
 "[0;1;31;5mCAUTION: [0;1;31mA fatal error has interrupted this process.\n"
 "         Please notify the Sysop about the conditions\n"

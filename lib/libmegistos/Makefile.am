@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  2003/09/29 21:38:01  alexios
+# Renamed src/ directory to lib/ to accommodate more source code in this
+# tree.
+#
 # Revision 1.5  2003/09/28 22:26:52  alexios
 # Added DEFS and fixed gcc command-line arguments.
 #
@@ -56,7 +60,8 @@ HDR =						\
 	ttynum.h				\
 	useracc.h				\
 	ver.h					\
-	version.h
+	version.h				\
+	../bbsconfig.h
 
 libmegistos_la_SOURCES =						    \
 	audit.c channels.c format.c input.c output.c timedate.c		    \
