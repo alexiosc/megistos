@@ -1,0 +1,25 @@
+Source: libmegistos
+Section: devel
+Priority: optional
+Maintainer: Alexios Chouchoulas (Megistos Project) <megistos@vennea.demon.co.uk>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.2
+
+Package: libmegistos-dev
+Architecture: any
+Depends: libmegistos (= ${Source-Version}), libc6-dev
+Description: Development files for Megistos BBS
+ Megistos is a stable, multilingual, traditional BBS system written to
+ resemble The Major BBS (R) from a user's point of view.
+ .
+ This is the C development toolkit for writing Megistos BBS applications
+ (called modules) and for compiling the entire system.
+
+Package: libmegistos1
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Shared library for all Megistos BBS software
+ Megistos is a stable, multilingual, traditional BBS system written to
+ resemble The Major BBS (R) from a user's point of view.
+ .
+ This is the shared library needed by all Megistos BBS components.

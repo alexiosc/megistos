@@ -1,0 +1,7 @@
+files
+tmp
+typhoon-dev
+typhoon1
+typhoon1.postinst.debhelper
+typhoon1.postrm.debhelper
+typhoon1.substvars
