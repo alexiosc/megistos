@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:33:14  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -58,9 +61,9 @@ static const char rcsinfo[] =
 
 #include <megistos/bbs.h>
 #include <megistos/mail.h>
-#include <megistos/mbk_bulletins.h>
-#include <megistos/bltidx.h>
-#include <megistos/bulletins.h>
+#include "mbk_bulletins.h"
+#include "bltidx.h"
+#include "bulletins.h"
 
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
@@ -220,7 +223,7 @@ fcopymsg (char *source, char *target)
 
 
 int
-getmsgheader (char *club, int msgno, struct message *msg)
+getmsgheader (char *club, int msgno, message_t *msg)
 {
 	char    lock[256], fname[256], tmp[256];
 	FILE   *fp;
@@ -237,7 +240,7 @@ getmsgheader (char *club, int msgno, struct message *msg)
 		fclose (fp);
 		lock_rm (lock);
 		return 0;
-	} else if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+	} else if (fread (msg, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		lock_rm (lock);
 		return 0;
@@ -263,7 +266,7 @@ fcopymsg (char *source, char *target)
 		return -1;
 	}
 
-	if (fseek (s, sizeof (struct message), SEEK_SET)) {
+	if (fseek (s, sizeof (message_t), SEEK_SET)) {
 		fclose (s);
 		fclose (t);
 		unlink (target);
@@ -306,7 +309,7 @@ fcopymsg (char *source, char *target)
 static void
 insmsg (char *club, uint32 msgno)
 {
-	struct message msg;
+	message_t      msg;
 	struct bltidx blt;
 	char    source[256], target[256], opt = 'B';
 	struct stat st;

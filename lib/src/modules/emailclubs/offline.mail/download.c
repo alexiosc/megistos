@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:33:53  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -70,15 +73,15 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.mail.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.mail.h>
+#include "offline.mail.h"
+#include <mailerplugins.h>
+#include "mbk_offline.mail.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 static int nummsgs = 0;
@@ -116,7 +119,7 @@ doemail ()
 		abort ();
 
 	while (res == BSE_FOUND) {
-		struct message msg;
+		message_t msg;
 
 		if (read (0, &c, 1))
 			if (c == 27 || c == 15 || c == 3)
@@ -189,7 +192,7 @@ doclub (struct lastread *p)
 		abort ();
 
 	while (res == BSE_FOUND) {
-		struct message msg;
+		message_t msg;
 
 		if (read (0, &c, 1))
 			if (c == 27 || c == 15 || c == 3)

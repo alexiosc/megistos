@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:32:00  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -55,9 +58,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_bulletins.h>
-#include <megistos/bltidx.h>
-#include <megistos/bulletins.h>
+#include "mbk_bulletins.h"
+#include "bltidx.h"
+#include "bulletins.h"
 
 
 int
@@ -115,7 +118,7 @@ autoins ()
 	for (j = 0; j < i; free (files[j]), j++) {
 		struct stat st;
 		char    fname[256];
-		struct message msg;
+		message_t msg;
 		int     msgno = 0;
 
 		if (abort)

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:33:53  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,20 +71,20 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.mail.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.mail.h>
+#include "offline.mail.h"
+#include <mailerplugins.h>
+#include "mbk_offline.mail.h"
 
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 static int
-ctl_request (struct qwkhdr *qwkhdr, struct message *msg)
+ctl_request (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	int     n = 8;
 	int     msgno;
@@ -132,7 +135,7 @@ ctl_request (struct qwkhdr *qwkhdr, struct message *msg)
 	/* Check the existence of the attachment and request it */
 
 	{
-		struct message att;
+		message_t att;
 		char    dosfname[13], num[13], fname[256];
 		int     i, res;
 
@@ -172,7 +175,7 @@ ctl_request (struct qwkhdr *qwkhdr, struct message *msg)
 
 
 static int
-ctl_add (struct qwkhdr *qwkhdr, struct message *msg)
+ctl_add (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	int     n = 4;
 	char    clubname[256];
@@ -217,7 +220,7 @@ ctl_add (struct qwkhdr *qwkhdr, struct message *msg)
 
 
 static int
-ctl_drop (struct qwkhdr *qwkhdr, struct message *msg)
+ctl_drop (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	int     n = 5;
 	char    clubname[256];
@@ -262,7 +265,7 @@ ctl_drop (struct qwkhdr *qwkhdr, struct message *msg)
 
 
 static int
-ctl_reset (struct qwkhdr *qwkhdr, struct message *msg)
+ctl_reset (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	int     n = 6;
 	char    clubname[256], tmp[256];
@@ -316,7 +319,7 @@ ctl_reset (struct qwkhdr *qwkhdr, struct message *msg)
 
 struct ctltype {
 	char   *keyword;
-	int     (*handler) (struct qwkhdr *, struct message *);
+	int     (*handler) (struct qwkhdr *, message_t *);
 };
 
 
@@ -343,7 +346,7 @@ outcontroltypes (FILE * fp)
 static int serial = 0;
 
 static int
-addforeign (struct qwkhdr *qwkhdr, struct message *msg)
+addforeign (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	char    fname[15];
 
@@ -356,7 +359,7 @@ addforeign (struct qwkhdr *qwkhdr, struct message *msg)
 
 
 int
-handlecontrolmsg (struct qwkhdr *qwkhdr, struct message *msg)
+handlecontrolmsg (struct qwkhdr *qwkhdr, message_t *msg)
 {
 	char    tmp[256];
 	int     i;

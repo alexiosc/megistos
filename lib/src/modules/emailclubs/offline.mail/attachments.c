@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:33:53  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,15 +71,15 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.mail.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.mail.h>
+#include "offline.mail.h"
+#include <mailerplugins.h>
+#include "mbk_offline.mail.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 
@@ -112,7 +115,7 @@ attmenu ()
 void
 previewheader (struct reqidx *idx)
 {
-	struct message msg;
+	message_t msg;
 
 	goclub (sameas (idx->reqarea, EMAILCLUBNAME) ? NULL : idx->reqarea);
 	getmsgheader (idx->msgno, &msg);
@@ -248,7 +251,7 @@ doatt ()
 					prompt (QWKCPNA);
 					break;
 				} else {
-					struct message msg;
+					message_t msg;
 
 					/* Check if the file is approved */
 

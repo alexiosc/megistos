@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:33:53  alexios
+ * Adjusted #includes. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -84,15 +87,15 @@ static const char rcsinfo[] =
 
 #include <megistos/bbs.h>
 #include <megistos/mail.h>
-#include <megistos/offline.mail.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.mail.h>
+#include "offline.mail.h"
+#include <mailerplugins.h>
+#include "mbk_offline.mail.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
@@ -155,7 +158,7 @@ mkfielduc (char *f, char *s, int len)
 
 
 static void
-makeheader (int clubid, struct message *msg)
+makeheader (int clubid, message_t *msg)
 {
 	char    tmp[256], topic[128];
 
@@ -186,7 +189,7 @@ makeheader (int clubid, struct message *msg)
 
 
 static char *
-mkpre (int clubid, struct message *msg)
+mkpre (int clubid, message_t *msg)
 {
 	if (prefs.flags & OMF_HEADER) {
 		char    s1[256] = { 0 }, s2[256] = {
@@ -274,7 +277,7 @@ mkpre (int clubid, struct message *msg)
 
 
 static char *
-mkbody (int clubid, struct message *msg)
+mkbody (int clubid, message_t *msg)
 {
 	char    fname[256], *body = NULL;
 	gzFile *zfp;
@@ -288,7 +291,7 @@ mkbody (int clubid, struct message *msg)
 				mkfname (msg->club[0] ? msg->
 					 club : EMAILDIRNAME, msg->msgno));
 	} else {
-		struct message dummy;
+		message_t dummy;
 
 		if (gzread (zfp, &dummy, sizeof (dummy)) <= 0) {
 			gzclose (zfp);
@@ -331,7 +334,7 @@ mkbody (int clubid, struct message *msg)
 
 
 static char *
-mkbody (int clubid, struct message *msg)
+mkbody (int clubid, message_t *msg)
 {
 	char    fname[256], *body = NULL;
 	FILE   *fp;
@@ -344,7 +347,7 @@ mkbody (int clubid, struct message *msg)
 		error_fatalsys ("Unable to open message %s/%d for reading",
 				mkfname (msg->club[0] ? msg->
 					 club : EMAILDIRNAME, msg->msgno));
-	} else if (fseek (fp, sizeof (struct message), SEEK_SET)) {
+	} else if (fseek (fp, sizeof (message_t), SEEK_SET)) {
 		int     i = errno;
 
 		fclose (fp);
@@ -385,7 +388,7 @@ mkbody (int clubid, struct message *msg)
 
 
 static char *
-mkfooter (int clubid, struct message *msg)
+mkfooter (int clubid, message_t *msg)
 {
 	if (msg->flags & MSF_FILEATT) {
 		char    fname[256];
@@ -463,7 +466,7 @@ mkfooter (int clubid, struct message *msg)
 
 
 void
-dumpndx (int clubid, struct message *msg)
+dumpndx (int clubid, message_t *msg)
 {
 	struct qwkndx ndxrec;
 
@@ -552,9 +555,9 @@ dumpmsg (char *pre, char *body, char *post)
 
 
 static void
-updatemsg (int clubid, struct message *msg)
+updatemsg (int clubid, message_t *msg)
 {
-	struct message m;
+	message_t m;
 
 	getmsgheader (msg->msgno, &m);
 	m.timesread++;
@@ -563,9 +566,9 @@ updatemsg (int clubid, struct message *msg)
 
 
 void
-receipt (int clubdid, struct message *msg)
+receipt (int clubdid, message_t *msg)
 {
-	struct message rrr;
+	message_t rrr;
 	char    hdrname[256], fname[256], s1[256], s2[256];
 	char    command[256];
 	FILE   *fp;
@@ -621,7 +624,7 @@ receipt (int clubdid, struct message *msg)
 
 
 void
-outmsg (int clubid, struct message *msg)
+outmsg (int clubid, message_t *msg)
 {
 	char   *preamble, *body, *footer;
 
