@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:34:08  alexios
+ * Fixed #includes; removed obsolete function latin() that is no longer
+ * needed; switched to using strerror() instead of str_errlist[].
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -84,7 +88,7 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_lined.h>
+#include "mbk_lined.h"
 
 
 #ifndef GREEK
@@ -116,14 +120,14 @@ int     maxlen;
 char   *txtupld;
 
 
-static char *
-latin (char *s)
+#if 0
 {
-	char    buf[526];
+	static char buf[526];
 
 	strcpy (buf, s);
 	return latinize (buf);
 }
+#endif
 
 
 void
@@ -675,7 +679,7 @@ save ()
 	if ((fp = fopen (filename, "w")) == NULL) {
 		int     i = errno;
 
-		prompt (SAVEERR, i, sys_errlist[i]);
+		prompt (SAVEERR, i, strerror (i));
 		errno = i;
 		error_intsys ("Unable to write to %s", filename);
 		return;
