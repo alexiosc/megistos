@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2001/10/03 18:13:51  alexios
+ * Migrated to snprintf() for security reasons.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -134,8 +137,8 @@ fullaccess()
   char ids[256],*cp=ids;
   char uid[256];
 
-  sprintf(ids," Sysop %s ",fullaxid);
-  sprintf(uid," %s ",thisuseracc.userid);
+  snprintf(ids,sizeof(ids)," Sysop %s ",fullaxid);
+  snprintf(uid,sizeof(uid)," %s ",thisuseracc.userid);
   for(cp=ids;*cp;cp++)*cp=toupper(*cp);
   for(cp=uid;*cp;cp++)*cp=toupper(*cp);
   return (strstr(ids,uid)!=NULL);
@@ -179,7 +182,7 @@ newevent()
 	}
       }
       if(!ok)continue;
-      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
+      snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),s);
       if(!stat(fname,&st)){
 	prompt(EVNALRX);
 	cnc_end();
@@ -235,7 +238,7 @@ newevent()
   if(!get_bool(&bool,EVNWARN,ERRSEL,0,0))return;
   if(bool)event.flags|=EVF_WARN;
 
-  sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
+  snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),s);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create file %s",fname);
   }
@@ -265,11 +268,11 @@ listevents()
       char time[10];
 
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
+      snprintf(s,sizeof(s),"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
-      sprintf(time,"%02d:%02d",event.hour,event.min);
+      snprintf(time,sizeof(time),"%02d:%02d",event.hour,event.min);
       prompt(EVLTAB,(char *)&dirent->d_name,
 	     event.flags&EVF_ASAP?asap:time,event.descr,
 	     msg_getunit(EVLNO,event.flags&EVF_ONLYONCE));
@@ -300,7 +303,7 @@ listprototypes()
       if((!strcmp(".",dirent->d_name))||(!strcmp("..",dirent->d_name)))
 	continue;
       memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
+      snprintf(s,sizeof(s),"%s/%s",mkfname(EVENTDIR),dirent->d_name);
       if((fp=fopen(s,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -342,7 +345,7 @@ delevent()
 
       s=cnc_word();
       for(;(*cp=tolower(*cp))!=0;cp++);
-      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
+      snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVDNEXS);
 	cnc_end();
@@ -356,7 +359,7 @@ delevent()
     prompt(CANCEL);
     return;
   } else if (bool){
-    sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
+    snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),s);
     unlink(fname);
     prompt(EVDOK,s);
     audit(thisuseronl.channel,AUDIT(EVDEL),thisuseracc.userid,s);
@@ -392,7 +395,7 @@ makevent(char *name)
   struct stat st;
   
   for(i=0;i<99;i++){
-    sprintf(fname,"%s/%s-%02d",mkfname(EVENTDIR),name,i);
+    sprintf(fname,sizeof(fname),"%s/%s-%02d",mkfname(EVENTDIR),name,i);
     if(!stat(fname,&st)){
       prompt(EVAUNI,name);
       return;
@@ -446,7 +449,7 @@ makevent(char *name)
       /* scheduling done here */
 
       memset(&event,0,sizeof(event));
-      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),name);
+      snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),name);
       if((fp=fopen(fname,"r"))==NULL)continue;
       fread(&event,sizeof(event),1,fp);
       fclose(fp);
@@ -481,7 +484,7 @@ makevent(char *name)
       }
 
       for(i=0,en=-1;i<99;i++){
-	sprintf(fname,"%s/%s-%02d",mkfname(EVENTDIR),name,i);
+	snprintf(fname,sizeof(fname),"%s/%s-%02d",mkfname(EVENTDIR),name,i);
 	if(stat(fname,&st)){
 	  en=i;
 	  break;
@@ -499,7 +502,7 @@ makevent(char *name)
       else prompt(event.flags&EVF_ONLYONCE?EVADD1:EVADD2,
 		  name,event.hour,event.min);
       
-      sprintf(fname,"%s-%02d",name,i);
+      snprintf(fname,sizeof(fname),"%s-%02d",name,i);
       if(event.flags&EVF_ASAP){
 	audit(thisuseronl.channel,AUDIT(EVADD),thisuseracc.userid,fname);
       } else if(event.flags&EVF_NOW){
@@ -542,7 +545,7 @@ addevent()
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
       }
-      sprintf(fname,"%s/.%s",mkfname(EVENTDIR),s);
+      snprintf(fname,sizeof(fname),"%s/.%s",mkfname(EVENTDIR),s);
       if(stat(fname,&st)){
 	prompt(EVANEX);
 	cnc_end();
@@ -567,7 +570,7 @@ undoevent (char *name)
     prompt(CANCEL);
     return;
   }
-  sprintf(fname,"%s/%s",mkfname(EVENTDIR),name);
+  snprintf(fname,sizeof(fname),"%s/%s",mkfname(EVENTDIR),name);
   unlink(fname);
   prompt(EVCAN,name);
   audit(thisuseronl.channel,AUDIT(EVCAN),thisuseracc.userid,name);
@@ -600,7 +603,7 @@ cancelevent()
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
       }
-      sprintf(fname,"%s/%s",mkfname(EVENTDIR),s);
+      snprintf(fname,sizeof(fname),"%s/%s",mkfname(EVENTDIR),s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVCNEX);
 	cnc_end();
