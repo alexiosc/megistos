@@ -1,9 +1,10 @@
+*.lo
+*.o
 .deps
 .libs
 Makefile
 Makefile.in
+libmegistos.la
 version.h
 version.mk
 visual
-*.o
-*.lo

@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/08/15 18:40:22  alexios
+ * Reinstated a minor fix that got overwitten by CVS, and fixed another
+ * stupid mistake.
+ *
  * Revision 1.5  2003/08/15 18:23:17  alexios
  * Fixed syntax error (d'oh!).
  *
@@ -35,12 +39,9 @@
  */
 
 
-static const char rcsid [] = "$Id$";
-
-
 /* Start by loading up autoconf definitions */
 
-#include "bbsconfig.defs.h"
+#include "bbsconfig.h"
 
 
 /* Always include standard string/memory headers
@@ -407,6 +408,8 @@ static const char rcsid [] = "$Id$";
 #      undef __GCC_NEW_VARARGS__
 #    endif
 #    include <sys/varargs.h>
+#  else
+#    define WANT_STDARG_H
 #  endif
 #endif
 
