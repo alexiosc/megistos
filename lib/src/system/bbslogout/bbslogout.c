@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:36  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -55,10 +58,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -72,52 +72,57 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_TYPES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_login.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_login.h>
 
 
 promptblock_t *msg;
 
 
 
-void resetlinestatus()
+void
+resetlinestatus ()
 {
-  channel_status_t status;
-  channel_getstatus(thisuseronl.channel,&status);
-  status.result=LSR_LOGOUT;
-  status.baud=atoi(getenv("BAUD"));
-  status.user[0]=0;
-  channel_setstatus(thisuseronl.channel,&status);
+	channel_status_t status;
+
+	channel_getstatus (thisuseronl.channel, &status);
+	status.result = LSR_LOGOUT;
+	status.baud = atoi (getenv ("BAUD"));
+	status.user[0] = 0;
+	channel_setstatus (thisuseronl.channel, &status);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  char fname[256];
-  int hup=!strcmp(argv[0],"bbshangup");
+	char    fname[256];
+	int     hup = !strcmp (argv[0], "bbshangup");
 
-  mod_setprogname(argv[0]);
+	mod_setprogname (argv[0]);
 
-  mod_init(INI_ALL);
-  msg=msg_open("login");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	msg = msg_open ("login");
+	msg_setlanguage (thisuseracc.language);
 
-  if(!hup){
-    fmt_setverticalformat(0);
-    prompt(SEEYA);
-    thisuseronl.flags|=OLF_LOGGEDOUT;
-  }
+	if (!hup) {
+		fmt_setverticalformat (0);
+		prompt (SEEYA);
+		thisuseronl.flags |= OLF_LOGGEDOUT;
+	}
 
-  thisuseracc.datelast=today();
+	thisuseracc.datelast = today ();
 
-  mod_done(INI_ALL);
-  channel_disconnect(thisuseronl.emupty);
+	mod_done (INI_ALL);
+	channel_disconnect (thisuseronl.emupty);
 
-  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),thisuseracc.userid);
-  unlink(fname);
+	sprintf (fname, "%s/%s", mkfname (ONLINEDIR), thisuseracc.userid);
+	unlink (fname);
 
-  resetlinestatus();
+	resetlinestatus ();
 
-  return 0;
+	return 0;
 }
+
+
+/* End of File */

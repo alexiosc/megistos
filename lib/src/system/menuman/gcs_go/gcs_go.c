@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:36  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -33,10 +36,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 #include <bbsinclude.h>
@@ -47,11 +47,14 @@ const char *__RCS=RCS_VER;
 /** The entry point to this global command handler */
 
 int
-__INIT_GCS__()
+__INIT_GCS__ ()
 {
-  if(margc==2 && sameas(margv[0],"/go")){
-    gopage(margv[1]);
-    return 1;
-  }
-  return 0;
+	if (margc == 2 && sameas (margv[0], "/go")) {
+		gopage (margv[1]);
+		return 1;
+	}
+	return 0;
 }
+
+
+/* End of File */

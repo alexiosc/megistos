@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -56,7 +56,7 @@ const char *__RCS=RCS_VER;
 
 
 
-static int chpid=-1;		/* The lockfile minder child's PID */
+static int chpid = -1;		/* The lockfile minder child's PID */
 
 
 
@@ -64,41 +64,46 @@ static int chpid=-1;		/* The lockfile minder child's PID */
    stored in the lock file or -1 on error. */
 
 static int
-readuucplock(char *name)
+readuucplock (char *name)
 {
-  int fd;
-  pid_t pid;
-  char apid[16];
+	int     fd;
+	pid_t   pid;
+	char    apid[16];
 
-  debug(D_LOCK,"readuucplock(\"%s\") called.",name);
+	debug (D_LOCK, "readuucplock(\"%s\") called.", name);
 
-  if((fd=open(name,O_RDONLY))<0){
-    int i=errno;
-    debug(D_LOCK,"Unable to open(\"%s\",O_RDONLY), errno=%d",name,i);
-    return -1;
-  }
-  
+	if ((fd = open (name, O_RDONLY)) < 0) {
+		int     i = errno;
 
-  /* Try reading the PID as an ascii number first. */
-
-  read(fd,apid,sizeof(apid));
-  if(sscanf(apid,"%d",(int*)&pid)!=1){
+		debug (D_LOCK, "Unable to open(\"%s\",O_RDONLY), errno=%d",
+		       name, i);
+		return -1;
+	}
 
 
-    /* Hm, maybe it's stored as a binary number */
+	/* Try reading the PID as an ascii number first. */
 
-    close(fd);
-    if((fd=open(name,O_RDONLY))<0){
-      int i=errno;
-      debug(D_LOCK,"Unable to open(\"%s\",O_RDONLY), errno=%d",name,i);
-      return -1;
-    }
-    read(fd,&pid,sizeof(pid));
-  }
+	read (fd, apid, sizeof (apid));
+	if (sscanf (apid, "%d", (int *) &pid) != 1) {
 
-  close(fd);
-  debug(D_LOCK,"Read PID %d from the lockfile.",pid);
-  return pid;
+
+		/* Hm, maybe it's stored as a binary number */
+
+		close (fd);
+		if ((fd = open (name, O_RDONLY)) < 0) {
+			int     i = errno;
+
+			debug (D_LOCK,
+			       "Unable to open(\"%s\",O_RDONLY), errno=%d",
+			       name, i);
+			return -1;
+		}
+		read (fd, &pid, sizeof (pid));
+	}
+
+	close (fd);
+	debug (D_LOCK, "Read PID %d from the lockfile.", pid);
+	return pid;
 }
 
 
@@ -107,118 +112,128 @@ readuucplock(char *name)
    non-zero value if one is found. */
 
 int
-checkuucplock(char *name)
+checkuucplock (char *name)
 {
-  int pid;
-  struct stat st;
-  
-  debug(D_LOCK,"checkuucplock(\"%s\") called.",name);
-  
-  if (stat(name,&st) && errno==ENOENT){
-    debug(D_LOCK,"stat(\"%s\",&st) failed, file not found",name);
-    return 0;
-  }
+	int     pid;
+	struct stat st;
 
-  if((pid=readuucplock(name))<=0){
-    debug(D_LOCK,"Unable to read lockfile \"%s\"!",name);
-    return 0;
-  }
-  
-  if(pid==(int)getpid()){
-    debug(D_LOCK,"Lockfile belongs to me... damn race conditions!");
-    return 0;
-  }
-  
-  if((kill(pid,0)<0)&&errno==ESRCH) {
-    debug(D_LOCK,"Stale lock, will remove.");
-    unlink(name);
-    return 0;
-  }
-  
-  debug(D_LOCK,"Lock belongs to active process.");
-  return 1;
+	debug (D_LOCK, "checkuucplock(\"%s\") called.", name);
+
+	if (stat (name, &st) && errno == ENOENT) {
+		debug (D_LOCK, "stat(\"%s\",&st) failed, file not found",
+		       name);
+		return 0;
+	}
+
+	if ((pid = readuucplock (name)) <= 0) {
+		debug (D_LOCK, "Unable to read lockfile \"%s\"!", name);
+		return 0;
+	}
+
+	if (pid == (int) getpid ()) {
+		debug (D_LOCK,
+		       "Lockfile belongs to me... damn race conditions!");
+		return 0;
+	}
+
+	if ((kill (pid, 0) < 0) && errno == ESRCH) {
+		debug (D_LOCK, "Stale lock, will remove.");
+		unlink (name);
+		return 0;
+	}
+
+	debug (D_LOCK, "Lock belongs to active process.");
+	return 1;
 }
 
 
 
 /* makeuucplock creates the named lock, storing our PID inside the filename */
 
-int makeuucplock(char *name)
+int
+makeuucplock (char *name)
 {
-  int fd, pid;
-  char buf[256];
-  char apid[16];
-  
-  debug(D_LOCK, "makelock(\"%s\") called.",name);
+	int     fd, pid;
+	char    buf[256];
+	char    apid[16];
 
-  /* First make a temp file */
-  sprintf(buf,UUCPLOCK,"tmp.");
-  sprintf(apid,"%d",(int)getpid());
-  strcat(buf,apid);
-  if((fd=creat(buf,0444))<0){
-    debug(D_LOCK,"Unable to create tempfile \"%s\"",buf);
-    return -1;
-  }
+	debug (D_LOCK, "makelock(\"%s\") called.", name);
 
-  debug(D_LOCK,"Created temp file \"%s\"",buf);
+	/* First make a temp file */
+	sprintf (buf, UUCPLOCK, "tmp.");
+	sprintf (apid, "%d", (int) getpid ());
+	strcat (buf, apid);
+	if ((fd = creat (buf, 0444)) < 0) {
+		debug (D_LOCK, "Unable to create tempfile \"%s\"", buf);
+		return -1;
+	}
+
+	debug (D_LOCK, "Created temp file \"%s\"", buf);
 
 
-  /* Put our pid in it */
+	/* Put our pid in it */
 
-  sprintf(apid,"%d",(int)getpid());
-  write(fd,apid,strlen(apid));
-  close(fd);
-  
-  
-  /* Link it to the lock file. */
-  while(link(buf,name)<0){
-    int i=errno;
-    debug(D_LOCK,"link(\"%s\",\"%s\") failed, errno=%d\n",buf,name,i);
-    if(i==EEXIST){		/* Lock file already exists. */
-      
-      /* Maybe someone already created that lock? */
-      
-      if((pid=readuucplock(name))<=0){
-	debug(D_LOCK,"Whoops, link \"%s\" exists now. Sleeping for 30s...",
-	      name);
-	sleep(30);
-	continue;
-      }
-      
-      
-      /* They did, but are they still around? */
-      
-      if((kill(pid,0)<0)&& errno==ESRCH){
-	unlink(name);		/* Remove the link... */
-	continue;		/* ...and retry. */
-      }
-      
-      debug(D_LOCK,"Lock \"%s\" not created, someone beat us to it.",name);
-      unlink(buf);
-      return -1;
-    }
-  }
-    
-    
-  /* And there was much rejoicing */
-  
-  debug(D_LOCK,"Lock \"%s\" created.",name);
-  unlink(buf);
-  return 1;
+	sprintf (apid, "%d", (int) getpid ());
+	write (fd, apid, strlen (apid));
+	close (fd);
+
+
+	/* Link it to the lock file. */
+	while (link (buf, name) < 0) {
+		int     i = errno;
+
+		debug (D_LOCK, "link(\"%s\",\"%s\") failed, errno=%d\n", buf,
+		       name, i);
+		if (i == EEXIST) {	/* Lock file already exists. */
+
+			/* Maybe someone already created that lock? */
+
+			if ((pid = readuucplock (name)) <= 0) {
+				debug (D_LOCK,
+				       "Whoops, link \"%s\" exists now. Sleeping for 30s...",
+				       name);
+				sleep (30);
+				continue;
+			}
+
+
+			/* They did, but are they still around? */
+
+			if ((kill (pid, 0) < 0) && errno == ESRCH) {
+				unlink (name);	/* Remove the link... */
+				continue;	/* ...and retry. */
+			}
+
+			debug (D_LOCK,
+			       "Lock \"%s\" not created, someone beat us to it.",
+			       name);
+			unlink (buf);
+			return -1;
+		}
+	}
+
+
+	/* And there was much rejoicing */
+
+	debug (D_LOCK, "Lock \"%s\" created.", name);
+	unlink (buf);
+	return 1;
 }
 
 
 
 /* If any UUCP locks are pending on this tty, wait until they're gone. */
 
-void waituucplocks()
+void
+waituucplocks ()
 {
-  debug(D_LOCK,"Checking for the lockfile."); 
-  
-  if(checkuucplock(lock)) {
-    while(checkuucplock(lock))sleep(30);
-    exit(0);
-  }
+	debug (D_LOCK, "Checking for the lockfile.");
+
+	if (checkuucplock (lock)) {
+		while (checkuucplock (lock))
+			sleep (30);
+		exit (0);
+	}
 }
 
 
@@ -227,35 +242,37 @@ void waituucplocks()
 /* A simplistic signal handler to remove our lock */
 
 void
-rmuucplock()
+rmuucplock ()
 {
-  unlink(lock);
+	unlink (lock);
 }
 
 
 
 /* Lock the line. Sending SIG{HUP,INT,QUIT,TERM} removes the lock */
 
-void lockline()
+void
+lockline ()
 {
-  debug(D_LOCK,"locking the line.");
-  
-  if(!makeuucplock(lock))exit(0); /* Errors are reported by makelock() */
+	debug (D_LOCK, "locking the line.");
 
-  signal(SIGHUP,rmuucplock);
-  signal(SIGINT,rmuucplock);
-  signal(SIGQUIT,rmuucplock);
-  signal(SIGTERM,rmuucplock);
+	if (!makeuucplock (lock))
+		exit (0);	/* Errors are reported by makelock() */
+
+	signal (SIGHUP, rmuucplock);
+	signal (SIGINT, rmuucplock);
+	signal (SIGQUIT, rmuucplock);
+	signal (SIGTERM, rmuucplock);
 }
 
 
 
 
 void
-uucplockchildhangup()
+uucplockchildhangup ()
 {
-  debug(D_LOCK,"Child caught SIGHUP.");
-  exit(0);
+	debug (D_LOCK, "Child caught SIGHUP.");
+	exit (0);
 }
 
 
@@ -265,54 +282,65 @@ uucplockchildhangup()
    kill the parent. The parent kills the child with a SIGHUP. */
 
 void
-watchuucplocks()
+watchuucplocks ()
 {
-  int ppid;
-  
-  /* If waitfor is used, there's no need to check for locks. */
+	int     ppid;
 
-  if(waitfor)return;
+	/* If waitfor is used, there's no need to check for locks. */
 
-  ppid=(int)getpid();
+	if (waitfor)
+		return;
+
+	ppid = (int) getpid ();
 
 
-  /* Now fork */
-  if((chpid=fork())==0){
-    
-    /* This is the child process */
+	/* Now fork */
+	if ((chpid = fork ()) == 0) {
 
-    signal(SIGHUP,uucplockchildhangup);
+		/* This is the child process */
 
-    for(;;) {
-      if((kill(ppid,0)<0)&&errno==ESRCH){
-	debug(D_LOCK,"Parent exited, child exiting too.");
-	exit(0);
-      }
-      if(checkuucplock(lock))break;
-      if((altlock)&&checkuucplock(altlock))break;
-      sleep(5);
-    }
-      
-    debug(D_LOCK,"Found lockfile(s), signaling parent and exiting...");
-    kill(ppid,SIGHUP);
-    exit(0);
-  }
-    
+		signal (SIGHUP, uucplockchildhangup);
 
-  /* This is the parent process. */
-  
-  if(chpid<0){
-    error_fatal("Couldn't fork lock-minding child process, exiting.");
-  }
+		for (;;) {
+			if ((kill (ppid, 0) < 0) && errno == ESRCH) {
+				debug (D_LOCK,
+				       "Parent exited, child exiting too.");
+				exit (0);
+			}
+			if (checkuucplock (lock))
+				break;
+			if ((altlock) && checkuucplock (altlock))
+				break;
+			sleep (5);
+		}
+
+		debug (D_LOCK,
+		       "Found lockfile(s), signaling parent and exiting...");
+		kill (ppid, SIGHUP);
+		exit (0);
+	}
+
+
+	/* This is the parent process. */
+
+	if (chpid < 0) {
+		error_fatal
+		    ("Couldn't fork lock-minding child process, exiting.");
+	}
 }
 
 
 
 void
-killminder()
+killminder ()
 {
-  int status;
-  if(chpid<0)return;
-  kill(chpid,SIGHUP);
-  wait(&status);
+	int     status;
+
+	if (chpid < 0)
+		return;
+	kill (chpid, SIGHUP);
+	wait (&status);
 }
+
+
+/* End of File */

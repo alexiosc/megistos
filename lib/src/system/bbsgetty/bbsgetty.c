@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,10 +44,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -55,54 +55,61 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "bbsgetty.h"
+#include <megistos/bbsgetty.h>
 
 
 
 static void
-startemud()
+startemud ()
 {
-  char fname[256];
-  int i;
+	char    fname[256];
+	int     i;
 
-  settermios(&ftermios,1);	/* Switch the terminal to its final state */
+	settermios (&ftermios, 1);	/* Switch the terminal to its final state */
 
-  /* Execute the post-connect command, if any */
-  if(postconnect!=NULL){
-    debug(D_RUN,"Executing postconnect command \"%s\"",postconnect);
-    execute_as_mortal(postconnect);
-    debug(D_RUN,"Done running postconnect command.");
-  }
-  
-  sprintf(fname,"%s/.emu-%s",mkfname(EMUFIFODIR),device);
-  unlink(fname);
+	/* Execute the post-connect command, if any */
+	if (postconnect != NULL) {
+		debug (D_RUN, "Executing postconnect command \"%s\"",
+		       postconnect);
+		execute_as_mortal (postconnect);
+		debug (D_RUN, "Done running postconnect command.");
+	}
 
-  if(mkfifo(fname,0660)){
-    error_fatalsys("Unable to create emulation FIFO %s",fname);
-  }
-  if(chown(fname,bbsuid,bbsgid)){
-    error_fatalsys("Unable to chown(\"%s\",%d,%d)",fname,bbsuid,bbsgid);
-  }
+	sprintf (fname, "%s/.emu-%s", mkfname (EMUFIFODIR), device);
+	unlink (fname);
 
-  debug(D_RUN,"Turning into emud. Bye!");
-  execl(mkfname(EMUDBIN),EMUDBIN,NULL);
-  i=errno;
+	if (mkfifo (fname, 0660)) {
+		error_fatalsys ("Unable to create emulation FIFO %s", fname);
+	}
+	if (chown (fname, bbsuid, bbsgid)) {
+		error_fatalsys ("Unable to chown(\"%s\",%d,%d)", fname, bbsuid,
+				bbsgid);
+	}
 
-  /* If we get to this point, something's gone wrong */
-  debug(D_RUN,"Aieee, something's gone very wrong. Couldn't spawn emud.");
-  errno=i;
-  error_fatalsys("Unable to spawn emu daemon for %s.",device);
+	debug (D_RUN, "Turning into emud. Bye!");
+	execl (mkfname (EMUDBIN), EMUDBIN, NULL);
+	i = errno;
+
+	/* If we get to this point, something's gone wrong */
+	debug (D_RUN,
+	       "Aieee, something's gone very wrong. Couldn't spawn emud.");
+	errno = i;
+	error_fatalsys ("Unable to spawn emu daemon for %s.", device);
 }
 
 
-int main(int argc, char **argv)
+int
+main (int argc, char **argv)
 {
-  mod_setprogname("bbsgetty");	/* this facilitates Megistos error logging */
-  init(argc,argv);		/* initialise bbsgetty */
-  waituucplocks();		/* wait for pending UUCP locks on this tty */
-  initline();			/* initialise the channel */
-  watchuucplocks();		/* monitor the lockfiles */
-  opentty();			/* open & initialize the tty */
-  startemud();			/* start emud (only it spawns bbslogin) */
-  return 0;			/* we never reach this point (hopefully) */
+	mod_setprogname ("bbsgetty");	/* this facilitates Megistos error logging */
+	init (argc, argv);	/* initialise bbsgetty */
+	waituucplocks ();	/* wait for pending UUCP locks on this tty */
+	initline ();		/* initialise the channel */
+	watchuucplocks ();	/* monitor the lockfiles */
+	opentty ();		/* open & initialize the tty */
+	startemud ();		/* start emud (only it spawns bbslogin) */
+	return 0;		/* we never reach this point (hopefully) */
 }
+
+
+/* End of File */

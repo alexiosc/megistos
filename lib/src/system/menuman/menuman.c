@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:36  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -72,10 +75,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -89,502 +89,559 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #define I_AM_MENUMAN
-#include "bbs.h"
-#include "menuman.h"
-#include "mbk_menuman.h"
+#include <megistos/bbs.h>
+#include <megistos/menuman.h>
+#include <megistos/mbk_menuman.h>
 
 
 promptblock_t *msg;
 
 struct pageidx {
-  char page[16];
-  long offset;
-  int flags;
+	char    page[16];
+	long    offset;
+	int     flags;
 };
 
 
-FILE               *pagefile=NULL;
-struct pageidx     *pageindex=NULL;
-int                numpages=0;
-union menumanpage  curpage;
-struct pageidx     *curidx=NULL;
-int                pagetype=0;
+FILE   *pagefile = NULL;
+struct pageidx *pageindex = NULL;
+int     numpages = 0;
+union menumanpage curpage;
+struct pageidx *curidx = NULL;
+int     pagetype = 0;
 
-int  defccr;
-int  useshm;
-int  retmenu;
-int  extmenu;
-char *toppag;
-char *extpag;
-char *menpro;
-char *menepi;
-char *shmbeg;
-char *shmopt;
-char *shmlop;
-char *shmend;
-char *shmprm;
-char *relogstg;
-int  keyrel;
-
-
-void
-describe()
-{
-  int i;
-  if(!curpage.m.descr[0][0])for(i=0;i<NUMLANGUAGES;i++){
-    strcpy(thisuseronl.descr[i],msg_getl(DEFDESCR,i));
-  } else memcpy(thisuseronl.descr,curpage.e.descr,sizeof(thisuseronl.descr));
-}
+int     defccr;
+int     useshm;
+int     retmenu;
+int     extmenu;
+char   *toppag;
+char   *extpag;
+char   *menpro;
+char   *menepi;
+char   *shmbeg;
+char   *shmopt;
+char   *shmlop;
+char   *shmend;
+char   *shmprm;
+char   *relogstg;
+int     keyrel;
 
 
 void
-loadindex()
+describe ()
 {
-  FILE *fp;
-  
-  if((fp=fopen(MENUMANINDEX,"r"))==NULL){
-    error_fatalsys("Unable to open %s",MENUMANINDEX);
-  }
-  if(pageindex)free(pageindex);
-  numpages=0;
-  while(!feof(fp)){
-    char line[256];
-    char page[256];
-    long offset;
-    int flags=0;
-    
-    if(!fgets(line,256,fp))continue;
-    if(sscanf(line,"%s %ld %x",page,&offset,&flags)!=3){
-      fclose(fp);
-      error_fatal("Menuman index %s bad format",MENUMANINDEX);
-    }
-    numpages++;
-    pageindex=realloc(pageindex,sizeof(struct pageidx)*numpages);
-    memset(&pageindex[numpages-1],0,sizeof(struct pageidx));
-    strncpy(pageindex[numpages-1].page,page,15);
-    pageindex[numpages-1].offset=offset;
-    pageindex[numpages-1].flags=flags;
-  }
-  fclose(fp);
+	int     i;
+
+	if (!curpage.m.descr[0][0])
+		for (i = 0; i < NUMLANGUAGES; i++) {
+			strcpy (thisuseronl.descr[i], msg_getl (DEFDESCR, i));
+	} else
+		memcpy (thisuseronl.descr, curpage.e.descr,
+			sizeof (thisuseronl.descr));
 }
 
 
 void
-init()
+loadindex ()
 {
-  int mmangopage();
-  void goback();
+	FILE   *fp;
 
-  mod_init(INI_ALL);
-  msg=msg_open("menuman");
-  msg_setlanguage(thisuseracc.language);
-
-  defccr=msg_int(DEFCCR,0,32767);
-
-  if((useshm=msg_token(USESHM,"PROMPT","SHORT")-1)<0){
-    error_fatal("LEVEL2 option USESHM (menuman.msg) has bad value.");
-  }
-  if((retmenu=msg_token(RETMENU,"SHORT","LONG")-1)<0){
-    error_fatal("LEVEL2 option RETMENU (menuman.msg) has bad value.");
-  }
-  if((extmenu=msg_token(EXTMENU,"SHORT","LONG")-1)<0){
-    error_fatal("LEVEL2 option EXTMENU (menuman.msg) has bad value.");
-  }
-
-  toppag=msg_string(TOPPAG);
-  extpag=msg_string(EXTPAG);
-  menpro=strdup(msg_get(MENPRO));
-  menepi=strdup(msg_get(MENEPI));
-  shmbeg=strdup(msg_get(SHMBEG));
-  shmopt=strdup(msg_get(SHMOPT));
-  shmlop=strdup(msg_get(SHMLOP));
-  shmend=strdup(msg_get(SHMEND));
-  shmprm=strdup(msg_get(SHMPRM));
-
-  relogstg=msg_string(RELOGSTG);
-  keyrel=msg_int(KEYREL,0,129);
-  
-  if((pagefile=fopen(MENUMANPAGES,"r"))==NULL){
-    error_fatalsys("Unable to open %s",MENUMANPAGES);
-  }
-
-  loadindex();
-  if(!strlen(thisuseronl.curpage)){
-    strcpy(thisuseronl.curpage,toppag);
-    out_setflags(OFL_AFTERINPUT);
-  }
-  if(thisuseronl.flags&OLF_MMCALLING)goback();
-  else {
-    mmangopage(thisuseronl.curpage);
-  }
-}
-
-
-void
-done()
-{
-  msg_close(msg);
-  fclose(pagefile);
-}
-
-
-int
-pagecmp(const void *a, const void *b)
-{
-  const struct pageidx *index1=a;
-  const struct pageidx *index2=b;
-  return(strcmp(index1->page,index2->page));
-}
-
-
-int
-retrievepage(char *page)
-{
-  struct pageidx *p;
-
-  p=bsearch(page,pageindex,numpages,sizeof(struct pageidx),pagecmp);
-  if(!p) return 0;
-  curidx=p;
-
-  if(fseek(pagefile,curidx->offset,SEEK_SET)) {
-    error_fatalsys("Unable to read page %s",curidx->page);
-  }
-  if(fread(&curpage,sizeof(curpage),1,pagefile)!=1){
-    error_fatalsys("Unable to read page %s",curidx->page);
-  }
-
-  return 1;
-}
-
-
-int
-checkpperm(char *page)
-{
-  struct pageidx *p;
-  union  menumanpage mmp;
-
-  if(!page || !page[0]) return 0;
-
-  p=bsearch(page,pageindex,numpages,sizeof(struct pageidx),pagecmp);
-  if(!p) return 0;
-  
-  if(fseek(pagefile,p->offset,SEEK_SET)){
-    error_fatalsys("Unable to read page %s",p->page);
-  }
-  if(fread(&mmp,sizeof(mmp),1,pagefile)!=1){
-    error_fatalsys("Unable to read page %s",p->page);
-  }
-
-  if(hassysaxs(&thisuseracc,USY_MASTERKEY)) return 1;
-  if(mmp.m.class[0]&&!sameas(mmp.m.class,thisuseracc.curclss)) return 0;
-  if(!key_owns(&thisuseracc,mmp.m.key)) return 0;
-  return 1;
-}
-
-
-int
-mmangopage(char *pagename)
-{
-  if(!checkpperm(pagename)) {
-    prompt(NOAXES1,pagename);
-    return 0;
-  }
-  if((thisuseronl.flags&OLF_MMGCDGO)==0)
-    strncpy(thisuseronl.prevpage,thisuseronl.curpage,15);
-  strncpy(thisuseronl.curpage,pagename,15);
-  thisuseronl.curpage[15]=0;
-  if(retrievepage(pagename)){
-    if(thisuseronl.flags&OLF_MMGCDGO){
-      thisuseronl.flags&=~OLF_MMGCDGO;
-      strncpy(thisuseronl.prevpage,curpage.m.prev,15);
-    }
-    if(curpage.m.type==PAGETYPE_MENU){
-      int i;
-      for(i=0;curpage.m.opts[i].opt && i<MENUOPTNUM;i++){
-	if(!checkpperm(curpage.m.opts[i].name)){
-	  curpage.m.opts[i].opt*=-1;
+	if ((fp = fopen (MENUMANINDEX, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", MENUMANINDEX);
 	}
-      }
-    }
-    thisuseronl.credspermin=
-      (curpage.m.creds==DEFAULTCCR)?defccr:curpage.m.creds;
-    describe();
-    return 1;
-  }
-  return 0;
+	if (pageindex)
+		free (pageindex);
+	numpages = 0;
+	while (!feof (fp)) {
+		char    line[256];
+		char    page[256];
+		long    offset;
+		int     flags = 0;
+
+		if (!fgets (line, 256, fp))
+			continue;
+		if (sscanf (line, "%s %ld %x", page, &offset, &flags) != 3) {
+			fclose (fp);
+			error_fatal ("Menuman index %s bad format",
+				     MENUMANINDEX);
+		}
+		numpages++;
+		pageindex =
+		    realloc (pageindex, sizeof (struct pageidx) * numpages);
+		memset (&pageindex[numpages - 1], 0, sizeof (struct pageidx));
+		strncpy (pageindex[numpages - 1].page, page, 15);
+		pageindex[numpages - 1].offset = offset;
+		pageindex[numpages - 1].flags = flags;
+	}
+	fclose (fp);
+}
+
+
+void
+init ()
+{
+	int     mmangopage ();
+	void    goback ();
+
+	mod_init (INI_ALL);
+	msg = msg_open ("menuman");
+	msg_setlanguage (thisuseracc.language);
+
+	defccr = msg_int (DEFCCR, 0, 32767);
+
+	if ((useshm = msg_token (USESHM, "PROMPT", "SHORT") - 1) < 0) {
+		error_fatal
+		    ("LEVEL2 option USESHM (menuman.msg) has bad value.");
+	}
+	if ((retmenu = msg_token (RETMENU, "SHORT", "LONG") - 1) < 0) {
+		error_fatal
+		    ("LEVEL2 option RETMENU (menuman.msg) has bad value.");
+	}
+	if ((extmenu = msg_token (EXTMENU, "SHORT", "LONG") - 1) < 0) {
+		error_fatal
+		    ("LEVEL2 option EXTMENU (menuman.msg) has bad value.");
+	}
+
+	toppag = msg_string (TOPPAG);
+	extpag = msg_string (EXTPAG);
+	menpro = strdup (msg_get (MENPRO));
+	menepi = strdup (msg_get (MENEPI));
+	shmbeg = strdup (msg_get (SHMBEG));
+	shmopt = strdup (msg_get (SHMOPT));
+	shmlop = strdup (msg_get (SHMLOP));
+	shmend = strdup (msg_get (SHMEND));
+	shmprm = strdup (msg_get (SHMPRM));
+
+	relogstg = msg_string (RELOGSTG);
+	keyrel = msg_int (KEYREL, 0, 129);
+
+	if ((pagefile = fopen (MENUMANPAGES, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", MENUMANPAGES);
+	}
+
+	loadindex ();
+	if (!strlen (thisuseronl.curpage)) {
+		strcpy (thisuseronl.curpage, toppag);
+		out_setflags (OFL_AFTERINPUT);
+	}
+	if (thisuseronl.flags & OLF_MMCALLING)
+		goback ();
+	else {
+		mmangopage (thisuseronl.curpage);
+	}
+}
+
+
+void
+done ()
+{
+	msg_close (msg);
+	fclose (pagefile);
+}
+
+
+int
+pagecmp (const void *a, const void *b)
+{
+	const struct pageidx *index1 = a;
+	const struct pageidx *index2 = b;
+
+	return (strcmp (index1->page, index2->page));
+}
+
+
+int
+retrievepage (char *page)
+{
+	struct pageidx *p;
+
+	p = bsearch (page, pageindex, numpages, sizeof (struct pageidx),
+		     pagecmp);
+	if (!p)
+		return 0;
+	curidx = p;
+
+	if (fseek (pagefile, curidx->offset, SEEK_SET)) {
+		error_fatalsys ("Unable to read page %s", curidx->page);
+	}
+	if (fread (&curpage, sizeof (curpage), 1, pagefile) != 1) {
+		error_fatalsys ("Unable to read page %s", curidx->page);
+	}
+
+	return 1;
+}
+
+
+int
+checkpperm (char *page)
+{
+	struct pageidx *p;
+	union menumanpage mmp;
+
+	if (!page || !page[0])
+		return 0;
+
+	p = bsearch (page, pageindex, numpages, sizeof (struct pageidx),
+		     pagecmp);
+	if (!p)
+		return 0;
+
+	if (fseek (pagefile, p->offset, SEEK_SET)) {
+		error_fatalsys ("Unable to read page %s", p->page);
+	}
+	if (fread (&mmp, sizeof (mmp), 1, pagefile) != 1) {
+		error_fatalsys ("Unable to read page %s", p->page);
+	}
+
+	if (hassysaxs (&thisuseracc, USY_MASTERKEY))
+		return 1;
+	if (mmp.m.class[0] && !sameas (mmp.m.class, thisuseracc.curclss))
+		return 0;
+	if (!key_owns (&thisuseracc, mmp.m.key))
+		return 0;
+	return 1;
+}
+
+
+int
+mmangopage (char *pagename)
+{
+	if (!checkpperm (pagename)) {
+		prompt (NOAXES1, pagename);
+		return 0;
+	}
+	if ((thisuseronl.flags & OLF_MMGCDGO) == 0)
+		strncpy (thisuseronl.prevpage, thisuseronl.curpage, 15);
+	strncpy (thisuseronl.curpage, pagename, 15);
+	thisuseronl.curpage[15] = 0;
+	if (retrievepage (pagename)) {
+		if (thisuseronl.flags & OLF_MMGCDGO) {
+			thisuseronl.flags &= ~OLF_MMGCDGO;
+			strncpy (thisuseronl.prevpage, curpage.m.prev, 15);
+		}
+		if (curpage.m.type == PAGETYPE_MENU) {
+			int     i;
+
+			for (i = 0; curpage.m.opts[i].opt && i < MENUOPTNUM;
+			     i++) {
+				if (!checkpperm (curpage.m.opts[i].name)) {
+					curpage.m.opts[i].opt *= -1;
+				}
+			}
+		}
+		thisuseronl.credspermin =
+		    (curpage.m.creds == DEFAULTCCR) ? defccr : curpage.m.creds;
+		describe ();
+		return 1;
+	}
+	return 0;
 }
 
 
 void
 showfile (union menumanpage *p)
 {
-  char rawname[256], *cp;
-  char fname[256];
-  int ansi=thisuseronl.flags&OLF_ANSION,i;
+	char    rawname[256], *cp;
+	char    fname[256];
+	int     ansi = thisuseronl.flags & OLF_ANSION, i;
 
-  if(p->m.type!=PAGETYPE_MENU && p->f.type!=PAGETYPE_FILE)return;
-  if((cp=strrchr(p->m.fname,'/'))==NULL)cp=p->m.fname;
-  strcpy(rawname,cp);
-  if((cp=strstr(rawname,".ans"))!=NULL)*cp=0;
-  else if((cp=strstr(rawname,".asc"))!=NULL)*cp=0;
-  
-  for(i=thisuseracc.language-1;i>=0;i--){
-    sprintf(fname,"%s/%s-%d.%s",
-	    mkfname(MENUMANDIR),rawname,i,ansi?"ans":"asc");
-    if(out_printfile(fname))return;
-    sprintf(fname,"%s/%s-%d.%s",
-	    mkfname(MENUMANDIR),rawname,i,(!ansi)?"ans":"asc");
-    if(out_printfile(fname))return;
-  }
-  sprintf(fname,"%s/%s.%s",
-	  mkfname(MENUMANDIR),rawname,ansi?"ans":"asc");
-  if(out_printfile(fname))return;
-  sprintf(fname,"%s/%s.%s",
-	  mkfname(MENUMANDIR),rawname,(!ansi)?"ans":"asc");
-  if(out_printfile(fname))return;
-  out_printfile(rawname);
-  error_log("Unable to locate page file similar to %s/%s",
-	    mkfname(MENUMANDIR),rawname);
+	if (p->m.type != PAGETYPE_MENU && p->f.type != PAGETYPE_FILE)
+		return;
+	if ((cp = strrchr (p->m.fname, '/')) == NULL)
+		cp = p->m.fname;
+	strcpy (rawname, cp);
+	if ((cp = strstr (rawname, ".ans")) != NULL)
+		*cp = 0;
+	else if ((cp = strstr (rawname, ".asc")) != NULL)
+		*cp = 0;
+
+	for (i = thisuseracc.language - 1; i >= 0; i--) {
+		sprintf (fname, "%s/%s-%d.%s",
+			 mkfname (MENUMANDIR), rawname, i,
+			 ansi ? "ans" : "asc");
+		if (out_printfile (fname))
+			return;
+		sprintf (fname, "%s/%s-%d.%s",
+			 mkfname (MENUMANDIR), rawname, i,
+			 (!ansi) ? "ans" : "asc");
+		if (out_printfile (fname))
+			return;
+	}
+	sprintf (fname, "%s/%s.%s",
+		 mkfname (MENUMANDIR), rawname, ansi ? "ans" : "asc");
+	if (out_printfile (fname))
+		return;
+	sprintf (fname, "%s/%s.%s",
+		 mkfname (MENUMANDIR), rawname, (!ansi) ? "ans" : "asc");
+	if (out_printfile (fname))
+		return;
+	out_printfile (rawname);
+	error_log ("Unable to locate page file similar to %s/%s",
+		   mkfname (MENUMANDIR), rawname);
 }
 
 
 void
-shortmenu(int which)
+shortmenu (int which)
 {
-  if(which){
-    int i;
+	if (which) {
+		int     i;
 
-    print(shmbeg);
-    for(i=0;curpage.m.opts[i].opt && i<MENUOPTNUM;i++){
-      if(curpage.m.opts[i].opt>0){
-	struct pageidx *p=NULL;
-	p=bsearch(curpage.m.opts[i].name,pageindex,numpages,
-		  sizeof(struct pageidx),pagecmp);
-	if(p->flags&MPF_HIDDEN)continue;
-	print(shmopt,toupper(curpage.m.opts[i].opt));
-      }
-    }
-    print(shmlop,'X');
-    print(shmend);
-  } else {
-    print(shmprm);
-  }
+		print (shmbeg);
+		for (i = 0; curpage.m.opts[i].opt && i < MENUOPTNUM; i++) {
+			if (curpage.m.opts[i].opt > 0) {
+				struct pageidx *p = NULL;
+				p = bsearch (curpage.m.opts[i].name, pageindex,
+					     numpages, sizeof (struct pageidx),
+					     pagecmp);
+				if (p->flags & MPF_HIDDEN)
+					continue;
+				print (shmopt,
+				       toupper (curpage.m.opts[i].opt));
+			}
+		}
+		print (shmlop, 'X');
+		print (shmend);
+	} else {
+		print (shmprm);
+	}
 }
 
 
 void
-byebye(int relog)
+byebye (int relog)
 {
-  char fname[256];
+	char    fname[256];
 
-  if(relog){
-    sprintf(fname,"%s/.relog-%s",mkfname(ONLINEDIR),thisuseronl.channel);
-    close(creat(fname,0660));
-  }
-  sprintf(fname,"%s/.logout-%s",mkfname(ONLINEDIR),thisuseronl.channel);
-  close(creat(fname,0660));
+	if (relog) {
+		sprintf (fname, "%s/.relog-%s", mkfname (ONLINEDIR),
+			 thisuseronl.channel);
+		close (creat (fname, 0660));
+	}
+	sprintf (fname, "%s/.logout-%s", mkfname (ONLINEDIR),
+		 thisuseronl.channel);
+	close (creat (fname, 0660));
 }
 
 
 static int
-checkexit()
+checkexit ()
 {
-  for(;;){
-    int i;
-    for(i=0;i<NUMLANGUAGES;i++){
-      strcpy(thisuseronl.descr[i],msg_getl(XITDESCR,i));
-    }
-    
-    prompt(RUSXITL);
-    cnc_end();
-    inp_get(0);
-    cnc_begin();
-    if(!margc || inp_reprompt())continue;
-    else if(margc && sameas(relogstg,margv[0])){
-      if(key_owns(&thisuseracc,keyrel)){
-	thisuseronl.flags|=OLF_RELOGGED;
-	byebye(1);
-	return 2;
-      } else {
-	describe();
-	return 0;
-      }
-    } else switch(cnc_yesno()){
-    case 'Y':
-      byebye(0);
-      return 1;
-    default:
-      describe();
-      return 0;
-    }
-  }
+	for (;;) {
+		int     i;
 
-  return 0;
-}
+		for (i = 0; i < NUMLANGUAGES; i++) {
+			strcpy (thisuseronl.descr[i], msg_getl (XITDESCR, i));
+		}
 
-
-int
-handleexit()
-{
-  if(sameas(curpage.m.name,toppag) || curpage.m.prev[0]==0
-     || sameas(curpage.m.prev,extpag)){
-    return checkexit();
-  } else mmangopage(curpage.m.prev);
-  return 0;
-}
-
-
-void
-goback()
-{
-  char temp[16]={0};
-  strncpy(temp,thisuseronl.prevpage,15);
-  thisuseronl.flags|=OLF_MMEXITING;
-  mmangopage(temp);
-}
-
-
-int
-handlemenupage()
-{
-  int givenmenu=0;
-
-  if((thisuseronl.flags&OLF_MMEXITING)&&(!extmenu))givenmenu=1;
-  thisuseronl.flags&=~OLF_MMEXITING;
-  describe();
-
-  out_setflags(OFL_AFTERINPUT);
-  for(;;){
-
-  what_a_disgrace:   /* Will it make you feel better if I say Microsoft uses */
-                     /* these? Naah... Well, I'm ashamed of myself! :-)      */
-
-    if(!givenmenu){
-      givenmenu=1;
-      print(menpro);
-      showfile(&curpage);
-      print(menepi);
-      shortmenu(useshm);
-    } else shortmenu(1);
-
-    inp_get(0);
-    cnc_begin();
-    if(margc && inp_isX(cnc_nxtcmd)){
-      switch(handleexit()){
-      case 2:
-	/* for(;;)sleep(666666); */
-      case 1:
-	return 0;
-      }
-    } else if(margc && sameas(cnc_nxtcmd,"?")) {
-      cnc_end();
-      givenmenu=0;
-    } else if(!margc && !inp_reprompt()) {
-      cnc_end();
-      if(retmenu)givenmenu=0;
-      continue;
-    } else if(inp_reprompt()) {
-      continue;
-    }else {
-      int i;
-      char c=toupper(cnc_chr());
-      for(i=0;curpage.m.opts[i].opt && i<MENUOPTNUM;i++){
-	if(toupper(curpage.m.opts[i].opt)==c){
-	  mmangopage(curpage.m.opts[i].name);
-	  return 1;
-	} else if (toupper(-curpage.m.opts[i].opt)==c){
-	  prompt(NOAXES2,c);
-	  goto what_a_disgrace;
+		prompt (RUSXITL);
+		cnc_end ();
+		inp_get (0);
+		cnc_begin ();
+		if (!margc || inp_reprompt ())
+			continue;
+		else if (margc && sameas (relogstg, margv[0])) {
+			if (key_owns (&thisuseracc, keyrel)) {
+				thisuseronl.flags |= OLF_RELOGGED;
+				byebye (1);
+				return 2;
+			} else {
+				describe ();
+				return 0;
+			}
+		} else
+			switch (cnc_yesno ()) {
+			case 'Y':
+				byebye (0);
+				return 1;
+			default:
+				describe ();
+				return 0;
+			}
 	}
-      }
-      prompt(ERRSEL,c);
-    }
-  }
-}
 
-
-void
-handlefilepage()
-{
-  showfile(&curpage);
-  goback();
-}
-
-
-void
-handleexecpage()
-{
-  char *s, inpstr[2048+256];
-  char fname[2048];
-
-  s=cnc_all();
-  sprintf(inpstr,"%s%s",curpage.e.input,((s==NULL || !*s)?"\0":s));
-  memset(thisuseronl.input,0,sizeof(thisuseronl.input));
-  strncpy(thisuseronl.input,inpstr,
-	  max(strlen(inpstr),sizeof(thisuseronl.input)));
-  describe();
-
-  thisuseronl.flags|=OLF_MMCALLING|OLF_MMEXITING;
-  if(thisuseronl.input[0])thisuseronl.flags|=OLF_MMCONCAT;
-
-  mod_done(INI_ALL);
-  strcpy(fname,mkfname(BINDIR"/%s",curpage.e.fname));
-  execlp(fname,fname,"--run",NULL);
-  prompt(CANTXEC,curpage.e.name);
-  exit(0);
-}
-
-
-void
-handlerunpage()
-{
-  thisuseronl.flags|=OLF_BUSY|OLF_NOTIMEOUT;
-  describe();
-  mod_done(INI_SIGNALS|INI_INPUT);
-  system(STTYBIN" sane intr 0x03");
-  system(curpage.r.command);
-  system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  mod_regpid(thisuseronl.channel);
-  mod_init(INI_SIGNALS|INI_INPUT);
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  inp_resetidle();
-  mmgopage(thisuseronl.prevpage);
-}
-
-
-void
-run()
-{
-  for(;;){
-    if(sameas(thisuseronl.curpage,extpag)){
-      int retval=checkexit();
-      if(retval)return;
-      goback();
-    }
-    switch(curpage.m.type){
-    case PAGETYPE_MENU:
-      if(!handlemenupage()) return;
-      break;
-    case PAGETYPE_FILE:
-      handlefilepage();
-      break;
-    case PAGETYPE_EXEC:
-      handleexecpage();
-      break;
-    case PAGETYPE_RUN:
-      handlerunpage();
-      break;
-    }
-  }
+	return 0;
 }
 
 
 int
-main(int argc, char **argv)
+handleexit ()
 {
-  mod_setprogname(argv[0]);
-  init();    /* Why is this so TurboVision-like? Heh heh */
-  run();
-  done();    /* Sorry, couldn't help it -- I had to. [A] */
-  return 126;
+	if (sameas (curpage.m.name, toppag) || curpage.m.prev[0] == 0
+	    || sameas (curpage.m.prev, extpag)) {
+		return checkexit ();
+	} else
+		mmangopage (curpage.m.prev);
+	return 0;
 }
+
+
+void
+goback ()
+{
+	char    temp[16] = { 0 };
+
+	strncpy (temp, thisuseronl.prevpage, 15);
+	thisuseronl.flags |= OLF_MMEXITING;
+	mmangopage (temp);
+}
+
+
+int
+handlemenupage ()
+{
+	int     givenmenu = 0;
+
+	if ((thisuseronl.flags & OLF_MMEXITING) && (!extmenu))
+		givenmenu = 1;
+	thisuseronl.flags &= ~OLF_MMEXITING;
+	describe ();
+
+	out_setflags (OFL_AFTERINPUT);
+	for (;;) {
+
+	      what_a_disgrace:	/* Will it make you feel better if I say Microsoft uses */
+		/* these? Naah... Well, I'm ashamed of myself! :-)      */
+
+		if (!givenmenu) {
+			givenmenu = 1;
+			print (menpro);
+			showfile (&curpage);
+			print (menepi);
+			shortmenu (useshm);
+		} else
+			shortmenu (1);
+
+		inp_get (0);
+		cnc_begin ();
+		if (margc && inp_isX (cnc_nxtcmd)) {
+			switch (handleexit ()) {
+			case 2:
+				/* for(;;)sleep(666666); */
+			case 1:
+				return 0;
+			}
+		} else if (margc && sameas (cnc_nxtcmd, "?")) {
+			cnc_end ();
+			givenmenu = 0;
+		} else if (!margc && !inp_reprompt ()) {
+			cnc_end ();
+			if (retmenu)
+				givenmenu = 0;
+			continue;
+		} else if (inp_reprompt ()) {
+			continue;
+		} else {
+			int     i;
+			char    c = toupper (cnc_chr ());
+
+			for (i = 0; curpage.m.opts[i].opt && i < MENUOPTNUM;
+			     i++) {
+				if (toupper (curpage.m.opts[i].opt) == c) {
+					mmangopage (curpage.m.opts[i].name);
+					return 1;
+				} else if (toupper (-curpage.m.opts[i].opt) ==
+					   c) {
+					prompt (NOAXES2, c);
+					goto what_a_disgrace;
+				}
+			}
+			prompt (ERRSEL, c);
+		}
+	}
+}
+
+
+void
+handlefilepage ()
+{
+	showfile (&curpage);
+	goback ();
+}
+
+
+void
+handleexecpage ()
+{
+	char   *s, inpstr[2048 + 256];
+	char    fname[2048];
+
+	s = cnc_all ();
+	sprintf (inpstr, "%s%s", curpage.e.input,
+		 ((s == NULL || !*s) ? "\0" : s));
+	memset (thisuseronl.input, 0, sizeof (thisuseronl.input));
+	strncpy (thisuseronl.input, inpstr,
+		 max (strlen (inpstr), sizeof (thisuseronl.input)));
+	describe ();
+
+	thisuseronl.flags |= OLF_MMCALLING | OLF_MMEXITING;
+	if (thisuseronl.input[0])
+		thisuseronl.flags |= OLF_MMCONCAT;
+
+	mod_done (INI_ALL);
+	strcpy (fname, mkfname (BINDIR "/%s", curpage.e.fname));
+	execlp (fname, fname, "--run", NULL);
+	prompt (CANTXEC, curpage.e.name);
+	exit (0);
+}
+
+
+void
+handlerunpage ()
+{
+	thisuseronl.flags |= OLF_BUSY | OLF_NOTIMEOUT;
+	describe ();
+	mod_done (INI_SIGNALS | INI_INPUT);
+	system (STTYBIN " sane intr 0x03");
+	system (curpage.r.command);
+	system (STTYBIN " -echo start undef stop undef intr undef susp undef");
+	mod_regpid (thisuseronl.channel);
+	mod_init (INI_SIGNALS | INI_INPUT);
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	inp_resetidle ();
+	mmgopage (thisuseronl.prevpage);
+}
+
+
+void
+run ()
+{
+	for (;;) {
+		if (sameas (thisuseronl.curpage, extpag)) {
+			int     retval = checkexit ();
+
+			if (retval)
+				return;
+			goback ();
+		}
+		switch (curpage.m.type) {
+		case PAGETYPE_MENU:
+			if (!handlemenupage ())
+				return;
+			break;
+		case PAGETYPE_FILE:
+			handlefilepage ();
+			break;
+		case PAGETYPE_EXEC:
+			handleexecpage ();
+			break;
+		case PAGETYPE_RUN:
+			handlerunpage ();
+			break;
+		}
+	}
+}
+
+
+int
+main (int argc, char **argv)
+{
+	mod_setprogname (argv[0]);
+	init ();		/* Why is this so TurboVision-like? Heh heh */
+	run ();
+	done ();		/* Sorry, couldn't help it -- I had to. [A] */
+	return 126;
+}
+
+
+/* End of File */

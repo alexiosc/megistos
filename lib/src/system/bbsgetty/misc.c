@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -59,54 +59,58 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "bbsgetty.h"
+#include <megistos/bbsgetty.h>
 
 
 
 /* Read the line state and status */
 
-void readlinestatus()
+void
+readlinestatus ()
 {
-  channel_status_t status;
-  debug(D_RUN,"Reading status file for device %s",device);
-  channel_getstatus(device,&status);
-  linestate=status.state;
-  debug(D_RUN,"Line status: state=%s, result=%s, bps=%d, user=%s",
-	channel_states[status.state],channel_results[status.result],
-	status.baud,status.user);
+	channel_status_t status;
+
+	debug (D_RUN, "Reading status file for device %s", device);
+	channel_getstatus (device, &status);
+	linestate = status.state;
+	debug (D_RUN, "Line status: state=%s, result=%s, bps=%d, user=%s",
+	       channel_states[status.state], channel_results[status.result],
+	       status.baud, status.user);
 }
 
 
 
 /* Write the line status */
 
-void writelinestatus(int result)
+void
+writelinestatus (int result)
 {
-  channel_status_t status;
-  debug(D_RUN,"Writing status for device \"%s\"",device);
-  channel_getstatus(device,&status);
-  status.result=result;
-  status.baud=reportedlinespeed;
-  status.user[0]=0;
-  channel_setstatus(device,&status);
+	channel_status_t status;
+
+	debug (D_RUN, "Writing status for device \"%s\"", device);
+	channel_getstatus (device, &status);
+	status.result = result;
+	status.baud = reportedlinespeed;
+	status.user[0] = 0;
+	channel_setstatus (device, &status);
 }
 
 
 
 /* Drop our priority, become mortal and sleep for ever */
 void
-idler()
+idler ()
 {
-  setpriority(PRIO_PROCESS,0,20);
-  setuid(bbsuid);
-  setgid(bbsgid);
-  for(;;){
+	setpriority (PRIO_PROCESS, 0, 20);
+	setuid (bbsuid);
+	setgid (bbsgid);
+	for (;;) {
 #ifdef REPENT_SINNERS_THE_END_IS_NIGH
-    sleep(999999);
+		sleep (999999);
 #else
-    sleep(666666);
+		sleep (666666);
 #endif
-  }
+	}
 }
 
 
@@ -114,25 +118,32 @@ idler()
 /* Execute a command as a mere mortal */
 
 void
-execute_as_mortal(char *command)
+execute_as_mortal (char *command)
 {
-  int pid=fork();
-  if(command==NULL)return;
-  
-  switch(pid){
-  case 0:
-    setuid(bbsuid);
-    setgid(bbsgid);
-    if(getuid()){
-      execl("/bin/sh","sh","-c",command,NULL);
-      system(command);
-    }
-    error_fatal("Unable to become "BBSUSERNAME" to run \"%s\".",command);
-    exit(1);
-  case -1:
-    error_fatal("Unable to fork() child process to run \"%s\"!",command);
-    exit(1);
-  default:
-    wait(&pid); /* No magic, I'm just reusing the pid variable here */
-  } 
+	int     pid = fork ();
+
+	if (command == NULL)
+		return;
+
+	switch (pid) {
+	case 0:
+		setuid (bbsuid);
+		setgid (bbsgid);
+		if (getuid ()) {
+			execl ("/bin/sh", "sh", "-c", command, NULL);
+			system (command);
+		}
+		error_fatal ("Unable to become " BBSUSERNAME " to run \"%s\".",
+			     command);
+		exit (1);
+	case -1:
+		error_fatal ("Unable to fork() child process to run \"%s\"!",
+			     command);
+		exit (1);
+	default:
+		wait (&pid);	/* No magic, I'm just reusing the pid variable here */
+	}
 }
+
+
+/* End of File */

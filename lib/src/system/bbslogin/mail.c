@@ -31,6 +31,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:36  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -61,10 +64,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -83,169 +83,184 @@ const char *__RCS=RCS_VER;
 #define WANT_TERMIOS_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
-#include "mbk_signup.h"
-#include "mbk_login.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
+#include <megistos/mbk_signup.h>
+#include <megistos/mbk_login.h>
 
 
 promptblock_t *signup;
 
-int  supu2s;
-char *supauth;
-int  sups2u;
-char *e2uatt;
-int  e2urrr;
+int     supu2s;
+char   *supauth;
+int     sups2u;
+char   *e2uatt;
+int     e2urrr;
 
 
 void
-sendu2s()
+sendu2s ()
 {
-  FILE *fp;
-  char header[256], body[256];
-  int  kgdnam, kgdcom, kgdadr, kgdpho, kgdage, kgdsex;
-  int  kgdpss, kgdpass;
-  char wh[80],age[80],sex[80];
-  char s1[80],s2[80],s3[80],s4[80];
-  char d1[80],d2[80];
-  char sys[80],ns[80],lang[80];
-  char buffer[MSGBUFSIZE], *supauth;
-  char command[256];
-  struct message msg;
+	FILE   *fp;
+	char    header[256], body[256];
+	int     kgdnam, kgdcom, kgdadr, kgdpho, kgdage, kgdsex;
+	int     kgdpss, kgdpass;
+	char    wh[80], age[80], sex[80];
+	char    s1[80], s2[80], s3[80], s4[80];
+	char    d1[80], d2[80];
+	char    sys[80], ns[80], lang[80];
+	char    buffer[MSGBUFSIZE], *supauth;
+	char    command[256];
+	struct message msg;
 
-  msg_set(msg_sys);
+	msg_set (msg_sys);
 
-  kgdnam=msg_int(KGDNAM,0,129);
-  kgdcom=msg_int(KGDCOM,0,129);
-  kgdadr=msg_int(KGDADR,0,129);
-  kgdpho=msg_int(KGDPHO,0,129);
-  kgdage=msg_int(KGDAGE,0,129);
-  kgdsex=msg_int(KGDSEX,0,129);
-  kgdpss=msg_int(KGDPSS,0,129);
-  kgdpass=msg_bool(KGDPASS);
+	kgdnam = msg_int (KGDNAM, 0, 129);
+	kgdcom = msg_int (KGDCOM, 0, 129);
+	kgdadr = msg_int (KGDADR, 0, 129);
+	kgdpho = msg_int (KGDPHO, 0, 129);
+	kgdage = msg_int (KGDAGE, 0, 129);
+	kgdsex = msg_int (KGDSEX, 0, 129);
+	kgdpss = msg_int (KGDPSS, 0, 129);
+	kgdpass = msg_bool (KGDPASS);
 
-  strcpy(wh,msg_get(GDETNAX));
-  strcpy(sex,thisuseracc.sex==USX_MALE?msg_get(GDETM):msg_get(GDETF));
-  memset(s1,0,sizeof(s1));
-  if(thisuseracc.flags&UFL_SUSPENDED)strcpy(s1,msg_get(GDETSUSP));
-  memset(s2,0,sizeof(s2));
-  if(thisuseracc.flags&UFL_EXEMPT)strcpy(s2,msg_get(GDETXMPT));
-  memset(s3,0,sizeof(s3));
-  if(thisuseracc.flags&UFL_DELETED)strcpy(s3,msg_get(GDETDEL));
-  memset(s4,0,sizeof(s3));
-  if(thisuseracc.sysaxs[0]||thisuseracc.sysaxs[1]||thisuseracc.sysaxs[2])
-    strcpy(s4,msg_get(GDETOP));
-  strcpy(sys,msg_get(GDETS1+thisuseracc.system-1));
-  ns[0]=0;
-  if(thisuseracc.prefs&UPF_NONSTOP)strcpy(ns,msg_get(GDETNST));
-  strcpy(lang,msg_get(GDETL1+thisuseracc.language-1));
-  sprintf(age,"%d",thisuseracc.age);
+	strcpy (wh, msg_get (GDETNAX));
+	strcpy (sex,
+		thisuseracc.sex ==
+		USX_MALE ? msg_get (GDETM) : msg_get (GDETF));
+	memset (s1, 0, sizeof (s1));
+	if (thisuseracc.flags & UFL_SUSPENDED)
+		strcpy (s1, msg_get (GDETSUSP));
+	memset (s2, 0, sizeof (s2));
+	if (thisuseracc.flags & UFL_EXEMPT)
+		strcpy (s2, msg_get (GDETXMPT));
+	memset (s3, 0, sizeof (s3));
+	if (thisuseracc.flags & UFL_DELETED)
+		strcpy (s3, msg_get (GDETDEL));
+	memset (s4, 0, sizeof (s3));
+	if (thisuseracc.sysaxs[0] || thisuseracc.sysaxs[1] ||
+	    thisuseracc.sysaxs[2])
+		strcpy (s4, msg_get (GDETOP));
+	strcpy (sys, msg_get (GDETS1 + thisuseracc.system - 1));
+	ns[0] = 0;
+	if (thisuseracc.prefs & UPF_NONSTOP)
+		strcpy (ns, msg_get (GDETNST));
+	strcpy (lang, msg_get (GDETL1 + thisuseracc.language - 1));
+	sprintf (age, "%d", thisuseracc.age);
 
-  strcpy(d1,strdate(thisuseracc.datecre));
-  strcpy(d2,(thisuseracc.datelast>=0)?strdate(thisuseracc.datelast):"");
-  sprompt(buffer,GDET,thisuseracc.userid,
-	 d1,s1,s2,
-	 d2,s3,s4,
-	 thisuseracc.username,
-	 thisuseracc.company,
-	 thisuseracc.address1,
-	 thisuseracc.address2,
-	 thisuseracc.phone,
-	 age,
-	 sex,
-	 sys,thisuseracc.scnwidth,thisuseracc.scnheight,ns,
-	 lang,thisuseracc.curclss,
-	 ((!kgdpass)?thisuseracc.passwd:wh),
-	 thisuseracc.credits,thisuseracc.totpaid);
+	strcpy (d1, strdate (thisuseracc.datecre));
+	strcpy (d2,
+		(thisuseracc.datelast >=
+		 0) ? strdate (thisuseracc.datelast) : "");
+	sprompt (buffer, GDET, thisuseracc.userid, d1, s1, s2, d2, s3, s4,
+		 thisuseracc.username, thisuseracc.company,
+		 thisuseracc.address1, thisuseracc.address2, thisuseracc.phone,
+		 age, sex, sys, thisuseracc.scnwidth, thisuseracc.scnheight,
+		 ns, lang, thisuseracc.curclss,
+		 ((!kgdpass) ? thisuseracc.passwd : wh), thisuseracc.credits,
+		 thisuseracc.totpaid);
 
-  msg_set(signup);
+	msg_set (signup);
 
-  sprintf(body,"/tmp/u2s%dB",getpid());
-  if((fp=fopen(body,"w"))==NULL)return;
-  fputs(buffer,fp);
-  fclose(fp);
+	sprintf (body, "/tmp/u2s%dB", getpid ());
+	if ((fp = fopen (body, "w")) == NULL)
+		return;
+	fputs (buffer, fp);
+	fclose (fp);
 
-  supauth=msg_get(SUPAUTH);
-  if(supauth && *supauth){
-    sprintf(command,"%s %s %s",supauth,thisuseracc.userid,body);
-    system(command);
-  }
+	supauth = msg_get (SUPAUTH);
+	if (supauth && *supauth) {
+		sprintf (command, "%s %s %s", supauth, thisuseracc.userid,
+			 body);
+		system (command);
+	}
 
-  memset(&msg,0,sizeof(msg));
-  strcpy(msg.from,thisuseracc.userid);
-  strcpy(msg.to,SYSOP);
-  sprintf(msg.subject,msg_get(U2STPC),thisuseracc.userid);
-  msg.flags=MSF_CANTMOD|MSF_SIGNUP;
+	memset (&msg, 0, sizeof (msg));
+	strcpy (msg.from, thisuseracc.userid);
+	strcpy (msg.to, SYSOP);
+	sprintf (msg.subject, msg_get (U2STPC), thisuseracc.userid);
+	msg.flags = MSF_CANTMOD | MSF_SIGNUP;
 
-  sprintf(header,"/tmp/u2s%dH",getpid());
-  if((fp=fopen(header,"w"))==NULL)return;
-  fwrite(&msg,sizeof(msg),1,fp);
-  fclose(fp);
+	sprintf (header, "/tmp/u2s%dH", getpid ());
+	if ((fp = fopen (header, "w")) == NULL)
+		return;
+	fwrite (&msg, sizeof (msg), 1, fp);
+	fclose (fp);
 
-  sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
-  system(command);
-  unlink(body);
-  unlink(header);
+	sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), header, body);
+	system (command);
+	unlink (body);
+	unlink (header);
 }
 
 
 void
-sends2u()
+sends2u ()
 {
-  FILE *fp;
-  char header[256], body[256];
-  char command[256];
-  struct message msg;
-  char *e2uatt;
+	FILE   *fp;
+	char    header[256], body[256];
+	char    command[256];
+	struct message msg;
+	char   *e2uatt;
 
-  sprintf(body,"/tmp/s2u%dB",getpid());
-  if((fp=fopen(body,"w"))==NULL)return;
-  fputs(msg_get(S2UTXT),fp);
-  fclose(fp);
+	sprintf (body, "/tmp/s2u%dB", getpid ());
+	if ((fp = fopen (body, "w")) == NULL)
+		return;
+	fputs (msg_get (S2UTXT), fp);
+	fclose (fp);
 
-  memset(&msg,0,sizeof(msg));
-  strcpy(msg.to,thisuseracc.userid);
-  strcpy(msg.from,SYSOP);
-  sprintf(msg.subject,msg_get(S2UTPC),thisuseracc.userid);
-  if(msg_bool(E2URRR))msg.flags=MSF_RECEIPT;
+	memset (&msg, 0, sizeof (msg));
+	strcpy (msg.to, thisuseracc.userid);
+	strcpy (msg.from, SYSOP);
+	sprintf (msg.subject, msg_get (S2UTPC), thisuseracc.userid);
+	if (msg_bool (E2URRR))
+		msg.flags = MSF_RECEIPT;
 
-  e2uatt=msg_string(E2UATT);
-  if(e2uatt && *e2uatt){
-    msg.flags|=(MSF_FILEATT|MSF_APPROVD);
-    strcpy(msg.fatt,msg_get(E2UNAM));
-  }
+	e2uatt = msg_string (E2UATT);
+	if (e2uatt && *e2uatt) {
+		msg.flags |= (MSF_FILEATT | MSF_APPROVD);
+		strcpy (msg.fatt, msg_get (E2UNAM));
+	}
 
-  sprintf(header,"/tmp/s2u%dH",getpid());
-  if((fp=fopen(header,"w"))==NULL)return;
-  fwrite(&msg,sizeof(msg),1,fp);
-  fclose(fp);
+	sprintf (header, "/tmp/s2u%dH", getpid ());
+	if ((fp = fopen (header, "w")) == NULL)
+		return;
+	fwrite (&msg, sizeof (msg), 1, fp);
+	fclose (fp);
 
-  if(e2uatt && *e2uatt){
-    sprintf(command,"%s %s %s -s %s",mkfname(BBSMAILBIN),header,body,e2uatt);
-  } else {
-    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
-  }
-  system(command);
-  unlink(body);
-  unlink(header);
+	if (e2uatt && *e2uatt) {
+		sprintf (command, "%s %s %s -s %s", mkfname (BBSMAILBIN),
+			 header, body, e2uatt);
+	} else {
+		sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), header,
+			 body);
+	}
+	system (command);
+	unlink (body);
+	unlink (header);
 }
 
 
 void
-sendmail()
+sendmail ()
 {
-  signup=msg_open("signup");
-  msg_set(signup);
-  supu2s=msg_bool(SUPU2S);
-  supauth=msg_string(SUPAUTH);
-  sups2u=msg_bool(SUPS2U);
-  e2uatt=msg_string(E2UATT);
-  e2urrr=msg_bool(E2URRR);
+	signup = msg_open ("signup");
+	msg_set (signup);
+	supu2s = msg_bool (SUPU2S);
+	supauth = msg_string (SUPAUTH);
+	sups2u = msg_bool (SUPS2U);
+	e2uatt = msg_string (E2UATT);
+	e2urrr = msg_bool (E2URRR);
 
-  if(supu2s)sendu2s();
-  if(sups2u)sends2u();
+	if (supu2s)
+		sendu2s ();
+	if (sups2u)
+		sends2u ();
 
-  audit(thisuseronl.channel,AUDIT(SIGNUP),thisuseracc.userid);
+	audit (thisuseronl.channel, AUDIT (SIGNUP), thisuseracc.userid);
 }
 
 
+
+
+/* End of File */

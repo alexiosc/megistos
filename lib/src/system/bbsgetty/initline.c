@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -46,10 +49,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -60,199 +60,210 @@ const char *__RCS=RCS_VER;
 #define WANT_IOCTL_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "bbsgetty.h"
+#include <megistos/bbsgetty.h>
 
 
 /* Update the utmp and wtmp files. */
 
 static void
-doutmp()
+doutmp ()
 {
-  pid_t         pid;
-  struct utmp  *utmp;
-  FILE         *fp;
-  
-  debug(D_RUN,"doutmp() called, updating UTMP/WTMP files.");
-  
-  pid=getpid();
-  
-  utmp=alcmem(sizeof(struct utmp));
-  strncpy(utmp->ut_line,device,sizeof(utmp->ut_line));
-  strncpy(utmp->ut_id,device+3,sizeof(utmp->ut_id)); /* ttyS4 -> S4 */
-  utmp->ut_host[0]='\0';
-  utmp->ut_addr=0;
-  strncpy(utmp->ut_user,"LOGIN",sizeof(utmp->ut_user));
-  utmp->ut_pid=pid;
-  utmp->ut_type=LOGIN_PROCESS;
-  utmp->ut_time=time(0);
-  pututline(utmp);
+	pid_t   pid;
+	struct utmp *utmp;
+	FILE   *fp;
 
-  /* Now do the WTMP file */
-  if((fp=fopen(WTMP_FILE,"a"))){
-    fseek(fp,0L,SEEK_END);
-    fwrite(utmp,sizeof(*utmp),1,fp);
-    fclose(fp);
-  }
+	debug (D_RUN, "doutmp() called, updating UTMP/WTMP files.");
 
-  endutent();
+	pid = getpid ();
+
+	utmp = alcmem (sizeof (struct utmp));
+	strncpy (utmp->ut_line, device, sizeof (utmp->ut_line));
+	strncpy (utmp->ut_id, device + 3, sizeof (utmp->ut_id));	/* ttyS4 -> S4 */
+	utmp->ut_host[0] = '\0';
+	utmp->ut_addr = 0;
+	strncpy (utmp->ut_user, "LOGIN", sizeof (utmp->ut_user));
+	utmp->ut_pid = pid;
+	utmp->ut_type = LOGIN_PROCESS;
+	utmp->ut_time = time (0);
+	pututline (utmp);
+
+	/* Now do the WTMP file */
+	if ((fp = fopen (WTMP_FILE, "a"))) {
+		fseek (fp, 0L, SEEK_END);
+		fwrite (utmp, sizeof (*utmp), 1, fp);
+		fclose (fp);
+	}
+
+	endutent ();
 }
 
 
 
 void
-initline()
+initline ()
 {
-  struct stat     st;
-  struct termios  t;
-  char            ch;
-  int             flags, fd;
-  char            *wait=waitfor;
+	struct stat st;
+	struct termios t;
+	char    ch;
+	int     flags, fd;
+	char   *wait = waitfor;
 
-  /* Set the device's ownership back to root */
-  
-  chmod(devname,0666);
-  if(!stat(devname,&st))chown(devname,0,st.st_gid);
+	/* Set the device's ownership back to root */
 
-
-  /* Update UTMP/WTMP */ 
-
-  doutmp();
+	chmod (devname, 0666);
+	if (!stat (devname, &st))
+		chown (devname, 0, st.st_gid);
 
 
-  /* Open the device for initialisation only if INIT or WAITCHAR are set */
+	/* Update UTMP/WTMP */
 
-  if(initstr||waitchar){
-    debug(D_RUN,"Opening line for initialisation: %s",devname);
-    while(((fd=open(devname,O_RDWR|O_NDELAY))<0)&&(errno==EBUSY))sleep(30);
-    if(fd<0){
-      debug(D_RUN,"Unable to open %s",devname);
-      error_fatalsys("Unable to open %s",devname);
-    }
-    if(fd!=0){
-      debug(D_RUN,"Whoops, stdin is not filehandle 0.");
-      error_fatal("Whoops, stdin is not filehandle 0.");
-    }
-    if(dup(0)!=1) {
-      debug(D_RUN,"Whoops, stdout is not filehandle 1.");
-      error_fatal("Whoops, stdout is not filehandle 1.");
-    }
-    if(dup(0)!=2) {
-      debug(D_RUN,"Whoops, stdout is not filehandle 2.");
-      error_fatal("Whoops, stdout is not filehandle 2.");
-    }
-
-    /* Arrange for the three file handles to be unbuffered */
-    setbuf(stdin,NULL);
-    setbuf(stdout,NULL);
-    setbuf(stderr,NULL);
+	doutmp ();
 
 
-    /* Set the baud rate to B0 so the line hangs up */
-    if(!nohangup){
-      tcgetattr(0,&t);
-      t.c_cflag&=~CBAUD;
-      t.c_cflag|=B0;
-      tcsetattr(0,TCSANOW,&t);
-    }
+	/* Open the device for initialisation only if INIT or WAITCHAR are set */
+
+	if (initstr || waitchar) {
+		debug (D_RUN, "Opening line for initialisation: %s", devname);
+		while (((fd = open (devname, O_RDWR | O_NDELAY)) < 0) &&
+		       (errno == EBUSY))
+			sleep (30);
+		if (fd < 0) {
+			debug (D_RUN, "Unable to open %s", devname);
+			error_fatalsys ("Unable to open %s", devname);
+		}
+		if (fd != 0) {
+			debug (D_RUN, "Whoops, stdin is not filehandle 0.");
+			error_fatal ("Whoops, stdin is not filehandle 0.");
+		}
+		if (dup (0) != 1) {
+			debug (D_RUN, "Whoops, stdout is not filehandle 1.");
+			error_fatal ("Whoops, stdout is not filehandle 1.");
+		}
+		if (dup (0) != 2) {
+			debug (D_RUN, "Whoops, stdout is not filehandle 2.");
+			error_fatal ("Whoops, stdout is not filehandle 2.");
+		}
+
+		/* Arrange for the three file handles to be unbuffered */
+		setbuf (stdin, NULL);
+		setbuf (stdout, NULL);
+		setbuf (stderr, NULL);
 
 
-    /* Prepare the terminal */
-    settermios(&itermios,0);
+		/* Set the baud rate to B0 so the line hangs up */
+		if (!nohangup) {
+			tcgetattr (0, &t);
+			t.c_cflag &= ~CBAUD;
+			t.c_cflag |= B0;
+			tcsetattr (0, TCSANOW, &t);
+		}
 
 
-    /* Set blocking inp_buffer */
-    flags=fcntl(0,F_GETFL,0);
-    fcntl(0,F_SETFL,flags&~O_NDELAY);
-
-    
-    /* If a PRECONNECT command is set, issue it now, becoming mortal first */
-    if(preconnect!=NULL){
-      debug(D_RUN,"Executing preconnect command \"%s\"",preconnect);
-      execute_as_mortal(preconnect);
-      debug(D_RUN,"Done running preconnect command.");
-    }
-    
-
-    /* Ok, time to send the init string to the line. */
-    if(initstr){
-      debug(D_RUN,"Initialising line %s...",devname);
-      
-      /* Set CLOCAL for init, so ATZ works right */
-      tcgetattr(0,&t);
-      t.c_cflag|=CLOCAL;
-      tcsetattr(0,TCSANOW,&t);
+		/* Prepare the terminal */
+		settermios (&itermios, 0);
 
 
-      /* Process the init sequence */
-      if(chat(initstr)<0) {
-	debug(D_RUN,"Init sequence failed... aborting.");
-	/*error_fatal("Init sequence failed, aborting.");*/
-	exit(1);
-      }
-      
-
-      /* Reset the line */
-      settermios(&itermios,0);
-    }
-  }
+		/* Set blocking inp_buffer */
+		flags = fcntl (0, F_GETFL, 0);
+		fcntl (0, F_SETFL, flags & ~O_NDELAY);
 
 
-  /* Notify the BBS that we initialised ok */
-  writelinestatus(LSR_OK);
+		/* If a PRECONNECT command is set, issue it now, becoming mortal first */
+		if (preconnect != NULL) {
+			debug (D_RUN, "Executing preconnect command \"%s\"",
+			       preconnect);
+			execute_as_mortal (preconnect);
+			debug (D_RUN, "Done running preconnect command.");
+		}
 
 
-  /*debug(D_RUN,"OOGAH!!! Linestate=%d, LST_BUSYOYT=%d",linestate,LST_BUSYOUT);*/
-  /* If the line is in the BUSY-OUT or NO-ANSWER state, we stop here */
-  if(linestate==LST_BUSYOUT||linestate==LST_NOANSWER){
-    writelinestatus(LSR_OK);
+		/* Ok, time to send the init string to the line. */
+		if (initstr) {
+			debug (D_RUN, "Initialising line %s...", devname);
 
-    /* Cancel alarms and wait for ever */
-    alarm(0);
-    idler();
-    exit(0);			/* We never get to this point, anyway */
-  }
-  
+			/* Set CLOCAL for init, so ATZ works right */
+			tcgetattr (0, &t);
+			t.c_cflag |= CLOCAL;
+			tcsetattr (0, TCSANOW, &t);
 
 
-  /* Do we have to wait for a character? */
-  
-  if(waitchar){
-    debug(D_RUN,"Waiting for a character...");
-    ioctl(0,TCFLSH,0);
-    read(0,&ch,1);		/* blocking inp_buffer */
-    debug(D_RUN,"Got it!");
-
-    
-    /* Check the lockfiles again */
-    if(checkuucplock(lock))exit(0);
-    if((altlock)&&checkuucplock(altlock))exit(0);
-    
-    
-    /* Should we wait for something specific (except Godot)? */
-    if(wait){
-      debug(D_RUN,"Executing WAITFOR script...");
+			/* Process the init sequence */
+			if (chat (initstr) < 0) {
+				debug (D_RUN,
+				       "Init sequence failed... aborting.");
+				/*error_fatal("Init sequence failed, aborting."); */
+				exit (1);
+			}
 
 
-      /* Take into account the character we just read */
-      if(ch == *wait) wait++;
+			/* Reset the line */
+			settermios (&itermios, 0);
+		}
+	}
 
 
-      /* Wait for the 'wait' sequence */
-      if((*wait)&&(expect(wait)<0)){
-	debug(D_RUN,"WAITFOR match failed.");
-	/* error_fatal("WAITFOR match failed.");*/
-	exit(1);
-      }
-    }
-  }
+	/* Notify the BBS that we initialised ok */
+	writelinestatus (LSR_OK);
 
 
-  /* Now be nice and close any files we've opened */
-  
-  if(initstr||waitchar){
-    close(0);
-    close(1);
-    close(2);
-  }
+	/*debug(D_RUN,"OOGAH!!! Linestate=%d, LST_BUSYOYT=%d",linestate,LST_BUSYOUT); */
+	/* If the line is in the BUSY-OUT or NO-ANSWER state, we stop here */
+	if (linestate == LST_BUSYOUT || linestate == LST_NOANSWER) {
+		writelinestatus (LSR_OK);
+
+		/* Cancel alarms and wait for ever */
+		alarm (0);
+		idler ();
+		exit (0);	/* We never get to this point, anyway */
+	}
+
+
+
+	/* Do we have to wait for a character? */
+
+	if (waitchar) {
+		debug (D_RUN, "Waiting for a character...");
+		ioctl (0, TCFLSH, 0);
+		read (0, &ch, 1);	/* blocking inp_buffer */
+		debug (D_RUN, "Got it!");
+
+
+		/* Check the lockfiles again */
+		if (checkuucplock (lock))
+			exit (0);
+		if ((altlock) && checkuucplock (altlock))
+			exit (0);
+
+
+		/* Should we wait for something specific (except Godot)? */
+		if (wait) {
+			debug (D_RUN, "Executing WAITFOR script...");
+
+
+			/* Take into account the character we just read */
+			if (ch == *wait)
+				wait++;
+
+
+			/* Wait for the 'wait' sequence */
+			if ((*wait) && (expect (wait) < 0)) {
+				debug (D_RUN, "WAITFOR match failed.");
+				/* error_fatal("WAITFOR match failed."); */
+				exit (1);
+			}
+		}
+	}
+
+
+	/* Now be nice and close any files we've opened */
+
+	if (initstr || waitchar) {
+		close (0);
+		close (1);
+		close (2);
+	}
 }
 
+
+
+/* End of File */

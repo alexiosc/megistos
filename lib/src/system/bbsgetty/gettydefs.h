@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -42,9 +45,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 /* Define the default line discipline, unless already defined */
@@ -71,31 +72,31 @@
 #define CNUL    0
 #endif
 #ifndef CERASE
-#define CERASE  127     /* ^? */
+#define CERASE  127		/* ^? */
 #endif
 #ifndef CKILL
-#define CKILL   025     /* ^U */
+#define CKILL   025		/* ^U */
 #endif
 #ifndef CINTR
-#define CINTR   03      /* ^C */
+#define CINTR   03		/* ^C */
 #endif
 #ifndef CQUIT
-#define CQUIT   034     /* ^\ */
+#define CQUIT   034		/* ^\ */
 #endif
 #ifndef CSTART
-#define CSTART  021     /* ^Q */
+#define CSTART  021		/* ^Q */
 #endif
 #ifndef CSTOP
-#define CSTOP   023     /* ^S */
+#define CSTOP   023		/* ^S */
 #endif
 #ifndef CEOF
-#define CEOF    04      /* ^D */
+#define CEOF    04		/* ^D */
 #endif
 #ifndef CMIN
-#define CMIN    06      /* satisfy read at 6 chars */
+#define CMIN    06		/* satisfy read at 6 chars */
 #endif
 #ifndef CTIME
-#define CTIME   01      /* .1 sec inter-character timer */
+#define CTIME   01		/* .1 sec inter-character timer */
 #endif
 
 
@@ -103,8 +104,8 @@
 /* Table for the various flags */
 
 struct symtab {
-  char          *name;		/* Symbolic name */
-  unsigned long  value;		/* Actual value */
+	char   *name;		/* Symbolic name */
+	unsigned long value;	/* Actual value */
 };
 
 
@@ -112,21 +113,21 @@ struct symtab {
 /* Input mode flags */
 
 struct symtab imodes[] = {
-  { "IGNBRK",	IGNBRK	},
-  { "BRKINT",	BRKINT	},
-  { "IGNPAR",	IGNPAR	},
-  { "PARMRK",	PARMRK	},
-  { "INPCK",	INPCK	},
-  { "ISTRIP",	ISTRIP	},
-  { "INLCR",	INLCR	},
-  { "IGNCR",	IGNCR	},
-  { "ICRNL",	ICRNL	},
-  { "IUCLC",	IUCLC	},
-  { "IXON",	IXON	},
-  { "IXANY",	IXANY	},
-  { "IXOFF",	IXOFF	},
-  { "IMAXBEL",	IMAXBEL	},
-  {  NULL,	0	}
+	{"IGNBRK", IGNBRK},
+	{"BRKINT", BRKINT},
+	{"IGNPAR", IGNPAR},
+	{"PARMRK", PARMRK},
+	{"INPCK", INPCK},
+	{"ISTRIP", ISTRIP},
+	{"INLCR", INLCR},
+	{"IGNCR", IGNCR},
+	{"ICRNL", ICRNL},
+	{"IUCLC", IUCLC},
+	{"IXON", IXON},
+	{"IXANY", IXANY},
+	{"IXOFF", IXOFF},
+	{"IMAXBEL", IMAXBEL},
+	{NULL, 0}
 };
 
 
@@ -134,37 +135,37 @@ struct symtab imodes[] = {
 /* Output mode flags */
 
 struct symtab omodes[] = {
-  { "OPOST",	OPOST	},
-  { "OLCUC",	OLCUC	},
-  { "ONLCR",	ONLCR	},
-  { "OCRNL",	OCRNL	},
-  { "ONOCR",	ONOCR	},
-  { "ONLRET",	ONLRET	},
-  { "OFILL",	OFILL	},
-  { "OFDEL",	OFDEL	},
-  { "NLDLY",	NLDLY	},
-  { "NL0",	NL0	},
-  { "NL1",	NL1	},
-  { "CRDLY",	CRDLY	},
-  { "CR0",	CR0	},
-  { "CR1",	CR1	},
-  { "CR2",	CR2	},
-  { "CR3",	CR3	},
-  { "TABDLY",	TABDLY	},
-  { "TAB0",	TAB0	},
-  { "TAB1",	TAB1	},
-  { "TAB2",	TAB2	},
-  { "TAB3",	TAB3	},
-  { "BSDLY",	BSDLY	},
-  { "BS0",	BS0	},
-  { "BS1",	BS1	},
-  { "VTDLY",	VTDLY	},
-  { "VT0",	VT0	},
-  { "VT1",	VT1	},
-  { "FFDLY",	FFDLY	},
-  { "FF0",	FF0	},
-  { "FF1",	FF1	},
-  {  NULL,	0	}
+	{"OPOST", OPOST},
+	{"OLCUC", OLCUC},
+	{"ONLCR", ONLCR},
+	{"OCRNL", OCRNL},
+	{"ONOCR", ONOCR},
+	{"ONLRET", ONLRET},
+	{"OFILL", OFILL},
+	{"OFDEL", OFDEL},
+	{"NLDLY", NLDLY},
+	{"NL0", NL0},
+	{"NL1", NL1},
+	{"CRDLY", CRDLY},
+	{"CR0", CR0},
+	{"CR1", CR1},
+	{"CR2", CR2},
+	{"CR3", CR3},
+	{"TABDLY", TABDLY},
+	{"TAB0", TAB0},
+	{"TAB1", TAB1},
+	{"TAB2", TAB2},
+	{"TAB3", TAB3},
+	{"BSDLY", BSDLY},
+	{"BS0", BS0},
+	{"BS1", BS1},
+	{"VTDLY", VTDLY},
+	{"VT0", VT0},
+	{"VT1", VT1},
+	{"FFDLY", FFDLY},
+	{"FF0", FF0},
+	{"FF1", FF1},
+	{NULL, 0}
 };
 
 
@@ -173,68 +174,68 @@ struct symtab omodes[] = {
 
 struct symtab cmodes[] = {
 #ifdef B0
-  { "B0",	B0	},
+	{"B0", B0},
 #endif
 #ifdef B50
-  { "B50",	B50	},
+	{"B50", B50},
 #endif
 #ifdef B75
-  { "B75",	B75	},
+	{"B75", B75},
 #endif
 #ifdef B110
-  { "B110",	B110	},
+	{"B110", B110},
 #endif
 #ifdef B134
-  { "B134",	B134	},
+	{"B134", B134},
 #endif
 #ifdef B150
-  { "B150",	B150	},
+	{"B150", B150},
 #endif
 #ifdef B200
-  { "B200",	B200	},
+	{"B200", B200},
 #endif
-  { "B300",	B300	},
-  { "B600",	B600	},
-  { "B1200",	B1200	},
-  { "B1800",	B1800	},
-  { "B2400",	B2400	},
-  { "B4800",	B4800	},
-  { "B9600",	B9600	},
+	{"B300", B300},
+	{"B600", B600},
+	{"B1200", B1200},
+	{"B1800", B1800},
+	{"B2400", B2400},
+	{"B4800", B4800},
+	{"B9600", B9600},
 #ifdef	B19200
-  { "B19200",	B19200	},
+	{"B19200", B19200},
 #endif
 #ifdef	B38400
-  { "B38400",	B38400	},
+	{"B38400", B38400},
 #endif
 #ifdef	B57600
-  { "B57600",	B57600	},
+	{"B57600", B57600},
 #endif
 #ifdef	B115200
-  { "B115200",	B115200	},
+	{"B115200", B115200},
 #endif
 #ifdef	B230400
-  { "B230400",	B230400	},
+	{"B230400", B230400},
 #endif
 #ifdef	B460800
-  { "B460800",	B460800	},
+	{"B460800", B460800},
 #endif
-  { "EXTA",	EXTA	},
-  { "EXTB",	EXTB	},
-  { "CS5",	CS5	},
-  { "CS6",	CS6	},
-  { "CS7",	CS7	},
-  { "CS8",	CS8	},
-  { "CSTOPB",	CSTOPB	},
-  { "CREAD",	CREAD	},
-  { "PARENB",	PARENB	},
-  { "PARODD",	PARODD	},
-  { "HUPCL",	HUPCL	},
-  { "CLOCAL",	CLOCAL	},
+	{"EXTA", EXTA},
+	{"EXTB", EXTB},
+	{"CS5", CS5},
+	{"CS6", CS6},
+	{"CS7", CS7},
+	{"CS8", CS8},
+	{"CSTOPB", CSTOPB},
+	{"CREAD", CREAD},
+	{"PARENB", PARENB},
+	{"PARODD", PARODD},
+	{"HUPCL", HUPCL},
+	{"CLOCAL", CLOCAL},
 #ifdef	LOBLK
-  { "LOBLK",	LOBLK	},
+	{"LOBLK", LOBLK},
 #endif
-  { "CRTSCTS",	CRTSCTS	},
-  {  NULL,	0	},
+	{"CRTSCTS", CRTSCTS},
+	{NULL, 0},
 };
 
 
@@ -242,25 +243,25 @@ struct symtab cmodes[] = {
 /* lmodes */
 
 struct symtab lmodes[] = {
-  { "ISIG",	ISIG	},
-  { "ICANON",	ICANON	},
-  { "XCASE",	XCASE	},
-  { "ECHO",	ECHO	},
-  { "ECHOE",	ECHOE	},
-  { "ECHOK",	ECHOK	},
-  { "ECHONL",	ECHONL	},
-  { "NOFLSH",	NOFLSH	},
-  { "TOSTOP",	TOSTOP	},
-  { "ECHOCTL",	ECHOCTL	},
-  { "ECHOPRT",	ECHOPRT	},
-  { "ECHOKE",	ECHOKE	},
-  { "FLUSHO",	FLUSHO	},
-  { "PENDIN",	PENDIN	},
-  { "IEXTEN",	IEXTEN	},
+	{"ISIG", ISIG},
+	{"ICANON", ICANON},
+	{"XCASE", XCASE},
+	{"ECHO", ECHO},
+	{"ECHOE", ECHOE},
+	{"ECHOK", ECHOK},
+	{"ECHONL", ECHONL},
+	{"NOFLSH", NOFLSH},
+	{"TOSTOP", TOSTOP},
+	{"ECHOCTL", ECHOCTL},
+	{"ECHOPRT", ECHOPRT},
+	{"ECHOKE", ECHOKE},
+	{"FLUSHO", FLUSHO},
+	{"PENDIN", PENDIN},
+	{"IEXTEN", IEXTEN},
 #ifdef XCLUDE
-  { "XCLUDE",	XCLUDE	},
+	{"XCLUDE", XCLUDE},
 #endif
-  {  NULL,	0	}
+	{NULL, 0}
 };
 
 
@@ -268,8 +269,8 @@ struct symtab lmodes[] = {
 /* Line disciplines (only one available, of course */
 
 struct symtab discs[] = {
-  { "LDISC0",	LDISC0	},
-  {  NULL,	0	}
+	{"LDISC0", LDISC0},
+	{NULL, 0}
 };
 
 
@@ -294,3 +295,6 @@ struct symtab discs[] = {
 
 #define	CC_SANE	{ CINTR, CQUIT, CERASE, CKILL, CEOF, CNUL, CNUL, CNUL }
 
+
+
+/* End of File */

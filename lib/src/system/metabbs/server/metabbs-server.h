@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:36  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -49,16 +52,16 @@
 #define METABBS_PORT 33333
 
 
-extern char *              rcs_ver;
-extern char                host_name[];
-extern int                 locksocket;
-extern struct sockaddr_in  name;
-extern int                 bbsuid,bbsgid;
-extern int                 under_inetd;
-extern char                tty[32];
+extern char *rcs_ver;
+extern char host_name[];
+extern int locksocket;
+extern struct sockaddr_in name;
+extern int bbsuid, bbsgid;
+extern int under_inetd;
+extern char tty[32];
 
 
-void mainloop();
+void    mainloop ();
 
 
 
@@ -72,16 +75,19 @@ void mainloop();
 
 #define RET_INF_HELLO    201	/* Welcome message(s) */
 #define RET_INF_LOGGEDIN 202	/* Client is now logged in */
-#define RET_INF_HELP     280    /* Help */
-#define RET_INF_MISC     290    /* Miscellaneous information */
+#define RET_INF_HELP     280	/* Help */
+#define RET_INF_MISC     290	/* Miscellaneous information */
 #define RET_INF_GOODBYE  299	/* Disconnecting */
 
 #define RET_ASK_LOGIN    301	/* Asking for login */
 #define RET_ASK_PASSWORD 302	/* Asking for password */
-#define RET_ASK_COMMAND  303    /* Asking for command */
+#define RET_ASK_COMMAND  303	/* Asking for command */
 
 #define RET_ERR_LOGIN    501	/* Login/password incorrect */
 #define RET_ERR_COMMAND  502	/* Unknown command */
-#define RET_ERR_LINEDOWN 503    /* This line not available */
-#define RET_ERR_TOOMANY  504    /* System too busy */
+#define RET_ERR_LINEDOWN 503	/* This line not available */
+#define RET_ERR_TOOMANY  504	/* System too busy */
 
+
+
+/* End of File */

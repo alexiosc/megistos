@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -61,17 +61,17 @@ const char *__RCS=RCS_VER;
 #include <bbs.h>
 
 
-static FILE  *df=NULL;
-static int    debuglevel;
+static FILE *df = NULL;
+static int debuglevel;
 
 
 
 /* Set the debugging level */
 
 void
-setdebuglevel(int i)
+setdebuglevel (int i)
 {
-  debuglevel=i;
+	debuglevel = i;
 }
 
 
@@ -82,23 +82,25 @@ setdebuglevel(int i)
    are filled in by the debug() macro. */
 
 void
-_debug(level,file,line,format,va_alist)
-int level, line;
-char *format, *file;
+_debug (level, file, line, format, va_alist)
+int     level, line;
+char   *format, *file;
 va_dcl
 {
-  va_list args;
-  va_start(args);
-  if(level&debuglevel){
-    void initdebug();
+	va_list args;
 
-    if(df==NULL)initdebug();
-    fprintf(df,"%2x (%s:%d) ",level,file,line);
-    vfprintf(df,format,args);
-    fputc('\n',df);
-    fflush(df);
-  }
-  va_end(args);
+	va_start (args);
+	if (level & debuglevel) {
+		void    initdebug ();
+
+		if (df == NULL)
+			initdebug ();
+		fprintf (df, "%2x (%s:%d) ", level, file, line);
+		vfprintf (df, format, args);
+		fputc ('\n', df);
+		fflush (df);
+	}
+	va_end (args);
 }
 
 
@@ -106,29 +108,34 @@ va_dcl
 /* Start debugging */
 
 void
-initdebug()
+initdebug ()
 {
-  char fname[256];
+	char    fname[256];
 
-  /* Open the debugging file, making sure it has a file descriptor > 2 */
+	/* Open the debugging file, making sure it has a file descriptor > 2 */
 
-  sprintf(fname,TMPDIR"/bbsgetty_debug.%ld",(long)getpid());
-  if((df=fopen(fname,"w"))==NULL){
-    error_fatalsys("Unable to open debug file \"%s\"",fname);
-  }
+	sprintf (fname, TMPDIR "/bbsgetty_debug.%ld", (long) getpid ());
+	if ((df = fopen (fname, "w")) == NULL) {
+		error_fatalsys ("Unable to open debug file \"%s\"", fname);
+	}
 
-  if(fileno(df)<3){
-    int fd1, fd2, fd3;		/* Make sure fd>2 */
-    fd1=dup(fileno(df));
-    fd2=dup(fileno(df));
-    fd3=dup(fileno(df));
-    close(fd1);
-    close(fd2);
-    fclose(df);
-    if((df=fdopen(fd3,"w"))==NULL){
-      error_fatalsys("Unable to open debug file \"%s\"",fname);
-    }
-  }
-  
-  _debug(0xff,__FILE__,__LINE__,"Debug file opened");
+	if (fileno (df) < 3) {
+		int     fd1, fd2, fd3;	/* Make sure fd>2 */
+
+		fd1 = dup (fileno (df));
+		fd2 = dup (fileno (df));
+		fd3 = dup (fileno (df));
+		close (fd1);
+		close (fd2);
+		fclose (df);
+		if ((df = fdopen (fd3, "w")) == NULL) {
+			error_fatalsys ("Unable to open debug file \"%s\"",
+					fname);
+		}
+	}
+
+	_debug (0xff, __FILE__, __LINE__, "Debug file opened");
 }
+
+
+/* End of File */

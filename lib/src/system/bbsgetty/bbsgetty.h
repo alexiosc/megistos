@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,9 +46,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 #ifndef __BBSGETTY_H
@@ -68,13 +69,13 @@
 
 /* debug levels */
 
-#define D_OPT   0x01            /* option settings */
-#define D_DEF   0x02            /* defaults file processing */
-#define D_CHAT  0x04            /* expect/send debugging */
-#define D_INIT  0x08            /* line initialization (INIT) */
-#define D_GTAB  0x10            /* gettydefs-like LINETYPE processing */
-#define D_GETL  0x20            /* get login name routine */
-#define D_RUN   0x40            /* other runtime diagnostics */
+#define D_OPT   0x01		/* option settings */
+#define D_DEF   0x02		/* defaults file processing */
+#define D_CHAT  0x04		/* expect/send debugging */
+#define D_INIT  0x08		/* line initialization (INIT) */
+#define D_GTAB  0x10		/* gettydefs-like LINETYPE processing */
+#define D_GETL  0x20		/* get login name routine */
+#define D_RUN   0x40		/* other runtime diagnostics */
 #define D_LOCK  0x80		/* locking-related messages */
 
 
@@ -86,71 +87,71 @@
 /* Speed table for modems. Caution: this is UGLY */
 
 struct speedtab {
-  unsigned   cbaud;		/* Baud rate flag */
-  int        nspeed;		/* Speed in numeric format */
-  char      *speed;		/* Speed in string format */
+	unsigned cbaud;		/* Baud rate flag */
+	int     nspeed;		/* Speed in numeric format */
+	char   *speed;		/* Speed in string format */
 };
 
 #ifdef OPENTTY_C
 static struct speedtab speedtab[] = {
 #ifdef B50
-  { B50,    50,    "50" },
+	{B50, 50, "50"},
 #endif
 #ifdef B75
-  { B75,    75,    "75" },
+	{B75, 75, "75"},
 #endif
 #ifdef B110
-  { B110,   110,   "110" },
+	{B110, 110, "110"},
 #endif
 #ifdef B134
-  { B134,   134,   "134" },
+	{B134, 134, "134"},
 #endif
 #ifdef B150
-  { B150,   150,   "150" },
+	{B150, 150, "150"},
 #endif
 #ifdef B200
-  { B200,   200,   "200" },
+	{B200, 200, "200"},
 #endif
-  { B300,   300,   "300" },
-  { B600,   600,   "600" },
-  { B1200,  1200,  "1200" },
-  { B1800,  1800,  "1800" },
-  { B2400,  2400,  "2400" },
-  { B4800,  4800,  "4800" },
-  { B9600,  9600,  "9600" },
+	{B300, 300, "300"},
+	{B600, 600, "600"},
+	{B1200, 1200, "1200"},
+	{B1800, 1800, "1800"},
+	{B2400, 2400, "2400"},
+	{B4800, 4800, "4800"},
+	{B9600, 9600, "9600"},
 #ifdef  B19200
-  { B19200, 19200, "19200" },
+	{B19200, 19200, "19200"},
 #endif
 #ifdef  B38400
-  { B38400, 38400, "38400" },
+	{B38400, 38400, "38400"},
 #endif
 #ifdef  B57600
-  { B57600, 57600, "57600" },
+	{B57600, 57600, "57600"},
 #endif
 #ifdef  B115200
-  { B115200, 115200, "115200" },
+	{B115200, 115200, "115200"},
 #endif
 #ifdef  B230400
-  { B230400, 230400, "230400" },
+	{B230400, 230400, "230400"},
 #endif
 #ifdef  B460800
-  { B460800, 460800, "460800" },
+	{B460800, 460800, "460800"},
 #endif
-  { 0,      0,     "" }
+	{0, 0, ""}
 };
-#endif /* OPENTTY_C */
+#endif				/* OPENTTY_C */
 
 
 
 /* Variables */
 
-extern char  autorate  [256];
-extern char  device    [256];
-extern char  devname   [256];
-extern char  lock      [256];
-extern char  altlock   [256];
-extern char  term      [256];
-extern char  speed     [256];
+extern char autorate[256];
+extern char device[256];
+extern char devname[256];
+extern char lock[256];
+extern char altlock[256];
+extern char term[256];
+extern char speed[256];
 
 extern char *progname;
 extern char *waitfor;
@@ -164,18 +165,18 @@ extern char *final;
 extern char *preconnect;
 extern char *postconnect;
 
-extern int   autobaud;
-extern int   debug;
-extern int   bbsgid;
-extern int   bbsuid;
-extern int   nohangup;
-extern int   delay;
-extern int   waitchar;
-extern int   lockedbaud;
-extern int   reportedlinespeed;
-extern int   linestate;
-extern int   localline;
-extern int   chanidx;
+extern int autobaud;
+extern int debug;
+extern int bbsgid;
+extern int bbsuid;
+extern int nohangup;
+extern int delay;
+extern int waitchar;
+extern int lockedbaud;
+extern int reportedlinespeed;
+extern int linestate;
+extern int localline;
+extern int chanidx;
 
 extern struct termios itermios;	/* Pre-connection termio flags */
 extern struct termios ftermios;	/* Post-connection termio flags */
@@ -184,67 +185,70 @@ extern struct termios ftermios;	/* Post-connection termio flags */
 
 /* init.c */
 
-void init(int argc, char **argv);
+void    init (int argc, char **argv);
 
 
 /* debug.c */
 
 
-void initdebug();
+void    initdebug ();
 
-void setdebuglevel(int i);
+void    setdebuglevel (int i);
 
-void _debug(int level,char *file, int line, char *format, ...);
+void    _debug (int level, char *file, int line, char *format, ...);
 
 #define debug(l,f...) _debug(l,__FILE__,__LINE__,##f)
 
 
 /* setdefaults.c */
 
-void parsefile(char *suffix);
+void    parsefile (char *suffix);
 
-void validate();
+void    validate ();
 
-void setdefaults(int argc, char **argv);
+void    setdefaults (int argc, char **argv);
 
 
 /* initline.c */
 
-void initline();
+void    initline ();
 
 
 /* uucplocks.c */
 
-void waituucplocks();
-void watchuucplocks();
-int  checkuucplock(char *name); 
-void lockline();
-void killminder();
+void    waituucplocks ();
+void    watchuucplocks ();
+int     checkuucplock (char *name);
+void    lockline ();
+void    killminder ();
 
 
 /* opentty.c */
 
-void opentty();
+void    opentty ();
 
 
 /* gettydefs.c */
 
-void parselinetype();
-void settermios(struct termios *termios, int state);
+void    parselinetype ();
+void    settermios (struct termios *termios, int state);
 
 
 /* misc.c */
 
-void readlinestatus();
-void writelinestatus(int result);
-void idler();
-void execute_as_mortal(char *command);
+void    readlinestatus ();
+void    writelinestatus (int result);
+void    idler ();
+void    execute_as_mortal (char *command);
 
 
 /* chat.c */
 
-int chat(char *s);
-int expect(char *s);
+int     chat (char *s);
+int     expect (char *s);
 
 
 #endif
+
+
+/* End of File */

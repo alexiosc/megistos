@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,17 +46,14 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
 #define WANT_ERRNO_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "bbsgetty.h"
+#include <megistos/bbsgetty.h>
 
 
 
@@ -84,296 +84,333 @@ const char *__RCS=RCS_VER;
 
 
 struct keylist {
-  char *name;
-  int   ref;
+	char   *name;
+	int     ref;
 };
 
 
 
-struct keylist keys[]={
-  KEY(BUSYOUT),
-  KEY(CONNECT),
-  KEY(DEBUG),
-  KEY(DELAY),
-  KEY(GETTYDEF),
-  KEY(HANGUP),
-  KEY(INIT),
-  KEY(LOCK),
-  KEY(OFFLINE),
-  KEY(TERM),
-  KEY(WAITCHAR),
-  KEY(WAITFOR),
-  KEY(LOCKNAME),
-  KEY(ALTLOCKNAME),
-  KEY(INITIAL),
-  KEY(FINAL),
-  KEY(PRECONNECT),
-  KEY(POSTCONNECT),
-  {"",-1}
+struct keylist keys[] = {
+	KEY (BUSYOUT),
+	KEY (CONNECT),
+	KEY (DEBUG),
+	KEY (DELAY),
+	KEY (GETTYDEF),
+	KEY (HANGUP),
+	KEY (INIT),
+	KEY (LOCK),
+	KEY (OFFLINE),
+	KEY (TERM),
+	KEY (WAITCHAR),
+	KEY (WAITFOR),
+	KEY (LOCKNAME),
+	KEY (ALTLOCKNAME),
+	KEY (INITIAL),
+	KEY (FINAL),
+	KEY (PRECONNECT),
+	KEY (POSTCONNECT),
+	{"", -1}
 };
 
 
 
 static int
-yesno(char *name, char *value, int *bool, int line)
+yesno (char *name, char *value, int *bool, int line)
 {
-  int res=YESNO(value);
-  if(res<0){
-    debug(D_DEF,"Line %d: expecting YES or NO value for %s, got \"%s\".",
-	  line,name,value);
-    error_fatal("Line %d: expecting YES or NO value for %s, got \"%s\".",
-	  line,name,value);
-  } else *bool=res;
-  return res;
+	int     res = YESNO (value);
+
+	if (res < 0) {
+		debug (D_DEF,
+		       "Line %d: expecting YES or NO value for %s, got \"%s\".",
+		       line, name, value);
+		error_fatal
+		    ("Line %d: expecting YES or NO value for %s, got \"%s\".",
+		     line, name, value);
+	} else
+		*bool = res;
+	return res;
 }
 
 
 
 static void
-processpair(char *name, char *value, int line)
+processpair (char *name, char *value, int line)
 {
-  int i, debuglevel;
+	int     i, debuglevel;
 
 
-  /* Look for the key's reference number */
+	/* Look for the key's reference number */
 
-  for(i=0;keys[i].ref>=0;i++){
-    if(sameas(name,keys[i].name))break;
-  }
+	for (i = 0; keys[i].ref >= 0; i++) {
+		if (sameas (name, keys[i].name))
+			break;
+	}
 
 
 
-  /* Not found? */
+	/* Not found? */
 
-  if(keys[i].ref<0){
-    debug(D_DEF,"Line %d: unknown configuration argument \"%s\".",line,name);
-    error_log("Line %d: unknown configuration argument \"%s\".",line,name);
-    return;
-  }
+	if (keys[i].ref < 0) {
+		debug (D_DEF,
+		       "Line %d: unknown configuration argument \"%s\".", line,
+		       name);
+		error_log ("Line %d: unknown configuration argument \"%s\".",
+			   line, name);
+		return;
+	}
 
- 
-  /* Got it! Process the values */
 
-  switch(keys[i].ref){
+	/* Got it! Process the values */
 
-  case KEY_DEBUG:
-    if(value[0]=='0'&&value[1]=='x'){
-      if(!sscanf(value,"%x",&debuglevel)){
-	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
-	      line,value);
-	error_log("Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
-		 line,value);
-      }
-    } else if(value[0]=='0'){
-      if(!sscanf(value,"%o",&debuglevel)){
-	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not an octal number.",
-	      value);
-	error_log("Line %d: DEBUG level \"%s\" is not an octal number.",
-		 value);
-      }
-    } else {
-      if(!sscanf(value,"%d",&debuglevel)){
-	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not a decimal number.",
-	      line,value);
-	error_log("Line %d: DEBUG level \"%s\" is not a decimal number.",
-		 line,value);
-      }
-    }
-    setdebuglevel(debuglevel);
-    break;
-    
-  case KEY_HANGUP:
-    yesno(name,value,&nohangup,line);
-    nohangup=!nohangup;
-    break;
+	switch (keys[i].ref) {
 
-  case KEY_WAITCHAR:
-    yesno(name,value,&waitchar,line);
-    break;
+	case KEY_DEBUG:
+		if (value[0] == '0' && value[1] == 'x') {
+			if (!sscanf (value, "%x", &debuglevel)) {
+				debug (D_DEF,
+				       "Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
+				       line, value);
+				error_log
+				    ("Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
+				     line, value);
+			}
+		} else if (value[0] == '0') {
+			if (!sscanf (value, "%o", &debuglevel)) {
+				debug (D_DEF,
+				       "Line %d: DEBUG level \"%s\" is not an octal number.",
+				       value);
+				error_log
+				    ("Line %d: DEBUG level \"%s\" is not an octal number.",
+				     value);
+			}
+		} else {
+			if (!sscanf (value, "%d", &debuglevel)) {
+				debug (D_DEF,
+				       "Line %d: DEBUG level \"%s\" is not a decimal number.",
+				       line, value);
+				error_log
+				    ("Line %d: DEBUG level \"%s\" is not a decimal number.",
+				     line, value);
+			}
+		}
+		setdebuglevel (debuglevel);
+		break;
 
-  case KEY_DELAY:
-    if(!sscanf(value,"%d",&delay)){
-      debug(D_DEF,"Line %d: value for DELAY \"%s\" is not a decimal number.",
-	    line,value);
-      error_log("Line %d: value for DELAY \"%s\" is not a decimal number.",
-	       line,value);
-    }
-    break;
+	case KEY_HANGUP:
+		yesno (name, value, &nohangup, line);
+		nohangup = !nohangup;
+		break;
 
-  case KEY_CONNECT:
-    connectstr=strdup(value);
-    break;
+	case KEY_WAITCHAR:
+		yesno (name, value, &waitchar, line);
+		break;
 
-  case KEY_WAITFOR:
-    waitfor=strdup(value);
-    waitchar=1;
-    break;
+	case KEY_DELAY:
+		if (!sscanf (value, "%d", &delay)) {
+			debug (D_DEF,
+			       "Line %d: value for DELAY \"%s\" is not a decimal number.",
+			       line, value);
+			error_log
+			    ("Line %d: value for DELAY \"%s\" is not a decimal number.",
+			     line, value);
+		}
+		break;
 
-  case KEY_INIT:
-    initstr=strdup(value);
-    break;
+	case KEY_CONNECT:
+		connectstr = strdup (value);
+		break;
 
-  case KEY_LOCK:
-    yesno(name,value,&lockedbaud,line);
-    break;
+	case KEY_WAITFOR:
+		waitfor = strdup (value);
+		waitchar = 1;
+		break;
 
-  case KEY_LOCKNAME:
-    strcpy(lock,value);
-    break;
+	case KEY_INIT:
+		initstr = strdup (value);
+		break;
 
-  case KEY_ALTLOCKNAME:
-    strcpy(altlock,value);
-    break;
+	case KEY_LOCK:
+		yesno (name, value, &lockedbaud, line);
+		break;
 
-  case KEY_BUSYOUT:
-    busyout=strdup(value);
-    break;
-    
-  case KEY_OFFLINE:
-    offline=strdup(value);
-    break;
+	case KEY_LOCKNAME:
+		strcpy (lock, value);
+		break;
 
-  case KEY_INITIAL:
-    initial=strdup(value);
-    break;
+	case KEY_ALTLOCKNAME:
+		strcpy (altlock, value);
+		break;
 
-  case KEY_FINAL:
-    final=strdup(value);
-    break;
+	case KEY_BUSYOUT:
+		busyout = strdup (value);
+		break;
 
-  case KEY_PRECONNECT:
-    preconnect=strdup(value);
-    break;
+	case KEY_OFFLINE:
+		offline = strdup (value);
+		break;
 
-  case KEY_POSTCONNECT:
-    postconnect=strdup(value);
-    break;
+	case KEY_INITIAL:
+		initial = strdup (value);
+		break;
 
-  default:
-    debug(D_DEF,"Sanity check failed! Yaaaaaargh! (code=%d)",keys[i].ref);
-    return;
-  }
+	case KEY_FINAL:
+		final = strdup (value);
+		break;
+
+	case KEY_PRECONNECT:
+		preconnect = strdup (value);
+		break;
+
+	case KEY_POSTCONNECT:
+		postconnect = strdup (value);
+		break;
+
+	default:
+		debug (D_DEF, "Sanity check failed! Yaaaaaargh! (code=%d)",
+		       keys[i].ref);
+		return;
+	}
 }
 
 
 
 void
-parsefile(char *suffix)
+parsefile (char *suffix)
 {
-  FILE *fp;
-  char fname[512];
-  int linenum;
+	FILE   *fp;
+	char    fname[512];
+	int     linenum;
 
-  strcpy(fname,mkfname(CHANDEFDIR"/bbsgetty.%s",suffix));
-  debug(D_DEF,"parsefile(\"%s\") called",fname);
+	strcpy (fname, mkfname (CHANDEFDIR "/bbsgetty.%s", suffix));
+	debug (D_DEF, "parsefile(\"%s\") called", fname);
 
-  if((fp=fopen(fname,"r"))==NULL){
-    int i=errno;
-    error_log("Unable to open config file %s",fname);
-    debug(D_DEF,"fopen(\"%s\",\"r\") failed, errno=%d",fname,i);
-    return;
-  }
-  
-  linenum=0;
-  while(!feof(fp)){
-    char line[8192], *name, *value, *cp;
-    if(fgets(line,sizeof(line),fp)==NULL)break;
-    linenum++;
+	if ((fp = fopen (fname, "r")) == NULL) {
+		int     i = errno;
 
-    /* Remove comments */
-    if((cp=strchr(line,'#'))!=NULL)*cp=0;
+		error_log ("Unable to open config file %s", fname);
+		debug (D_DEF, "fopen(\"%s\",\"r\") failed, errno=%d", fname,
+		       i);
+		return;
+	}
 
-    /* Empty line? */
-    if(!strlen(stripspace(line)))continue;
+	linenum = 0;
+	while (!feof (fp)) {
+		char    line[8192], *name, *value, *cp;
 
-    /* Get the name and value */
-    if((cp=strchr(line,'='))==NULL){
-      debug(D_DEF,"line %d has bad format (not NAME=VALUE)",linenum);
-      error_log("bad format (%s line %d)",fname,linenum);
-      continue;
-    }
+		if (fgets (line, sizeof (line), fp) == NULL)
+			break;
+		linenum++;
 
-    *cp=0;
-    name=line;
-    value=cp+1;
-    name=strtok(name," \t\f");
-    cp=stripspace(value);
-    strcpy(value,cp);
-    cp=&value[strlen(value)-1];
-    for(;cp>=value && (isspace(*cp)||*cp=='\n'||*cp=='\r');cp--)*cp=0;
+		/* Remove comments */
+		if ((cp = strchr (line, '#')) != NULL)
+			*cp = 0;
 
-    /* Debug the name=value pair */
-    debug(D_DEF,"Parsed line: \"%s\" = \"%s\"",name,value);
+		/* Empty line? */
+		if (!strlen (stripspace (line)))
+			continue;
+
+		/* Get the name and value */
+		if ((cp = strchr (line, '=')) == NULL) {
+			debug (D_DEF,
+			       "line %d has bad format (not NAME=VALUE)",
+			       linenum);
+			error_log ("bad format (%s line %d)", fname, linenum);
+			continue;
+		}
+
+		*cp = 0;
+		name = line;
+		value = cp + 1;
+		name = strtok (name, " \t\f");
+		cp = stripspace (value);
+		strcpy (value, cp);
+		cp = &value[strlen (value) - 1];
+		for (;
+		     cp >= value && (isspace (*cp) || *cp == '\n' ||
+				     *cp == '\r'); cp--)
+			*cp = 0;
+
+		/* Debug the name=value pair */
+		debug (D_DEF, "Parsed line: \"%s\" = \"%s\"", name, value);
 
 
-    /* Processs the name/value pairs */
-    processpair(name,value,linenum);
+		/* Processs the name/value pairs */
+		processpair (name, value, linenum);
 
-  }
+	}
 
-  debug(D_DEF,"Options parsed successfully");
+	debug (D_DEF, "Options parsed successfully");
 }
 
 
 
 /* Setup validation and sanity checks */
 void
-validate()
+validate ()
 {
-  if(!strlen(device)){
-    debug(D_DEF,"No device has been specified!");
-    error_fatal("No device has been specified!");
-  }
-  
-  if(!initial || !strlen(initial)){
-    debug(D_DEF,"No INI_IAL flags have been specified!");
-    error_fatal("No INI_IAL flags have been specified!");
-  } else if (!final || !strlen(final)){
-    final=strdup(initial);
-  }
+	if (!strlen (device)) {
+		debug (D_DEF, "No device has been specified!");
+		error_fatal ("No device has been specified!");
+	}
+
+	if (!initial || !strlen (initial)) {
+		debug (D_DEF, "No INI_IAL flags have been specified!");
+		error_fatal ("No INI_IAL flags have been specified!");
+	} else if (!final || !strlen (final)) {
+		final = strdup (initial);
+	}
 }
 
 
 
 void
-setdefaults(int argc, char **argv)
+setdefaults (int argc, char **argv)
 {
-  register int  c;
-  int           debuglevel;
+	register int c;
+	int     debuglevel;
 
 
-  /* Parse command line -- this is mostly uugetty stuff for slight
-     compatibility reasons */
+	/* Parse command line -- this is mostly uugetty stuff for slight
+	   compatibility reasons */
 
-  while((c=getopt(argc,argv,"D:"))!=EOF){
-    switch(c) {
-    case 'D':
-      if(optarg[0]=='0'&&optarg[1]=='x'){
-	if(!sscanf(optarg,"%x",&debuglevel)){
-	  error_fatal("Debug level \"%s\" is not a hexadecimal number.",optarg);
+	while ((c = getopt (argc, argv, "D:")) != EOF) {
+		switch (c) {
+		case 'D':
+			if (optarg[0] == '0' && optarg[1] == 'x') {
+				if (!sscanf (optarg, "%x", &debuglevel)) {
+					error_fatal
+					    ("Debug level \"%s\" is not a hexadecimal number.",
+					     optarg);
+				}
+			} else if (optarg[0] == '0') {
+				if (!sscanf (optarg, "%o", &debuglevel)) {
+					error_fatal
+					    ("Debug level \"%s\" is not an octal number.",
+					     optarg);
+				}
+			} else {
+				if (!sscanf (optarg, "%d", &debuglevel)) {
+					error_fatal
+					    ("Debug level \"%s\" is not a decimal number.",
+					     optarg);
+				}
+			}
+			setdebuglevel (debuglevel);
+			break;
+		}
 	}
-      } else if(optarg[0]=='0'){
-	if(!sscanf(optarg,"%o",&debuglevel)){
-	  error_fatal("Debug level \"%s\" is not an octal number.",optarg);
+
+
+
+	/* Get tty name */
+
+	if (optind < argc) {
+		strcpy (device, argv[optind++]);
+	} else {
+		error_fatal ("No TTY device given in command line.");
+		exit (2);
 	}
-      } else {
-	if(!sscanf(optarg,"%d",&debuglevel)){
-	  error_fatal("Debug level \"%s\" is not a decimal number.",optarg);
-	}
-      }
-      setdebuglevel(debuglevel);
-      break;
-    }
-  }
-
-
-
-  /* Get tty name */
-
-  if(optind<argc){
-    strcpy(device,argv[optind++]);
-  } else {
-    error_fatal("No TTY device given in command line.");
-    exit(2);
-  }
 }
+
+
+/* End of File */

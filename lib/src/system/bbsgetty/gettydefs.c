@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/22 17:23:37  alexios
+ * Ran through megistos-config --oh to beautify source.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 #define OPENTTY_C 1
 #define WANT_CTYPE_H 1
@@ -57,8 +57,8 @@ const char *__RCS=RCS_VER;
 
 
 
-struct termios itermios=DEFAULT_ITERMIOS; /* Pre-connection termios flags */
-struct termios ftermios=DEFAULT_FTERMIOS; /* Post-connection termiso flags */
+struct termios itermios = DEFAULT_ITERMIOS;	/* Pre-connection termios flags */
+struct termios ftermios = DEFAULT_FTERMIOS;	/* Post-connection termiso flags */
 
 
 #define FAIL    -1
@@ -69,14 +69,14 @@ struct termios ftermios=DEFAULT_FTERMIOS; /* Post-connection termiso flags */
 /* findsym() - look for field in symtab list */
 
 static int
-findsym(char *field, struct symtab *symtab)
+findsym (char *field, struct symtab *symtab)
 {
-  for(;symtab->name!=NULL;symtab++) {
-    if(strcmp(symtab->name, field)==0) {
-      return symtab->value;
-    }
-  }
-  return FAIL;
+	for (; symtab->name != NULL; symtab++) {
+		if (strcmp (symtab->name, field) == 0) {
+			return symtab->value;
+		}
+	}
+	return FAIL;
 }
 
 
@@ -84,206 +84,217 @@ findsym(char *field, struct symtab *symtab)
 #define	toggle(f,b) if(inverted)(f)&=~(b);else(f)|=(b)
 
 static void
-addfield(struct termios *termio, char *field)
+addfield (struct termios *termio, char *field)
 {
-  unsigned long  val;
-  int            inverted;
-  
-
-  /* There are flags, who, through no fault of their own, are SANE */
-
-  if(strcmp(field,"SANE")==0) {
-    termio->c_iflag|=ISANE;
-    termio->c_oflag|=OSANE;
-    termio->c_cflag|=CSANE;
-    termio->c_lflag|=LSANE;
-  } else {
-
-    /* Does this mean these flags are INSANE? :-) */
+	unsigned long val;
+	int     inverted;
 
 
-    /* -FLAG reverses the meaning */
-    if (*field=='-'){
-      inverted=1;
-      field++;
-    } else {
-      inverted=0;
-    }
+	/* There are flags, who, through no fault of their own, are SANE */
 
-    /* Look for different flags */
+	if (strcmp (field, "SANE") == 0) {
+		termio->c_iflag |= ISANE;
+		termio->c_oflag |= OSANE;
+		termio->c_cflag |= CSANE;
+		termio->c_lflag |= LSANE;
+	} else {
 
-    if((val=findsym(field,imodes))!=FAIL){
-      toggle(termio->c_iflag,val);
-    } else if((val=findsym(field,omodes))!=FAIL) {
-      toggle(termio->c_oflag,val);
-    } else if((val=findsym(field,cmodes))!=FAIL) {
-      if(val&CBAUD)termio->c_cflag&=~CBAUD;
-      toggle(termio->c_cflag,val);
-    } else if((val=findsym(field,lmodes)) != FAIL) {
-      toggle(termio->c_lflag,val);
-    } else {
-      error_log("Undefined LINETYPE symbol: \"%s\"",field);
-      debug(D_GTAB,"Undefined LINETYPE symbol: \"%s\"",field);
-    }
-  }
+		/* Does this mean these flags are INSANE? :-) */
+
+
+		/* -FLAG reverses the meaning */
+		if (*field == '-') {
+			inverted = 1;
+			field++;
+		} else {
+			inverted = 0;
+		}
+
+		/* Look for different flags */
+
+		if ((val = findsym (field, imodes)) != FAIL) {
+			toggle (termio->c_iflag, val);
+		} else if ((val = findsym (field, omodes)) != FAIL) {
+			toggle (termio->c_oflag, val);
+		} else if ((val = findsym (field, cmodes)) != FAIL) {
+			if (val & CBAUD)
+				termio->c_cflag &= ~CBAUD;
+			toggle (termio->c_cflag, val);
+		} else if ((val = findsym (field, lmodes)) != FAIL) {
+			toggle (termio->c_lflag, val);
+		} else {
+			error_log ("Undefined LINETYPE symbol: \"%s\"", field);
+			debug (D_GTAB, "Undefined LINETYPE symbol: \"%s\"",
+			       field);
+		}
+	}
 }
 
 
 
 static void
-parseinitial()
+parseinitial ()
 {
-  char *cp;
-  
-
-  /* No INI_IAL specified; return */ 
-
-  if(!initial){
-    debug(D_GTAB,"No INI_IAL specified; returning.");
-    return;
-  }
+	char   *cp;
 
 
-  /* parse the INI_IAL string */
+	/* No INI_IAL specified; return */
 
-  debug(D_GTAB,"Parsing INI_IAL: \"%s\"",initial);
-
-  cp=strtok(initial," \t\r\n");
-  do{
-    debug(D_GTAB,"INI_IAL: parsing token \"%s\"",cp);
-    addfield(&itermios,cp);
-  } while((cp=strtok(NULL," \t\n\r"))!=NULL);
+	if (!initial) {
+		debug (D_GTAB, "No INI_IAL specified; returning.");
+		return;
+	}
 
 
-  /* Debug the lot */
-  debug(D_GTAB,"Initial termios: iflag=%x, oflag=%x, cflag=%x, lflag=%x",
-	itermios.c_iflag, itermios.c_oflag,
-	itermios.c_cflag, itermios.c_lflag);
-  debug(D_GTAB,"Initial line discipline: %x",itermios.c_line);
+	/* parse the INI_IAL string */
+
+	debug (D_GTAB, "Parsing INI_IAL: \"%s\"", initial);
+
+	cp = strtok (initial, " \t\r\n");
+	do {
+		debug (D_GTAB, "INI_IAL: parsing token \"%s\"", cp);
+		addfield (&itermios, cp);
+	} while ((cp = strtok (NULL, " \t\n\r")) != NULL);
+
+
+	/* Debug the lot */
+	debug (D_GTAB,
+	       "Initial termios: iflag=%x, oflag=%x, cflag=%x, lflag=%x",
+	       itermios.c_iflag, itermios.c_oflag, itermios.c_cflag,
+	       itermios.c_lflag);
+	debug (D_GTAB, "Initial line discipline: %x", itermios.c_line);
 }
 
 
 
 static void
-parsefinal()
+parsefinal ()
 {
-  char *cp;
-  
-
-  /* No FINAL specified; return */ 
-
-  if(!final){
-    debug(D_GTAB,"No FINAL specified; returning.");
-    return;
-  }
+	char   *cp;
 
 
-  /* parse the FINAL string */
+	/* No FINAL specified; return */
 
-  debug(D_GTAB,"Parsing FINAL: \"%s\"",final);
-
-  cp=strtok(final," \t\r\n");
-  do{
-    debug(D_GTAB,"FINAL: parsing token \"%s\"",cp);
-    addfield(&ftermios,cp);
-  } while((cp=strtok(NULL," \t\n\r"))!=NULL);
+	if (!final) {
+		debug (D_GTAB, "No FINAL specified; returning.");
+		return;
+	}
 
 
-  /* Debug the lot */
-  debug(D_GTAB,"Final termios: iflag=%x, oflag=%x, cflag=%x, lflag=%x",
-	ftermios.c_iflag, ftermios.c_oflag,
-	ftermios.c_cflag, ftermios.c_lflag);
-  debug(D_GTAB,"Final line discipline: %x",ftermios.c_line);
+	/* parse the FINAL string */
+
+	debug (D_GTAB, "Parsing FINAL: \"%s\"", final);
+
+	cp = strtok (final, " \t\r\n");
+	do {
+		debug (D_GTAB, "FINAL: parsing token \"%s\"", cp);
+		addfield (&ftermios, cp);
+	} while ((cp = strtok (NULL, " \t\n\r")) != NULL);
+
+
+	/* Debug the lot */
+	debug (D_GTAB, "Final termios: iflag=%x, oflag=%x, cflag=%x, lflag=%x",
+	       ftermios.c_iflag, ftermios.c_oflag,
+	       ftermios.c_cflag, ftermios.c_lflag);
+	debug (D_GTAB, "Final line discipline: %x", ftermios.c_line);
 }
 
 
 
 void
-parselinetype()
+parselinetype ()
 {
-  debug(D_GTAB,"Parselinetype() called.");
-  parseinitial();
-  parsefinal();
+	debug (D_GTAB, "Parselinetype() called.");
+	parseinitial ();
+	parsefinal ();
 }
 
 
 
 
 void
-settermios(struct termios *termios, int state)
+settermios (struct termios *termios, int state)
 {
-  register int i;
-  int cbaud;
-  static struct termios setterm;
-  char Cintr=CINTR;
-  char Cerase=CERASE;
-  char Ckill=CKILL;
-  
-  tcgetattr(0,&setterm);
+	register int i;
+	int     cbaud;
+	static struct termios setterm;
+	char    Cintr = CINTR;
+	char    Cerase = CERASE;
+	char    Ckill = CKILL;
 
-  if(!state){			/* Initial settings */
-    setterm.c_iflag=termios->c_iflag;
-    setterm.c_oflag=termios->c_oflag;
-    setterm.c_cflag=termios->c_cflag;
-    setterm.c_lflag=termios->c_lflag;
-    setterm.c_line=termios->c_line;
-    
-    /* single character processing */
-    setterm.c_lflag&=~(ICANON);
-    setterm.c_cc[VMIN]=1;
-    setterm.c_cc[VTIME]=0;
-    
-    /* sanity check */
-    if((setterm.c_cflag&CBAUD)==0)setterm.c_cflag|=SSPEED;
-    if((setterm.c_cflag&CSIZE)==0)setterm.c_cflag|=DEF_CFL;
-    setterm.c_cflag|=(CREAD|HUPCL);
+	tcgetattr (0, &setterm);
 
-    /* What speed are we talking at? */
-    cbaud=setterm.c_cflag&CBAUD;
-    for(i=0;speedtab[i].cbaud && speedtab[i].cbaud!=cbaud;i++);
-    unsetenv("BAUD");
-    setenv("BAUD",speedtab[i].speed,1);
-    
-    tcsetattr(0,TCSANOW,&setterm);
-    tcsetattr(1,TCSANOW,&setterm); /* Paranoid */
-    tcsetattr(2,TCSANOW,&setterm); /* What else? */
+	if (!state) {		/* Initial settings */
+		setterm.c_iflag = termios->c_iflag;
+		setterm.c_oflag = termios->c_oflag;
+		setterm.c_cflag = termios->c_cflag;
+		setterm.c_lflag = termios->c_lflag;
+		setterm.c_line = termios->c_line;
 
-  } else {
+		/* single character processing */
+		setterm.c_lflag &= ~(ICANON);
+		setterm.c_cc[VMIN] = 1;
+		setterm.c_cc[VTIME] = 0;
 
-    setterm.c_iflag = termios->c_iflag;
-    setterm.c_oflag = termios->c_oflag;
-    setterm.c_cflag = termios->c_cflag;
-    setterm.c_lflag = termios->c_lflag;
-    setterm.c_line  = termios->c_line;
-    
-    /* sanity check */
-    if((setterm.c_cflag&CBAUD)==0)setterm.c_cflag|=SSPEED;
-    if((setterm.c_cflag&CSIZE)==0)setterm.c_cflag|=DEF_CFL;
-    setterm.c_cflag|=CREAD;
-    
-    /* set c_cc[] chars to reasonable values */
-    /*    bzero(&setterm.c_cc,sizeof(setterm.c_cc));*/
-    setterm.c_cc[VINTR]=Cintr;
-    setterm.c_cc[VQUIT]=CQUIT;
-    setterm.c_cc[VERASE]=Cerase;
-    setterm.c_cc[VKILL]=Ckill;
-    setterm.c_cc[VEOF]=CEOF;
+		/* sanity check */
+		if ((setterm.c_cflag & CBAUD) == 0)
+			setterm.c_cflag |= SSPEED;
+		if ((setterm.c_cflag & CSIZE) == 0)
+			setterm.c_cflag |= DEF_CFL;
+		setterm.c_cflag |= (CREAD | HUPCL);
+
+		/* What speed are we talking at? */
+		cbaud = setterm.c_cflag & CBAUD;
+		for (i = 0; speedtab[i].cbaud && speedtab[i].cbaud != cbaud;
+		     i++);
+		unsetenv ("BAUD");
+		setenv ("BAUD", speedtab[i].speed, 1);
+
+		tcsetattr (0, TCSANOW, &setterm);
+		tcsetattr (1, TCSANOW, &setterm);	/* Paranoid */
+		tcsetattr (2, TCSANOW, &setterm);	/* What else? */
+
+	} else {
+
+		setterm.c_iflag = termios->c_iflag;
+		setterm.c_oflag = termios->c_oflag;
+		setterm.c_cflag = termios->c_cflag;
+		setterm.c_lflag = termios->c_lflag;
+		setterm.c_line = termios->c_line;
+
+		/* sanity check */
+		if ((setterm.c_cflag & CBAUD) == 0)
+			setterm.c_cflag |= SSPEED;
+		if ((setterm.c_cflag & CSIZE) == 0)
+			setterm.c_cflag |= DEF_CFL;
+		setterm.c_cflag |= CREAD;
+
+		/* set c_cc[] chars to reasonable values */
+		/*    bzero(&setterm.c_cc,sizeof(setterm.c_cc)); */
+		setterm.c_cc[VINTR] = Cintr;
+		setterm.c_cc[VQUIT] = CQUIT;
+		setterm.c_cc[VERASE] = Cerase;
+		setterm.c_cc[VKILL] = Ckill;
+		setterm.c_cc[VEOF] = CEOF;
 #ifdef CDISCARD
-    setterm.c_cc[VDISCARD]=CDISCARD;
+		setterm.c_cc[VDISCARD] = CDISCARD;
 #endif
 #ifdef CEOL
-    setterm.c_cc[CEOL] = CEOL;
+		setterm.c_cc[CEOL] = CEOL;
 #endif
 
-    /*
-     *  SMR - Linux does funny things if VMIN is zero (like more doesn't work),
-     *        so I put it to one here.
-     */
+		/*
+		 *  SMR - Linux does funny things if VMIN is zero (like more doesn't work),
+		 *        so I put it to one here.
+		 */
 
-    setterm.c_cc[VMIN] = 1;
-    tcsetattr(0,TCSANOW,&setterm);
-    tcsetattr(1,TCSANOW,&setterm);
-    tcsetattr(2,TCSANOW,&setterm);
-  }
+		setterm.c_cc[VMIN] = 1;
+		tcsetattr (0, TCSANOW, &setterm);
+		tcsetattr (1, TCSANOW, &setterm);
+		tcsetattr (2, TCSANOW, &setterm);
+	}
 }
 
+
+
+/* End of File */
