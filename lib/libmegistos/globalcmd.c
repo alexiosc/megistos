@@ -28,6 +28,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:16:22  alexios
+ * Rationalised the RCS/CVS ident(1) strings. Stopped including unneeded
+ * Registry file (the registry global command moved to the rightful
+ * place, the registry module, a long time ago).
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -88,10 +93,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -109,9 +111,6 @@ const char *__RCS=RCS_VER;
 #include "config.h"
 #include "bbs.h"
 #include "mbk_sysvar.h"
-
-#define __REGISTRY_UNAMBIGUOUS__
-#include "mbk_registry.h"
 
 static gcs_t *gcservers=NULL;
 static int  gcsnum=0;
