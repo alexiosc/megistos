@@ -4,6 +4,7 @@ libmegistos1
 libmegistos1.postinst.debhelper
 libmegistos1.postrm.debhelper
 libmegistos1.substvars
+megistos-dev
 shlibs.local
 tmp
 typhoon-dev

@@ -11,6 +11,7 @@ config.log
 config.status
 configure
 configure-stamp
+libltdl
 libtool
 stamp-h
 stamp-h.in
