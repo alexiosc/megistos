@@ -9,6 +9,7 @@ bbsconfig.h
 bbsconfig.h.in
 build-stamp
 config.cache
+config.guess
 config.h.in
 config.log
 config.status
