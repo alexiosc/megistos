@@ -15,6 +15,7 @@ config.log
 config.status
 configure
 configure-stamp
+configure.tmp
 libltdl
 libtool
 log
