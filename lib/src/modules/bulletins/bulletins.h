@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:32:36  alexios
+ * Removed redundant rcsinfo. Changed struct message to message_t.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -49,10 +52,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
 
 
 /* bulletins.c */
@@ -128,7 +127,7 @@ void    listclubs ();
 
 /* insert.c */
 
-int     getmsgheader (char *club, int msgno, struct message *msg);
+int     getmsgheader (char *club, int msgno, message_t *msg);
 
 void    insertblt ();
 
