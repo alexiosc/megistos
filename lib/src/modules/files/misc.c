@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 09:00:31  alexios
+ * Adjusted #includes. Recoded time and charge calculations using integer
+ * operations.
+ *
  * Revision 1.4  2003/12/24 20:12:12  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,10 +72,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <math.h>
-#include <megistos/typhoon.h>
+#include <libtyphoon/typhoon.h>
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 
 
 char   *
@@ -227,30 +231,76 @@ _getfiletype (char *fname, int recurse)
 
     The formula used here is the same as in the updown tool: 
 
-                               file size
+                           file size * 10 bits
      time in mins = ---------------------------------
-                      60 * efficiency * (bps/38400) */
+                      60 * efficiency * (bps/38400) 
+
+
+   2003-12-27: rearranged as an integer expression (with simulated
+   rounding).
+
+*/
 
 int
 calcxfertime (int size, int inseconds)
 {
+	int xfertime = (100 * size) /
+		((thisuseronl.baudrate > 0 ? thisuseronl.baudrate : 38400) *
+		 peffic * (inseconds ? 1 : 60));
+
+	xfertime = (xfertime + 5) / 10;
+	return xfertime;
+
+#if 0	
 	return (int)
 	    (rint (((double) size) /
 		   ((((double)
 		      (thisuseronl.baudrate ? thisuseronl.baudrate : 38400) /
 		      10.0) * (((double) peffic / 100.0))) *
 		    (inseconds ? 1.0 : 60.0))));
+#endif
+
 }
+
+/* Charge calculation:
+
+   C0 = dnlcharge (in credits)
+   C1 = thisuseronl->credspermin * 100  (in credits / 100 min)
+   t  = download time (in seconds))
+
+                     C1 cr             1 min
+   Charge = C0 cr + --------- * t s * -------
+                     100 min           60 s
+
+                     C1 cr * t
+   Charge = C0 cr + -----------
+                     100 * 60
+
+                      C1 t
+   Charge = C0 cr + -------- cr
+                      6000
+
+   The extra accuracy of both the time (in seconds, not minutes) and
+   charge (credits / 100 minutes, not credits per minute) aids in
+   coding this as an integer expression directly (with the help of
+   calcxfertime().
+*/
 
 int
 calccharge (int size, struct libidx *l)
 {
+	return l->dnlcharge + 
+		(thisuseronl.credspermin * calcxfertime (size, 1)) / 6000;
+
+#if 0
 	return (int)
 	    (rint
 	     (((double) l->dnlcharge) +
 	      (((double) thisuseronl.credspermin) / 100.0) * ((double) size) /
 	      ((((double) (thisuseronl.baudrate ? thisuseronl.baudrate : 38400)
 		 / 10.0) * (((double) peffic / 100.0))) * 60.0)));
+#endif
+
 }
 
 
