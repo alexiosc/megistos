@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2001/05/20 13:59:28  alexios
+ * Wisely changed audit entries AU*_HACKTRY to AU*_CRACKTRY. :-)
+ *
  * Revision 1.4  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -1362,7 +1365,7 @@ authenticate()
 	prompt(PSWNOG,NULL);
 	strikes++;
 	if(strikes>=LOGINSTRIKES){
-	  audit(tty,AUDIT(HACKTRY),userid,channel_baudstg(baud));
+	  audit(tty,AUDIT(CRACKTRY),userid,channel_baudstg(baud));
 	  kickout();
 	}
       }
