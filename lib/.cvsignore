@@ -3,6 +3,7 @@ Makefile.in
 aclocal.m4
 bbsconfig.h
 bbsconfig.h.in
+build-stamp
 config.cache
 config.h.in
 config.log
