@@ -1,3 +1,72 @@
+NOTES ON WRITING PROPER INSTALLATION SCRIPTS FOR THE SYSTEM
+
+(log and history at end of file)
+
+
+
+Preferred PREFIX:
+
+FSSTND:   /var/lib/megistos (eg Debian)
+FALLBACK: /usr/local/lib/megistos
+
+
+Installation steps:
+
+* Configure
+
+* Compile
+
+* Make directory hierarchy under $PREFIX:
+
+	bin:  binaries
+	data: BBS data
+	doc:  documentation
+	etc:  configuration
+	lib:  libraries
+	lock: lock directory
+	log:  system logs
+	src:  source (symbolic link to actual source directory!)
+
+* Keep scripts inside source distribution, copy them to $PREFIX/bin.
+
+* Each module responsible for copying its own scripts and binaries to
+  $PREFIX/bin.
+
+* Likewise for documentation, setup and initialising their data subdirectory.
+
+* Create users bbs & bbsuser (optionally: sshbbs)
+
+* Add entries to logrotate
+
+* Add inetd.conf entry for telnet access
+
+* Ask and enable console login
+
+* Add init.d script
+
+* Set Sysop password
+
+* Set other BBS basic settings
+
+* MSG installation: compare messages.
+
+	If the block hasn't yet been installed, install it.
+	Else: if the blocks are identical, do nothing.
+	Else: go through blocks with msgtool:
+		LEVEL1/Base config:
+			install missing variables at the right place.
+			prompt user for all values.
+		LEVEL2/Setup config:
+			install missing variables.
+			Notify user for differing values.
+		LEVEL3/Message config:
+			install missing blocks.
+			Notify user, allow changing.
+
+
+OLD CONTENTS OF FILE FOLLOW
+-------------------------------------------------------------------------------
+
  0. Install and test Greek Support
  1. Create group bbs (GID 200 on vennea)
  2. Create user bbs.bbs (UID 502 on vennea)
@@ -86,3 +155,14 @@ That should do it (but don't quote me on that)
 
 Should you need to compile anything, cd to that directory and make. To compile
 everything, do make clean/make dep/make/whatever in /bbs/src.
+
+
+-------------------------------------------------------------------------------
+
+$Id$
+
+$Log$
+Revision 1.2  2001/05/02 19:36:50  alexios
+Added a checklist of things needed to rationalise and automate the
+installation process (and create Debian packages).
+
