@@ -1,0 +1,12 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/31 06:58:27  alexios
+# Initial revision.
+#
+
+include $(top_srcdir)/templates/program
+
+# End of file.
