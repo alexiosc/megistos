@@ -49,7 +49,6 @@
 		101	: enable color insertion (default)
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -60,6 +59,10 @@
 
 #define INT	"%i"
 #define FLT	"%3.0f"
+
+extern int asprintf __P ((char **__restrict __ptr,
+			  __const char *__restrict __fmt, ...))
+     __attribute__ ((__format__ (__printf__, 2, 3)));
 
 int insert_color_dir=0;
 
@@ -259,5 +262,5 @@ void init_printf(void)
 	   glibc2 will compile without warning. This has no consequences,
 	   cause gallup_print_arginfo() will never be called libc5 */
 	   
-	register_printf_function ('F', (printf_function)gallup_print, NULL /*gallup_print_arginfo*/);
+	register_printf_function ('F', gallup_print, NULL /*gallup_print_arginfo*/);
 }

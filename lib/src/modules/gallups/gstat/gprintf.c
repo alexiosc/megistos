@@ -53,6 +53,7 @@
 #define __USE_GNU 1
 #define __USE_UNIX98 1
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <printf.h>
@@ -262,5 +263,5 @@ void init_printf(void)
 	   glibc2 will compile without warning. This has no consequences,
 	   cause gallup_print_arginfo() will never be called libc5 */
 	   
-	register_printf_function ('F', (printf_function)gallup_print, gallup_print_arginfo);
+	register_printf_function ('F', gallup_print, gallup_print_arginfo);
 }

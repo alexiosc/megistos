@@ -2,6 +2,6 @@
 
 #define BJ_MAJORVERSION "0"
 #define BJ_MINORVERSION "7"
-#define BJ_COMPILED_BY  "bbs@tehuti"
-#define BJ_MAKE_NUMBER  "321"
-#define BJ_DATE         "01-01-03 12:39"
+#define BJ_COMPILED_BY  "bbs@vennea"
+#define BJ_MAKE_NUMBER  "298"
+#define BJ_DATE         "01-04-22 17:53"
