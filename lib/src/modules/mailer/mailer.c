@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:40:11  alexios
+ * Adjusted #includes. One minor fix.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -73,8 +76,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mailer.h>
-#include <megistos/mbk_mailer.h>
+#include "mailer.h"
+#include "mbk_mailer.h"
 
 
 promptblock_t *msg, *archivers, *mailer_msg;
@@ -260,7 +263,7 @@ mod_info_t mod_info_mailer = {
 	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
 	"Packages parts of the BBS for off-line browsing and use.",
 	RCS_VER,
-	VERSION,
+	MAILER_VERSION,
 	{0, NULL}
 	,			/* Login handler */
 	{0, handler_run}

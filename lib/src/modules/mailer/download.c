@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:39:56  alexios
+ * Adjusted #includes. One minor fix.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -89,10 +92,10 @@ static const char rcsinfo[] =
 
 #include <megistos/bbs.h>
 #include <megistos/systemversion.h>
-#include <megistos/mailer.h>
-#include <megistos/mbk_mailer.h>
+#include "mailer.h"
+#include "mbk_mailer.h"
 #define __ARCHIVERS_UNAMBIGUOUS__
-#include <megistos/mbk_archivers.h>
+#include <mbk/mbk_archivers.h>
 
 
 static int
@@ -123,7 +126,7 @@ mkfiles (char *dir)
 		return 0;
 	}
 	fprintf (fp, "DOOR = MegistosMail\r\n");
-	fprintf (fp, "VERSION = %s\r\n", VERSION);
+	fprintf (fp, "VERSION = %s\r\n", MAILER_VERSION);
 	fprintf (fp, "SYSTEM = %s\r\n", bbs_systemversion);
 	fprintf (fp, "CONTROLNAME = %s\r\n", ctlname[0]);
 	fprintf (fp, "MIXEDCASE = YES\r\n");
