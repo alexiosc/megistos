@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/09/28 13:11:15  alexios
+ * Renamed locally used convenience macro _() which clashed with the I18N
+ * convenience macro of the same name.
+ *
  * Revision 1.6  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -110,7 +114,7 @@ static const char rcsinfo[] =
 #include "mbk_sysvar.h"
 
 
-#define _(x) mkfname("%s%s",SYSVARFILE,x)
+#define _m(x) mkfname("%s%s",SYSVARFILE,x)
 
 
 struct sysvar *sysvar = NULL;
@@ -300,31 +304,31 @@ savesysvars ()
 	/* Make a backup copy of the sysvar file and age it -- it tends to
 	   die at bad crashes and we need the backups */
 
-	if (!stat (_(".OOOO"), &st))
-		rename (_(".OOOO"), _(".OOOOO"));
-	if (!stat (_(".OOO"), &st))
-		rename (_(".OOO"), _(".OOOO"));
-	if (!stat (_(".OO"), &st))
-		rename (_(".OO"), _(".OOO"));
-	if (!stat (_(".O"), &st))
-		rename (_(".O"), _(".OO"));
-	if (!stat (_(""), &st))
-		fcopy (_(""), _(".O"));
+	if (!stat (_m(".OOOO"), &st))
+		rename (_m(".OOOO"), _m(".OOOOO"));
+	if (!stat (_m(".OOO"), &st))
+		rename (_m(".OOO"), _m(".OOOO"));
+	if (!stat (_m(".OO"), &st))
+		rename (_m(".OO"), _m(".OOO"));
+	if (!stat (_m(".O"), &st))
+		rename (_m(".O"), _m(".OO"));
+	if (!stat (_m(""), &st))
+		fcopy (_m(""), _m(".O"));
 
 	/* Make sure the files have the right owners/permissions if we're root */
 	if (!getuid ()) {
-		chown (_(""), bbs_uid, bbs_gid);
-		chown (_(".O"), bbs_uid, bbs_gid);
-		chown (_(".OO"), bbs_uid, bbs_gid);
-		chown (_(".OOO"), bbs_uid, bbs_gid);
-		chown (_(".OOOO"), bbs_uid, bbs_gid);
-		chown (_(".OOOOO"), bbs_uid, bbs_gid);
-		chmod (_(""), 0660);
-		chmod (_(".O"), 0660);
-		chmod (_(".OO"), 0660);
-		chmod (_(".OOO"), 0660);
-		chmod (_(".OOOO"), 0660);
-		chmod (_(".OOOOO"), 0660);
+		chown (_m(""), bbs_uid, bbs_gid);
+		chown (_m(".O"), bbs_uid, bbs_gid);
+		chown (_m(".OO"), bbs_uid, bbs_gid);
+		chown (_m(".OOO"), bbs_uid, bbs_gid);
+		chown (_m(".OOOO"), bbs_uid, bbs_gid);
+		chown (_m(".OOOOO"), bbs_uid, bbs_gid);
+		chmod (_m(""), 0660);
+		chmod (_m(".O"), 0660);
+		chmod (_m(".OO"), 0660);
+		chmod (_m(".OOO"), 0660);
+		chmod (_m(".OOOO"), 0660);
+		chmod (_m(".OOOOO"), 0660);
 	}
 
 	sprintf (fname, mkfname ("%s.%d", SYSVARFILE, (int) getpid ()));
@@ -356,7 +360,7 @@ savesysvars ()
 				lock_wait ("LCK..sysvar", 10);
 				if (lock_check ("LCK..sysvar", dummy) <= 0) {
 					lock_place ("LCK..sysvar", "writing");
-					fcopy (fname, _(""));
+					fcopy (fname, _m(""));
 					unlink (fname);
 					lock_rm ("LCK..sysvar");
 				}
