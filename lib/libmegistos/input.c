@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/08/15 18:08:45  alexios
+ * Rationalised RCS/CVS ident(1) strings.
+ *
  * Revision 1.4  2001/06/30 10:34:37  alexios
  * Fixed significant security fault a symptom of which was SF bug #223631. The
  * patch was provided by Lucas Maneos, although I was *sure* I'd already
@@ -87,10 +90,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 #define WANT_STDLIB_H 1

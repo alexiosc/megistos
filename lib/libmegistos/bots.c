@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.2  2003/08/15 18:08:45  alexios
+ * Rationalised RCS/CVS ident(1) strings.
+ *
  * Revision 1.1  2001/04/22 15:24:15  alexios
  * Initial checkin.
  *
@@ -34,10 +37,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
