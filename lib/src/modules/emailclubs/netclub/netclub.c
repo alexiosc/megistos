@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -52,133 +53,145 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 #include <typhoon.h>
 
-#include "bbs.h"
-#include "netclub.h"
+#include <megistos/bbs.h>
+#include <megistos/netclub.h>
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
-#include "mbk_sysvar.h"
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_sysvar.h>
+#include <megistos/mbk_emailclubs.h>
 
 
-promptblock_t  *msg;
-int         usercaller=0;
-char       *bbscode;
+promptblock_t *msg;
+int     usercaller = 0;
+char   *bbscode;
 
-int         mode=MODE_NOP;	/* Operation mode */
-int         debug=0;		/* Debugging mode */
-int         force=0;		/* Force sync */
-int         dryrun=0;		/* Dry run */
-char       *sys=NULL;		/* Name of single system to use */
-char       *clubname=NULL;	/* Club name to list */
+int     mode = MODE_NOP;	/* Operation mode */
+int     debug = 0;		/* Debugging mode */
+int     force = 0;		/* Force sync */
+int     dryrun = 0;		/* Dry run */
+char   *sys = NULL;		/* Name of single system to use */
+char   *clubname = NULL;	/* Club name to list */
 
 
 
 
 void
-syntax()
+syntax ()
 {
-  printf("syntax: netclub [options]\n\nOptions:\n\b");
-  printf("   -c              List remote clubs.\n");
-  printf("   -d              Verbose debugging on.\n");
-  printf("   -f              Force sync now, regardless of desired times.\n");
-  printf("   -g              (Go) Synchronise remote clubs.\n");
-  printf("   -I clubname     Get info on remote club (best used with -s).\n");
-  printf("   -l              List import points/sync times, exit immediately.\n");
-  printf("   -n              Dry run, don't write anything to disk.\n");
-  printf("   -s host/BBS     Only operate on specified system.\n");
-  exit(1);
+	printf ("syntax: netclub [options]\n\nOptions:\n\b");
+	printf ("   -c              List remote clubs.\n");
+	printf ("   -d              Verbose debugging on.\n");
+	printf
+	    ("   -f              Force sync now, regardless of desired times.\n");
+	printf ("   -g              (Go) Synchronise remote clubs.\n");
+	printf
+	    ("   -I clubname     Get info on remote club (best used with -s).\n");
+	printf
+	    ("   -l              List import points/sync times, exit immediately.\n");
+	printf ("   -n              Dry run, don't write anything to disk.\n");
+	printf ("   -s host/BBS     Only operate on specified system.\n");
+	exit (1);
 }
 
 
 void
-init(int argc, char **argv)
+init (int argc, char **argv)
 {
-  int init=0;
-  char c;
+	int     init = 0;
+	char    c;
 
-  while((c=getopt(argc,argv,"cdfgI:lns:h?"))!=EOF){
-    switch(c){
-    case 'c':
-      mode=MODE_LISTCLUBS;
-      break;
-    case 'I':
-      mode=MODE_CLUBINFO;
-      clubname=strdup(optarg);
-      break;
-    case 'l':
-      mode=MODE_REPORT;
-      break;
-    case 'g':
-      mode=MODE_SYNC;
-      break;
-    case 'd':
-      debug=1;
-      break;
-    case 'f':
-      force=1;
-      break;
-    case 'n':
-      dryrun=1;
-      break;
-    case 's':
-      sys=strdup(optarg);
-      break;
-    case 'h':
-    case '?':
-    default:
-      syntax();
-    }
-  }
-  
-  mkdir(mkfname(IHAVEDIR),0777); /* Paranoia mode and a silly thing to do */
-  d_dbfpath(mkfname(IHAVEDIR));
-  d_dbdpath(mkfname(IHAVEDIR));
-  if(d_open("ihavedb","s")!=S_OKAY){
-    error_log("Cannot open ihave database (db_status %d)\n",db_status);
-    return;
-  }
+	while ((c = getopt (argc, argv, "cdfgI:lns:h?")) != EOF) {
+		switch (c) {
+		case 'c':
+			mode = MODE_LISTCLUBS;
+			break;
+		case 'I':
+			mode = MODE_CLUBINFO;
+			clubname = strdup (optarg);
+			break;
+		case 'l':
+			mode = MODE_REPORT;
+			break;
+		case 'g':
+			mode = MODE_SYNC;
+			break;
+		case 'd':
+			debug = 1;
+			break;
+		case 'f':
+			force = 1;
+			break;
+		case 'n':
+			dryrun = 1;
+			break;
+		case 's':
+			sys = strdup (optarg);
+			break;
+		case 'h':
+		case '?':
+		default:
+			syntax ();
+		}
+	}
+
+	mkdir (mkfname (IHAVEDIR), 0777);	/* Paranoia mode and a silly thing to do */
+	d_dbfpath (mkfname (IHAVEDIR));
+	d_dbdpath (mkfname (IHAVEDIR));
+	if (d_open ("ihavedb", "s") != S_OKAY) {
+		error_log ("Cannot open ihave database (db_status %d)\n",
+			   db_status);
+		return;
+	}
 
 
-  if(getenv("USERID")&&strcmp("",getenv("USERID"))){
-    usercaller=1;
-    init=INI_ALL;
-  }else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
-  mod_init(init);
+	if (getenv ("USERID") && strcmp ("", getenv ("USERID"))) {
+		usercaller = 1;
+		init = INI_ALL;
+	} else
+		init =
+		    INI_TTYNUM | INI_OUTPUT | INI_SYSVARS | INI_ERRMSGS |
+		    INI_CLASSES;
+	mod_init (init);
 
-  msg=msg_open("sysvar");
-  bbscode=msg_string(SYSVAR_BBSCOD);
-  msg_close(msg);
+	msg = msg_open ("sysvar");
+	bbscode = msg_string (SYSVAR_BBSCOD);
+	msg_close (msg);
 
-  msg=msg_open("emailclubs");
-  if(init==INI_ALL)msg_setlanguage(thisuseracc.language);
+	msg = msg_open ("emailclubs");
+	if (init == INI_ALL)
+		msg_setlanguage (thisuseracc.language);
 }
 
 
 void
-run()
+run ()
 {
-  if(mode==MODE_NOP){
-    fprintf(stderr,"No operation mode specified, no action will be taken.\n");
-    fprintf(stderr,"Try -h for help.\n\n");
-    exit(1);
-  }
-  iterate();
+	if (mode == MODE_NOP) {
+		fprintf (stderr,
+			 "No operation mode specified, no action will be taken.\n");
+		fprintf (stderr, "Try -h for help.\n\n");
+		exit (1);
+	}
+	iterate ();
 }
 
 
 void
-done()
+done ()
 {
-  exit(0);
+	exit (0);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  init(argc,argv);
-  run();
-  done();
-  return 0;
+	mod_setprogname (argv[0]);
+	init (argc, argv);
+	run ();
+	done ();
+	return 0;
 }
+
+
+/* End of File */

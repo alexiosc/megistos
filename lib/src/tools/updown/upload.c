@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -63,10 +66,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -81,293 +82,326 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "updown.h"
-#include "mbk_updown.h"
+#include <megistos/bbs.h>
+#include <megistos/updown.h>
+#include <megistos/mbk_updown.h>
 
 
 static void
-showmenu()
+showmenu ()
 {
-  int i, pos=0;
+	int     i, pos = 0;
 
-  prompt(UPLHDR);
+	prompt (UPLHDR);
 
-  for(i=0;i<numprotocols;i++){
-    if((protocols[i].flags&PRF_UPLOAD) &&
-       (NUMFILES==1 || protocols[i].flags&PRF_BATCH)){
-      char flush[80];
-      int j=(i/2)%2+1;
-      
-      sprintf(flush,"%33s",protocols[i].name);
-      while(flush[j]==32 && flush[j+1]==32){
-	flush[j]='.';
-	j+=2;
-      }
-      prompt(PROTLIN1+pos,protocols[i].select,flush);
-      pos=(pos+1)%2;
-    }
-  }
-  if(pos)prompt(PROTLIN2,"","");
-  prompt(UPLFTR);
-}
+	for (i = 0; i < numprotocols; i++) {
+		if ((protocols[i].flags & PRF_UPLOAD) &&
+		    (NUMFILES == 1 || protocols[i].flags & PRF_BATCH)) {
+			char    flush[80];
+			int     j = (i / 2) % 2 + 1;
 
-
-int
-dolink()
-{
-  char *s,c;
-  struct stat st;
-
-  for(;;){
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      s=cnc_word();
-    } else {
-      prompt(LNKASK);
-      inp_get(0);
-      s=margv[0];
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 1;
-      }
-    }
-    
-    if(stat(s,&st)){
-      cnc_end();
-      prompt(LNKERR,s);
-    }else{
-      char s1[256],fname[256];
-
-      getcwd(s1,256);
-      sprintf(fname,"%s/%08lx",s1,time(0));
-      symlink(s,fname);
-      prompt(LINKOK,s);
-      
-      return 0;
-    }
-  }
-  return 0;
-}
-
-
-int
-upload(char *prot)
-{
-  int  i, f=-1,result=1,retry=0;
-  char fname[256], command[256], cwd[256];
-  
-  for(i=0;i<numprotocols;i++){
-    if((protocols[i].flags&PRF_UPLOAD) &&
-       (NUMFILES==1 || protocols[i].flags&PRF_BATCH) &&
-       (sameas(protocols[i].select,prot))){
-      f=i;
-      break;
-    }
-  }
-  if(f==-1){
-    prompt(ERRSEL,prot);
-    return -1;
-  }
-
-  sprintf(fname,TMPDIR"/upl%05d",getpid());
-  sprintf(command,"rm -rf %s &>/dev/null",fname);
-  system(command);
-  mkdir(fname,0777);
-
-  sprintf(fname,TMPDIR"/upl%05d",getpid());
-  getcwd(cwd,sizeof(cwd));
-  chdir(fname);
-
-  if(!(protocols[f].flags&PRF_LINK)){
-    sprintf(command,"umask 007; %s %s; chmod 660 *",protocols[f].command,
-	    protocols[f].flags&PRF_NEEDN?xferlist[firstentry].fullname:"");
-    
-    {
-      char s1[80],s2[80];
-      
-      strncpy(s1,msg_get(SUPLOAD),80);
-      strncpy(s2,msg_getunit(SSINGLE,NUMFILES),80);
-      
-      prompt(XFERBEG,s1,s2,protocols[f].name,protocols[f].stopkey);
-    }
-    
-    thisuseronl.flags|=OLF_BUSY;
-
-    /* Turn off translation if the protocol is binary */
-    if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_OFF);
-    msg_close(msg_sys);
-    mod_done(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
-
-    system(STTYBIN" sane intr 0x03");
-    result=system(command);
-    system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-    mod_init(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
-    msg_set(msg);
-
-    /* Turn translation back on if necessary */
-    if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_ON);
-    mod_regpid(thisuseronl.channel);
-    thisuseronl.flags&=~OLF_BUSY;
-  } else result=dolink();
-
-  chdir(cwd);
-    
-  retry=0;
-  if(result){
-    autodis=0;
-    prompt(UPLFAIL);
-    if(!get_bool(&retry,URETRY,0,0,0))retry=0;
-    if(!retry){
-      sprintf(fname,TMPDIR"/upl%05d",getpid());
-      sprintf(command,"rm -rf %s &>/dev/null",fname);
-      system(command);
-    }
-  }
-
-  if(!result && !retry){
-    FILE *tsibouki;
-    int  total=0;
-
-    if(xferlist[firstentry].auditsok[0] && xferlist[firstentry].auditdok[0]){
-      audit(thisuseronl.channel,
-	    xferlist[firstentry].auditfok,
-	    xferlist[firstentry].auditsok,
-	    xferlist[firstentry].auditdok,
-	    thisuseracc.userid,xferlist[firstentry].fullname);
-    }
-
-    if(xferlist[firstentry].cmdok[0]){
-      char command[4096];
-      sprintf(command,"%s %d '%s'",
-	      xferlist[firstentry].cmdok,
-	      i,
-	      xferlist[firstentry].fullname);
-      system(command);
-    }
-    
-    sprintf(fname,TMPDIR"/upl%05d",getpid());
-    sprintf(command,
-	    "(echo %s `find %s \\( -type f -or -type l \\)` " \
-	    "|tr '\\040' '\\012') 2>/dev/null >%s",
-	    fname,fname,xferlistname);
-    system(command);
-
-    if(!(protocols[f].flags&PRF_LINK)){
-      sprintf(command,"du `find %s -print -maxdepth 1` -bD |cut -f 1",fname);
-      if((tsibouki=popen(command,"r"))!=NULL){
-	int i;
-	if(fscanf(tsibouki," %d \n",&i)){
-	  total+=i;
-	  thisuseracc.filesupl++;
-	  if(sysvar)sysvar->filesupl++;
+			sprintf (flush, "%33s", protocols[i].name);
+			while (flush[j] == 32 && flush[j + 1] == 32) {
+				flush[j] = '.';
+				j += 2;
+			}
+			prompt (PROTLIN1 + pos, protocols[i].select, flush);
+			pos = (pos + 1) % 2;
+		}
 	}
-      }
-      pclose(tsibouki);
-      thisuseracc.bytesupl+=total;
-      if(sysvar)sysvar->bytesupl+=(total/100);
-    }
-  } else if(result && !retry){
-    if(xferlist[firstentry].auditsfail[0] &&
-       xferlist[firstentry].auditdfail[0]){
-      audit(thisuseronl.channel,
-	    xferlist[firstentry].auditffail,
-	    xferlist[firstentry].auditsfail,
-	    xferlist[firstentry].auditdfail,
-	    thisuseracc.userid,xferlist[firstentry].fullname);
-    }
-    if(xferlist[i].cmdfail[0]){
-      char command[4096];
-      sprintf(command,"%s %d '%s'",
-	      xferlist[firstentry].cmdfail,
-	      i,
-	      xferlist[firstentry].fullname);
-      system(command);
-    }
-    sprintf(command,"\\rm -rf %s %s",fname,xferlistname);
-    system(command);
-  }
+	if (pos)
+		prompt (PROTLIN2, "", "");
+	prompt (UPLFTR);
+}
 
-  return !retry;
+
+int
+dolink ()
+{
+	char   *s, c;
+	struct stat st;
+
+	for (;;) {
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			s = cnc_word ();
+		} else {
+			prompt (LNKASK);
+			inp_get (0);
+			s = margv[0];
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 1;
+			}
+		}
+
+		if (stat (s, &st)) {
+			cnc_end ();
+			prompt (LNKERR, s);
+		} else {
+			char    s1[256], fname[256];
+
+			getcwd (s1, 256);
+			sprintf (fname, "%s/%08lx", s1, time (0));
+			symlink (s, fname);
+			prompt (LINKOK, s);
+
+			return 0;
+		}
+	}
+	return 0;
+}
+
+
+int
+upload (char *prot)
+{
+	int     i, f = -1, result = 1, retry = 0;
+	char    fname[256], command[256], cwd[256];
+
+	for (i = 0; i < numprotocols; i++) {
+		if ((protocols[i].flags & PRF_UPLOAD) &&
+		    (NUMFILES == 1 || protocols[i].flags & PRF_BATCH) &&
+		    (sameas (protocols[i].select, prot))) {
+			f = i;
+			break;
+		}
+	}
+	if (f == -1) {
+		prompt (ERRSEL, prot);
+		return -1;
+	}
+
+	sprintf (fname, TMPDIR "/upl%05d", getpid ());
+	sprintf (command, "rm -rf %s &>/dev/null", fname);
+	system (command);
+	mkdir (fname, 0777);
+
+	sprintf (fname, TMPDIR "/upl%05d", getpid ());
+	getcwd (cwd, sizeof (cwd));
+	chdir (fname);
+
+	if (!(protocols[f].flags & PRF_LINK)) {
+		sprintf (command, "umask 007; %s %s; chmod 660 *",
+			 protocols[f].command,
+			 protocols[f].flags & PRF_NEEDN ? xferlist[firstentry].
+			 fullname : "");
+
+		{
+			char    s1[80], s2[80];
+
+			strncpy (s1, msg_get (SUPLOAD), 80);
+			strncpy (s2, msg_getunit (SSINGLE, NUMFILES), 80);
+
+			prompt (XFERBEG, s1, s2, protocols[f].name,
+				protocols[f].stopkey);
+		}
+
+		thisuseronl.flags |= OLF_BUSY;
+
+		/* Turn off translation if the protocol is binary */
+		if (protocols[f].flags & PRF_BINARY)
+			out_setxlation (XLATION_OFF);
+		msg_close (msg_sys);
+		mod_done (INI_OUTPUT | INI_INPUT | INI_SIGNALS);
+
+		system (STTYBIN " sane intr 0x03");
+		result = system (command);
+		system (STTYBIN
+			" -echo start undef stop undef intr undef susp undef");
+		mod_init (INI_OUTPUT | INI_INPUT | INI_SIGNALS);
+		msg_set (msg);
+
+		/* Turn translation back on if necessary */
+		if (protocols[f].flags & PRF_BINARY)
+			out_setxlation (XLATION_ON);
+		mod_regpid (thisuseronl.channel);
+		thisuseronl.flags &= ~OLF_BUSY;
+	} else
+		result = dolink ();
+
+	chdir (cwd);
+
+	retry = 0;
+	if (result) {
+		autodis = 0;
+		prompt (UPLFAIL);
+		if (!get_bool (&retry, URETRY, 0, 0, 0))
+			retry = 0;
+		if (!retry) {
+			sprintf (fname, TMPDIR "/upl%05d", getpid ());
+			sprintf (command, "rm -rf %s &>/dev/null", fname);
+			system (command);
+		}
+	}
+
+	if (!result && !retry) {
+		FILE   *tsibouki;
+		int     total = 0;
+
+		if (xferlist[firstentry].auditsok[0] &&
+		    xferlist[firstentry].auditdok[0]) {
+			audit (thisuseronl.channel,
+			       xferlist[firstentry].auditfok,
+			       xferlist[firstentry].auditsok,
+			       xferlist[firstentry].auditdok,
+			       thisuseracc.userid,
+			       xferlist[firstentry].fullname);
+		}
+
+		if (xferlist[firstentry].cmdok[0]) {
+			char    command[4096];
+
+			sprintf (command, "%s %d '%s'",
+				 xferlist[firstentry].cmdok,
+				 i, xferlist[firstentry].fullname);
+			system (command);
+		}
+
+		sprintf (fname, TMPDIR "/upl%05d", getpid ());
+		sprintf (command,
+			 "(echo %s `find %s \\( -type f -or -type l \\)` "
+			 "|tr '\\040' '\\012') 2>/dev/null >%s",
+			 fname, fname, xferlistname);
+		system (command);
+
+		if (!(protocols[f].flags & PRF_LINK)) {
+			sprintf (command,
+				 "du `find %s -print -maxdepth 1` -bD |cut -f 1",
+				 fname);
+			if ((tsibouki = popen (command, "r")) != NULL) {
+				int     i;
+
+				if (fscanf (tsibouki, " %d \n", &i)) {
+					total += i;
+					thisuseracc.filesupl++;
+					if (sysvar)
+						sysvar->filesupl++;
+				}
+			}
+			pclose (tsibouki);
+			thisuseracc.bytesupl += total;
+			if (sysvar)
+				sysvar->bytesupl += (total / 100);
+		}
+	} else if (result && !retry) {
+		if (xferlist[firstentry].auditsfail[0] &&
+		    xferlist[firstentry].auditdfail[0]) {
+			audit (thisuseronl.channel,
+			       xferlist[firstentry].auditffail,
+			       xferlist[firstentry].auditsfail,
+			       xferlist[firstentry].auditdfail,
+			       thisuseracc.userid,
+			       xferlist[firstentry].fullname);
+		}
+		if (xferlist[i].cmdfail[0]) {
+			char    command[4096];
+
+			sprintf (command, "%s %d '%s'",
+				 xferlist[firstentry].cmdfail,
+				 i, xferlist[firstentry].fullname);
+			system (command);
+		}
+		sprintf (command, "\\rm -rf %s %s", fname, xferlistname);
+		system (command);
+	}
+
+	return !retry;
 }
 
 
 void
-uploadrun()
+uploadrun ()
 {
-  int  shownmenu=0;
-  char *s;
+	int     shownmenu = 0;
+	char   *s;
 
-  for(;;){
-    if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-      if(!shownmenu){
-	showmenu();
-	shownmenu=1;
-      }
-    } else shownmenu=1;
-    if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
-      thisuseronl.input[0]=0;
-    } else {
-      if(!cnc_nxtcmd){
-	if(thisuseronl.flags&OLF_MMCONCAT){
-	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return;
+	for (;;) {
+		if (!
+		    (thisuseronl.flags & OLF_MMCALLING &&
+		     thisuseronl.input[0])) {
+			if (!shownmenu) {
+				showmenu ();
+				shownmenu = 1;
+			}
+		} else
+			shownmenu = 1;
+		if (thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0]) {
+			thisuseronl.input[0] = 0;
+		} else {
+			if (!cnc_nxtcmd) {
+				if (thisuseronl.flags & OLF_MMCONCAT) {
+					thisuseronl.flags &= ~OLF_MMCONCAT;
+					return;
+				}
+				if (!shownmenu) {
+					showmenu ();
+					shownmenu = 1;
+				}
+				prompt (SHORT);
+				inp_get (0);
+				cnc_begin ();
+			}
+		}
+
+		if (margc)
+			s = cnc_word ();
+		else
+			continue;
+		if (sameas (s, "?"))
+			shownmenu = 0;
+		else if (inp_isX (s)) {
+			char    command[256];
+
+			if (xferlist[firstentry].auditsfail[0] &&
+			    xferlist[firstentry].auditdfail[0]) {
+				audit (thisuseronl.channel,
+				       xferlist[firstentry].auditffail,
+				       xferlist[firstentry].auditsfail,
+				       xferlist[firstentry].auditdfail,
+				       thisuseracc.userid,
+				       xferlist[firstentry].fullname);
+			}
+			sprintf (command, "\\rm -rf /tmp/upl%05d %s",
+				 getpid (), xferlistname);
+			system (command);
+			return;
+		} else if (!margc || inp_reprompt ())
+			cnc_end ();
+		else {
+			char   *excl = NULL;
+
+			inp_raw ();
+			excl = strchr (s, '!');
+			if (excl ||
+			    ((excl = strchr (cnc_nxtcmd, '!')) != NULL)) {
+				autodis = 1;
+				if (excl)
+					*excl = 0;
+			}
+
+			switch (upload (s)) {
+			case 0:
+				shownmenu = 0;
+				break;
+			case -1:
+				cnc_end ();
+				break;
+			case 1:
+				if (autodis)
+					autodisconnect ();
+				return;
+			default:
+				shownmenu = 0;
+			}
+		}
+		cnc_end ();
 	}
-	if(!shownmenu){
-	  showmenu();
-	  shownmenu=1;
-	}
-	prompt(SHORT);
-	inp_get(0);
-	cnc_begin();
-      }
-    }
-
-    if(margc)s=cnc_word();
-    else continue;
-    if(sameas(s,"?"))shownmenu=0;
-    else if(inp_isX(s)){
-      char command[256];
-
-      if(xferlist[firstentry].auditsfail[0] &&
-	 xferlist[firstentry].auditdfail[0]){
-	audit(thisuseronl.channel,
-	      xferlist[firstentry].auditffail,
-	      xferlist[firstentry].auditsfail,
-	      xferlist[firstentry].auditdfail,
-	      thisuseracc.userid,xferlist[firstentry].fullname);
-      }
-      sprintf(command,"\\rm -rf /tmp/upl%05d %s",getpid(),xferlistname);
-      system(command);
-      return;
-    } else if(!margc || inp_reprompt())cnc_end();
-    else {
-      char *excl=NULL;
-
-      inp_raw();
-      excl=strchr(s,'!');
-      if(excl || ((excl=strchr(cnc_nxtcmd,'!'))!=NULL)){
-	autodis=1;
-	if(excl)*excl=0;
-      }
-
-      switch(upload(s)){
-      case 0:
-	shownmenu=0;
-	break;
-      case -1:
-	cnc_end();
-	break;
-      case 1:
-	if(autodis)autodisconnect();
-	return;
-      default:
-	shownmenu=0;
-      }
-    }
-    cnc_end();
-  }
 }
+
+
+/* End of File */

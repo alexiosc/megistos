@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,23 +54,22 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
 
 struct directive {
-  char name[10];
-  int  code;
+	char    name[10];
+	int     code;
 };
 
 
 struct viewer {
-  char string[80];
-  char type[80];
-  char command[256];
+	char    string[80];
+	char    type[80];
+	char    command[256];
 };
 
 
@@ -80,11 +82,11 @@ struct viewer {
 
 
 struct protocol {
-  char name[40];
-  char select[8];
-  char command[80];
-  char stopkey[16];
-  long flags;
+	char    name[40];
+	char    select[8];
+	char    command[80];
+	char    stopkey[16];
+	long    flags;
 };
 
 
@@ -99,50 +101,53 @@ struct protocol {
 extern promptblock_t *msg;
 
 
-extern int  peffic;
+extern int peffic;
 extern char *vprsel;
-extern int  dissec;
-extern int  lnkkey;
+extern int dissec;
+extern int lnkkey;
 extern char *lnksel;
-extern int  refnd;
-extern int  refper;
+extern int refnd;
+extern int refper;
 
 extern struct protocol *protocols;
-extern int             numprotocols;
-extern struct viewer   *viewers;
-extern int             numviewers;
-extern char            *xferlistname;
-extern xfer_item_t     *xferlist;
-extern int             totalitems;
-extern int             numitems;
-extern char            *taglistname;
-extern int             numtagged;
-extern int             xfertagged;
-extern int             taggedsize;
-extern int             autodis;
-extern int             logout;
+extern int numprotocols;
+extern struct viewer *viewers;
+extern int numviewers;
+extern char *xferlistname;
+extern xfer_item_t *xferlist;
+extern int totalitems;
+extern int numitems;
+extern char *taglistname;
+extern int numtagged;
+extern int xfertagged;
+extern int taggedsize;
+extern int autodis;
+extern int logout;
 
-extern char            filetype[256];
-extern long            filesize;
-extern long            xfertime;
-extern int             firstentry;
+extern char filetype[256];
+extern long filesize;
+extern long xfertime;
+extern int firstentry;
 
 
 #define NUMFILES   (xfertagged?(numitems+numtagged):numitems)
 #define MAXRECURSE 10
 #define SYMLINKTO  "symbolic link to "
 
-void autodisconnect();
+void    autodisconnect ();
 
-void readprotocols();
-void readviewers();
-void readtransferlist();
+void    readprotocols ();
+void    readviewers ();
+void    readtransferlist ();
 
-void extraprotocols();
-void getfilesize();
-void getfiletype();
+void    extraprotocols ();
+void    getfilesize ();
+void    getfiletype ();
 
-void downloadrun();
-void getfirstentry();
+void    downloadrun ();
+void    getfirstentry ();
 
-void uploadrun();
+void    uploadrun ();
+
+
+/* End of File */

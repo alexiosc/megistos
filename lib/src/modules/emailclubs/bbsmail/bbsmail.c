@@ -53,6 +53,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -83,10 +86,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -98,78 +99,92 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
-#include "mbk_sysvar.h"
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_sysvar.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 /*#define DEBUG 1*/
 
 
 promptblock_t *msg;
-int       usercaller=0;
-char      *bbscode;
+int     usercaller = 0;
+char   *bbscode;
 
 
 void
-init()
+init ()
 {
-  int init=0;
+	int     init = 0;
 
-  if(getenv("USERID")&&strcmp("",getenv("USERID"))){
-    usercaller=1;
-    init=INI_ALL;
-  }else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
-  mod_init(init);
+	if (getenv ("USERID") && strcmp ("", getenv ("USERID"))) {
+		usercaller = 1;
+		init = INI_ALL;
+	} else
+		init =
+		    INI_TTYNUM | INI_OUTPUT | INI_SYSVARS | INI_ERRMSGS |
+		    INI_CLASSES;
+	mod_init (init);
 
-  msg=msg_open("sysvar");
-  bbscode=msg_string(SYSVAR_BBSCOD);
-  msg_close(msg);
+	msg = msg_open ("sysvar");
+	bbscode = msg_string (SYSVAR_BBSCOD);
+	msg_close (msg);
 
-  msg=msg_open("emailclubs");
-  if(init==INI_ALL)msg_setlanguage(thisuseracc.language);
+	msg = msg_open ("emailclubs");
+	if (init == INI_ALL)
+		msg_setlanguage (thisuseracc.language);
 }
 
 
 void
-done()
+done ()
 {
-  exit(0);
+	exit (0);
 }
 
 
 void
-syntax()
+syntax ()
 {
-  printf("syntax: bbsmail <header-file> <body-file> ");
-  printf("[-{h|s|c} <attach-file>]\n\n");
-  printf("The header-file must contain a valid mail header.\n");
-  printf("The body-file must contain the body of the message.\n");
-  printf("The optional argument declares an optional attached file.\n");
-  printf("  -h = form hard link to the file.\n");
-  printf("  -s = form symbolic link to the file.\n");
-  printf("  -c = copy the file to the attachment directory.\n");
-  printf("The following attach-file argument specifies the attachment\n");
-  printf("file to be linked or copied.\n");
-  exit(1);
+	printf ("syntax: bbsmail <header-file> <body-file> ");
+	printf ("[-{h|s|c} <attach-file>]\n\n");
+	printf ("The header-file must contain a valid mail header.\n");
+	printf ("The body-file must contain the body of the message.\n");
+	printf ("The optional argument declares an optional attached file.\n");
+	printf ("  -h = form hard link to the file.\n");
+	printf ("  -s = form symbolic link to the file.\n");
+	printf ("  -c = copy the file to the attachment directory.\n");
+	printf
+	    ("The following attach-file argument specifies the attachment\n");
+	printf ("file to be linked or copied.\n");
+	exit (1);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  init();
-  if(argc!=3&&argc!=5)syntax();
-  if(argc==3)bbsmail_run(argv[1],argv[2],0,"");
-  else if(strcmp(argv[3],"-h")&&strcmp(argv[3],"-s")&&strcmp(argv[3],"-c")){
-    syntax();
-  } else if(!strcmp(argv[3],"-h"))bbsmail_run(argv[1],argv[2],1,argv[4]);
-  else if(!strcmp(argv[3],"-s"))bbsmail_run(argv[1],argv[2],2,argv[4]);
-  else if(!strcmp(argv[3],"-c"))bbsmail_run(argv[1],argv[2],3,argv[4]);
-  done();
-  return 0;
+	mod_setprogname (argv[0]);
+	init ();
+	if (argc != 3 && argc != 5)
+		syntax ();
+	if (argc == 3)
+		bbsmail_run (argv[1], argv[2], 0, "");
+	else if (strcmp (argv[3], "-h") && strcmp (argv[3], "-s") &&
+		 strcmp (argv[3], "-c")) {
+		syntax ();
+	} else if (!strcmp (argv[3], "-h"))
+		bbsmail_run (argv[1], argv[2], 1, argv[4]);
+	else if (!strcmp (argv[3], "-s"))
+		bbsmail_run (argv[1], argv[2], 2, argv[4]);
+	else if (!strcmp (argv[3], "-c"))
+		bbsmail_run (argv[1], argv[2], 3, argv[4]);
+	done ();
+	return 0;
 }
+
+
+/* End of File */

@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -53,9 +56,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -68,64 +70,69 @@
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 /* netmail.c */
 
-void handlenetmail(struct message *msg, char *srcname);
+void    handlenetmail (struct message *msg, char *srcname);
 
-void checknetmail(struct message *msg, char *srcname);
+void    checknetmail (struct message *msg, char *srcname);
 
 
 /* resolve.c */
 
-void resolverecipient(char *s, char *by);
+void    resolverecipient (char *s, char *by);
 
-void checkautofw(struct message *msg);
+void    checkautofw (struct message *msg);
 
 
 /* utils.c */
 
-void bbsencrypt(char *buf,int size,int key);
+void    bbsencrypt (char *buf, int size, int key);
 
-void addihave(struct message *msg);
+void    addihave (struct message *msg);
 
-void copyatt(int copymode, struct message *msg, int email, char *attachment);
+void    copyatt (int copymode, struct message *msg, int email,
+		 char *attachment);
 
 
 
 /* msghdr.c */
 
-void readmsghdr(char *fname, struct message *msg);
+void    readmsghdr (char *fname, struct message *msg);
 
-void writemsghdr(char *fname,struct message *msg);
+void    writemsghdr (char *fname, struct message *msg);
 
-void preparemsghdr(struct message *msg, int email);
+void    preparemsghdr (struct message *msg, int email);
 
-void writemessage(char *body, struct message *msg, int email);
+void    writemessage (char *body, struct message *msg, int email);
 
 
 /* msgnum.c */
 
-void getemsgnum(struct message *msg);
+void    getemsgnum (struct message *msg);
 
-void getcmsgnum(struct message *msg);
+void    getcmsgnum (struct message *msg);
 
 
 /* database.c */
 
-void addtodb(struct message *msg, int email);
+void    addtodb (struct message *msg, int email);
 
 
 /* bbsmail.c */
 
 extern promptblock_t *msg;
-extern int       usercaller;
-extern char      *bbscode;
+extern int usercaller;
+extern char *bbscode;
 
 
 /* bbsmail_run.c */
 
-void bbsmail_run(char *fname, char *srcname, int copymode, char *attachment);
+void    bbsmail_run (char *fname, char *srcname, int copymode,
+		     char *attachment);
+
+
+/* End of File */

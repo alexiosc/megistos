@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -46,10 +49,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,62 +62,71 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 void
-resolverecipient(char *s, char *by)
+resolverecipient (char *s, char *by)
 {
-  char original[256], fname[256], lock[256];
-  int  n=0, maxn=msg_int(MAXBNCE,1,100);
-  struct emailuser user;
-  FILE *fp;
+	char    original[256], fname[256], lock[256];
+	int     n = 0, maxn = msg_int (MAXBNCE, 1, 100);
+	struct emailuser user;
+	FILE   *fp;
 
-  if(strchr(s,'%')||strchr(s,'@'))return;
-  
-  strcpy(original,s);
-  strcpy(by,s);
+	if (strchr (s, '%') || strchr (s, '@'))
+		return;
 
-  for(;;){
-    strcpy(fname,mkfname("%s/%s",MSGUSRDIR,s));
-    sprintf(lock,ECUSERLOCK,s);
+	strcpy (original, s);
+	strcpy (by, s);
 
-    if((lock_wait(lock,20))==LKR_TIMEOUT)return;
-    lock_place(lock,"reading");
-    
-    if((fp=fopen(fname,"r"))==NULL){
-      lock_rm(lock);
-      return;
-    }
-    if(fread(&user,sizeof(struct emailuser),1,fp)!=1){
-      fclose(fp);
-      lock_rm(lock);
-      return;
-    }
-    fclose(fp);
-    lock_rm(lock);
-    if(!user.forwardto[0])return;
-    if(!strcmp(s,user.forwardto))return;
-    strcpy(by,s);
-    strcpy(s,user.forwardto);
+	for (;;) {
+		strcpy (fname, mkfname ("%s/%s", MSGUSRDIR, s));
+		sprintf (lock, ECUSERLOCK, s);
+
+		if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+			return;
+		lock_place (lock, "reading");
+
+		if ((fp = fopen (fname, "r")) == NULL) {
+			lock_rm (lock);
+			return;
+		}
+		if (fread (&user, sizeof (struct emailuser), 1, fp) != 1) {
+			fclose (fp);
+			lock_rm (lock);
+			return;
+		}
+		fclose (fp);
+		lock_rm (lock);
+		if (!user.forwardto[0])
+			return;
+		if (!strcmp (s, user.forwardto))
+			return;
+		strcpy (by, s);
+		strcpy (s, user.forwardto);
 /*    print("BY:  %s, TO: %s\n",by,s); */
-    if(!strcmp(original,s))return;
-    if(++n>maxn)return;
-  }
+		if (!strcmp (original, s))
+			return;
+		if (++n > maxn)
+			return;
+	}
 }
 
 
 void
-checkautofw(struct message *msg)
+checkautofw (struct message *msg)
 {
-  char original[256], temp[256];
-  
-  resolverecipient(msg->to,original);
-  if(strcmp(original,msg->to)){
-    sprintf(temp,"%s %s %s",HST_AUTOFW,original,msg->history);
-    strncpy(msg->history,temp,sizeof(msg->history));
-    msg->flags|=MSF_AUTOFW;
-  }
+	char    original[256], temp[256];
+
+	resolverecipient (msg->to, original);
+	if (strcmp (original, msg->to)) {
+		sprintf (temp, "%s %s %s", HST_AUTOFW, original, msg->history);
+		strncpy (msg->history, temp, sizeof (msg->history));
+		msg->flags |= MSF_AUTOFW;
+	}
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:22  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -63,10 +66,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -79,265 +80,298 @@ const char *__RCS=RCS_VER;
 #define WANT_NCURSES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "vised.h"
-#include "mbk_vised.h"
+#include <megistos/bbs.h>
+#include <megistos/vised.h>
+#include <megistos/mbk_vised.h>
 
 
-static char findtext[1024]={0};
-static char ftxt[1024]={0};
-static int opt=0;
+static char findtext[1024] = { 0 };
+static char ftxt[1024] = { 0 };
+static int opt = 0;
 
-int fy=0,fx=0,fl=0;
-
-
-void
-find()
-{
-  int c;
-
-  move(LINES-2,0);
-  printansi(msg_get(FIND1));
-  refresh();
-  strcpy(ftxt,getstg(findtext,rmargin));
-  if(inp_isX(ftxt)||ftxt[0]==0){
-    showstatus();
-    return;
-  } else strcpy(findtext,ftxt);
-  move(LINES-2,0);
-  printansi(msg_get(FIND2));
-  refresh();
-
-  for(opt=0;!opt;){
-    char s[2],t[2];
-
-    while((c=mygetch())==ERR)usleep(20000);
-
-    if(c==3||c==27){
-      showstatus();
-      return;
-    }
-    s[0]=c;
-    s[1]=0;
-    strcpy(t,latinize(s));
-    c=toupper(t[0]);
-    switch(c){
-    case 10:
-    case 13:
-      opt=1;
-      break;
-    case 'I':
-      opt=2;
-      break;
-    case 'P':
-      opt=3;
-      break;
-    }
-  }
-
-  dosearch();
-}
+int     fy = 0, fx = 0, fl = 0;
 
 
 void
-dosearch()
+find ()
 {
-  char *cp;
-  int c,n;
-  struct line *l;
+	int     c;
 
-  if(!findtext[0])find();
-  fx=fy=fl=0;
+	move (LINES - 2, 0);
+	printansi (msg_get (FIND1));
+	refresh ();
+	strcpy (ftxt, getstg (findtext, rmargin));
+	if (inp_isX (ftxt) || ftxt[0] == 0) {
+		showstatus ();
+		return;
+	} else
+		strcpy (findtext, ftxt);
+	move (LINES - 2, 0);
+	printansi (msg_get (FIND2));
+	refresh ();
 
-  strcpy(ftxt,findtext);
-  if(opt==2)for(c=0;ftxt[c];c++)ftxt[c]=toupper(ftxt[c]);
-  else if(opt==3)strcpy(ftxt,phonetic(findtext));
+	for (opt = 0; !opt;) {
+		char    s[2], t[2];
 
-  for(n=cy,l=current;l;l=l->next,n++){
-    char line[1024];
-    
-    if(opt==2){
-      strcpy(line,l->text);
-      for(c=0;l->text[c];c++)line[c]=toupper(line[c]);
-    } else if(opt==3){
-      strcpy(line,l->text);
-      phonetic(line);
-    } else strcpy(line,l->text);
+		while ((c = mygetch ()) == ERR)
+			usleep (20000);
 
-    if((cp=strstr((n==cy&&cx)?&line[cx]:line,ftxt))!=NULL){
-      cy=fy=n;
-      fl=strlen(ftxt);
-      cx=fx=(cp-line);
-      cx+=fl;
-      current=l;
-      if((cy-toprow+1)<1||(cy-toprow+1)>=LINES-2)centerline();
-      showtext(0);
-      showstatus();
-      refresh();
-      return;
-    }
-  }
-  movepage(numlines);
-  showstatus();
-}
-
-
-void
-replace()
-{
-  int c,n;
-  static char findtext[1024]={0},ftxt[1024]={0},reptxt[1024]={0};
-  char *cp;
-  struct line *l;
-  int opt,action=0,all=0;
-
-  move(LINES-2,0);
-  printansi(msg_get(FREP1));
-  refresh();
-  strcpy(ftxt,getstg(findtext,rmargin));
-  if(inp_isX(ftxt)||ftxt[0]==0){
-    showstatus();
-    return;
-  } else strcpy(findtext,ftxt);
-
-  move(LINES-2,0);
-  printansi(msg_get(FREP2));
-  refresh();
-  strcpy(reptxt,getstg(reptxt,rmargin));
-  if(inp_isX(reptxt)){
-    showstatus();
-    return;
-  }
-
-  move(LINES-2,0);
-  printansi(msg_get(FREP3));
-  refresh();
-
-  for(opt=0;!opt;){
-    char s[2],t[2];
-
-    while((c=mygetch())==ERR)usleep(20000);
-
-    if(c==3||c==27){
-      showstatus();
-      return;
-    }
-    s[0]=c;
-    s[1]=0;
-    strcpy(t,latinize(s));
-    c=toupper(t[0]);
-    switch(c){
-    case 10:
-    case 13:
-      opt=1;
-      break;
-    case 'I':
-      opt=2;
-      break;
-    case 'P':
-      opt=3;
-      break;
-    }
-  }
-
-  fy=fx=fl=0;
-
-  strcpy(ftxt,findtext);
-  if(opt==2)for(c=0;ftxt[c];c++)ftxt[c]=toupper(ftxt[c]);
-  else if(opt==3)strcpy(ftxt,phonetic(findtext));
-  
-  do{
-    for(n=cy,l=current;l;l=l->next,n++){
-      char line[1024];
-      
-      if(opt==2){
-	strcpy(line,l->text);
-	for(c=0;l->text[c];c++)line[c]=toupper(line[c]);
-      } else if(opt==3){
-	strcpy(line,l->text);
-	phonetic(line);
-      } else strcpy(line,l->text);
-
-      if((cp=strstr((n==cy&&cx)?&line[cx]:line,ftxt))!=NULL){
-	cy=fy=n;
-	fl=strlen(ftxt);
-	cx=fx=(cp-line);
-	cx+=fl;
-	current=l;
-	if(!all){
-	  if((cy-toprow+1)<1||(cy-toprow+1)>=LINES-2)centerline();
-	  showtext(0);
+		if (c == 3 || c == 27) {
+			showstatus ();
+			return;
+		}
+		s[0] = c;
+		s[1] = 0;
+		strcpy (t, latinize (s));
+		c = toupper (t[0]);
+		switch (c) {
+		case 10:
+		case 13:
+			opt = 1;
+			break;
+		case 'I':
+			opt = 2;
+			break;
+		case 'P':
+			opt = 3;
+			break;
+		}
 	}
-	break;
-      }
-    }
-    if(l){
-      if(!all){
-	move(LINES-2,0);
-	printansi(msg_get(FREP4));
-	putcursor();
-	refresh();
-      }
 
-      for(action=0;!action;){
-	char s[2],t[2];
-
-	if(!all){
-	  while((c=mygetch())==ERR)usleep(20000);
-	
-	  if(c==3||c==27){
-	    showstatus();
-	    return;
-	  }
-	  s[0]=c;
-	  s[1]=0;
-	  strcpy(t,latinize(s));
-	  c=toupper(t[0]);
-	} else c='Y';
-	switch(c){
-	case 'Y':
-	  {
-	    char temp[1024];
-	    int  b;
-
-	    strcpy(temp,l->text);
-	    b=numbytes-strlen(temp);
-	    temp[fx]=0;
-	    strcat(temp,reptxt);
-	    strcat(temp,&l->text[fx+fl]);
-	    b+=strlen(temp);
-	    if(b>maxsize){
-	      bel(ERRSIZ);
-	      l=NULL;
-	      action=-1;
-	    } else {
-	      cx-=strlen(ftxt);
-	      cx+=strlen(reptxt);
-	      current=getline(cy=n);
-	      putcursor();
-	      action=1;
-	      numbytes=b;
-	      strcpy(l->text,temp);
-	      fl=0;
-	    }
-	  }
-	  break;
-	case 'N':
-	  action=1;
-	  break;
-	case 'A':
-	  all=1;
-	  action=1;
-	  break;
-	case 'Q':
-	  action=-1;
-	  l=NULL;
-	  break;
-	}
-      }
-    }
-  } while (l);
-
-  if((cy-toprow+1)<1||(cy-toprow+1)>=LINES-2)centerline();
-  showtext(0);
+	dosearch ();
 }
+
+
+void
+dosearch ()
+{
+	char   *cp;
+	int     c, n;
+	struct line *l;
+
+	if (!findtext[0])
+		find ();
+	fx = fy = fl = 0;
+
+	strcpy (ftxt, findtext);
+	if (opt == 2)
+		for (c = 0; ftxt[c]; c++)
+			ftxt[c] = toupper (ftxt[c]);
+	else if (opt == 3)
+		strcpy (ftxt, phonetic (findtext));
+
+	for (n = cy, l = current; l; l = l->next, n++) {
+		char    line[1024];
+
+		if (opt == 2) {
+			strcpy (line, l->text);
+			for (c = 0; l->text[c]; c++)
+				line[c] = toupper (line[c]);
+		} else if (opt == 3) {
+			strcpy (line, l->text);
+			phonetic (line);
+		} else
+			strcpy (line, l->text);
+
+		if ((cp =
+		     strstr ((n == cy &&
+			      cx) ? &line[cx] : line, ftxt)) != NULL) {
+			cy = fy = n;
+			fl = strlen (ftxt);
+			cx = fx = (cp - line);
+			cx += fl;
+			current = l;
+			if ((cy - toprow + 1) < 1 ||
+			    (cy - toprow + 1) >= LINES - 2)
+				centerline ();
+			showtext (0);
+			showstatus ();
+			refresh ();
+			return;
+		}
+	}
+	movepage (numlines);
+	showstatus ();
+}
+
+
+void
+replace ()
+{
+	int     c, n;
+	static char findtext[1024] = { 0 }, ftxt[1024] = {
+	0}, reptxt[1024] = {
+	0};
+	char   *cp;
+	struct line *l;
+	int     opt, action = 0, all = 0;
+
+	move (LINES - 2, 0);
+	printansi (msg_get (FREP1));
+	refresh ();
+	strcpy (ftxt, getstg (findtext, rmargin));
+	if (inp_isX (ftxt) || ftxt[0] == 0) {
+		showstatus ();
+		return;
+	} else
+		strcpy (findtext, ftxt);
+
+	move (LINES - 2, 0);
+	printansi (msg_get (FREP2));
+	refresh ();
+	strcpy (reptxt, getstg (reptxt, rmargin));
+	if (inp_isX (reptxt)) {
+		showstatus ();
+		return;
+	}
+
+	move (LINES - 2, 0);
+	printansi (msg_get (FREP3));
+	refresh ();
+
+	for (opt = 0; !opt;) {
+		char    s[2], t[2];
+
+		while ((c = mygetch ()) == ERR)
+			usleep (20000);
+
+		if (c == 3 || c == 27) {
+			showstatus ();
+			return;
+		}
+		s[0] = c;
+		s[1] = 0;
+		strcpy (t, latinize (s));
+		c = toupper (t[0]);
+		switch (c) {
+		case 10:
+		case 13:
+			opt = 1;
+			break;
+		case 'I':
+			opt = 2;
+			break;
+		case 'P':
+			opt = 3;
+			break;
+		}
+	}
+
+	fy = fx = fl = 0;
+
+	strcpy (ftxt, findtext);
+	if (opt == 2)
+		for (c = 0; ftxt[c]; c++)
+			ftxt[c] = toupper (ftxt[c]);
+	else if (opt == 3)
+		strcpy (ftxt, phonetic (findtext));
+
+	do {
+		for (n = cy, l = current; l; l = l->next, n++) {
+			char    line[1024];
+
+			if (opt == 2) {
+				strcpy (line, l->text);
+				for (c = 0; l->text[c]; c++)
+					line[c] = toupper (line[c]);
+			} else if (opt == 3) {
+				strcpy (line, l->text);
+				phonetic (line);
+			} else
+				strcpy (line, l->text);
+
+			if ((cp =
+			     strstr ((n == cy &&
+				      cx) ? &line[cx] : line, ftxt)) != NULL) {
+				cy = fy = n;
+				fl = strlen (ftxt);
+				cx = fx = (cp - line);
+				cx += fl;
+				current = l;
+				if (!all) {
+					if ((cy - toprow + 1) < 1 ||
+					    (cy - toprow + 1) >= LINES - 2)
+						centerline ();
+					showtext (0);
+				}
+				break;
+			}
+		}
+		if (l) {
+			if (!all) {
+				move (LINES - 2, 0);
+				printansi (msg_get (FREP4));
+				putcursor ();
+				refresh ();
+			}
+
+			for (action = 0; !action;) {
+				char    s[2], t[2];
+
+				if (!all) {
+					while ((c = mygetch ()) == ERR)
+						usleep (20000);
+
+					if (c == 3 || c == 27) {
+						showstatus ();
+						return;
+					}
+					s[0] = c;
+					s[1] = 0;
+					strcpy (t, latinize (s));
+					c = toupper (t[0]);
+				} else
+					c = 'Y';
+				switch (c) {
+				case 'Y':
+					{
+						char    temp[1024];
+						int     b;
+
+						strcpy (temp, l->text);
+						b = numbytes - strlen (temp);
+						temp[fx] = 0;
+						strcat (temp, reptxt);
+						strcat (temp,
+							&l->text[fx + fl]);
+						b += strlen (temp);
+						if (b > maxsize) {
+							bel (ERRSIZ);
+							l = NULL;
+							action = -1;
+						} else {
+							cx -= strlen (ftxt);
+							cx += strlen (reptxt);
+							current = getline (cy =
+									   n);
+							putcursor ();
+							action = 1;
+							numbytes = b;
+							strcpy (l->text, temp);
+							fl = 0;
+						}
+					}
+					break;
+				case 'N':
+					action = 1;
+					break;
+				case 'A':
+					all = 1;
+					action = 1;
+					break;
+				case 'Q':
+					action = -1;
+					l = NULL;
+					break;
+				}
+			}
+		}
+	} while (l);
+
+	if ((cy - toprow + 1) < 1 || (cy - toprow + 1) >= LINES - 2)
+		centerline ();
+	showtext (0);
+}
+
+
+/* End of File */

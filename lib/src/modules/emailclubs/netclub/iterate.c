@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -53,53 +54,63 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "netclub.h"
+#include <megistos/netclub.h>
 
 
 
 static int
-rsysselect(const struct dirent *d)
+rsysselect (const struct dirent *d)
 {
-  if(d->d_name[strlen(d->d_name)-1]=='~')return 0;
-  return d->d_name[0]!='.';
+	if (d->d_name[strlen (d->d_name) - 1] == '~')
+		return 0;
+	return d->d_name[0] != '.';
 }
 
 
 
 void
-iterate()
+iterate ()
 {
-  struct dirent **systems;
-  char   fname[512];
-  int    n,i;
+	struct dirent **systems;
+	char    fname[512];
+	int     n, i;
 
-  n=scandir(mkfname(MSGSDIR"/..netimport"),&systems,rsysselect,alphasort);
-  for(i=0;i<n;free(systems[i]),i++){
-    char *cp=systems[i]->d_name;
-    strcpy(fname,mkfname(MSGSDIR"/..netimport/%s",cp));
-    *(strrchr(cp,':'))='/';
+	n = scandir (mkfname (MSGSDIR "/..netimport"), &systems, rsysselect,
+		     alphasort);
+	for (i = 0; i < n; free (systems[i]), i++) {
+		char   *cp = systems[i]->d_name;
 
-    if(debug)fprintf(stderr,"System: fname=(%s) sysname=(%s)\n",fname,cp);
-    if(sys!=NULL && !sameas(cp,sys))continue;
-    
-    switch(mode){
-    case MODE_REPORT:
-      print_report(fname,cp);
-      break;
-    case MODE_LISTCLUBS:
-      list_clubs(fname,cp);
-      break;
-    case MODE_CLUBINFO:
-      club_info(fname,cp,clubname);
-      break;
-    case MODE_SYNC:
-      club_sync(fname,cp);
-      break;
-    default:
-      fprintf(stderr,"Paranoia check failed, bailing out.\n");
-      exit(0);
-    }
+		strcpy (fname, mkfname (MSGSDIR "/..netimport/%s", cp));
+		*(strrchr (cp, ':')) = '/';
 
-  }
-  free(systems);
+		if (debug)
+			fprintf (stderr, "System: fname=(%s) sysname=(%s)\n",
+				 fname, cp);
+		if (sys != NULL && !sameas (cp, sys))
+			continue;
+
+		switch (mode) {
+		case MODE_REPORT:
+			print_report (fname, cp);
+			break;
+		case MODE_LISTCLUBS:
+			list_clubs (fname, cp);
+			break;
+		case MODE_CLUBINFO:
+			club_info (fname, cp, clubname);
+			break;
+		case MODE_SYNC:
+			club_sync (fname, cp);
+			break;
+		default:
+			fprintf (stderr,
+				 "Paranoia check failed, bailing out.\n");
+			exit (0);
+		}
+
+	}
+	free (systems);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:24  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,68 +51,67 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
 
 struct stringfield {
-  char type;
-  long flags;
-  char *template;
-  int  color, x, y;
-  int  max, shown, cp;
-  unsigned char *data;
+	char    type;
+	long    flags;
+	char   *template;
+	int     color, x, y;
+	int     max, shown, cp;
+	unsigned char *data;
 };
 
 
 struct numfield {
-  char type;
-  long flags;
-  char *template;
-  int  color, x, y;
-  int  min, max, shown, cp;
-  unsigned char *data;
+	char    type;
+	long    flags;
+	char   *template;
+	int     color, x, y;
+	int     min, max, shown, cp;
+	unsigned char *data;
 };
 
 
 struct list {
-  char type;
-  long flags;
-  char *template;
-  int  color, x, y, size;
-  unsigned char *options;
-  unsigned char *data;
+	char    type;
+	long    flags;
+	char   *template;
+	int     color, x, y, size;
+	unsigned char *options;
+	unsigned char *data;
 };
 
 
 struct toggle {
-  char type;
-  long flags;
-  char *template;
-  int  color, x, y;
-  unsigned char on,off;
-  int  data;
+	char    type;
+	long    flags;
+	char   *template;
+	int     color, x, y;
+	unsigned char on, off;
+	int     data;
 };
 
 
 struct button {
-  char type;
-  long flags;
-  char *template;
-  int  color, x, y, size;
-  unsigned char *label, key;
+	char    type;
+	long    flags;
+	char   *template;
+	int     color, x, y, size;
+	unsigned char *label, key;
 };
 
 
 union object {
-  struct stringfield s;
-  struct numfield    n;
-  struct list        l;
-  struct toggle      t;
-  struct button      b;
+	struct stringfield s;
+	struct numfield n;
+	struct list l;
+	struct toggle t;
+	struct button b;
 };
 
 
@@ -130,22 +132,25 @@ union object {
 #define ISPRINT(c) (((c)>=32||(c)<0))
 
 
-extern union object  *object;
-extern int           numobjects;
-extern promptblock_t     *msg;
-extern promptblock_t     *templates;
-extern int           mode;
-extern char          *mbkname;
-extern int           vtnum;
-extern int           ltnum;
-extern char          *dfname;
+extern union object *object;
+extern int numobjects;
+extern promptblock_t *msg;
+extern promptblock_t *templates;
+extern int mode;
+extern char *mbkname;
+extern int vtnum;
+extern int ltnum;
+extern char *dfname;
 
-void runvisual();
+void    runvisual ();
 
-void visualhelp();
+void    visualhelp ();
 
-void fieldhelp(int field);
+void    fieldhelp (int field);
 
-void runlinear();
+void    runlinear ();
 
-void endsession(char *event);
+void    endsession (char *event);
+
+
+/* End of File */

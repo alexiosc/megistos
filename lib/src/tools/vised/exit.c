@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:22  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -64,10 +67,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -80,42 +81,47 @@ const char *__RCS=RCS_VER;
 #define WANT_NCURSES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "vised.h"
-#include "mbk_vised.h"
+#include <megistos/bbs.h>
+#include <megistos/vised.h>
+#include <megistos/mbk_vised.h>
 
 
 int
-doquit()
+doquit ()
 {
-  int c;
-  char s[2],t[2];
+	int     c;
+	char    s[2], t[2];
 
-  move(LINES-2,0);
-  printansi(msg_get(QUIT));
-  refresh();
+	move (LINES - 2, 0);
+	printansi (msg_get (QUIT));
+	refresh ();
 
-  while((c=mygetch())==ERR)usleep(20000);
-  
-  s[0]=c;
-  s[1]=0;
-  strcpy(t,latinize(s));
-  c=toupper(t[0]);
-  return(c=='Y');
+	while ((c = mygetch ()) == ERR)
+		usleep (20000);
+
+	s[0] = c;
+	s[1] = 0;
+	strcpy (t, latinize (s));
+	c = toupper (t[0]);
+	return (c == 'Y');
 }
 
 
 void
-golined()
+golined ()
 {
-  char n[16];
-  savefile();
-  sprintf(n,"%d",maxsize);
-  out_setflags(OFL_AFTERINPUT);
-  prompt(CLRSCR);
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  execl(mkfname(LINEDBIN),"lined",filename,n,NULL);
-  clearok(stdscr,TRUE);
-  showstatus();
-  showtext(0);
+	char    n[16];
+
+	savefile ();
+	sprintf (n, "%d", maxsize);
+	out_setflags (OFL_AFTERINPUT);
+	prompt (CLRSCR);
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	execl (mkfname (LINEDBIN), "lined", filename, n, NULL);
+	clearok (stdscr, TRUE);
+	showstatus ();
+	showtext (0);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -35,9 +38,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -51,7 +53,7 @@
 #define WANT_RPC_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 #define MODE_SYNC       0
@@ -61,22 +63,25 @@
 #define MODE_NOP       -1
 
 
-extern char   *bbscode;
-extern int     mode;
-extern int     debug;		/* Debugging mode */
-extern int     force;
-extern int     dryrun;		/* Dry run */
-extern char   *sys;
-extern char   *clubname;
+extern char *bbscode;
+extern int mode;
+extern int debug;		/* Debugging mode */
+extern int force;
+extern int dryrun;		/* Dry run */
+extern char *sys;
+extern char *clubname;
 
 
-void iterate();
+void    iterate ();
 
-void print_report(char *fname, char *sysname);
+void    print_report (char *fname, char *sysname);
 
-void list_clubs(char *fname, char *cp);
+void    list_clubs (char *fname, char *cp);
 
-void club_info(char *fname,char *cp,char *clubname);
+void    club_info (char *fname, char *cp, char *clubname);
 
-void club_sync(char *fname,char *cp);
+void    club_sync (char *fname, char *cp);
 
+
+
+/* End of File */

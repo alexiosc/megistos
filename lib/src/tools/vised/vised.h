@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:22  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -57,9 +60,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -84,122 +86,125 @@
 
 
 struct line {
-  char        *text;
-  struct line *next;
+	char   *text;
+	struct line *next;
 };
 
 
-extern struct line  *first;
-extern struct line  *last;
-extern struct       line *top;
-extern struct       line *current;
-extern promptblock_t    *msg;
-extern int          numlines, numbytes, maxsize;
-extern char         filename[1024];
-extern int          cx,cy,toprow,leftcol;
-extern int          kbx,kby,kkx,kky;
-extern int          fx,fy,fl;
-extern int          metamode;
-extern int          insertmode;
-extern int          formatmode;
-extern int          rmargin;
+extern struct line *first;
+extern struct line *last;
+extern struct line *top;
+extern struct line *current;
+extern promptblock_t *msg;
+extern int numlines, numbytes, maxsize;
+extern char filename[1024];
+extern int cx, cy, toprow, leftcol;
+extern int kbx, kby, kkx, kky;
+extern int fx, fy, fl;
+extern int metamode;
+extern int insertmode;
+extern int formatmode;
+extern int rmargin;
 
-extern int          maxlen;
-extern int          vscrinc;
-extern int          hscrinc;
-extern int          pageinc;
-extern int          insert;
-extern int          format;
-extern char         *qtechrs;
-extern int          qtemaxc;
-extern int          cfgtxt;
-extern int          cbgtxt;
-extern int          cfgfnd;
-extern int          cbgfnd;
-extern int          cfgblk;
-extern int          cbgblk;
-extern int          cfgqte;
-extern int          cbgqte;
-extern char         *txtupld;
-extern char         *stins[2];
-extern char         *stformat[5];
-extern char         *statust;
-extern char         *statusb;
-extern char         *statusm;
-extern char         *statuso;
-extern char         *statusk;
+extern int maxlen;
+extern int vscrinc;
+extern int hscrinc;
+extern int pageinc;
+extern int insert;
+extern int format;
+extern char *qtechrs;
+extern int qtemaxc;
+extern int cfgtxt;
+extern int cbgtxt;
+extern int cfgfnd;
+extern int cbgfnd;
+extern int cfgblk;
+extern int cbgblk;
+extern int cfgqte;
+extern int cbgqte;
+extern char *txtupld;
+extern char *stins[2];
+extern char *stformat[5];
+extern char *statust;
+extern char *statusb;
+extern char *statusm;
+extern char *statuso;
+extern char *statusk;
 
 
 /* vised.c */
 
-int getfg(int p);
-int getbg(int p);
-void init();
-int loadfile(char *fname);
-void savefile();
-void run();
-void done();
+int     getfg (int p);
+int     getbg (int p);
+void    init ();
+int     loadfile (char *fname);
+void    savefile ();
+void    run ();
+void    done ();
 
 
 /* display.c */
 
-void putcursor();
-void bel(int error);
-void showstatus();
-void showtext(int num);
-void noblock();
+void    putcursor ();
+void    bel (int error);
+void    showstatus ();
+void    showtext (int num);
+void    noblock ();
 
 
 /* edit.c */
 
-void inschar (int c, int update);
-void splitline();
-void newline();
-void joinlines(int target);
-void backspace();
-void delline();
-void deletechar();
+void    inschar (int c, int update);
+void    splitline ();
+void    newline ();
+void    joinlines (int target);
+void    backspace ();
+void    delline ();
+void    deletechar ();
 
 
 /* utils.c */
 
-struct line *getline(int line);
-void insertline(struct line *afterline, char *s);
-void deleteline(int num);
-void centerline();
-void gotoline(int line, int column);
-void movecursor(int dy,int dx);
-void movepage(int incr);
-int  getlinenum(struct line *l);
-void counttext();
-char *getstg(char *def, int maxlen);
-void printansi(char *s);
-void attr(int cga_attr);
-void cleartoeol();
-void maskblock(int x1, int y1, int x2, int y2, unsigned char a);
+struct line *getline (int line);
+void    insertline (struct line *afterline, char *s);
+void    deleteline (int num);
+void    centerline ();
+void    gotoline (int line, int column);
+void    movecursor (int dy, int dx);
+void    movepage (int incr);
+int     getlinenum (struct line *l);
+void    counttext ();
+char   *getstg (char *def, int maxlen);
+void    printansi (char *s);
+void    attr (int cga_attr);
+void    cleartoeol ();
+void    maskblock (int x1, int y1, int x2, int y2, unsigned char a);
 
 
 /* format.c */
 
-void formatline();
-void formatpara();
-void rightmargin();
+void    formatline ();
+void    formatpara ();
+void    rightmargin ();
 
 
 /* blocks.c */
 
-void delblock();
-void copyblock(int move);
+void    delblock ();
+void    copyblock (int move);
 
 
 /* find.c */
 
-void find();
-void replace();
-void dosearch();
+void    find ();
+void    replace ();
+void    dosearch ();
 
 
 /* exit.c */
 
-int doquit();
-void golined();
+int     doquit ();
+void    golined ();
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.4  2001/05/26 20:26:00  alexios
  * Corrected bug that caused time estimations to be negative with SSH-type
  * connections.
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -72,133 +73,173 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <math.h>
-#include "bbs.h"
-#include "updown.h"
-#include "mbk_updown.h"
+#include <megistos/bbs.h>
+#include <megistos/updown.h>
+#include <megistos/mbk_updown.h>
 
 
-char filetype[256];
-long filesize;
-long xfertime;
+char    filetype[256];
+long    filesize;
+long    xfertime;
 
 
 void
-getfiletype(char *fname,int recurse)
+getfiletype (char *fname, int recurse)
 {
-  FILE *fp;
-  char command[256], line[1024], *cp=line;
+	FILE   *fp;
+	char    command[256], line[1024], *cp = line;
 
-  strcpy(filetype,msg_get(FTUNK));
-  if(!recurse)return;
+	strcpy (filetype, msg_get (FTUNK));
+	if (!recurse)
+		return;
 
-  sprintf(command,"file %s",fname);
-  if((fp=popen(command,"r"))==NULL) return;
-  line[0]=0;
-  fgets(line,sizeof(line),fp);
-  fclose(fp);
+	sprintf (command, "file %s", fname);
+	if ((fp = popen (command, "r")) == NULL)
+		return;
+	line[0] = 0;
+	fgets (line, sizeof (line), fp);
+	fclose (fp);
 
-  if((cp=strchr(line,10))!=NULL)*cp=0;
-  if((cp=strchr(line,13))!=NULL)*cp=0;
-  if(!line[0]) return;
+	if ((cp = strchr (line, 10)) != NULL)
+		*cp = 0;
+	if ((cp = strchr (line, 13)) != NULL)
+		*cp = 0;
+	if (!line[0])
+		return;
 
-  if((cp=strchr(line,32))==NULL)return;
-  else cp++;
-  if(sameto(SYMLINKTO,cp)){
-    cp+=strlen(SYMLINKTO);
-    getfiletype(cp,recurse-1);
-  } else strcpy(filetype,cp);
-  filetype[60]=0;
+	if ((cp = strchr (line, 32)) == NULL)
+		return;
+	else
+		cp++;
+	if (sameto (SYMLINKTO, cp)) {
+		cp += strlen (SYMLINKTO);
+		getfiletype (cp, recurse - 1);
+	} else
+		strcpy (filetype, cp);
+	filetype[60] = 0;
 }
 
 
 void
-getfilesize()
+getfilesize ()
 {
-  int i;
-  struct stat st;
+	int     i;
+	struct stat st;
 
-  filesize=0L;
-  for(i=0;i<totalitems;i++){
-    if((xferlist[i].flags&(XFF_TAGGED+XFF_KILLED))==0 ||
-       ((xfertagged||logout)&&(xferlist[i].flags&XFF_KILLED)==0)){
-      if(!xferlist[i].size){
-	if(!stat(xferlist[i].fullname,&st)){
-	  filesize+=(xferlist[i].size=st.st_size);
+	filesize = 0L;
+	for (i = 0; i < totalitems; i++) {
+		if ((xferlist[i].flags & (XFF_TAGGED + XFF_KILLED)) == 0 ||
+		    ((xfertagged || logout) &&
+		     (xferlist[i].flags & XFF_KILLED) == 0)) {
+			if (!xferlist[i].size) {
+				if (!stat (xferlist[i].fullname, &st)) {
+					filesize += (xferlist[i].size =
+						     st.st_size);
+				}
+			} else
+				filesize += xferlist[i].size;
+		} else if ((xferlist[i].flags & XFF_KILLED) == 0) {
+			if (!xferlist[i].size)
+				if (!stat (xferlist[i].fullname, &st)) {
+					xferlist[i].size = st.st_size;
+				}
+		}
 	}
-      } else filesize+=xferlist[i].size;
-    } else if((xferlist[i].flags&XFF_KILLED)==0){
-      if(!xferlist[i].size)if(!stat(xferlist[i].fullname,&st)){
-	xferlist[i].size=st.st_size;
-      }
-    }
-  }
 
 
-  /* Time in minutes = Size / ((bps/10) * protocol efficiency * 60) */
+	/* Time in minutes = Size / ((bps/10) * protocol efficiency * 60) */
 
-  xfertime=(int)
-    (rint(((double)filesize) /
-	   ((((double)(thisuseronl.baudrate>0?thisuseronl.baudrate:38400)/10.0)*
-	    (((double)peffic/100.0))) * 60.0)));
+	xfertime = (int)
+	    (rint (((double) filesize) /
+		   ((((double)
+		      (thisuseronl.baudrate >
+		       0 ? thisuseronl.baudrate : 38400) / 10.0) *
+		     (((double) peffic / 100.0))) * 60.0)));
 }
 
 
 void
-extraprotocols()
+extraprotocols ()
 {
-  getfilesize();
-  if(xferlist[firstentry].dir==FXM_DOWNLOAD ||
-     xferlist[firstentry].dir==FXM_TRANSIENT){
-    if(NUMFILES==1){
-      getfiletype(xferlist[firstentry].fullname,MAXRECURSE);
-      if(filesize<0){
-	prompt(FNOTFND,xferlist[firstentry].filename);
-	exit(1);
-      } else {
-	int i;
-	
-	for(i=0;i<numviewers;i++){
-	  if(strstr(filetype,viewers[i].string)==filetype){
-	    struct protocol prot;
-	    
-	    sprintf(prot.name,msg_get(VIEWNAME),viewers[i].type);
-	    strcpy(prot.select,vprsel);
-	    strcpy(prot.command,viewers[i].command);
-	    prot.flags=PRF_NEEDN|PRF_VIEWER;
-	    
-	    numprotocols++;
-	    protocols=realloc(protocols,sizeof(struct protocol)*numprotocols);
-	    if(!protocols){
-	      error_fatal("Unable to allocate memory for the protocol"\
-		    "table",NULL);
-	    } else {
-	      memcpy(&protocols[numprotocols-1],&prot,sizeof(struct protocol));
-	      memset(&prot,0,sizeof(prot));
-	      strcpy(prot.stopkey,"Ctrl-C");
-	      prot.flags=PRF_NEEDN;
-	    }
-	  }
-	}
-      }
-    }
-  } else {
-    if(key_owns(&thisuseracc,lnkkey)){
-      struct protocol prot;
+	getfilesize ();
+	if (xferlist[firstentry].dir == FXM_DOWNLOAD ||
+	    xferlist[firstentry].dir == FXM_TRANSIENT) {
+		if (NUMFILES == 1) {
+			getfiletype (xferlist[firstentry].fullname,
+				     MAXRECURSE);
+			if (filesize < 0) {
+				prompt (FNOTFND,
+					xferlist[firstentry].filename);
+				exit (1);
+			} else {
+				int     i;
 
-      sprintf(prot.name,msg_get(LNKNAM));
-      strcpy(prot.select,lnksel);
-      strcpy(prot.command,"");
-      prot.flags=PRF_UPLOAD|PRF_LINK;
-      
-      numprotocols++;
-      protocols=realloc(protocols,sizeof(struct protocol)*numprotocols);
-      if(!protocols){
-	error_fatal("Unable to allocate memory for the protocol"\
-	      "table",NULL);
-      } else {
-	memcpy(&protocols[numprotocols-1],&prot,sizeof(struct protocol));
-	memset(&prot,0,sizeof(prot));
-      }
-    }
-  }
+				for (i = 0; i < numviewers; i++) {
+					if (strstr
+					    (filetype,
+					     viewers[i].string) == filetype) {
+						struct protocol prot;
+
+						sprintf (prot.name,
+							 msg_get (VIEWNAME),
+							 viewers[i].type);
+						strcpy (prot.select, vprsel);
+						strcpy (prot.command,
+							viewers[i].command);
+						prot.flags =
+						    PRF_NEEDN | PRF_VIEWER;
+
+						numprotocols++;
+						protocols =
+						    realloc (protocols,
+							     sizeof (struct
+								     protocol)
+							     * numprotocols);
+						if (!protocols) {
+							error_fatal
+							    ("Unable to allocate memory for the protocol"
+							     "table", NULL);
+						} else {
+							memcpy (&protocols
+								[numprotocols -
+								 1], &prot,
+								sizeof (struct
+									protocol));
+							memset (&prot, 0,
+								sizeof (prot));
+							strcpy (prot.stopkey,
+								"Ctrl-C");
+							prot.flags = PRF_NEEDN;
+						}
+					}
+				}
+			}
+		}
+	} else {
+		if (key_owns (&thisuseracc, lnkkey)) {
+			struct protocol prot;
+
+			sprintf (prot.name, msg_get (LNKNAM));
+			strcpy (prot.select, lnksel);
+			strcpy (prot.command, "");
+			prot.flags = PRF_UPLOAD | PRF_LINK;
+
+			numprotocols++;
+			protocols =
+			    realloc (protocols,
+				     sizeof (struct protocol) * numprotocols);
+			if (!protocols) {
+				error_fatal
+				    ("Unable to allocate memory for the protocol"
+				     "table", NULL);
+			} else {
+				memcpy (&protocols[numprotocols - 1], &prot,
+					sizeof (struct protocol));
+				memset (&prot, 0, sizeof (prot));
+			}
+		}
+	}
 }
+
+
+/* End of File */

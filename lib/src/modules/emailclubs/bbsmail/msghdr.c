@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -57,10 +60,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -72,185 +73,197 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 void
-readmsghdr(char *fname, struct message *msg)
+readmsghdr (char *fname, struct message *msg)
 {
-  FILE *fp;
-  if((fp=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open mail header file %s (%d)",fname,errno);
-  }
+	FILE   *fp;
 
-  if(fread(msg,sizeof(struct message),1,fp)!=1){
-    fclose(fp);
-    error_fatalsys("Unable to read mail header file %s",fname);
-    exit(1);
-  }
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open mail header file %s (%d)",
+				fname, errno);
+	}
 
-  fclose(fp);
+	if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+		fclose (fp);
+		error_fatalsys ("Unable to read mail header file %s", fname);
+		exit (1);
+	}
+
+	fclose (fp);
 }
 
 
 void
-writemsghdr(char *fname,struct message *msg)
+writemsghdr (char *fname, struct message *msg)
 {
-  FILE *fp;
+	FILE   *fp;
 
 #ifdef DEBUG
-  printf("Dumping new mail header back to header file...\n");
-  printf("Club:    (%s)\n",msg->club);
-  printf("From:    (%s)\n",msg->from);
-  printf("To:      (%s)\n",msg->to);
-  printf("Subject: (%s)\n",msg->subject);
-  printf("History: (%s)\n",msg->history);
-  printf("Fatt:    (%s)\n",msg->fatt);
-  printf("Msgno:   (%ld)\n",msg->msgno);
-  printf("flags:   (%lx)\n",msg->flags);
-  printf("\n");
+	printf ("Dumping new mail header back to header file...\n");
+	printf ("Club:    (%s)\n", msg->club);
+	printf ("From:    (%s)\n", msg->from);
+	printf ("To:      (%s)\n", msg->to);
+	printf ("Subject: (%s)\n", msg->subject);
+	printf ("History: (%s)\n", msg->history);
+	printf ("Fatt:    (%s)\n", msg->fatt);
+	printf ("Msgno:   (%ld)\n", msg->msgno);
+	printf ("flags:   (%lx)\n", msg->flags);
+	printf ("\n");
 #endif
 
-  if((fp=fopen(fname,"w"))==NULL){
-    error_logsys("Unable to create %s",fname);
-    fclose(fp);
-    exit(1);
-  }
-  if(fwrite(msg,sizeof(struct message),1,fp)!=1){
-    error_logsys("Unable to write %s",fname);
-    exit(1);
-  }
-  fclose(fp);
+	if ((fp = fopen (fname, "w")) == NULL) {
+		error_logsys ("Unable to create %s", fname);
+		fclose (fp);
+		exit (1);
+	}
+	if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+		error_logsys ("Unable to write %s", fname);
+		exit (1);
+	}
+	fclose (fp);
 }
 
 
 
 void
-preparemsghdr(struct message *msg, int email)
+preparemsghdr (struct message *msg, int email)
 {
-  /* Don't touch the date of network messages */
-  
-  if((msg->flags&MSF_NET)==0){
-    msg->crdate=today();
-    msg->crtime=now();
-  }
-  msg->replies=msg->timesread=0;
-  if(email){
-    randomize();
-    while(!msg->cryptkey)msg->cryptkey=rnd(1<<30);
-  } else msg->cryptkey=0;
+	/* Don't touch the date of network messages */
 
-  /* Don't touch the net message vector if it's already there */
-  
-  if(!msg->origbbs[0]){
-    strcpy(msg->origbbs,bbscode);
-    strcpy(msg->origclub,msg->club);
-    sprintf(msg->msgid,"%d.%08x%04x",
-	    msg->msgno,
-	    (int)time(NULL),
-	    (int)getpid());	/* As unique as things go */
-  }
-  
-  if(!msg->fatt[0])sprintf(msg->fatt,"%d.att",msg->msgno);
-} 
+	if ((msg->flags & MSF_NET) == 0) {
+		msg->crdate = today ();
+		msg->crtime = now ();
+	}
+	msg->replies = msg->timesread = 0;
+	if (email) {
+		randomize ();
+		while (!msg->cryptkey)
+			msg->cryptkey = rnd (1 << 30);
+	} else
+		msg->cryptkey = 0;
+
+	/* Don't touch the net message vector if it's already there */
+
+	if (!msg->origbbs[0]) {
+		strcpy (msg->origbbs, bbscode);
+		strcpy (msg->origclub, msg->club);
+		sprintf (msg->msgid, "%d.%08x%04x", msg->msgno, (int) time (NULL), (int) getpid ());	/* As unique as things go */
+	}
+
+	if (!msg->fatt[0])
+		sprintf (msg->fatt, "%d.att", msg->msgno);
+}
 
 
 void
-writemessage(char *srcname, struct message *msg, int email)
+writemessage (char *srcname, struct message *msg, int email)
 {
-  char msgname[256], lock[256], buff[8192];
-  FILE *fp, *fp2;
-  int count;
+	char    msgname[256], lock[256], buff[8192];
+	FILE   *fp, *fp2;
+	int     count;
 
-  /* Wait for locks to clear */
+	/* Wait for locks to clear */
 
-  sprintf(lock,CLUBLOCK,(email?EMAILCLUBNAME:msg->club));
-  if(lock_wait(lock,5)==LKR_TIMEOUT){
-    if(usercaller)prompt(TIMEOUT1);
-    if(lock_wait(lock,55)==LKR_TIMEOUT){
-      if(usercaller)prompt(TIMEOUT2);
-      error_log("Timed out (60 sec) waiting for %s",lock);
-      exit(1);
-    }
-  }
-
-
-  /* Lock it */
-
-  lock_place(lock,"adding");
+	sprintf (lock, CLUBLOCK, (email ? EMAILCLUBNAME : msg->club));
+	if (lock_wait (lock, 5) == LKR_TIMEOUT) {
+		if (usercaller)
+			prompt (TIMEOUT1);
+		if (lock_wait (lock, 55) == LKR_TIMEOUT) {
+			if (usercaller)
+				prompt (TIMEOUT2);
+			error_log ("Timed out (60 sec) waiting for %s", lock);
+			exit (1);
+		}
+	}
 
 
-  /* Generate the filename */
+	/* Lock it */
 
-  if(email)strcpy(msgname,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
-  else strcpy(msgname,
-	      mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,msg->club,msg->msgno));
+	lock_place (lock, "adding");
 
 
-  /* Write the message header */
-  
-  if((fp=fopen(msgname,"w"))==NULL){
-    error_logsys("Unable to create %s",msgname);
-    lock_rm(lock);
-    fclose(fp);
-    exit(1);
-  }
+	/* Generate the filename */
 
-  if(fwrite(msg,sizeof(struct message),1,fp)!=1){
-    error_logsys("Unable to write %s",msgname);
-    lock_rm(lock);
-    exit(1);
-  }
+	if (email)
+		strcpy (msgname,
+			mkfname (EMAILDIR "/" MESSAGEFILE, msg->msgno));
+	else
+		strcpy (msgname,
+			mkfname ("%s/%s/" MESSAGEFILE, MSGSDIR, msg->club,
+				 msg->msgno));
 
 
-  /* Debugging info */
+	/* Write the message header */
+
+	if ((fp = fopen (msgname, "w")) == NULL) {
+		error_logsys ("Unable to create %s", msgname);
+		lock_rm (lock);
+		fclose (fp);
+		exit (1);
+	}
+
+	if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+		error_logsys ("Unable to write %s", msgname);
+		lock_rm (lock);
+		exit (1);
+	}
+
+
+	/* Debugging info */
 
 #ifdef DEBUG
-  printf("Gonna save the message body as '%s'.\n",msgname);
+	printf ("Gonna save the message body as '%s'.\n", msgname);
 #endif
 
 
-  /* Now copy the message body */
+	/* Now copy the message body */
 
-  if((fp2=fopen(srcname,"r"))==NULL){
-    error_logsys("Unable to open %s",srcname);
-    lock_rm(lock);
-    fclose(fp2);
-    fclose(fp);
-    exit(1);
-  }
+	if ((fp2 = fopen (srcname, "r")) == NULL) {
+		error_logsys ("Unable to open %s", srcname);
+		lock_rm (lock);
+		fclose (fp2);
+		fclose (fp);
+		exit (1);
+	}
 
-  while((count=fread(&buff,1,sizeof(buff),fp2))>0){
-    bbsencrypt(buff,sizeof(buff),msg->cryptkey);
-    if(fwrite(&buff,1,count,fp)!=count){
-      error_logsys("Unable to write %s",msgname);
-      lock_rm(lock);
-      fclose(fp2);
-      fclose(fp);
-      exit(1);
-    }
-  }
-
-
-  /* Remove the lock, close the files and adjust permissions */
-  
-  lock_rm(lock);
-  fclose(fp2);
-  fclose(fp);
-  chmod(msgname,0660);
+	while ((count = fread (&buff, 1, sizeof (buff), fp2)) > 0) {
+		bbsencrypt (buff, sizeof (buff), msg->cryptkey);
+		if (fwrite (&buff, 1, count, fp) != count) {
+			error_logsys ("Unable to write %s", msgname);
+			lock_rm (lock);
+			fclose (fp2);
+			fclose (fp);
+			exit (1);
+		}
+	}
 
 
-  /* Adjust ownership if we're the super-user */
+	/* Remove the lock, close the files and adjust permissions */
 
-  if((!getuid())||(!getgid())){
-    char command[256];
-    sprintf(command,"chown -f bbs.bbs %s",msgname);
-    system(command);
-  }
+	lock_rm (lock);
+	fclose (fp2);
+	fclose (fp);
+	chmod (msgname, 0660);
+
+
+	/* Adjust ownership if we're the super-user */
+
+	if ((!getuid ()) || (!getgid ())) {
+		char    command[256];
+
+		sprintf (command, "chown -f bbs.bbs %s", msgname);
+		system (command);
+	}
 }
 
 
 
 
+
+
+/* End of File */

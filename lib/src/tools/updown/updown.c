@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -59,10 +62,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -77,189 +78,199 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "updown.h"
-#include "mbk_updown.h"
+#include <megistos/bbs.h>
+#include <megistos/updown.h>
+#include <megistos/mbk_updown.h>
 
 
-int  maxtag;
-int  peffic;
-char *vprsel;
-int  dissec;
-int  lnkkey;
-char *lnksel;
-int  refnd;
-int  refper;
+int     maxtag;
+int     peffic;
+char   *vprsel;
+int     dissec;
+int     lnkkey;
+char   *lnksel;
+int     refnd;
+int     refper;
 
 
-promptblock_t       *msg;
-struct protocol *protocols=NULL;
-int             numprotocols=0;
-struct viewer   *viewers=NULL;
-int             numviewers=0;
-char            *xferlistname=NULL;
-xfer_item_t     *xferlist=NULL;
-int             totalitems=0;
-int             numitems=0;
-char            *taglistname=NULL;
-int             numtagged=0;
-int             xfertagged=0;
-int             taggedsize=0;
-int             autodis=0;
-int             logout=0;
+promptblock_t *msg;
+struct protocol *protocols = NULL;
+int     numprotocols = 0;
+struct viewer *viewers = NULL;
+int     numviewers = 0;
+char   *xferlistname = NULL;
+xfer_item_t *xferlist = NULL;
+int     totalitems = 0;
+int     numitems = 0;
+char   *taglistname = NULL;
+int     numtagged = 0;
+int     xfertagged = 0;
+int     taggedsize = 0;
+int     autodis = 0;
+int     logout = 0;
 
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
-  msg=msg_open("updown");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	msg = msg_open ("updown");
+	msg_setlanguage (thisuseracc.language);
 
-  peffic=msg_int(PEFFIC,1,100);
-  vprsel=msg_string(VPRSEL);
-  dissec=msg_int(DISSEC,1,32767);
-  lnkkey=msg_int(LNKKEY,0,129);
-  lnksel=msg_string(LNKSEL);
-  refnd=msg_bool(REFND);
-  refper=msg_int(REFPER,0,100);
+	peffic = msg_int (PEFFIC, 1, 100);
+	vprsel = msg_string (VPRSEL);
+	dissec = msg_int (DISSEC, 1, 32767);
+	lnkkey = msg_int (LNKKEY, 0, 129);
+	lnksel = msg_string (LNKSEL);
+	refnd = msg_bool (REFND);
+	refper = msg_int (REFPER, 0, 100);
 
-  readprotocols();
-  readviewers();
-  readtransferlist(xferlistname,&numitems,0);
-  readtransferlist(taglistname,&numtagged,XFF_TAGGED);
+	readprotocols ();
+	readviewers ();
+	readtransferlist (xferlistname, &numitems, 0);
+	readtransferlist (taglistname, &numtagged, XFF_TAGGED);
 
-  if(!totalitems){
-    prompt(NOFILES);
-    exit(0);
-  } else {
-    extraprotocols();
-  }
+	if (!totalitems) {
+		prompt (NOFILES);
+		exit (0);
+	} else {
+		extraprotocols ();
+	}
 }
 
 
 void
-writetagfile()
+writetagfile ()
 {
-  FILE *fp;
-  int i;
+	FILE   *fp;
+	int     i;
 
-  if((fp=fopen(taglistname,"w"))==NULL){
-    error_logsys("Unable to write tag file %s",taglistname);
-    return;
-  }
-  for(i=0;i<totalitems;i++){
-    if(xferlist[i].flags&XFF_KILLED)continue;
-    if(xferlist[i].flags&XFF_TAGGED){
-      fwrite(&xferlist[i],sizeof(xfer_item_t),1,fp);
-    }
-  }
-  fclose(fp);
+	if ((fp = fopen (taglistname, "w")) == NULL) {
+		error_logsys ("Unable to write tag file %s", taglistname);
+		return;
+	}
+	for (i = 0; i < totalitems; i++) {
+		if (xferlist[i].flags & XFF_KILLED)
+			continue;
+		if (xferlist[i].flags & XFF_TAGGED) {
+			fwrite (&xferlist[i], sizeof (xfer_item_t), 1, fp);
+		}
+	}
+	fclose (fp);
 
-  if((fp=fopen(xferlistname,"w"))==NULL){
-    error_logsys("Unable to write xferlist file %s",taglistname);
-    return;
-  }
-  fwrite(xferlist,sizeof(xfer_item_t),totalitems,fp);
-  fclose(fp);
+	if ((fp = fopen (xferlistname, "w")) == NULL) {
+		error_logsys ("Unable to write xferlist file %s", taglistname);
+		return;
+	}
+	fwrite (xferlist, sizeof (xfer_item_t), totalitems, fp);
+	fclose (fp);
 }
 
 
 void
-returncharges()
+returncharges ()
 {
-  int      i,refund=0;
-  classrec_t *class=cls_find(thisuseracc.curclss);
+	int     i, refund = 0;
+	classrec_t *class = cls_find (thisuseracc.curclss);
 
-  if(refnd==0 || refper==0)return;
+	if (refnd == 0 || refper == 0)
+		return;
 
-  for(i=0;i<totalitems;i++){
-    if((xferlist[i].flags&(XFF_TAGGED|XFF_SUCCESS))==0){
-      refund+=xferlist[i].refund;
-    }
-  }
-  refund=(refund*refper)/100;
-  if(refund&&((class->flags&CLF_NOCHRGE)==0)){
-    prompt(REFUND,refund,msg_getunit(CRDSNG,refund));
-    usr_postcredits(thisuseracc.userid,refund,0);
-  }
+	for (i = 0; i < totalitems; i++) {
+		if ((xferlist[i].flags & (XFF_TAGGED | XFF_SUCCESS)) == 0) {
+			refund += xferlist[i].refund;
+		}
+	}
+	refund = (refund * refper) / 100;
+	if (refund && ((class->flags & CLF_NOCHRGE) == 0)) {
+		prompt (REFUND, refund, msg_getunit (CRDSNG, refund));
+		usr_postcredits (thisuseracc.userid, refund, 0);
+	}
 }
 
 
 void
-done()
+done ()
 {
-  if(xferlist[firstentry].dir==FXM_DOWNLOAD ||
-     xferlist[firstentry].dir==FXM_TRANSIENT){
-    writetagfile();
-    returncharges();
-  }
-  msg_close(msg);
-  exit(0);
+	if (xferlist[firstentry].dir == FXM_DOWNLOAD ||
+	    xferlist[firstentry].dir == FXM_TRANSIENT) {
+		writetagfile ();
+		returncharges ();
+	}
+	msg_close (msg);
+	exit (0);
 }
 
 
 void
-autodisconnect()
+autodisconnect ()
 {
-  int  i;
-  char c;
+	int     i;
+	char    c;
 
-  inp_nonblock();
+	inp_nonblock ();
 
-  prompt(DISCON);
-  for(i=dissec-1;i>=0;i--){
-    prompt(COUNTDN,i);
-    sleep(1);
-    c=0;
-    if((read(0,&c,1)==1) && (c==27 || c==13 || c==10 || c==32)){
-      prompt(ADABORT);
-      inp_block();
-      return;
-    }
-  }
+	prompt (DISCON);
+	for (i = dissec - 1; i >= 0; i--) {
+		prompt (COUNTDN, i);
+		sleep (1);
+		c = 0;
+		if ((read (0, &c, 1) == 1) &&
+		    (c == 27 || c == 13 || c == 10 || c == 32)) {
+			prompt (ADABORT);
+			inp_block ();
+			return;
+		}
+	}
 
-  inp_block();
-  print("\n\n\n\n");
-  thisuseronl.flags|=OLF_LOGGEDOUT;
-  channel_disconnect(thisuseronl.emupty);
+	inp_block ();
+	print ("\n\n\n\n");
+	thisuseronl.flags |= OLF_LOGGEDOUT;
+	channel_disconnect (thisuseronl.emupty);
 }
 
 
 void
-run()
+run ()
 {
-  switch(xferlist[0].dir){
-  case FXM_DOWNLOAD:
-  case FXM_TRANSIENT:
-    downloadrun();
-    break;
-  case FXM_UPLOAD:
-    uploadrun();
-    break;
-  default:
-    error_fatal("Invalid transfer mode \"%c\"",xferlist[0].dir);
-  }
+	switch (xferlist[0].dir) {
+	case FXM_DOWNLOAD:
+	case FXM_TRANSIENT:
+		downloadrun ();
+		break;
+	case FXM_UPLOAD:
+		uploadrun ();
+		break;
+	default:
+		error_fatal ("Invalid transfer mode \"%c\"", xferlist[0].dir);
+	}
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  if(argc!=3 && argc!=4){
-    fprintf(stderr,"syntax: %s xferlist-file taglist-file [-logout]\n\n",argv[0]);
-    exit(-1);
-  } else {
-    xferlistname=argv[1];
-    taglistname=argv[2];
-    if(argc==4 && (!strcmp(argv[3],"-logout")))logout=1;
-    else logout=0;
-  }
+	mod_setprogname (argv[0]);
+	if (argc != 3 && argc != 4) {
+		fprintf (stderr,
+			 "syntax: %s xferlist-file taglist-file [-logout]\n\n",
+			 argv[0]);
+		exit (-1);
+	} else {
+		xferlistname = argv[1];
+		taglistname = argv[2];
+		if (argc == 4 && (!strcmp (argv[3], "-logout")))
+			logout = 1;
+		else
+			logout = 0;
+	}
 
-  init();
-  run();
-  done();
+	init ();
+	run ();
+	done ();
 
-  return 0;
+	return 0;
 }
+
+
+/* End of File */

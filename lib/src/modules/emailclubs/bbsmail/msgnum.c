@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -52,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,155 +68,169 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 void
-getemsgnum(struct message *msg)
+getemsgnum (struct message *msg)
 {
-  char chkname[256];
-  struct stat st;
+	char    chkname[256];
+	struct stat st;
 
-  /* Wait for lock to clear */
+	/* Wait for lock to clear */
 
-  if(lock_wait(NEMESSAGELOCK,5)==LKR_TIMEOUT){
-    if(usercaller)prompt(TIMEOUT1);
-    if(lock_wait(NEMESSAGELOCK,55)==LKR_TIMEOUT){
-      if(usercaller)prompt(TIMEOUT2);
-      error_log("Timed out (60 sec) waiting for %s",NEMESSAGELOCK);
-      exit(1);
-    }
-  }
+	if (lock_wait (NEMESSAGELOCK, 5) == LKR_TIMEOUT) {
+		if (usercaller)
+			prompt (TIMEOUT1);
+		if (lock_wait (NEMESSAGELOCK, 55) == LKR_TIMEOUT) {
+			if (usercaller)
+				prompt (TIMEOUT2);
+			error_log ("Timed out (60 sec) waiting for %s",
+				   NEMESSAGELOCK);
+			exit (1);
+		}
+	}
 
-  /* Lock the area */
-  
-  lock_place(NEMESSAGELOCK,"seeking");
+	/* Lock the area */
 
-
-  /* Get the next message number in a paranoid but safe way */
-
-  do{
-    sysvar->emessages++;
-    strcpy(chkname,mkfname("%s/"MESSAGEFILE,EMAILDIR,sysvar->emessages));
-  } while (!stat(chkname,&st));
-
-  
-  /* Remove the lock */
-  
-  lock_rm(NEMESSAGELOCK);
+	lock_place (NEMESSAGELOCK, "seeking");
 
 
-  /* Set the message number in the header */
-  
-  msg->msgno=sysvar->emessages;
+	/* Get the next message number in a paranoid but safe way */
+
+	do {
+		sysvar->emessages++;
+		strcpy (chkname,
+			mkfname ("%s/" MESSAGEFILE, EMAILDIR,
+				 sysvar->emessages));
+	} while (!stat (chkname, &st));
 
 
-  /* Debugging info */
+	/* Remove the lock */
+
+	lock_rm (NEMESSAGELOCK);
+
+
+	/* Set the message number in the header */
+
+	msg->msgno = sysvar->emessages;
+
+
+	/* Debugging info */
 
 #ifdef DEBUG
-  printf("Right... This should be email message #%d\n",sysvar->emessages);
+	printf ("Right... This should be email message #%d\n",
+		sysvar->emessages);
 #endif
 }
 
 
 
 void
-getcmsgnum(struct message *msg)
+getcmsgnum (struct message *msg)
 {
-  struct clubheader clubhdr;
-  FILE *fp;
-  char fname[256], chkname[256];
-  struct stat st;
+	struct clubheader clubhdr;
+	FILE   *fp;
+	char    fname[256], chkname[256];
+	struct stat st;
 
-  /* Read the club header */
-    
-  strcpy(fname,mkfname("%s/h%s",CLUBHDRDIR,msg->club));
-  if((fp=fopen(fname,"r"))==NULL){
-    error_logsys("Unable to open %s",fname);
-    exit(1);
-  }
-  
-  if(fread(&clubhdr,sizeof(clubhdr),1,fp)!=1){
-    error_logsys("Unable to read %s",fname);
-    fclose(fp);
-    exit(1);
-  }
-  fclose(fp);
+	/* Read the club header */
 
+	strcpy (fname, mkfname ("%s/h%s", CLUBHDRDIR, msg->club));
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_logsys ("Unable to open %s", fname);
+		exit (1);
+	}
 
-  /* Wait for club lock to clear */
-  
-  sprintf(fname,CLUBLOCK,clubhdr.club);
-  if(lock_wait(fname,5)==LKR_TIMEOUT){
-    if(usercaller)prompt(TIMEOUT1);
-    if(lock_wait(fname,55)==LKR_TIMEOUT){
-      if(usercaller)prompt(TIMEOUT2);
-      error_log("Timed out (60 sec) waiting for %s",
-	       NEMESSAGELOCK);
-      exit(1);
-    }
-  }
+	if (fread (&clubhdr, sizeof (clubhdr), 1, fp) != 1) {
+		error_logsys ("Unable to read %s", fname);
+		fclose (fp);
+		exit (1);
+	}
+	fclose (fp);
 
 
-  /* Place the lock */
-  
-  lock_place(fname,"seeking");
+	/* Wait for club lock to clear */
+
+	sprintf (fname, CLUBLOCK, clubhdr.club);
+	if (lock_wait (fname, 5) == LKR_TIMEOUT) {
+		if (usercaller)
+			prompt (TIMEOUT1);
+		if (lock_wait (fname, 55) == LKR_TIMEOUT) {
+			if (usercaller)
+				prompt (TIMEOUT2);
+			error_log ("Timed out (60 sec) waiting for %s",
+				   NEMESSAGELOCK);
+			exit (1);
+		}
+	}
 
 
-  /* Good old paranoid way of calculating next msg number */
-  
-  do{
-    clubhdr.msgno++;
-    strcpy(chkname,
-	   mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,clubhdr.club,clubhdr.msgno));
-  }while(!stat(chkname,&st));
+	/* Place the lock */
 
-  
-  /* Update the club header as well */
-  
-  clubhdr.nmsgs++;
-  if(msg->flags&MSF_FILEATT){
-    clubhdr.nfiles++;
-    if((msg->flags&MSF_APPROVD)==0)clubhdr.nfunapp++;
-  }
+	lock_place (fname, "seeking");
 
 
-  /* And write the club header back */
-  
-  strcpy(fname,mkfname("%s/h%s",CLUBHDRDIR,msg->club));
-  if((fp=fopen(fname,"w"))==NULL){
-    error_logsys("Unable to create %s",fname);
-    exit(1);
-  }
-  
-  if(fwrite(&clubhdr,sizeof(clubhdr),1,fp)!=1){
-    error_logsys("Unable to write %s",fname);
-    fclose(fp);
-    exit(1);
-  }
-  fclose(fp);
+	/* Good old paranoid way of calculating next msg number */
+
+	do {
+		clubhdr.msgno++;
+		strcpy (chkname,
+			mkfname ("%s/%s/" MESSAGEFILE, MSGSDIR, clubhdr.club,
+				 clubhdr.msgno));
+	} while (!stat (chkname, &st));
 
 
-  /* Done with the club header, remove the lock */
-  
-  lock_rm(fname);
+	/* Update the club header as well */
+
+	clubhdr.nmsgs++;
+	if (msg->flags & MSF_FILEATT) {
+		clubhdr.nfiles++;
+		if ((msg->flags & MSF_APPROVD) == 0)
+			clubhdr.nfunapp++;
+	}
 
 
-  /* Store the message number in the header */
+	/* And write the club header back */
 
-  msg->msgno=clubhdr.msgno;
+	strcpy (fname, mkfname ("%s/h%s", CLUBHDRDIR, msg->club));
+	if ((fp = fopen (fname, "w")) == NULL) {
+		error_logsys ("Unable to create %s", fname);
+		exit (1);
+	}
+
+	if (fwrite (&clubhdr, sizeof (clubhdr), 1, fp) != 1) {
+		error_logsys ("Unable to write %s", fname);
+		fclose (fp);
+		exit (1);
+	}
+	fclose (fp);
 
 
-  /* And increase the total number of club messages written */
+	/* Done with the club header, remove the lock */
 
-  sysvar->sigmessages++;
+	lock_rm (fname);
 
 
-  /* Debugging info */
-  
+	/* Store the message number in the header */
+
+	msg->msgno = clubhdr.msgno;
+
+
+	/* And increase the total number of club messages written */
+
+	sysvar->sigmessages++;
+
+
+	/* Debugging info */
+
 #ifdef DEBUG
-  printf("Right... This should be club %s message #%ld\n",clubhdr.club,msg->msgno);
+	printf ("Right... This should be club %s message #%ld\n", clubhdr.club,
+		msg->msgno);
 #endif
 }
+
+
+/* End of File */

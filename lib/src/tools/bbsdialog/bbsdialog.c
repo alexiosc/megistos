@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:24  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -55,10 +58,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -70,116 +71,128 @@ const char *__RCS=RCS_VER;
 #define WANT_NCURSES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsdialog.h"
-#include "mbk_bbsdialog.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsdialog.h>
+#include <megistos/mbk_bbsdialog.h>
 
 
 
-union object  *object=NULL;
-int           numobjects=0;
-promptblock_t     *msg=NULL;
-promptblock_t     *templates=NULL;
-int           mode;
-char          *mbkname=NULL;
-int           vtnum=0;
-int           ltnum=0;
-char          *dfname=NULL;
+union object *object = NULL;
+int     numobjects = 0;
+promptblock_t *msg = NULL;
+promptblock_t *templates = NULL;
+int     mode;
+char   *mbkname = NULL;
+int     vtnum = 0;
+int     ltnum = 0;
+char   *dfname = NULL;
 
 
 void
-endsession(char *event)
+endsession (char *event)
 {
-  FILE *fp;
-  int i;
+	FILE   *fp;
+	int     i;
 
-  if(mode==VISUAL){
-    thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-    inp_resetidle();
-    attrset(A_NORMAL);
-    clear();
-    wrefresh(stdscr);
-    refresh();
-    endwin();
-  }
+	if (mode == VISUAL) {
+		thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+		inp_resetidle ();
+		attrset (A_NORMAL);
+		clear ();
+		wrefresh (stdscr);
+		refresh ();
+		endwin ();
+	}
 
-  if((fp=fopen(dfname,"w"))==NULL){
-    error_fatalsys("Unable to write data file %s",dfname);
-  }
+	if ((fp = fopen (dfname, "w")) == NULL) {
+		error_fatalsys ("Unable to write data file %s", dfname);
+	}
 
-  for(i=0;i<numobjects;i++){
-    switch(object[i].s.type){
-    case OBJ_STRING:
-      fprintf(fp,"%s\n",object[i].s.data);
-      break;
-    case OBJ_NUM:
-      fprintf(fp,"%s\n",object[i].n.data);
-      break;
-    case OBJ_LIST:
-      fprintf(fp,"%s\n",object[i].l.data);
-      break;
-    case OBJ_TOGGLE:
-      fprintf(fp,"%s\n",object[i].t.data?"on":"off");
-      break;
-    case OBJ_BUTTON:
-      fprintf(fp,"%s\n",object[i].b.label);
-      break;
-    }
-  }
-  fprintf(fp,"%s\n",event);
-  fclose(fp);
+	for (i = 0; i < numobjects; i++) {
+		switch (object[i].s.type) {
+		case OBJ_STRING:
+			fprintf (fp, "%s\n", object[i].s.data);
+			break;
+		case OBJ_NUM:
+			fprintf (fp, "%s\n", object[i].n.data);
+			break;
+		case OBJ_LIST:
+			fprintf (fp, "%s\n", object[i].l.data);
+			break;
+		case OBJ_TOGGLE:
+			fprintf (fp, "%s\n", object[i].t.data ? "on" : "off");
+			break;
+		case OBJ_BUTTON:
+			fprintf (fp, "%s\n", object[i].b.label);
+			break;
+		}
+	}
+	fprintf (fp, "%s\n", event);
+	fclose (fp);
 
-  if(strcasecmp(event,"Linear"))exit(0);
-  else {
-    char format[20];
+	if (strcasecmp (event, "Linear"))
+		exit (0);
+	else {
+		char    format[20];
 
-    sprintf(format,"%d",ltnum);
-    execl(mkfname(BBSDIALOGBIN),"bbsdialog",mbkname,"-1",format,dfname,NULL);
-  }
+		sprintf (format, "%d", ltnum);
+		execl (mkfname (BBSDIALOGBIN), "bbsdialog", mbkname, "-1",
+		       format, dfname, NULL);
+	}
 }
 
 
 void
-usage()
+usage ()
 {
-  printf("syntax: bbsdialog mbk_name vtemplate ltemplate data_file\n\n");
-  printf("mbk_name:  name of a message block file containing the templates.\n");
-  printf("vtemplate: prompt # of the visual template.\n");
-  printf("ltemplate: prompt # of the linear template. The mbk file should have\n");
-  printf("           N (N=number of fields) prompts right after (ltemplate).\n");
-  printf("           These prompts are the data entry prompts for each field,\n");
-  printf("           in order of definition.\n");
-  printf("data_file: file containing default values and data (one line/field).\n\n");
-  exit(-1);
+	printf
+	    ("syntax: bbsdialog mbk_name vtemplate ltemplate data_file\n\n");
+	printf
+	    ("mbk_name:  name of a message block file containing the templates.\n");
+	printf ("vtemplate: prompt # of the visual template.\n");
+	printf
+	    ("ltemplate: prompt # of the linear template. The mbk file should have\n");
+	printf
+	    ("           N (N=number of fields) prompts right after (ltemplate).\n");
+	printf
+	    ("           These prompts are the data entry prompts for each field,\n");
+	printf ("           in order of definition.\n");
+	printf
+	    ("data_file: file containing default values and data (one line/field).\n\n");
+	exit (-1);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  if(argc!=5){
-    usage();
-  } else {
-    mbkname=argv[1];
-    vtnum=atoi(argv[2]);
-    ltnum=atoi(argv[3]);
-    dfname=argv[4];
-  }
+	mod_setprogname (argv[0]);
+	if (argc != 5) {
+		usage ();
+	} else {
+		mbkname = argv[1];
+		vtnum = atoi (argv[2]);
+		ltnum = atoi (argv[3]);
+		dfname = argv[4];
+	}
 
-  mod_init(INI_ALL);
-  msg=msg_open("bbsdialog");
-  msg_setlanguage(thisuseracc.language);
-  templates=msg_open(mbkname);
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	msg = msg_open ("bbsdialog");
+	msg_setlanguage (thisuseracc.language);
+	templates = msg_open (mbkname);
+	msg_setlanguage (thisuseracc.language);
 
-  if(vtnum>=0 && thisuseracc.prefs&UPF_VISUAL && thisuseronl.flags&OLF_ANSION){
-    mode=VISUAL;
-    runvisual();
-  } else {
-    mode=LINEAR;
-    runlinear();
-  }
+	if (vtnum >= 0 && thisuseracc.prefs & UPF_VISUAL &&
+	    thisuseronl.flags & OLF_ANSION) {
+		mode = VISUAL;
+		runvisual ();
+	} else {
+		mode = LINEAR;
+		runlinear ();
+	}
 
-  return 0;
+	return 0;
 }
+
+
+/* End of File */

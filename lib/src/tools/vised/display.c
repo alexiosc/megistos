@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:22  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -62,10 +65,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -78,128 +79,154 @@ const char *__RCS=RCS_VER;
 #define WANT_NCURSES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "vised.h"
-#include "mbk_vised.h"
+#include <megistos/bbs.h>
+#include <megistos/vised.h>
+#include <megistos/mbk_vised.h>
 
-static int err=0;
+static int err = 0;
 
 
 void
-putcursor()
+putcursor ()
 {
-  move(cy-toprow+1,min(cx,current?strlen(current->text):9999)-leftcol);
+	move (cy - toprow + 1,
+	      min (cx, current ? strlen (current->text) : 9999) - leftcol);
 }
 
 
 void
-bel(int error)
+bel (int error)
 {
-  char c=7;
-  write(0,&c,1);
-  err=error;
-  if(error){
-    move(0,0);
-    switch(error){
-    default:
-      printansi(msg_get(error));
-    }
-  }
+	char    c = 7;
+
+	write (0, &c, 1);
+	err = error;
+	if (error) {
+		move (0, 0);
+		switch (error) {
+		default:
+			printansi (msg_get (error));
+		}
+	}
 }
 
 
 void
-showstatus()
+showstatus ()
 {
-  char line[1024];
+	char    line[1024];
 
-  if(!err){
-    move(0,0);
-    sprintf(line,statust,min(cx+1,current?max(1,strlen(current->text)):9999),
-	    cy,numbytes,maxsize,
-	    stins[insertmode],stformat[formatmode],rmargin);
-    printansi(line);
-  }
-  err=0;
-  
-  move(LINES-2,0);
-  switch(metamode){
-  case 1:
-    printansi(statusm);
-    break;
-  case 2:
-    printansi(statuso);
-    break;
-  case 3:
-    printansi(statusk);
-    break;
-  default:
-    printansi(statusb);
-  }
+	if (!err) {
+		move (0, 0);
+		sprintf (line, statust,
+			 min (cx + 1,
+			      current ? max (1,
+					     strlen (current->text)) : 9999),
+			 cy, numbytes, maxsize, stins[insertmode],
+			 stformat[formatmode], rmargin);
+		printansi (line);
+	}
+	err = 0;
 
-  putcursor();
-  refresh();
+	move (LINES - 2, 0);
+	switch (metamode) {
+	case 1:
+		printansi (statusm);
+		break;
+	case 2:
+		printansi (statuso);
+		break;
+	case 3:
+		printansi (statusk);
+		break;
+	default:
+		printansi (statusb);
+	}
+
+	putcursor ();
+	refresh ();
 }
 
 
 void
-showtext(int num)
+showtext (int num)
 {
-  struct line *l;
-  int i;
-  char line[1024];
+	struct line *l;
+	int     i;
+	char    line[1024];
 
-  for(i=1,l=top;l&&i<LINES-2;l=l->next,i++){
-    int j,ln=i+toprow-1;
+	for (i = 1, l = top; l && i < LINES - 2; l = l->next, i++) {
+		int     j, ln = i + toprow - 1;
 
-    if(leftcol && (i==(cy-toprow+1))){
-      strcpy(line,&(l->text[leftcol]));
-      line[COLS]=0;
-    } else strncpy(line,l->text,COLS+1);
+		if (leftcol && (i == (cy - toprow + 1))) {
+			strcpy (line, &(l->text[leftcol]));
+			line[COLS] = 0;
+		} else
+			strncpy (line, l->text, COLS + 1);
 
-    attr(cfgtxt+(cbgtxt<<4));
-    for(j=0;line[j]&&j<qtemaxc;j++)if(strchr(qtechrs,line[j])){
-      attr(cfgqte+(cbgqte<<4));
-      break;
-    }
+		attr (cfgtxt + (cbgtxt << 4));
+		for (j = 0; line[j] && j < qtemaxc; j++)
+			if (strchr (qtechrs, line[j])) {
+				attr (cfgqte + (cbgqte << 4));
+				break;
+			}
 
-    move(i,0);
-    if(!num || (i==num) || ((num<0)&&((-num)<=i))){
-      int j;
-      cleartoeol();
-      for(j=0;line[j];j++)if(line[j]>=0&&line[j]<32)line[j]='?';
-      mvaddstr(i,0,line);
-      if(BLOCK){
-	int a=cfgblk+(cbgblk<<4);
-	if(ln==kby && kbx<strlen(line))
-	  maskblock(kbx,i,(kby==kky)?kkx-1:strlen(line)-1,i,a);
-	else if(ln>kby && (ln==kky-(kkx==0)) && kkx)
-	  maskblock(0,i,kkx-1,i,a);
-	else if(ln>kby && ln<=kky-1 && strlen(line))
-	  maskblock(0,i,strlen(line)-1,i,a);
-      }
-      if(fl && ln==fy)maskblock(fx,i,fx+fl-1,i,cfgfnd+(cbgfnd<<4));
+		move (i, 0);
+		if (!num || (i == num) || ((num < 0) && ((-num) <= i))) {
+			int     j;
 
-    }
-    attr(cfgtxt+(cbgtxt<<4));
-  }
+			cleartoeol ();
+			for (j = 0; line[j]; j++)
+				if (line[j] >= 0 && line[j] < 32)
+					line[j] = '?';
+			mvaddstr (i, 0, line);
+			if (BLOCK) {
+				int     a = cfgblk + (cbgblk << 4);
 
-  attr(cfgtxt+(cbgtxt<<4));
-  if(!num)for(;i<LINES-2;i++){
-    move(i,0);
-    cleartoeol();
-  }
+				if (ln == kby && kbx < strlen (line))
+					maskblock (kbx, i,
+						   (kby ==
+						    kky) ? kkx -
+						   1 : strlen (line) - 1, i,
+						   a);
+				else if (ln > kby && (ln == kky - (kkx == 0))
+					 && kkx)
+					maskblock (0, i, kkx - 1, i, a);
+				else if (ln > kby && ln <= kky - 1 &&
+					 strlen (line))
+					maskblock (0, i, strlen (line) - 1, i,
+						   a);
+			}
+			if (fl && ln == fy)
+				maskblock (fx, i, fx + fl - 1, i,
+					   cfgfnd + (cbgfnd << 4));
 
-  putcursor();
-  refresh();
+		}
+		attr (cfgtxt + (cbgtxt << 4));
+	}
+
+	attr (cfgtxt + (cbgtxt << 4));
+	if (!num)
+		for (; i < LINES - 2; i++) {
+			move (i, 0);
+			cleartoeol ();
+		}
+
+	putcursor ();
+	refresh ();
 }
 
 
 void
-noblock()
+noblock ()
 {
-  int i=BLOCK;
-  kby=kky=1;
-  kbx=kkx=0;
-  if(i)showtext(0);
+	int     i = BLOCK;
+
+	kby = kky = 1;
+	kbx = kkx = 0;
+	if (i)
+		showtext (0);
 }
+
+
+/* End of File */

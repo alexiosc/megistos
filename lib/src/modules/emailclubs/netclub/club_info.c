@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -53,79 +54,91 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include "netclub.h"
-#include "metaservices.h"
+#include <megistos/netclub.h>
+#include <megistos/metaservices.h>
 
 
 
 void
-club_info(char *fname, char *sysname, char *clubname)
+club_info (char *fname, char *sysname, char *clubname)
 {
-  CLIENT                        *cl=NULL;
-  struct club_header_request_t   bbs;
-  struct club_header_t          *hdr;
-  club_header                   *result;
-  char                           tmp[256], *cp;
-    
-
-  /* Separate the hostname from the codename */
-
-  strcpy(tmp,sysname);
-  if((cp=strchr(tmp,'/'))==NULL){
-    fprintf(stderr,"System \"%s\" has invalid name!\n",sysname);
-    return;
-  }
-
-  *cp++=0;			/* tmp=hostname, cp=codename */
+	CLIENT *cl = NULL;
+	struct club_header_request_t bbs;
+	struct club_header_t *hdr;
+	club_header *result;
+	char    tmp[256], *cp;
 
 
-  /* Make the connection */
-  
-  if(debug)fprintf(stderr,"Creating RPC client for host %s\n",tmp);
-  if((cl=clnt_create(tmp,METABBS_PROG,METABBS_VERS,"tcp"))==NULL){
-    clnt_pcreateerror(tmp);
-    return;
-  }
+	/* Separate the hostname from the codename */
+
+	strcpy (tmp, sysname);
+	if ((cp = strchr (tmp, '/')) == NULL) {
+		fprintf (stderr, "System \"%s\" has invalid name!\n", sysname);
+		return;
+	}
+
+	*cp++ = 0;		/* tmp=hostname, cp=codename */
 
 
-  /* Call the procedure */
-  
-  strcpy(bbs.codename,bbscode);
-  strcpy(bbs.targetname,cp);
-  strcpy(bbs.club,clubname);
-  if(debug)fprintf(stderr,"Sending club header request to %s/%s\n",tmp,cp);
-  if((result=distclub_request_header_1(&bbs,cl))==NULL){
-    clnt_perror(cl,tmp);
-    clnt_destroy(cl);
-    fprintf(stderr,"RPC request wasn't answered by %s",tmp);
-    return;
-  }
-  clnt_destroy(cl);
+	/* Make the connection */
 
-  if(debug||(result->result_code!=0)){
-    int i=result->result_code;
-    fprintf(stderr,"Server returns result %d (%s)\n",i,
-	    i>0?strerror(i):clr_errorlist[-i]);
-  }
-  if(result->result_code)return;
+	if (debug)
+		fprintf (stderr, "Creating RPC client for host %s\n", tmp);
+	if ((cl =
+	     clnt_create (tmp, METABBS_PROG, METABBS_VERS, "tcp")) == NULL) {
+		clnt_pcreateerror (tmp);
+		return;
+	}
 
-  hdr=&(result->club_header_u.club);
-  printf("System:       %s/%s\n",tmp,cp);
-  printf("Club:         %s\n",hdr->club);
-  printf("Description:  %s\n",hdr->descr);
-  printf("ClubOp:       %s\n",hdr->clubop);
-  printf("Created:      %s %s\n",strdate(hdr->crdate),strtime(hdr->crtime,1));
-  printf("Messages:     %d\n",hdr->nmsgs);
-  printf("Periodicals:  %d\n",hdr->nper);
-  printf("Bulletins:    %d\n",hdr->nblts);
-  printf("Files:        %d\n",hdr->nfiles);
-  printf("Unapproved:   %d\n",hdr->nfunapp);
-  printf("Msg lifetime: %d day(s)\n",hdr->msglife);
 
-  printf("\nClub banner follows:\n");
-  printf("-------------------------------------------------------------------------------\n");
-  printf("%s\e[0m",hdr->banner);
-  printf("-------------------------------------------------------------------------------\n\n");
+	/* Call the procedure */
 
-  xdr_free((xdrproc_t)xdr_club_header,(caddr_t)result);
+	strcpy (bbs.codename, bbscode);
+	strcpy (bbs.targetname, cp);
+	strcpy (bbs.club, clubname);
+	if (debug)
+		fprintf (stderr, "Sending club header request to %s/%s\n", tmp,
+			 cp);
+	if ((result = distclub_request_header_1 (&bbs, cl)) == NULL) {
+		clnt_perror (cl, tmp);
+		clnt_destroy (cl);
+		fprintf (stderr, "RPC request wasn't answered by %s", tmp);
+		return;
+	}
+	clnt_destroy (cl);
+
+	if (debug || (result->result_code != 0)) {
+		int     i = result->result_code;
+
+		fprintf (stderr, "Server returns result %d (%s)\n", i,
+			 i > 0 ? strerror (i) : clr_errorlist[-i]);
+	}
+	if (result->result_code)
+		return;
+
+	hdr = &(result->club_header_u.club);
+	printf ("System:       %s/%s\n", tmp, cp);
+	printf ("Club:         %s\n", hdr->club);
+	printf ("Description:  %s\n", hdr->descr);
+	printf ("ClubOp:       %s\n", hdr->clubop);
+	printf ("Created:      %s %s\n", strdate (hdr->crdate),
+		strtime (hdr->crtime, 1));
+	printf ("Messages:     %d\n", hdr->nmsgs);
+	printf ("Periodicals:  %d\n", hdr->nper);
+	printf ("Bulletins:    %d\n", hdr->nblts);
+	printf ("Files:        %d\n", hdr->nfiles);
+	printf ("Unapproved:   %d\n", hdr->nfunapp);
+	printf ("Msg lifetime: %d day(s)\n", hdr->msglife);
+
+	printf ("\nClub banner follows:\n");
+	printf
+	    ("-------------------------------------------------------------------------------\n");
+	printf ("%s\e[0m", hdr->banner);
+	printf
+	    ("-------------------------------------------------------------------------------\n\n");
+
+	xdr_free ((xdrproc_t) xdr_club_header, (caddr_t) result);
 }
+
+
+/* End of File */

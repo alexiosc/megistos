@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -39,10 +42,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -54,95 +55,103 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
-#include "mbk_sysvar.h"
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_sysvar.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 void
-bbsmail_run(char *fname, char *srcname, int copymode, char *attachment)
+bbsmail_run (char *fname, char *srcname, int copymode, char *attachment)
 {
-  int email=1;
-  struct message msg, msg0;
+	int     email = 1;
+	struct message msg, msg0;
 
 
 #ifdef DEBUG
-  printf("fname=(%s)\nsrcname=(%s)\ncopymode=%d\natt=(%s)\n",fname,srcname,copymode,attachment);
+	printf ("fname=(%s)\nsrcname=(%s)\ncopymode=%d\natt=(%s)\n", fname,
+		srcname, copymode, attachment);
 #endif
 
-  /* Read message header from FILE1 */
+	/* Read message header from FILE1 */
 
-  readmsghdr(fname,&msg);
-
-
-  /* Is it an email or club message? */
-
-  email=(msg.club[0]==0);
+	readmsghdr (fname, &msg);
 
 
-  /* Deal with auto-forwarded messages */
+	/* Is it an email or club message? */
 
-  if(email)checkautofw(&msg);
+	email = (msg.club[0] == 0);
 
 
-  /* Print nice debugging info. Maybe. */
+	/* Deal with auto-forwarded messages */
+
+	if (email)
+		checkautofw (&msg);
+
+
+	/* Print nice debugging info. Maybe. */
 
 #ifdef DEBUG
-  printf("Club:    (%s)\n",msg.club);
-  printf("From:    (%s)\n",msg.from);
-  printf("To:      (%s)\n",msg.to);
-  printf("Subject: (%s)\n",msg.subject);
-  printf("History: (%s)\n",msg.history);
-  printf("Fatt:    (%s)\n",msg.fatt);
-  printf("Msgno:   (%ld)\n",msg.msgno);
-  printf("flags:   (%lx)\n",msg.flags);
-  printf("\n");
+	printf ("Club:    (%s)\n", msg.club);
+	printf ("From:    (%s)\n", msg.from);
+	printf ("To:      (%s)\n", msg.to);
+	printf ("Subject: (%s)\n", msg.subject);
+	printf ("History: (%s)\n", msg.history);
+	printf ("Fatt:    (%s)\n", msg.fatt);
+	printf ("Msgno:   (%ld)\n", msg.msgno);
+	printf ("flags:   (%lx)\n", msg.flags);
+	printf ("\n");
 #endif
 
 
-  /* Get new message number */
+	/* Get new message number */
 
-  if(email)getemsgnum(&msg);
-  else getcmsgnum(&msg);
-
-
-  /* Prepare the message header */
-
-  preparemsghdr(&msg,email);
+	if (email)
+		getemsgnum (&msg);
+	else
+		getcmsgnum (&msg);
 
 
-  /* Add the message index to the Typhoon database */
+	/* Prepare the message header */
 
-  addtodb(&msg,email);
-
-
-  /* Write the message header and body */
-
-  writemessage(srcname,&msg,email);
-  memcpy(&msg0,&msg,sizeof(struct message));
+	preparemsghdr (&msg, email);
 
 
-  /* Add club messages to the IHAVE list */
+	/* Add the message index to the Typhoon database */
 
-  if(!email)addihave(&msg);
-
-
-  /* Copy the optional file attachment */
-
-  copyatt(copymode,&msg,email,attachment);
+	addtodb (&msg, email);
 
 
-  /* Check for network mail */
+	/* Write the message header and body */
 
-  checknetmail(&msg,srcname);
+	writemessage (srcname, &msg, email);
+	memcpy (&msg0, &msg, sizeof (struct message));
 
 
-  /* Write final message header back to source file */
+	/* Add club messages to the IHAVE list */
 
-  writemsghdr(fname,&msg);
+	if (!email)
+		addihave (&msg);
+
+
+	/* Copy the optional file attachment */
+
+	copyatt (copymode, &msg, email, attachment);
+
+
+	/* Check for network mail */
+
+	checknetmail (&msg, srcname);
+
+
+	/* Write final message header back to source file */
+
+	writemsghdr (fname, &msg);
 }
 
 
+
+
+/* End of File */

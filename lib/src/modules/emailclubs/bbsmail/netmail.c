@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -52,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,69 +68,73 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "bbsmail.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/bbsmail.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 
 void
-handlenetmail(struct message *msg, char *srcname)
+handlenetmail (struct message *msg, char *srcname)
 {
-  char command[256],buffer[8192];
-  FILE *fp;
-  struct stat st;
-  useracc_t uacc;
-  char fatt[256];
+	char    command[256], buffer[8192];
+	FILE   *fp;
+	struct stat st;
+	useracc_t uacc;
+	char    fatt[256];
 
-  st.st_size=0;
-  stat(srcname,&st);
+	st.st_size = 0;
+	stat (srcname, &st);
 
-  if(!msg->fatt[0])sprintf(fatt,FILEATTACHMENT,msg->msgno);
-  else strcpy(fatt,msg->fatt);
-  
-  usr_loadaccount(msg->from,&uacc);
-  latinize(uacc.username);
+	if (!msg->fatt[0])
+		sprintf (fatt, FILEATTACHMENT, msg->msgno);
+	else
+		strcpy (fatt, msg->fatt);
 
-  if((msg->flags&MSF_FILEATT)==0){
-    sprintf(command,"cat - %s |%s %s",
-	    srcname,
-	    msg_get(SENDMAIL),
-	    msg->to);
-  }else{
-    char tmp[256];
-    sprintf(tmp,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg->msgno));
-    sprintf(command,"uuencode <%s %s >/tmp/mailatt%05d",tmp,fatt,getpid());
-    system(command);
-    sprintf(command,"cat - %s /tmp/mailatt%05d|%s %s",
-	    srcname,
-	    getpid(),
-	    msg_get(SENDMAIL),
-	    msg->to);
-  }
-  if((fp=popen(command,"w"))==NULL){
-    error_logsys("Unable to spawn %s pipe",msg_get(SENDMAIL));
-    exit(1);
-  }
-  sprompt(buffer,NMSGHDR,uacc.username,msg->from,msg->subject,
-	  msg->history,msg->flags&MSF_FILEATT?fatt:"No",msg->msgno,
-	  msg->flags&MSF_RECEIPT?"Yes":"No",st.st_size);
-  fprintf(fp,buffer);
-  pclose(fp);
-  sysvar->nmessages++;
+	usr_loadaccount (msg->from, &uacc);
+	latinize (uacc.username);
+
+	if ((msg->flags & MSF_FILEATT) == 0) {
+		sprintf (command, "cat - %s |%s %s",
+			 srcname, msg_get (SENDMAIL), msg->to);
+	} else {
+		char    tmp[256];
+
+		sprintf (tmp,
+			 mkfname (EMAILATTDIR "/" FILEATTACHMENT, msg->msgno));
+		sprintf (command, "uuencode <%s %s >/tmp/mailatt%05d", tmp,
+			 fatt, getpid ());
+		system (command);
+		sprintf (command, "cat - %s /tmp/mailatt%05d|%s %s",
+			 srcname, getpid (), msg_get (SENDMAIL), msg->to);
+	}
+	if ((fp = popen (command, "w")) == NULL) {
+		error_logsys ("Unable to spawn %s pipe", msg_get (SENDMAIL));
+		exit (1);
+	}
+	sprompt (buffer, NMSGHDR, uacc.username, msg->from, msg->subject,
+		 msg->history, msg->flags & MSF_FILEATT ? fatt : "No",
+		 msg->msgno, msg->flags & MSF_RECEIPT ? "Yes" : "No",
+		 st.st_size);
+	fprintf (fp, buffer);
+	pclose (fp);
+	sysvar->nmessages++;
 }
 
 
 void
-checknetmail(struct message *msg, char *srcname)
+checknetmail (struct message *msg, char *srcname)
 {
 
 #ifdef DEBUG
-  printf("Checking for netmail...\n");
+	printf ("Checking for netmail...\n");
 #endif
 
-  if(strchr(msg->to,'@')||strchr(msg->to,'%')){
-    handlenetmail(msg,srcname);
-  }
+	if (strchr (msg->to, '@') || strchr (msg->to, '%')) {
+		handlenetmail (msg, srcname);
+	}
 }
 
+
+
+/* End of File */

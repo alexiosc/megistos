@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:22  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -85,10 +88,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -108,9 +109,9 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <sys/kd.h>
-#include "bbs.h"
-#include "vised.h"
-#include "mbk_vised.h"
+#include <megistos/bbs.h>
+#include <megistos/vised.h>
+#include <megistos/mbk_vised.h>
 
 
 #ifndef GREEK
@@ -122,689 +123,748 @@ const char *__RCS=RCS_VER;
 #endif
 
 
-struct       line *first=NULL;
-struct       line *last=NULL;
-struct       line *top=NULL;
-struct       line *current=NULL;
-promptblock_t    *msg;
-int          numlines=0, numbytes=0, maxsize=262144;
-char         filename[1024];
-int          cx=0,cy=0,toprow=0,leftcol=0;
-int          kbx=0,kby=1,kkx=0,kky=1;
-int          metamode=0;
-int          insertmode=0;
-int          formatmode=0;
-int          rmargin=75;
-int          ok=0;
-int          oldmetaflag;
+struct line *first = NULL;
+struct line *last = NULL;
+struct line *top = NULL;
+struct line *current = NULL;
+promptblock_t *msg;
+int     numlines = 0, numbytes = 0, maxsize = 262144;
+char    filename[1024];
+int     cx = 0, cy = 0, toprow = 0, leftcol = 0;
+int     kbx = 0, kby = 1, kkx = 0, kky = 1;
+int     metamode = 0;
+int     insertmode = 0;
+int     formatmode = 0;
+int     rmargin = 75;
+int     ok = 0;
+int     oldmetaflag;
 
 
-int          maxlen;
-int          vscrinc;
-int          hscrinc;
-int          pageinc;
-int          insert;
-int          format;
-char         *qtechrs;
-int          qtemaxc;
-int          cfgtxt;
-int          cbgtxt;
-int          cfgfnd;
-int          cbgfnd;
-int          cfgblk;
-int          cbgblk;
-int          cfgqte;
-int          cbgqte;
-char         *txtupld;
-char         *stins[2];
-char         *stformat[5];
-char         *statust;
-char         *statusb;
-char         *statusm;
-char         *statuso;
-char         *statusk;
+int     maxlen;
+int     vscrinc;
+int     hscrinc;
+int     pageinc;
+int     insert;
+int     format;
+char   *qtechrs;
+int     qtemaxc;
+int     cfgtxt;
+int     cbgtxt;
+int     cfgfnd;
+int     cbgfnd;
+int     cfgblk;
+int     cbgblk;
+int     cfgqte;
+int     cbgqte;
+char   *txtupld;
+char   *stins[2];
+char   *stformat[5];
+char   *statust;
+char   *statusb;
+char   *statusm;
+char   *statuso;
+char   *statusk;
 
 
 static char *
-latin(char *s)
+latin (char *s)
 {
-  char buf[526];
-  strcpy(buf,s);
-  return latinize(buf);
+	char    buf[526];
+
+	strcpy (buf, s);
+	return latinize (buf);
 }
 
 
 int
-getfg(int p)
+getfg (int p)
 {
-  return msg_token(p,"BLACK","DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
-		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
-		"CYAN","RED","MAGENTA","YELLOW","WHITE")-1;
+	return msg_token (p, "BLACK", "DARKBLUE", "DARKGREEN", "DARKCYAN",
+			  "DARKRED", "DARKMAGENTA", "BROWN", "GREY",
+			  "DARKGREY", "BLUE", "GREEN", "CYAN", "RED",
+			  "MAGENTA", "YELLOW", "WHITE") - 1;
 }
 
 
 int
-getbg(int p)
+getbg (int p)
 {
-  return msg_token(p,"BLACK","BLUE","GREEN","CYAN","RED","MAGENTA","BROWN",
-		"GREY")-1;
+	return msg_token (p, "BLACK", "BLUE", "GREEN", "CYAN", "RED",
+			  "MAGENTA", "BROWN", "GREY") - 1;
 }
 
 
 void
-init()
+init ()
 {
-  int i;
+	int     i;
 
-  mod_init(INI_ALL);
-  msg=msg_open("vised");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	msg = msg_open ("vised");
+	msg_setlanguage (thisuseracc.language);
 
-  system(STTYBIN" -echo start undef stop undef intr undef susp undef");
+	system (STTYBIN " -echo start undef stop undef intr undef susp undef");
 
-  maxlen=msg_int(RMARGIN,20,999);
-  vscrinc=msg_int(VSCRINC,1,25);
-  hscrinc=msg_int(HSCRINC,1,25);
-  pageinc=msg_int(PAGEINC,0,100);
-  insert=msg_bool(INSERT);
-  if((format=msg_token(FORMAT,"NONE","LEFT","RIGHT","CENTRE","JUSTIFY")-1)<0){
-    error_fatal("LEVEL2 option INSERT (vised.msg) has bad value.");
-  }
-  txtupld=msg_string(TXTUPLD);
-  stins[0]=msg_string(STOVR);
-  stins[1]=msg_string(STINS);
-  for(i=0;i<5;i++)stformat[i]=msg_string(STNONE+i);
-  qtechrs=msg_string(QTECHRS);
-  qtemaxc=msg_int(QTEMAXC,1,10);
-  statust=msg_string(STATUST);
-  statusb=msg_string(STATUSB);
-  statusm=msg_string(STATUSM);
-  statuso=msg_string(STATUSO);
-  statusk=msg_string(STATUSK);
+	maxlen = msg_int (RMARGIN, 20, 999);
+	vscrinc = msg_int (VSCRINC, 1, 25);
+	hscrinc = msg_int (HSCRINC, 1, 25);
+	pageinc = msg_int (PAGEINC, 0, 100);
+	insert = msg_bool (INSERT);
+	if ((format =
+	     msg_token (FORMAT, "NONE", "LEFT", "RIGHT", "CENTRE",
+			"JUSTIFY") - 1) < 0) {
+		error_fatal
+		    ("LEVEL2 option INSERT (vised.msg) has bad value.");
+	}
+	txtupld = msg_string (TXTUPLD);
+	stins[0] = msg_string (STOVR);
+	stins[1] = msg_string (STINS);
+	for (i = 0; i < 5; i++)
+		stformat[i] = msg_string (STNONE + i);
+	qtechrs = msg_string (QTECHRS);
+	qtemaxc = msg_int (QTEMAXC, 1, 10);
+	statust = msg_string (STATUST);
+	statusb = msg_string (STATUSB);
+	statusm = msg_string (STATUSM);
+	statuso = msg_string (STATUSO);
+	statusk = msg_string (STATUSK);
 
-  if((cfgtxt=getfg(CFGTXT))<0)
-    error_fatal("LEVEL2 option CFGTXT (vised.msg) has bad value.");
-  if((cbgtxt=getbg(CBGTXT))<0)
-    error_fatal("LEVEL2 option CBGTXT (vised.msg) has bad value.");
+	if ((cfgtxt = getfg (CFGTXT)) < 0)
+		error_fatal
+		    ("LEVEL2 option CFGTXT (vised.msg) has bad value.");
+	if ((cbgtxt = getbg (CBGTXT)) < 0)
+		error_fatal
+		    ("LEVEL2 option CBGTXT (vised.msg) has bad value.");
 
-  if((cfgblk=getfg(CFGBLK))<0)
-    error_fatal("LEVEL2 option CFGBLK (vised.msg) has bad value.");
-  if((cbgblk=getbg(CBGBLK))<0)
-    error_fatal("LEVEL2 option CBGBLK (vised.msg) has bad value.");
+	if ((cfgblk = getfg (CFGBLK)) < 0)
+		error_fatal
+		    ("LEVEL2 option CFGBLK (vised.msg) has bad value.");
+	if ((cbgblk = getbg (CBGBLK)) < 0)
+		error_fatal
+		    ("LEVEL2 option CBGBLK (vised.msg) has bad value.");
 
-  if((cfgfnd=getfg(CFGFND))<0)
-    error_fatal("LEVEL2 option CFGFND (vised.msg) has bad value.");
-  if((cbgfnd=getbg(CBGFND))<0)
-    error_fatal("LEVEL2 option CBGFND (vised.msg) has bad value.");
+	if ((cfgfnd = getfg (CFGFND)) < 0)
+		error_fatal
+		    ("LEVEL2 option CFGFND (vised.msg) has bad value.");
+	if ((cbgfnd = getbg (CBGFND)) < 0)
+		error_fatal
+		    ("LEVEL2 option CBGFND (vised.msg) has bad value.");
 
-  if((cfgqte=getfg(CFGQTE))<0)
-    error_fatal("LEVEL2 option CFGQTE (vised.msg) has bad value.");
-  if((cbgqte=getbg(CBGQTE))<0)
-    error_fatal("LEVEL2 option CBGQTE (vised.msg) has bad value.");
+	if ((cfgqte = getfg (CFGQTE)) < 0)
+		error_fatal
+		    ("LEVEL2 option CFGQTE (vised.msg) has bad value.");
+	if ((cbgqte = getbg (CBGQTE)) < 0)
+		error_fatal
+		    ("LEVEL2 option CBGQTE (vised.msg) has bad value.");
 
-  thisuseronl.input[0]=0;
-  /*  thisuseronl.flags&=~(OLF_MMCONCAT); */
+	thisuseronl.input[0] = 0;
+	/*  thisuseronl.flags&=~(OLF_MMCONCAT); */
 }
 
 
 int
-loadfile(char *fname)
+loadfile (char *fname)
 {
-  FILE        *fp;
-  
-  if((fp=fopen(fname,"r"))!=NULL){
-    while(!feof(fp)){
-      char line[MAXLEN+1]={0};
-      if(fgets(line,sizeof(line),fp)){
-	char *cp=line;
-	char tabs[MAXLEN+1], *tp=tabs;
-	int i;
+	FILE   *fp;
 
-	memset(tabs,1,sizeof(tabs));
-	line[MAXLEN]=tabs[MAXLEN]=0;
-	for(cp=line;*cp;cp++)if(*cp==10 || *cp==13){
-	  *cp=0;
-	  break;
+	if ((fp = fopen (fname, "r")) != NULL) {
+		while (!feof (fp)) {
+			char    line[MAXLEN + 1] = { 0 };
+
+			if (fgets (line, sizeof (line), fp)) {
+				char   *cp = line;
+				char    tabs[MAXLEN + 1], *tp = tabs;
+				int     i;
+
+				memset (tabs, 1, sizeof (tabs));
+				line[MAXLEN] = tabs[MAXLEN] = 0;
+				for (cp = line; *cp; cp++)
+					if (*cp == 10 || *cp == 13) {
+						*cp = 0;
+						break;
+					}
+
+				for (i = 0; line[i] && (*tp); i++)
+					if (line[i] == '\t') {
+						int     j;
+
+						for (j = 0; (j < 8) && (*tp);
+						     j++)
+							*(tp++) = 32;
+					} else
+						*(tp++) = line[i];
+				*tp = 0;
+
+				if (numbytes + strlen (tabs) + 1 > maxsize) {
+					prompt (LOADERR, maxsize);
+					fclose (fp);
+					return 1;
+				}
+				insertline (last, tabs);
+			}
+		}
+		fclose (fp);
+		return 1;
+	}
+	return 0;
+}
+
+
+void
+savefile ()
+{
+	struct line *l;
+	int     mt = 0;
+	FILE   *fp;
+
+	if ((fp = fopen (filename, "w")) == NULL) {
+		int     i = errno;
+
+		prompt (SAVEERR, i, sys_errlist[i]);
+		error_setnotify (0);
+		errno = i;
+		error_fatalsys ("Unable to write to %s", filename);
 	}
 
-	for(i=0;line[i]&&(*tp);i++)if(line[i]=='\t'){
-	  int j;
-	  for(j=0;(j<8)&&(*tp);j++)*(tp++)=32;
-	} else *(tp++)=line[i];
-	*tp=0;
+	for (l = first; l; l = l->next) {
+		int     i = strspn (l->text, " ");
 
-	if(numbytes+strlen(tabs)+1>maxsize){
-	  prompt(LOADERR,maxsize);
-	  fclose(fp);
-	  return 1;
+		if (!strlen (&(l->text[i])))
+			mt++;
+		else {
+			for (; mt; mt--)
+				fprintf (fp, "\n");
+			fprintf (fp, "%s\n", l->text);
+		}
 	}
-	insertline(last,tabs);
-      }
-    }
-    fclose(fp);
-    return 1;
-  }
-  return 0;
+	if (numbytes > maxsize)
+		ftruncate (fileno (fp), maxsize);
+
+	fclose (fp);
 }
 
 
 void
-savefile()
+help ()
 {
-  struct line *l;
-  int mt=0;
-  FILE *fp;
+	int     p = HELP1, c;
 
-  if((fp=fopen(filename,"w"))==NULL){
-    int i=errno;
-    prompt(SAVEERR,i,sys_errlist[i]);
-    error_setnotify(0);
-    errno=i;
-    error_fatalsys("Unable to write to %s",filename);
-  }
-
-  for(l=first;l;l=l->next){
-    int i=strspn(l->text," ");
-    if(!strlen(&(l->text[i])))mt++;
-    else {
-      for(;mt;mt--)fprintf(fp,"\n");
-      fprintf(fp,"%s\n",l->text);
-    }
-  }
-  if(numbytes>maxsize)ftruncate(fileno(fp),maxsize);
-
-  fclose(fp);
+	switch (metamode) {
+	case 0:
+		p = HELP1;
+		break;
+	case -3:
+	case 3:
+		p = HELP2;
+		break;
+	case -2:
+	case 2:
+		p = HELP3;
+		break;
+	}
+	for (; p <= HELP4; p++) {
+		move (1, 0);
+		printansi (msg_get (p));
+		refresh ();
+		while ((c = mygetch ()) == ERR)
+			usleep (20000);
+		if (c != 10 && c != 13 && c != KEY_ENTER)
+			break;
+	}
+	showstatus ();
+	showtext (0);
+	refresh ();
 }
 
 
 void
-help()
+upload ()
 {
-  int p=HELP1,c;
-  switch(metamode){
-  case 0:
-    p=HELP1;
-    break;
-  case -3:
-  case 3:
-    p=HELP2;
-    break;
-  case -2:
-  case 2:
-    p=HELP3;
-    break;
-  }
-  for(;p<=HELP4;p++){
-    move(1,0);
-    printansi(msg_get(p));
-    refresh();
-    while((c=mygetch())==ERR)usleep(20000);
-    if(c!=10&&c!=13&&c!=KEY_ENTER)break;
-  }
-  showstatus();
-  showtext(0);
-  refresh();
-}
+	char    fname[256], command[256], *cp, name[256], dir[256];
+	FILE   *fp;
 
+	cnc_end ();
+	name[0] = dir[0] = 0;
+	xfer_add (FXM_UPLOAD, "UPLOAD-NAMELESS", txtupld, 0, -1);
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	xfer_run ();
+	thisuseronl.flags |= (OLF_BUSY | OLF_NOTIMEOUT);
 
-void
-upload()
-{
-  char fname[256],command[256],*cp,name[256],dir[256];
-  FILE *fp;
+	sprintf (fname, XFERLIST, getpid ());
 
-  cnc_end();
-  name[0]=dir[0]=0;
-  xfer_add(FXM_UPLOAD,"UPLOAD-NAMELESS",txtupld,0,-1);
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  xfer_run();
-  thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
-  
-  sprintf(fname,XFERLIST,getpid());
-
-  if((fp=fopen(fname,"r"))==NULL){
+	if ((fp = fopen (fname, "r")) == NULL) {
 /*    prompt(XFERERR); */
-    goto kill;
-  }
+		goto kill;
+	}
 
-  while (!feof(fp)){
-    char line[1024];
+	while (!feof (fp)) {
+		char    line[1024];
 
-    if(fgets(line,sizeof(line),fp)){
-      strcpy(dir,line);
-      break;
-    }
-  }
-  if((cp=strchr(dir,'\n'))!=NULL)*cp=0;
-  fclose(fp);
+		if (fgets (line, sizeof (line), fp)) {
+			strcpy (dir, line);
+			break;
+		}
+	}
+	if ((cp = strchr (dir, '\n')) != NULL)
+		*cp = 0;
+	fclose (fp);
 
-  sprintf(name,TMPDIR"/vised-%05d",getpid());
+	sprintf (name, TMPDIR "/vised-%05d", getpid ());
 
-  sprintf(command,"cat %s/* >%s 2>/dev/null",dir,name);
-  system(command);
+	sprintf (command, "cat %s/* >%s 2>/dev/null", dir, name);
+	system (command);
 
-  if(!loadfile(name))prompt(XFERERR);
+	if (!loadfile (name))
+		prompt (XFERERR);
 
- kill:
-  sprintf(command,"rm -rf %s %s",fname,dir);
-  system(command);
-  if(name[0]){
-    sprintf(command,"rm -f %s >&/dev/null",name);
-    system(command);
-  }
-  xfer_kill_list();
+      kill:
+	sprintf (command, "rm -rf %s %s", fname, dir);
+	system (command);
+	if (name[0]) {
+		sprintf (command, "rm -f %s >&/dev/null", name);
+		system (command);
+	}
+	xfer_kill_list ();
 }
 
 
 void
-initvisual()
+initvisual ()
 {
-  initscr();
-  scrollok(stdscr,FALSE);
-  leaveok(stdscr,FALSE);
+	initscr ();
+	scrollok (stdscr, FALSE);
+	leaveok (stdscr, FALSE);
 
-  if(has_colors()){
-    int i,j;
-    int cols[8]={COLOR_BLACK,COLOR_BLUE,COLOR_GREEN,COLOR_CYAN,
-		 COLOR_RED,COLOR_MAGENTA,COLOR_YELLOW,COLOR_WHITE};
-  
-    start_color();
-    for(i=0;i<8;i++)for(j=0;j<8;j++)init_pair(i+j*8,cols[i],cols[j]);
-  }
+	if (has_colors ()) {
+		int     i, j;
+		int     cols[8] =
+		    { COLOR_BLACK, COLOR_BLUE, COLOR_GREEN, COLOR_CYAN,
+			COLOR_RED, COLOR_MAGENTA, COLOR_YELLOW, COLOR_WHITE
+		};
 
-  ioctl(0,KDGKBMETA,&oldmetaflag);
-  ioctl(0,KDSKBMETA,K_ESCPREFIX);
-  cbreak();
-  noecho();
-  keypad(stdscr,TRUE);
-  meta(stdscr,1);
+		start_color ();
+		for (i = 0; i < 8; i++)
+			for (j = 0; j < 8; j++)
+				init_pair (i + j * 8, cols[i], cols[j]);
+	}
+
+	ioctl (0, KDGKBMETA, &oldmetaflag);
+	ioctl (0, KDSKBMETA, K_ESCPREFIX);
+	cbreak ();
+	noecho ();
+	keypad (stdscr, TRUE);
+	meta (stdscr, 1);
 }
 
 
 static void
-moveinposition()
+moveinposition ()
 {
-  int j,num=0;
-  struct line *l;
-  
-  for(l=first;l;l=l->next){
-    for(j=0;l->text[j]&&j<qtemaxc;j++)if(strchr(qtechrs,l->text[j])){
-      num++;
-      break;
-    }
-  }
-  num++;
-  
-  if(num+1<numlines)gotoline(num,1);
-  else gotoline(0,1);
+	int     j, num = 0;
+	struct line *l;
+
+	for (l = first; l; l = l->next) {
+		for (j = 0; l->text[j] && j < qtemaxc; j++)
+			if (strchr (qtechrs, l->text[j])) {
+				num++;
+				break;
+			}
+	}
+	num++;
+
+	if (num + 1 < numlines)
+		gotoline (num, 1);
+	else
+		gotoline (0, 1);
 }
 
 
 void
-run()
+run ()
 {
-  thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
+	thisuseronl.flags |= (OLF_BUSY | OLF_NOTIMEOUT);
 
-  initvisual();
-  mod_init(INI_SIGNALS);
-  idlok(stdscr,TRUE);
+	initvisual ();
+	mod_init (INI_SIGNALS);
+	idlok (stdscr, TRUE);
 
-  loadfile(filename);
-  if(!numlines)insertline(NULL,"");
+	loadfile (filename);
+	if (!numlines)
+		insertline (NULL, "");
 
-  if(!pageinc)pageinc=LINES-4;
-  insertmode=insert;
-  formatmode=format;
-  rmargin=maxlen;
+	if (!pageinc)
+		pageinc = LINES - 4;
+	insertmode = insert;
+	formatmode = format;
+	rmargin = maxlen;
 
-  erase();
-  showstatus();
-  
-  moveinposition();
+	erase ();
+	showstatus ();
 
-  showtext(0);
-  refresh();
+	moveinposition ();
 
-  nodelay(stdscr,TRUE);
+	showtext (0);
+	refresh ();
 
-  for(ok=0;!ok;){
-    int c=0, pause=0;
-    
-    while((c=mygetch())==ERR){
-      usleep(1000);
-      if(++pause==25)showstatus();
-      if(pause==25 && metamode<0){
-	metamode=-metamode;
-	showstatus();
-      }
-    }
-    if(fl){
-      fl=0;
-      if(fy>=toprow && fy<=toprow+numlines-3)showtext(fy-toprow+1);
-    }
-      
-    switch(metamode){
-    case 0:
-      switch(c){
-      case 27:
-	metamode=1;
-	break;
-      case CTRL('O'):
-	metamode=-2;
-	break;
-      case CTRL('K'):
-	metamode=-3;
-	break;
-      case KEY_UP:
-      case CTRL('P'):
-	movecursor(-1,0);
-	break;
-      case KEY_DOWN:
-      case CTRL('N'):
-	movecursor(1,0);
-	break;
-      case KEY_LEFT:
-      case CTRL('B'):
-	movecursor(0,-1);
-	break;
-      case KEY_RIGHT:
-      case CTRL('F'):
-	movecursor(0,1);
-	break;
-      case KEY_HOME:
-      case CTRL('A'):
-	movecursor(0,-2);
-	break;
-      case KEY_END:
-      case CTRL('E'):
-	movecursor(0,2);
-	break;
-      case CTRL('T'):
-      case KEY_PPAGE:
-	movepage(-pageinc);
-	break;
-      case CTRL('V'):
-      case KEY_NPAGE:
-	movepage(pageinc);
-	break;
-      case CTRL('Q'):
-	movepage(-numlines);
-	break;
-      case CTRL('W'):
-	movepage(numlines);
-	break;
-      case CTRL('R'):
-	help();
-	break;
-      case CTRL('L'):
-	while(mygetch()!=ERR);
-	centerline();
-	showstatus();
-	showtext(0);
-	clearok(stdscr,TRUE);
-	refresh();
-	break;
-      case CTRL('U'):
-	dosearch();
-	break;
-      case CTRL('Y'):
-	noblock();
-	delline();
-	break;
-      case CTRL('D'):
-	noblock();
-	deletechar();
-	break;
-      case 8:
-      case 127:
-      case KEY_BACKSPACE:
-	noblock();
-	backspace();
-	break;
-      case 10:
-      case 13:
-	if(current->text&&IS_SAVE(current->text)){
-	  backspace();
-	  backspace();
-	  savefile();
-	  ok=1;
-	} else if(current->text&&IS_UPLOAD(current->text)){
-	  backspace();
-	  backspace();
-	  out_setflags(OFL_AFTERINPUT);
-	  prompt(CLRSCR);
-	  upload();
-	  clearok(stdscr,1);
-	  movepage(numlines);
-	  centerline();
-	  showtext(0);
-	  showstatus();
-	} else if(current->text&&inp_isX(current->text)){
-	  backspace();
-	  if(doquit()){
-	    unlink(filename);
-	    ok=-1;
-	  } else {
-	    showtext(0);
-	    showstatus();
-	  }
-	} else {
-	  if(NOWRAP)formatline();
-	  else newline();
+	nodelay (stdscr, TRUE);
+
+	for (ok = 0; !ok;) {
+		int     c = 0, pause = 0;
+
+		while ((c = mygetch ()) == ERR) {
+			usleep (1000);
+			if (++pause == 25)
+				showstatus ();
+			if (pause == 25 && metamode < 0) {
+				metamode = -metamode;
+				showstatus ();
+			}
+		}
+		if (fl) {
+			fl = 0;
+			if (fy >= toprow && fy <= toprow + numlines - 3)
+				showtext (fy - toprow + 1);
+		}
+
+		switch (metamode) {
+		case 0:
+			switch (c) {
+			case 27:
+				metamode = 1;
+				break;
+			case CTRL ('O'):
+				metamode = -2;
+				break;
+			case CTRL ('K'):
+				metamode = -3;
+				break;
+			case KEY_UP:
+			case CTRL ('P'):
+				movecursor (-1, 0);
+				break;
+			case KEY_DOWN:
+			case CTRL ('N'):
+				movecursor (1, 0);
+				break;
+			case KEY_LEFT:
+			case CTRL ('B'):
+				movecursor (0, -1);
+				break;
+			case KEY_RIGHT:
+			case CTRL ('F'):
+				movecursor (0, 1);
+				break;
+			case KEY_HOME:
+			case CTRL ('A'):
+				movecursor (0, -2);
+				break;
+			case KEY_END:
+			case CTRL ('E'):
+				movecursor (0, 2);
+				break;
+			case CTRL ('T'):
+			case KEY_PPAGE:
+				movepage (-pageinc);
+				break;
+			case CTRL ('V'):
+			case KEY_NPAGE:
+				movepage (pageinc);
+				break;
+			case CTRL ('Q'):
+				movepage (-numlines);
+				break;
+			case CTRL ('W'):
+				movepage (numlines);
+				break;
+			case CTRL ('R'):
+				help ();
+				break;
+			case CTRL ('L'):
+				while (mygetch () != ERR);
+				centerline ();
+				showstatus ();
+				showtext (0);
+				clearok (stdscr, TRUE);
+				refresh ();
+				break;
+			case CTRL ('U'):
+				dosearch ();
+				break;
+			case CTRL ('Y'):
+				noblock ();
+				delline ();
+				break;
+			case CTRL ('D'):
+				noblock ();
+				deletechar ();
+				break;
+			case 8:
+			case 127:
+			case KEY_BACKSPACE:
+				noblock ();
+				backspace ();
+				break;
+			case 10:
+			case 13:
+				if (current->text && IS_SAVE (current->text)) {
+					backspace ();
+					backspace ();
+					savefile ();
+					ok = 1;
+				} else if (current->text &&
+					   IS_UPLOAD (current->text)) {
+					backspace ();
+					backspace ();
+					out_setflags (OFL_AFTERINPUT);
+					prompt (CLRSCR);
+					upload ();
+					clearok (stdscr, 1);
+					movepage (numlines);
+					centerline ();
+					showtext (0);
+					showstatus ();
+				} else if (current->text &&
+					   inp_isX (current->text)) {
+					backspace ();
+					if (doquit ()) {
+						unlink (filename);
+						ok = -1;
+					} else {
+						showtext (0);
+						showstatus ();
+					}
+				} else {
+					if (NOWRAP)
+						formatline ();
+					else
+						newline ();
+				}
+				break;
+			case 9:
+				{
+					int     i;
+
+					for (i = 0; i < 4; i++)
+						inschar (32, 0);
+					showtext (0);
+				}
+				break;
+				break;
+			case CTRL ('C'):
+				if (doquit ()) {
+					unlink (filename);
+					ok = -1;
+				} else
+					showstatus ();
+				break;
+			case KEY_SUSPEND:
+			case CTRL ('Z'):
+				out_setflags (OFL_AFTERINPUT);
+				prompt (CLRSCR);
+				upload ();
+				clearok (stdscr, 1);
+				movepage (numlines);
+				centerline ();
+				showtext (0);
+				showstatus ();
+				break;
+			case CTRL ('X'):
+				golined ();
+				break;
+			case CTRL ('S'):
+				savefile ();
+				ok = 1;
+				break;
+			default:
+				noblock ();
+				if (c >= 32 && c <= 255)
+					inschar (c, 1);
+			}
+			break;
+		case 1:	/* META-<chr> COMBINATIONS */
+			{
+				char    s[2], t[2];
+
+				s[0] = c;
+				s[1] = 0;
+				strcpy (t, latinize (s));
+				c = toupper (t[0]);
+				switch (c) {
+				case 'v':
+				case 'V':
+					movepage (-pageinc);
+					break;
+				case '<':
+				case ',':
+					movepage (-numlines);
+					break;
+				case '>':
+				case '.':
+					movepage (numlines);
+					break;
+				case 'I':
+					insertmode ^= 1;
+					break;
+				case 'L':
+					formatmode = LEFT;
+					break;
+				case 'C':
+					formatmode = CENTRE;
+					break;
+				case 'R':
+					formatmode = RIGHT;
+					break;
+				case 'J':
+					formatmode = JUSTIFY;
+					break;
+				case 'N':
+					formatmode = NOFORMAT;
+					break;
+				case 'F':
+					noblock ();
+					formatpara ();
+					showtext (0);
+					break;
+				case 'X':
+					savefile ();
+					ok = 1;
+					break;
+				case 'Q':
+					if (doquit ()) {
+						unlink (filename);
+						ok = -1;
+					} else
+						showstatus ();
+					break;
+				case '%':
+					replace ();
+					break;
+				case CTRL ('R'):
+					help ();
+					break;
+				}
+			}
+			metamode = 0;
+			showstatus ();
+			break;
+		case -2:
+		case 2:
+			{
+				char    s[2], t[2];
+
+				s[0] = c;
+				s[1] = 0;
+				strcpy (t, latinize (s));
+				c = toupper (t[0]);
+				switch (c) {
+				case 'I':
+					insertmode ^= 1;
+					break;
+				case 'L':
+					formatmode = LEFT;
+					break;
+				case 'C':
+					formatmode = CENTRE;
+					break;
+				case 'R':
+					formatmode = RIGHT;
+					break;
+				case 'J':
+					formatmode = JUSTIFY;
+					break;
+				case 'N':
+					formatmode = NOFORMAT;
+					break;
+				case CTRL ('R'):
+					help ();
+					break;
+				}
+				if (metamode > 0)
+					showstatus ();
+				metamode = 0;
+				break;
+			}
+		case -3:
+		case 3:
+			{
+				char    s[2], t[2];
+
+				s[0] = c;
+				s[1] = 0;
+				strcpy (t, latinize (s));
+				c = toupper (t[0]);
+				switch (c) {
+				case 'B':
+					kbx = cx;
+					kby = cy;
+					showtext (0);
+					break;
+				case 'K':
+					kkx = cx;
+					kky = cy;
+					showtext (0);
+					break;
+				case 'Y':
+					delblock ();
+					/*centerline(); */
+					showtext (0);
+					break;
+				case 'V':
+				case 'M':
+					copyblock (1);
+					break;
+				case 'C':
+					copyblock (0);
+					break;
+				case 'F':
+					find ();
+					break;
+				case 'A':
+					replace ();
+					break;
+				case 'R':
+					rightmargin ();
+					break;
+				case CTRL ('R'):
+					help ();
+					break;
+				}
+				if (metamode > 0)
+					showstatus ();
+				metamode = 0;
+				break;
+			}
+		}
 	}
-	break;
-      case 9:
-	{
-	  int i;
-	  for(i=0;i<4;i++)inschar(32,0);
-	  showtext(0);
-	}
-	break;
-	break;
-      case CTRL('C'):
-	if(doquit()){
-	  unlink(filename);
-	  ok=-1;
-	} else showstatus();
-	break;
-      case KEY_SUSPEND:
-      case CTRL('Z'):
-	out_setflags(OFL_AFTERINPUT);
-	prompt(CLRSCR);
-	upload();
-	clearok(stdscr,1);
-	movepage(numlines);
-	centerline();
-	showtext(0);
-	showstatus();
-	break;
-      case CTRL('X'):
-	golined();
-	break;
-      case CTRL('S'):
-	savefile();
-	ok=1;
-	break;
-      default:
-	noblock();
-	if(c>=32 && c<=255)inschar(c,1);
-      }
-      break;
-    case 1:      /* META-<chr> COMBINATIONS */
-      {
-	char s[2],t[2];
-	s[0]=c;
-	s[1]=0;
-	strcpy(t,latinize(s));
-	c=toupper(t[0]);
-	switch(c){
-	case 'v':
-	case 'V':
-	  movepage(-pageinc);
-	  break;
-	case '<':
-	case ',':
-	  movepage(-numlines);
-	  break;
-	case '>':
-	case '.':
-	  movepage(numlines);
-	  break;
-	case 'I':
-	  insertmode^=1;
-	  break;
-	case 'L':
-	  formatmode=LEFT;
-	  break;
-	case 'C':
-	  formatmode=CENTRE;
-	  break;
-	case 'R':
-	  formatmode=RIGHT;
-	  break;
-	case 'J':
-	  formatmode=JUSTIFY;
-	  break;
-	case 'N':
-	  formatmode=NOFORMAT;
-	  break;
-	case 'F':
-	  noblock();
-	  formatpara();
-	  showtext(0);
-	  break;
-	case 'X':
-	  savefile();
-	  ok=1;
-	  break;
-	case 'Q':
-	  if(doquit()){
-	    unlink(filename);
-	    ok=-1;
-	  } else showstatus();
-	  break;
-	case '%':
-	  replace();
-	  break;
-	case CTRL('R'):
-	  help();
-	  break;
-	}
-      }
-      metamode=0;
-      showstatus();
-      break;
-    case -2:
-    case 2:
-      {
-	char s[2],t[2];
-	s[0]=c;
-	s[1]=0;
-	strcpy(t,latinize(s));
-	c=toupper(t[0]);
-	switch(c){
-	case 'I':
-	  insertmode^=1;
-	  break;
-	case 'L':
-	  formatmode=LEFT;
-	  break;
-	case 'C':
-	  formatmode=CENTRE;
-	  break;
-	case 'R':
-	  formatmode=RIGHT;
-	  break;
-	case 'J':
-	  formatmode=JUSTIFY;
-	  break;
-	case 'N':
-	  formatmode=NOFORMAT;
-	  break;
-	case CTRL('R'):
-	  help();
-	  break;
-	}
-	if(metamode>0)showstatus();
-	metamode=0;
-	break;
-      }
-    case -3:
-    case 3:
-      {
-	char s[2],t[2];
-	s[0]=c;
-	s[1]=0;
-	strcpy(t,latinize(s));
-	c=toupper(t[0]);
-	switch(c){
-	case 'B':
-	  kbx=cx;
-	  kby=cy;
-	  showtext(0);
-	  break;
-	case 'K':
-	  kkx=cx;
-	  kky=cy;
-	  showtext(0);
-	  break;
-	case 'Y':
-	  delblock();
-	  /*centerline();*/
-	  showtext(0);
-	  break;
-	case 'V':
-	case 'M':
-	  copyblock(1);
-	  break;
-	case 'C':
-	  copyblock(0);
-	  break;
-	case 'F':
-	  find();
-	  break;
-	case 'A':
-	  replace();
-	  break;
-	case 'R':
-	  rightmargin();
-	  break;
-	case CTRL('R'):
-	  help();
-	  break;
-	}
-	if(metamode>0)showstatus();
-	metamode=0;
-	break;
-      }
-    }
-  }
 }
 
 
 void
-done()
+done ()
 {
-  ioctl(0,KDSKBMETA,oldmetaflag);
-  endwin();
-  out_setflags(OFL_AFTERINPUT);
-  prompt(CLRSCR);
-  system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
+	ioctl (0, KDSKBMETA, oldmetaflag);
+	endwin ();
+	out_setflags (OFL_AFTERINPUT);
+	prompt (CLRSCR);
+	system (STTYBIN " -echo start undef stop undef intr undef susp undef");
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  if(argc==3 && (maxsize=atoi(argv[2]))){
-    init();
-    strcpy(filename,argv[1]);
-    run();
-    done();
-    exit(ok==-1);
-  }
-  return 1;
+	mod_setprogname (argv[0]);
+	if (argc == 3 && (maxsize = atoi (argv[2]))) {
+		init ();
+		strcpy (filename, argv[1]);
+		run ();
+		done ();
+		exit (ok == -1);
+	}
+	return 1;
 }
 
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 23:20:23  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -57,10 +60,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -73,111 +74,137 @@ const char *__RCS=RCS_VER;
 #define WANT_NCURSES_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "vised.h"
-#include "mbk_vised.h"
+#include <megistos/bbs.h>
+#include <megistos/vised.h>
+#include <megistos/mbk_vised.h>
 
 
 void
-delblock()
+delblock ()
 {
-  int i,join=0;
-  if(!BLOCK)return;
+	int     i, join = 0;
 
-  current=getline(cy=kby);
-  cx=kbx;
+	if (!BLOCK)
+		return;
 
-  if(kby==kky){
-    struct line *l=getline(kby);
-    numbytes-=strlen(l->text);
-    strcpy(&l->text[kbx],&l->text[kkx]);
-    numbytes+=strlen(l->text);
-    noblock();
-    return;
-  }
+	current = getline (cy = kby);
+	cx = kbx;
 
-  for(i=kky;i>=kby;i--){
-    if(i==kby && kbx){
-      struct line *l=getline(i);
-      numbytes-=strlen(l->text);
-      l->text[kbx]=0;
-      numbytes+=strlen(l->text);
-      current=getline(cy=kby);
-      cx=kby;
-      join++;
-    } else if(i==kky && kkx){
-      struct line *l=getline(i);
-      numbytes-=strlen(l->text);
-      strcpy(l->text,&l->text[kkx]);
-      numbytes+=strlen(l->text);
-      join++;
-    } else deleteline(i);
-  }
-  if((cy-toprow+1)<1||(cy-toprow+1)>=LINES-2)centerline();
-  kby=kky=1;
-  kbx=kkx=0;
-  if(join==2)joinlines(cy);
-  else noblock();
+	if (kby == kky) {
+		struct line *l = getline (kby);
 
-  top=getline(toprow);
-  if(cy==toprow)current=top;
-  else current=getline(cy);
-  cx=0;
-  if(cy>numlines){
-    insertline(last,"");
-    current=last;
-  } else if(!numlines)insertline(NULL,"");
-  if(cy==1 && numlines==1)centerline();
+		numbytes -= strlen (l->text);
+		strcpy (&l->text[kbx], &l->text[kkx]);
+		numbytes += strlen (l->text);
+		noblock ();
+		return;
+	}
+
+	for (i = kky; i >= kby; i--) {
+		if (i == kby && kbx) {
+			struct line *l = getline (i);
+
+			numbytes -= strlen (l->text);
+			l->text[kbx] = 0;
+			numbytes += strlen (l->text);
+			current = getline (cy = kby);
+			cx = kby;
+			join++;
+		} else if (i == kky && kkx) {
+			struct line *l = getline (i);
+
+			numbytes -= strlen (l->text);
+			strcpy (l->text, &l->text[kkx]);
+			numbytes += strlen (l->text);
+			join++;
+		} else
+			deleteline (i);
+	}
+	if ((cy - toprow + 1) < 1 || (cy - toprow + 1) >= LINES - 2)
+		centerline ();
+	kby = kky = 1;
+	kbx = kkx = 0;
+	if (join == 2)
+		joinlines (cy);
+	else
+		noblock ();
+
+	top = getline (toprow);
+	if (cy == toprow)
+		current = top;
+	else
+		current = getline (cy);
+	cx = 0;
+	if (cy > numlines) {
+		insertline (last, "");
+		current = last;
+	} else if (!numlines)
+		insertline (NULL, "");
+	if (cy == 1 && numlines == 1)
+		centerline ();
 }
 
 
 void
-copyblock(int move)
+copyblock (int move)
 {
-  int i;
-  char line[1024];
-  struct line *l,*insp;
+	int     i;
+	char    line[1024];
+	struct line *l, *insp;
 
-  if(!BLOCK)return;
-  if(cy>kby && cy<(kky-(kkx==0)))return;
-  if(cy==kby && cx>=kbx)return;
-  if(cy==(kky-(kkx==0)) && cx<kkx)return;
+	if (!BLOCK)
+		return;
+	if (cy > kby && cy < (kky - (kkx == 0)))
+		return;
+	if (cy == kby && cx >= kbx)
+		return;
+	if (cy == (kky - (kkx == 0)) && cx < kkx)
+		return;
 
-  l=getline(kby);
-  if(cx){
-    splitline();
-  }
-  if(cy==1)insp=NULL;
-  else insp=getline(cy-1);
-  
-  for(i=kby;i<=(kky-(kkx==0));i++){
-    if(i==kby && kby==kky && kkx>0){
-      strcpy(line,&l->text[kbx]);
-      line[kkx-kbx]=0;
-    } else if(i==kby)strcpy(line,&l->text[kbx]);
-    else if(kkx>0 && i==(kky-(kkx==0))){
-      strcpy(line,l->text);
-      line[kkx]=0;
-    } else strcpy(line,l->text);
+	l = getline (kby);
+	if (cx) {
+		splitline ();
+	}
+	if (cy == 1)
+		insp = NULL;
+	else
+		insp = getline (cy - 1);
 
-    if(!move&&(numbytes+strlen(line)+1>maxsize)){
-      bel(ERRSIZ);
-      break;
-    }
-    insertline(insp,line);
-    insp=insp->next;
-    l=l->next;
-  }
-  cy=getlinenum(insp);
-  current=insp;
-  cx=strlen(line);
-  if((cy-toprow+1)<1||(cy-toprow+1)>=LINES-2)centerline();
-  if(move){
-    int x=cx;
-    struct line *c=current;
-    delblock();
-    gotoline(getlinenum(c),x);
-  }
-  noblock();
-  showtext(0);
+	for (i = kby; i <= (kky - (kkx == 0)); i++) {
+		if (i == kby && kby == kky && kkx > 0) {
+			strcpy (line, &l->text[kbx]);
+			line[kkx - kbx] = 0;
+		} else if (i == kby)
+			strcpy (line, &l->text[kbx]);
+		else if (kkx > 0 && i == (kky - (kkx == 0))) {
+			strcpy (line, l->text);
+			line[kkx] = 0;
+		} else
+			strcpy (line, l->text);
+
+		if (!move && (numbytes + strlen (line) + 1 > maxsize)) {
+			bel (ERRSIZ);
+			break;
+		}
+		insertline (insp, line);
+		insp = insp->next;
+		l = l->next;
+	}
+	cy = getlinenum (insp);
+	current = insp;
+	cx = strlen (line);
+	if ((cy - toprow + 1) < 1 || (cy - toprow + 1) >= LINES - 2)
+		centerline ();
+	if (move) {
+		int     x = cx;
+		struct line *c = current;
+
+		delblock ();
+		gotoline (getlinenum (c), x);
+	}
+	noblock ();
+	showtext (0);
 }
+
+
+/* End of File */
