@@ -3,18 +3,23 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 09:01:28  alexios
+# Added mbk and typhoon rules; removed libcnv files.
+#
 # Revision 1.1  2003/12/24 20:11:27  alexios
 # Initial revision.
 #
 
 PROGNAMES = files
 
+BUILT_SOURCES = dbfile.h   dbkey.h   dblib.h   mbk_files.h 
+EXTRA_DIST    = dbfile.ddl dbkey.ddl dblib.ddl 
+CLEANFILES    = dbfile.dbd dbkey.dbd dblib.dbd
+
 files_SOURCES = \
 	access.c \
 	cache.c \
 	cleanup.c \
-	cnvutils.c \
-	cnvutils.h \
 	dbfile.c \
 	dbfile.h \
 	dbkey.c \
@@ -26,11 +31,6 @@ files_SOURCES = \
 	fileops.c \
 	files.c \
 	files.h \
-	libcnv.c \
-	libcnv.h \
-	libfil.c \
-	libkey.c \
-	libsig.c \
 	list.c \
 	misc.c \
 	mklib.c \
@@ -63,7 +63,18 @@ files_SOURCES = \
 	substvars.c \
 	upload.c
 
+#	cnvutils.c \
+#	cnvutils.h \
+#	libfil.c \
+#	libcnv.c \
+#	libcnv.h \
+#	libkey.c \
+#	libsig.c
+
+
 include $(top_srcdir)/templates/module
-include $(top_srcdir)/templates/msg
+include $(top_srcdir)/templates/typhoon
+include $(top_srcdir)/templates/clubhdr
+
 
 # End of file
