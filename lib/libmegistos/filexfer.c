@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -63,7 +66,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -82,133 +86,145 @@ static const char rcsinfo[] = "$Id$";
 #include "audit.h"
 
 
-static int  fok=(AUF_TRANSFER|AUF_INFO);
-static int  ffail=(AUF_TRANSFER|AUF_INFO);
-static char auditsok[80]={0};
-static char auditdok[80]={0};
-static char auditsfail[80]={0};
-static char auditdfail[80]={0};
-static char cmdok[80]={0};
-static char cmdfail[80]={0};
+static int fok = (AUF_TRANSFER | AUF_INFO);
+static int ffail = (AUF_TRANSFER | AUF_INFO);
+static char auditsok[80] = { 0 };
+static char auditdok[80] = { 0 };
+static char auditsfail[80] = { 0 };
+static char auditdfail[80] = { 0 };
+static char cmdok[80] = { 0 };
+static char cmdfail[80] = { 0 };
 
 
 void
-xfer_setaudit(uint32 flok, char *sok, char *dok,
-	      uint32 flfail, char *sfail, char *dfail)
+xfer_setaudit (uint32 flok, char *sok, char *dok,
+	       uint32 flfail, char *sfail, char *dfail)
 {
-  fok=flok;
-  ffail=flfail;
-  strcpy(auditsok,sok?sok:"");
-  strcpy(auditdok,dok?dok:"");
-  strcpy(auditsfail,sfail?sfail:"");
-  strcpy(auditdfail,dfail?dfail:"");
+	fok = flok;
+	ffail = flfail;
+	strcpy (auditsok, sok ? sok : "");
+	strcpy (auditdok, dok ? dok : "");
+	strcpy (auditsfail, sfail ? sfail : "");
+	strcpy (auditdfail, dfail ? dfail : "");
 }
 
 
 void
-xfer_setcmd(char *ok, char *fail)
+xfer_setcmd (char *ok, char *fail)
 {
-  strcpy(cmdok,ok?ok:"");
-  strcpy(cmdfail,fail?fail:"");
+	strcpy (cmdok, ok ? ok : "");
+	strcpy (cmdfail, fail ? fail : "");
 }
 
 
 int
-xfer_add(char mode, char *file, char *description, int refund, int credspermin)
+xfer_add (char mode, char *file, char *description, int refund,
+	  int credspermin)
 {
-  char fname[256];
-  struct stat st;
-  xfer_item_t xferitem;
-  FILE *fp;
+	char    fname[256];
+	struct stat st;
+	xfer_item_t xferitem;
+	FILE   *fp;
 
-  memset(&xferitem,0,sizeof(xferitem));
+	memset (&xferitem, 0, sizeof (xferitem));
 
-  if((mode==FXM_DOWNLOAD||mode==FXM_TRANSIENT)&&stat(file,&st)) return 0;
+	if ((mode == FXM_DOWNLOAD || mode == FXM_TRANSIENT) &&
+	    stat (file, &st))
+		return 0;
 
-  strncpy((char *)&xferitem.magic,XFER_ITEM_MAGIC,sizeof(xferitem.magic));
-  xferitem.dir=mode;
-  xferitem.auditfok=fok;
-  xferitem.auditffail=ffail;
-  strcpy(xferitem.fullname,file);
-  strcpy(xferitem.description,description);
-  strcpy(xferitem.auditsok,auditsok);
-  strcpy(xferitem.auditdok,auditdok);
-  strcpy(xferitem.auditsfail,auditsfail);
-  strcpy(xferitem.auditdfail,auditdfail);
-  strcpy(xferitem.cmdok,cmdok);
-  strcpy(xferitem.cmdfail,cmdfail);
-  xferitem.refund=refund;
-  xferitem.credspermin=credspermin;
+	strncpy ((char *) &xferitem.magic, XFER_ITEM_MAGIC,
+		 sizeof (xferitem.magic));
+	xferitem.dir = mode;
+	xferitem.auditfok = fok;
+	xferitem.auditffail = ffail;
+	strcpy (xferitem.fullname, file);
+	strcpy (xferitem.description, description);
+	strcpy (xferitem.auditsok, auditsok);
+	strcpy (xferitem.auditdok, auditdok);
+	strcpy (xferitem.auditsfail, auditsfail);
+	strcpy (xferitem.auditdfail, auditdfail);
+	strcpy (xferitem.cmdok, cmdok);
+	strcpy (xferitem.cmdfail, cmdfail);
+	xferitem.refund = refund;
+	xferitem.credspermin = credspermin;
 
-  sprintf(fname,XFERLIST,getpid());
-  if((fp=fopen(fname,"a"))==NULL){
-    return 0;
-  }
-  fwrite(&xferitem,sizeof(xferitem),1,fp);
-  fclose(fp);
-  return 1;
+	sprintf (fname, XFERLIST, getpid ());
+	if ((fp = fopen (fname, "a")) == NULL) {
+		return 0;
+	}
+	fwrite (&xferitem, sizeof (xferitem), 1, fp);
+	fclose (fp);
+	return 1;
 }
 
 
 int
-xfer_addwild(char mode, char *filespec, char *description, int refund, int credspermin)
+xfer_addwild (char mode, char *filespec, char *description, int refund,
+	      int credspermin)
 {
-  char command[1024], *dir=filespec, *wc=filespec;
-  FILE *pipe;
-  int i=0;
+	char    command[1024], *dir = filespec, *wc = filespec;
+	FILE   *pipe;
+	int     i = 0;
 
-  if((wc=strrchr(filespec,'/'))!=NULL)*(wc++)=0;
+	if ((wc = strrchr (filespec, '/')) != NULL)
+		*(wc++) = 0;
 
-  sprintf(command,"(find %s/ -name '%s' -maxdepth 1 -type f -print "\
-	  "|tr \" \" \"\\012\") 2>/dev/null",wc?dir:".",wc?wc:filespec);
-  if((pipe=popen(command,"r"))==NULL)return 0;
-  while(!feof(pipe)){
-    if(fgets(command,sizeof(command),pipe)){
-      if((wc=strchr(command,'\n'))!=NULL)*wc=0;
-      i++;
-      xfer_add(mode,command,description,refund,credspermin);
-    }
-  }
-  fclose(pipe);
-  return i;
+	sprintf (command, "(find %s/ -name '%s' -maxdepth 1 -type f -print "
+		 "|tr \" \" \"\\012\") 2>/dev/null", wc ? dir : ".",
+		 wc ? wc : filespec);
+	if ((pipe = popen (command, "r")) == NULL)
+		return 0;
+	while (!feof (pipe)) {
+		if (fgets (command, sizeof (command), pipe)) {
+			if ((wc = strchr (command, '\n')) != NULL)
+				*wc = 0;
+			i++;
+			xfer_add (mode, command, description, refund,
+				  credspermin);
+		}
+	}
+	fclose (pipe);
+	return i;
 }
 
 
 int
-xfer_run()
+xfer_run ()
 {
-  char command[256];
-  int res;
+	char    command[256];
+	int     res;
 
-  if(cnc_more()){
-    thisuseronl.flags|=OLF_MMCALLING;
-    strcpy(thisuseronl.input,cnc_nxtcmd);
-  } else thisuseronl.input[0]=0;
+	if (cnc_more ()) {
+		thisuseronl.flags |= OLF_MMCALLING;
+		strcpy (thisuseronl.input, cnc_nxtcmd);
+	} else
+		thisuseronl.input[0] = 0;
 
-  strcpy(command,mkfname(UPDOWNBIN" "XFERLIST" "TAGLIST,
-			 getpid(),thisuseronl.userid,thisuseronl.channel));
+	strcpy (command, mkfname (UPDOWNBIN " " XFERLIST " " TAGLIST,
+				  getpid (), thisuseronl.userid,
+				  thisuseronl.channel));
 
-  res=runcommand(command);
-  system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  return res;
+	res = runcommand (command);
+	system (STTYBIN " -echo start undef stop undef intr undef susp undef");
+	return res;
 }
 
 
 int
-xfer_kill_list()
+xfer_kill_list ()
 {
-  char fname[256];
+	char    fname[256];
 
-  sprintf(fname,XFERLIST,getpid());
-  return unlink(fname);
+	sprintf (fname, XFERLIST, getpid ());
+	return unlink (fname);
 }
 
 
 int
-xfer_kill_taglist()
+xfer_kill_taglist ()
 {
-  char fname[256];
+	char    fname[256];
 
-  sprintf(fname,TAGLIST,thisuseronl.userid,thisuseronl.channel);
-  return unlink(fname);
+	sprintf (fname, TAGLIST, thisuseronl.userid, thisuseronl.channel);
+	return unlink (fname);
 }

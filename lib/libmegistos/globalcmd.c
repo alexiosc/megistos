@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:16:22  alexios
  * Rationalised the RCS/CVS ident(1) strings. Stopped including unneeded
  * Registry file (the registry global command moved to the rightful
@@ -93,7 +96,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -112,83 +116,92 @@ static const char rcsinfo[] = "$Id$";
 #include "bbs.h"
 #include "mbk_sysvar.h"
 
-static gcs_t *gcservers=NULL;
-static int  gcsnum=0;
+static gcs_t *gcservers = NULL;
+static int gcsnum = 0;
 
 
 void
-gcs_add(gcs_t gcs){
-  gcsnum++;
-  if((gcservers=realloc(gcservers,sizeof(void *)*gcsnum))==NULL){
-    error_fatal("Can't allocate global command table space!",NULL);
-  }
-  gcservers[gcsnum-1]=gcs;
-}
-
-
-int soselect(const struct dirent *a)
+gcs_add (gcs_t gcs)
 {
-  return strncmp(a->d_name,"gcs_",4)==0;
-}
-
-
-void
-gcs_init()
-{
-  struct dirent **d;
-  int i;
-
-  gcsnum=scandir("/usr/local/bbs/lib/gcs",&d,soselect,alphasort);
-  if(gcsnum==0)return;
-
-  gcservers=(gcs_t*)alcmem(sizeof(gcs_t)*gcsnum);
-
-  for(i=0;i<gcsnum;i++){
-    char lib[256];
-    void *handle;
-    char *err;
-
-    sprintf(lib,"%s/%s",mkfname(GCSDIR),d[i]->d_name);
-    free(d[i]);
-
-    handle = dlopen (lib, RTLD_LAZY);
-
-    if(handle==NULL){
-      error_fatal("Unable to open GCS shared object %s (%s)",lib,dlerror());
-    }
-
-    gcservers[i]=dlsym(handle,"__INIT_GCS__");
-    err=dlerror();
-
-    if(gcservers[i]==NULL){
-      error_fatal("__INIT_GCS__ not found in %s",lib);
-    }
-
-    if(err!=NULL){
-      error_fatal("Unable to access __INIT_GCS__ in %s (%s)",lib,err);
-    }
-  }
-
-  free(d);
+	gcsnum++;
+	if ((gcservers =
+	     realloc (gcservers, sizeof (void *) * gcsnum)) == NULL) {
+		error_fatal ("Can't allocate global command table space!",
+			     NULL);
+	}
+	gcservers[gcsnum - 1] = gcs;
 }
 
 
 int
-gcs_handle()
+soselect (const struct dirent *a)
 {
-  int i;
-  int (*gcserver)(void);
-  promptblock_t *temp;
+	return strncmp (a->d_name, "gcs_", 4) == 0;
+}
 
-  temp=msg_cur;
-  inp_parsin();
-  for(i=0;i<gcsnum;i++){
-    gcserver=gcservers[i];
-    if(gcserver()){
-      msg_set(temp);
-      return 1;
-    }
-  }
-  msg_set(temp);
-  return 0;
+
+void
+gcs_init ()
+{
+	struct dirent **d;
+	int     i;
+
+	gcsnum = scandir ("/usr/local/bbs/lib/gcs", &d, soselect, alphasort);
+	if (gcsnum == 0)
+		return;
+
+	gcservers = (gcs_t *) alcmem (sizeof (gcs_t) * gcsnum);
+
+	for (i = 0; i < gcsnum; i++) {
+		char    lib[256];
+		void   *handle;
+		char   *err;
+
+		sprintf (lib, "%s/%s", mkfname (GCSDIR), d[i]->d_name);
+		free (d[i]);
+
+		handle = dlopen (lib, RTLD_LAZY);
+
+		if (handle == NULL) {
+			error_fatal
+			    ("Unable to open GCS shared object %s (%s)", lib,
+			     dlerror ());
+		}
+
+		gcservers[i] = dlsym (handle, "__INIT_GCS__");
+		err = dlerror ();
+
+		if (gcservers[i] == NULL) {
+			error_fatal ("__INIT_GCS__ not found in %s", lib);
+		}
+
+		if (err != NULL) {
+			error_fatal
+			    ("Unable to access __INIT_GCS__ in %s (%s)", lib,
+			     err);
+		}
+	}
+
+	free (d);
+}
+
+
+int
+gcs_handle ()
+{
+	int     i;
+	int     (*gcserver) (void);
+	promptblock_t *temp;
+
+	temp = msg_cur;
+	inp_parsin ();
+	for (i = 0; i < gcsnum; i++) {
+		gcserver = gcservers[i];
+		if (gcserver ()) {
+			msg_set (temp);
+			return 1;
+		}
+	}
+	msg_set (temp);
+	return 0;
 }

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -41,7 +44,8 @@
  */
 
 
-static const char rcsinfo [] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 #include <bbsinclude.h>
 #include "useracc.h"
@@ -51,49 +55,62 @@ static const char rcsinfo [] = "$Id$";
 
 
 int
-hassysaxs(useracc_t *user,int index)
+hassysaxs (useracc_t * user, int index)
 {
-  if(index<0 || index>(sizeof(user->sysaxs)*32))return 0;
-  return(user->sysaxs[index/32] & (1<<(index%32)))!=0;
+	if (index < 0 || index > (sizeof (user->sysaxs) * 32))
+		return 0;
+	return (user->sysaxs[index / 32] & (1 << (index % 32))) != 0;
 }
 
 
 bbskey_t *
-key_make(bbskey_t *userkeys, bbskey_t *classkeys, bbskey_t *combokeys)
+key_make (bbskey_t * userkeys, bbskey_t * classkeys, bbskey_t * combokeys)
 {
-  int i;
-  for(i=0;i<KEYLENGTH;i++)combokeys[i]=userkeys[i]|classkeys[i];
-  return combokeys;
+	int     i;
+
+	for (i = 0; i < KEYLENGTH; i++)
+		combokeys[i] = userkeys[i] | classkeys[i];
+	return combokeys;
 }
 
 
 int
-key_exists(bbskey_t *keys,int key)
+key_exists (bbskey_t * keys, int key)
 {
-  if(!key) return 1;
-  if(key<0 || key>(32*KEYLENGTH)) return 0;
-  key--;
-  return(keys[key/32]&(1<<(key%32)))!=0;
+	if (!key)
+		return 1;
+	if (key < 0 || key > (32 * KEYLENGTH))
+		return 0;
+	key--;
+	return (keys[key / 32] & (1 << (key % 32))) != 0;
 }
 
 
-int key_owns(useracc_t *user,int key)
+int
+key_owns (useracc_t * user, int key)
 {
-  bbskey_t combo[KEYLENGTH];
-  classrec_t *class=cls_find(user->curclss);
+	bbskey_t combo[KEYLENGTH];
+	classrec_t *class = cls_find (user->curclss);
 
-  if(!key)return 1;
-  if(key==(32*KEYLENGTH+1))return(sameas(user->userid,SYSOP));
-  if (hassysaxs(user,USY_MASTERKEY))return 1;
-  key_make(user->keys,class->keys,combo);
-  return(key_exists(combo,key));
+	if (!key)
+		return 1;
+	if (key == (32 * KEYLENGTH + 1))
+		return (sameas (user->userid, SYSOP));
+	if (hassysaxs (user, USY_MASTERKEY))
+		return 1;
+	key_make (user->keys, class->keys, combo);
+	return (key_exists (combo, key));
 }
 
 
-void key_set(bbskey_t *keys, int key, int set)
+void
+key_set (bbskey_t * keys, int key, int set)
 {
-  if(key<1 || key>(32*KEYLENGTH))return;
-  key--;
-  if(set) keys[key/32]|=(1<<(key%32));
-  else keys[key/32]&=~(1<<(key%32));
+	if (key < 1 || key > (32 * KEYLENGTH))
+		return;
+	key--;
+	if (set)
+		keys[key / 32] |= (1 << (key % 32));
+	else
+		keys[key / 32] &= ~(1 << (key % 32));
 }

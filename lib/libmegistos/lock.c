@@ -31,6 +31,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -54,7 +57,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define __BBSLOCKD__ 1
@@ -77,116 +81,122 @@ static const char rcsinfo[] = "$Id$";
 
 
 static int
-lockdcmd(char *cmd,const char *name,char *info)
+lockdcmd (char *cmd, const char *name, char *info)
 {
-  char buf[512];
-  int n,s,len,res;
-  struct sockaddr_un sock;
+	char    buf[512];
+	int     n, s, len, res;
+	struct sockaddr_un sock;
 
-  /* Create the socket */
+	/* Create the socket */
 
-  if((s=socket(AF_UNIX,SOCK_STREAM,0))<0){
-    error_fatalsys("Unable to create bbslockd socket.");
-  }
-
-
-  /* Name the socket */
-
-  bzero(&sock,sizeof(sock));
-  sock.sun_family=AF_UNIX;
-  strcpy(sock.sun_path,BBSLOCKD_SOCKET);
-  len=sizeof(sock.sun_family)+strlen(sock.sun_path);
-
-  /* Connect to the socket */
-  for(n=0;n<10;n++){
-    res=connect(s,(struct sockaddr *)&sock,len);
-    if(res==0)break;
-    if(errno==ECONNREFUSED){
-
-      /* Connection refused. This may mean that the server is too
-         backlogged (whoa, I'd hate to imagine such a simple server
-         being backlogged -- this should really never happen). Wait a
-         bit and retry. */
-
-      usleep(100000);		/* Wait for .1 second */
-      continue;
-    }
-  }
+	if ((s = socket (AF_UNIX, SOCK_STREAM, 0)) < 0) {
+		error_fatalsys ("Unable to create bbslockd socket.");
+	}
 
 
-  /* Oh well, we failed to connect. */
-  if(res<0)
-    error_fatalsys("Unable to connect to bbslockd socket %s",BBSLOCKD_SOCKET);
+	/* Name the socket */
+
+	bzero (&sock, sizeof (sock));
+	sock.sun_family = AF_UNIX;
+	strcpy (sock.sun_path, BBSLOCKD_SOCKET);
+	len = sizeof (sock.sun_family) + strlen (sock.sun_path);
+
+	/* Connect to the socket */
+	for (n = 0; n < 10; n++) {
+		res = connect (s, (struct sockaddr *) &sock, len);
+		if (res == 0)
+			break;
+		if (errno == ECONNREFUSED) {
+
+			/* Connection refused. This may mean that the server is too
+			   backlogged (whoa, I'd hate to imagine such a simple server
+			   being backlogged -- this should really never happen). Wait a
+			   bit and retry. */
+
+			usleep (100000);	/* Wait for .1 second */
+			continue;
+		}
+	}
 
 
-  
-  /* Prepare the command string */
-
-  if(!strcmp(cmd,LKC_PLACE)){
-    sprintf(buf,"%s %s %d %s",cmd,name,(int)getpid(),
-	    (info==NULL||!strlen(info))?"":info);
-  } else {
-    sprintf(buf,"%s %s %d",cmd,name,(int)getpid());
-  }
+	/* Oh well, we failed to connect. */
+	if (res < 0)
+		error_fatalsys ("Unable to connect to bbslockd socket %s",
+				BBSLOCKD_SOCKET);
 
 
-  /* Transmit the command string */
 
-  if(send(s,buf,strlen(buf),0)<0){
-    error_fatalsys("Unable to send() to bbslockd.");
-  }
+	/* Prepare the command string */
 
-
-  /* Receive the result */
-  
-  bzero(buf,sizeof(buf));
-  if(recv(s,buf,sizeof(buf),0)<0){
-    error_fatalsys("Unable to recv() from bbslockd.");
-  }
+	if (!strcmp (cmd, LKC_PLACE)) {
+		sprintf (buf, "%s %s %d %s", cmd, name, (int) getpid (),
+			 (info == NULL || !strlen (info)) ? "" : info);
+	} else {
+		sprintf (buf, "%s %s %d", cmd, name, (int) getpid ());
+	}
 
 
-  if(sscanf(buf,"%d%n",&res,&n)!=1){
-    error_fatal("bbslockd issued syntantically incorrect response \"%s\"!",buf);
-  }
-  if(res>1 && info!=NULL)strcpy(info,&buf[n]);
+	/* Transmit the command string */
 
-  shutdown(s,2);
-  close(s);
-  return res;
+	if (send (s, buf, strlen (buf), 0) < 0) {
+		error_fatalsys ("Unable to send() to bbslockd.");
+	}
+
+
+	/* Receive the result */
+
+	bzero (buf, sizeof (buf));
+	if (recv (s, buf, sizeof (buf), 0) < 0) {
+		error_fatalsys ("Unable to recv() from bbslockd.");
+	}
+
+
+	if (sscanf (buf, "%d%n", &res, &n) != 1) {
+		error_fatal
+		    ("bbslockd issued syntantically incorrect response \"%s\"!",
+		     buf);
+	}
+	if (res > 1 && info != NULL)
+		strcpy (info, &buf[n]);
+
+	shutdown (s, 2);
+	close (s);
+	return res;
 }
 
 
 
 int
-lock_place(const char *name, const char *info)
+lock_place (const char *name, const char *info)
 {
-  return lockdcmd(LKC_PLACE,name,(char*)info);
+	return lockdcmd (LKC_PLACE, name, (char *) info);
 }
 
 
 int
-lock_check(const char *name, char *info)
+lock_check (const char *name, char *info)
 {
-  return lockdcmd(LKC_CHECK,name,info);
+	return lockdcmd (LKC_CHECK, name, info);
 }
 
 
 int
-lock_rm(const char *name)
+lock_rm (const char *name)
 {
-  return lockdcmd(LKC_REMOVE,name,NULL);
+	return lockdcmd (LKC_REMOVE, name, NULL);
 }
 
 
 int
-lock_wait(const char *name,int delay)
+lock_wait (const char *name, int delay)
 {
-  int naps=delay*5;
-  int i, result;
+	int     naps = delay * 5;
+	int     i, result;
 
-  for(i=0;i<naps;i++){
-    if((result=lock_check(name,NULL))<1) return result;
-    usleep(200000);
-  }
-  return LKR_TIMEOUT;
+	for (i = 0; i < naps; i++) {
+		if ((result = lock_check (name, NULL)) < 1)
+			return result;
+		usleep (200000);
+	}
+	return LKR_TIMEOUT;
 }

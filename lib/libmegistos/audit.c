@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.5  2003/08/15 18:11:38  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -59,7 +62,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -88,105 +92,118 @@ static const char rcsinfo[] = "$Id$";
 #include "mbk_sysvar.h"
 
 
-static char *auditfile=NULL;
-static char *orig_auditfile=NULL;
+static char *auditfile = NULL;
+static char *orig_auditfile = NULL;
 
 
 void
-audnotify(flags, channel,summary,detailed)
-int flags;
-char *channel, *summary, *detailed;
+audnotify (flags, channel, summary, detailed)
+int     flags;
+char   *channel, *summary, *detailed;
 {
-  int i;
-  struct shmuserrec *ushm=NULL;
-  char buf[MSGBUFSIZE];
-  channel_status_t status;
+	int     i;
+	struct shmuserrec *ushm = NULL;
+	char    buf[MSGBUFSIZE];
+	channel_status_t status;
 
-  if(chan_count==0)return;	/* Not initialised yet */
+	if (chan_count == 0)
+		return;		/* Not initialised yet */
 
-  for(i=0;i<chan_count;i++){
-    if(!channel_getstatus(channels[i].ttyname,&status)){
-      continue;
-    }
-    
-    fflush(stdout);
-    if(status.result==LSR_USER){
-      if(usr_insystem(status.user,0,&ushm)){
-	if(!ushm){
-	  continue;
+	for (i = 0; i < chan_count; i++) {
+		if (!channel_getstatus (channels[i].ttyname, &status)) {
+			continue;
+		}
+
+		fflush (stdout);
+		if (status.result == LSR_USER) {
+			if (usr_insystem (status.user, 0, &ushm)) {
+				if (!ushm) {
+					continue;
+				}
+				if (ushm->onl.flags & OLF_BUSY) {
+					continue;
+				}
+				if (hassysaxs (&ushm->acc, USY_PAGEAUDIT) &&
+				    ((flags & ushm->acc.
+				      auditfiltering) & ~AUF_SEVERITY) &&
+				    ((flags & ushm->acc.
+				      auditfiltering) & AUF_SEVERITY)) {
+					msg_set (msg_sys);
+					sprompt_other (ushm, buf,
+						       AUDINJI +
+						       GETSEVERITY (flags),
+						       channel, summary,
+						       detailed);
+					msg_reset ();
+					usr_injoth (&ushm->onl, buf, 0);
+				}
+				shmdt ((char *) ushm);
+			}
+		}
 	}
-	if(ushm->onl.flags&OLF_BUSY){
-	  continue;
-	}
-	if(hassysaxs(&ushm->acc,USY_PAGEAUDIT)&&
-	   ((flags&ushm->acc.auditfiltering)&~AUF_SEVERITY)&&
-	   ((flags&ushm->acc.auditfiltering)&AUF_SEVERITY)){
-	  msg_set(msg_sys);
-	  sprompt_other(ushm,buf,AUDINJI+GETSEVERITY(flags),
-			channel,summary,detailed);
-	  msg_reset();
-	  usr_injoth(&ushm->onl,buf,0);
-	}
-	shmdt((char *)ushm);
-      }
-    }
-  }
 }
 
 
 int
-audit(char *channel, uint32 flags, char *summary, char *format,...)
+audit (char *channel, uint32 flags, char *summary, char *format, ...)
 {
-  va_list args;
+	va_list args;
 
-  FILE    *fp;
-  char    s[60],chanstr[32];
-  char    entry[132]={0};
-  int     c;
+	FILE   *fp;
+	char    s[60], chanstr[32];
+	char    entry[132] = { 0 };
+	int     c;
 
-  if(auditfile==NULL)audit_setfile(NULL);
+	if (auditfile == NULL)
+		audit_setfile (NULL);
 
-  va_start(args,format);
+	va_start (args, format);
 
-  if((fp=fopen(auditfile,"a"))==NULL)return 0;
+	if ((fp = fopen (auditfile, "a")) == NULL)
+		return 0;
 
-  if(channel==NULL)channel=thisuseronl.channel;
+	if (channel == NULL)
+		channel = thisuseronl.channel;
 
-  c=chan_getnum(channel);
-  if(c!=-1)sprintf(chanstr,"CHANNEL %02x",c);
-  else sprintf(chanstr,"%-10s",channel);
-  fflush(stdout);
+	c = chan_getnum (channel);
+	if (c != -1)
+		sprintf (chanstr, "CHANNEL %02x", c);
+	else
+		sprintf (chanstr, "%-10s", channel);
+	fflush (stdout);
 
-  vsprintf(s,format,args);
-  va_end(args);
+	vsprintf (s, format, args);
+	va_end (args);
 
-  sprintf(entry,"%-8s %-9s (%04x) %-10s %-30s %-60s",strtime(now(),1),
-	  strdate(today()),flags,chanstr,summary,s);
-  entry[120]=0;
-  fprintf(fp,"%s\n",entry);
-  fclose(fp);
-  chmod(auditfile,0666);
+	sprintf (entry, "%-8s %-9s (%04x) %-10s %-30s %-60s",
+		 strtime (now (), 1), strdate (today ()), flags, chanstr,
+		 summary, s);
+	entry[120] = 0;
+	fprintf (fp, "%s\n", entry);
+	fclose (fp);
+	chmod (auditfile, 0666);
 
-  if(!strcmp(orig_auditfile,auditfile))audnotify(flags,chanstr,summary,s);
+	if (!strcmp (orig_auditfile, auditfile))
+		audnotify (flags, chanstr, summary, s);
 
-  return 1;
+	return 1;
 }
 
 
 void
-audit_setfile(char *s)
+audit_setfile (char *s)
 {
-  if(auditfile==NULL){
-    auditfile=strdup(mkfname(AUDITFILE));
-    orig_auditfile=strdup(auditfile);
-  }
-  free(auditfile);
-  auditfile=strdup(s!=NULL?s:orig_auditfile);
+	if (auditfile == NULL) {
+		auditfile = strdup (mkfname (AUDITFILE));
+		orig_auditfile = strdup (auditfile);
+	}
+	free (auditfile);
+	auditfile = strdup (s != NULL ? s : orig_auditfile);
 }
 
 
 void
-audit_resetfile()
+audit_resetfile ()
 {
-  strcpy(auditfile,orig_auditfile);
+	strcpy (auditfile, orig_auditfile);
 }

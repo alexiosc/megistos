@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:14:04  alexios
  * Rationalised the RCS/CVS ident(1) strings. Fixed issues with
  * relatively recent versions of the stdarg.h header file that caused
@@ -86,7 +89,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -120,103 +124,108 @@ static const char rcsinfo[] = "$Id$";
 
 #include "mbk_sysvar.h"
 
-char out_buffer [8192];
-uint32 out_flags=OFL_WAITTOCLEAR|OFL_ANSIENABLE;
+char    out_buffer[8192];
+uint32  out_flags = OFL_WAITTOCLEAR | OFL_ANSIENABLE;
 
 
 #define IS_BOT (out_flags&OFL_ISBOT)
 
 
-struct substvar *substvars=NULL, *lastsubstvar=NULL;
+struct substvar *substvars = NULL, *lastsubstvar = NULL;
 
 
 static int translation;
 
 
 
-static int isvarchar(char c)
+static int
+isvarchar (char c)
 {
-  if(out_flags&OFL_PROTECTVARS)return c==_VARCHAR;
-  else return c==_VARCHAR || c==_ASCIIVARCHAR;
+	if (out_flags & OFL_PROTECTVARS)
+		return c == _VARCHAR;
+	else
+		return c == _VARCHAR || c == _ASCIIVARCHAR;
 }
 
 
 void
-out_init()
+out_init ()
 {
-  msg_sys=msg_open("sysvar");
+	msg_sys = msg_open ("sysvar");
 
-  out_initsubstvars();
-  out_setwaittoclear(1);
-  fmt_setpausetext(msg_string(PAUSE));
-  out_clearflags(OFL_INHIBITVARS);
-  out_setflags(OFL_PROTECTVARS);
+	out_initsubstvars ();
+	out_setwaittoclear (1);
+	fmt_setpausetext (msg_string (PAUSE));
+	out_clearflags (OFL_INHIBITVARS);
+	out_setflags (OFL_PROTECTVARS);
 }
 
 
 void
-out_done()
+out_done ()
 {
-  fflush(stdout);
+	fflush (stdout);
 }
 
 
 void
-out_setxlation(int i)
+out_setxlation (int i)
 {
-  FILE *fp;
-  char fname[256];
-  int shmid;
-  struct emuqueue *emuq;
-  static int oldxlation=-1;
+	FILE   *fp;
+	char    fname[256];
+	int     shmid;
+	struct emuqueue *emuq;
+	static int oldxlation = -1;
 
-  /* This is going to be tedious. Ok, here goes. */
-  /* Get the shared memory ID of our emud's emuqueue */
+	/* This is going to be tedious. Ok, here goes. */
+	/* Get the shared memory ID of our emud's emuqueue */
 
-  sprintf(fname,"%s/.shmid-%s",mkfname(EMULOGDIR),getenv("CHANNEL"));
+	sprintf (fname, "%s/.shmid-%s", mkfname (EMULOGDIR),
+		 getenv ("CHANNEL"));
 
-  if((fp=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open %s",fname);
-  }
-  if(!fscanf(fp,"%d",&shmid)){
-    error_fatalsys("Unable to read %s",fname);
-  }
-  fclose(fp);
-
-
-  /* Attach to the shared memory block */
-
-  if((emuq=(struct emuqueue *)shmat(shmid,NULL,0))==NULL){
-    error_fatalsys("Error attaching to emulation shared memory");
-  }
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", fname);
+	}
+	if (!fscanf (fp, "%d", &shmid)) {
+		error_fatalsys ("Unable to read %s", fname);
+	}
+	fclose (fp);
 
 
-  /* Finally, set the translation (or enable/disable it) */
+	/* Attach to the shared memory block */
 
-  if(i==XLATION_OFF){
-    if(oldxlation<0){
-      oldxlation=emuq->xlation;
-      emuq->xlation=-1;
-    }
-  } else if(i==XLATION_ON){
-    if(oldxlation>=0){
-      emuq->xlation=oldxlation;
-    }
-  } else {
-    emuq->xlation=i;
-    oldxlation=-1;
-  }
+	if ((emuq = (struct emuqueue *) shmat (shmid, NULL, 0)) == NULL) {
+		error_fatalsys ("Error attaching to emulation shared memory");
+	}
 
 
-  /* Detach the shared memory */
+	/* Finally, set the translation (or enable/disable it) */
 
-  shmdt((char *)emuq);
+	if (i == XLATION_OFF) {
+		if (oldxlation < 0) {
+			oldxlation = emuq->xlation;
+			emuq->xlation = -1;
+		}
+	} else if (i == XLATION_ON) {
+		if (oldxlation >= 0) {
+			emuq->xlation = oldxlation;
+		}
+	} else {
+		emuq->xlation = i;
+		oldxlation = -1;
+	}
 
-  
-  /* Set the user's online record */
 
-  if(thisshm)usr_setoxlation(thisuseronl,i);
-  translation=i;
+	/* Detach the shared memory */
+
+	shmdt ((char *) emuq);
+
+
+	/* Set the user's online record */
+
+	if (thisshm)
+		usr_setoxlation (thisuseronl, i);
+	translation = i;
 }
 
 
@@ -246,948 +255,1116 @@ xlwrite(int fd, const char *s, int count)
 */
 
 
-int out_send(int fd, const char *s, int count)
+int
+out_send (int fd, const char *s, int count)
 {
-  register int offs=0;
-  int retval=count;
+	register int offs = 0;
+	int     retval = count;
 
-  /* If non-blocking I/O is used, excessive output may overrun the OS output
-     buffer. Under Linux, this is 4 kbytes, a fact that can account for long
-     listings getting garbled. So we loop, trying to write as much of the
-     string as we can, waiting a bit between writes -- but only if the entire
-     string couldn't be sent. The performance impact should be minimal, as the
-     bottleneck is likely to be the user's bandwidth anyway. */
+	/* If non-blocking I/O is used, excessive output may overrun the OS output
+	   buffer. Under Linux, this is 4 kbytes, a fact that can account for long
+	   listings getting garbled. So we loop, trying to write as much of the
+	   string as we can, waiting a bit between writes -- but only if the entire
+	   string couldn't be sent. The performance impact should be minimal, as the
+	   bottleneck is likely to be the user's bandwidth anyway. */
 
-  while(count>0){
-    register int i=write(fd,&s[offs],count);
+	while (count > 0) {
+		register int i = write (fd, &s[offs], count);
 
-    if(i<0)return i;
-    
-    offs+=i;
-    count-=i;
+		if (i < 0)
+			return i;
 
-    /* Wait for the output buffer to have some more space, unless of course
-       we've managed to send the whole string. This depends on bandwidth. It
-       doesn't need to be big for the Linux console. Modems can send out less
-       information, so we have to wait more. To cover all cases, we wait for a
-       pretty long time. This might produce slightly jerky output on the
-       console (though I personally can't detect it), but won't easily be
-       detectable on a modem. */
+		offs += i;
+		count -= i;
 
-    if(count>0)usleep(500*1000); /* 500ms */
-  }
+		/* Wait for the output buffer to have some more space, unless of course
+		   we've managed to send the whole string. This depends on bandwidth. It
+		   doesn't need to be big for the Linux console. Modems can send out less
+		   information, so we have to wait more. To cover all cases, we wait for a
+		   pretty long time. This might produce slightly jerky output on the
+		   console (though I personally can't detect it), but won't easily be
+		   detectable on a modem. */
 
-  return retval;
+		if (count > 0)
+			usleep (500 * 1000);	/* 500ms */
+	}
+
+	return retval;
 }
 
 
 
 static void
-printexpand(buf,parmlist)
-char *buf;
-void *parmlist;
+printexpand (buf, parmlist)
+char   *buf;
+void   *parmlist;
 {
-  char *p1=buf,format[16384]={0},newbuf[16384]={0};
-  int count=0,found,ansistate=0;
-  char *bufptr;
+	char   *p1 = buf, format[16384] = { 0 }, newbuf[16384] = {
+	0};
+	int     count = 0, found, ansistate = 0;
+	char   *bufptr;
 
-  while(*p1 && count<16383){
-    while (*p1 && !isvarchar(*p1)){
-      format[count]=*p1;
-      if(!(out_flags&OFL_ANSIENABLE)){
-	if(!ansistate && *p1==27 && *(p1+1)!='!')ansistate=1;
-	else if((ansistate==1) && (*p1=='['))ansistate=2;
-	else if((ansistate==2) && (isdigit(*p1) || (*p1==';')));
-	else if(ansistate==2){
-	  char ansicommands[16];
-	  
-	  strcpy(ansicommands,"ABCDHJKmsu");
-	  ansistate=0;
-	  if(!strchr(ansicommands,*p1))count++;
-	  if(*p1=='J')format[count-1]=12;
+	while (*p1 && count < 16383) {
+		while (*p1 && !isvarchar (*p1)) {
+			format[count] = *p1;
+			if (!(out_flags & OFL_ANSIENABLE)) {
+				if (!ansistate && *p1 == 27 &&
+				    *(p1 + 1) != '!')
+					ansistate = 1;
+				else if ((ansistate == 1) && (*p1 == '['))
+					ansistate = 2;
+				else if ((ansistate == 2) &&
+					 (isdigit (*p1) || (*p1 == ';')));
+				else if (ansistate == 2) {
+					char    ansicommands[16];
+
+					strcpy (ansicommands, "ABCDHJKmsu");
+					ansistate = 0;
+					if (!strchr (ansicommands, *p1))
+						count++;
+					if (*p1 == 'J')
+						format[count - 1] = 12;
+				} else {
+					ansistate = 0;
+					count++;
+				}
+			} else
+				count++;
+			p1++;
+		}
+		format[count] = 0;
+		if (out_flags & OFL_INHIBITVARS)
+			break;
+		if (!(*p1))
+			break;
+
+		if (isvarchar (*(p1 + 1))) {
+			p1 += 2;
+			format[count++] = '@';
+		} else {
+			struct substvar *svp = substvars;
+			char    tmp[256], *tp;
+
+			strcpy (tmp, p1);
+			found = 0;
+			tmp[0] = _VARCHAR;
+			for (tp = tmp + 1; *tp; tp++)
+				if (*tp == '@') {
+					*tp = _VARCHAR;
+					break;
+				}
+			while (!found && svp) {
+				if (sameto (svp->varname, tmp)) {
+					char   *subst =
+					    (char *) (*svp->varcalc) ();
+					count += strlen (subst);
+					p1 += strlen (svp->varname);
+					found = 1;
+					strcat (format, subst);
+				}
+				svp = svp->next;
+			}
+			if (!found) {
+				char    undefd[32];
+
+				strcpy (undefd, "[UNKNOWN VARIABLE NAME]");
+				strcat (format, undefd);
+				count += strlen (undefd);
+				p1++;
+			}
+		}
+	}
+
+	vsprintf (newbuf, format, parmlist);
+
+	bufptr = newbuf;
+	if ((!IS_BOT) && (out_flags & OFL_WAITTOCLEAR))
+		while (*bufptr) {
+			char   *clp = strstr (bufptr, "\033[2J");
+			int     len = clp - bufptr;
+
+			if (!clp)
+				break;
+
+			if (strlen (clp) >= 4 && clp[3] != 'J')
+				break;
+
+			if (len) {
+				char    c = bufptr[len];
+
+				bufptr[len] = 0;
+				fmt_output (bufptr);
+				bufptr[len] = c;
+				out_clearflags (OFL_AFTERINPUT);
+			}
+
+			bufptr += len;
+
+			if (!(out_flags & OFL_AFTERINPUT)) {
+				char    c, *msgp;
+				char    clrscr[32] = "\033[2J\033[1;1H\0";
+
+				bufptr += 4;
+
+				msg_set (msg_sys);
+				msgp = msg_get (W2CLR);
+				out_send (fileno (stdout), msgp,
+					  strlen (msgp));
+				msg_reset ();
+
+				read (0, &c, 1);
+				inp_resetidle ();
+				if (!(out_flags & OFL_ANSIENABLE)) {
+					c = 12;
+					out_send (fileno (stdout), &c, 1);
+				} else {
+					out_send (fileno (stdout), clrscr,
+						  strlen (clrscr));
+				}
+			} else {
+				char    homestg[10] = "\033[1;1H\0";
+
+				out_send (fileno (stdout), bufptr, 4);
+				out_send (fileno (stdout), homestg,
+					  strlen (homestg));
+				bufptr += 4;
+			}
+			fmt_resetvpos (0);
 	} else {
- 	  ansistate=0;
-	  count++;
+		char    homestg[20] = "\033[2J\033[1;1H\0";
+
+		while (*bufptr) {
+			char   *clp = strstr (bufptr, "\033[2J");
+			int     len = clp - bufptr;
+
+			if (!clp)
+				break;
+
+			if (strlen (clp) >= 4 && clp[3] != 'J')
+				break;
+
+			if (len) {
+				char    c = bufptr[len];
+
+				bufptr[len] = 0;
+				fmt_output (bufptr);
+				bufptr[len] = c;
+				out_clearflags (OFL_AFTERINPUT);
+			}
+			out_send (fileno (stdout), bufptr, 4);
+			out_send (fileno (stdout), homestg, strlen (homestg));
+			bufptr += 4 + len;
+		}
 	}
-      } else count++;
-      p1++;
-    }
-    format[count]=0;
-    if(out_flags&OFL_INHIBITVARS)break;
-    if(!(*p1))break;
-
-    if(isvarchar(*(p1+1))) {
-      p1+=2;
-      format[count++]='@';
-    } else {
-      struct substvar *svp=substvars;
-      char tmp[256], *tp;
-      strcpy(tmp,p1);
-      found=0;
-      tmp[0]=_VARCHAR;
-      for(tp=tmp+1;*tp;tp++)if(*tp=='@'){
-	*tp=_VARCHAR;
-	break;
-      }
-      while(!found && svp){
-	if(sameto(svp->varname,tmp)){
-	  char *subst=(char *)(*svp->varcalc)();
-	  count+=strlen(subst);
-	  p1+=strlen(svp->varname);
-	  found=1;
-	  strcat(format,subst);
+	if (strlen (bufptr)) {
+		fmt_output (bufptr);
+		out_clearflags (OFL_AFTERINPUT);
 	}
-	svp=svp->next;
-      }
-      if(!found){
-	char undefd[32];
-	strcpy(undefd,"[UNKNOWN VARIABLE NAME]");
-	strcat(format,undefd);
-	count+=strlen(undefd);
-	p1++;
-      }
-    }
-  }
-
-  vsprintf(newbuf,format,parmlist);
-
-  bufptr=newbuf;
-  if((!IS_BOT) && (out_flags&OFL_WAITTOCLEAR))while(*bufptr){
-    char *clp=strstr(bufptr,"\033[2J");
-    int  len=clp-bufptr;
-    
-    if(!clp) break;
-
-    if(strlen(clp)>=4 && clp[3]!='J') break;
-    
-    if(len){
-      char c=bufptr[len];
-      bufptr[len]=0;
-      fmt_output(bufptr);
-      bufptr[len]=c;
-      out_clearflags(OFL_AFTERINPUT);
-    }
-
-    bufptr+=len;
-
-    if(!(out_flags&OFL_AFTERINPUT)){
-      char c, *msgp;
-      char clrscr[32]="\033[2J\033[1;1H\0";
-
-      bufptr+=4;
-
-      msg_set(msg_sys);
-      msgp=msg_get(W2CLR);
-      out_send(fileno(stdout),msgp,strlen(msgp));
-      msg_reset();
-
-      read(0,&c,1);
-      inp_resetidle();
-      if(!(out_flags&OFL_ANSIENABLE)){
-	c=12;
-	out_send(fileno(stdout),&c,1);
-      }else{
-	out_send(fileno(stdout),clrscr,strlen(clrscr));
-      }
-    } else {
-      char homestg[10]="\033[1;1H\0";
-      out_send(fileno(stdout),bufptr,4);
-      out_send(fileno(stdout),homestg,strlen(homestg));
-      bufptr+=4;
-    }
-    fmt_resetvpos(0);
-  } else {
-    char homestg[20]="\033[2J\033[1;1H\0";
-    
-    while(*bufptr){
-      char *clp=strstr(bufptr,"\033[2J");
-      int  len=clp-bufptr;
-
-      if(!clp) break;
-
-      if(strlen(clp)>=4 && clp[3]!='J') break;
-    
-      if(len){
-	char c=bufptr[len];
-	bufptr[len]=0;
-	fmt_output(bufptr);
-	bufptr[len]=c;
-	out_clearflags(OFL_AFTERINPUT);
-      }
-      out_send(fileno(stdout),bufptr,4);
-      out_send(fileno(stdout),homestg,strlen(homestg));
-      bufptr+=4+len;
-    }
-  }
-  if(strlen(bufptr)){
-    fmt_output(bufptr);
-    out_clearflags(OFL_AFTERINPUT);
-  }
 }
 
-void print(char *buf, ...);
+void    print (char *buf, ...);
 
 
 static void
-sprintexpand(stg,buf,parmlist)
-char *stg;
-char *buf;
-void *parmlist;
+sprintexpand (stg, buf, parmlist)
+char   *stg;
+char   *buf;
+void   *parmlist;
 {
-  char *p1=buf,format[16384]={0};
-  int count=0,found;
+	char   *p1 = buf, format[16384] = { 0 };
+	int     count = 0, found;
 
-  while(*p1 && count<16383){
-    while (*p1 && !isvarchar(*p1)){
-      format[count]=*p1;
-      count++;
-      p1++;
-    }
+	while (*p1 && count < 16383) {
+		while (*p1 && !isvarchar (*p1)) {
+			format[count] = *p1;
+			count++;
+			p1++;
+		}
 
-    format[count]=0;
+		format[count] = 0;
 
-    if(!(*p1))break;		/* End of the format string? */
-    else if(isvarchar(*(p1+1))) { /* No, just another variable */
-      p1+=2;
-      format[count++]='@';
-    } else {
-      struct substvar *svp=substvars;
-      found=0;
-      while(!found && svp){
-	if(sameto(svp->varname,p1)){
-	  char *subst=(char *)(*svp->varcalc)();
-	  count+=strlen(subst);
-	  p1+=strlen(svp->varname);
-	  found=1;
-	  strcat(format,subst);
+		if (!(*p1))
+			break;	/* End of the format string? */
+		else if (isvarchar (*(p1 + 1))) {	/* No, just another variable */
+			p1 += 2;
+			format[count++] = '@';
+		} else {
+			struct substvar *svp = substvars;
+
+			found = 0;
+			while (!found && svp) {
+				if (sameto (svp->varname, p1)) {
+					char   *subst =
+					    (char *) (*svp->varcalc) ();
+					count += strlen (subst);
+					p1 += strlen (svp->varname);
+					found = 1;
+					strcat (format, subst);
+				}
+				svp = svp->next;
+			}
+			if (!found) {
+				char    undefd[32];
+
+				strcpy (undefd, "[UNKNOWN VARIABLE NAME]");
+				strcat (format, undefd);
+				count += strlen (undefd);
+				p1++;
+			}
+		}
 	}
-	svp=svp->next;
-      }
-      if(!found){
-	char undefd[32];
-	strcpy(undefd,"[UNKNOWN VARIABLE NAME]");
-	strcat(format,undefd);
-	count+=strlen(undefd);
-	p1++;
-      }
-    }
-  }
 
-  vsprintf(stg,format,parmlist);
+	vsprintf (stg, format, parmlist);
 }
 
 
 void
-print(char *buf, ...)
+print (char *buf, ...)
 {
-  va_list args;
+	va_list args;
 
-  va_start(args, buf);
-  printexpand(buf,args);
-  va_end(args);
+	va_start (args, buf);
+	printexpand (buf, args);
+	va_end (args);
 }
 
 
 void
-sprint(char * stg, char * buf, ...)
+sprint (char *stg, char *buf, ...)
 {
-  va_list args;
+	va_list args;
 
-  va_start(args, buf);
-  sprintexpand(stg,buf,args);
-  va_end(args);
+	va_start (args, buf);
+	sprintexpand (stg, buf, args);
+	va_end (args);
 }
 
 
 
 void
-prompt(int num, ...)
+prompt (int num, ...)
 {
-  va_list args;
-  char *s=msg_getl_bot(num,(msg_cur->language),1);
+	va_list args;
+	char   *s = msg_getl_bot (num, (msg_cur->language), 1);
 
-  va_start(args, num);
-  printexpand(s,args);
-  va_end(args);
+	va_start (args, num);
+	printexpand (s, args);
+	va_end (args);
 }
 
 
 void
-sprompt(char *stg, int num, ...)
+sprompt (char *stg, int num, ...)
 {
-  va_list args;
-  char *s=msg_getl_bot(num,(msg_cur->language),1);
+	va_list args;
+	char   *s = msg_getl_bot (num, (msg_cur->language), 1);
 
-  inp_acceptinjoth();
-  va_start(args, num);
-  sprintexpand(stg,s,args);
-  va_end(args);
+	inp_acceptinjoth ();
+	va_start (args, num);
+	sprintexpand (stg, s, args);
+	va_end (args);
 }
 
 
-char *
-sprompt_other(struct shmuserrec * ushm, char *stg, int num, ...)
+char   *
+sprompt_other (struct shmuserrec *ushm, char *stg, int num, ...)
 {
-  va_list args;
-  char *s;
-  uint32 old_flags=out_flags;
+	va_list args;
+	char   *s;
+	uint32  old_flags = out_flags;
 
-  if(ushm->onl.flags&OLF_ISBOT) out_flags|=OFL_ISBOT;
-  else out_flags&=~OFL_ISBOT;
+	if (ushm->onl.flags & OLF_ISBOT)
+		out_flags |= OFL_ISBOT;
+	else
+		out_flags &= ~OFL_ISBOT;
 
-  s=msg_getl_bot(num,ushm->acc.language-1,1);
-  va_start(args, num);
-  sprintexpand(stg,s,args);
-  va_end(args);
-  out_flags=old_flags;
+	s = msg_getl_bot (num, ushm->acc.language - 1, 1);
+	va_start (args, num);
+	sprintexpand (stg, s, args);
+	va_end (args);
+	out_flags = old_flags;
 
-  return stg;
+	return stg;
 }
 
 
-int out_printfile(char *fname)
+int
+out_printfile (char *fname)
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen(fname,"r"))!=NULL){
-    int oldprotect=out_flags&OFL_PROTECTVARS;
-    out_clearflags(OFL_PROTECTVARS);
+	if ((fp = fopen (fname, "r")) != NULL) {
+		int     oldprotect = out_flags & OFL_PROTECTVARS;
 
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
+		out_clearflags (OFL_PROTECTVARS);
 
-    while(!feof(fp)){
-      char line[MSGBUFSIZE];
-      int  num=fread(line,1,sizeof(line)-1,fp);
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_STARTS);
 
-      line[num]=0;
-      if(num)print(line);
-      if(fmt_lastresult==PAUSE_QUIT)break;
-    }
-    oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
-    fclose(fp);
+		while (!feof (fp)) {
+			char    line[MSGBUFSIZE];
+			int     num = fread (line, 1, sizeof (line) - 1, fp);
 
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+			line[num] = 0;
+			if (num)
+				print (line);
+			if (fmt_lastresult == PAUSE_QUIT)
+				break;
+		}
+		oldprotect ? out_setflags (OFL_PROTECTVARS) :
+		    out_clearflags (OFL_PROTECTVARS);
+		fclose (fp);
 
-    return 1;
-  } else return 0;
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_ENDS);
+
+		return 1;
+	} else
+		return 0;
 }
 
 
-int out_catfile(char *fname)
+int
+out_catfile (char *fname)
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen(fname,"r"))!=NULL){
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
+	if ((fp = fopen (fname, "r")) != NULL) {
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_STARTS);
 
-    while(!feof(fp)){
-      char line[MSGBUFSIZE];
-      if(fgets(line,1024,fp)){
-	if(fmt_screenpause()==PAUSE_QUIT) return 1;
-	out_send(fileno(stdout),line,strlen(line));
-      }
-    }
+		while (!feof (fp)) {
+			char    line[MSGBUFSIZE];
 
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+			if (fgets (line, 1024, fp)) {
+				if (fmt_screenpause () == PAUSE_QUIT)
+					return 1;
+				out_send (fileno (stdout), line,
+					  strlen (line));
+			}
+		}
 
-    fclose(fp);
-    return 1;
-  } else return 0;
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_ENDS);
+
+		fclose (fp);
+		return 1;
+	} else
+		return 0;
 }
 
 
-int out_printlongfile(char *fname)
+int
+out_printlongfile (char *fname)
 {
-  FILE *fp;
-  char c;
+	FILE   *fp;
+	char    c;
 
-  if((fp=fopen(fname,"r"))!=NULL){
-    int oldprotect=out_flags&OFL_PROTECTVARS;
+	if ((fp = fopen (fname, "r")) != NULL) {
+		int     oldprotect = out_flags & OFL_PROTECTVARS;
 
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_STARTS);
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_STARTS);
 
-    inp_nonblock();
-    while(!feof(fp)){
-      char line[MSGBUFSIZE];
-      if(read(fileno(stdin),&c,1)&&
-	 ((c==13)||(c==10)||(c==27)||(c==15)||(c==3))){
-	fmt_lastresult=PAUSE_QUIT;
-	break;
-      }
-      if(fgets(line,1024,fp)){
-	if(fmt_screenpause()==PAUSE_QUIT) return 1;
-	out_send(fileno(stdout),line,strlen(line));
-      }
-    }
-    inp_resetblocking();
-    oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
+		inp_nonblock ();
+		while (!feof (fp)) {
+			char    line[MSGBUFSIZE];
 
-    if(IS_BOT) print("\n%03d\n",BTS_FILE_ENDS);
+			if (read (fileno (stdin), &c, 1) &&
+			    ((c == 13) || (c == 10) || (c == 27) || (c == 15)
+			     || (c == 3))) {
+				fmt_lastresult = PAUSE_QUIT;
+				break;
+			}
+			if (fgets (line, 1024, fp)) {
+				if (fmt_screenpause () == PAUSE_QUIT)
+					return 1;
+				out_send (fileno (stdout), line,
+					  strlen (line));
+			}
+		}
+		inp_resetblocking ();
+		oldprotect ? out_setflags (OFL_PROTECTVARS) :
+		    out_clearflags (OFL_PROTECTVARS);
 
-    fclose(fp);
-    return 1;
-  } else return 0;
+		if (IS_BOT)
+			print ("\n%03d\n", BTS_FILE_ENDS);
+
+		fclose (fp);
+		return 1;
+	} else
+		return 0;
 }
 
 
 void
-out_addsubstvar(name, varcalc)
-char *name;
-char *(*varcalc)(void);
+out_addsubstvar (name, varcalc)
+char   *name;
+char   *(*varcalc) (void);
 {
-  struct substvar *new=alcmem(sizeof(struct substvar));
-  char *cp, *tp, temp[64];
+	struct substvar *new = alcmem (sizeof (struct substvar));
+	char   *cp, *tp, temp[64];
 
-  cp=name;
-  tp=temp;
-  if(*cp!=_ASCIIVARCHAR) *tp++=_ASCIIVARCHAR;
-  for(;*cp;cp++,tp++){
-    *tp=((*cp)==_ASCIIVARCHAR?_VARCHAR:(*cp));
-  }
-  if(*(tp-1)!=_VARCHAR)*tp++=_VARCHAR;
-  *tp=0;
-  new->varname=(char *)alcmem(strlen(name)+1);
-  strcpy(new->varname,temp);
-  new->varcalc=varcalc;
-  new->next=NULL;
-  if(!substvars)substvars=new;
-  if(lastsubstvar)lastsubstvar->next=new;
-  lastsubstvar=new;
+	cp = name;
+	tp = temp;
+	if (*cp != _ASCIIVARCHAR)
+		*tp++ = _ASCIIVARCHAR;
+	for (; *cp; cp++, tp++) {
+		*tp = ((*cp) == _ASCIIVARCHAR ? _VARCHAR : (*cp));
+	}
+	if (*(tp - 1) != _VARCHAR)
+		*tp++ = _VARCHAR;
+	*tp = 0;
+	new->varname = (char *) alcmem (strlen (name) + 1);
+	strcpy (new->varname, temp);
+	new->varcalc = varcalc;
+	new->next = NULL;
+	if (!substvars)
+		substvars = new;
+	if (lastsubstvar)
+		lastsubstvar->next = new;
+	lastsubstvar = new;
 }
 
 
-char *sv_bbstitle()
+char   *
+sv_bbstitle ()
 {
-  return sysvar->bbstitle;
+	return sysvar->bbstitle;
 }
 
 
-char *sv_company()
+char   *
+sv_company ()
 {
-  return sysvar->company;
+	return sysvar->company;
 }
 
 
-char *sv_address1()
+char   *
+sv_address1 ()
 {
-  return sysvar->address1;
+	return sysvar->address1;
 }
 
 
-char *sv_address2()
+char   *
+sv_address2 ()
 {
-  return sysvar->address2;
+	return sysvar->address2;
 }
 
 
-char *sv_city()
+char   *
+sv_city ()
 {
-  return sysvar->city;
+	return sysvar->city;
 }
 
 
-char *sv_dataphone()
+char   *
+sv_dataphone ()
 {
-  return sysvar->dataphone;
+	return sysvar->dataphone;
 }
 
 
-char *sv_voicephone()
+char   *
+sv_voicephone ()
 {
-  return sysvar->voicephone;
+	return sysvar->voicephone;
 }
 
 
-char *sv_livephone()
+char   *
+sv_livephone ()
 {
-  return sysvar->livephone;
+	return sysvar->livephone;
 }
 
 
-char *sv_charge()
+char   *
+sv_charge ()
 {
-  static char conv[32];
-  sprintf(conv,"%.2f",(float)((float)thisuseronl.credspermin/100.0));
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%.2f",
+		 (float) ((float) thisuseronl.credspermin / 100.0));
+	return conv;
 }
 
 
-char *sv_chargehour()
+char   *
+sv_chargehour ()
 {
-  return sysvar->chargehour;
+	return sysvar->chargehour;
 }
 
 
-char *sv_mincredits()
+char   *
+sv_mincredits ()
 {
-  return sysvar->mincredits;
+	return sysvar->mincredits;
 }
 
 
-char *sv_minmoney()
+char   *
+sv_minmoney ()
 {
-  return sysvar->minmoney;
+	return sysvar->minmoney;
 }
 
 
-char *sv_version()
+char   *
+sv_version ()
 {
-  static char s[256];
-  strcpy(s,bbs_systemversion);
-  return s;
+	static char s[256];
+
+	strcpy (s, bbs_systemversion);
+	return s;
 }
 
 
-char *sv_shortversion()
+char   *
+sv_shortversion ()
 {
-  static char s[256];
-  strcpy(s,bbs_shortversion);
-  return s;
+	static char s[256];
+
+	strcpy (s, bbs_shortversion);
+	return s;
 }
 
 
-char *sv_baudrate()
+char   *
+sv_baudrate ()
 {
-  char *s=channel_baudstg(atoi(getenv("BAUD")));
-  return s?s:"";
+	char   *s = channel_baudstg (atoi (getenv ("BAUD")));
+
+	return s ? s : "";
 }
 
 
-char *sv_time()
+char   *
+sv_time ()
 {
-  return strtime(now(),0);
+	return strtime (now (), 0);
 }
 
 
-char *sv_timesec()
+char   *
+sv_timesec ()
 {
-  return strtime(now(),1);
+	return strtime (now (), 1);
 }
 
 
-char *sv_date()
+char   *
+sv_date ()
 {
-  char *s=strdate(today());
-  return s;
+	char   *s = strdate (today ());
+
+	return s;
 }
 
 
-char *sv_passexp()
+char   *
+sv_passexp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->pswexpiry);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->pswexpiry);
+	return conv;
 }
 
 
-char *sv_userid()
+char   *
+sv_userid ()
 {
-  return thisuseracc.userid;
+	return thisuseracc.userid;
 }
 
 
-char *sv_username()
+char   *
+sv_username ()
 {
-  return thisuseracc.username;
+	return thisuseracc.username;
 }
 
 
-char *sv_usercomp()
+char   *
+sv_usercomp ()
 {
-  return thisuseracc.company;
+	return thisuseracc.company;
 }
 
 
-char *sv_useraddr1()
+char   *
+sv_useraddr1 ()
 {
-  return thisuseracc.address1;
+	return thisuseracc.address1;
 }
 
 
-char *sv_useraddr2()
+char   *
+sv_useraddr2 ()
 {
-  return thisuseracc.address2;
+	return thisuseracc.address2;
 }
 
 
-char *sv_userphone()
+char   *
+sv_userphone ()
 {
-  return thisuseracc.phone;
+	return thisuseracc.phone;
 }
 
 
-char *sv_userage()
+char   *
+sv_userage ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.age);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.age);
+	return conv;
 }
 
 
-char *sv_usersex()
+char   *
+sv_usersex ()
 {
-  static char conv[32];
-  sprintf(conv,"%c",thisuseracc.sex);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%c", thisuseracc.sex);
+	return conv;
 }
 
 
-char *sv_userlang()
+char   *
+sv_userlang ()
 {
-  return msg_langnames[(int)thisuseracc.language];
+	return msg_langnames[(int) thisuseracc.language];
 }
 
 
-char *sv_scnwidth()
+char   *
+sv_scnwidth ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.scnwidth);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.scnwidth);
+	return conv;
 }
 
 
-char *sv_scnheight()
+char   *
+sv_scnheight ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.scnheight);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.scnheight);
+	return conv;
 }
 
 
-char *sv_datecre()
+char   *
+sv_datecre ()
 {
-  char *s=strdate(thisuseracc.datecre);
-  return s;
+	char   *s = strdate (thisuseracc.datecre);
+
+	return s;
 }
 
 
-char *sv_datelast()
+char   *
+sv_datelast ()
 {
-  char *s=strdate(thisuseracc.datelast);
-  return s;
+	char   *s = strdate (thisuseracc.datelast);
+
+	return s;
 }
 
 
-char *sv_userclass()
+char   *
+sv_userclass ()
 {
-  return thisuseracc.curclss;
+	return thisuseracc.curclss;
 }
 
 
-char *sv_credstdy()
+char   *
+sv_credstdy ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.timetdy);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.timetdy);
+	return conv;
 }
 
 
-char *sv_classdays()
+char   *
+sv_classdays ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.classdays);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.classdays);
+	return conv;
 }
 
 
-char *sv_credits()
+char   *
+sv_credits ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.credits);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.credits);
+	return conv;
 }
 
 
-char *sv_totcreds()
+char   *
+sv_totcreds ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.totcreds);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.totcreds);
+	return conv;
 }
 
 
-char *sv_totpaid()
+char   *
+sv_totpaid ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.totpaid);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.totpaid);
+	return conv;
 }
 
 
-char *sv_curpage()
+char   *
+sv_curpage ()
 {
-  return thisuseronl.curpage;
+	return thisuseronl.curpage;
 }
 
 
-char *sv_lastpage()
+char   *
+sv_lastpage ()
 {
-  return thisuseronl.prevpage;
+	return thisuseronl.prevpage;
 }
 
 
-char *sv_online()
+char   *
+sv_online ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseronl.onlinetime);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseronl.onlinetime);
+	return conv;
 }
 
 
-char *sv_numconns()
+char   *
+sv_numconns ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.connections);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.connections);
+	return conv;
 }
 
 
-char *sv_credsever()
+char   *
+sv_credsever ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.credsever);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.credsever);
+	return conv;
 }
 
 
-char *sv_timever()
+char   *
+sv_timever ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.timever);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.timever);
+	return conv;
 }
 
 
-char *sv_filesdnl()
+char   *
+sv_filesdnl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.filesdnl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.filesdnl);
+	return conv;
 }
 
 
-char *sv_kbsdnl()
+char   *
+sv_kbsdnl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.bytesdnl>>10);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.bytesdnl >> 10);
+	return conv;
 }
 
 
-char *sv_filesupl()
+char   *
+sv_filesupl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.filesupl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.filesupl);
+	return conv;
 }
 
 
-char *sv_kbsupl()
+char   *
+sv_kbsupl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.bytesupl>>10);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.bytesupl >> 10);
+	return conv;
 }
 
 
-char *sv_tnlnum()
+char   *
+sv_tnlnum ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",chan_telnetlinecount());
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", chan_telnetlinecount ());
+	return conv;
 }
 
 
-char *sv_tnlmax()
+char   *
+sv_tnlmax ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->tnlmax);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->tnlmax);
+	return conv;
 }
 
 
-char *sv_upassexp()
+char   *
+sv_upassexp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",thisuseracc.passexp);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", thisuseracc.passexp);
+	return conv;
 }
 
 
-char *sv_tcredspaid()
+char   *
+sv_tcredspaid ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->tcredspaid);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->tcredspaid);
+	return conv;
 }
 
 
-char *sv_tcreds()
+char   *
+sv_tcreds ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->tcreds);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->tcreds);
+	return conv;
 }
 
 
-char *sv_ttimever()
+char   *
+sv_ttimever ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->timever);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->timever);
+	return conv;
 }
 
 
-char *sv_tfilesupl()
+char   *
+sv_tfilesupl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->filesupl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->filesupl);
+	return conv;
 }
 
 
-char *sv_tfilesdnl()
+char   *
+sv_tfilesdnl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->filesdnl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->filesdnl);
+	return conv;
 }
 
 
-char *sv_tbytesupl()
+char   *
+sv_tbytesupl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->bytesupl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->bytesupl);
+	return conv;
 }
 
 
-char *sv_tbytesdnl()
+char   *
+sv_tbytesdnl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->bytesdnl);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->bytesdnl);
+	return conv;
 }
 
 
-char *sv_sigmsgs()
+char   *
+sv_sigmsgs ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->sigmessages);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->sigmessages);
+	return conv;
 }
 
 
-char *sv_emsgs()
+char   *
+sv_emsgs ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->emessages);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->emessages);
+	return conv;
 }
 
 
-char *sv_nmsgs()
+char   *
+sv_nmsgs ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->nmessages);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->nmessages);
+	return conv;
 }
 
 
-char *sv_tconns()
+char   *
+sv_tconns ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",sysvar->connections);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", sysvar->connections);
+	return conv;
 }
 
 
 void
-out_initsubstvars()
+out_initsubstvars ()
 {
-  struct substvar table []={
-    {"@BBS@",sv_bbstitle,NULL},
-    {"@COMPANY@",sv_company,NULL},
-    {"@ADDRESS1@",sv_address1,NULL},
-    {"@ADDRESS2@",sv_address2,NULL},
-    {"@CITY@",sv_city,NULL},
-    {"@DATAPH@",sv_dataphone,NULL},
-    {"@VOICEPH@",sv_voicephone,NULL},
-    {"@LIVEPH@",sv_livephone,NULL},
-    {"@CHARGE@",sv_charge,NULL},
-    {"@CHRGEHOUR@",sv_chargehour,NULL},
-    {"@MINCREDITS@",sv_mincredits,NULL},
-    {"@MINMONEY@",sv_minmoney,NULL},
-    {"@VERSION@",sv_version,NULL},
-    {"@SHORTVERSION@",sv_shortversion,NULL},
-    {"@BAUD@",sv_baudrate,NULL},
-    {"@TIME@",sv_time,NULL},
-    {"@TIMESEC@",sv_timesec,NULL},
-    {"@DATE@",sv_date,NULL},
-    {"@PASSEXP@",sv_passexp,NULL},
-    {"@USERID@",sv_userid,NULL},
-    {"@USERNAME@",sv_username,NULL},
-    {"@USERCOMP@",sv_usercomp,NULL},
-    {"@USERADDR1@",sv_useraddr1,NULL},
-    {"@USERADDR2@",sv_useraddr2,NULL},
-    {"@USERPHONE@",sv_userphone,NULL},
-    {"@USERAGE@",sv_userage,NULL},
-    {"@USERSEX@",sv_usersex,NULL},
-    {"@USERLANG@",sv_userlang,NULL},
-    {"@SCNWIDTH@",sv_scnwidth,NULL},
-    {"@SCNHEIGHT@",sv_scnheight,NULL},
-    {"@DATECRE@",sv_datecre,NULL},
-    {"@DATELAST@",sv_datelast,NULL},
-    {"@USERCLASS@",sv_userclass,NULL},
-    {"@CREDSTDY@",sv_credstdy,NULL},
-    {"@CLASSDAYS@",sv_classdays,NULL},
-    {"@CREDITS@",sv_credits,NULL},
-    {"@TOTCREDS@",sv_totcreds,NULL},
-    {"@TOTPAID@",sv_totpaid,NULL},
-    {"@PAGE@",sv_curpage,NULL},
-    {"@LASTPAGE@",sv_lastpage,NULL},
-    {"@ONLINE@",sv_online,NULL},
-    {"@NUMCONNS@",sv_numconns,NULL},
-    {"@CREDSEVER@",sv_credsever,NULL},
-    {"@TIMEVER@",sv_timever,NULL},
-    {"@FILESDNL@",sv_filesdnl,NULL},
-    {"@KBSDNL@",sv_kbsdnl,NULL},
-    {"@FILESUPL@",sv_filesupl,NULL},
-    {"@KBSUPL@",sv_kbsupl,NULL},
-    {"@TNLNUM@",sv_tnlnum,NULL},
-    {"@TNLMAX@",sv_tnlmax,NULL},
-    {"@UPASSEXP@",sv_upassexp,NULL},
-    {"@TCREDSPAID@",sv_tcredspaid,NULL},
-    {"@TCREDS@",sv_tcreds,NULL},
-    {"@TTIMEVER@",sv_ttimever,NULL},
-    {"@TFILESUPL@",sv_tfilesupl,NULL},
-    {"@TFILESDNL@",sv_tfilesdnl,NULL},
-    {"@TBYTESUPL@",sv_tbytesupl,NULL},
-    {"@TBYTESDNL@",sv_tbytesdnl,NULL},
-    {"@SIGMSGS@",sv_sigmsgs,NULL},
-    {"@EMSGS@",sv_emsgs,NULL},
-    {"@NMSGS@",sv_nmsgs,NULL},
-    {"@TCONNS@",sv_tconns,NULL},
-    {"",NULL,NULL}
-  };
-  
-  int i=0;
-  
-  while(table[i].varname[0]){
-    out_addsubstvar(table[i].varname,table[i].varcalc);
-    i++;
-  }
+	struct substvar table[] = {
+		{"@BBS@", sv_bbstitle, NULL},
+		{"@COMPANY@", sv_company, NULL},
+		{"@ADDRESS1@", sv_address1, NULL},
+		{"@ADDRESS2@", sv_address2, NULL},
+		{"@CITY@", sv_city, NULL},
+		{"@DATAPH@", sv_dataphone, NULL},
+		{"@VOICEPH@", sv_voicephone, NULL},
+		{"@LIVEPH@", sv_livephone, NULL},
+		{"@CHARGE@", sv_charge, NULL},
+		{"@CHRGEHOUR@", sv_chargehour, NULL},
+		{"@MINCREDITS@", sv_mincredits, NULL},
+		{"@MINMONEY@", sv_minmoney, NULL},
+		{"@VERSION@", sv_version, NULL},
+		{"@SHORTVERSION@", sv_shortversion, NULL},
+		{"@BAUD@", sv_baudrate, NULL},
+		{"@TIME@", sv_time, NULL},
+		{"@TIMESEC@", sv_timesec, NULL},
+		{"@DATE@", sv_date, NULL},
+		{"@PASSEXP@", sv_passexp, NULL},
+		{"@USERID@", sv_userid, NULL},
+		{"@USERNAME@", sv_username, NULL},
+		{"@USERCOMP@", sv_usercomp, NULL},
+		{"@USERADDR1@", sv_useraddr1, NULL},
+		{"@USERADDR2@", sv_useraddr2, NULL},
+		{"@USERPHONE@", sv_userphone, NULL},
+		{"@USERAGE@", sv_userage, NULL},
+		{"@USERSEX@", sv_usersex, NULL},
+		{"@USERLANG@", sv_userlang, NULL},
+		{"@SCNWIDTH@", sv_scnwidth, NULL},
+		{"@SCNHEIGHT@", sv_scnheight, NULL},
+		{"@DATECRE@", sv_datecre, NULL},
+		{"@DATELAST@", sv_datelast, NULL},
+		{"@USERCLASS@", sv_userclass, NULL},
+		{"@CREDSTDY@", sv_credstdy, NULL},
+		{"@CLASSDAYS@", sv_classdays, NULL},
+		{"@CREDITS@", sv_credits, NULL},
+		{"@TOTCREDS@", sv_totcreds, NULL},
+		{"@TOTPAID@", sv_totpaid, NULL},
+		{"@PAGE@", sv_curpage, NULL},
+		{"@LASTPAGE@", sv_lastpage, NULL},
+		{"@ONLINE@", sv_online, NULL},
+		{"@NUMCONNS@", sv_numconns, NULL},
+		{"@CREDSEVER@", sv_credsever, NULL},
+		{"@TIMEVER@", sv_timever, NULL},
+		{"@FILESDNL@", sv_filesdnl, NULL},
+		{"@KBSDNL@", sv_kbsdnl, NULL},
+		{"@FILESUPL@", sv_filesupl, NULL},
+		{"@KBSUPL@", sv_kbsupl, NULL},
+		{"@TNLNUM@", sv_tnlnum, NULL},
+		{"@TNLMAX@", sv_tnlmax, NULL},
+		{"@UPASSEXP@", sv_upassexp, NULL},
+		{"@TCREDSPAID@", sv_tcredspaid, NULL},
+		{"@TCREDS@", sv_tcreds, NULL},
+		{"@TTIMEVER@", sv_ttimever, NULL},
+		{"@TFILESUPL@", sv_tfilesupl, NULL},
+		{"@TFILESDNL@", sv_tfilesdnl, NULL},
+		{"@TBYTESUPL@", sv_tbytesupl, NULL},
+		{"@TBYTESDNL@", sv_tbytesdnl, NULL},
+		{"@SIGMSGS@", sv_sigmsgs, NULL},
+		{"@EMSGS@", sv_emsgs, NULL},
+		{"@NMSGS@", sv_nmsgs, NULL},
+		{"@TCONNS@", sv_tconns, NULL},
+		{"", NULL, NULL}
+	};
+
+	int     i = 0;
+
+	while (table[i].varname[0]) {
+		out_addsubstvar (table[i].varname, table[i].varcalc);
+		i++;
+	}
 }
 
 
-void __out_setclear(int set, uint32 f)
+void
+__out_setclear (int set, uint32 f)
 {
-  if(set){
-    out_flags|=f;
-  } else out_flags&=~f;
+	if (set) {
+		out_flags |= f;
+	} else
+		out_flags &= ~f;
 
-  if(thisshm!=NULL && f&OFL_AFTERINPUT){
-    if(out_flags&OFL_AFTERINPUT)thisuseronl.flags|=OLF_AFTERINP;
-      else thisuseronl.flags&=~OLF_AFTERINP;
-  }
+	if (thisshm != NULL && f & OFL_AFTERINPUT) {
+		if (out_flags & OFL_AFTERINPUT)
+			thisuseronl.flags |= OLF_AFTERINP;
+		else
+			thisuseronl.flags &= ~OLF_AFTERINP;
+	}
 }

@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.5  2003/08/15 20:09:13  alexios
  * Fixed code to remove warnings.
  *
@@ -67,7 +70,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -89,91 +93,104 @@ static const char rcsinfo[] = "$Id$";
 #define FATAL 1
 
 static int errormessageflag;
-static int circular=0;
-static char *chan_unknown="[no channel]";
+static int circular = 0;
+static char *chan_unknown = "[no channel]";
 
-char * mkfname(char * fmt, ...);
+char   *mkfname (char *fmt, ...);
 
 static void
-bbserror(file,line,reason,format,parmlist)
-char *file,*reason,*format;
-int line;
-void *parmlist;
+bbserror (file, line, reason, format, parmlist)
+char   *file, *reason, *format;
+int     line;
+void   *parmlist;
 {
-  struct tm *dt;
-  time_t t;
-  char datetime[64];
-  FILE *fp;
+	struct tm *dt;
+	time_t  t;
+	char    datetime[64];
+	FILE   *fp;
 
-  if((fp=fopen(mkfname(ERRORFILE),"a"))==NULL)return;
-  t=time(0);
-  dt=localtime(&t);
-  strftime(datetime,sizeof(datetime),"%d/%m/%Y %H:%M:%S",dt);
-  fprintf(fp,"%s %s (%s:%d): %s, ",datetime,__module.progname,file,line,reason);
-  vfprintf(fp,format,parmlist);
-  fputc('\n',fp);
-  fclose(fp);
+	if ((fp = fopen (mkfname (ERRORFILE), "a")) == NULL)
+		return;
+	t = time (0);
+	dt = localtime (&t);
+	strftime (datetime, sizeof (datetime), "%d/%m/%Y %H:%M:%S", dt);
+	fprintf (fp, "%s %s (%s:%d): %s, ", datetime, __module.progname, file,
+		 line, reason);
+	vfprintf (fp, format, parmlist);
+	fputc ('\n', fp);
+	fclose (fp);
 }
 
 
 void
-_interror(char * file, int line, char * format, ...)
+_interror (char *file, int line, char *format, ...)
 {
-  char *chan;
-  va_list args;
-  va_start(args, format);
-  bbserror(file,line,"ERROR",format,args);
-  if(circular==0){
-    circular=1;
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(ERROR));
-    else audit(chan_unknown,AUDIT(ERROR));
-    circular=0;
-  }
-  va_end(args);
+	char   *chan;
+	va_list args;
+
+	va_start (args, format);
+	bbserror (file, line, "ERROR", format, args);
+	if (circular == 0) {
+		circular = 1;
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (ERROR));
+		else
+			audit (chan_unknown, AUDIT (ERROR));
+		circular = 0;
+	}
+	va_end (args);
 }
 
 
 void
-_logerror(char * file, int line, char * format, ...)
+_logerror (char *file, int line, char *format, ...)
 {
-  char *chan;
-  va_list args;
-  va_start(args, format);
-  bbserror(file,line,"ERROR",format,args);
-  va_end(args);
-  if(circular==0){
-    circular=1;
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(ERROR));
-    else audit(chan_unknown,AUDIT(ERROR));
-    circular=0;
-    if(errormessageflag)print(ERRORMESSAGE);
-  }
+	char   *chan;
+	va_list args;
+
+	va_start (args, format);
+	bbserror (file, line, "ERROR", format, args);
+	va_end (args);
+	if (circular == 0) {
+		circular = 1;
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (ERROR));
+		else
+			audit (chan_unknown, AUDIT (ERROR));
+		circular = 0;
+		if (errormessageflag)
+			print (ERRORMESSAGE);
+	}
 }
 
 
 void
-_fatal(char * file, int line, char * format, ...)
+_fatal (char *file, int line, char *format, ...)
 {
-  char *chan;
-  va_list args;
-  va_start(args, format);
-  bbserror(file,line,"FATAL",format,args);
-  va_end(args);
-  if(circular==0){
-    circular=1;
-    if(errormessageflag)print(FATALMESSAGE);
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(FATAL));
-    else audit(chan_unknown,AUDIT(FATAL));
-    circular=0;
-  }
-  exit(FATAL);
+	char   *chan;
+	va_list args;
+
+	va_start (args, format);
+	bbserror (file, line, "FATAL", format, args);
+	va_end (args);
+	if (circular == 0) {
+		circular = 1;
+		if (errormessageflag)
+			print (FATALMESSAGE);
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (FATAL));
+		else
+			audit (chan_unknown, AUDIT (FATAL));
+		circular = 0;
+	}
+	exit (FATAL);
 }
 
 
 void
-error_setnotify(int state)
+error_setnotify (int state)
 {
-  errormessageflag=state;
+	errormessageflag = state;
 }
 
 
@@ -183,72 +200,83 @@ error_setnotify(int state)
    error, too. */
 
 void
-_interrorsys(char * file, int line, int err, char * format, ...)
+_interrorsys (char *file, int line, int err, char *format, ...)
 {
-  char *chan;
-  char fmt[512];
-  va_list args;
-  va_start(args, format);
+	char   *chan;
+	char    fmt[512];
+	va_list args;
+
+	va_start (args, format);
 #ifdef HAVE_STRERROR
-  sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
+	sprintf (fmt, "%s (errno=%d, %s)", format, err, strerror (err));
 #else
-  sprintf(fmt,"%s (errno=%d)",format,err);
+	sprintf (fmt, "%s (errno=%d)", format, err);
 #endif
-  bbserror(file,line,"ERROR",fmt,args);
-  if(circular==0){
-    circular=1;
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(ERROR));
-    else audit(chan_unknown,AUDIT(ERROR));
-    circular=0;
-  }
-  va_end(args);
+	bbserror (file, line, "ERROR", fmt, args);
+	if (circular == 0) {
+		circular = 1;
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (ERROR));
+		else
+			audit (chan_unknown, AUDIT (ERROR));
+		circular = 0;
+	}
+	va_end (args);
 }
 
 
 void
-_logerrorsys(char * file, int line, int err, char * format, ...)
+_logerrorsys (char *file, int line, int err, char *format, ...)
 {
-  char *chan;
-  char fmt[512];
-  va_list args;
-  va_start(args, format);
+	char   *chan;
+	char    fmt[512];
+	va_list args;
+
+	va_start (args, format);
 #ifdef HAVE_STRERROR
-  sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
+	sprintf (fmt, "%s (errno=%d, %s)", format, err, strerror (err));
 #else
-  sprintf(fmt,"%s (errno=%d)",format,err);
+	sprintf (fmt, "%s (errno=%d)", format, err);
 #endif
-  bbserror(file,line,"ERROR",fmt,args);
-  va_end(args);
-  if(circular==0){
-    circular=1;
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(ERROR));
-    else audit(chan_unknown,AUDIT(ERROR));
-    circular=0;
-    if(errormessageflag)print(ERRORMESSAGE);
-  }
+	bbserror (file, line, "ERROR", fmt, args);
+	va_end (args);
+	if (circular == 0) {
+		circular = 1;
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (ERROR));
+		else
+			audit (chan_unknown, AUDIT (ERROR));
+		circular = 0;
+		if (errormessageflag)
+			print (ERRORMESSAGE);
+	}
 }
 
 
 void
-_fatalsys(char * file, int line, int err, char * format, ...)
+_fatalsys (char *file, int line, int err, char *format, ...)
 {
-  char fmt[512];
-  char *chan;
-  va_list args;
-  va_start(args, format);
+	char    fmt[512];
+	char   *chan;
+	va_list args;
+
+	va_start (args, format);
 #ifdef HAVE_STRERROR
-  sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
+	sprintf (fmt, "%s (errno=%d, %s)", format, err, strerror (err));
 #else
-  sprintf(fmt,"%s (errno=%d)",format,err);
+	sprintf (fmt, "%s (errno=%d)", format, err);
 #endif
-  bbserror(file,line,"FATAL",fmt,args);
-  va_end(args);
-  if(circular==0){
-    circular=1;
-    if(errormessageflag)print(FATALMESSAGE);
-    if((chan=getenv("CHANNEL"))!=NULL)audit(chan,AUDIT(FATAL));
-    else audit(chan_unknown,AUDIT(FATAL));
-    circular=0;
-  }
-  exit(FATAL);
+	bbserror (file, line, "FATAL", fmt, args);
+	va_end (args);
+	if (circular == 0) {
+		circular = 1;
+		if (errormessageflag)
+			print (FATALMESSAGE);
+		if ((chan = getenv ("CHANNEL")) != NULL)
+			audit (chan, AUDIT (FATAL));
+		else
+			audit (chan_unknown, AUDIT (FATAL));
+		circular = 0;
+	}
+	exit (FATAL);
 }

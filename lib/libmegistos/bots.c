@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.3  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.2  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -37,7 +40,8 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -53,29 +57,33 @@ static const char rcsinfo[] = "$Id$";
 
 /* Escape sequences like "\nXXX " where XXX is a three digit number */
 
-char *
-bot_escape(char *s)
+char   *
+bot_escape (char *s)
 {
-  char *cp;
-  for(cp=s;*cp;cp++){
-    if(strlen(cp)>=6 && (*cp)=='\n' && isdigit(*(cp+1)) &&
-       isdigit(*(cp+2)) && isdigit(*(cp+3)) && isspace(*(cp+4))){
-      *cp='\33';
-    }
-  }
-  return s;
-}
-      
+	char   *cp;
 
-char *
-bot_unescape(char *s)
+	for (cp = s; *cp; cp++) {
+		if (strlen (cp) >= 6 && (*cp) == '\n' && isdigit (*(cp + 1)) &&
+		    isdigit (*(cp + 2)) && isdigit (*(cp + 3)) &&
+		    isspace (*(cp + 4))) {
+			*cp = '\33';
+		}
+	}
+	return s;
+}
+
+
+char   *
+bot_unescape (char *s)
 {
-  char *cp;
-  for(cp=s;*cp;cp++){
-    if(strlen(cp)>=6 && (*cp)=='\33' && isdigit(*(cp+1)) &&
-       isdigit(*(cp+2)) && isdigit(*(cp+3)) && isspace(*(cp+4))){
-      *cp='\n';
-    }
-  }
-  return s;
+	char   *cp;
+
+	for (cp = s; *cp; cp++) {
+		if (strlen (cp) >= 6 && (*cp) == '\33' && isdigit (*(cp + 1))
+		    && isdigit (*(cp + 2)) && isdigit (*(cp + 3)) &&
+		    isspace (*(cp + 4))) {
+			*cp = '\n';
+		}
+	}
+	return s;
 }

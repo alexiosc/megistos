@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -58,7 +61,8 @@
  */
 
 
-static const char rcsinfo [] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -83,387 +87,411 @@ static const char rcsinfo [] = "$Id$";
 
 
 
-char           *msg_buffer;
-promptblock_t  *msg_cur=NULL;
-promptblock_t  *msg_last=NULL;
-promptblock_t  *msg_sys=NULL;
+char   *msg_buffer;
+promptblock_t *msg_cur = NULL;
+promptblock_t *msg_last = NULL;
+promptblock_t *msg_sys = NULL;
 
-static long       lastprompt;
+static long lastprompt;
 
-static char       postfix[80];
-int               msg_numlangs;
-char              msg_langnames[NUMLANGUAGES][64];
+static char postfix[80];
+int     msg_numlangs;
+char    msg_langnames[NUMLANGUAGES][64];
 
 
 void
-msg_init()
+msg_init ()
 {
-  FILE *langfp;
+	FILE   *langfp;
 
-  msg_numlangs=0;
-  if((langfp=fopen(mkfname(LANGUAGEFILE),"r"))!=NULL){
-    while(!feof(langfp)){
-      char line[1024];
-      
-      if(fgets(line,1024,langfp)){
-	char *cp=line;
-	char *nlp=strrchr(line,10);
-	
-	if(nlp)*nlp=0;
-	while(*cp && isspace(*cp))cp++;
-	if(*cp && *cp!='#')strcpy(msg_langnames[msg_numlangs++],cp);
-      }
-    }
-    fclose(langfp);
-  }
+	msg_numlangs = 0;
+	if ((langfp = fopen (mkfname (LANGUAGEFILE), "r")) != NULL) {
+		while (!feof (langfp)) {
+			char    line[1024];
+
+			if (fgets (line, 1024, langfp)) {
+				char   *cp = line;
+				char   *nlp = strrchr (line, 10);
+
+				if (nlp)
+					*nlp = 0;
+				while (*cp && isspace (*cp))
+					cp++;
+				if (*cp && *cp != '#')
+					strcpy (msg_langnames[msg_numlangs++],
+						cp);
+			}
+		}
+		fclose (langfp);
+	}
 }
 
 
 promptblock_t *
-msg_open(char *name)
+msg_open (char *name)
 {
-  char fname[256], magic[4];
-  long result;
+	char    fname[256], magic[4];
+	long    result;
 
-  msg_last=msg_cur;
-  msg_cur=(promptblock_t *)alcmem(sizeof(promptblock_t));
+	msg_last = msg_cur;
+	msg_cur = (promptblock_t *) alcmem (sizeof (promptblock_t));
 
-  sprintf(fname,"%s/%s.mbk", mkfname(MBKDIR), name);
-  if((msg_cur->handle=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open prompt file %s",fname);
-  }
+	sprintf (fname, "%s/%s.mbk", mkfname (MBKDIR), name);
+	if ((msg_cur->handle = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open prompt file %s", fname);
+	}
 
-  if (fread(magic,sizeof(magic),1,msg_cur->handle)!=1){
-    error_fatalsys("Unable to read magic number from prompt file %s",fname);
-  }
+	if (fread (magic, sizeof (magic), 1, msg_cur->handle) != 1) {
+		error_fatalsys
+		    ("Unable to read magic number from prompt file %s", fname);
+	}
 
-  if(strncmp(magic,MBK_MAGIC,4)){
-    error_fatal("Corrupted file %s. Remove it and use msgidx to recreate.",
-		fname);
-  }
+	if (strncmp (magic, MBK_MAGIC, 4)) {
+		error_fatal
+		    ("Corrupted file %s. Remove it and use msgidx to recreate.",
+		     fname);
+	}
 
-  if (fread(&(msg_cur->indexsize),sizeof(long),1,msg_cur->handle)!=1){
-    error_fatalsys("Corrupted prompt file %s (indexcount)",fname);
-  }
+	if (fread (&(msg_cur->indexsize), sizeof (long), 1, msg_cur->handle) !=
+	    1) {
+		error_fatalsys ("Corrupted prompt file %s (indexcount)",
+				fname);
+	}
 
-  if (fread(&(msg_cur->langoffs),
-	    sizeof(msg_cur->langoffs),1,
-	    msg_cur->handle)!=1){
-    error_fatalsys("Corrupted prompt file %s (langoffs)",fname);
-  }
+	if (fread (&(msg_cur->langoffs),
+		   sizeof (msg_cur->langoffs), 1, msg_cur->handle) != 1) {
+		error_fatalsys ("Corrupted prompt file %s (langoffs)", fname);
+	}
 
-  msg_cur->indexsize++;
-  msg_cur->index=(idx_t *)alcmem(msg_cur->indexsize*sizeof(idx_t));
-  result=fread(msg_cur->index,
-	       sizeof(idx_t),
-	       msg_cur->indexsize,
-	       msg_cur->handle);
-  if(result!=msg_cur->indexsize){
-    error_fatal("Corrupted prompt file %s (index)",fname);
-  }
+	msg_cur->indexsize++;
+	msg_cur->index =
+	    (idx_t *) alcmem (msg_cur->indexsize * sizeof (idx_t));
+	result =
+	    fread (msg_cur->index, sizeof (idx_t), msg_cur->indexsize,
+		   msg_cur->handle);
+	if (result != msg_cur->indexsize) {
+		error_fatal ("Corrupted prompt file %s (index)", fname);
+	}
 
-  msg_cur->indexsize--;
-  msg_cur->language=0;
-  sprintf(msg_cur->fname,"%s.mbk",name);
-  lastprompt=-1;
+	msg_cur->indexsize--;
+	msg_cur->language = 0;
+	sprintf (msg_cur->fname, "%s.mbk", name);
+	lastprompt = -1;
 
-  if(thisshm)msg_setlanguage(thisuseracc.language);
+	if (thisshm)
+		msg_setlanguage (thisuseracc.language);
 
-  return msg_cur;
+	return msg_cur;
 }
 
 
 void
-msg_set(promptblock_t *blk)
+msg_set (promptblock_t * blk)
 {
-  msg_last=msg_cur;
-  msg_cur=blk;
-  lastprompt=-1;
+	msg_last = msg_cur;
+	msg_cur = blk;
+	lastprompt = -1;
 }
 
 
 void
-msg_reset()
+msg_reset ()
 {
-  if(msg_last==NULL)return;
-  msg_cur=msg_last;
-  lastprompt=-1;
+	if (msg_last == NULL)
+		return;
+	msg_cur = msg_last;
+	lastprompt = -1;
 }
 
 
 
 static char *
-msg_botprocess(char *id, int num, int lang, char *s)
+msg_botprocess (char *id, int num, int lang, char *s)
 {
-  static char *botbuf=NULL;
-  char tmp[80];
-  char *cp=s;
-  int count=0;
+	static char *botbuf = NULL;
+	char    tmp[80];
+	char   *cp = s;
+	int     count = 0;
 
-  if(botbuf==NULL){
-    botbuf=alcmem(256<<10); /* 256k, allocated on demand only */
-  }
-  
-  bzero(botbuf,sizeof(botbuf));
-  
-  /* xxx will be updated later */
-  sprintf(botbuf,"%03d xxx %s %s %d %d\n",
-	  BTS_PROMPT_STARTS,
-	  msg_cur->fname,id,num,lang);
+	if (botbuf == NULL) {
+		botbuf = alcmem (256 << 10);	/* 256k, allocated on demand only */
+	}
 
-  bot_escape(s);		/* Escape result code-like sequences */
+	bzero (botbuf, sizeof (botbuf));
 
-  for(cp=s;*cp;cp++){
-    if(*cp=='%'){		/* Escape format specifiers */
-      char *sp=cp;
-    
-      if(*(cp+1)=='%'){
-	cp++;
-	continue;
-      }
+	/* xxx will be updated later */
+	sprintf (botbuf, "%03d xxx %s %s %d %d\n",
+		 BTS_PROMPT_STARTS, msg_cur->fname, id, num, lang);
 
-      for(cp++;(*cp) && strcspn(cp,"diouxXeEfgcspn");cp++);
-      
-      if(*cp){
-	count++;
-	sprintf(tmp,"%03d ",BTS_PROMPT_ARGUMENT);
-	strcat(botbuf,tmp);
-	strncat(botbuf,sp,cp-sp+1);
-	strcat(botbuf,"\n");
-      }
+	bot_escape (s);		/* Escape result code-like sequences */
 
-      *sp=1;			/* 'mark' the original format specifier */
-    }
-  }
+	for (cp = s; *cp; cp++) {
+		if (*cp == '%') {	/* Escape format specifiers */
+			char   *sp = cp;
 
-  sprintf(tmp,"%03d %03d",BTS_PROMPT_STARTS,count);
-  memcpy(botbuf,tmp,strlen(tmp)); /* Copy just the "601 xxx" part */
-  sprintf(tmp,"%03d ",BTS_PROMPT_TEXT);
-  strcat(botbuf,tmp);
-  strcat(botbuf,s);
-  sprintf(tmp,"\n%03d\n",BTS_PROMPT_ENDS);
-  strcat(botbuf,tmp);
+			if (*(cp + 1) == '%') {
+				cp++;
+				continue;
+			}
 
-  return botbuf;
+			for (cp++; (*cp) && strcspn (cp, "diouxXeEfgcspn");
+			     cp++);
+
+			if (*cp) {
+				count++;
+				sprintf (tmp, "%03d ", BTS_PROMPT_ARGUMENT);
+				strcat (botbuf, tmp);
+				strncat (botbuf, sp, cp - sp + 1);
+				strcat (botbuf, "\n");
+			}
+
+			*sp = 1;	/* 'mark' the original format specifier */
+		}
+	}
+
+	sprintf (tmp, "%03d %03d", BTS_PROMPT_STARTS, count);
+	memcpy (botbuf, tmp, strlen (tmp));	/* Copy just the "601 xxx" part */
+	sprintf (tmp, "%03d ", BTS_PROMPT_TEXT);
+	strcat (botbuf, tmp);
+	strcat (botbuf, s);
+	sprintf (tmp, "\n%03d\n", BTS_PROMPT_ENDS);
+	strcat (botbuf, tmp);
+
+	return botbuf;
 }
 
 
-char *
-msg_getl_bot(int num, int language, int checkbot)
+char   *
+msg_getl_bot (int num, int language, int checkbot)
 {
-  long offset=0,size;
-  int oldnum;
-  char *id=NULL;
+	long    offset = 0, size;
+	int     oldnum;
+	char   *id = NULL;
 
-  language=language%(NUMLANGUAGES);
+	language = language % (NUMLANGUAGES);
 
-  if(!msg_cur)return NULL;
-  oldnum=num;
-  num+=msg_cur->langoffs[language];
+	if (!msg_cur)
+		return NULL;
+	oldnum = num;
+	num += msg_cur->langoffs[language];
 
-  if(num==lastprompt)return msg_buffer;
-  if(!msg_buffer)msg_buffer=alcmem(MSGBUFSIZE);
+	if (num == lastprompt)
+		return msg_buffer;
+	if (!msg_buffer)
+		msg_buffer = alcmem (MSGBUFSIZE);
 
-  if(num<0||num>msg_cur->indexsize){
-    error_fatal("Prompt %s (lang %d, index %d) out of range (1-%d) in %s",
-		id,num,language,msg_cur->indexsize,msg_cur->fname);
-  }
+	if (num < 0 || num > msg_cur->indexsize) {
+		error_fatal
+		    ("Prompt %s (lang %d, index %d) out of range (1-%d) in %s",
+		     id, num, language, msg_cur->indexsize, msg_cur->fname);
+	}
 
-  id=msg_cur->index[num-1].id;
-  offset=msg_cur->index[num-1].offset;
-  if(fseek(msg_cur->handle,offset,SEEK_SET)){
-    error_fatalsys("Failed to fseek() prompt %s (#%d) location %ld in %s",
-		   id,oldnum,offset,msg_cur->fname);
-  }
-  size=msg_cur->index[num].offset-offset;
-  if(size>=MSGBUFSIZE)size=MSGBUFSIZE-1;
-  size=MSGBUFSIZE-1;
-  if(fread(msg_buffer,size,1,msg_cur->handle)!=1){
+	id = msg_cur->index[num - 1].id;
+	offset = msg_cur->index[num - 1].offset;
+	if (fseek (msg_cur->handle, offset, SEEK_SET)) {
+		error_fatalsys
+		    ("Failed to fseek() prompt %s (#%d) location %ld in %s",
+		     id, oldnum, offset, msg_cur->fname);
+	}
+	size = msg_cur->index[num].offset - offset;
+	if (size >= MSGBUFSIZE)
+		size = MSGBUFSIZE - 1;
+	size = MSGBUFSIZE - 1;
+	if (fread (msg_buffer, size, 1, msg_cur->handle) != 1) {
 #if 0
-    error_fatal("Error reading prompt %s (index %d, lang %d) in %s (s=%ld i=%ld o=%ld)",
-		msg_cur->index[num].id,
-		oldnum,language,
-		msg_cur->fname,(void *)size,
-		msg_cur->index[num].offset,offset);
+		error_fatal
+		    ("Error reading prompt %s (index %d, lang %d) in %s (s=%ld i=%ld o=%ld)",
+		     msg_cur->index[num].id, oldnum, language, msg_cur->fname,
+		     (void *) size, msg_cur->index[num].offset, offset);
 #endif
-  }
-  lastprompt=num;
+	}
+	lastprompt = num;
 
-  /* If this is a bot, format the prompt for it. */
+	/* If this is a bot, format the prompt for it. */
 
-  if(checkbot && (out_flags&OFL_ISBOT)){
-    lastprompt=-1;
-    return msg_botprocess(id,num,language,msg_buffer);
-  }
+	if (checkbot && (out_flags & OFL_ISBOT)) {
+		lastprompt = -1;
+		return msg_botprocess (id, num, language, msg_buffer);
+	}
 
-  return msg_buffer;
+	return msg_buffer;
 }
 
 
-char *
-msg_getunitl(int num,int value,int language)
+char   *
+msg_getunitl (int num, int value, int language)
 {
-  long offset,size;
-  char *id=NULL;
+	long    offset, size;
+	char   *id = NULL;
 
-  postfix[0]=0;
-  num+=(value!=1)+msg_cur->langoffs[language];
-  if(num<1||num>msg_cur->indexsize){
-    error_fatal("Prompt %s (#%d) out of range (1-%d) in file %s",
-	  id,num,msg_cur->indexsize,msg_cur->fname,0,0,0);
-  }
-  offset=msg_cur->index[num-1].offset;
-  if((size=msg_cur->index[num].offset-offset)>79)return postfix;
-  if(fseek(msg_cur->handle,offset,SEEK_SET)){
-    error_fatalsys("Failed to fseek() prompt %s location %ld in file %s",
-	  msg_cur->index[num].id,offset,msg_cur->fname);
-  }
-  if(fread(postfix,size,1,msg_cur->handle)!=1){
-    error_fatalsys("Error reading prompt %s (#%d) in file %s %d %d %d",
-		   msg_cur->index[num].id,
-		   num,
-		   msg_cur->fname,
-		   size,
-		   msg_cur->index[num].offset,
-		   offset,0);
-  }
-  return postfix;
+	postfix[0] = 0;
+	num += (value != 1) + msg_cur->langoffs[language];
+	if (num < 1 || num > msg_cur->indexsize) {
+		error_fatal ("Prompt %s (#%d) out of range (1-%d) in file %s",
+			     id, num, msg_cur->indexsize, msg_cur->fname, 0, 0,
+			     0);
+	}
+	offset = msg_cur->index[num - 1].offset;
+	if ((size = msg_cur->index[num].offset - offset) > 79)
+		return postfix;
+	if (fseek (msg_cur->handle, offset, SEEK_SET)) {
+		error_fatalsys
+		    ("Failed to fseek() prompt %s location %ld in file %s",
+		     msg_cur->index[num].id, offset, msg_cur->fname);
+	}
+	if (fread (postfix, size, 1, msg_cur->handle) != 1) {
+		error_fatalsys
+		    ("Error reading prompt %s (#%d) in file %s %d %d %d",
+		     msg_cur->index[num].id, num, msg_cur->fname, size,
+		     msg_cur->index[num].offset, offset, 0);
+	}
+	return postfix;
 }
 
 
 void
-msg_close(promptblock_t *blk)
+msg_close (promptblock_t * blk)
 {
-  if(!msg_cur)return;
-  if(blk && blk->fname[0]){
-    fclose(blk->handle);
-    free(blk->index);
-    blk->fname[0]=0;
-    free(blk);
-    blk=NULL;
-    if (msg_buffer) {
-      free(msg_buffer);
-      msg_buffer=NULL;
-    }
-  }
+	if (!msg_cur)
+		return;
+	if (blk && blk->fname[0]) {
+		fclose (blk->handle);
+		free (blk->index);
+		blk->fname[0] = 0;
+		free (blk);
+		blk = NULL;
+		if (msg_buffer) {
+			free (msg_buffer);
+			msg_buffer = NULL;
+		}
+	}
 }
 
 
 static char *
-lastwd(char *s)                               
+lastwd (char *s)
 {
-  char *cp;
-  
-  if(!s || !(*s))return(s);
-  for(cp=s+strlen(s)-1;cp>=s && isspace(*cp);cp--){
-    if(cp==s)return(cp);
-  }
-  for (;cp>=s && !isspace(*cp);cp--){
-    if(cp==s)return(cp);
-  }
-  return(cp+1);
+	char   *cp;
+
+	if (!s || !(*s))
+		return (s);
+	for (cp = s + strlen (s) - 1; cp >= s && isspace (*cp); cp--) {
+		if (cp == s)
+			return (cp);
+	}
+	for (; cp >= s && !isspace (*cp); cp--) {
+		if (cp == s)
+			return (cp);
+	}
+	return (cp + 1);
 }
 
 
 long
-msg_long(int num,long floor,long ceiling)
+msg_long (int num, long floor, long ceiling)
 {
-  long temp;
-  char *id;
+	long    temp;
+	char   *id;
 
-  id=msg_cur->index[num].id;
-  if(sscanf(lastwd(msg_get_nobot(num)),"%ld",&temp)){
-    if(temp>=floor && temp<=ceiling)return(temp);
-    error_fatal("Long numeric option %s (#%d) in file %s is out of range",
-	   id,num,msg_cur->fname);
-  }
-  error_fatal("Long numeric option %s (#%d) in file %s has bad value",
-	      id,num,msg_cur->fname);
-  return -1;
+	id = msg_cur->index[num].id;
+	if (sscanf (lastwd (msg_get_nobot (num)), "%ld", &temp)) {
+		if (temp >= floor && temp <= ceiling)
+			return (temp);
+		error_fatal
+		    ("Long numeric option %s (#%d) in file %s is out of range",
+		     id, num, msg_cur->fname);
+	}
+	error_fatal ("Long numeric option %s (#%d) in file %s has bad value",
+		     id, num, msg_cur->fname);
+	return -1;
 }
 
 
 unsigned
-msg_hex(int num,unsigned floor,unsigned ceiling)
+msg_hex (int num, unsigned floor, unsigned ceiling)
 {
-  long temp;
-  char *id;
-  
-  id=msg_cur->index[num].id;
-  if(sscanf(lastwd(msg_get_nobot(num)),"%lx",&temp)){
-    if(temp>=floor && temp<=ceiling)return((unsigned)temp);
-    error_fatal("Hex numeric option %s (#%d) in file %s is out of range",
-	  id,num,msg_cur->fname);
-  }
-  error_fatal("Hex numeric option %s (#%d) in file %s has bad value",
-	id,num,msg_cur->fname);
-  return -1;
+	long    temp;
+	char   *id;
+
+	id = msg_cur->index[num].id;
+	if (sscanf (lastwd (msg_get_nobot (num)), "%lx", &temp)) {
+		if (temp >= floor && temp <= ceiling)
+			return ((unsigned) temp);
+		error_fatal
+		    ("Hex numeric option %s (#%d) in file %s is out of range",
+		     id, num, msg_cur->fname);
+	}
+	error_fatal ("Hex numeric option %s (#%d) in file %s has bad value",
+		     id, num, msg_cur->fname);
+	return -1;
 }
 
 
 int
-msg_int(int num, int floor, int ceiling)            
+msg_int (int num, int floor, int ceiling)
 {
-  return((int)msg_long(num,floor+0L,ceiling+0L));
+	return ((int) msg_long (num, floor + 0L, ceiling + 0L));
 }
 
 
 int
-msg_bool(int num)                           
+msg_bool (int num)
 {
-  int rc=0;
-  char *id;
+	int     rc = 0;
+	char   *id;
 
-  id=msg_cur->index[num].id;
-  switch(toupper(*lastwd(msg_get_nobot(num)))){
-  case 'Y':
-    rc=1;
-  case 'N':
-    return(rc);
-  }
-  error_fatal("Yes/No option %s (#%d) in file %s has bad value",
-	id,num,msg_cur->fname,0,0,0,0);
-  return -1;
+	id = msg_cur->index[num].id;
+	switch (toupper (*lastwd (msg_get_nobot (num)))) {
+	case 'Y':
+		rc = 1;
+	case 'N':
+		return (rc);
+	}
+	error_fatal ("Yes/No option %s (#%d) in file %s has bad value",
+		     id, num, msg_cur->fname, 0, 0, 0, 0);
+	return -1;
 }
 
 
 char
-msg_char(int num)
+msg_char (int num)
 {
-  return(*lastwd(msg_get_nobot(num)));
+	return (*lastwd (msg_get_nobot (num)));
 }
 
 
-char *
-msg_string(int msgnum)                     
+char   *
+msg_string (int msgnum)
 {
-  char *cp,*mp;
-  
-  cp=alcmem(strlen(mp=msg_get_nobot(msgnum))+1);
-  strcpy(cp,mp);
-  return(cp);
+	char   *cp, *mp;
+
+	cp = alcmem (strlen (mp = msg_get_nobot (msgnum)) + 1);
+	strcpy (cp, mp);
+	return (cp);
 }
 
 
 int
-msg_token(int msgnum,char *toklst, ...)
+msg_token (int msgnum, char *toklst, ...)
 {
-  char **ppt,*token;
-  int i;
-  
-  token=lastwd(msg_get_nobot(msgnum));
-  for(ppt=&toklst,i=1;*ppt!=NULL;ppt++,i++){
-    if(strcmp(token,*ppt)==0)return i;
-  }
-  return(0);
+	char  **ppt, *token;
+	int     i;
+
+	token = lastwd (msg_get_nobot (msgnum));
+	for (ppt = &toklst, i = 1; *ppt != NULL; ppt++, i++) {
+		if (strcmp (token, *ppt) == 0)
+			return i;
+	}
+	return (0);
 }
 
 
 void
-msg_setlanguage(int l)
+msg_setlanguage (int l)
 {
-  if(!msg_cur)return;
-  msg_cur->language=(l-1)%(NUMLANGUAGES);
-  msg_sys->language=(l-1)%(NUMLANGUAGES);
-  lastprompt=-1;
+	if (!msg_cur)
+		return;
+	msg_cur->language = (l - 1) % (NUMLANGUAGES);
+	msg_sys->language = (l - 1) % (NUMLANGUAGES);
+	lastprompt = -1;
 }

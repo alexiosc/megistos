@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 11:40:07  alexios
+ * Ran indent(1) on all C source to improve readability.
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -56,7 +59,8 @@
  */
 
 
-static const char rcsinfo [] = "$Id$";
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -70,120 +74,133 @@ static const char rcsinfo [] = "$Id$";
 #include "bbs.h"
 
 
-struct channeldef *channels=NULL;
-struct channeldef *chan_last=NULL;
-int                chan_count=0;
+struct channeldef *channels = NULL;
+struct channeldef *chan_last = NULL;
+int     chan_count = 0;
 
 
 int
-chancmp(const void *a, const void *b)
+chancmp (const void *a, const void *b)
 {
-  return ((struct channeldef *)a)->channel-((struct channeldef *)b)->channel;
+	return ((struct channeldef *) a)->channel -
+	    ((struct channeldef *) b)->channel;
 }
 
 
 void
-chan_init()
+chan_init ()
 {
-  FILE *fp;
-  char magic[256];
+	FILE   *fp;
+	char    magic[256];
 
-  if((fp=fopen(mkfname(CHANDEFFILE),"r"))==NULL){
-    error_fatalsys("Unable to open %s",mkfname(CHANDEFFILE));
-  }
+	if ((fp = fopen (mkfname (CHANDEFFILE), "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", mkfname (CHANDEFFILE));
+	}
 
-  /* Check the magic number */
-  bzero(magic,sizeof(magic));
-  if(fread(magic,strlen(CHANNEL_MAGIC),1,fp)!=1){
-    error_fatalsys("Unable to read magic number from %s",mkfname(CHANDEFFILE));
-  }
-  if(strcmp(magic,CHANNEL_MAGIC)){
-    error_fatal("Corrupted channel table file (%s), use mkchan to recreate it.",
-	  mkfname(CHANDEFFILE));
-  }
+	/* Check the magic number */
+	bzero (magic, sizeof (magic));
+	if (fread (magic, strlen (CHANNEL_MAGIC), 1, fp) != 1) {
+		error_fatalsys ("Unable to read magic number from %s",
+				mkfname (CHANDEFFILE));
+	}
+	if (strcmp (magic, CHANNEL_MAGIC)) {
+		error_fatal
+		    ("Corrupted channel table file (%s), use mkchan to recreate it.",
+		     mkfname (CHANDEFFILE));
+	}
 
-  if(channels){
-    free(channels);
-    chan_count=0;
-  }
-  if(fread(&chan_count,sizeof(chan_count),1,fp)!=1){
-    error_fatalsys("Unable to read %s",mkfname(CHANDEFFILE));
-  }
+	if (channels) {
+		free (channels);
+		chan_count = 0;
+	}
+	if (fread (&chan_count, sizeof (chan_count), 1, fp) != 1) {
+		error_fatalsys ("Unable to read %s", mkfname (CHANDEFFILE));
+	}
 
-  if((channels=alcmem(sizeof(struct channeldef)*chan_count))==NULL){
-    error_fatalsys("Unable to allocate memory for channel table.",
-	  mkfname(CHANDEFFILE));
-  }
+	if ((channels =
+	     alcmem (sizeof (struct channeldef) * chan_count)) == NULL) {
+		error_fatalsys ("Unable to allocate memory for channel table.",
+				mkfname (CHANDEFFILE));
+	}
 
-  if(fread(channels,sizeof(struct channeldef),chan_count,fp)!=chan_count){
-    error_fatalsys("Unable to read %s",mkfname(CHANDEFFILE));
-  }
+	if (fread (channels, sizeof (struct channeldef), chan_count, fp) !=
+	    chan_count) {
+		error_fatalsys ("Unable to read %s", mkfname (CHANDEFFILE));
+	}
 
-  fclose(fp);
-  chan_last=channels;
+	fclose (fp);
+	chan_last = channels;
 }
 
 
 uint32
-chan_getnum(char *tty)
+chan_getnum (char *tty)
 {
-  int i;
+	int     i;
 
-  if(chan_last && !strcmp(chan_last->ttyname,tty))
-    return chan_last->channel;
-  for(i=0;i<chan_count;i++){
-    if(!strcmp(channels[i].ttyname,tty)){
-      chan_last=&channels[i];
-      return channels[i].channel;
-    }
-  }
-  return -1;
+	if (chan_last && !strcmp (chan_last->ttyname, tty))
+		return chan_last->channel;
+	for (i = 0; i < chan_count; i++) {
+		if (!strcmp (channels[i].ttyname, tty)) {
+			chan_last = &channels[i];
+			return channels[i].channel;
+		}
+	}
+	return -1;
 }
 
 
 uint32
-chan_getindex(char *tty)
+chan_getindex (char *tty)
 {
-  int i;
+	int     i;
 
-  for(i=0;i<chan_count;i++){
-    if(!strcmp(channels[i].ttyname,tty)){
-      chan_last=&channels[i];
-      return i;
-    }
-  }
-  return -1;
+	for (i = 0; i < chan_count; i++) {
+		if (!strcmp (channels[i].ttyname, tty)) {
+			chan_last = &channels[i];
+			return i;
+		}
+	}
+	return -1;
 }
 
 
-char *
-chan_getname(uint32 num)
+char   *
+chan_getname (uint32 num)
 {
-  struct channeldef *temp, key;
+	struct channeldef *temp, key;
 
-  key.channel=num;
-  if(chan_last && chan_last->channel==num) return chan_last->ttyname;
-  temp=bsearch(&key,channels,chan_count,sizeof(struct channeldef),chancmp);
-  if(!temp)return NULL;
-  chan_last=temp;
-  return temp->ttyname;
+	key.channel = num;
+	if (chan_last && chan_last->channel == num)
+		return chan_last->ttyname;
+	temp =
+	    bsearch (&key, channels, chan_count, sizeof (struct channeldef),
+		     chancmp);
+	if (!temp)
+		return NULL;
+	chan_last = temp;
+	return temp->ttyname;
 }
 
 
 uint32
-chan_telnetlinecount()
+chan_telnetlinecount ()
 {
-  int i, retval;
+	int     i, retval;
 
-  for(i=0,retval=0;i<chan_count;i++){
-    if(channels[i].flags&TTF_TELNET){
-      channel_status_t status;
-      channel_getstatus(channels[i].ttyname,&status);
-      if(strcmp(status.user,"[NO-USER]") ||
-	 (status.result!=LSR_INIT && status.result!=LSR_OK
-	  && status.result!=LSR_FAIL && status.result!=LSR_LOGOUT
-	  && status.result!=LSR_FAIL))retval++;
-    }
-  }
-  return retval;
+	for (i = 0, retval = 0; i < chan_count; i++) {
+		if (channels[i].flags & TTF_TELNET) {
+			channel_status_t status;
+
+			channel_getstatus (channels[i].ttyname, &status);
+			if (strcmp (status.user, "[NO-USER]") ||
+			    (status.result != LSR_INIT &&
+			     status.result != LSR_OK &&
+			     status.result != LSR_FAIL &&
+			     status.result != LSR_LOGOUT &&
+			     status.result != LSR_FAIL))
+				retval++;
+		}
+	}
+	return retval;
 }
