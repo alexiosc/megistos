@@ -5,6 +5,7 @@
 Makefile
 Makefile.in
 libmegistos.la
+megistos-config
 version.h
 version.mk
 visual
