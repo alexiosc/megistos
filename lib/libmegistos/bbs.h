@@ -41,6 +41,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/28 22:27:04  alexios
+ * Added gettext.h inclusion.
+ *
  * Revision 1.4  2003/09/27 20:27:45  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -70,6 +73,8 @@
 #define BBS_H
 
 #include <bbsinclude.h>
+
+#include "gettext.h"
 
 #include "config.h"
 #include "errors.h"
