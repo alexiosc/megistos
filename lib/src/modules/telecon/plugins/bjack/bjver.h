@@ -3,5 +3,5 @@
 #define BJ_MAJORVERSION "0"
 #define BJ_MINORVERSION "7"
 #define BJ_COMPILED_BY  "bbs@vennea"
-#define BJ_MAKE_NUMBER  "298"
-#define BJ_DATE         "01-04-22 17:53"
+#define BJ_MAKE_NUMBER  "299"
+#define BJ_DATE         "01-04-23 10:38"
