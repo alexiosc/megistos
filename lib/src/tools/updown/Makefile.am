@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/25 13:37:32  alexios
+# Added BUILT_SOURCES for the two message blocks.
+#
 # Revision 1.2  2003/12/23 23:21:20  alexios
 # Minor simplifications.
 #
@@ -11,6 +14,8 @@
 #
 
 PROGNAMES = updown
+
+BUILT_SOURCES = mbk_updown.h mbk_archivers.h
 
 updown_SOURCES = \
 	download.c \
