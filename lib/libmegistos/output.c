@@ -28,6 +28,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:14:04  alexios
+ * Rationalised the RCS/CVS ident(1) strings. Fixed issues with
+ * relatively recent versions of the stdarg.h header file that caused
+ * syntax errors.
+ *
  * Revision 1.3  2001/04/22 14:49:05  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -81,10 +86,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -423,7 +425,7 @@ void *parmlist;
   }
 }
 
-void print();
+void print(char *buf, ...);
 
 
 static void
@@ -476,26 +478,22 @@ void *parmlist;
 
 
 void
-print(buf,va_alist)
-char *buf;
-va_dcl
+print(char *buf, ...)
 {
   va_list args;
 
-  va_start(args);
+  va_start(args, buf);
   printexpand(buf,args);
   va_end(args);
 }
 
 
 void
-sprint(stg,buf,va_alist)
-char *stg,*buf;
-va_dcl
+sprint(char * stg, char * buf, ...)
 {
   va_list args;
 
-  va_start(args);
+  va_start(args, buf);
   sprintexpand(stg,buf,args);
   va_end(args);
 }
@@ -503,41 +501,32 @@ va_dcl
 
 
 void
-prompt(num,va_alist)
-int num;
-va_dcl
+prompt(int num, ...)
 {
   va_list args;
   char *s=msg_getl_bot(num,(msg_cur->language),1);
 
-  va_start(args);
+  va_start(args, num);
   printexpand(s,args);
   va_end(args);
 }
 
 
 void
-sprompt(stg,num,va_alist)
-char *stg;
-int num;
-va_dcl
+sprompt(char *stg, int num, ...)
 {
   va_list args;
   char *s=msg_getl_bot(num,(msg_cur->language),1);
 
   inp_acceptinjoth();
-  va_start(args);
+  va_start(args, num);
   sprintexpand(stg,s,args);
   va_end(args);
 }
 
 
 char *
-sprompt_other(ushm,stg,num,va_alist)
-struct shmuserrec *ushm;
-char *stg;
-int num;
-va_dcl
+sprompt_other(struct shmuserrec * ushm, char *stg, int num, ...)
 {
   va_list args;
   char *s;
@@ -547,7 +536,7 @@ va_dcl
   else out_flags&=~OFL_ISBOT;
 
   s=msg_getl_bot(num,ushm->acc.language-1,1);
-  va_start(args);
+  va_start(args, num);
   sprintexpand(stg,s,args);
   va_end(args);
   out_flags=old_flags;
