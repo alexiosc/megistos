@@ -30,6 +30,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/23 08:19:56  alexios
+ * Fixed MetaBBS conditional compilation issues. Removed references to
+ * sys_errlist[], which is deprecated, replacing them with calls to
+ * strerror(). Fixed #include directives.
+ *
  * Revision 1.6  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -136,9 +141,9 @@ static const char rcsinfo[] = "$Id$";
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_signup.h>
-#include <megistos/mbk_login.h>
-#include <megistos/bbslogin.h>
+#include <mbk/mbk_signup.h>
+#include <mbk/mbk_login.h>
+#include "bbslogin.h"
 
 
 #define STDIN  0
@@ -318,14 +323,14 @@ mkinjoth ()
 
 		error_fatal
 		    ("Unable to allocate IPC message queue (errno=%d, %s)", i,
-		     sys_errlist[i]);
+		     strerror (i));
 	}
 
 	if (msgctl (user.injothqueue, IPC_STAT, &buf)) {
 		int     i = errno;
 
 		error_fatal ("Unable to IPC_STAT injoth queue (errno=%d, %s)",
-			     i, sys_errlist[i]);
+			     i, strerror (i));
 	}
 
 	buf.msg_perm.uid = uid;
@@ -862,6 +867,8 @@ lowerc (char *s)
 }
 
 
+#ifdef HAVE_METABBS
+
 static char *magic_spaces = " \t  \t    \t        \t                \t\n";
 
 static int
@@ -891,6 +898,8 @@ check_interbbs ()
 	return 0;
 }
 
+#endif /* HAVE_METABBS */
+
 
 void
 authenticate ()
@@ -898,9 +907,14 @@ authenticate ()
 	struct passwd *passwd, pass;
 	char    status = 0, filename[256];
 	FILE   *fp;
-	int     givenprompt = 0, strikes = 0, metabbs_strikes = 0, signup = 0;
+	int     givenprompt = 0, strikes = 0, signup = 0;
 	int     defaultansi = (chan_last->flags & TTF_ANSI) != 0;
 	channel_status_t linestatus;
+       
+#ifdef HAVE_METABBS
+	int metabbs_strikes = 0;
+#endif /* HAVE_METABBS */
+
 
 	/* Delay so that b.a.d comms packages have enough time to start reading the
 	   port after the connection. This isn't guaranteed to catch everything, but we
