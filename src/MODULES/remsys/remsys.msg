@@ -2460,191 +2460,32 @@ User disconnected.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----SOUP---
-
-
-
-
-
-
-RSSRCHVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m„¨œ¬¤˜ ™á©ª ›œ›¦£â¤à¤ ®¨©«é¤[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+RSSRCHVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mSearch user database[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  –œ¬›é¤¬£¦ . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             ³ [0m
-[30;47m ³  ‘ç¤Ÿ£˜  . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@15;15;2s[47;37m                     ³ [0m
-[30;47m ³  ¤¦£˜«œ§é¤¬£¦ . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
-[30;47m ³  „«˜ ¨œå˜ . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
-[30;47m ³  ƒ œçŸ¬¤© (1/2) . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
-[30;47m ³  ƒ œçŸ¬¤© (2/2)  . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
-[30;47m ³  ’¢â­à¤¦  . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             ³ [0m
-[30;47m ³  “§¦¢¦š ©«ãª  . . . . . . .  [0;30;46m @2;" |="l [47m  [0;30;46m @14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|€š¤à©«¦"l [1;47;37m                      ³ [0m
-[30;47m ³  †¢ ¡å˜  . . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@2;0;99;0n[47;37m                                  ³ [0m
-[30;47m ³  ”ç¢¦ . . . . . . . . . . .  [0;30;46m @2;" |="l [47m  [46m @7;"€¤›¨˜ª|‚¬¤˜å¡˜"l [1;47;37m                             ³ [0m
-[30;47m ³  Credits › ˜Ÿâ© £˜ «é¨˜  . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           ³ [0m
-[30;47m ³  PAID credits àª «é¨˜ . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           ³ [0m
+[30;47m ³  Username  . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             ³ [0m
+[30;47m ³  Password . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@15;15;2s[47;37m                     ³ [0m
+[30;47m ³  Real name . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
+[30;47m ³  Company  . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
+[30;47m ³  Address (1/2) . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
+[30;47m ³  Address (2/2)  . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      ³ [0m
+[30;47m ³  Phone . . . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             ³ [0m
+[30;47m ³  Computer type  . . . . . .  [0;30;46m @2;" |="l [47m  [0;30;46m @14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|Unknown"l [1;47;37m                      ³ [0m
+[30;47m ³  Age . . . . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@2;0;99;0n[47;37m                                  ³ [0m
+[30;47m ³  Sex  . . . . . . . . . . .  [0;30;46m @2;" |="l [47m  [46m @7;"Male|Female"l [1;47;37m                             ³ [0m
+[30;47m ³  Credits available now . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           ³ [0m
+[30;47m ³  PAID credits to date . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           ³ [0m
 [30;47m ³  Class . . . . . . . . . . . [0;30;46m @2;" |="l [47m  [1;44;37m@9;9;1s[47;37m                           ³ [0m
-[30;47m ³  †£œ¨¦£¤å˜ œšš¨˜­ãª  . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  ³ [0m
-[30;47m ³  ’œ¢œ¬«˜å˜ ©ç¤›œ© . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  ³ [0m
+[30;47m ³  Signup date  . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  ³ [0m
+[30;47m ³  Last login  . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  ³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  ' '=don't-care  'IN'=§œ¨ â®œ                                            [0;1;47;37m³ [0m
+[30;47m ³  ' '=don't-care  'IN'=contains                                           [0;1;47;37m³ [0m
 [30;47m ³                                  [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
-[30;47m ³  Ctrl-R: ¦ãŸœ ˜                  ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R: Help                     ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Search: visual template
 
 
-RSSRCHM {€¤›¨˜ª} T String for 'male' in edit templates
-RSSRCHF {‚¬¤˜å¡˜} T String for 'female' in edit templates
+RSSRCHM {Male} T String for 'male' in edit templates
+RSSRCHF {Female} T String for 'female' in edit templates
 
 RSSRCHS1 {IBM compatible} T String for system type #1 in edit templates
 RSSRCHS2 {Apple Mac} T String for system type #2 in edit templates
@@ -2653,27 +2494,27 @@ RSSRCHS4 {Amiga} T String for system type #4 in edit templates
 RSSRCHS5 {Atari} T String for system type #5 in edit templates
 RSSRCHS6 {Archimedes} T String for system type #6 in edit templates
 RSSRCHS7 {Amstrad CPC} T String for system type #7 in edit templates
-RSSRCHS8 {€š¤à©«¦} T String for system type #8 (unknown) in edit templates
+RSSRCHS8 {Unknown} T String for system type #8 (unknown) in edit templates
 
 
 RSSRCHLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
-[30;47m ³ „¨œ¬¤˜ ™á©ª ›œ›¦£â¤à¤ ®¨©«é¤                                           [0;1;47;37m³ [0m
+[30;47m ³ Search user database                                                     [0;1;47;37m³ [0m
 [30;47m ³ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [0;1;47;37m³ [0m
-[30;47m ³ –œ¬›é¤¬£¦ . . . . . . . . . [31m 1[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 2[30m. [34m@23;23;0s[1;47;37m          ³ [0m
-[30;47m ³ ‘ç¤Ÿ£˜  . . . . . . . . .  [31m 3[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 4[30m. [34m@15;15;2s[1;47;37m                  ³ [0m
-[30;47m ³ ¤¦£˜«œ§é¤¬£¦ . . . . . . . [31m 5[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 6[30m. [34m@30;30;0s[1;47;37m   ³ [0m
-[30;47m ³ „«˜ ¨œå˜ . . . . . . . . .  [31m 7[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 8[30m. [34m@30;30;0s[1;47;37m   ³ [0m
-[30;47m ³ ƒ œçŸ¬¤© (1/2) . . . . . . [31m 9[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m10[30m. [34m@30;30;0s[1;47;37m   ³ [0m
-[30;47m ³ ƒ œçŸ¬¤© (2/2)  . . . . .  [31m11[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m12[30m. [34m@30;30;0s[1;47;37m   ³ [0m
-[30;47m ³ ’¢â­à¤¦  . . . . . . . . . [31m13[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m14[30m. [34m@23;23;0s[1;47;37m          ³ [0m
-[30;47m ³ “§¦¢¦š ©«ãª  . . . . . . .  [31m15[30m. [34m@2;" |="l  [31m16[30m. [34m@14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|€š¤à©«¦"l[1;47;37m                   ³ [0m
-[30;47m ³ †¢ ¡å˜  . . . . . . . . . . [31m17[30m. [34m@2;" |<|<=|=|>=|>"l  [31m18[30m. [34m@2;0;99;0n[1;47;37m                               ³ [0m
-[30;47m ³ ”ç¢¦ . . . . . . . . . . .  [31m19[30m. [34m@2;" |="l  [31m20[30m. [34m@7;"€¤›¨˜ª|‚¬¤˜å¡˜"l[1;47;37m                          ³ [0m
-[30;47m ³ Credits › ˜Ÿâ© £˜ «é¨˜  . . [31m21[30m. [34m@2;" |<|<=|=|>=|>"l  [31m22[30m. [34m@9;0;999999999;0n[1;47;37m                        ³ [0m
-[30;47m ³ PAID credits àª «é¨˜ . . .  [31m23[30m. [34m@2;" |<|<=|=|>=|>"l  [31m24[30m. [34m@9;0;999999999;0n[1;47;37m                        ³ [0m
+[30;47m ³ Username  . . . . . . . . . [31m 1[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 2[30m. [34m@23;23;0s[1;47;37m          ³ [0m
+[30;47m ³ Password . . . . . . . . .  [31m 3[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 4[30m. [34m@15;15;2s[1;47;37m                  ³ [0m
+[30;47m ³ Real name . . . . . . . . . [31m 5[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 6[30m. [34m@30;30;0s[1;47;37m   ³ [0m
+[30;47m ³ Company  . . . . . . . . .  [31m 7[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 8[30m. [34m@30;30;0s[1;47;37m   ³ [0m
+[30;47m ³ Address (1/2) . . . . . . . [31m 9[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m10[30m. [34m@30;30;0s[1;47;37m   ³ [0m
+[30;47m ³ Address (2/2)  . . . . . .  [31m11[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m12[30m. [34m@30;30;0s[1;47;37m   ³ [0m
+[30;47m ³ Phone . . . . . . . . . . . [31m13[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m14[30m. [34m@23;23;0s[1;47;37m          ³ [0m
+[30;47m ³ Computer type  . . . . . .  [31m15[30m. [34m@2;" |="l  [31m16[30m. [34m@14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|€š¤à©«¦"l[1;47;37m                   ³ [0m
+[30;47m ³ Age . . . . . . . . . . . . [31m17[30m. [34m@2;" |<|<=|=|>=|>"l  [31m18[30m. [34m@2;0;99;0n[1;47;37m                               ³ [0m
+[30;47m ³ Sex  . . . . . . . . . . .  [31m19[30m. [34m@2;" |="l  [31m20[30m. [34m@7;"€¤›¨˜ª|‚¬¤˜å¡˜"l[1;47;37m                          ³ [0m
+[30;47m ³ Credits available now . . . [31m21[30m. [34m@2;" |<|<=|=|>=|>"l  [31m22[30m. [34m@9;0;999999999;0n[1;47;37m                        ³ [0m
+[30;47m ³ PAID credits to date . . .  [31m23[30m. [34m@2;" |<|<=|=|>=|>"l  [31m24[30m. [34m@9;0;999999999;0n[1;47;37m                        ³ [0m
 [30;47m ³ Class . . . . . . . . . . . [31m25[30m. [34m@2;" |="l  [31m26[30m. [34m@9;9;1s[1;47;37m                        ³ [0m
-[30;47m ³ †£œ¨¦£¤å˜ œšš¨˜­ãª  . . .  [31m27[30m. [34m@2;" |<|<=|=|>=|>"l  [31m28[30m. [34m@10;10;4s[1;37;47m                       ³ [0m
-[30;47m ³ ’œ¢œ¬«˜å˜ ©ç¤›œ© . . . . . [31m29[30m. [34m@2;" |<|<=|=|>=|>"l  [31m30[30m. [34m@10;10;4s[1;37;47m                       ³ [0m
+[30;47m ³ Signup date  . . . . . . .  [31m27[30m. [34m@2;" |<|<=|=|>=|>"l  [31m28[30m. [34m@10;10;4s[1;37;47m                       ³ [0m
+[30;47m ³ Last login  . . . . . . . . [31m29[30m. [34m@2;" |<|<=|=|>=|>"l  [31m30[30m. [34m@10;10;4s[1;37;47m                       ³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Search: Linear template
 
 
@@ -2710,22 +2551,21 @@ RSSRCH30 {} T Search: help for field #30
 
 
 RSSRCHC {[0;1;31m
-† › ˜› ¡˜©å˜ ˜¡¬¨éŸ¡œ.
+Aborted.
 [0;1m} T Search: canceled
 
 
 RSSRCHR {[0;1;31m
-!Wƒœ¤ â®œ  ¤æ£˜ ¤˜ ¯á¥¦¬£œ ©«¤ ™á© ›œ›¦£â¤à¤ ˜¤ ›œ¤ ¦¨å©œ«œ
-«¦¬¢á® ©«¦¤ â¤˜ ¡¨ «ã¨ ¦. :-) !)
+!WYou need to specify at least one search criterion.!)
 [0;1m} T Search: no query
 
 
 RSSRCHB {[0;1m
-( â©«œ [33mEnter[37m š ˜ «œ¨£˜« ©£æ «ª â¨œ¬¤˜ª)
+(Press [33mEnter[37m to cancel the search)
 
-•¨ã©«œª §¦¬ ™¨âŸ¡˜¤:
+Users found:
 
-–„“ƒ—Œ“‹    €‚‹€’ˆ‰ Œ‹€
+USERNAME     REAL NAME
 !F-
 [0m} T Search: header
 
@@ -2735,42 +2575,39 @@ RSSRCHL {%-13s%s
 
 
 RSCLASSWHO {[0;1m
-¦ ¦¤ ®¨ã©« Ÿâ¢œ ª ¤˜ £œ«˜¡ ¤ã©œ ª ©œ á¢¢¦ class; [0m} T Change User's Class: Whose?
+What user's class should I change? [0m} T Change User's Class: Whose?
 
 
 RSCLASSREP {[0;1;32m
-•¨ã©«ª . . . . . . . . [37m%s[32m
-’¨â®¦¤ class  . . . . . [37m%s
+Username . . . . . . .  [37m%s[32m
+Current class . . . . . [37m%s
 [0;1m} T Change User's Class: Current class report
 
 
 RSCLASSCLS {[0;1m
-‘œ §¦ ¦ class ¤˜ £œ«˜­œ¨Ÿœå ¦ ®¨ã©«ª; (? š ˜ ¡˜«á¢¦š¦) [0m} T Change User's Class: Which class?
+Move user to what class? (? for a list) [0m} T Change User's Class: Which class?
 
 
 RSCLASSERR {[0;1;31m
-’©¡ «©¡ «©¡... ›œ¤ ¬§á¨®œ  ˜¬«æ «¦ class. ƒé©œ ? š ˜ ¡˜«á¢¦š¦.
+That class doesn't exist. Enter ? for a list.
 [0;1m} T Change User's Class: Class does not exist
 
 
 RSCLASSDEL {[0;1;31m
-!J”«¦¬! ©¦ œ©ç á¢¢˜œª «¦ class, ¡á§¦ ¦ª â©™©œ «¦¤ ®¨ã©«.
-† ˜¢¢˜šã class ›œ¤  ©®çœ  §¢â¦¤.!)
-
-!J‘åš¦¬¨˜ ›œ¤ ¡á¤œ  §¢˜¡å«©œª ¦ ‹§¢áŸ¨˜ª;;;!)
+!JWhoops! The user was deleted while you were changing their class.
+The class change no longer holds.!)
 [0;1m} T Change Class: User has been deleted
 
 
 RSCLASSNOT {[0;1;32m
 ***
-!J •œ ¨ ©«ãª ‘¬©«ã£˜«¦ª £æ¢ ª ©˜ª £œ«â­œ¨œ ©«¦ class [37m%s[32m. ƒé©«œ
-[33mAV[32m ˜§æ «¦ ¡œ¤«¨ ¡æ £œ¤¦ç š ˜ ¤˜
-›œå«œ «  á¢¢˜¥œ ©«¦¤ ¢¦š˜¨ ˜©£æ ©˜ª.!)
+!JYou were just moved to the [37m%s[32m class. Enter
+[33mAV[32m at the main menu to see what's changed.!)
 [0;1m} T Change Class: User notification
 
 
 RSCLASSOK {[0;1;32m
-„¤«á¥œ ,  ˜¢¢˜šã âš ¤œ £œ œ§ «¬®å˜.
+OK, the class change was successful.
 
 [0;1m} T Change Class: Finished successfully
 
@@ -2779,11 +2616,11 @@ RSCLASSOK {[0;1;32m
 
 
 RSKEYSWHO {[0;1m
-‹œ §¦ ¦¤ ®¨ã©« Ÿ˜ §˜å¥œ ª §á¢ , ˜­œ¤« ¡æ; [0m} T Change User's Keys: Whose?
+Change whose keyring? [0m} T Change User's Keys: Whose?
 
 
 RSKEYSSYS {[0;1;31m
-® , ƒ„Œ Ÿ˜ §˜å¥œ ª £œ «˜ ¡¢œ › á «¦¬ ©ç©¦§˜. €¬«æª «˜ â®œ  æ¢˜ £¦¤å£àª.
+No, you WON'T change Sysop's keyring. The Sysop always has all keys.
 
 [0;1m} T Change User's Keys: Won't change Sysop's keys
 
@@ -2803,100 +2640,100 @@ RSKEYSTAB {[0;1;32m
 
 
 RSKEYSASK {
-[0;1m!Wƒé©«œ «¦¤ ˜¨ Ÿ£æ «¦¬ ¡¢œ › ¦ç (1-128, ? š ˜ œ£­á¤ © ¡¢œ › é¤, 
-ON=æ¢˜, OFF=¡˜¤â¤˜, OK š ˜ «â¢¦ª, X š ˜ ˜¡ç¨à©): !)[0m} T Change User's Keys: Key Editor, enter key
+[0;1m!WEnter key number to toggle (1-128, ? for a list, 
+ON=all, OFF=none, OK to end, X to cancel): !)[0m} T Change User's Keys: Key Editor, enter key
 
 
 RSKEYSON {[0;1;32m
-’¦ ¡¢œ ›å %d §¨¦©«âŸ¡œ ©«¦ ©ç¤¦¢¦.
+Key %d added to the keyring.
 [0;1m} T Change User's Keys: Key Editor, added key
 
 
 RSKEYSOFF {[0;1;32m
-’¦ ¡¢œ ›å %d ˜­˜ ¨âŸ¡œ ˜§æ «¦ ©ç¤¦¢¦.
+Key %d removed from the keyring.
 [0;1m} T Change User's Keys: Key Editor, deleted key
 
 
 RSKEYSDEL {[0;1;31m
-!J”«¦¬! ©¦ œ©ç â§˜ œª £œ «˜ ¡¢œ › á, ¡á§¦ ¦ª â©™©œ «¦¤ ®¨ã©«.
-† ˜¢¢˜šã ›œ¤  ©®çœ  §¢â¦¤.!)
+!JWhoops! The user was deleted while you were editing their keyring.
+The changes no longer hold.!)
 [0;1m} T Change User's Keys: User has been deleted
 
 
 RSKEYSOK {[0;1;32m
-„¤«á¥œ ,  ˜¢¢˜šã âš ¤œ £œ œ§ «¬®å˜.
+OK, user's keyring saved.
 
 [0;1m} T Change User's Keys: Finished successfully
 
 
 
 
-RSTYPEASK {[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+RSTYPEASK {[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[0;1m¡, «é¨˜, §¦ ¦ ˜¨®œå¦ Ÿâ¢œ ª ¤˜ ›œ ª; [0m} T Type file: What file?
+[0;1mWhat file do you want to view? [0m} T Type file: What file?
 
 
 RSTYPEERR {[0;1;31m
-!J’¦ ˜¨®œå¦ %s ›œ¤ ™¨âŸ¡œ ã ›œ¤ £§¦¨œå ¤˜ ˜¤¦ ®Ÿœå.!)
+!JFile %s wasn't found or it couldn't be opened.!)
 
 [0;1m} T Type file: File not found
 
 
 
 
-RSCOPYSRC {[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+RSCOPYSRC {[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[0;1m¡, «é¨˜, §¦ ¦ ˜¨®œå¦ Ÿâ¢œ ª ¤˜ ˜¤« š¨á¯œ ª; [0m} T Copy file: Enter source file
+[0;1mWhat file do you want to copy?  [0m} T Copy file: Enter source file
 
 
 RSCOPYTRG {
-[0;1m‰˜  §¦ç Ÿâ¢œ ª ¤˜ «¦ ˜¤« š¨á¯œ ª;            [0m} T Copy file: Enter destination
+[0;1mWhere do you want it copied to? [0m} T Copy file: Enter destination
 
 
 RSCOPYERR {[0;1;31m
-!J† ˜¤« š¨˜­ã ©«˜£á«©œ ¢æšà ¢áŸ¦¬ª.!)
+!JCopying stopped due to an error.!)
 
 [0;1m} T Copy file: cp returned error
 
 
 RSCOPYOK {[0;1;31m
-!J† ˜¤« š¨˜­ã «â¢œ à©œ œ§ «¬®éª.!)
+!JCopying was successful.!)
 
 [0;1m} T Copy file: ok!
 
 
 
 
-RSRENSRC {[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+RSRENSRC {[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[0;1m¡, «é¨˜, §¦ ¦ ˜¨®œå¦ Ÿâ¢œ ª ¤˜ £œ«¦¤¦£á©œ ª; [0m} T Rename/move file: Enter file
+[0;1mWhat file do you want to rename? [0m} T Rename/move file: Enter file
 
 
 RSRENTRG {
-[0;1m‰˜  §¦ ¦ œå¤˜  «¦ ¡˜ ¤¦ç¨ ¦ æ¤¦£á «¦¬;        [0m} T Rename/move file: Enter new name/dir
+[0;1mWhat's its new name or location? [0m} T Rename/move file: Enter new name/dir
 
 
 RSRENERR {[0;1;31m
-!J† › ˜› ¡˜©å˜ ©«˜£á«©œ ¢æšà ¢áŸ¦¬ª.!)
+!JAborted due to an I/O error.!)
 
 [0;1m} T Rename/move file: mv returned error
 
 
 RSRENOK {[0;1;31m
-!J† › ˜› ¡˜©å˜ «â¢œ à©œ œ§ «¬®éª.!)
+!JSuccessful.!)
 
 [0;1m} T Rename/move file: ok!
 
 
 
 
-RSDIRASK {[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+RSDIRASK {[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[0;1m¡, «é¨˜, §¦ ¦ directory/˜¨®œå¦ Ÿâ¢œ ª ¤˜ ¡á¤œ ª DIR; [0m} T DIR: what directory?
+[0;1mList what file or directory? [0m} T DIR: what directory?
 
 
 RSDIRERR {[0;1;31m
-!J’¦ %s ›œ¤ ™¨âŸ¡œ ã ›œ¤ £§¦¨œå ¤˜ ˜¤¦ ®Ÿœå.!)
+!J%s couldn't be opened.!)
 
 [0;1m} T DIR: can't open directory/file
 
@@ -2904,86 +2741,86 @@ RSDIRERR {[0;1;31m
 
 
 RSDELASK {
-!W[0;1;31;5m‘•†: !i[0;1;31m¨æ¡œ «˜  ¤˜ › ˜š¨á¯œ«œ â¤˜
-˜¨®œå¦. [5mƒ„Œ[0;1;31m Ÿ˜ ¬§á¨¥œ  á¢¢ œ¨é«©, ¡˜  «¦ ˜¨®œå¦
-[5mƒ„Œ[0;1;31m £§¦¨œå ¤˜ ˜¤˜¡«Ÿœå £œ ¡˜¤â¤˜ «¨æ§¦. ¨¦©â¥«œ «  ¡á¤œ«œ.!)
+!W[0;1;31;5mCAUTION: !i[0;1;31mYou are about to delete a
+file. There will be [5mNO[0;1;31m confirmation, and the file
+[5mCANNOT[0;1;31m be recovered once it's deleted. Be careful.!)
 !0l
-[0;1m¦ ¦ ˜¨®œå¦ Ÿâ¢œ«œ ¤˜ › ˜š¨á¯œ«œ; [0m} T DEL: what file?
+[0;1mPermanently remove what file? [0m} T DEL: what file?
 
 
 RSDELERR {[0;1;31m
-!J’¦ %s ›œ¤ ™¨âŸ¡œ ã ›œ¤ £§¦¨œå ¤˜ › ˜š¨˜­œå.!)
+!J%s not found, or couldn't be removed.!)
 
 [0;1m} T DEL: can't remove directory/file
 
 
 
 
-RSSYSASK {[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+RSSYSASK {[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[0;1m¡, «é¨˜, §¦ ˜ œ¤«¦¢ã Ÿâ¢œ ª ¤˜ «¨â¥œ ª; [0m} T SYS: Enter command to run
+[0;1mExecute what command? [0m} T SYS: Enter command to run
 
 
 
 RSXFERDIR {[0;1m
-¦ ˜ œå¤˜   › œçŸ¬¤© «ª £œ«˜­¦¨áª ˜¨®œåà¤;
+What would you like to do?
 
-[33mU[37m . . . €¤œ™á¦¬£œ ®¨ã© £¦ ˜¨®œå¦ (§® ¤â¦ "™œ¢« à£â¤¦" kernel)
-[33mD[37m  . .  ‰˜«œ™á¦¬£œ ˜§˜¨˜å««˜ utilities (cindy???.gif)
+[33mU[37m . . . Upload files
+[33mD[37m  . .  Download files
 } T Transfer files: Up or down?
 
 
 RSXFERSHRT {
-[0;1m˜¨˜¡˜¢é ›é©«œ «¤ œ§ ¢¦šã ©˜ª (œšé ¤å§«à «˜ª virtual ®œå¨˜ª £¦¬): [0m} T Transfer files: Up or down, short menu
+[0;1mEnter your choice: [0m} T Transfer files: Up or down, short menu
 
 
 RSXFERRSEL {[0;1;31m
-˜¨˜¡˜¢é ›é©«œ [33mU[31m, [33mD[31m, [33m?[31m š ˜ «¦ £œ¤¦ç, ã [33mX[31m š ˜ â¥¦›¦.
+Please enter [33mU[31m, [33mD[31m, [33m?[31m for the menu, or [33mX[31m to exit.
 [0;1m} T Transfer files: Wrong selection
 
 
 RSXFERWHD {
-[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)[37m
+[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-!W¦ ¦ ˜¨®œå¦ Ÿâ¢œ«œ ¤˜ ¢á™œ«œ; ˜¨˜¡˜¢é ›é©«œ «¦ æ¤¦£˜ «¦¬ ˜¨®œå¦¬
-(wildcards œ§ «¨â§¦¤«˜ ):!) [0m} T Transfer files: Enter filename
+!WDownload what file? Please enter the full filename
+(UNIX wildcards are allowed):!) [0m} T Transfer files: Enter filename
 
 
 RSXFERERR {[0;1;31m
-!J’¦ %s ›œ¤ ™¨âŸ¡œ ã ›œ¤ £§¦¨œå ¤˜ ˜¤¦ ®Ÿœå.!)
+!J%s not found, or couldn't be opened.!)
 
 [0;1m} T Transfer files: Can't open file
 
 
 RSXFERWHU {
-[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)
+[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-[32m€¨®œå˜ §¦¬ ©«œå¢˜«œ: [37m%d
+[32mUploaded files: [37m%d
 
-!W‘œ §¦ ¦ directory ¤˜ «˜ ©«œå¢¦¬£œ;!) [0m} T Transfer files: Enter directory
+!WPlace them in what directory?!) [0m} T Transfer files: Enter directory
 
 
 RSXFERER2 {[0;1;31m
-!J’¦ %s ›œ¤ œå¤˜  directory! ’©¡ «©¡ «©¡...!)
+!J%s is not a directory! Hmm...!)
 
 [0;1m} T Transfer files: File is not a directory
 
 
 RSXFERER3 {[0;1;31m
-!J€¡ç¨à© £œ«˜­¦¨áª.!)
+!JTransfer aborted.!)
 
 [0;1m} T Transfer files: transfer aborted.
 
 
 
 RSEDITWHF {
-[0;1;32m!W‡¬£åà æ«  ©«¦ linux š¨á­¦¬£œ «˜ directories £œ '/' ¡˜  æ®  £œ '\'! :-)!)[37m
+[0;1;32m!WReminder: this is a UNIX filesystem: mind your slashes! (/)! :-)!)
 
-!W¦ ¦ ˜¨®œå¦ Ÿâ¢œ«œ ¤˜ ­â¨œ«œ ©«¦¤ editor; ˜¨˜¡˜¢é ›é©«œ «¦ æ¤¦£˜ «¦¬ ˜¨®œå¦¬:!) [0m} T Edit a file: Enter filename
+!WEdit what file?!) [0m} T Edit a file: Enter filename
 
 
 RSEDITERR {[0;1;31m
-!J’¦ %s ›œ¤ ™¨âŸ¡œ ã ›œ¤ £§¦¨œå ¤˜ ˜¤¦ ®Ÿœå.!)
+!J%s not found, or it couldn't be opened.!)
 
 [0;1m} T Edit a file: Can't open file
 
@@ -2994,20 +2831,20 @@ RSEDITERR {[0;1;31m
 
 
 RSAUDIT1 {[0;1m
-„£­á¤ © «¦¬ Audit Trail.
+View the Audit Trail.
 
-!W‡â¢œ«œ ¤˜ ›œå«œ «¦ Audit Trail ˜§æ «¤ ˜¨®ã ([[33mB[37m]eginning) ã «¦ «â¢¦ª
-([[33mE[37m]nd);!)[0m } T Audit: Beginning or end?
+!WView the Audit Trail from the [[33mB[37m]eginning
+or [[33mE[37m]nd?!)[0m } T Audit: Beginning or end?
 
 
 RSAUDITR {[0;1;31m
-!Wƒœ¤ ¬§á¨®œ  ˜¬«ã  œ§ ¢¦šã.!)
+!WSorry, there is no such choice.!)
 [0m} T Audit: No such option
 
 
 RSAUDIT2 {[0;1;32m
 
-(§ â©«œ Enter š ˜ › ˜¡¦§ã «ª œ£­á¤ ©ª)
+(press Enter to stop the listing)
 
 AUDIT TRAIL
 !F-
@@ -3031,27 +2868,27 @@ RSAUDITE {!W[0;1;31m%s!)
 
 RSAUDIT3 {!0l[0;1;31m
 
-!W† › ˜› ¡˜©å˜ «œ¨£˜«å©«¡œ §¨æà¨˜.!)
+!WAborted.!)
 [0;1m} T Audit: Listing terminated
 
 
 
 
 RSCLEANUP1 {[0;1m
-„£­á¤ © «¦¬ Cleanup Audit Trail.
+View the Cleanup Audit Trail.
 
-!W‡â¢œ«œ ¤˜ ›œå«œ «¦ Cleanup Audit Trail ˜§æ «¤ ˜¨®ã ([[33mB[37m]eginning) ã «¦ «â¢¦ª
-([[33mE[37m]nd);!)[0m } T Audit: Beginning or end?
+!WView the Cleanup Audit Trail from the [[33mB[37m]eginning
+or [[33mE[37m]nd?!)[0m } T Audit: Beginning or end?
 
 
 RSCLEANUPR {[0;1;31m
-!Wƒœ¤ ¬§á¨®œ  ˜¬«ã  œ§ ¢¦šã.!)
+!WSorry, there is no such choice.!)
 [0m} T Audit: No such option
 
 
 RSCLEANUP2 {[0;1;32m
 
-(§ â©«œ Enter š ˜ › ˜¡¦§ã «ª œ£­á¤ ©ª)
+(press Enter to stop the listing)
 
 CLEANUP AUDIT TRAIL
 !F-
@@ -3060,30 +2897,29 @@ CLEANUP AUDIT TRAIL
 
 RSCLEANUP3 {[0;1;31m
 
-!W† › ˜› ¡˜©å˜ «œ¨£˜«å©«¡œ §¨æà¨˜.!)
+!WAborted.!)
 [0;1m} T Audit: Listing terminated
 
 
 
 RSLOGONH {[0;1m
 
-€¢¢˜šã ¡œ £â¤¦¬ œ ©æ›¦¬ (logon message).
+Change login message of the day.
 
-!J“§á¨®¦¬¤ ›ç¦ œå› ¡œ £â¤à¤: «¦ šœ¤ ¡æ, §¦¬ œ£­˜¤åœ«˜  ©œ æ¢˜ «˜ ¡˜¤á¢ ˜,
-¡˜  «¦ œ › ¡æ, §¦¬ œ£­˜¤åœ«˜  £æ¤¦ ©œ â¤˜ ¡˜¤á¢ . ‰áŸœ ¡˜¤á¢  £§¦¨œå ¤˜
-â®œ  «¦ › ¡æ «¦¬ ¡œå£œ¤¦, §¦¬ œ£­˜¤åœ«˜  ‹€…ˆ £œ «¦ šœ¤ ¡æ ¡œå£œ¤¦ ˜£â©àª
-§¨ ¤ ¦ ®¨ã©«ª ›é©œ  «¦ ¯œ¬›é¤¬£æ «¦¬.!)
+!JThere are two types of messages of the day: a general one, shown to
+all channels, and per-channel specific messages, shown on one channel only.
+Both general and per-channel messages are shown, if they've been set.!)
 [0;1m} T Logon message: help
 
 
 RSLOGONP {[0;1m
-!W¦ ¦ ˜¨®œå¦ Ÿâ¢œ«œ ¤˜ ˜¢¢á¥œ«œ; ƒé©«œ [33m*[37m š ˜ «¦ šœ¤ ¡æ £ã¤¬£˜, ã
-˜¨ Ÿ£æ ¡˜¤˜¢ ¦ç/unix tty š ˜ ¤˜ ˜¢¢á¥œ«œ «¦ ¡œå£œ¤¦ £æ¤¦ œ¤æª ¡˜¤˜¢ ¦ç, ã
-[33m?[37m š ˜ ¡˜«á¢¦š¦ ¬§˜¨®æ¤«à¤ £¤¬£á«à¤:!) [0m} T Logon message: prompt
+!WChange what message? Enter [33m*[37m for the general message, or
+a channel number or UNIX tty for a per-channel specific message, or
+[33m?[37m for a list of existing messages:!) [0m} T Logon message: prompt
 
 
 RSLOGONL1 {[0;1m
-‰˜«á¢¦š¦ª ã› ¬§˜¨®æ¤«à¤ ¡œ £â¤à¤ œ ©æ›¦¬
+Existing messages of the day
 
  ‰˜¤á¢   ‹âšœŸ¦ª
 -----------------
@@ -3104,31 +2940,31 @@ RSLOGONL3 {[0;1m-----------------
 
 
 RSLOGOND {[0;1m
-!W€¬«æ «¦ ¡œå£œ¤¦ œ ©æ›¦¬ ¬§á¨®œ  ã›. ‡â¢œ«œ ¤˜ «¦ ˜¢¢á¥œ«œ, ã ¤˜ «¦ › ˜š¨á¯œ«œ;
-ƒé©«œ [[33mD[37m]elete=› ˜š¨˜­ã, ã [[33mE[37m]dit=˜¢¢˜šã: [Enter=Edit]!) [0m} T Logon message: delete or edit?
+!WThis message of the day exists. Would you like to 
+[[33mD[37m]elete it, or [[33mE[37m]dit it? [Enter=Edit]!) [0m} T Logon message: delete or edit?
 
 
 RSLOGONDR {[0;1;31m
-€¬«ã  œ§ ¢¦šã› ›œ¤ ¬§á¨®œ .
+That is not a valid choice at this point.
 [0;1m} T Logon message: invalid selection
 
 
 RSLOGONDD {[0;1;32m
-‰˜¢éª, «¦ ¡œå£œ¤¦ œ ©æ›¦¬ › œš¨á­.
+Okay, the message of the day was deleted.
 [0;1m} T Logon message: logon message deleted
 
 
 
 
 RSCLSSTR {[0;1;31m
-!JŠ¬§á£˜ , ›œ¤ ­˜å¤œ«˜  ¤˜ ¬§á¨®œ  «¦ ˜¨®œå¦ ©«˜« ©« ¡é¤ š ˜ «˜ classes.
-ˆ©àª ¤˜ ›£ ¦¬¨šœå«˜  ˜¬«ã «¤ ©« š£ã, ã ¤˜ £¤ â®œ  ›£ ¦¬¨šŸœå ˜¡æ£˜.!)
+!JSorry, the class statistics file doesn't seem to be available yet.
+Please try again in a few hours.!)
 [0;1m} T Class statistics: error
 
 
 RSCLSST1 {[0;1m
 ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄ¿
-³ Class     ³ •¨ã©«œª ³ Credits ³ Šœ§«á   ³
+³ Class     ³   Users ³ Credits ³ Minutes ³
 ÃÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄ´
 } T Class statistics: table header
 
@@ -3139,7 +2975,7 @@ RSCLSST2 {[0;1m³ [32m%-9s[37m ³ [33m%7d[37m ³ [33m%7d[37m ³ [33m%7d[37m
 
 RSCLSST3 {[0;1mÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÙ
 
-(œ£­˜¤å¦¤«˜  £æ¤¦ classes ©«˜ ¦§¦å˜ â®œ  ¡˜«˜¤˜¢àŸœå ®¨æ¤¦ª)
+(only classes in which users have spent time are shown)
 [0;1m
 } T Class statistics: table footer
 
@@ -3147,14 +2983,14 @@ RSCLSST3 {[0;1mÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÙ
 
 
 RSMODSTR {[0;1;31m
-!JŠ¬§á£˜ , ›œ¤ ­˜å¤œ«˜  ¤˜ ¬§á¨®œ  «¦ ˜¨®œå¦ ©«˜« ©« ¡é¤ š ˜ «˜ classes.
-ˆ©àª ¤˜ ›£ ¦¬¨šœå«˜  ˜¬«ã «¤ ©« š£ã, ã ¤˜ £¤ â®œ  ›£ ¦¬¨šŸœå ˜¡æ£˜.!)
+!JThe module statistics file doen't seem to be available yet. Please
+try again in a few hours.!)
 [0;1m} T Module statistics: error
 
 
 RSMODST1 {[0;1m
 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ ¤¦£˜ module                               ³ Credits     %% ³ Šœ§«á       %% ³
+³ Module name                                ³ Credits     %% ³ Minutes     %% ³
 ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
 } T Class statistics: table header
 
@@ -3171,36 +3007,36 @@ RSMODST3 {[0;1mÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄ
 
 RSSYSTATS {[0;1m
 
-[32m¤¦£˜ ©¬©«ã£˜«¦ª . . . . . . [37m@BBS@
-[32m„¡›¦© §¨¦š¨á££˜«¦ª . . . .  [37m@VERSION@
-[32m€¨ Ÿ£æª ¡˜¤˜¢ é¤ . . . . . . [37m%d
+[32mSystem name  . . . . . . . . [37m@BBS@
+[32mSoftware version  . . . . .  [37m@VERSION@
+[32mChannels . . . . . . . . . . [37m%d
 
-[32m„®¦¬¤ ›àŸœå ©¬¤¦¢ ¡á  . . .  [37m%7d [32mcredit(s)
-[32m€§'˜¬«á, PAID œå¤˜   . . . . [37m%7d [32mcredit(s)
-[32m‘¬¤¦¢ ¡æª on-line ®¨æ¤¦ª  .  [37m%7d [32m¢œ§«á
-[32m‘¬¤›â©œ ª  . . . . . . . . . [37m%7d
+[32mTotal credits posted  . . .  [37m%7d [32mcredit(s)
+[32mOf which, PAID credits . . . [37m%7d [32mcredit(s)
+[32mTotal time spent by users .  [37m%7d [32mminutes
+[32mTotal logins . . . . . . . . [37m%7d
 
-[32mUploads . . . . . . . . . .  [37m%7d [32m˜¨®œå˜   [37m%7d [32mkbytes
-[32mDownloads  . . . . . . . . . [37m%7d [32m˜¨®œå˜   [37m%7d [32mkbytes
+[32mUploads . . . . . . . . . .  [37m%7d [32mfiles   [37m%7d [32mkbytes
+[32mDownloads  . . . . . . . . . [37m%7d [32mfiles   [37m%7d [32mkbytes
 
-[32m‹¤ç£˜«˜ ©œ clubs . . . . .  [37m%7d[32m ©¬¤¦¢ ¡á, [37m%7d[32m ¬§á¨®¦¤«˜
-[32m‹¤ç£˜«˜ email . . . . . . . [37m%7d[32m ©¬¤¦¢ ¡á, [37m%7d[32m ¬§á¨®¦¤«˜
-[32m‹¤ç£˜«˜ net-mail . . . . .  [37m%7d[32m œ¥œ¨®æ£œ¤˜
-[32m‹¤ç£˜«˜ net-mail  . . . . . [37m%7d[32m œ ©œ¨®æ£œ¤˜
+[32mClub messages . . . . . . .  [37m%7d[32m total, [37m%7d[32m existing
+[32mEmail messages . . . . . . . [37m%7d[32m total, [37m%7d[32m existing
+[32mInternet email messages . .  [37m%7d[32m sent
+[32mInternet email messages  . . [37m%7d[32m received
 
 [0;1m} T System statistics
 
 
 
 RSLINST1 {[0;1m
-[32m¤¦£˜ £®˜¤ã£˜«¦ª  . . . [37m%s
-[32m!W„¡›¦© ¢œ «¦¬¨š ¡¦ç . .  [37m!i%s!)
-[32m!0l„§œ¥œ¨š˜©«ãª  . . . . .  [37m%s %s (%s BogoMips)
+[32mHostname . . . . . . . . [37m%s
+[32m!WOperating system  . . .  [37m!i%s!)
+[32m!0lCPU . . . . . . . . . .  [37m%s %s (%s BogoMips)
 [32mUptime . . . . . . . . . [37m%02d:%02d:%02d
-[32m”æ¨«¦ª ©¬©«ã£˜«¦ª . . .  [37m%s
+[32mSystem load . . . . . .  [37m%s
 
 ÚÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄ¿
-³ ‹Œ†‹† ³  Total  ³   Used  ³   Free  ³ Shared  ³ Buffers ³  Cache  ³
+³ MEM   ³  Total  ³   Used  ³   Free  ³ Shared  ³ Buffers ³  Cache  ³
 ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄ´
 ³ RAM   ³  [32m%5d  [37m³  [32m%5d  [37m³  [33m%5d  [37m³  [32m%5d  [37m³  [32m%5d  [37m³  [32m%5d  [37m³
 ³ Swap  ³  [32m%5d  [37m³  [32m%5d  [37m³  [33m%5d  [37mÃÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÙ
@@ -3208,12 +3044,12 @@ RSLINST1 {[0;1m
 [0;1m} T Linux statistics 1
 
 
-RSLINSTW {[0;1;32;5m[s!J˜¨˜¡˜¢é §œ¨ £â¤œ«œ...!)[0;1m} T Linux statistics, please wait
+RSLINSTW {[0;1;32;5m[s!JPlease wait...!)[0;1m} T Linux statistics, please wait
 
 
 RSLINST2 {[0;1m[u[K[0;1m
 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ ƒå©¡¦ª          ³ Size (K) ³ Used (K) ³ Free (K) ³ Mounted on               ³
+³ Partition       ³ Size (K) ³ Used (K) ³ Free (K) ³ Mounted on               ³
 ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
 } T Linux statistics 2
 
@@ -3222,9 +3058,9 @@ RSLINST3 {³ %s%-16s[37m³ %s%8d [37m³ %s%8d [37m³ %s%8d [0;1m³ %s%-25s[37m³
 } T Linux statistics 3
 
 RSLINST4 {ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-³ ‘ç¤¦¢¦          ³ [32m%8d [37m³ [32m%8d [37m³ [32m%8d [0;1m³                          ³
+³ Total           ³ [32m%8d [37m³ [32m%8d [37m³ [32m%8d [0;1m³                          ³
 ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÙ
-³ [32mÛÛ  [37m¢˜ ¡˜¢á    [33mÛÛ  [37m‰˜ ¨æª š ˜ ¡˜Ÿá¨ ©£˜    [31mÛÛ  [37m ƒˆ‘‰‘ ‚„‹ˆ‘„ ³
+³ [32mÛÛ  [37mAll's well  [33mÛÛ  [37mClean me up please      [31mÛÛ  [37mALMOST FULL!    ³
 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 [0;1m} T Linux statistics 4
 
@@ -3237,101 +3073,99 @@ RSLINST7 {[31m} T Linux statistics 7 (disk free space is critical)
 
 
 RSGENST1 {[0;1;32m
-!J€¬«ã  œ¤«¦¢ã §˜¨â®œ  £ ˜ £œšá¢ ©œ ¨á ©«˜« ©« ¡é¤ ©«¦ ®œåà¤
-š ˜ › á­¦¨˜ «£ã£˜«˜ «ª ™á©ª. ‡˜ ®¨œ ˜©«œå ¤˜ ¦¨å©œ«œ §¦ ˜ ©«¦ ®œå˜
-Ÿâ¢œ«œ ¤˜ ›œå«œ, ¡˜  £œ §¦ ˜ £¦¨­ã.!)
+!JThis command offers a wide selection of statistics on various
+parts of the system. You'll need to select what data you want to see,
+and in what form.!)
 
-[37m!W„¨é«© 1 ˜§æ 4: ‡â¢œ«œ ¤˜ ›œå«œ ©ç¤¦¢˜ ã £â©¦¬ª æ¨¦¬ª;
-ƒé©«œ [[33mT[37m]otal=‘ç¤¦¢¦, [[33mA[37m]verage=‹â©¦ª æ¨¦ª, ã [33mX[37m š ˜ â¥¦›¦:!) [0m} T Generic statistics 1
+[37m!WQuestion 1 of 4: Show [[33mT[37m]otals or [[33mA[37m]verages? ([33mX[37m to exit):!) [0m} T Generic statistics 1
 
 
 RSGENST2 {[0;1m
-!W„¨é«© 2 ˜§æ 4: ‡â¢œ«œ  ˜¤á¢¬© ¤˜ šå¤œ  §á¤à ©œ!)
+!WQuestion 2 of 4: View statistics on !)
 
-  [33mC[37m. ‰˜«˜¤á¢à© Credits
-  [33mM[37m. Šœ§«á (Minutes) on-line
-  [33mL[37m. €¨ Ÿ£æ ¡¢ã©œà¤ (CaLls)
+  [33mC[37m. Credit consumption
+  [33mM[37m. Minutes on-line
+  [33mL[37m. Number of CaLls or logins
 
-!Wƒé©«œ «¤ œ§ ¢¦šã ©˜ª ([33mC[37m,[33mM[37m,[33mL[37m, ã [33mX[37m š ˜ «¤ §¨¦š¦ç£œ¤ œ¨é«©:!) [0m} T Generic statistics 2
+!WEnter your choice ([33mC[37m,[33mM[37m,[33mL[37m, or [33mX[37m to go back:!) [0m} T Generic statistics 2
 
 
 RSGENST3 {[0;1m
-!W„¨é«© 3 ˜§æ 4: ’  œå›¦¬ª ©«˜« ©« ¡ã Ÿâ¢œ«œ;!)
+!WQuestion 3 of 4: Plot this quantity against:!)
 
-  [33mB[37m. BaudStats . . . . . . . . . ’˜®ç««œª ©ç¤›œ©ª
-  [33mC[37m. ClassStats . . . . . . . . ‰¢á©œ ª ®¨©«é¤ (*)
-  [33mD[37m. DayStats  . . . . . . . .  †£œ¨ã© ˜ ¡å¤© (*)
-  [33mM[37m. ModStats . . .  ‘«˜« ©« ¡âª š ˜ «˜ modules (*)
-  [33mT[37m. TTYstats  . . . . . . . . . . . •¨ã© ¡˜¤˜¢ é¤
+  [33mB[37m. BaudStats . . . . . .  Connection speeds/types
+  [33mC[37m. ClassStats . . . . . . . . .  User classes (*)
+  [33mD[37m. DayStats  . . . . . . . . Daily time usage (*)
+  [33mM[37m. ModStats . . . . . . . . . .  Module usage (*)
+  [33mT[37m. TTYstats  . . . . . . . . . . .  Channel usage
 
-!W(*) !iƒœ¤ ¬§¦©«¨åœ«˜  ˜¤á¢¬© ˜¨ Ÿ£¦ç ¡¢ã©œà¤ (™¢. §¨¦š¦ç£œ¤ œ¨é«©).!)[B
+!W(*) !iCan't combine these with number of calls (see previous question).!)[B
 !0l
-!Wƒé©«œ «¤ œ§ ¢¦šã ©˜ª ([33mB[37m,[33mC[37m,[33mD[37m,[33mM[37m,[33mT[37m,
-ã [33mX[37m š ˜ «¤ §¨¦š¦ç£œ¤ œ¨é«©:!) [0m} T Generic statistics 3
+!WEnter your choice ([33mB[37m,[33mC[37m,[33mD[37m,[33mM[37m,[33mT[37m,
+or [33mX[37m to go back):!) [0m} T Generic statistics 3
 
 
 RSGENSTR {[0;1;31m
-!J„®œ«œ «ã©œ  ˜¤á¢¬© ˜¨ Ÿ£¦ç ¡¢ã©œà¤, ¡˜  «¦ œå›¦ª ©«˜« ©« ¡ãª §¦¬ £æ¢ ª › ˜¢â¥˜«œ
-›œ¤ «¦ ¬§¦©«¨åœ  ˜¬«æ. ‰˜  ©«¦ ¡á«à ¡á«à, ˜¤ ›œ¤ ©¦¬ ˜¨¡¦ç¤ ¡á§¦¬ 120 › ˜­¦¨œ« ¡á
-š¨˜­ã£˜«˜ ¡˜  Ÿâ¢œ ª ¡  á¢¢˜, ¤˜ §˜ª ¤˜ «˜ ­« á¥œ ª £æ¤¦ª ©¦¬. :-) !)
+!JThis combination of quantities is not supported. Besides, if 120 different charts
+aren't enough for you, go code the rest yourself! :-) !)
 [0;1m} T Generic statistics, impossible combination
 
 
 RSGENST4 {[0;1m
-!W„¨é«© 4 ˜§æ 4: ’  ®¨¦¤ ¡æ §œ¨ ¦¨ ©£æ ¤˜ Ÿâ©¦¬£œ;!)
+!WQuestion 4 of 4: What's the scope of the chart?!)
 
-  [33mD[37m. Day . . . . . . . . . . ‹æ¤¦ ©£œ¨ ¤á ©«˜« ©« ¡á ©«¦ ®œå˜
-  [33mM[37m. Month  . . . . . . . . . . ‘«˜« ©« ¡ã ˜¬«¦ç «¦¬ £ã¤˜ £æ¤¦
-  [33mY[37m. Year  . . . . . . . . . . ‘«˜« ©« ¡ã ˜¬«¦ç «¦¬ â«¦¬ª £æ¤¦
-  [33mE[37m. Ever . .  ‰˜¤â¤˜ª ®¨¦¤ ¡æª §œ¨ ¦¨ ©£æª, ©¬¤¦¢ ¡á ©«¦ ®œå˜
+  [33mD[37m. Today
+  [33mM[37m. This Month
+  [33mY[37m. This Year
+  [33mE[37m. Ever
 
-!Wƒé©«œ «¤ œ§ ¢¦šã ©˜ª ([33mD[37m,[33mM[37m,[33mY[37m,[33mE[37m,
-ã [33mX[37m š ˜ «¤ §¨¦š¦ç£œ¤ œ¨é«©:!) [0m} T Generic statistics 4
+!WEnter your choice ([33mD[37m,[33mM[37m,[33mY[37m,[33mE[37m,
+or [33mX[37m to go back:!) [0m} T Generic statistics 4
 
 
 
 
 RSTOPSM {[0;1m
-[32m¦ ¦ TOP-30 Ÿâ¢œ«œ ¤˜ ›œå«œ;
+[32mWhat Top list do you want to see?
 
-[33mA[37m  . . . . . . . . . . . . . . . . . €¨ Ÿ£æª ©¬¤›â©œà¤
-[33mB[37m . . . . . . . . . . . . . . . . . ˜¢ æ«œ¨˜ accounts
-[33mC[37m  . . . . . . . . . . . . . . . . . . €¨ Ÿ£æª credits
-[33mD[37m . . . . . . . . . . . . . . . . €¨ Ÿ£æª paid credits
-[33mE[37m  . . . . . . . .  €¨ Ÿ£æª credits §¦¬ â®¦¬¤ ¥¦›œ¬«œå
-[33mF[37m . . . . . . . . . . . . . . . . . . . •¨æ¤¦ª on-line
-[33mG[37m  . . . . . . . . €¨ Ÿ£æª £¤¬£á«à¤ §¦¬ â®¦¬¤ š¨˜­«œå
-[33mH[37m . . . . . .   ¡˜¢ç«œ¨¦  uploaders (˜¨ Ÿ£æª ˜¨®œåà¤)
-[33mI[37m  . . . . . .    ¡˜¢ç«œ¨¦  uploaders (˜¨ Ÿ£æª bytes)
-[33mJ[37m . . .    ¡˜¢ç«œ¨¦ (;) downloaders (˜¨ Ÿ£æª ˜¨®œåà¤)
-[33mK[37m  . . . .   ¡˜¢ç«œ¨¦ (;) downloaders (˜¨ Ÿ£æª bytes)
-[33mL[37m . . . . . . . .  ’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ £¤ç£˜«˜
-[33mM[37m  . . . . . . . . . ’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ ˜¨®œå˜
-[33mN[37m . . . . . . . . . . ’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ á¨Ÿ¨˜
-[33mO[37m  . ’˜ clubs £œ « ª §œ¨ ©©æ«œ¨œª ˜¤˜š¤é©œ ª £¤¬£á«à¤
-[33mP[37m . . . .  ’˜ clubs £œ « ª §œ¨ ©©æ«œ¨œª ¢ã¯œ ª ˜¨®œåà¤
+[33mA[37m  . . . . . . . . . . . . . . .  Number of logins
+[33mB[37m . . . . . . . . . . . . . . . .  Oldest accounts
+[33mC[37m  . . . . . . . . . . . . . . . . . . . . Credits
+[33mD[37m . . . . . . . . . . . . . . . . . . Paid credits
+[33mE[37m  . . . . . . . . . . . . . . . . . Spent credits
+[33mF[37m . . . . . . . . . . . . . . . . . . Time on-line
+[33mG[37m  . . . . . . . . . . . . . . .  Messages written
+[33mH[37m . . . . . . . . . . . . . .  Most files uploaded
+[33mI[37m  . . . . . . . . . . . . Largest volume uploaded
+[33mJ[37m . . . . . . . . . . . . .  Most files downloaded
+[33mK[37m  . . . . . . . . . . . Largest volume downloaded
+[33mL[37m . . . . . . . . . . . . . . . Most club messages
+[33mM[37m  . . . . . . . . . . . . . . . . Most club files
+[33mN[37m . . . . . . . . . . Most club articles/bulletins
+[33mO[37m  . . . . . . . . . . . . Most club message reads
+[33mP[37m . . . . . . . . . . . . Most club file downloads
 [0;1m} T TOP-Ns, long menu
 
 
 RSTOPSS {[0;1m
-!Wƒé©«œ «¤ œ§ ¢¦šã ©˜ª ([33mA[37m-[33mP[37m, ã [33mX[37m š ˜ â¥¦›¦)!) [0m} T TOP-Ns, short menu
+!WEnter your choice ([33mA[37m-[33mP[37m, or [33mX[37m to exit)!) [0m} T TOP-Ns, short menu
 
-RSTOPSTA {€¨ Ÿ£æª ©¬¤›â©œà¤} T TOP-Ns, chart title 1
-RSTOPSTB {˜¢ æ«œ¨˜ accounts} T TOP-Ns, chart title 2
-RSTOPSTC {€¨ Ÿ£æª credits} T TOP-Ns, chart title 3
-RSTOPSTD {€¨ Ÿ£æª paid credits} T TOP-Ns, chart title 4
-RSTOPSTE {€¨ Ÿ£æª credits §¦¬ â®¦¬¤ ¥¦›œ¬«œå} T TOP-Ns, chart title 5
-RSTOPSTF {•¨æ¤¦ª on-line} T TOP-Ns, chart title 6
-RSTOPSTG {€¨ Ÿ£æª £¤¬£á«à¤ §¦¬ â®¦¬¤ š¨˜­«œå} T TOP-Ns, chart title 7
-RSTOPSTH {  ¡˜¢ç«œ¨¦  uploaders (˜¨ Ÿ£æª ˜¨®œåà¤)} T TOP-Ns, chart title 8
-RSTOPSTI {  ¡˜¢ç«œ¨¦  uploaders (˜¨ Ÿ£æª bytes)} T TOP-Ns, chart title 9
-RSTOPSTJ {  ¡˜¢ç«œ¨¦ (;) downloaders (˜¨ Ÿ£æª ˜¨®œåà¤)} T TOP-Ns, chart title 10
-RSTOPSTK {  ¡˜¢ç«œ¨¦ (;) downloaders (˜¨ Ÿ£æª bytes)} T TOP-Ns, chart title 11
-RSTOPSTL {’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ £¤ç£˜«˜} T TOP-Ns, chart title 12
-RSTOPSTM {’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ ˜¨®œå˜} T TOP-Ns, chart title 13
-RSTOPSTN {’˜ clubs £œ «˜ §œ¨ ©©æ«œ¨˜ á¨Ÿ¨˜} T TOP-Ns, chart title 14
-RSTOPSTO {’˜ clubs £œ « ª §œ¨ ©©æ«œ¨œª ˜¤˜š¤é©œ ª £¤¬£á«à¤} T TOP-Ns, chart title 15
-RSTOPSTP {’˜ clubs £œ « ª §œ¨ ©©æ«œ¨œª ¢ã¯œ ª ˜¨®œåà¤} T TOP-Ns, chart title 16
+RSTOPSTA {Number of logins} T TOP-Ns, chart title 1
+RSTOPSTB {Oldest accounts} T TOP-Ns, chart title 2
+RSTOPSTC {Most Credits} T TOP-Ns, chart title 3
+RSTOPSTD {Most Paid Credits} T TOP-Ns, chart title 4
+RSTOPSTE {Most Credits Spent} T TOP-Ns, chart title 5
+RSTOPSTF {Most Time On-Line} T TOP-Ns, chart title 6
+RSTOPSTG {Most Messages Written} T TOP-Ns, chart title 7
+RSTOPSTH {Most Files Uploaded} T TOP-Ns, chart title 8
+RSTOPSTI {Largest Volume Uploaded (bytes)} T TOP-Ns, chart title 9
+RSTOPSTJ {Most Files Downloaded} T TOP-Ns, chart title 10
+RSTOPSTK {Largest Volume Downloaded (bytes)} T TOP-Ns, chart title 11
+RSTOPSTL {Most Club Messages} T TOP-Ns, chart title 12
+RSTOPSTM {Most Club Files} T TOP-Ns, chart title 13
+RSTOPSTN {Most Club Articles/Bulletins} T TOP-Ns, chart title 14
+RSTOPSTO {Most Club Messages Read} T TOP-Ns, chart title 15
+RSTOPSTP {Most Club Files Downloaded} T TOP-Ns, chart title 16
 
 
 RSTOPS1 {
@@ -3354,71 +3188,68 @@ RSTOPS3 {[0;30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 
 RSGDET {[0;1;32m
-!J† ç§˜¨¥ ˜¬«ãª «ª œ¤«¦¢ãª ˜§¢á ©£˜å¤œ  æ«  â®œ«œ «¤ œ¤«¦¢ã /L
-(global detail). ƒé©«œ [33m/L <¯œ¬›é¤¬£¦>[32m ˜§'¦§¦¬›ã§¦«œ £â©˜ ©«¤ ™á©
-š ˜ ¤˜ §á¨œ«œ §¢¨¦­¦¨åœª š ˜ «¦ ¯œ¬›é¤¬£¦ ˜¬«æ.!)
+!JThis command doesn't do anything. You see it because you have the
+global detail command. It allows you to view users' account details
+anywhere on the system by entering [33m/L username[32m.!)
 [0;1m} T Global Detail:[A information
 
 
 
 
 RSSYSOPWHO {[0;1m
-¦ ¦¤ ¡˜¡¦£¦å¨ Ÿ˜ ¡˜«˜¨˜©«œåª £œ ©¬©¦§ ¡á §¨¦¤æ£ ˜, ˜­œ¤« ¡æ; [0m} T Change Sysop Permissions: Whose?
+What poor soul should we curse with operator privileges, boss? [0m} T Change Sysop Permissions: Whose?
 
 
 RSSYSOPNSY {[0;1;31m
-!J„ ¦®  ¤˜ ¡á¤¦¬£œ ¡˜  ©ç©¦§˜ æ§¦ ¦¤ ¡˜  æ§¦ ¦¤. €¬«á «˜ ¡˜¤¦¤åœ  ¦ £œšá¢¦ª...!)
+!JOnly the Sysop can set operator privileges!!)
 
-!J(€¬«ã  œ¤«¦¢ã ›å¤œ  §¨¦¤æ£ ˜ ©œ ¡á§¦ ¦¤, ˜¤ œ¡«œ¢œ©«œå ˜§æ «¦¤ Sysop. €¢¢ éª,
-©˜ª ›œå®¤œ  æ«  â®œ«œ §¨¦¤æ£ ˜ ®œ ¨ ©«ã ©¬©«ã£˜«¦ª.!)
+!JYou can see this command because you have the global operator privilege, which
+allows you access to the entire system without limits.!)
 
 [0;1m} T Remote Sysop can't make person a Sysop
 
 
-RSSYSOPHDR {[0;1m€¢¢˜šã §¨æ©™˜©ª «¦¬ %s... («¦¤ á£¦ ¨¦)
+RSSYSOPHDR {[0;1mChange privileges for %s... (poor soul)
 
 } T Change Sysop Permissions: Menu header
 
 
 RSSYSOPMNU {[0;1m
-!W„§ ¢¦šã š ˜ ˜¢¢˜šã, ON=æ¢˜, OFF=¡˜¤â¤˜, X š ˜ â¥¦›¦, ã ?: !)[0m} T Change Sysop Permissions: Menu prompt
+!WCommand to toggle, ON=all, OFF=none, X to saev and exit, or ? to show privileges: !)[0m} T Change Sysop Permissions: Menu prompt
 
 
 RSSYSOPON {[0;1m
-† œ¤«¦¢ã %s §¨¦©«âŸ¡œ ©«¦ ©ç¤¦¢¦.
+Command %s was added to the user's privilege set.
 } T Change Sysop Permissions: Option turned on
 
 
 RSSYSOPOFF {[0;1m
-† œ¤«¦¢ã %s ˜­˜ ¨âŸ¡œ ˜§æ «¦ ©ç¤¦¢¦.
+Command %s removed from the user's privilege set.
 } T Change Sysop Permissions: Option turned off
 
 
 RSSYSOPSOP {[0;1;31m
-!J’  ˜¤˜©­á¢œ œª œå¤˜  ˜¬«âª, ˜­œ¤« ¡æ; „å©˜  ¦ ¡¦¤©¦¢ â¨ª, ¡˜  ¦ ¡¦¤©¦¢ â¨ª
-â®œ  §¨æ©™˜© §á¤«˜ ¡˜  §˜¤«¦ç. ƒœ¤ £§¦¨œåª ¤˜ ˜¢¢á¥œ ª «¤ §¨æ©™˜©ã ©¦¬.!)
+!JFeeling insecure, boss? You're the Sysop, and the Sysop always has access
+to everything. You really can't change your privileges.!)
 
 [0;1m} T Change Sysop Permissions: Can't change Sysop's access
 
 
 RSSYSOPUPD {[0;1;32m
-€¤«œ, á¢¢¦ª â¤˜ª ©«¦ Club «à¤ ‡œé¤...
+Right, privileges set.
 } T Change Sysop Permissions: User's permissions updated
 
 
 RSSYSOPDEL {[0;1;31m
-!J’¤ §á«©œª á©®£˜, £á©«¦¨á £¦¬... ‰˜Ÿéª â› ¤œª §¨¦¤æ£ ˜ ©«¦ Ÿç£--,
-œœœ, œ¤¤¦é ©«¦¤ ®¨ã©«, ¡á§¦ ¦ª «¦¤ â©™©œ. † §¨æ©™˜© §¦¬ «¦¬ â›à©œª ›œ¤
- ©®çœ  §¢œæ¤.!)
-
-!J‘¬£™¦¬¢ã: ¡¦å«˜ ¡˜¢á £ã§àª œå¤˜  ©«¤ ™á© ¦ ˜ššâ¢ª...!)
+!JEr, this is rich. The user was deleted while you were editing their
+privileged commands. Your changes were ignored.!)
 [0;1m} T Change Sysop Permissions: User has been deleted
 
 
 RSSYSOPNOT {[0;1;32m
 ***
-!J •œ ¨ ©«ãª ‘¬©«ã£˜«¦ª £æ¢ ª á¢¢˜¥œ « ª œ › ¡âª §¨¦©™á©œ ª ©˜ª.
-„¢á«œ ©œ œ§˜­ã £˜å «¦¬ š ˜ ¤˜ £áŸœ«œ §¦ ˜ ˜¡¨ ™éª ã«˜¤  ˜¢¢˜šã.!)	
+!JThe Sysop has just changed your operator privileges. Ask them
+about this to find out what's changed and why.!)	
 [0;1m} T Change Sysop Permissions: User notification
 
 
@@ -3427,7 +3258,7 @@ RSSYSOPNOT {[0;1;32m
 
 
 CLSLSTHDR {[0;1;32m
-“§á¨®¦¤«˜ classes:
+Existing classes:
 
 !W} T List of classes: Header
 
@@ -3438,54 +3269,52 @@ CLSLSTEND {!)
 
 
 GCHANBCH {[0;1;31m
-!W’©¡ «©¡ «©¡... §á¢  §˜å¦¬£œ; ƒœ¤ ¬§á¨®œ  «â«¦ ¦ ¡˜¤á¢ , ®˜¨ «à£â¤œ!!)
+!WThere's no such channel.!)
 [0;1m} T Get channel: bad channel number
 
 
 GCHANBDV {[0;1;31m
-!W„£ ™â™˜ ˜, á¤«œ ¤˜ ›é©œ ª ©à©«á «¦ tty... :-)
-ƒœ¤ £§¦¨é ¤˜ ˜¤¦å¥à ˜¬«æ «¦ tty. ‘åš¦¬¨˜ «¦ â›à©œª ©«¤ £¦¨­ã tty*;
-’¦ ¦ç¤ ® §¨¦©â®œ  «˜ ¡œ­˜¢˜å˜ ¡˜  «˜ £ ¡¨á š¨á££˜«˜. „©ç;!)
+!WCan't open that UNIX tty. UNIX distinguishes between
+upper and lower case letters. Do you?!)
 [0;1m} T Get channel: bad device name
 
 
 GCHANBID {[0;1;31m
-!W€«ç®©œª, ¤œ˜¨â ©ç©¦§˜. €¬«æ «¦ á«¦£¦ ›œ¤ œå¤˜  ©¬›œ›œ£â¤¦.
-‰  ˜¤ ›œ¤ £œ § ©«œçœ ª, ¡á¤œ â¤˜ /#. :-)!)
+!WSorry, that user is not on-line. Enter [33m/#[31m to see for yourself.!)
 [0;1m} T Get channel: bad user ID
 
 
 GCHANHUH {[0;1;31m
-!Wƒœ¤ ¡˜«˜¢˜™˜å¤à «¤ ¢â¥ "%s". €¤ œå¤˜  æ¤¦£˜ ®¨ã©«, ˜¬«æª ¦ ®¨ã©«ª
-›œ¤ ¬§á¨®œ  ©«¤ ™á©. €¢¢ éª, ¡á¤˜«œ £á¢¢¦¤ ¡á§¦ ¦ ¢áŸ¦ª.!)
+!WI don't understand "%s". If this is a username, that user does not exist.
+Otherwise, you're doing something wrong.!)
 [0;1m} T Get channel: can't figure out what input is
 
 
 CHNLSTHDR {[0m
 ÚÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ [1;33m##[0m ³  [1;33mBAUD[0m  ³ [1;33m•†‘’†‘ (‰€’€‘’€‘† ‚€‹‹†‘)[0m               ³
+³ [1;33m##[0m ³  [1;33mBAUD[0m  ³ [1;33mUSER (CHANNEL STATUS)      [0m               ³
 ÃÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
 } T Channel list: header
 
-CHNLSTTBQ {[0m³ [1;32m%02x[0m ³        ³ [0;37m¨¦©à¨ ¤á ˜¤œ¤œ¨šã š¨˜££ã (LOGOUT)       [0m ³
+CHNLSTTBQ {[0m³ [1;32m%02x[0m ³        ³ [0;37mTemporarily inactive (user logging out)  [0m ³
 } T Channel list: line, QUIT state
 
-CHNLSTTBI {[0m³ [1;32m%02x[0m ³        ³ [0;1;33mReset modem ©«¤ ¡˜«á©«˜© %-14s[0m ³
+CHNLSTTBI {[0m³ [1;32m%02x[0m ³        ³ [0;1;33mResetting line to state: %-16s[0m ³
 } T Channel list: line, INIT state
 
-CHNLSTTBR {[0m³ [1;32m%02x[0m ³        ³ [0;1;34m„ ©œ¨®æ£œ¤ «¢œ­à¤ ¡ã ¡¢ã© (RING)      [0m ³
+CHNLSTTBR {[0m³ [1;32m%02x[0m ³        ³ [0;1;34mIncoming call (RING)                     [0m ³
 } T Channel list: line, RING state
 
-CHNLSTTBA {[0m³ [1;32m%02x[0m ³        ³ [0;1;36m€§˜¤«é ©œ œ ©œ¨®æ£œ¤ ¡¢ã© (ANSWER)     [0m ³
+CHNLSTTBA {[0m³ [1;32m%02x[0m ³        ³ [0;1;36mAnswering call (ANSWER)                  [0m ³
 } T Channel list: line, ANSWER state
 
 CHNLSTTBM {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1;32mMetaBBS: %-32.32s[0m ³
 } T Channel list: line, METABBS state
 
-CHNLSTTBL {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1;37m‘ç¤›œ© £œ «¤ ™á© (LOGIN)              [0m ³
+CHNLSTTBL {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1;37mConnecting call (LOGIN)                  [0m ³
 } T Channel list: line, LOGIN state
 
-CHNLSTTBG {[0m³ [1;32m%02x[0m ³        ³ [0;1;37m‘ç¤›œ© ¤â¦¬ ®¨ã©« (RELOGON)            [0m ³
+CHNLSTTBG {[0m³ [1;32m%02x[0m ³        ³ [0;1;37mRelogging in (RELOGON)                   [0m ³
 } T Channel list: line, RELOG state
 
 CHNLSTTBU {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1m%-31.31s%-10s[0m ³
@@ -3493,16 +3322,16 @@ CHNLSTTBU {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1m%-31.31s%-10s[0m ³
 
 CHNLSTPGS {[32;5m(/p sysop)} T Channel list: list, USER state, used has paged the Sysop
 
-CHNLSTTBU2 {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1m† š¨˜££ã œå¤˜  ¡˜«œ ¢££â¤.             [0m ³
+CHNLSTTBU2 {[0m³ [1;32m%02x[0m ³ [1;32m%6s[0m ³ [0;1mThis line is in use.                     [0m ³
 } T Channel list: line, USER state (unnamed)
 
-CHNLSTTBO {[0m³ [1;32m%02x[0m ³        ³ [0;1;32m‰˜«á©«˜© š¨˜££ãª: %-22s[0m ³
+CHNLSTTBO {[0m³ [1;32m%02x[0m ³        ³ [0;1;32mLine state: %-29s[0m ³
 } T Channel list: line, OK state
 
-CHNLSTTBF {[0m³ [1;32m%02x[0m ³        ³ [0;1;31;5m€§¦«¬®å˜ «¦¬ reset! ‰˜«á©«˜©: %-10s[0m ³
+CHNLSTTBF {[0m³ [1;32m%02x[0m ³        ³ [0;1;31;5mReset failed! State: %-20s[0m ³
 } T Channel list: line, FAIL state
 
-CHNLSTTBE {[0m³ [1;32m%02x[0m ³        ³ ¨¦©à¨ ¤á áš¤à©« ¡˜«á©«˜©               ³
+CHNLSTTBE {[0m³ [1;32m%02x[0m ³        ³ Temporarily unknown state                 ³
 } T Channel list: line, error reading line state
 
 CHNLSTFTR {[0mÀÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -3514,257 +3343,231 @@ CHNLSTFTR {[0mÀÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
 
-RSAPGVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m”å¢«¨¦ ¡˜«˜®à¨ã©œà¤ Audit Trail[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+RSAPGVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mAudit Filter Editor[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „›é £§¦¨œå«œ  ¤˜ œ¢âš¥œ«œ §¦ ˜  œå› ¡˜«˜®à¨ã©œà¤  «¦¬ audit  trail Ÿ˜  [0;1;47;37m³ [0m
-[30;47m ³  ©˜ª  ›œå®¤œ  «¦ ©ç©«£˜.  † ©¦™˜¨æ««˜  ¡˜«˜®à¨ã©œà¤ £§¦¨œå ¤˜ ˜¢¢á¥œ   [0;1;47;37m³ [0m
-[30;47m ³  ¡˜  £œ «¤ œ¤«¦¢ã /audit. ƒé©«œ Ctrl-O ©œ ¡á§¦ ¦ §œ›å¦ š ˜ ™¦ãŸœ ˜.     [0;1;47;37m³ [0m
+[30;47m ³  This allows  you to set  what types  of audit trail entries  you'll be  [0;1;47;37m³ [0m
+[30;47m ³  paged about. You can also use the /audit global command to temporarily  [0;1;47;37m³ [0m
+[30;47m ³  change the minimum severity leve. Press Ctrl-O for help on a field.     [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „£­á¤ © . . . . . . . . [0;30;46m @23;"‰˜££å˜ ¡˜«˜®é¨©|„§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª|„§œåš¦¬©œª & ‘£˜¤« ¡âª|¢œª ¦  ¡˜«˜®à¨ã©œ ª"l [0;30;47m  (space š ˜ ˜¢¢˜šã)  [0;1;47;37m³ [0m
+[30;47m ³  Minimum severity . . . . [0;30;46m @23;"Show nothing|Emergency|Cautionary|Show all"l [0;30;47m  (space š ˜ ˜¢¢˜šã)  [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „å› ¡˜«˜®à¨ã©œà¤ §¦¬ Ÿâ¢œ«œ ¤˜ ™¢â§œ«œ:            (space š ˜ ˜¢¢˜šã)  [0;1;47;37m³ [0m
+[30;47m ³  Entry types:                                         (space to toggle)  [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  •¨œé©œ ª/‘«˜« ©« ¡á/Š¦š ©« ¡âª ¡˜«˜®à¨ã©œ ª . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „ › ¡âª «˜¡« ¡âª › œ¨š˜©åœª (cleanup, events)  . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  ‰˜«˜®à¨ã©œ ª ®œ ¨ ©£¦ç ©¬©«ã£˜«¦ª . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  €©­á¢œ ˜ ©¬©«ã£˜«¦ª, ®¨©«é¤ ¡˜  ˜¨®œåà¤ . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  ‹œ«˜­¦¨âª/˜¤˜š¤é©œ ª ˜¨®œåà¤  . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  ‰å¤© ®¨©«é¤ (©¬¤›â©œ ª, ˜§¦©¬¤›â©œ ª, ¡¢§)  . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  €¢¢œª ¡˜«˜®à¨ã©œ ª  . . . . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Charges/Statistics/Accounting entries . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Special regular processes (cleanup, events)  . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  System operations . . . . . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  System, user and file security . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  File transfers/reads  . . . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  User activities (logins, logouts, etc) . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Other entries . . . . . . . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  ¨¦©¦®ã: ¦  ˜¢¢˜šâª  ©®ç¦¬¤ š ˜ Š„‘ « ª £œ«â§œ «˜ ©¬¤›â©œ ª ©˜ª.       [0;1;47;37m³ [0m
+[30;47m ³  Attention: changes will apply to this and FUTURE connections.           [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
 [30;47m ³                                  [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
-[30;47m ³  Ctrl-R: ¦ãŸœ ˜                  ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R: Help                     ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Audit paging: visual template
 
 
-SEVO {‰˜££å˜ ¡˜«˜®é¨©} T Filtering: show nothing (off)
-SEVE {„§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª} T Filtering: show emergency entries only
-SEVC {„§œåš¦¬©œª & ‘£˜¤« ¡âª} T Filtering: show emergency and cautionary
-SEVI {¢œª ¦  ¡˜«˜®à¨ã©œ ª} T Filtering: show everything
+SEVO {Show nothing} T Filtering: show nothing (off)
+SEVE {Emergency} T Filtering: show emergency entries only
+SEVC {Cautionary} T Filtering: show emergency and cautionary
+SEVI {Show all} T Filtering: show everything
 
 
 
 RSAPGLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
-[30;47m ³ ”å¢«¨¦ ¡˜«˜®à¨ã©œà¤ Audit Trail                                          [0;1;47;37m³ [0m
+[30;47m ³ Audit Filter Editor                                                      [0;1;47;37m³ [0m
 [30;47m ³ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [0;1;47;37m³ [0m
-[30;47m ³ „›é £§¦¨œå«œ ¤˜  œ¢âš¥œ«œ §¦ ˜ œå› ¡˜«˜®à¨ã©œà¤ «¦¬  audit trail Ÿ˜ ©˜ª [0;1;47;37m³ [0m
-[30;47m ³ ›œå®¤œ  «¦ ©ç©«£˜.  † ©¦™˜¨æ««˜  ¡˜«˜®à¨ã©œà¤ £§¦¨œå ¤˜ ˜¢¢á¥œ  ¡˜  £œ [0;1;47;37m³ [0m
-[30;47m ³ «¤ œ¤«¦¢ã /audit.                                                       [0;1;47;37m³ [0m
+[30;47m ³ This allows you to set what types of audit trail entries you'll be paged [0;1;47;37m³ [0m
+[30;47m ³ about. You can also use  the /audit global command to temporarily change [0;1;47;37m³ [0m
+[30;47m ³ the minimum severity level.                                              [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m1[30m. „£­á¤ © . . . . . . . . . . . . . . . . . .  [34m@23;"‰˜££å˜ ¡˜«˜®é¨©|„§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª|„§œåš¦¬©œª & ‘£˜¤« ¡âª|¢œª ¦  ¡˜«˜®à¨ã©œ ª"l [0;1;47;37m³ [0m
+[30;47m ³ [31m1[30m. Minimum severity . . . . . . . . . . . . . .  [34m@23;"Show nothing|Emergency|Cautionary|Show all"l [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m2[30m. •¨œé©œ ª/‘«˜« ©« ¡á/Š¦š ©« ¡âª ¡˜«˜®à¨ã©œ ª . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m3[30m. „ › ¡âª «˜¡« ¡âª › œ¨š˜©åœª (cleanup, events)  . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m4[30m. ‰˜«˜®à¨ã©œ ª ®œ ¨ ©£¦ç ©¬©«ã£˜«¦ª . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m5[30m. €©­á¢œ ˜ ©¬©«ã£˜«¦ª, ®¨©«é¤ ¡˜  ˜¨®œåà¤ . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m6[30m. ‹œ«˜­¦¨âª/˜¤˜š¤é©œ ª ˜¨®œåà¤  . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m7[30m. ‰å¤© ®¨©«é¤ (©¬¤›â©œ ª, ˜§¦©¬¤›â©œ ª, ¡¢§)  . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m8[30m. €¢¢œª ¡˜«˜®à¨ã©œ ª  . . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m2[30m. Charges/Statistics/Accounting entries . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m3[30m. Special regular processes (cleanup, events)  . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m4[30m. System operations . . . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m5[30m. System, user and file security . . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m6[30m. File transfers/reads  . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m7[30m. User activities (logins, logouts, etc) . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m8[30m. Other entries . . . . . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  ¨¦©¦®ã: ¦  ˜¢¢˜šâª  ©®ç¦¬¤ š ˜ Š„‘ « ª £œ«â§œ «˜ ©¬¤›â©œ ª ©˜ª.       [0;1;47;37m³ [0m
+[30;47m ³  Attention: changes will apply to this and FUTURE connections.           [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m
 } T Audit paging: Linear template
 
 
 RSAPGH0 {[0;1m
-!J  ¡˜«˜®à¨ã©œ ª «¦¬ Audit Trail ®à¨å¦¤«˜  ©œ «¨œ ª £œšá¢œª ¡˜«š¦¨åœª
-©¦™˜¨æ««˜ª.   §¢¨¦­¦¨ ˜¡âª ¡˜«˜®à¨ã©œ ª œå¤˜  ¦  § ¦ ¡¦ ¤âª. ‰˜«˜®à¨¦ç¤
-­¬© ¦¢¦š ¡âª › œ¨š˜©åœª.   ©£˜¤« ¡âª ¡˜«˜®à¨ã©œ ª œ£­˜¤å¦¤«˜  ©œ ¡æ¡¡ ¤¦
-®¨é£˜. ¤¦£á¦¤«˜  ©£˜¤« ¡âª š ˜«å £§¦¨œå ¤˜ ›¢é¤¦¬¤ ¡˜«˜©«á©œ ª §¦¬
-˜§˜ «¦ç¤ «¤ §¨¦©¦®ã ©˜ª (æ§àª œšš¨˜­âª ¤âà¤ ®¨©«é¤, hack tries ¡¢§). ’â¢¦ª,
-¦  œ§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª œå¤˜  ¦  § ¦ ©§á¤ œª ¡˜  ›¢é¤¦¬¤ ©¦™˜¨á §¨¦™¢ã£˜«˜
-©« ™á©. á¤«¦«œ §¨â§œ  ¤˜ «¦¬ª ›å¤œ«˜   ˜§˜¨˜å«« §¨¦©¦®ã. „›é £§¦¨œå«œ ¤˜
-¦¨å©œ«œ «¦ ¡˜«é­¢  ©¦™˜¨æ««˜ª «à¤ ¡˜«˜®à¨ã©œà¤ §¦¬ Ÿ˜ ™¢â§œ«œ ˜¤á §á©˜
-©« š£ã.!)
+!JAudit trail entries belong to three severity groups. Informational entries
+are the most common ones. They log normal system activity. Cautionary entries
+log events that may need your attention, but are not necessarily serious.
+Finally, emergency entries denote events that are very important and deserve
+your immediate and full attention. This where you set the minimum severity
+level for which you'll be paged.!)
 } T Audit paging: field help 0
 
 RSAPGH1 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­œ«˜  ¡á«  §¦¬ â®œ  ¤˜ ¡á¤œ  £œ ®¨œé©œ ª credits,
-©«˜« ©« ¡âª ¡˜«˜®à¨ã©œ ª ¡˜  šœ¤ ¡éª ¢¦š ©« ¡âª ¡˜«˜®à¨ã©œ ª.!)
+!JTurn this on to get pages about entries regarding
+credit charges, statistical information and general accounting activity.!)
 [0;1m} T Audit paging: field help 1
 
 
 RSAPGH2 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­œ«˜  ¡á«  §¦¬ â®œ  ¤˜ ¡á¤œ  £œ « ª «˜¡« ¡âª › œ¨š˜©åœª
-«ª ™á©ª (§® cleanup).!)
+!JTurn this on to get pages about entries regarding
+regularly performed tasks and activities (e.g. cleanups and events).!)
 [0;1m} T Audit paging: field help 2
 
 
 RSAPGH3 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­œ«˜   œ¡«â¢œ© ¡á§¦ ˜ª œ¤«¦¢ãª ®œ ¨ ©«ã ©¬©«ã£˜«¦ª ã
-§˜¨æ£¦ ˜ œ¤â¨šœ ˜.!)
+!JTurn this on to get pages about entries regarding
+system operation commands, or similar administrative activities.!)
 [0;1m} T Audit paging: field help 3
 
 
 RSAPGH4 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­œ«˜  ¡á«  §¦¬ â®œ  ¤˜ ¡á¤œ  £œ «¤ ˜©­á¢œ ˜ «¦¬
-©¬©«ã£˜«¦ª: §¨¦©§áŸœ œª ©§˜©å£˜«¦ª ¢¦š˜¨ ˜©£é¤ ¡¢§.!)
+!JTurn this on to get pages about entries regarding
+system security such as invalid passwords entered, etc.!)
 [0;1m} T Audit paging: field help 4
 
 
 RSAPGH5 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­¦¤«˜  £œ«˜­¦¨âª ˜¨®œåà¤, ˜¤˜š¤é©œ ª ˜¨®œåà¤ ã §˜¨æ£¦ œª
-œ¤â¨šœ œª.!)
+!JTurn this on to get pages about entries regarding
+file transfer activities: downloads, uploads, file viewing, etc.!)
 [0;1m} T Audit paging: field help 5
 
 
 RSAPGH6 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­¦¤«˜  ©¬¤›â©œ ª ¡˜  ˜§¦©¬¤›â©œ ª ®¨©«é¤ (¡˜  ©®œ« ¡âª
-¡˜«˜®à¨ã©œ ª).!)
+!JTurn this on to get pages about entries regarding
+user movements: logins, logouts, etc.!)
 [0;1m} T Audit paging: field help 6
 
 
 RSAPGH7 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ©˜ª œ ›¦§¦ œå ¡áŸœ
-­¦¨á §¦¬ Ÿ˜ ¡˜«˜š¨á­œ«˜  ¡á§¦ ˜ œ¤â¨šœ ˜ §¦¬ ›œ¤ ˜¤ã¡œ  ©« ª á¢¢œª
-¡˜«š¦¨åœª ¡˜«˜®à¨ã©œà¤.!)
+!JTurn this on to get pages about entries regarding
+miscellaneous activities that don't belong to any other category.!)
 [0;1m} T Audit paging: field help 7
 
 
 RSAPGCAN {[0;1;31m
-  ˜¢¢˜šâª ©˜ª £˜«˜ éŸ¡˜¤.
+Aborted.
 [0;1m} T Audit paging: filtering changes aborted
 
 
 RSAPGOK {[0;1;32m
-„¤«á¥œ , «¦ ­å¢«¨¦ «à¤ ¡˜«˜®à¨ã©œà¤ ¨¬Ÿ£å©«¡œ.
+Okay, the audit filter has been configured.
 [0;1m} T Audit paging: filtering changes set
 
 
 
-RSFLTVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m„¨œ¬¤˜ «¦¬ Audit Trail[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+RSFLTVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mSearch the Audit Trail[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „¨œ¬¤˜ š ˜ . . . [1;44;37m@80;51;0s[0;1;47;37m  [0;1;47;37m³ [0m
+[30;47m ³  Search for . . . [1;44;37m@80;51;0s[0;1;47;37m  [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „¨œ¬¤˜ §¢¨¦­¦¨ ˜¡é¤ ¡˜«˜®à¨ã©œà¤ . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ ©£˜¤« ¡é¤ ¡˜«˜®à¨ã©œà¤ . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ œ§œåš¦¬©à¤ ¡˜«˜®à¨ã©œà¤  . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search informational entries  . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search cautionary entries  . . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search emergency entries  . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „¨œ¬¤˜ ®¨œé©œà¤/©«˜« ©« ¡é¤/¢¦š ©« ¡é¤ ¡˜«˜®à¨ã©œà¤  . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ œ › ¡é¤ «˜¡« ¡é¤ › œ¨š˜© é¤ (cleanup, events)  . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ ‰˜«˜®à¨ã©œà¤ ®œ ¨ ©£¦ç ©¬©«ã£˜«¦ª . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ €©­á¢œ ˜ª ©¬©«ã£˜«¦ª, ®¨©«é¤ ¡˜  ˜¨®œåà¤  . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ ‹œ«˜­¦¨é¤/˜¤˜š¤é©œà¤ ˜¨®œåà¤  . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ ‰ ¤ã©œà¤ ®¨©«é¤ (©¬¤›â©œà¤, ˜§¦©¬¤›â©œà¤, ¡¢§)  . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
-[30;47m ³  „¨œ¬¤˜ €¢¢à¤ ¡˜«˜®à¨ã©œà¤  . . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search Charges/Statistics/Accounting entries . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search Special regular processes (cleanup, events)  . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search System operations . . . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search System, user and file security . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search File transfers/reads  . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search User activities (logins, logouts, etc) . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Search Other entries . . . . . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³  „£­á¤ © ˜§æ «¦ «â¢¦ª (¤âœª ¡˜«˜®à¨ã©œ ª) §¨¦ª «¤ ˜¨®ã . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
+[30;47m ³  Show backwards (most recent entries first)  . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  ³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
 [30;47m ³                                  [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
-[30;47m ³  Ctrl-R: ¦ãŸœ ˜                  ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R: Help                     ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Audit search: visual template
 
 
 
 RSFLTLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
-[30;47m ³ „¨œ¬¤˜ «¦¬ Audit Trail                                                   [0;1;47;37m³ [0m
+[30;47m ³ Search the Audit Trail                                                   [0;1;47;37m³ [0m
 [30;47m ³ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m1[30m.  „¨œ¬¤˜ š ˜ . . . [34m@80;51;0s [0;1;47;37m³ [0m
+[30;47m ³ [31m1[30m.  Search for . . . [34m@80;51;0s [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m2[30m.  „¨œ¬¤˜ §¢¨¦­¦¨ ˜¡é¤ ¡˜«˜®à¨ã©œà¤ . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m3[30m.  „¨œ¬¤˜ ©£˜¤« ¡é¤ ¡˜«˜®à¨ã©œà¤ . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m4[30m.  „¨œ¬¤˜ œ§œåš¦¬©à¤ ¡˜«˜®à¨ã©œà¤  . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m2[30m.  Search informational entries  . . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m3[30m.  Search cautionary entries  . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m4[30m.  Search emergency entries  . . . . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m5[30m.  „¨œ¬¤˜ •¨œé©œà¤/‘«˜« ©« ¡é¤/Š¦š ©« ¡é¤ ¡˜«˜®à¨ã©œà¤ . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m6[30m.  „¨œ¬¤˜ „ › ¡é¤ «˜¡« ¡é¤ › œ¨š˜© é¤ (cleanup, events) . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m7[30m.  „¨œ¬¤˜ ‰˜«˜®à¨ã©œà¤ ®œ ¨ ©£¦ç ©¬©«ã£˜«¦ª  . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m8[30m.  „¨œ¬¤˜ €©­á¢œ ˜ª ©¬©«ã£˜«¦ª, ®¨©«é¤ ¡˜  ˜¨®œåà¤ . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m9[30m.  „¨œ¬¤˜ ‹œ«˜­¦¨é¤/˜¤˜š¤é©œà¤ ˜¨®œåà¤ . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m10[30m. „¨œ¬¤˜ ‰å¤©ª ®¨©«é¤ (©¬¤›â©œ ª, ˜§¦©¬¤›â©œ ª, ¡¢§)  . . . . . [34m@"X "t [0;1;47;37m³ [0m
-[30;47m ³ [31m11[30m. „¨œ¬¤˜ €¢¢à¤ ¡˜«˜®à¨ã©œà¤ . . . . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m5[30m.  Search Charges/Statistics/Accounting entries . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m6[30m.  Search Special regular processes (cleanup, events)  . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m7[30m.  Search System operations . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m8[30m.  Search System, user and file security . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m9[30m.  Search File transfers/reads  . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m10[30m. Search User activities (logins, logouts, etc) . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m11[30m. Search Other entries . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
-[30;47m ³ [31m12[30m. „£­á¤ © ˜§æ «¦ «â¢¦ª (¤âœª ¡˜«˜®à¨ã©œ ª) §¨¦ª «¤ ˜¨®ã . . . .  [34m@"X "t [0;1;47;37m³ [0m
+[30;47m ³ [31m12[30m. Show backwards (most recent entries first)  . . . . . . . . . .  [34m@"X "t [0;1;47;37m³ [0m
 [30;47m ³                                                                          [0;1;47;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m
 } T Audit search: linear template
 
 
 RSFLT1 {[0;1m
-!J„›é £§¦¨œå«œ ¤˜ ›é©œ«œ £å˜ ¢â¥ ã ­¨á© ¡¢œ ›å «¤ ¦§¦å˜ Ÿ˜ ¯á¥¦¬£œ ©«¦ 
-Audit Trail. €¤ ˜­ã©œ«œ ˜¬«æ «¦ §œ›å¦ ¡œ¤æ, æ¢œª ¦  ¡˜«˜®à¨ã©œ ª «¦¬ Audit
-Trail Ÿ˜ œ£­˜¤ ©«¦ç¤ (˜­¦ç ­ ¢«¨˜¨ ©«¦ç¤ ¡˜  ˜§æ « ª ¨¬Ÿ£å©œ ª «à¤ ¬§æ¢¦ §à¤
-§œ›åà¤!).
+!JEnter a keyword to look for in the Audit Trail.
+Leave the keyword blank to simply filter the audit trail by whatever filtering criteria
+you have set.!).
 [0;1m} T Audit search: field help 1
 
 
 RSFLT2 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«ã «¤ œ§ ¢¦šã, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜ §¢¨¦­¦¨ ˜¡âª ¡˜«˜®à¨ã©œ ª.
-‹§¦¨œå«œ ¤˜ œ£­˜¤å©œ«œ ¡  á¢¢œª ¡˜«˜®à¨ã©œ ª œ¤œ¨š¦§¦ é¤«˜ª «˜ ˜¤«å©«¦ ®˜ §œ›å˜.!)
+!JTurn this on to search through informational audit trail entries.!)
 [0;1m} T Audit search: field help 2
 
 
 RSFLT3 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«ã «¤ œ§ ¢¦šã, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜ ©£˜¤« ¡âª ¡˜«˜®à¨ã©œ ª.
-‹§¦¨œå«œ ¤˜ œ£­˜¤å©œ«œ ¡  á¢¢œª ¡˜«˜®à¨ã©œ ª œ¤œ¨š¦§¦ é¤«˜ª «˜ ˜¤«å©«¦ ®˜ §œ›å˜.!)
+!JTurn this on to search through cautionary audit trail entries.!)
 [0;1m} T Audit search: field help 3
 
 
 RSFLT4 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«ã «¤ œ§ ¢¦šã, «¦ ©ç©«£˜ Ÿœ ¯á¥œ  š ˜ œ§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª.
-‹§¦¨œå«œ ¤˜ œ£­˜¤å©œ«œ ¡  á¢¢œª ¡˜«˜®à¨ã©œ ª œ¤œ¨š¦§¦ é¤«˜ª «˜ ˜¤«å©«¦ ®˜ §œ›å˜.!)
+!JTurn this on to search through emergency audit trail entries.!)
 [0;1m} T Audit search: field help 4
 
 RSFLTH5 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ ®¨œé©œ ª credits,
-©«˜« ©« ¡âª ¡˜«˜®à¨ã©œ ª ¡˜  šœ¤ ¡éª ¢¦š ©« ¡âª ¡˜«˜®à¨ã©œ ª.!)
+!JTurn this on to search through charge and accounting-related entries.!)
 [0;1m} T Audit paging: field help 5
 
 
 RSFLTH6 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ « ª «˜¡« ¡âª › œ¨š˜©åœª
-«ª ™á©ª (§® cleanup).!)
+!JTurn this on to search through regular events-related entries.!)
 [0;1m} T Audit paging: field help 6
 
 
 RSFLTH7 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ «¤ œ¡«â¢œ© œ¤«¦¢é¤ ®œ ¨ ©«ã ©¬©«ã£˜«¦ª ã
-§˜¨æ£¦ œª œ¤â¨šœ œª.!)
+!JTurn this on to search through system operation-related entries.!)
 [0;1m} T Audit paging: field help 7
 
 
 RSFLTH8 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ «¤ ˜©­á¢œ ˜ «¦¬
-©¬©«ã£˜«¦ª: §¨¦©§áŸœ œª ©§˜©å£˜«¦ª ¢¦š˜¨ ˜©£é¤ ¡¢§.!)
+!JTurn this on to search through security-related entries.!)
 [0;1m} T Audit paging: field help 8
 
 
 RSFLTH9 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜ 
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ £œ«˜­¦¨âª ˜¨®œåà¤, ˜¤˜š¤é©œ ª ˜¨®œåà¤ ã §˜¨æ£¦ œª
-œ¤â¨šœ œª.!)
+!JTurn this on to search through file transfer-related entries.!)
 [0;1m} T Audit paging: field help 9
 
 
 RSFLTH10 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ  š ˜
-¡˜«˜®à¨ã©œ ª §¦¬ â®¦¬¤ ¤˜ ¡á¤¦¬¤ £œ ©¬¤›â©œ ª ¡˜  ˜§¦©¬¤›â©œ ª ®¨©«é¤.!)
+!JTurn this on to search through user activity-related entries.!)
 [0;1m} T Audit paging: field help 10
 
 
 RSFLTH11 {[0;1m
-!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«æ «¦ œå›¦ª ¡˜«˜®é¨©ª, «¦ ©ç©«£˜ Ÿ˜ ¯á¥œ 
-š ˜ ¡˜«˜®à¨ã©œ ª §¦¬ ›œ¤ ˜¤ã¡¦¬¤ ©« ª ¬§æ¢¦ §œª ¡˜«š¦¨åœª.!)
+!JTurn this on to search through miscellaneous entries.!)
 [0;1m} T Audit paging: field help 11
 
 
 
 RSFLTH12 {[0;1m
-!J‹œ ˜¬«ã «¤ œ§ ¢¦šã œ¤œ¨šã, ¦  ¡˜«˜®à¨ã©œ ª ©˜ª §˜¨¦¬© á¦¤«˜  £œ ˜¤«å©«¨¦­ ®¨¦¤ ¡ã ©œ ¨á: ¦  § ¦ §¨æ©­˜«œª
-œ£­˜¤å¦¤«˜  §¨é«œª. €¬«ã œå¤˜  ¡˜   § ¦ §¨˜¡« ¡ã ¢œ «¦¬¨šå˜ ¡˜«á ¡˜¤æ¤˜.!)
+!JTurn this on to reverse the search order. This will show the most recent
+log entries first. Generally speaking, this is the most useful behaviour.!)
 [0;1m} T Audit paging: field help 12
 
 
@@ -3778,24 +3581,24 @@ RSFLTH12 {[0;1m
 
 
 AUDSRCH {[0;1;32m
-„¨œ¬¤˜ «¦¬ Audit Trail...
+Searching the Audit Trail...
 !FÄ
 [0;1m} T Searching Audit Trail
 
 
 AUDSEND {!0l[0;1;32m!FÄ
 
-’â¢¦ª â¨œ¬¤˜ª.
+End of search.
 [0;1m} T Searching Audit Trail, end of search
 
 
 AUDNF {[0;1;31m
-!J‘¬šš¤é£, ›œ¤ ™¨âŸ¡œ «å§¦«˜ ©®œ« ¡æ.!)
+!JSorry, nothing found.!)
 [0;1m} T Searching Audit Trail, nothing found
 
 
 AUDSCAN {[0;1;31m!0l
-† â¨œ¬¤˜ «œ¨£˜«å©«¡œ.
+Search aborted.
 [0;1m} T Audit Trail search terminated.
 
 
