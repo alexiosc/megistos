@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -67,256 +68,296 @@ const char *__RCS=RCS_VER;
 #define WANT_STRING_H 1
 #include <bbsinclude.h>
 
-#include "typhoon.h"
-#include "bbs.h"
-#include "files.h"
+#include <megistos/typhoon.h>
+#include <megistos/bbs.h>
+#include <megistos/files.h>
 
 
 static int id_dbkey;
 
 
 void
-dbkeyopen()
+dbkeyopen ()
 {
-  d_dbfpath(mkfname(FILELIBDBDIR));
-  d_dbdpath(mkfname(FILELIBDBDIR));
-  if(d_open("dbkey","s")!=S_OKAY){
-    error_fatal("Cannot open keyword database (db_status %d).",
-	  db_status);
-  }
-  d_dbget(&id_dbkey);
+	d_dbfpath (mkfname (FILELIBDBDIR));
+	d_dbdpath (mkfname (FILELIBDBDIR));
+	if (d_open ("dbkey", "s") != S_OKAY) {
+		error_fatal ("Cannot open keyword database (db_status %d).",
+			     db_status);
+	}
+	d_dbget (&id_dbkey);
 }
 
 
 void
-addkeywords(char *s, int approved, struct fileidx *f)
+addkeywords (char *s, int approved, struct fileidx *f)
 {
-  struct keywordidx k;
-  char *cp;
-  d_dbset(id_dbkey);
+	struct keywordidx k;
+	char   *cp;
 
-  cp=strtok(s," ");
-  while(cp){
+	d_dbset (id_dbkey);
 
-    strcpy(k.keyword,cp);
-    strcpy(k.fname,f->fname);
-    k.klibnum=f->flibnum;
-    k.approved=approved;
-   
-    /*print("KEY=(%s), FNAME=(%s), LIB=%d\n",k.keyword,k.fname,k.klibnum);*/
+	cp = strtok (s, " ");
+	while (cp) {
 
-    if(d_fillnew(KEYWORDIDX,&k)!=S_OKAY){
-      error_fatal("Typhoon call failed with db_status=%d",db_status);
-    }
+		strcpy (k.keyword, cp);
+		strcpy (k.fname, f->fname);
+		k.klibnum = f->flibnum;
+		k.approved = approved;
 
-    cp=strtok(NULL," ");
-  }
+		/*print("KEY=(%s), FNAME=(%s), LIB=%d\n",k.keyword,k.fname,k.klibnum); */
+
+		if (d_fillnew (KEYWORDIDX, &k) != S_OKAY) {
+			error_fatal ("Typhoon call failed with db_status=%d",
+				     db_status);
+		}
+
+		cp = strtok (NULL, " ");
+	}
 }
 
 
 void
-addkeyword(struct keywordidx *kw)
+addkeyword (struct keywordidx *kw)
 {
-  d_dbset(id_dbkey);
-  if(d_fillnew(KEYWORDIDX,kw)==S_OKAY)return;
-  else
-    error_fatal("Typhoon call failed with db_status=%d",db_status);
+	d_dbset (id_dbkey);
+	if (d_fillnew (KEYWORDIDX, kw) == S_OKAY)
+		return;
+	else
+		error_fatal ("Typhoon call failed with db_status=%d",
+			     db_status);
 }
 
 
 void
-deletekeyword(int libnum, char *fname, int approved, char *keyword)
+deletekeyword (int libnum, char *fname, int approved, char *keyword)
 {
-  struct filekey k;
+	struct filekey k;
 
-  bzero(&k,sizeof(k));
-  k.approved=approved;
-  k.klibnum=libnum;
-  strcpy(k.keyword,keyword);
-  strcpy(k.fname,fname);
+	bzero (&k, sizeof (k));
+	k.approved = approved;
+	k.klibnum = libnum;
+	strcpy (k.keyword, keyword);
+	strcpy (k.fname, fname);
 
-  if(d_keyfind(FILEKEY,&k)==S_NOTFOUND)return;
-  
-  if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
-  
-  if(d_keyread(&k)!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
-  
-  if(d_delete()!=S_OKAY){
-    error_fatal("Typhoon call failed with db_status=%d",db_status);
-  }
+	if (d_keyfind (FILEKEY, &k) == S_NOTFOUND)
+		return;
+
+	if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
+
+	if (d_keyread (&k) != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
+
+	if (d_delete () != S_OKAY) {
+		error_fatal ("Typhoon call failed with db_status=%d",
+			     db_status);
+	}
 }
 
 
 int
-keywordfind(int libnum, char *keyword, struct maintkey *k)
+keywordfind (int libnum, char *keyword, struct maintkey *k)
 {
-  d_dbset(id_dbkey);
-  bzero(k,sizeof(k));
-  k->approved=1;
-  k->klibnum=libnum;
-  strcpy(k->keyword,keyword);
-  k->fname[0]=1;
-  k->fname[0]=0;
+	d_dbset (id_dbkey);
+	bzero (k, sizeof (k));
+	k->approved = 1;
+	k->klibnum = libnum;
+	strcpy (k->keyword, keyword);
+	k->fname[0] = 1;
+	k->fname[0] = 0;
 
-  if(d_keyfind(MAINTKEY,k)==S_NOTFOUND)
-    if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
+	if (d_keyfind (MAINTKEY, k) == S_NOTFOUND)
+		if (d_keynext (MAINTKEY) == S_NOTFOUND)
+			return 0;
 
-  if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
-  
-  return libnum==k->klibnum;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
+
+	return libnum == k->klibnum;
 }
 
 
 int
-keygetfirst(int libnum, struct maintkey *k)
+keygetfirst (int libnum, struct maintkey *k)
 {
-  d_dbset(id_dbkey);
-  bzero(k,sizeof(k));
-  k->approved=1;
-  k->klibnum=libnum;
-  k->keyword[0]=1;
-  k->keyword[1]=0;
-  k->fname[0]=1;
-  k->fname[0]=0;
-  if(d_keyfind(MAINTKEY,k)==S_NOTFOUND)
-    if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
+	d_dbset (id_dbkey);
+	bzero (k, sizeof (k));
+	k->approved = 1;
+	k->klibnum = libnum;
+	k->keyword[0] = 1;
+	k->keyword[1] = 0;
+	k->fname[0] = 1;
+	k->fname[0] = 0;
+	if (d_keyfind (MAINTKEY, k) == S_NOTFOUND)
+		if (d_keynext (MAINTKEY) == S_NOTFOUND)
+			return 0;
 
-  if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
-  
-  return libnum==k->klibnum;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
+
+	return libnum == k->klibnum;
 }
 
 
 int
-keygetnext(int libnum, struct maintkey *k)
+keygetnext (int libnum, struct maintkey *k)
 {
-  d_dbset(id_dbkey);
-  if(d_keyfind(MAINTKEY,k)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	d_dbset (id_dbkey);
+	if (d_keyfind (MAINTKEY, k) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
+	if (d_keynext (MAINTKEY) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
-  
-  return k->klibnum==libnum;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 3 failed with db_status=%d",
+			     db_status);
+
+	return k->klibnum == libnum;
 }
 
 
 int
-keyindexfirst(struct indexkey *k)
+keyindexfirst (struct indexkey *k)
 {
-  d_dbset(id_dbkey);
-  bzero(k,sizeof(k));
-  if(d_keyfrst(INDEXKEY)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	d_dbset (id_dbkey);
+	bzero (k, sizeof (k));
+	if (d_keyfrst (INDEXKEY) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
-  
-  return 1;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
+
+	return 1;
 }
 
 
 int
-keyindexnext(struct indexkey *k)
+keyindexnext (struct indexkey *k)
 {
-  d_dbset(id_dbkey);
-  if(d_keyfind(INDEXKEY,k)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	d_dbset (id_dbkey);
+	if (d_keyfind (INDEXKEY, k) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keynext(INDEXKEY)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
+	if (d_keynext (INDEXKEY) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
-  
-  return 1;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 3 failed with db_status=%d",
+			     db_status);
+
+	return 1;
 }
 
 
 int
-keyfilefirst(int libnum, char *fname, int approved, struct filekey *k)
+keyfilefirst (int libnum, char *fname, int approved, struct filekey *k)
 {
-  d_dbset(id_dbkey);
-  bzero(k,sizeof(k));
-  k->approved=approved;
-  k->klibnum=libnum;
-  strcpy(k->fname,fname);
-  k->keyword[0]=1;
-  k->keyword[0]=0;
+	d_dbset (id_dbkey);
+	bzero (k, sizeof (k));
+	k->approved = approved;
+	k->klibnum = libnum;
+	strcpy (k->fname, fname);
+	k->keyword[0] = 1;
+	k->keyword[0] = 0;
 
-  if(d_keyfind(FILEKEY,k)==S_NOTFOUND)
-    if(d_keynext(FILEKEY)==S_NOTFOUND)return 0;
+	if (d_keyfind (FILEKEY, k) == S_NOTFOUND)
+		if (d_keynext (FILEKEY) == S_NOTFOUND)
+			return 0;
 
-  if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
 
-  return libnum==k->klibnum && !strcmp(k->fname,fname) &&
-    approved==k->approved;
+	return libnum == k->klibnum && !strcmp (k->fname, fname) &&
+	    approved == k->approved;
 }
 
 
 int
-keyfilenext(int libnum, char *fname, int approved, struct filekey *k)
+keyfilenext (int libnum, char *fname, int approved, struct filekey *k)
 {
-  d_dbset(id_dbkey);
-  if(d_keyfind(FILEKEY,k)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
+	d_dbset (id_dbkey);
+	if (d_keyfind (FILEKEY, k) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 1 failed with db_status=%d",
+			     db_status);
 
-  if(d_keynext(FILEKEY)==S_NOTFOUND)return 0;
-  else if(db_status!=S_OKAY)
-    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
+	if (d_keynext (FILEKEY) == S_NOTFOUND)
+		return 0;
+	else if (db_status != S_OKAY)
+		error_fatal ("Typhoon call 2 failed with db_status=%d",
+			     db_status);
 
-  if(d_keyread(k)!=S_OKAY)
-    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
-  
-  return k->klibnum==libnum && !strcmp(k->fname,fname) &&
-    k->approved==approved;
+	if (d_keyread (k) != S_OKAY)
+		error_fatal ("Typhoon call 3 failed with db_status=%d",
+			     db_status);
+
+	return k->klibnum == libnum && !strcmp (k->fname, fname) &&
+	    k->approved == approved;
 }
 
 
 void
-delfilekeywords(struct libidx *l, struct fileidx *f)
+delfilekeywords (struct libidx *l, struct fileidx *f)
 {
-  struct filekey k;
-  int    morekeys, keys=0;
-  char   keystg[8192];
-  
-  keystg[0]=0;
-  morekeys=keyfilefirst(l->libnum,f->fname,f->approved,&k);
-  while(morekeys){
-    char tmp[32];
-    keys++;
-    sprintf(tmp,"%s ",k.keyword);
-    strcat(keystg,tmp);
-    morekeys=keyfilenext(l->libnum,f->fname,f->approved,&k);
-  }
-  if(keys){
-    char k[8192],*cp;
-    strcpy(k,keystg);
-    for(cp=strtok(k," ");cp;cp=strtok(NULL," ")){
-      deletekeyword(l->libnum,f->fname,f->approved,cp);
-    }
-  }
+	struct filekey k;
+	int     morekeys, keys = 0;
+	char    keystg[8192];
+
+	keystg[0] = 0;
+	morekeys = keyfilefirst (l->libnum, f->fname, f->approved, &k);
+	while (morekeys) {
+		char    tmp[32];
+
+		keys++;
+		sprintf (tmp, "%s ", k.keyword);
+		strcat (keystg, tmp);
+		morekeys = keyfilenext (l->libnum, f->fname, f->approved, &k);
+	}
+	if (keys) {
+		char    k[8192], *cp;
+
+		strcpy (k, keystg);
+		for (cp = strtok (k, " "); cp; cp = strtok (NULL, " ")) {
+			deletekeyword (l->libnum, f->fname, f->approved, cp);
+		}
+	}
 }
+
+
+/* End of File */

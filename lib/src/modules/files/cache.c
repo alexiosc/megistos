@@ -32,6 +32,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -66,78 +67,89 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 #define mkcachename(s,l,u,f) \
 sprintf(s,"%s/%s:%d:%s",mkfname(LIBCACHEDIR),u,l->libnum,f)
 
 
-static char *convertfname(struct libidx *lib, char *fname)
+static char *
+convertfname (struct libidx *lib, char *fname)
 {
-  static char ret[512];
-  /*  char buf[256];
-  int i;
+	static char ret[512];
 
-  for(i=0;fname[i];i++)buf[i]=fname[i]=='/'?':':fname[i];
-  buf[i]=0;*/
+	/*  char buf[256];
+	   int i;
 
-  mkcachename(ret,lib,thisuseracc.userid,fname);
-  return ret;
+	   for(i=0;fname[i];i++)buf[i]=fname[i]=='/'?':':fname[i];
+	   buf[i]=0; */
+
+	mkcachename (ret, lib, thisuseracc.userid, fname);
+	return ret;
 }
 
 
 /* Assumes the slow device (if any) has been locked */
 
-static int copyfile(struct libidx *lib, char *source)
+static int
+copyfile (struct libidx *lib, char *source)
 {
-  char *target=convertfname(lib, source);
-  if(fcopy(source,target)){
-    unlink(target);
-    return 0;
-  }
-  utime(target,NULL);
-  return 1;
+	char   *target = convertfname (lib, source);
+
+	if (fcopy (source, target)) {
+		unlink (target);
+		return 0;
+	}
+	utime (target, NULL);
+	return 1;
 }
 
 
-static char *incache(struct libidx *lib, char *fname)
+static char *
+incache (struct libidx *lib, char *fname)
 {
-  char *converted=convertfname(lib,fname);
-  struct stat st;
-  if(!stat(converted,&st)){
-    utime(converted,NULL);
-    return converted;
-  }
-  return NULL;
+	char   *converted = convertfname (lib, fname);
+	struct stat st;
+
+	if (!stat (converted, &st)) {
+		utime (converted, NULL);
+		return converted;
+	}
+	return NULL;
 }
 
 
 
-static char  *converted_fname;
-static int    libnum;
+static char *converted_fname;
+static int libnum;
 
-static int cachesel(const struct dirent *d)
+static int
+cachesel (const struct dirent *d)
 {
-  char tmp[256], *cp;
+	char    tmp[256], *cp;
 
-  strcpy(tmp,d->d_name);
+	strcpy (tmp, d->d_name);
 
-  /* Skip the username */
+	/* Skip the username */
 
-  if((cp=strtok(tmp,":"))==NULL)return 0;
+	if ((cp = strtok (tmp, ":")) == NULL)
+		return 0;
 
-  /* Now get and compare the libnum */
+	/* Now get and compare the libnum */
 
-  if((cp=strtok(NULL,":"))==NULL)return 0;
-  if(atoi(cp)!=libnum)return 0;
+	if ((cp = strtok (NULL, ":")) == NULL)
+		return 0;
+	if (atoi (cp) != libnum)
+		return 0;
 
-  /* Finally get and compare the filename */
+	/* Finally get and compare the filename */
 
-  if((cp=strtok(NULL,":"))==NULL)return 0;
-  return !strcmp(converted_fname,cp);
+	if ((cp = strtok (NULL, ":")) == NULL)
+		return 0;
+	return !strcmp (converted_fname, cp);
 }
 
 
@@ -148,67 +160,76 @@ static int cachesel(const struct dirent *d)
    (caching isn't persistent as planned, but it saves disk space).  Assumption:
    the file hasn't already been put in the cache by THIS user. */
 
-static char *linkfile(struct libidx *lib, char *fname)
+static char *
+linkfile (struct libidx *lib, char *fname)
 {
-  struct dirent  **d=NULL;
-  char           source[512];
-  static char    target[512];
-  int            i,j;
+	struct dirent **d = NULL;
+	char    source[512];
+	static char target[512];
+	int     i, j;
 
-  converted_fname=fname;
-  libnum=lib->libnum;
-  if((j=scandir(mkfname(LIBCACHEDIR),&d,cachesel,alphasort))==0){
-    if(d)free(d);
-    return NULL;
-  }
+	converted_fname = fname;
+	libnum = lib->libnum;
+	if ((j =
+	     scandir (mkfname (LIBCACHEDIR), &d, cachesel, alphasort)) == 0) {
+		if (d)
+			free (d);
+		return NULL;
+	}
 
-  /* Any of these will do, they're all hard links to the same inode anyway. So
-     we pick the first one (obviously). */
+	/* Any of these will do, they're all hard links to the same inode anyway. So
+	   we pick the first one (obviously). */
 
-  sprintf(source,"%s/%s",mkfname(LIBCACHEDIR),d[0]->d_name);
-  for(i=0;i<j;i++)free(d[i]);	/* Clean up */
-  mkcachename(target,lib,thisuseracc.userid,fname);
-  if(link(source, target))return NULL;
+	sprintf (source, "%s/%s", mkfname (LIBCACHEDIR), d[0]->d_name);
+	for (i = 0; i < j; i++)
+		free (d[i]);	/* Clean up */
+	mkcachename (target, lib, thisuseracc.userid, fname);
+	if (link (source, target))
+		return NULL;
 
-  /* Success! */
-  return target;
+	/* Success! */
+	return target;
 }
 
 
-char *cachefile(struct libidx *lib, struct fileidx *file)
+char   *
+cachefile (struct libidx *lib, struct fileidx *file)
 {
-  int  group=getlibgroup(lib);
-  char *pathname;
+	int     group = getlibgroup (lib);
+	char   *pathname;
 
-  /* If it's not on a slow device, no need to cache it. */
-  if(group<0)return NULL;
+	/* If it's not on a slow device, no need to cache it. */
+	if (group < 0)
+		return NULL;
 
-  /* Check if it's already in the cache by us */
+	/* Check if it's already in the cache by us */
 
-  if((pathname=incache(lib,file->fname))!=NULL)
-    return pathname;		/* It's there, return its filename. */
+	if ((pathname = incache (lib, file->fname)) != NULL)
+		return pathname;	/* It's there, return its filename. */
 
-  /* Now check to see if someone else has requested this file and it's in the
-     cache under another user's ID. If it is, make a fresh hard link to it so
-     it doesn't get inadvertently unlinked. */
+	/* Now check to see if someone else has requested this file and it's in the
+	   cache under another user's ID. If it is, make a fresh hard link to it so
+	   it doesn't get inadvertently unlinked. */
 
-  if((pathname=linkfile(lib,file->fname))!=NULL)
-    return pathname;		/* Linked to it, return the new filename. */
+	if ((pathname = linkfile (lib, file->fname)) != NULL)
+		return pathname;	/* Linked to it, return the new filename. */
 
-  /* Fair enough, it's not in the cache at all. Copy it. */
+	/* Fair enough, it's not in the cache at all. Copy it. */
 
-  /* Step one. Lock the slow device so we have exclusive use. */
+	/* Step one. Lock the slow device so we have exclusive use. */
 
-  prompt(FILECACH);
-  if(!obtainliblock(lib,sldevto,"caching")){
-    error_fatal("Timeout waiting for slow library %s.",lib->fullname);
-  }
-  if(!copyfile(lib,file->fname)){
-    error_fatal("Error while copying file to cache.",lib->fullname);
-  }
-  rmliblock(lib);
+	prompt (FILECACH);
+	if (!obtainliblock (lib, sldevto, "caching")) {
+		error_fatal ("Timeout waiting for slow library %s.",
+			     lib->fullname);
+	}
+	if (!copyfile (lib, file->fname)) {
+		error_fatal ("Error while copying file to cache.",
+			     lib->fullname);
+	}
+	rmliblock (lib);
 
-  return convertfname(lib,file->fname);
+	return convertfname (lib, file->fname);
 }
 
 
@@ -234,38 +255,44 @@ char *cachefile(struct libidx *lib, struct fileidx *file)
 
 #if 0
 
-static int allsel(const struct dirent *d)
+static int
+allsel (const struct dirent *d)
 {
-  return 1;
+	return 1;
 }
 
 
-static int cachesize()		/* Also unlinks expired files */
-{
-  struct dirent **d=NULL;
-  struct stat st;
-  char fname[512];
-  int i, j, s=0, t=time(NULL)-sldctim*60;
+static int
+cachesize ()
+{				/* Also unlinks expired files */
+	struct dirent **d = NULL;
+	struct stat st;
+	char    fname[512];
+	int     i, j, s = 0, t = time (NULL) - sldctim * 60;
 
-  if((j=scandir(mkfname(LIBCACHEDIR),&d,allsel,alphasort))==0){
-    if(d)free(d);
-    return 0;
-  }
+	if ((j = scandir (mkfname (LIBCACHEDIR), &d, allsel, alphasort)) == 0) {
+		if (d)
+			free (d);
+		return 0;
+	}
 
-  for(i=0;i<j;i++){
-    sprintf(fname,"%s/%s",mkfname(LIBCACHEDIR),d[i]->d_name);
-    st.st_size=0;
-    stat(fname,&st);
-    if((stat(fname,&st)==0) && st.st_mtime<t){
-      unlink(fname);
-      st.st_size=0;
-      stat(fname,&st);
-    }
-    s+=st.st_size;
-    free(d[i]);
-  }
-  free(d);
+	for (i = 0; i < j; i++) {
+		sprintf (fname, "%s/%s", mkfname (LIBCACHEDIR), d[i]->d_name);
+		st.st_size = 0;
+		stat (fname, &st);
+		if ((stat (fname, &st) == 0) && st.st_mtime < t) {
+			unlink (fname);
+			st.st_size = 0;
+			stat (fname, &st);
+		}
+		s += st.st_size;
+		free (d[i]);
+	}
+	free (d);
 
-  return s;
+	return s;
 }
 #endif
+
+
+/* End of File */

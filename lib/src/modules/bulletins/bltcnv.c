@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,9 +60,9 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <typhoon.h>
-#include "bbs.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 #define BLTLEN 110
@@ -69,132 +70,159 @@ const char *__RCS=RCS_VER;
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"bltcnv: convert MajorBBS 5.xx bulletins to Megistos format.\n\n"\
-	  "Syntax: bltcnv options.\n\nOptions:\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "bltcnv: convert MajorBBS 5.xx bulletins to Megistos format.\n\n"
+		 "Syntax: bltcnv options.\n\nOptions:\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"majordir", 1, 0, 'm'},
-  {0, 0, 0, 0}
+	{"majordir", 1, 0, 'm'},
+	{0, 0, 0, 0}
 };
 
 
-static char *arg_majordir=".";
+static char *arg_majordir = ".";
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "m:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "m:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 
 void
-convert()
+convert ()
 {
-  FILE            *fp;
-  char            rec[64<<10], c, *fname=rec;
-  char            source[256], target[256], lastclub[32]={0};
-  int             reclen;
-  int             num=0;
-  struct bltidx   blt;
+	FILE   *fp;
+	char    rec[64 << 10], c, *fname = rec;
+	char    source[256], target[256], lastclub[32] = { 0 };
+	int     reclen;
+	int     num = 0;
+	struct bltidx blt;
 
-  sprintf(fname,"%s/bulletin.txt",arg_majordir?arg_majordir:".");
-  fp=fopen(fname,"r");
-  if(fp==NULL){
-    sprintf(fname,"%s/BULLETIN.TXT",arg_majordir?arg_majordir:".");
-    if((fp=fopen(fname,"r"))==NULL){
-      fprintf(stderr,
-	      "bltcnv: convert(): unable to find bulletin.txt or BULLETIN.TXT.\n");
-      exit(1);
-    }
-  }
+	sprintf (fname, "%s/bulletin.txt", arg_majordir ? arg_majordir : ".");
+	fp = fopen (fname, "r");
+	if (fp == NULL) {
+		sprintf (fname, "%s/BULLETIN.TXT",
+			 arg_majordir ? arg_majordir : ".");
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fprintf (stderr,
+				 "bltcnv: convert(): unable to find bulletin.txt or BULLETIN.TXT.\n");
+			exit (1);
+		}
+	}
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%d\n",&reclen)==0){
-      if(feof(fp))break;
-      fprintf(stderr,"bltcnv: convert(): unable to parse record length. Corrupted file?\n");
-      exit(1);
-    }
-    if(feof(fp))break;
-    fgetc(fp);			/* Get rid of the comma after the record length */
+	while (!feof (fp)) {
+		if (fscanf (fp, "%d\n", &reclen) == 0) {
+			if (feof (fp))
+				break;
+			fprintf (stderr,
+				 "bltcnv: convert(): unable to parse record length. Corrupted file?\n");
+			exit (1);
+		}
+		if (feof (fp))
+			break;
+		fgetc (fp);	/* Get rid of the comma after the record length */
 
-    if(reclen!=BLTLEN){
-      fprintf(stderr,"bltcnv: convert() incorrect record length.\n");
-      exit(1);
-    }
+		if (reclen != BLTLEN) {
+			fprintf (stderr,
+				 "bltcnv: convert() incorrect record length.\n");
+			exit (1);
+		}
 
-    if(fread(rec,reclen,1,fp)!=1){
-      fprintf(stderr,"bltcnv: convert(): unable to read record around pos=%ld.\n",ftell(fp));
-      exit(1);
-    }
+		if (fread (rec, reclen, 1, fp) != 1) {
+			fprintf (stderr,
+				 "bltcnv: convert(): unable to read record around pos=%ld.\n",
+				 ftell (fp));
+			exit (1);
+		}
 
-    bzero(&blt,sizeof(blt));
-    blt.num=(((unsigned char)rec[0])|(((unsigned char)rec[1])<<8));
-    blt.date=today();
-    sprintf(blt.fname,"conv-%d.blt",blt.num);
+		bzero (&blt, sizeof (blt));
+		blt.num =
+		    (((unsigned char) rec[0]) |
+		     (((unsigned char) rec[1]) << 8));
+		blt.date = today ();
+		sprintf (blt.fname, "conv-%d.blt", blt.num);
 
-    if(!sameas(lastclub,&rec[15])){
-      strcpy(lastclub,&rec[15]);
-      if(!findclub(lastclub)){
-	fprintf(stderr,"convert(): area (%s) does not exist!\n",lastclub);
-	exit(1);
-      }
-    }
-    strcpy(blt.area,lastclub);
-    strcpy(blt.author,&rec[26]);
-    strcpy(blt.descr,&rec[36]);
-    blt.timesread=(((unsigned char)rec[77])|(((unsigned char)rec[78])<<8));
+		if (!sameas (lastclub, &rec[15])) {
+			strcpy (lastclub, &rec[15]);
+			if (!findclub (lastclub)) {
+				fprintf (stderr,
+					 "convert(): area (%s) does not exist!\n",
+					 lastclub);
+				exit (1);
+			}
+		}
+		strcpy (blt.area, lastclub);
+		strcpy (blt.author, &rec[26]);
+		strcpy (blt.descr, &rec[36]);
+		blt.timesread =
+		    (((unsigned char) rec[77]) |
+		     (((unsigned char) rec[78]) << 8));
 
-    sprintf(source,"%s/%s/%s",arg_majordir,&rec[15],&rec[2]);
-    strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname));
-    fcopy(source,target);
-    dbins(&blt);
-    printf("%3d %-13s %-10s %s\n",blt.num,blt.fname,blt.area,blt.descr);
+		sprintf (source, "%s/%s/%s", arg_majordir, &rec[15], &rec[2]);
+		strcpy (target,
+			mkfname (MSGSDIR "/%s/%s/%s", blt.area, MSGBLTDIR,
+				 blt.fname));
+		fcopy (source, target);
+		dbins (&blt);
+		printf ("%3d %-13s %-10s %s\n", blt.num, blt.fname, blt.area,
+			blt.descr);
 
-    num++;
-    do c=fgetc(fp); while(c=='\n' || c=='\r' || c==26);
-    ungetc(c,fp);
-  }
-  fclose(fp);
-  printf("\nConverted %d bulletin(s)\n",num);
+		num++;
+		do
+			c = fgetc (fp);
+		while (c == '\n' || c == '\r' || c == 26);
+		ungetc (c, fp);
+	}
+	fclose (fp);
+	printf ("\nConverted %d bulletin(s)\n", num);
 }
 
 
 int
-bltcnv_main(int argc, char **argv)
+bltcnv_main (int argc, char **argv)
 {
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
 
-  dbopen();
-  convert();
-  
-  printf("Syncing disks...\n");
-  fflush(stdout);
-  system("sync");
+	dbopen ();
+	convert ();
 
-  return 0;
+	printf ("Syncing disks...\n");
+	fflush (stdout);
+	system ("sync");
+
+	return 0;
 }
+
+
+/* End of File */
+
+
+/* End of File */

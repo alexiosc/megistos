@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,9 +44,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,77 +66,77 @@
 
 
 struct actionidx {
-  char *verb;
-  int  index;
+	char   *verb;
+	int     index;
 };
 
 
 #ifdef MKACTION
 
 struct Saction {
-  char *verb;
-  char type;
-  char *access;
-  int  key;
-  char *user[ML];
-  char *simple[ML];
+	char   *verb;
+	char    type;
+	char   *access;
+	int     key;
+	char   *user[ML];
+	char   *simple[ML];
 };
 
 
 struct Oaction {
-  char *verb;
-  char type;
-  char *access;
-  int  key;
-  char *user[ML];
-  char *other[ML];
-  char *all[ML];
-  char *target[ML];
-  char *secret[ML];
+	char   *verb;
+	char    type;
+	char   *access;
+	int     key;
+	char   *user[ML];
+	char   *other[ML];
+	char   *all[ML];
+	char   *target[ML];
+	char   *secret[ML];
 };
 
 
 struct Daction {
-  char *verb;
-  char type;
-  char *access;
-  int  key;
-  char *user[ML];
-  char *simple[ML];
-  char *other[ML];
-  char *all[ML];
-  char *target[ML];
-  char *secret[ML];
+	char   *verb;
+	char    type;
+	char   *access;
+	int     key;
+	char   *user[ML];
+	char   *simple[ML];
+	char   *other[ML];
+	char   *all[ML];
+	char   *target[ML];
+	char   *secret[ML];
 };
 
 
 struct Aaction {
-  char *verb;
-  char type;
-  char *access;
-  int  key;
-  char *user[ML];
-  char *simple[ML];
-  char *adverb[ML];
+	char   *verb;
+	char    type;
+	char   *access;
+	int     key;
+	char   *user[ML];
+	char   *simple[ML];
+	char   *adverb[ML];
 };
 
 
 struct Gaction {
-  char *verb;
-  char type;
-  char *access;
-  int  key;
-  char *user[ML];
-  char *generic[ML];
+	char   *verb;
+	char    type;
+	char   *access;
+	int     key;
+	char   *user[ML];
+	char   *generic[ML];
 };
 
 
 union action {
-  struct Saction s;
-  struct Oaction o;
-  struct Daction d;
-  struct Aaction a;
-  struct Gaction g;
+	struct Saction s;
+	struct Oaction o;
+	struct Daction d;
+	struct Aaction a;
+	struct Gaction g;
 };
 
 
@@ -152,21 +154,22 @@ union action {
 
 
 struct keyword {
-  char keyword[12];
-  int  code;
-} keywords[]={
-  {"access",   CODE_ACCESS},
-  {"adverb",   CODE_ADVERB},
-  {"all",      CODE_ALL},
-  {"generic",  CODE_GENERIC},
-  {"key",      CODE_KEY},
-  {"other",    CODE_OTHER},
-  {"secret",   CODE_SECRET},
-  {"simple",   CODE_SIMPLE},
-  {"target",   CODE_TARGET},
-  {"user",     CODE_USER},
-  {"verb",     CODE_VERB},
-  {"",-1}};
+	char    keyword[12];
+	int     code;
+} keywords[] = {
+	{
+	"access", CODE_ACCESS}, {
+	"adverb", CODE_ADVERB}, {
+	"all", CODE_ALL}, {
+	"generic", CODE_GENERIC}, {
+	"key", CODE_KEY}, {
+	"other", CODE_OTHER}, {
+	"secret", CODE_SECRET}, {
+	"simple", CODE_SIMPLE}, {
+	"target", CODE_TARGET}, {
+	"user", CODE_USER}, {
+	"verb", CODE_VERB}, {
+"", -1}};
 
 
 #define STRING(s) (s?s:"")
@@ -214,4 +217,7 @@ struct keyword {
 #define FOOTER \
 "\n\n"
 
-#endif /* MKACTION */
+#endif				/* MKACTION */
+
+
+/* End of File */

@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,100 +60,119 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
-#include "config.h"
-#include "cnvutils.h"
-#include "files.h"
+#include <megistos/bbs.h>
+#include <megistos/config.h>
+#include <megistos/cnvutils.h>
+#include <megistos/files.h>
 
 
 void
-libfil(char *arg_majordir)
+libfil (char *arg_majordir)
 {
-  FILE            *fp;
-  char            rec[16384], c, *fname=rec;
-  int             reclen;
-  int             num=0;
-  char            tmp[10];
-  struct libidx   lib;
-  struct fileidx  *file;
+	FILE   *fp;
+	char    rec[16384], c, *fname = rec;
+	int     reclen;
+	int     num = 0;
+	char    tmp[10];
+	struct libidx lib;
+	struct fileidx *file;
 
-  bzero(&lib,sizeof(lib));
+	bzero (&lib, sizeof (lib));
 
-  sprintf(fname,"%s/libfil.txt",arg_majordir?arg_majordir:".");
-  fp=fopen(fname,"r");
-  if(fp==NULL){
-    sprintf(fname,"%s/LIBFIL.TXT",arg_majordir?arg_majordir:".");
-    if((fp=fopen(fname,"r"))==NULL){
-      fprintf(stderr,"libcnv: libfil(): unable to find libfil.txt or LIBFIL.TXT.\n");
-      exit(1);
-    }
-  }
+	sprintf (fname, "%s/libfil.txt", arg_majordir ? arg_majordir : ".");
+	fp = fopen (fname, "r");
+	if (fp == NULL) {
+		sprintf (fname, "%s/LIBFIL.TXT",
+			 arg_majordir ? arg_majordir : ".");
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fprintf (stderr,
+				 "libcnv: libfil(): unable to find libfil.txt or LIBFIL.TXT.\n");
+			exit (1);
+		}
+	}
 
-  printf("\nInstalling Files... "); fflush(stdout);
+	printf ("\nInstalling Files... ");
+	fflush (stdout);
 
-  file=alcmem(sizeof(struct fileidx));
+	file = alcmem (sizeof (struct fileidx));
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%d\n",&reclen)==0){
-      if(feof(fp))break;
-      fprintf(stderr,"libcnv: libfil(): unable to parse record length. Corrupted file?\n");
-      exit(1);
-    }
-    if(feof(fp))break;
-    fgetc(fp);			/* Get rid of the comma after the record length */
+	while (!feof (fp)) {
+		if (fscanf (fp, "%d\n", &reclen) == 0) {
+			if (feof (fp))
+				break;
+			fprintf (stderr,
+				 "libcnv: libfil(): unable to parse record length. Corrupted file?\n");
+			exit (1);
+		}
+		if (feof (fp))
+			break;
+		fgetc (fp);	/* Get rid of the comma after the record length */
 
-    if(fread(rec,reclen,1,fp)!=1){
-      fprintf(stderr,"libcnv: libfil(): unable to read record around pos=%ld.\n",ftell(fp));
-      exit(1);
-    }
+		if (fread (rec, reclen, 1, fp) != 1) {
+			fprintf (stderr,
+				 "libcnv: libfil(): unable to read record around pos=%ld.\n",
+				 ftell (fp));
+			exit (1);
+		}
 
-    bzero(file,sizeof(struct fileidx));
-    
-    /* Filename */
-    strcpy(file->fname,lcase(&rec[10]));
+		bzero (file, sizeof (struct fileidx));
 
-    /* Skip Major-generated files: index., files., topfiles. */
-    if(!strcmp(file->fname,"index.")||
-       !strcmp(file->fname,"files.")||
-       !strcmp(file->fname,"topfiles."))continue;
-    
-    /* Library number (Major keeps string references to libraries) */
-    if(!sameas(&rec[1],lib.keyname)){
-      strcpy(tmp,&rec[1]);
-      if(libread(tmp, library.libnum, &lib)!=1){
-	printf("\nWarning: Library %s doesn't exist. Skipping file %s.\n",
-	       lib.fullname, file->fname);
-      }
-    }
+		/* Filename */
+		strcpy (file->fname, lcase (&rec[10]));
 
-    file->flibnum=lib.libnum;
+		/* Skip Major-generated files: index., files., topfiles. */
+		if (!strcmp (file->fname, "index.") ||
+		    !strcmp (file->fname, "files.") ||
+		    !strcmp (file->fname, "topfiles."))
+			continue;
 
-    file->timestamp=convert_timedate(stg2short(&rec[400]),stg2short(&rec[402]));
-    file->flags=0;
-    file->approved=toupper(rec[0])=='A';
-    file->downloaded=stg2int(&rec[408]);
-    file->descrlen=strlen(&rec[74])+1;
-    strcpy(file->uploader,&rec[23]);
-    if(file->approved)strcpy(file->approved_by,"Sysop"); /* Major lacks this */
-    strcpy(file->summary,&rec[33]);
-    strcpy(file->description,&rec[74]);
+		/* Library number (Major keeps string references to libraries) */
+		if (!sameas (&rec[1], lib.keyname)) {
+			strcpy (tmp, &rec[1]);
+			if (libread (tmp, library.libnum, &lib) != 1) {
+				printf
+				    ("\nWarning: Library %s doesn't exist. Skipping file %s.\n",
+				     lib.fullname, file->fname);
+			}
+		}
 
-    if(fileexists(lib.libnum,file->fname,0)||
-       fileexists(lib.libnum,file->fname,1)){
-      printf("\nWarning: file %s already exists in library %s. Skipping.\n",
-	     file->fname,lib.fullname);
-    } else {
-      filecreate(file);
-    }
+		file->flibnum = lib.libnum;
 
-    /* DONE! */
-    if((++num%100)==0){
-      printf("%d ",num); 
-      fflush(stdout);
-    }
-    do c=fgetc(fp); while(c=='\n' || c=='\r' || c==26);
-    ungetc(c,fp);
-  }
-  printf("\n\nInstalled %d files.\n",num);
+		file->timestamp =
+		    convert_timedate (stg2short (&rec[400]),
+				      stg2short (&rec[402]));
+		file->flags = 0;
+		file->approved = toupper (rec[0]) == 'A';
+		file->downloaded = stg2int (&rec[408]);
+		file->descrlen = strlen (&rec[74]) + 1;
+		strcpy (file->uploader, &rec[23]);
+		if (file->approved)
+			strcpy (file->approved_by, "Sysop");	/* Major lacks this */
+		strcpy (file->summary, &rec[33]);
+		strcpy (file->description, &rec[74]);
+
+		if (fileexists (lib.libnum, file->fname, 0) ||
+		    fileexists (lib.libnum, file->fname, 1)) {
+			printf
+			    ("\nWarning: file %s already exists in library %s. Skipping.\n",
+			     file->fname, lib.fullname);
+		} else {
+			filecreate (file);
+		}
+
+		/* DONE! */
+		if ((++num % 100) == 0) {
+			printf ("%d ", num);
+			fflush (stdout);
+		}
+		do
+			c = fgetc (fp);
+		while (c == '\n' || c == '\r' || c == 26);
+		ungetc (c, fp);
+	}
+	printf ("\n\nInstalled %d files.\n", num);
 
 }
+
+
+/* End of File */

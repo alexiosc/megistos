@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,22 +43,24 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
 /* libsig.c */
 
-void libsig(char *arg_under, char *arg_basedir,
-	    char *arg_majordir, int arg_key);
+void    libsig (char *arg_under, char *arg_basedir,
+		char *arg_majordir, int arg_key);
 
 /* libfil.c */
 
-void libfil(char *arg_majordir);
+void    libfil (char *arg_majordir);
 
 /* libkey.c */
 
-void libkey(char *arg_majordir);
+void    libkey (char *arg_majordir);
 
+
+
+/* End of File */

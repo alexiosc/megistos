@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -33,10 +36,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #include <bbs.h>
@@ -48,13 +49,17 @@ const char *__RCS=RCS_VER;
 /* This global command is CRAP. It must be fixed. */
 
 int
-__INIT_GCS__()
+__INIT_GCS__ ()
 {
-  if(margc==1 && sameas(margv[0],"/cookie") && sysvar->glockie){
-    char command[256];
+	if (margc == 1 && sameas (margv[0], "/cookie") && sysvar->glockie) {
+		char    command[256];
 
-    sprintf(command,"%s/cookie --run",mkfname(BINDIR));
-    system(command);
-    return 1;
-  } else return 0;
+		sprintf (command, "%s/cookie --run", mkfname (BINDIR));
+		system (command);
+		return 1;
+	} else
+		return 0;
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -56,10 +59,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -72,290 +73,316 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 int
-chanselect(const struct dirent *d)
+chanselect (const struct dirent *d)
 {
-  return(int)(d->d_name[0]!='.');
+	return (int) (d->d_name[0] != '.');
 }
 
 
 int
-getchanax(char *user, char *chan)
+getchanax (char *user, char *chan)
 {
-  int ax=getusrax(chan,user);
+	int     ax = getusrax (chan, user);
 
-  if(ax<0){
-    prompt(-ax);
-    return -1;
-  }
-  return ax;
+	if (ax < 0) {
+		prompt (-ax);
+		return -1;
+	}
+	return ax;
 }
 
 
 void
-joinchan(char *s)
+joinchan (char *s)
 {
-  char chan[256];
-  int i,ax;
+	char    chan[256];
+	int     i, ax;
 
-  if(!checktick())return;
+	if (!checktick ())
+		return;
 
-  i=sscanf(s,"%*s %s",chan);
-  if((i==1)&&sameas(chan,"?"))prompt(JOINHLP);
-  if(i!=1){
-    if(sameas(thisuseracc.userid,thisuseronl.telechan))strcpy(chan,MAINCHAN);
-    else strcpy(chan,thisuseracc.userid);
-  }
+	i = sscanf (s, "%*s %s", chan);
+	if ((i == 1) && sameas (chan, "?"))
+		prompt (JOINHLP);
+	if (i != 1) {
+		if (sameas (thisuseracc.userid, thisuseronl.telechan))
+			strcpy (chan, MAINCHAN);
+		else
+			strcpy (chan, thisuseracc.userid);
+	}
 
-  if(!sameas(chan,MAINCHAN)&&(chan[0]!='/'))tlcuidxref(chan,0);
+	if (!sameas (chan, MAINCHAN) && (chan[0] != '/'))
+		tlcuidxref (chan, 0);
 
-  if(sameas(chan,curchannel)){
-    prompt(SAMECHAN);
-    return;
-  }
-  
-  ax=getchanax(thisuseracc.userid,chan);
+	if (sameas (chan, curchannel)) {
+		prompt (SAMECHAN);
+		return;
+	}
+
+	ax = getchanax (thisuseracc.userid, chan);
 /*  print("CHAN=(%s), AX=%x\n",chan,ax); */
-  if(ax<0)return;
-  else if(!ax){
-    prompt(CHNAX);
-    return;
-  }
+	if (ax < 0)
+		return;
+	else if (!ax) {
+		prompt (CHNAX);
+		return;
+	}
 
-  userexit(LFTCHN);
-  leavechannel();
-  enterchannel(chan);
-  userent(ENTCHN);
-  showinfo();
+	userexit (LFTCHN);
+	leavechannel ();
+	enterchannel (chan);
+	userent (ENTCHN);
+	showinfo ();
 }
 
 
 void
-flagunlist(int on)
+flagunlist (int on)
 {
-  if(on){
-    chanusrflags(thisuseracc.userid,curchannel,CUF_UNLISTED,0);
-    thisuseronl.flags|=OLF_TLCUNLIST;
-    prompt(UNLSTON);
-  } else {
-    chanusrflags(thisuseracc.userid,curchannel,0,CUF_UNLISTED);
-    thisuseronl.flags&=~OLF_TLCUNLIST;
-    prompt(UNLSTOFF);
-  }
+	if (on) {
+		chanusrflags (thisuseracc.userid, curchannel, CUF_UNLISTED, 0);
+		thisuseronl.flags |= OLF_TLCUNLIST;
+		prompt (UNLSTON);
+	} else {
+		chanusrflags (thisuseracc.userid, curchannel, 0, CUF_UNLISTED);
+		thisuseronl.flags &= ~OLF_TLCUNLIST;
+		prompt (UNLSTOFF);
+	}
 }
 
 
 void
-sendmain(char *userid)
+sendmain (char *userid)
 {
-  sendaction(userid,ACT_DROPMAIN);
+	sendaction (userid, ACT_DROPMAIN);
 }
 
 
 void
-sendaction(char *userid,int action)
+sendaction (char *userid, int action)
 {
-  if(usr_insys(userid,0)){
-    othruseraux.action=action;
-    bbsdcommand("user2",othruseronl.channel,"");
-  }
+	if (usr_insys (userid, 0)) {
+		othruseraux.action = action;
+		bbsdcommand ("user2", othruseronl.channel, "");
+	}
 }
 
 
 void
-actionhandler()
+actionhandler ()
 {
-  signal(SIGMAIN,actionhandler);
-  inp_cancel();
+	signal (SIGMAIN, actionhandler);
+	inp_cancel ();
 }
 
 
 void
-droptomain()
+droptomain ()
 {
-  if(strcmp(curchannel,MAINCHAN)){
-    char tmp[24];
-    leavechannel();
-    prompt(DROPMAIN);
-    strcpy(tmp,MAINCHAN);
-    enterchannel(tmp);
-    userent(ENTCHN);
-    showinfo();
-  }
+	if (strcmp (curchannel, MAINCHAN)) {
+		char    tmp[24];
+
+		leavechannel ();
+		prompt (DROPMAIN);
+		strcpy (tmp, MAINCHAN);
+		enterchannel (tmp);
+		userent (ENTCHN);
+		showinfo ();
+	}
 }
 
 
 static char sqtmp[24];
 static int squelchopt;
 
-char *
-fx_squelch(struct chanusr *u)
+char   *
+fx_squelch (struct chanusr *u)
 {
-  int lang=othruseracc.language-1;
-  char moderator[1024], squelchee[1024];
+	int     lang = othruseracc.language - 1;
+	char    moderator[1024], squelchee[1024];
 
-  strcpy(moderator,msg_getunitl(SQUMODM,thisuseracc.sex==USX_MALE,lang));
-  strcpy(squelchee,msg_getunitl(SQUMALE,othruseracc.sex==USX_MALE,lang));
-  
-  if(strcmp(sqtmp,u->userid)){
-    sprintf(out_buffer,msg_getl(squelchopt?SQUOTHR:USQOTHR,lang),
-	    moderator,squelchee,sqtmp);
-  } else {
-    sprintf(out_buffer,msg_getl(squelchopt?SQUYOU:USQYOU,lang),moderator);
-  }
-  return out_buffer;
+	strcpy (moderator,
+		msg_getunitl (SQUMODM, thisuseracc.sex == USX_MALE, lang));
+	strcpy (squelchee,
+		msg_getunitl (SQUMALE, othruseracc.sex == USX_MALE, lang));
+
+	if (strcmp (sqtmp, u->userid)) {
+		sprintf (out_buffer,
+			 msg_getl (squelchopt ? SQUOTHR : USQOTHR, lang),
+			 moderator, squelchee, sqtmp);
+	} else {
+		sprintf (out_buffer,
+			 msg_getl (squelchopt ? SQUYOU : USQYOU, lang),
+			 moderator);
+	}
+	return out_buffer;
 }
 
 
 void
-squelch(char *s)
+squelch (char *s)
 {
-  char userid[2048]={0};
-  int i;
+	char    userid[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",userid);
+	i = sscanf (s, "%*s %s", userid);
 
-  if((i<1)||sameas(userid,"?")){
-    prompt(SQHELP);
-    return;
-  }
+	if ((i < 1) || sameas (userid, "?")) {
+		prompt (SQHELP);
+		return;
+	}
 
-  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
-     &&(!(thisuseraux.access&CUF_MODERATOR))){
-    prompt(SQNOAX);
-    return;
-  }
-  
-  if(!tlcuidxref(userid,1)){
-    prompt(QUNKUSR,userid);
-    return;
-  }
-  
-  usr_insys(userid,0);
-  
-  if(strcmp(othruseronl.telechan,curchannel)||
-     ((othruseronl.flags&OLF_INTELECON)==0)){
-    prompt(QUNKUSR,userid);
-    return;
-  }
+	if (!key_owns (&thisuseracc, sopkey) &&
+	    strcmp (thisuseracc.userid, curchannel)
+	    && (!(thisuseraux.access & CUF_MODERATOR))) {
+		prompt (SQNOAX);
+		return;
+	}
 
-  setusrax(curchannel,userid,0,CUF_READONLY,0);
+	if (!tlcuidxref (userid, 1)) {
+		prompt (QUNKUSR, userid);
+		return;
+	}
 
-  strcpy(sqtmp,userid);
-  squelchopt=1;
-  broadcast(fx_squelch);
+	usr_insys (userid, 0);
 
-  prompt(SQUMOD,msg_getunit(SQUMALE,othruseracc.sex==USX_MALE),userid);
+	if (strcmp (othruseronl.telechan, curchannel) ||
+	    ((othruseronl.flags & OLF_INTELECON) == 0)) {
+		prompt (QUNKUSR, userid);
+		return;
+	}
+
+	setusrax (curchannel, userid, 0, CUF_READONLY, 0);
+
+	strcpy (sqtmp, userid);
+	squelchopt = 1;
+	broadcast (fx_squelch);
+
+	prompt (SQUMOD, msg_getunit (SQUMALE, othruseracc.sex == USX_MALE),
+		userid);
 }
 
 
 void
-unsquelch(char *s)
+unsquelch (char *s)
 {
-  char userid[2048]={0};
-  int i;
+	char    userid[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",userid);
+	i = sscanf (s, "%*s %s", userid);
 
-  if((i<1)||sameas(userid,"?")){
-    prompt(SQHELP);
-    return;
-  }
+	if ((i < 1) || sameas (userid, "?")) {
+		prompt (SQHELP);
+		return;
+	}
 
-  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
-     &&(!(thisuseraux.access&CUF_MODERATOR))){
-    prompt(SQNOAX);
-    return;
-  }
-  
-  if(!tlcuidxref(userid,1)){
-    prompt(QUNKUSR,userid);
-    return;
-  }
-  
-  usr_insys(userid,0);
-  
-  if(strcmp(othruseronl.telechan,curchannel)||
-     ((othruseronl.flags&OLF_INTELECON)==0)){
-    prompt(QUNKUSR,userid);
-    return;
-  }
+	if (!key_owns (&thisuseracc, sopkey) &&
+	    strcmp (thisuseracc.userid, curchannel)
+	    && (!(thisuseraux.access & CUF_MODERATOR))) {
+		prompt (SQNOAX);
+		return;
+	}
 
-  setusrax(curchannel,userid,0,0,CUF_READONLY);
+	if (!tlcuidxref (userid, 1)) {
+		prompt (QUNKUSR, userid);
+		return;
+	}
 
-  strcpy(sqtmp,userid);
-  squelchopt=0;
-  broadcast(fx_squelch);
+	usr_insys (userid, 0);
 
-  prompt(USQMOD,msg_getunit(SQUMALE,othruseracc.sex==USX_MALE),userid);
+	if (strcmp (othruseronl.telechan, curchannel) ||
+	    ((othruseronl.flags & OLF_INTELECON) == 0)) {
+		prompt (QUNKUSR, userid);
+		return;
+	}
+
+	setusrax (curchannel, userid, 0, 0, CUF_READONLY);
+
+	strcpy (sqtmp, userid);
+	squelchopt = 0;
+	broadcast (fx_squelch);
+
+	prompt (USQMOD, msg_getunit (SQUMALE, othruseracc.sex == USX_MALE),
+		userid);
 }
 
 
 static char topictmp[64];
 
-char *
-fx_topic(struct chanusr *u)
+char   *
+fx_topic (struct chanusr *u)
 {
-  int lang=othruseracc.language-1;
-  sprintf(out_buffer,msg_getl(TOPNEW,lang),
-	  msg_getunitl(TOPM,thisuseracc.sex==USX_MALE,lang),
-	  thisuseracc.userid,topictmp);
-  return out_buffer;
+	int     lang = othruseracc.language - 1;
+
+	sprintf (out_buffer, msg_getl (TOPNEW, lang),
+		 msg_getunitl (TOPM, thisuseracc.sex == USX_MALE, lang),
+		 thisuseracc.userid, topictmp);
+	return out_buffer;
 }
 
 
 void
-topic(char *s)
+topic (char *s)
 {
-  char *topic, *cp;
-  int i=-1,n;
+	char   *topic, *cp;
+	int     i = -1, n;
 
-  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
-     &&(!(thisuseraux.access&CUF_MODERATOR))){
-    prompt(TOPNAX);
-    return;
-  }
+	if (!key_owns (&thisuseracc, sopkey) &&
+	    strcmp (thisuseracc.userid, curchannel)
+	    && (!(thisuseraux.access & CUF_MODERATOR))) {
+		prompt (TOPNAX);
+		return;
+	}
 
-  i=sscanf(s,"%*s %n",&n);
+	i = sscanf (s, "%*s %n", &n);
 
-  if(i>=0){
-    topic=&s[n];
-    for(cp=topic+strlen(topic)-1;*cp==32;cp--){printf("(%s)\n",topic);*cp=0;}
-  }
+	if (i >= 0) {
+		topic = &s[n];
+		for (cp = topic + strlen (topic) - 1; *cp == 32; cp--) {
+			printf ("(%s)\n", topic);
+			*cp = 0;
+		}
+	}
 
-  if(i<0||!topic[0]){
-    struct chanhdr *c;
-    if((c=readchanhdr(curchannel))==NULL){
-      error_fatal("Unable to read channel %s",curchannel);
-    }
-    
-    c->topic[0]=0;
-    
-    writechanhdr(curchannel,c);
-    
-    prompt(TOPCLR);
-    
-    return;
-  } else {
-    struct chanhdr *c;
-    if((c=readchanhdr(curchannel))==NULL){
-      error_fatal("Unable to read channel %s",curchannel);
-    }
+	if (i < 0 || !topic[0]) {
+		struct chanhdr *c;
 
-    strncpy(c->topic,topic,sizeof(c->topic));
-    
-    writechanhdr(curchannel,c);
+		if ((c = readchanhdr (curchannel)) == NULL) {
+			error_fatal ("Unable to read channel %s", curchannel);
+		}
 
-    prompt(TOPMOD,c->topic);
+		c->topic[0] = 0;
 
-    strcpy(topictmp,c->topic);
-    broadcast(fx_topic);
-    
-    return;
-  }
+		writechanhdr (curchannel, c);
+
+		prompt (TOPCLR);
+
+		return;
+	} else {
+		struct chanhdr *c;
+
+		if ((c = readchanhdr (curchannel)) == NULL) {
+			error_fatal ("Unable to read channel %s", curchannel);
+		}
+
+		strncpy (c->topic, topic, sizeof (c->topic));
+
+		writechanhdr (curchannel, c);
+
+		prompt (TOPMOD, c->topic);
+
+		strcpy (topictmp, c->topic);
+		broadcast (fx_topic);
+
+		return;
+	}
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -62,23 +63,26 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 void
-op_describe()
+op_describe ()
 {
-  char tempname[256];
-  char fname[256];
+	char    tempname[256];
+	char    fname[256];
 
-  sprintf(fname,"%s/%s",library.dir,rdmefil);
-  close(open(fname,O_CREAT|O_WRONLY|O_EXCL));
-  chmod(fname,0660);
-  sprintf(tempname,TMPDIR"/filedes%08lx",time(0));
-  unlink(tempname);
-  symlink(fname,tempname);
-  editor(tempname,rdmesiz);
-  unlink(tempname);
+	sprintf (fname, "%s/%s", library.dir, rdmefil);
+	close (open (fname, O_CREAT | O_WRONLY | O_EXCL));
+	chmod (fname, 0660);
+	sprintf (tempname, TMPDIR "/filedes%08lx", time (0));
+	unlink (tempname);
+	symlink (fname, tempname);
+	editor (tempname, rdmesiz);
+	unlink (tempname);
 }
+
+
+/* End of File */

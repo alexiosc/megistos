@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -53,10 +56,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -69,99 +70,110 @@ const char *__RCS=RCS_VER;
 #define WANT_ERRNO_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailer.h"
-#include "mbk_mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/mailer.h>
+#include <megistos/mbk_mailer.h>
 
 
 struct usrqwk userqwk;
 
 
 int
-loadprefs(char *plugin, void *buffer)
+loadprefs (char *plugin, void *buffer)
 {
-  FILE *fp;
-  char fname[256];
-  struct stat st;
-  struct usrtag tag;
+	FILE   *fp;
+	char    fname[256];
+	struct stat st;
+	struct usrtag tag;
 
-  sprintf(fname,"%s/%s",mkfname(MAILERUSRDIR),thisuseracc.userid);
+	sprintf (fname, "%s/%s", mkfname (MAILERUSRDIR), thisuseracc.userid);
 
-  if(stat(fname,&st))return -1;
+	if (stat (fname, &st))
+		return -1;
 
-  if((fp=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading",fname);
-  }
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s for reading", fname);
+	}
 
-  while(ftell(fp)<st.st_size){
-    if(!fread(&tag,sizeof(tag),1,fp)){
-      error_fatalsys("Unable to read tag from %s",fname);
-    }
-    if(!strcmp(plugin,tag.plugin)){
-      if(!fread(buffer,tag.len,1,fp)){
-	error_fatalsys("Unable to read from %s",fname);
-      }
-      return 1;
-    }
-    if(fseek(fp,tag.len,SEEK_CUR)){
-      error_fatalsys("Unable to seek while reading from %s",fname);
-    }
-  }
-  fclose(fp);
+	while (ftell (fp) < st.st_size) {
+		if (!fread (&tag, sizeof (tag), 1, fp)) {
+			error_fatalsys ("Unable to read tag from %s", fname);
+		}
+		if (!strcmp (plugin, tag.plugin)) {
+			if (!fread (buffer, tag.len, 1, fp)) {
+				error_fatalsys ("Unable to read from %s",
+						fname);
+			}
+			return 1;
+		}
+		if (fseek (fp, tag.len, SEEK_CUR)) {
+			error_fatalsys ("Unable to seek while reading from %s",
+					fname);
+		}
+	}
+	fclose (fp);
 
-  return 0;
+	return 0;
 }
 
 
 void
-saveprefs(char *plugin, int len, void *buffer)
+saveprefs (char *plugin, int len, void *buffer)
 {
-  FILE *fp;
-  char fname[256];
-  struct stat st;
-  struct usrtag tag;
+	FILE   *fp;
+	char    fname[256];
+	struct stat st;
+	struct usrtag tag;
 
-  sprintf(fname,"%s/%s",mkfname(MAILERUSRDIR),thisuseracc.userid);
+	sprintf (fname, "%s/%s", mkfname (MAILERUSRDIR), thisuseracc.userid);
 
-  if(!stat(fname,&st)){
-    if((fp=fopen(fname,"r+"))==NULL){
-      error_fatalsys("Unable to open %s for writing",fname);
-    }
-  } else {
-    if((fp=fopen(fname,"w+"))==NULL){
-      error_fatalsys("Unable to create %s",fname);
-    }
-    st.st_size=0;
-  }
+	if (!stat (fname, &st)) {
+		if ((fp = fopen (fname, "r+")) == NULL) {
+			error_fatalsys ("Unable to open %s for writing",
+					fname);
+		}
+	} else {
+		if ((fp = fopen (fname, "w+")) == NULL) {
+			error_fatalsys ("Unable to create %s", fname);
+		}
+		st.st_size = 0;
+	}
 
-  while(ftell(fp)<st.st_size){
-    if(!fread(&tag,sizeof(tag),1,fp)){
-      error_fatalsys("Unable to read tag from %s",fname);
-    }
-    if(!strcmp(plugin,tag.plugin)){
-      if(tag.len!=len){
-	error_fatalsys("Block length mismatch, %d!=%d.",len,tag.len);
-      }
-      errno=0;
-      if(!fwrite(buffer,tag.len,1,fp)){
-	error_fatalsys("Unable to write to %s",fname);
-      }
-      fclose(fp);
-      return;
-    }
-    if(fseek(fp,tag.len,SEEK_CUR)){
-      error_fatalsys("Unable to seek while reading from %s",fname);
-    }
-  }
+	while (ftell (fp) < st.st_size) {
+		if (!fread (&tag, sizeof (tag), 1, fp)) {
+			error_fatalsys ("Unable to read tag from %s", fname);
+		}
+		if (!strcmp (plugin, tag.plugin)) {
+			if (tag.len != len) {
+				error_fatalsys
+				    ("Block length mismatch, %d!=%d.", len,
+				     tag.len);
+			}
+			errno = 0;
+			if (!fwrite (buffer, tag.len, 1, fp)) {
+				error_fatalsys ("Unable to write to %s",
+						fname);
+			}
+			fclose (fp);
+			return;
+		}
+		if (fseek (fp, tag.len, SEEK_CUR)) {
+			error_fatalsys ("Unable to seek while reading from %s",
+					fname);
+		}
+	}
 
-  bzero(&tag,sizeof(tag));
-  strcpy(tag.plugin,plugin);
-  tag.len=len;
-  if(!fwrite(&tag,sizeof(tag),1,fp)){
-    error_fatalsys("Unable to write tag to %s",fname);
-  }
-  if(!fwrite(buffer,tag.len,1,fp)){
-    error_fatalsys("Unable to write to %s",fname);
-  }
-  fclose(fp);
+	bzero (&tag, sizeof (tag));
+	strcpy (tag.plugin, plugin);
+	tag.len = len;
+	if (!fwrite (&tag, sizeof (tag), 1, fp)) {
+		error_fatalsys ("Unable to write tag to %s", fname);
+	}
+	if (!fwrite (buffer, tag.len, 1, fp)) {
+		error_fatalsys ("Unable to write to %s", fname);
+	}
+	fclose (fp);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -60,139 +61,147 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static int
-getdellibname(char *s)
+getdellibname (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(OLDLASK);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(strlen(i)>sizeof(library.keyname)-1){
-      prompt(OCRE2LN,sizeof(library.keyname)-1);
-    } else if(strspn(i,FNAMECHARS)!=strlen(i)){
-      prompt(OCRECHR);
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (OLDLASK);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (strlen (i) > sizeof (library.keyname) - 1) {
+			prompt (OCRE2LN, sizeof (library.keyname) - 1);
+		} else if (strspn (i, FNAMECHARS) != strlen (i)) {
+			prompt (OCRECHR);
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
 static void
-delkeywords(struct libidx *l)
+delkeywords (struct libidx *l)
 {
-  struct fileidx f;
-  int approved;
-  
-  for(approved=0;approved<=1;approved++){
-    if(filegetfirst(l->libnum,&f,approved)){
-      do{
-	delfilekeywords(l,&f);
-	
-      } while(filegetnext(l->libnum,&f));
-    }
-  }
+	struct fileidx f;
+	int     approved;
+
+	for (approved = 0; approved <= 1; approved++) {
+		if (filegetfirst (l->libnum, &f, approved)) {
+			do {
+				delfilekeywords (l, &f);
+
+			} while (filegetnext (l->libnum, &f));
+		}
+	}
 }
 
 
 
 static void
-delfiles(struct libidx *l)
+delfiles (struct libidx *l)
 {
-  struct fileidx f;
-  int approved;
-  
-  for(approved=0;approved<=1;approved++){
-    if(filegetfirst(l->libnum,&f,approved)){
-      do{
-	char fname[512];
-	struct stat st;
-	bzero(&st,sizeof(st));
-	sprintf(fname,"%s/%s",l->dir,f.fname);
-	stat(fname,&st);
-	libinstfile(l,&f,st.st_size,LIF_DEL);
-      } while(filegetnext(l->libnum,&f));
-    }
-  }
+	struct fileidx f;
+	int     approved;
+
+	for (approved = 0; approved <= 1; approved++) {
+		if (filegetfirst (l->libnum, &f, approved)) {
+			do {
+				char    fname[512];
+				struct stat st;
+
+				bzero (&st, sizeof (st));
+				sprintf (fname, "%s/%s", l->dir, f.fname);
+				stat (fname, &st);
+				libinstfile (l, &f, st.st_size, LIF_DEL);
+			} while (filegetnext (l->libnum, &f));
+		}
+	}
 }
 
 
 
 void
-op_delete()
+op_delete ()
 {
-  char s[20];
-  struct libidx lib,tmp;
+	char    s[20];
+	struct libidx lib, tmp;
 
-  for(;;){
-    cnc_end();
-    if(!getdellibname(s))return;
+	for (;;) {
+		cnc_end ();
+		if (!getdellibname (s))
+			return;
 
-    if(!libread(s,library.libnum,&lib)){
-      prompt(OLDLNEX,s);
-      cnc_end();
-      continue;
-    } else break;
-  }
+		if (!libread (s, library.libnum, &lib)) {
+			prompt (OLDLNEX, s);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  /* Refuse to delete the main library */
-  
-  if(sameas(lib.fullname,libmain)){
-    prompt(OLDLMAI,libmain);
-  }
+	/* Refuse to delete the main library */
 
-
-  /* Refuse to delete the library if it has sublibraries */
-
-  if(libgetchild(lib.libnum,"",&tmp)){
-    prompt(OLDLSUB);
-    cnc_end();
-    return;
-  }
+	if (sameas (lib.fullname, libmain)) {
+		prompt (OLDLMAI, libmain);
+	}
 
 
-  /* First delete keywords */
+	/* Refuse to delete the library if it has sublibraries */
 
-  prompt(OLDLKEY);
-  delkeywords(&lib);
+	if (libgetchild (lib.libnum, "", &tmp)) {
+		prompt (OLDLSUB);
+		cnc_end ();
+		return;
+	}
 
-  /* Then delete all the files */
 
-  prompt(OLDLFIL);
-  delfiles(&lib);
+	/* First delete keywords */
 
-  /* And, finally, delete the library */
+	prompt (OLDLKEY);
+	delkeywords (&lib);
 
-  libdelete(lib.libnum);
+	/* Then delete all the files */
+
+	prompt (OLDLFIL);
+	delfiles (&lib);
+
+	/* And, finally, delete the library */
+
+	libdelete (lib.libnum);
 }
+
+
+/* End of File */

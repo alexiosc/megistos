@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -56,10 +59,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -73,131 +74,151 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailcleanup.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/mailcleanup.h>
+#include <megistos/mbk_emailclubs.h>
 
 
 
 
 
 
-int  dayssince=1;
-int  numusers=0;
-int  nummodified=0;
+int     dayssince = 1;
+int     numusers = 0;
+int     nummodified = 0;
 
-int emllif;
+int     emllif;
 
 
 void
-cleanup_init()
+cleanup_init ()
 {
-  char fname[256];
-  FILE *fp;
-  int cof=cofdate(today());
-  promptblock_t *msg;
+	char    fname[256];
+	FILE   *fp;
+	int     cof = cofdate (today ());
+	promptblock_t *msg;
 
-  printf("Email/Clubs cleanup\n\n");
+	printf ("Email/Clubs cleanup\n\n");
 
-  mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES);
+	mod_init (INI_TTYNUM | INI_OUTPUT | INI_SYSVARS | INI_ERRMSGS |
+		  INI_CLASSES);
 
-  msg=msg_open("emailclubs");
+	msg = msg_open ("emailclubs");
 
-  emllif=msg_int(EMLLIF,-1,32767);
+	emllif = msg_int (EMLLIF, -1, 32767);
 
-  msg_close(msg);
+	msg_close (msg);
 
-  sprintf(fname,"%s/%s",mkfname(MSGSDIR),DAYSSINCEFILE);
-  if((fp=fopen(fname,"r"))!=NULL){
-    int i;
-    if(fscanf(fp,"%d\n",&i)==1){
-      dayssince=cof-i;
-      if(dayssince<0)dayssince=1;
-    }
-    fclose(fp);
-  }
-  if((fp=fopen(fname,"w"))!=NULL){
-    fprintf(fp,"%d\n",cof);
-    fclose(fp);
-  }
-  chmod(fname,0660);
-  printf("Days since last cleanup: %d\n\n",dayssince);
+	sprintf (fname, "%s/%s", mkfname (MSGSDIR), DAYSSINCEFILE);
+	if ((fp = fopen (fname, "r")) != NULL) {
+		int     i;
+
+		if (fscanf (fp, "%d\n", &i) == 1) {
+			dayssince = cof - i;
+			if (dayssince < 0)
+				dayssince = 1;
+		}
+		fclose (fp);
+	}
+	if ((fp = fopen (fname, "w")) != NULL) {
+		fprintf (fp, "%d\n", cof);
+		fclose (fp);
+	}
+	chmod (fname, 0660);
+	printf ("Days since last cleanup: %d\n\n", dayssince);
 }
 
 
 
 void
-emailcleanup()
+emailcleanup ()
 {
-  char fname[256];
-  DIR *dp;
-  struct dirent *dir;
-  struct message msg;
-  FILE *fp;
-  int ctoday=cofdate(today());
-  int emldel=0, emldelb=0;
-  int maxmsgno=0;
+	char    fname[256];
+	DIR    *dp;
+	struct dirent *dir;
+	struct message msg;
+	FILE   *fp;
+	int     ctoday = cofdate (today ());
+	int     emldel = 0, emldelb = 0;
+	int     maxmsgno = 0;
 
-  if(dayssince<1){
-    printf("emailcleanup(): no need to cleanup email yet.\n");
-    return;
-  } else printf("E-Mail cleanup...\n");
+	if (dayssince < 1) {
+		printf ("emailcleanup(): no need to cleanup email yet.\n");
+		return;
+	} else
+		printf ("E-Mail cleanup...\n");
 
-  strcpy(fname,mkfname(EMAILDIR));
-  if((dp=opendir(fname))==NULL){
-    printf("emailcleanup(): can't open directory %s, cleanup not done\n",fname);
-    return;
-  }
+	strcpy (fname, mkfname (EMAILDIR));
+	if ((dp = opendir (fname)) == NULL) {
+		printf
+		    ("emailcleanup(): can't open directory %s, cleanup not done\n",
+		     fname);
+		return;
+	}
 
-  sysvar->emsgslive=0;
-  while((dir=readdir(dp))!=NULL){
-    if(!isdigit(dir->d_name[0]))continue;
-    sprintf(fname,"%s/%s",mkfname(EMAILDIR),dir->d_name);
+	sysvar->emsgslive = 0;
+	while ((dir = readdir (dp)) != NULL) {
+		if (!isdigit (dir->d_name[0]))
+			continue;
+		sprintf (fname, "%s/%s", mkfname (EMAILDIR), dir->d_name);
 
-    if((fp=fopen(fname,"r"))==NULL)continue;
+		if ((fp = fopen (fname, "r")) == NULL)
+			continue;
 
-    memset(&msg,0,sizeof(msg));
-    if(fread(&msg,sizeof(msg),1,fp)!=1){
-      fclose(fp);
-      continue;
-    }
-    fclose(fp);
+		memset (&msg, 0, sizeof (msg));
+		if (fread (&msg, sizeof (msg), 1, fp) != 1) {
+			fclose (fp);
+			continue;
+		}
+		fclose (fp);
 
-    if(emllif>=0){
-      if((ctoday-cofdate(msg.crdate))>emllif){
-	struct stat st;
-	if(!stat(fname,&st))emldelb+=st.st_size;
-	emldel++;
-	unlink(fname);
-	strcpy(fname,mkfname(EMAILATTDIR"/"FILEATTACHMENT,msg.msgno));
-	if(!stat(fname,&st))if(st.st_nlink==1)emldelb+=st.st_size;
-	unlink(fname);
-      } else sysvar->emsgslive++;
-    }
-  }
+		if (emllif >= 0) {
+			if ((ctoday - cofdate (msg.crdate)) > emllif) {
+				struct stat st;
 
-  /* Paranoia check: make sure club's msgno pointer points beyond
-     last message in area */
-    
-  if(sysvar->emessages<maxmsgno)sysvar->emessages=maxmsgno;
+				if (!stat (fname, &st))
+					emldelb += st.st_size;
+				emldel++;
+				unlink (fname);
+				strcpy (fname,
+					mkfname (EMAILATTDIR "/"
+						 FILEATTACHMENT, msg.msgno));
+				if (!stat (fname, &st))
+					if (st.st_nlink == 1)
+						emldelb += st.st_size;
+				unlink (fname);
+			} else
+				sysvar->emsgslive++;
+		}
+	}
+
+	/* Paranoia check: make sure club's msgno pointer points beyond
+	   last message in area */
+
+	if (sysvar->emessages < maxmsgno)
+		sysvar->emessages = maxmsgno;
 
 
-  closedir(dp);
-  printf("\nemailcleanup(): killed %d old email message(s)\n",emldel);
-  printf("                freed %d byte(s)\n",emldelb);
-  printf("                There are %d active message(s) now\n\n",sysvar->emsgslive);
+	closedir (dp);
+	printf ("\nemailcleanup(): killed %d old email message(s)\n", emldel);
+	printf ("                freed %d byte(s)\n", emldelb);
+	printf ("                There are %d active message(s) now\n\n",
+		sysvar->emsgslive);
 }
 
 
-void doreindex();
+void    doreindex ();
 
 
 int
-handler_cleanup(int argc, char *argv[])
+handler_cleanup (int argc, char *argv[])
 {
-  cleanup_init();
-  emailcleanup();
-  clubcleanup();
-  doreindex();
-  return 0;
+	cleanup_init ();
+	emailcleanup ();
+	clubcleanup ();
+	doreindex ();
+	return 0;
 }
+
+
+/* End of File */

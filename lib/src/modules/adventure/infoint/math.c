@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /*
  * math.c
@@ -55,7 +56,7 @@ const char *__RCS=RCS_VER;
  *
  */
 
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 /*
  * add
@@ -64,9 +65,10 @@ const char *__RCS=RCS_VER;
  *
  */
 
-void add (zword_t a, zword_t b)
+void
+add (zword_t a, zword_t b)
 {
-  store_operand (a + b);
+	store_operand (a + b);
 }
 
 
@@ -78,9 +80,10 @@ void add (zword_t a, zword_t b)
  *
  */
 
-void subtract (zword_t a, zword_t b)
+void
+subtract (zword_t a, zword_t b)
 {
-  store_operand (a - b);
+	store_operand (a - b);
 }
 
 
@@ -92,9 +95,10 @@ void subtract (zword_t a, zword_t b)
  *
  */
 
-void multiply (zword_t a, zword_t b)
+void
+multiply (zword_t a, zword_t b)
 {
-  store_operand (a * b);
+	store_operand (a * b);
 }
 
 
@@ -106,9 +110,10 @@ void multiply (zword_t a, zword_t b)
  *
  */
 
-void divide (zword_t a, zword_t b)
+void
+divide (zword_t a, zword_t b)
 {
-  store_operand (a / b);
+	store_operand (a / b);
 }
 
 
@@ -120,9 +125,10 @@ void divide (zword_t a, zword_t b)
  *
  */
 
-void remainder (zword_t a, zword_t b)
+void
+remainder (zword_t a, zword_t b)
 {
-  store_operand (a % b);
+	store_operand (a % b);
 }
 
 
@@ -134,12 +140,13 @@ void remainder (zword_t a, zword_t b)
  *
  */
 
-void shift (zword_t a, zword_t b)
+void
+shift (zword_t a, zword_t b)
 {
-  if ((short) b > 0)
-    store_operand (a << (short) b);
-  else
-    store_operand (a >> abs ((short) b));
+	if ((short) b > 0)
+		store_operand (a << (short) b);
+	else
+		store_operand (a >> abs ((short) b));
 }
 
 
@@ -152,15 +159,15 @@ void shift (zword_t a, zword_t b)
  *
  */
 
-void arith_shift (zword_t a, zword_t b)
+void
+arith_shift (zword_t a, zword_t b)
 {
-  if ((short) b > 0)
-    store_operand (a << (short) b);
-  else
-    if ((short) a > 0)
-      store_operand (a >> abs ((short) b));
-    else
-      store_operand (~((~a) >> abs ((short) b)));
+	if ((short) b > 0)
+		store_operand (a << (short) b);
+	else if ((short) a > 0)
+		store_operand (a >> abs ((short) b));
+	else
+		store_operand (~((~a) >> abs ((short) b)));
 }
 
 
@@ -172,9 +179,10 @@ void arith_shift (zword_t a, zword_t b)
  *
  */
 
-void or (zword_t a, zword_t b)
+void
+or (zword_t a, zword_t b)
 {
-  store_operand (a | b);
+	store_operand (a | b);
 }
 
 
@@ -186,9 +194,10 @@ void or (zword_t a, zword_t b)
  *
  */
 
-void not (zword_t a)
+void
+not (zword_t a)
 {
-  store_operand (~a);
+	store_operand (~a);
 }
 
 
@@ -200,9 +209,10 @@ void not (zword_t a)
  *
  */
 
-void and (zword_t a, zword_t b)
+void
+and (zword_t a, zword_t b)
 {
-  store_operand (a & b);
+	store_operand (a & b);
 }
 
 
@@ -214,15 +224,16 @@ void and (zword_t a, zword_t b)
  *
  */
 
-void zip_random (zword_t a)
+void
+zip_random (zword_t a)
 {
-  if (a == 0)
-    store_operand (0);
-  else if (a & 0x8000) { /* (a < 0) - used to set seed with #RANDOM */
-    srand ((unsigned int) abs (a));
-    store_operand (0);
-  } else /* (a > 0) */
-    store_operand (((zword_t) rand () % a) + 1);
+	if (a == 0)
+		store_operand (0);
+	else if (a & 0x8000) {	/* (a < 0) - used to set seed with #RANDOM */
+		srand ((unsigned int) abs (a));
+		store_operand (0);
+	} else			/* (a > 0) */
+		store_operand (((zword_t) rand () % a) + 1);
 }
 
 
@@ -235,9 +246,10 @@ void zip_random (zword_t a)
  */
 
 
-void test (zword_t a, zword_t b)
+void
+test (zword_t a, zword_t b)
 {
-  conditional_jump (((~a) & b) == 0);
+	conditional_jump (((~a) & b) == 0);
 }
 
 
@@ -249,9 +261,10 @@ void test (zword_t a, zword_t b)
  *
  */
 
-void compare_zero (zword_t a)
+void
+compare_zero (zword_t a)
 {
-  conditional_jump (a == 0);
+	conditional_jump (a == 0);
 }
 
 
@@ -263,17 +276,18 @@ void compare_zero (zword_t a)
  *
  */
 
-void compare_je (int count, zword_t *operand)
+void
+compare_je (int count, zword_t * operand)
 {
-  int i;
-  
-  for (i = 1; i < count; i++)
-    if (operand[0] == operand[i]) {
-      conditional_jump (TRUE);
-      return;
-    }
-  conditional_jump (FALSE);
-  
+	int     i;
+
+	for (i = 1; i < count; i++)
+		if (operand[0] == operand[i]) {
+			conditional_jump (TRUE);
+			return;
+		}
+	conditional_jump (FALSE);
+
 }
 
 
@@ -285,9 +299,10 @@ void compare_je (int count, zword_t *operand)
  *
  */
 
-void compare_jl (zword_t a, zword_t b)
+void
+compare_jl (zword_t a, zword_t b)
 {
-  conditional_jump ((short) a < (short) b);
+	conditional_jump ((short) a < (short) b);
 }
 
 
@@ -299,7 +314,14 @@ void compare_jl (zword_t a, zword_t b)
  *
  */
 
-void compare_jg (zword_t a, zword_t b)
+void
+compare_jg (zword_t a, zword_t b)
 {
-  conditional_jump ((short) a > (short) b);
+	conditional_jump ((short) a > (short) b);
 }
+
+
+/* End of File */
+
+
+/* End of File */

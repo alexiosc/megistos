@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -66,205 +67,221 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "clubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/clubs.h>
+#include <megistos/email.h>
 
 
 void
-tagmsg(struct message *msg)
+tagmsg (struct message *msg)
 {
-  getmsgheader(msg->msgno,msg);
-  msg->flags^=MSF_EXEMPT;
-  writemsgheader(msg);
-  prompt(msg->flags&MSF_EXEMPT?COPTTG:COPTUN);
+	getmsgheader (msg->msgno, msg);
+	msg->flags ^= MSF_EXEMPT;
+	writemsgheader (msg);
+	prompt (msg->flags & MSF_EXEMPT ? COPTTG : COPTUN);
 }
 
 
 void
-periodic(struct message *msg)
+periodic (struct message *msg)
 {
-  int i;
-  
-  if(!get_number(&i,COPPASK,0,999999,COPPERR,COPPDEF,msg->period))return;
-  
-  getmsgheader(msg->msgno,msg);
-  msg->period=i;
-  writemsgheader(msg);
+	int     i;
 
-  if(!msg->period){
-    loadclubhdr(msg->club);
-    clubhdr.nper--;
-    saveclubhdr(&clubhdr);
-    prompt(COPPOK1);
-  } else {
-    loadclubhdr(msg->club);
-    clubhdr.nper++;
-    saveclubhdr(&clubhdr);
-    prompt(COPPOK2,msg->period,msg_getunit(DAYSNG,msg->period));
-  }
+	if (!get_number
+	    (&i, COPPASK, 0, 999999, COPPERR, COPPDEF, msg->period))
+		return;
+
+	getmsgheader (msg->msgno, msg);
+	msg->period = i;
+	writemsgheader (msg);
+
+	if (!msg->period) {
+		loadclubhdr (msg->club);
+		clubhdr.nper--;
+		saveclubhdr (&clubhdr);
+		prompt (COPPOK1);
+	} else {
+		loadclubhdr (msg->club);
+		clubhdr.nper++;
+		saveclubhdr (&clubhdr);
+		prompt (COPPOK2, msg->period,
+			msg_getunit (DAYSNG, msg->period));
+	}
 }
 
 
 void
-approve(struct message *msg)
+approve (struct message *msg)
 {
-  getmsgheader(msg->msgno,msg);
-  msg->flags^=MSF_APPROVD;
-  writemsgheader(msg);
+	getmsgheader (msg->msgno, msg);
+	msg->flags ^= MSF_APPROVD;
+	writemsgheader (msg);
 
-  loadclubhdr(msg->club);
-  if(msg->flags&MSF_APPROVD)clubhdr.nfunapp--;
-  else clubhdr.nfunapp++;
-  saveclubhdr(&clubhdr);
+	loadclubhdr (msg->club);
+	if (msg->flags & MSF_APPROVD)
+		clubhdr.nfunapp--;
+	else
+		clubhdr.nfunapp++;
+	saveclubhdr (&clubhdr);
 
-  prompt(msg->flags&MSF_APPROVD?COPAAPP:COPAUNA);
+	prompt (msg->flags & MSF_APPROVD ? COPAAPP : COPAUNA);
 }
 
 
 void
-insatt(struct message *msg)
+insatt (struct message *msg)
 {
-  char opt;
-  int res, truncpos;
-  FILE *fpi, *fpo;
-  char fnamei[256], fnameo[256];
-  struct message m;
-  char buf[1024];
-  int read, written;
+	char    opt;
+	int     res, truncpos;
+	FILE   *fpi, *fpo;
+	char    fnamei[256], fnameo[256];
+	struct message m;
+	char    buf[1024];
+	int     read, written;
 
-  for(;;){
-    inp_setflags(INF_HELP);
-    res=get_menu(&opt,1,COPIAMNU,COPIASMNU,COPIARS,"OA",0,0);
-    inp_clearflags(INF_HELP);
-    if(res<0){
-      prompt(COPIAH);
-      cnc_end();
-      continue;
-    }
-    break;
-  }
+	for (;;) {
+		inp_setflags (INF_HELP);
+		res =
+		    get_menu (&opt, 1, COPIAMNU, COPIASMNU, COPIARS, "OA", 0,
+			      0);
+		inp_clearflags (INF_HELP);
+		if (res < 0) {
+			prompt (COPIAH);
+			cnc_end ();
+			continue;
+		}
+		break;
+	}
 
-  sprintf(fnamei,"%s/%s/%s/"FILEATTACHMENT,
-	  mkfname(MSGSDIR),msg->club,MSGATTDIR,msg->msgno);
-  sprintf(fnameo,"%s/%s/"MESSAGEFILE,
-	  mkfname(MSGSDIR),msg->club,msg->msgno);
+	sprintf (fnamei, "%s/%s/%s/" FILEATTACHMENT,
+		 mkfname (MSGSDIR), msg->club, MSGATTDIR, msg->msgno);
+	sprintf (fnameo, "%s/%s/" MESSAGEFILE,
+		 mkfname (MSGSDIR), msg->club, msg->msgno);
 
-  if((fpi=fopen(fnamei,"r"))==NULL){
-    fclose(fpi);
-    prompt(COPIAR);
-    return;
-  }
+	if ((fpi = fopen (fnamei, "r")) == NULL) {
+		fclose (fpi);
+		prompt (COPIAR);
+		return;
+	}
 
-  if(opt=='A'){
-    if((fpo=fopen(fnameo,"a"))==NULL){
-      fclose(fpi);
-      fclose(fpo);
-      prompt(COPIAR);
-      return;
-    }
-    fprintf(fpo,"\n\n");
-  } else {
-    if((fpo=fopen(fnameo,"r+"))==NULL){
-      fclose(fpi);
-      fclose(fpo);
-      prompt(COPIAR);
-      return;
-    }
-    fseek(fpo,sizeof(struct message),SEEK_SET);
-  }
+	if (opt == 'A') {
+		if ((fpo = fopen (fnameo, "a")) == NULL) {
+			fclose (fpi);
+			fclose (fpo);
+			prompt (COPIAR);
+			return;
+		}
+		fprintf (fpo, "\n\n");
+	} else {
+		if ((fpo = fopen (fnameo, "r+")) == NULL) {
+			fclose (fpi);
+			fclose (fpo);
+			prompt (COPIAR);
+			return;
+		}
+		fseek (fpo, sizeof (struct message), SEEK_SET);
+	}
 
-  do{
-    read=fread(&buf,1,sizeof(buf),fpi);
-    written=fwrite(&buf,1,read,fpo);
-    if(fmt_lastresult==PAUSE_QUIT)break;
-  }while(read && read==written);
+	do {
+		read = fread (&buf, 1, sizeof (buf), fpi);
+		written = fwrite (&buf, 1, read, fpo);
+		if (fmt_lastresult == PAUSE_QUIT)
+			break;
+	} while (read && read == written);
 
-  truncpos=ftell(fpo);
-  fclose(fpi);
-  fclose(fpo);
-  truncate(fnameo,truncpos);
-  unlink(fnamei);
+	truncpos = ftell (fpo);
+	fclose (fpi);
+	fclose (fpo);
+	truncate (fnameo, truncpos);
+	unlink (fnamei);
 
-  getmsgheader(msg->msgno,&m);
-  res=(m.flags&MSF_APPROVD)==0;
-  m.flags&=~(MSF_FILEATT|MSF_APPROVD);
-  writemsgheader(&m);
+	getmsgheader (msg->msgno, &m);
+	res = (m.flags & MSF_APPROVD) == 0;
+	m.flags &= ~(MSF_FILEATT | MSF_APPROVD);
+	writemsgheader (&m);
 
-  loadclubhdr(msg->club);
-  clubhdr.nfiles--;
-  if(res)clubhdr.nfunapp--;
-  saveclubhdr(&clubhdr);
+	loadclubhdr (msg->club);
+	clubhdr.nfiles--;
+	if (res)
+		clubhdr.nfunapp--;
+	saveclubhdr (&clubhdr);
 
-  prompt(opt=='A'?COPIAA:COPIAO);
+	prompt (opt == 'A' ? COPIAA : COPIAO);
 }
 
 
 void
-insblt(struct message *msg)
+insblt (struct message *msg)
 {
-  char command[256];
-  if(!msg->club[0]){
-    error_fatal("Sanity check failed: club message with no set club.");
-  }
-  sprintf(command,"%s --insert %s/%d",
-	  mkfname(BULLETINBIN),msg->club,msg->msgno);
-  runcommand(command);
+	char    command[256];
+
+	if (!msg->club[0]) {
+		error_fatal
+		    ("Sanity check failed: club message with no set club.");
+	}
+	sprintf (command, "%s --insert %s/%d",
+		 mkfname (BULLETINBIN), msg->club, msg->msgno);
+	runcommand (command);
 }
 
 
 char
-clubopmenu(struct message *msg)
+clubopmenu (struct message *msg)
 {
-  int menu=msg->flags&MSF_FILEATT?COPMNUF:COPMNU;
-  int help=msg->flags&MSF_FILEATT?COPMNUFH:COPMNUH;
-  char opts[32];
-  char opt;
-  int i;
+	int     menu = msg->flags & MSF_FILEATT ? COPMNUF : COPMNU;
+	int     help = msg->flags & MSF_FILEATT ? COPMNUFH : COPMNUH;
+	char    opts[32];
+	char    opt;
+	int     i;
 
-  strcpy(opts,(msg->flags&MSF_FILEATT?"MECFTPBAI":"MECFTPB"));
+	strcpy (opts, (msg->flags & MSF_FILEATT ? "MECFTPBAI" : "MECFTPB"));
 
-  for(;;){
-    inp_setflags(INF_HELP);
-    i=get_menu(&opt,1,0,menu,COPERR,opts,0,0);
-    inp_clearflags(INF_HELP);
+	for (;;) {
+		inp_setflags (INF_HELP);
+		i = get_menu (&opt, 1, 0, menu, COPERR, opts, 0, 0);
+		inp_clearflags (INF_HELP);
 
-    if(!i)return 0;
-    else if(i<0){
-      cnc_end();
-      prompt(help);
-      continue;
-    } else break;
-  }
-  switch (opt){
-  case 'C':
-    copymsg(msg);
-    return 1;
-  case 'F':
-    forwardmsg(msg);
-    return 1;
-  case 'M':
-    clubopmodify(msg);
-    return 0;
-  case 'E':
-    erasemsg(0,msg);
-    return 1;
-  case 'T':
-    tagmsg(msg);
-    return 0;
-  case 'P':
-    periodic(msg);
-    return 0;
-  case 'A':
-    approve(msg);
-    return 0;
-  case 'I':
-    insatt(msg);
-    return 1;
-  case 'B':
-    insblt(msg);
-    return 0;
-  }
-  return 'N';
+		if (!i)
+			return 0;
+		else if (i < 0) {
+			cnc_end ();
+			prompt (help);
+			continue;
+		} else
+			break;
+	}
+	switch (opt) {
+	case 'C':
+		copymsg (msg);
+		return 1;
+	case 'F':
+		forwardmsg (msg);
+		return 1;
+	case 'M':
+		clubopmodify (msg);
+		return 0;
+	case 'E':
+		erasemsg (0, msg);
+		return 1;
+	case 'T':
+		tagmsg (msg);
+		return 0;
+	case 'P':
+		periodic (msg);
+		return 0;
+	case 'A':
+		approve (msg);
+		return 0;
+	case 'I':
+		insatt (msg);
+		return 1;
+	case 'B':
+		insblt (msg);
+		return 0;
+	}
+	return 'N';
 }
+
+
+/* End of File */

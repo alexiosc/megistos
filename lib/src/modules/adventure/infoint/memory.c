@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /*
  * memory.c
@@ -57,14 +58,14 @@ const char *__RCS=RCS_VER;
  */
 
 #include <bbs.h>
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 /* A cache entry */
 
 typedef struct cache_entry {
-  struct cache_entry *flink;
-  int page_number;
-  zbyte_t data[PAGE_SIZE];
+	struct cache_entry *flink;
+	int     page_number;
+	zbyte_t data[PAGE_SIZE];
 } cache_entry_t;
 
 /* Cache chain anchor */
@@ -94,63 +95,65 @@ static cache_entry_t *update_cache (int);
  *
  */
 
-void load_cache (void)
+void
+load_cache (void)
 {
-  unsigned long file_size;
-  unsigned int i, file_pages, data_pages;
-  cache_entry_t *cachep;
-  
-  /* Allocate output and status line buffers */
-  
-  line = (char *) malloc (screen_cols + 1);
-  if (line == NULL)
-    error_fatal ("Insufficient memory to play game");
-  status_line = (char *) malloc (screen_cols + 1);
-  if (status_line == NULL)
-    error_fatal ("Insufficient memory to play game");
-  
-  /* Must have at least one cache page for memory calculation */
-  
-  cachep = (cache_entry_t *) malloc (sizeof (cache_entry_t));
-  if (cachep == NULL)
-    error_fatal ("Insufficient memory to play game");
-  cachep->flink = cache;
-  cachep->page_number = 0;
-  cache = cachep;
-  
-  /* Calculate dynamic cache pages required */
-  
-  if (h_config & CONFIG_MAX_DATA)
-    data_pages = calc_data_pages ();
-  else
-    data_pages = (h_data_size + PAGE_MASK) >> PAGE_SHIFT;
-  data_size = data_pages * PAGE_SIZE;
-  file_size = (unsigned long) h_file_size * story_scaler;
-  file_pages = (unsigned int) ((file_size + PAGE_MASK) >> PAGE_SHIFT);
-  
-  /* Allocate static data area and initialise it */
-  
-  datap = (zbyte_t *) malloc (data_size);
-  if (datap == NULL)
-    error_fatal ("Insufficient memory to play game");
-  for (i = 0; i < data_pages; i++)
-    read_page (i, &datap[i * PAGE_SIZE]);
-  
-  /* Allocate memory for undo */
-  
-  undo_datap = (zbyte_t *) malloc (data_size);
-  
-  /* Allocate cache pages and initialise them */
-  
-  for (i = data_pages; cachep != NULL && i < file_pages; i++) {
-    cachep = (cache_entry_t *) malloc (sizeof (cache_entry_t));
-    if (cachep != NULL) {
-      cachep->flink = cache;
-      cachep->page_number = i;
-      read_page (cachep->page_number, cachep->data);
-      cache = cachep;
-    }
-  }
+	unsigned long file_size;
+	unsigned int i, file_pages, data_pages;
+	cache_entry_t *cachep;
+
+	/* Allocate output and status line buffers */
+
+	line = (char *) malloc (screen_cols + 1);
+	if (line == NULL)
+		error_fatal ("Insufficient memory to play game");
+	status_line = (char *) malloc (screen_cols + 1);
+	if (status_line == NULL)
+		error_fatal ("Insufficient memory to play game");
+
+	/* Must have at least one cache page for memory calculation */
+
+	cachep = (cache_entry_t *) malloc (sizeof (cache_entry_t));
+	if (cachep == NULL)
+		error_fatal ("Insufficient memory to play game");
+	cachep->flink = cache;
+	cachep->page_number = 0;
+	cache = cachep;
+
+	/* Calculate dynamic cache pages required */
+
+	if (h_config & CONFIG_MAX_DATA)
+		data_pages = calc_data_pages ();
+	else
+		data_pages = (h_data_size + PAGE_MASK) >> PAGE_SHIFT;
+	data_size = data_pages * PAGE_SIZE;
+	file_size = (unsigned long) h_file_size *story_scaler;
+
+	file_pages = (unsigned int) ((file_size + PAGE_MASK) >> PAGE_SHIFT);
+
+	/* Allocate static data area and initialise it */
+
+	datap = (zbyte_t *) malloc (data_size);
+	if (datap == NULL)
+		error_fatal ("Insufficient memory to play game");
+	for (i = 0; i < data_pages; i++)
+		read_page (i, &datap[i * PAGE_SIZE]);
+
+	/* Allocate memory for undo */
+
+	undo_datap = (zbyte_t *) malloc (data_size);
+
+	/* Allocate cache pages and initialise them */
+
+	for (i = data_pages; cachep != NULL && i < file_pages; i++) {
+		cachep = (cache_entry_t *) malloc (sizeof (cache_entry_t));
+		if (cachep != NULL) {
+			cachep->flink = cache;
+			cachep->page_number = i;
+			read_page (cachep->page_number, cachep->data);
+			cache = cachep;
+		}
+	}
 }
 
 
@@ -162,28 +165,29 @@ void load_cache (void)
  *
  */
 
-void unload_cache (void)
+void
+unload_cache (void)
 {
-  cache_entry_t *cachep, *nextp;
-  
-  /* Make sure all output has been flushed */
-  
-  new_line ();
-  
-  /* Free output buffer, status line and data memory */
-  
-  free (line);
-  free (status_line);
-  free (datap);
-  free (undo_datap);
-  
-  /* Free cache memory */
-  
-  for (cachep = cache; cachep->flink != NULL; cachep = nextp) {
-    nextp = cachep->flink;
-    free (cachep);
-  }
-  
+	cache_entry_t *cachep, *nextp;
+
+	/* Make sure all output has been flushed */
+
+	new_line ();
+
+	/* Free output buffer, status line and data memory */
+
+	free (line);
+	free (status_line);
+	free (datap);
+	free (undo_datap);
+
+	/* Free cache memory */
+
+	for (cachep = cache; cachep->flink != NULL; cachep = nextp) {
+		nextp = cachep->flink;
+		free (cachep);
+	}
+
 }
 
 
@@ -195,15 +199,16 @@ void unload_cache (void)
  *
  */
 
-zword_t read_code_word (void)
+zword_t
+read_code_word (void)
 {
-  zword_t w;
-  
-  w = (zword_t) read_code_byte () << 8;
-  w |= (zword_t) read_code_byte ();
-  
-  return (w);
-  
+	zword_t w;
+
+	w = (zword_t) read_code_byte () << 8;
+	w |= (zword_t) read_code_byte ();
+
+	return (w);
+
 }
 
 /*
@@ -213,30 +218,31 @@ zword_t read_code_word (void)
  *
  */
 
-zbyte_t read_code_byte (void)
+zbyte_t
+read_code_byte (void)
 {
-  unsigned int page_number, page_offset;
-  
-  /* Calculate page and offset values */
-  
-  page_number = (unsigned int) (pc >> PAGE_SHIFT);
-  page_offset = (unsigned int) pc & PAGE_MASK;
-  
-  /* Load page into translation buffer */
-  
-  if (page_number != current_code_page) {
-    current_code_cachep = update_cache (page_number);
-    current_code_page = page_number;
-  }
-  
-  /* Update the PC */
-  
-  pc++;
-  
-  /* Return byte from page offset */
-  
-  return (current_code_cachep->data[page_offset]);
-  
+	unsigned int page_number, page_offset;
+
+	/* Calculate page and offset values */
+
+	page_number = (unsigned int) (pc >> PAGE_SHIFT);
+	page_offset = (unsigned int) pc & PAGE_MASK;
+
+	/* Load page into translation buffer */
+
+	if (page_number != current_code_page) {
+		current_code_cachep = update_cache (page_number);
+		current_code_page = page_number;
+	}
+
+	/* Update the PC */
+
+	pc++;
+
+	/* Return byte from page offset */
+
+	return (current_code_cachep->data[page_offset]);
+
 }
 
 
@@ -248,15 +254,16 @@ zbyte_t read_code_byte (void)
  *
  */
 
-zword_t read_data_word (unsigned long *addr)
+zword_t
+read_data_word (unsigned long *addr)
 {
-  zword_t w;
-  
-  w = (zword_t) read_data_byte (addr) << 8;
-  w |= (zword_t) read_data_byte (addr);
-  
-  return (w);
-  
+	zword_t w;
+
+	w = (zword_t) read_data_byte (addr) << 8;
+	w |= (zword_t) read_data_byte (addr);
+
+	return (w);
+
 }
 
 
@@ -268,40 +275,41 @@ zword_t read_data_word (unsigned long *addr)
  *
  */
 
-zbyte_t read_data_byte (unsigned long *addr)
+zbyte_t
+read_data_byte (unsigned long *addr)
 {
-  unsigned int page_number, page_offset;
-  zbyte_t value;
-  
-  /* Check if byte is in non-paged cache */
-  
-  if (*addr < (unsigned long) data_size)
-    value = datap[*addr];
-  else {
-    
-    /* Calculate page and offset values */
-    
-    page_number = (int) (*addr >> PAGE_SHIFT);
-    page_offset = (int) *addr & PAGE_MASK;
-    
-    /* Load page into translation buffer */
-    
-    if (page_number != current_data_page) {
-      current_data_cachep = update_cache (page_number);
-      current_data_page = page_number;
-    }
-    
-    /* Fetch byte from page offset */
-    
-    value = current_data_cachep->data[page_offset];
-  }
-  
-  /* Update the address */
-  
-  (*addr)++;
-  
-  return (value);
-  
+	unsigned int page_number, page_offset;
+	zbyte_t value;
+
+	/* Check if byte is in non-paged cache */
+
+	if (*addr < (unsigned long) data_size)
+		value = datap[*addr];
+	else {
+
+		/* Calculate page and offset values */
+
+		page_number = (int) (*addr >> PAGE_SHIFT);
+		page_offset = (int) *addr & PAGE_MASK;
+
+		/* Load page into translation buffer */
+
+		if (page_number != current_data_page) {
+			current_data_cachep = update_cache (page_number);
+			current_data_page = page_number;
+		}
+
+		/* Fetch byte from page offset */
+
+		value = current_data_cachep->data[page_offset];
+	}
+
+	/* Update the address */
+
+	(*addr)++;
+
+	return (value);
+
 }
 
 
@@ -320,37 +328,41 @@ zbyte_t read_data_byte (unsigned long *addr)
  *
  */
 
-static unsigned int calc_data_pages (void)
+static unsigned int
+calc_data_pages (void)
 {
-  unsigned long offset, data_end, dictionary_end;
-  int separator_count, word_size, word_count;
-  unsigned int data_pages;
-  
-  /* Calculate end of data area, use restart size if data size is too low */
-  
-  if (h_data_size > h_restart_size)
-    data_end = h_data_size;
-  else
-    data_end = h_restart_size;
-  
-  /* Calculate end of dictionary table */
-  
-  offset = h_words_offset;
-  separator_count = read_data_byte (&offset);
-  offset += separator_count;
-  word_size = read_data_byte (&offset);
-  word_count = read_data_word (&offset);
-  dictionary_end = offset + (word_size * word_count);
-  
-  /* If data end is too low then use end of dictionary instead */
-  
-  if (dictionary_end > data_end)
-    data_pages = (unsigned int) ((dictionary_end + PAGE_MASK) >> PAGE_SHIFT);
-  else
-    data_pages = (unsigned int) ((data_end + PAGE_MASK) >> PAGE_SHIFT);
-  
-  return (data_pages);
-  
+	unsigned long offset, data_end, dictionary_end;
+	int     separator_count, word_size, word_count;
+	unsigned int data_pages;
+
+	/* Calculate end of data area, use restart size if data size is too low */
+
+	if (h_data_size > h_restart_size)
+		data_end = h_data_size;
+	else
+		data_end = h_restart_size;
+
+	/* Calculate end of dictionary table */
+
+	offset = h_words_offset;
+	separator_count = read_data_byte (&offset);
+	offset += separator_count;
+	word_size = read_data_byte (&offset);
+	word_count = read_data_word (&offset);
+	dictionary_end = offset + (word_size * word_count);
+
+	/* If data end is too low then use end of dictionary instead */
+
+	if (dictionary_end > data_end)
+		data_pages =
+		    (unsigned int) ((dictionary_end + PAGE_MASK) >>
+				    PAGE_SHIFT);
+	else
+		data_pages =
+		    (unsigned int) ((data_end + PAGE_MASK) >> PAGE_SHIFT);
+
+	return (data_pages);
+
 }
 
 
@@ -365,46 +377,54 @@ static unsigned int calc_data_pages (void)
  *
  */
 
-static cache_entry_t *update_cache (int page_number)
+static cache_entry_t *
+update_cache (int page_number)
 {
-  cache_entry_t *cachep, *lastp;
-  
-  /* Search the cache chain for the page */
-  
-  for (lastp = cache, cachep = cache;
-       cachep->flink != NULL &&
-         cachep->page_number &&
-         cachep->page_number != page_number;
-       lastp = cachep, cachep = cachep->flink)
-    ;
-  
-  /* If no page in chain then read it from disk */
-  
-  if (cachep->page_number != page_number) {
-    
-    /* Reusing last cache page, so invalidate cache if page was in use */
-    
-    if (cachep->flink == NULL && cachep->page_number) {
-      if (current_code_page == (unsigned int) cachep->page_number)
-	current_code_page = 0;
-      if (current_data_page == (unsigned int) cachep->page_number)
-	current_data_page = 0;
-    }
-    
-    /* Load the new page number and the page contents from disk */
-    
-    cachep->page_number = page_number;
-    read_page (page_number, cachep->data);
-  }
-  
-  /* If page is not at front of cache chain then move it there */
-  
-  if (lastp != cache) {
-    lastp->flink = cachep->flink;
-    cachep->flink = cache;
-    cache = cachep;
-  }
-  
-  return (cachep);
-  
+	cache_entry_t *cachep, *lastp;
+
+	/* Search the cache chain for the page */
+
+	for (lastp = cache, cachep = cache;
+	     cachep->flink != NULL &&
+	     cachep->page_number &&
+	     cachep->page_number != page_number;
+	     lastp = cachep, cachep = cachep->flink);
+
+	/* If no page in chain then read it from disk */
+
+	if (cachep->page_number != page_number) {
+
+		/* Reusing last cache page, so invalidate cache if page was in use */
+
+		if (cachep->flink == NULL && cachep->page_number) {
+			if (current_code_page ==
+			    (unsigned int) cachep->page_number)
+				current_code_page = 0;
+			if (current_data_page ==
+			    (unsigned int) cachep->page_number)
+				current_data_page = 0;
+		}
+
+		/* Load the new page number and the page contents from disk */
+
+		cachep->page_number = page_number;
+		read_page (page_number, cachep->data);
+	}
+
+	/* If page is not at front of cache chain then move it there */
+
+	if (lastp != cache) {
+		lastp->flink = cachep->flink;
+		cachep->flink = cache;
+		cache = cachep;
+	}
+
+	return (cachep);
+
 }
+
+
+/* End of File */
+
+
+/* End of File */

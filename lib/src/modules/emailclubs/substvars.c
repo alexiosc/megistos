@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,179 +62,196 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/email.h>
 
 
 static char *
-sv_club()
+sv_club ()
 {
-  return clubhdr.club;
+	return clubhdr.club;
 }
 
 
 static char *
-sv_clubid()
+sv_clubid ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.clubid);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.clubid);
+	return conv;
 }
 
 
 static char *
-sv_clubdesc()
+sv_clubdesc ()
 {
-  return clubhdr.descr;
+	return clubhdr.descr;
 }
 
 
 static char *
-sv_clubop()
+sv_clubop ()
 {
-  return clubhdr.clubop;
+	return clubhdr.clubop;
 }
 
 
 static char *
-sv_clubcrdate()
+sv_clubcrdate ()
 {
-  static char conv[32];
-  sprintf(conv,"%s",strdate(clubhdr.crdate));
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%s", strdate (clubhdr.crdate));
+	return conv;
 }
 
 
 static char *
-sv_clubcrtime()
+sv_clubcrtime ()
 {
-  static char conv[32];
-  sprintf(conv,"%s",strtime(clubhdr.crtime,0));
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%s", strtime (clubhdr.crtime, 0));
+	return conv;
 }
 
 
 static char *
-sv_clubmsgs()
+sv_clubmsgs ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.nmsgs);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.nmsgs);
+	return conv;
 }
 
 
 static char *
-sv_clubfiles()
+sv_clubfiles ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.nfiles);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.nfiles);
+	return conv;
 }
 
 
 static char *
-sv_clubper()
+sv_clubper ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.nper);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.nper);
+	return conv;
 }
 
 
 static char *
-sv_clubblts()
+sv_clubblts ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.nblts);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.nblts);
+	return conv;
 }
 
 
 static char *
-sv_clubw4app()
+sv_clubw4app ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.nfunapp);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.nfunapp);
+	return conv;
 }
 
 
 static char *
-sv_clubmsglife()
+sv_clubmsglife ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.msglife);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.msglife);
+	return conv;
 }
 
 
 static char *
-sv_clubpostchg()
+sv_clubpostchg ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.postchg);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.postchg);
+	return conv;
 }
 
 
 static char *
-sv_clubuplchg()
+sv_clubuplchg ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.uploadchg);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.uploadchg);
+	return conv;
 }
 
 
 static char *
-sv_clubdnlchg()
+sv_clubdnlchg ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",clubhdr.dnloadchg);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", clubhdr.dnloadchg);
+	return conv;
 }
 
 
 static char *
-sv_clubrate()
+sv_clubrate ()
 {
-  static char conv[32];
-  int i=(clubhdr.credspermin==-1)?thisuseronl.credspermin:clubhdr.credspermin;
-  sprintf(conv,"%d.%02d",i/100,i%100);
-  return conv;
+	static char conv[32];
+	int     i =
+	    (clubhdr.credspermin ==
+	     -1) ? thisuseronl.credspermin : clubhdr.credspermin;
+	sprintf (conv, "%d.%02d", i / 100, i % 100);
+	return conv;
 }
 
 
 void
-initecsubstvars()
+initecsubstvars ()
 {
-  struct substvar table []={
-    {"@CLUB@",sv_club,NULL},
-    {"@CLUBID@",sv_clubid,NULL},
-    {"@CLUBDESC@",sv_clubdesc,NULL},
-    {"@CLUBOP@",sv_clubop,NULL},
-    {"@CLUBCRDATE@",sv_clubcrdate,NULL},
-    {"@CLUBCRTIME@",sv_clubcrtime,NULL},
+	struct substvar table[] = {
+		{"@CLUB@", sv_club, NULL},
+		{"@CLUBID@", sv_clubid, NULL},
+		{"@CLUBDESC@", sv_clubdesc, NULL},
+		{"@CLUBOP@", sv_clubop, NULL},
+		{"@CLUBCRDATE@", sv_clubcrdate, NULL},
+		{"@CLUBCRTIME@", sv_clubcrtime, NULL},
 
-    {"@CLUBMSGS@",sv_clubmsgs,NULL},
-    {"@CLUBFILES@",sv_clubfiles,NULL},
-    {"@CLUBPER@",sv_clubper,NULL},
-    {"@CLUBBLTS@",sv_clubblts,NULL},
-    {"@CLUBW4APP@",sv_clubw4app,NULL},
+		{"@CLUBMSGS@", sv_clubmsgs, NULL},
+		{"@CLUBFILES@", sv_clubfiles, NULL},
+		{"@CLUBPER@", sv_clubper, NULL},
+		{"@CLUBBLTS@", sv_clubblts, NULL},
+		{"@CLUBW4APP@", sv_clubw4app, NULL},
 
-    {"@CLUBMSGLIFE@",sv_clubmsglife,NULL},
-    {"@CLUBPOSTCHG@",sv_clubpostchg,NULL},
-    {"@CLUBUPLCHG@",sv_clubuplchg,NULL},
-    {"@CLUBDNLCHG@",sv_clubdnlchg,NULL},
-    {"@CLUBRATE@",sv_clubrate,NULL},
-    {"",NULL,NULL}
-  };
-  
-  int i=0;
-  
-  while(table[i].varname[0]){
-    out_addsubstvar(table[i].varname,table[i].varcalc);
-    i++;
-  }
+		{"@CLUBMSGLIFE@", sv_clubmsglife, NULL},
+		{"@CLUBPOSTCHG@", sv_clubpostchg, NULL},
+		{"@CLUBUPLCHG@", sv_clubuplchg, NULL},
+		{"@CLUBDNLCHG@", sv_clubdnlchg, NULL},
+		{"@CLUBRATE@", sv_clubrate, NULL},
+		{"", NULL, NULL}
+	};
+
+	int     i = 0;
+
+	while (table[i].varname[0]) {
+		out_addsubstvar (table[i].varname, table[i].varcalc);
+		i++;
+	}
 }
+
+
+/* End of File */

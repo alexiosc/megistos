@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -33,10 +36,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -48,91 +49,109 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <bbs.h>
-#include "registry.h"
-#include "mbk_registry.h"
+#include <megistos/registry.h>
+#include <megistos/mbk_registry.h>
 
 
-static promptblock_t *regmsg=NULL;
-static int template [3][30];
+static promptblock_t *regmsg = NULL;
+static int template[3][30];
 
 
 /** The entry point to the global command */
 
 int
-__INIT_GCS__()
+__INIT_GCS__ ()
 {
-  struct stat st;
-  char fname[256], userid[32];
+	struct stat st;
+	char    fname[256], userid[32];
 
-  if(margc==2 && sameas(margv[0],"/r")){
-    if(regmsg==NULL){
-      int i,j;
-      regmsg=msg_open("registry");
-      for(i=0;i<3;i++)for(j=0;j<30;j++)
-	template[i][j]=msg_int(T1F1+i*30+j,0,255);
-    }
+	if (margc == 2 && sameas (margv[0], "/r")) {
+		if (regmsg == NULL) {
+			int     i, j;
 
-    msg_set(regmsg);
-    strcpy(userid,margv[1]);
-    usr_uidxref(userid,0);
-    if(!usr_exists(userid)){ 
-      prompt(REGERR);
-      msg_reset();
-      return 1;
-    }
-    sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
-    if(stat(fname,&st)){
-      prompt(REGERR);
-      msg_reset();
-      return 1;
-    }
+			regmsg = msg_open ("registry");
+			for (i = 0; i < 3; i++)
+				for (j = 0; j < 30; j++)
+					template[i][j] =
+					    msg_int (T1F1 + i * 30 + j, 0,
+						     255);
+		}
 
-    {
-      FILE *fp;
-      char *format[33];
-      struct registry registry;
-      int i,j,pos;
+		msg_set (regmsg);
+		strcpy (userid, margv[1]);
+		usr_uidxref (userid, 0);
+		if (!usr_exists (userid)) {
+			prompt (REGERR);
+			msg_reset ();
+			return 1;
+		}
+		sprintf (fname, "%s/%s", mkfname (REGISTRYDIR), userid);
+		if (stat (fname, &st)) {
+			prompt (REGERR);
+			msg_reset ();
+			return 1;
+		}
 
-      msg_set(regmsg);
-      memset(&registry,0,sizeof(registry));
+		{
+			FILE   *fp;
+			char   *format[33];
+			struct registry registry;
+			int     i, j, pos;
 
-      sprintf(fname,"%s/%s",mkfname(REGISTRYDIR),userid);
-      if((fp=fopen(fname,"r"))==NULL){
-	sprompt_other(othrshm,out_buffer,UIDERR);
-	usr_injoth(&othruseronl,out_buffer,0);
-	return 1;
-      }
+			msg_set (regmsg);
+			memset (&registry, 0, sizeof (registry));
 
-      if(fread(&registry,sizeof(struct registry),1,fp)!=1){
-	error_fatalsys("Unable to read registry %s",fname);
-      }
-      registry.template=registry.template%3;
-      fclose(fp);
+			sprintf (fname, "%s/%s", mkfname (REGISTRYDIR),
+				 userid);
+			if ((fp = fopen (fname, "r")) == NULL) {
+				sprompt_other (othrshm, out_buffer, UIDERR);
+				usr_injoth (&othruseronl, out_buffer, 0);
+				return 1;
+			}
 
-      format[0]=userid;
-      for(i=pos=0,j=1;i<30;pos+=template[registry.template][i++]+1){
-	if(template[registry.template][i])format[j++]=&registry.registry[pos];
-      }
-      format[j++]=registry.summary;
-      format[j]=NULL;
-      vsprintf(out_buffer,msg_get(T1LOOKUP+registry.template),format);
-      print(out_buffer);
-    }
-    
-    return 1;
-  } else if(margc==1 && sameas(margv[0],"/r")){
-    if(regmsg==NULL){
-      int i,j;
-      regmsg=msg_open("registry");
-      for(i=0;i<3;i++)for(j=0;j<30;j++)
-	template[i][j]=msg_int(T1F1+i*30+j,0,255);
-    }
+			if (fread (&registry, sizeof (struct registry), 1, fp)
+			    != 1) {
+				error_fatalsys ("Unable to read registry %s",
+						fname);
+			}
+			registry.template = registry.template % 3;
+			fclose (fp);
 
-    msg_set(regmsg);
-    prompt(REGHELP);
-    msg_reset();
-    return 1;
-  }
-  msg_reset();
-  return 0;
+			format[0] = userid;
+			for (i = pos = 0, j = 1; i < 30;
+			     pos += template[registry.template][i++] + 1) {
+				if (template[registry.template][i])
+					format[j++] = &registry.registry[pos];
+			}
+			format[j++] = registry.summary;
+			format[j] = NULL;
+			vsprintf (out_buffer,
+				  msg_get (T1LOOKUP + registry.template),
+				  format);
+			print (out_buffer);
+		}
+
+		return 1;
+	} else if (margc == 1 && sameas (margv[0], "/r")) {
+		if (regmsg == NULL) {
+			int     i, j;
+
+			regmsg = msg_open ("registry");
+			for (i = 0; i < 3; i++)
+				for (j = 0; j < 30; j++)
+					template[i][j] =
+					    msg_int (T1F1 + i * 30 + j, 0,
+						     255);
+		}
+
+		msg_set (regmsg);
+		prompt (REGHELP);
+		msg_reset ();
+		return 1;
+	}
+	msg_reset ();
+	return 0;
 }
+
+
+/* End of File */

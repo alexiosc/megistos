@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -53,10 +56,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,96 +68,116 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailer.h"
-#include "mbk_mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/mailer.h>
+#include <megistos/mbk_mailer.h>
 
 
-struct plugin *plugins=NULL;
-int            numplugins=0;
+struct plugin *plugins = NULL;
+int     numplugins = 0;
 
 
 void
-parseplugindef()
+parseplugindef ()
 {
-  FILE *fp;
-  struct plugin p;
-  int d=0, lines=0;
+	FILE   *fp;
+	struct plugin p;
+	int     d = 0, lines = 0;
 
-  if(plugins)free(plugins);
-  numplugins=0;
-  bzero(&p,sizeof(p));
+	if (plugins)
+		free (plugins);
+	numplugins = 0;
+	bzero (&p, sizeof (p));
 
-  if((fp=fopen(mkfname(PLUGINDEFFILE),"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",mkfname(PLUGINDEFFILE));
-  }
-
-  while(!feof(fp)){
-    char line[1024], *cp, keyword[256];
-    int n;
-
-    if(!fgets(line,sizeof(line),fp))break;
-    lines++;
-
-    if((cp=strrchr(line,'\n'))!=NULL)*cp=0;
-    for(cp=line;*cp&&isspace(*cp);cp++);
-    if(*cp=='#'||*cp==0)continue;
-
-    if(!sscanf(cp,"%s %n",keyword,&n))continue;
-
-    for(cp=&line[n];*cp&&isspace(*cp);cp++);
-
-    if(sameas(keyword,"plugin")){
-      strncpy(p.name,cp,NAMELEN);
-      p.name[NAMELEN-1]=0;
-    } else if(sameas(keyword,"descr")){
-      if(d>=NUMLANGUAGES){
-	error_fatal("Too many 'descr' keywords in %s line %d",
-	      mkfname(PLUGINDEFFILE),lines);
-      }
-      strncpy(p.descr[d],cp,DESCRLEN);
-      p.descr[d++][DESCRLEN-1]=0;
-    } else if(sameas(keyword,"flags")){
-      for(;*cp;cp++){
-	if(isspace(*cp))continue;
-	switch(toupper(*cp)){
-	case 'S':
-	  p.flags|=PLF_SETUP;
-	  break;
-	case 'U':
-	  p.flags|=PLF_UPLOAD;
-	  break;
-	case 'D':
-	  p.flags|=PLF_DOWNLOAD;
-	  break;
-	case 'R':
-	  p.flags|=PLF_REQMAN;
-	  break;
-	default:
-	  error_fatal("Bad flag %c in %s line %d",
-		*cp,mkfname(PLUGINDEFFILE),lines);
+	if ((fp = fopen (mkfname (PLUGINDEFFILE), "r")) == NULL) {
+		error_fatalsys ("Unable to open %s for reading.",
+				mkfname (PLUGINDEFFILE));
 	}
-      }
-    } else if(sameas(keyword,"end")){
-      int i;
-      struct plugin *pp=alcmem(sizeof(struct plugin)*++numplugins);
 
-      if(numplugins>=MAXPLUGINS){
-	error_fatal("Exceeded maximum of %d plugins.",MAXPLUGINS);
-      }
+	while (!feof (fp)) {
+		char    line[1024], *cp, keyword[256];
+		int     n;
 
-      if(numplugins>1){
-	memcpy(pp,plugins,sizeof(struct plugin)*(numplugins-1));
-	free(plugins);
-      }
-      plugins=pp;
-      for(i=1;i<NUMLANGUAGES;i++)if(!p.descr[i])strcpy(p.descr[i],p.descr[i-1]);
-      memcpy(&plugins[numplugins-1],&p,sizeof(struct plugin));
-      bzero(&p,sizeof(p));
-      d=0;
-    } else error_fatal("Unrecognised keyword %s in %s line %d.",
-		 keyword,mkfname(PLUGINDEFFILE),lines);
-  }
+		if (!fgets (line, sizeof (line), fp))
+			break;
+		lines++;
 
-  fclose(fp);
+		if ((cp = strrchr (line, '\n')) != NULL)
+			*cp = 0;
+		for (cp = line; *cp && isspace (*cp); cp++);
+		if (*cp == '#' || *cp == 0)
+			continue;
+
+		if (!sscanf (cp, "%s %n", keyword, &n))
+			continue;
+
+		for (cp = &line[n]; *cp && isspace (*cp); cp++);
+
+		if (sameas (keyword, "plugin")) {
+			strncpy (p.name, cp, NAMELEN);
+			p.name[NAMELEN - 1] = 0;
+		} else if (sameas (keyword, "descr")) {
+			if (d >= NUMLANGUAGES) {
+				error_fatal
+				    ("Too many 'descr' keywords in %s line %d",
+				     mkfname (PLUGINDEFFILE), lines);
+			}
+			strncpy (p.descr[d], cp, DESCRLEN);
+			p.descr[d++][DESCRLEN - 1] = 0;
+		} else if (sameas (keyword, "flags")) {
+			for (; *cp; cp++) {
+				if (isspace (*cp))
+					continue;
+				switch (toupper (*cp)) {
+				case 'S':
+					p.flags |= PLF_SETUP;
+					break;
+				case 'U':
+					p.flags |= PLF_UPLOAD;
+					break;
+				case 'D':
+					p.flags |= PLF_DOWNLOAD;
+					break;
+				case 'R':
+					p.flags |= PLF_REQMAN;
+					break;
+				default:
+					error_fatal
+					    ("Bad flag %c in %s line %d", *cp,
+					     mkfname (PLUGINDEFFILE), lines);
+				}
+			}
+		} else if (sameas (keyword, "end")) {
+			int     i;
+			struct plugin *pp =
+			    alcmem (sizeof (struct plugin) * ++numplugins);
+
+			if (numplugins >= MAXPLUGINS) {
+				error_fatal ("Exceeded maximum of %d plugins.",
+					     MAXPLUGINS);
+			}
+
+			if (numplugins > 1) {
+				memcpy (pp, plugins,
+					sizeof (struct plugin) * (numplugins -
+								  1));
+				free (plugins);
+			}
+			plugins = pp;
+			for (i = 1; i < NUMLANGUAGES; i++)
+				if (!p.descr[i])
+					strcpy (p.descr[i], p.descr[i - 1]);
+			memcpy (&plugins[numplugins - 1], &p,
+				sizeof (struct plugin));
+			bzero (&p, sizeof (p));
+			d = 0;
+		} else
+			error_fatal ("Unrecognised keyword %s in %s line %d.",
+				     keyword, mkfname (PLUGINDEFFILE), lines);
+	}
+
+	fclose (fp);
 }
+
+
+/* End of File */

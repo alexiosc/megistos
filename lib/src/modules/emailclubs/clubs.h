@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,9 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -98,12 +100,12 @@
 
 /* clubs.c */
 
-int defaultrate;
+int     defaultrate;
 
 
 /* clubwrite.c */
 
-void clubwrite();
+void    clubwrite ();
 
 
 /* clubread.c */
@@ -120,92 +122,93 @@ extern int savecounter;
 extern int lastkey;
 
 
-void showkeywords();
+void    showkeywords ();
 
-void clubread();
+void    clubread ();
 
-void scanmessages();
+void    scanmessages ();
 
-void keywordscan();
+void    keywordscan ();
 
-void fileapp();
+void    fileapp ();
 
 
 
 /* clubscan.c */
 
-void scanupdatemsg(struct message *msg,int read);
+void    scanupdatemsg (struct message *msg, int read);
 
-int scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode);
+int     scan4msg (int *msgno, int *sequencebroken, int targetnum, int dir,
+		  int mode);
 
 /*int scan4files(int *msgno, int *sequencebroken, int targetnum, int dir, int mode);*/
 
-char clubreadmenu(struct message *msg, char defopt);
+char    clubreadmenu (struct message *msg, char defopt);
 
-char clubheadermenu(struct message *msg, char defopt);
+char    clubheadermenu (struct message *msg, char defopt);
 
-int startscanning(int startmsg, int bdir);
+int     startscanning (int startmsg, int bdir);
 
-void scanupdatemsg(struct message *msg,int read);
+void    scanupdatemsg (struct message *msg, int read);
 
 
 
 /* clublist.c */
 
-void listmessages();
+void    listmessages ();
 
 
 /* qsc.c */
 
 struct lastread *uqsc;
 
-struct lastread *ustartqsc(char *uid);
+struct lastread *ustartqsc (char *uid);
 
-struct lastread *startqsc();
+struct lastread *startqsc ();
 
-struct lastread *getqsc();
+struct lastread *getqsc ();
 
-struct lastread *nextqsc();
+struct lastread *nextqsc ();
 
-struct lastread *prevqsc();
+struct lastread *prevqsc ();
 
-struct lastread *findqsc(char *club);
+struct lastread *findqsc (char *club);
 
-struct lastread *goqsc(char *club);
+struct lastread *goqsc (char *club);
 
-struct lastread *resetqsc();
+struct lastread *resetqsc ();
 
-void initialise();
+void    initialise ();
 
-int isfirstqsc();
+int     isfirstqsc ();
 
-int islastqsc();
+int     islastqsc ();
 
-void all(int add);
+void    all (int add);
 
-void addqsc(char *club, int lastmsg, int flags);
+void    addqsc (char *club, int lastmsg, int flags);
 
-int delqsc(char *club);
+int     delqsc (char *club);
 
-int killqsc(char *club);
+int     killqsc (char *club);
 
-int getlastread(char *club);
+int     getlastread (char *club);
 
-void setlastread(char *club, int msg);
+void    setlastread (char *club, int msg);
 
-void doneqsc();
+void    doneqsc ();
 
-void usaveqsc(char *uid);
+void    usaveqsc (char *uid);
 
-void saveqsc();
+void    saveqsc ();
 
-int quickscanmenu(struct message *msg);
+int     quickscanmenu (struct message *msg);
 
-void configurequickscan(int create);
+void    configurequickscan (int create);
 
-void doquickscan();
+void    doquickscan ();
 
-int qgoclub();
+int     qgoclub ();
 
 
 
@@ -214,20 +217,20 @@ int qgoclub();
 #define QSC_ADD 1
 #define QSC_DEL 0
 
-void globalqsc(int add, char *club);
+void    globalqsc (int add, char *club);
 
-void listclubs();
+void    listclubs ();
 
-void longlistclubs();
+void    longlistclubs ();
 
-void operations();
+void    operations ();
 
 
 /* networking.c */
 
 #ifdef HAVE_METABBS
 #ifdef __CLUBS_C
-void networking();
+void    networking ();
 #endif
 #endif
 
@@ -240,25 +243,28 @@ extern int threadmessage;
 
 extern char threadclub[16];
 
-void enterdefaultclub();
+void    enterdefaultclub ();
 
-void enterclub(char *club);
+void    enterclub (char *club);
 
-void showbanner();
+void    showbanner ();
 
-int checkinclub(char *club);
+int     checkinclub (char *club);
 
-int getclub(char *club, int pr, int err, int all);
+int     getclub (char *club, int pr, int err, int all);
 
-int thread(struct message *msg, char defopt);
+int     thread (struct message *msg, char defopt);
 
 
 /* clubop.c */
 
-char clubopmenu(struct message *msg);
+char    clubopmenu (struct message *msg);
 
 
 /* msgcnv.c */
 
-int msgcnv_main(int argc, char **argv);
+int     msgcnv_main (int argc, char **argv);
 
+
+
+/* End of File */

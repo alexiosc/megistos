@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,26 +51,25 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 /* bulletins.c */
 
 extern promptblock_t *msg, *clubmsg;
 
-extern int   entrykey;
-extern int   sopkey;
-extern int   flaxes;
-extern int   indsel;
-extern int   indspd;
-extern int   audins;
-extern int   auddel;
-extern int   audedt;
-extern int   audrd;
-extern int   askdef;
-extern int   ainsdef;
+extern int entrykey;
+extern int sopkey;
+extern int flaxes;
+extern int indsel;
+extern int indspd;
+extern int audins;
+extern int auddel;
+extern int audedt;
+extern int audrd;
+extern int askdef;
+extern int ainsdef;
 extern char *dnldesc;
 
 
@@ -80,92 +82,92 @@ extern char *dnldesc;
 
 /* db.c */
 
-void dbopen();
+void    dbopen ();
 
-void dbclose();
+void    dbclose ();
 
-int dbgetfirst();
+int     dbgetfirst ();
 
-int dbgetlast();
+int     dbgetlast ();
 
-int dbins(struct bltidx *blt);
+int     dbins (struct bltidx *blt);
 
-int dbexists(char *area, char *fname);
+int     dbexists (char *area, char *fname);
 
-void dbget(struct bltidx *blt);
+void    dbget (struct bltidx *blt);
 
-int dblistfind(char *club, int num);
+int     dblistfind (char *club, int num);
 
-int dbfound();
+int     dbfound ();
 
-int dblistfirst();
+int     dblistfirst ();
 
-int dblistnext();
+int     dblistnext ();
 
-int dblistlast();
+int     dblistlast ();
 
-int dblistprev();
+int     dblistprev ();
 
-int dbnumexists(int num);
+int     dbnumexists (int num);
 
-int dbchkambiguity(char *fname);
+int     dbchkambiguity (char *fname);
 
-int dbupdate(struct bltidx *blt);
+int     dbupdate (struct bltidx *blt);
 
-int dbdelete();
+int     dbdelete ();
 
 
 /* clubs.c */
 
 extern char club[16];
 
-void selectclub();
+void    selectclub ();
 
-void listclubs();
+void    listclubs ();
 
 
 /* insert.c */
 
-int getmsgheader(char *club, int msgno,struct message *msg);
+int     getmsgheader (char *club, int msgno, struct message *msg);
 
-void insertblt();
+void    insertblt ();
 
-int extins(char *msgspec);
+int     extins (char *msgspec);
 
 
 /* list.c */
 
-void list(int full);
+void    list (int full);
 
-void listambiguous(char *fname);
+void    listambiguous (char *fname);
 
 
 /* read.c */
 
-int getblt(int pr, struct bltidx *blt);
+int     getblt (int pr, struct bltidx *blt);
 
-void bltread();
+void    bltread ();
 
-void bltdnl();
+void    bltdnl ();
 
-void showblt(struct bltidx *blt);
+void    showblt (struct bltidx *blt);
 
 
 /* misc.c */
 
-int getclub(char *club, int pr, int err, int def, char *defval);
+int     getclub (char *club, int pr, int err, int def, char *defval);
 
-int getaccess(char *club);
+int     getaccess (char *club);
 
-int getdescr(char *s, int pr);
+int     getdescr (char *s, int pr);
 
-void bltinfo(struct bltidx *blt);
+void    bltinfo (struct bltidx *blt);
 
 
 
 /* substvars.c */
 
-void initbltsubstvars();
+void    initbltsubstvars ();
 
 
 
@@ -174,47 +176,53 @@ void initbltsubstvars();
 extern struct clubheader clubhdr;
 
 
-int findclub(char *club);
+int     findclub (char *club);
 
-int getclubid();
+int     getclubid ();
 
-int loadclubhdr(char *club);
+int     loadclubhdr (char *club);
 
-int saveclubhdr(struct clubheader *hdr);
+int     saveclubhdr (struct clubheader *hdr);
 
-int getdefaultax(useracc_t *uacc, char *club);
+int     getdefaultax (useracc_t * uacc, char *club);
 
-int getclubax(useracc_t *uacc, char *club);
+int     getclubax (useracc_t * uacc, char *club);
 
-void setclubax(useracc_t *uacc, char *club, int ax);
+void    setclubax (useracc_t * uacc, char *club, int ax);
 
 
 /* delete.c */
 
-int checklocks(struct bltidx *blt);
-void bltdel();
+int     checklocks (struct bltidx *blt);
+void    bltdel ();
 
 
 /* search.c */
 
-void keysearch();
+void    keysearch ();
 
 
 /* edit.c */
 
-void bltedt();
+void    bltedt ();
 
 
 /* autoins.c */
 
-void autoins();
+void    autoins ();
 
 
 /* login.c */
 
-int login(int argc, char **argv);
+int     login (int argc, char **argv);
 
 
 /* cleanup.c */
 
-int cleanup(int argc, char **argv);
+int     cleanup (int argc, char **argv);
+
+
+/* End of File */
+
+
+/* End of File */

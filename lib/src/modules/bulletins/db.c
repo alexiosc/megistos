@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -29,10 +32,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -43,188 +44,206 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "typhoon.h"
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/typhoon.h>
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 void
-dbopen()
+dbopen ()
 {
-  d_dbfpath(mkfname(BLTDBDIR));
-  d_dbdpath(mkfname(BLTDBDIR));
-  if(d_open("bltidx","s")!=S_OKAY){
-    error_fatal("Unable to open Bulletin database (db_status %d)",
-	  db_status);
-  }
-}
-
-
-void
-dbclose()
-{
-  d_close();
-}
-
-
-int
-dbgetfirst()
-{
-  d_keyfrst(NUM);
-  if(db_status==S_OKAY){
-    int res;
-    d_keyread(&res);
-    if(db_status==S_OKAY)return res;
-  } else if(db_status==S_NOTFOUND)return 0;
-
-  error_fatal("Freak error (db_status=%d), argh argh.",db_status);
-  return -1; /* just to get rid of the warning */
-}
-
-
-int
-dbgetlast()
-{
-  d_keylast(NUM);
-  if(db_status==S_OKAY){
-    int res;
-    d_keyread(&res);
-    if(db_status==S_OKAY)return res;
-  } else if(db_status==S_NOTFOUND)return 0;
-
-  error_fatal("Freak error (db_status=%d), argh argh.",db_status);
-  return -1; /* just to get rid of the warning */
-}
-
-
-int
-dbins(struct bltidx *blt)
-{
-  d_fillnew(BLTIDX,blt);
-  /*if(db_status==S_OKAY)return;*/
-  /*error_fatal("Unable to insert new bulletin (db_status=%d).",db_status);*/
-  return db_status==S_OKAY;
-}
-
-
-int
-dbexists(char *area, char *fname)
-{
-  struct fnamec key;
-
-  strcpy(key.area,area);
-  strcpy(key.fname,fname);
-  d_keyfind(FNAMEC,&key);
-  return db_status==S_OKAY;
+	d_dbfpath (mkfname (BLTDBDIR));
+	d_dbdpath (mkfname (BLTDBDIR));
+	if (d_open ("bltidx", "s") != S_OKAY) {
+		error_fatal ("Unable to open Bulletin database (db_status %d)",
+			     db_status);
+	}
 }
 
 
 void
-dbget(struct bltidx *blt)
+dbclose ()
 {
-  d_recread(blt);
-  if(db_status!=S_OKAY){
-    error_fatal("Unable to get current record (db_status=%d).",db_status);
-  }
+	d_close ();
 }
 
 
 int
-dblistfind(char *club, int num)
+dbgetfirst ()
 {
-  struct numc numc;
-  strcpy(numc.area,club);
-  numc.num=1;
-  d_keyfind(NUMC,&numc);
-  if(db_status!=S_OKAY)d_keynext(NUMC);
-  return db_status==S_OKAY;
+	d_keyfrst (NUM);
+	if (db_status == S_OKAY) {
+		int     res;
+
+		d_keyread (&res);
+		if (db_status == S_OKAY)
+			return res;
+	} else if (db_status == S_NOTFOUND)
+		return 0;
+
+	error_fatal ("Freak error (db_status=%d), argh argh.", db_status);
+	return -1;		/* just to get rid of the warning */
 }
 
 
 int
-dbfound()
+dbgetlast ()
 {
-  return db_status==S_OKAY;
+	d_keylast (NUM);
+	if (db_status == S_OKAY) {
+		int     res;
+
+		d_keyread (&res);
+		if (db_status == S_OKAY)
+			return res;
+	} else if (db_status == S_NOTFOUND)
+		return 0;
+
+	error_fatal ("Freak error (db_status=%d), argh argh.", db_status);
+	return -1;		/* just to get rid of the warning */
 }
 
 
 int
-dblistfirst()
+dbins (struct bltidx *blt)
 {
-  d_keyfrst(NUMC);
-  return db_status==S_OKAY;
+	d_fillnew (BLTIDX, blt);
+	/*if(db_status==S_OKAY)return; */
+	/*error_fatal("Unable to insert new bulletin (db_status=%d).",db_status); */
+	return db_status == S_OKAY;
 }
 
 
 int
-dblistlast()
+dbexists (char *area, char *fname)
 {
-  d_keylast(NUMC);
-  return db_status==S_OKAY;
+	struct fnamec key;
+
+	strcpy (key.area, area);
+	strcpy (key.fname, fname);
+	d_keyfind (FNAMEC, &key);
+	return db_status == S_OKAY;
+}
+
+
+void
+dbget (struct bltidx *blt)
+{
+	d_recread (blt);
+	if (db_status != S_OKAY) {
+		error_fatal ("Unable to get current record (db_status=%d).",
+			     db_status);
+	}
 }
 
 
 int
-dblistnext()
+dblistfind (char *club, int num)
 {
-  d_keynext(NUMC);
-  return db_status==S_OKAY;
+	struct numc numc;
+
+	strcpy (numc.area, club);
+	numc.num = 1;
+	d_keyfind (NUMC, &numc);
+	if (db_status != S_OKAY)
+		d_keynext (NUMC);
+	return db_status == S_OKAY;
 }
 
 
 int
-dblistprev()
+dbfound ()
 {
-  d_keyprev(NUMC);
-  return db_status==S_OKAY;
+	return db_status == S_OKAY;
 }
 
 
 int
-dbnumexists(int num)
+dblistfirst ()
 {
-  d_keyfind(NUM,&num);
-  return db_status==S_OKAY;
+	d_keyfrst (NUMC);
+	return db_status == S_OKAY;
 }
 
 
 int
-dbchkambiguity(char *fname)
+dblistlast ()
 {
-  struct fnamec key;
-
-  strcpy(key.fname,fname);
-  strcpy(key.area,"");
-
-  d_keyfind(FNAMEC,&key);
-  if(db_status!=S_OKAY)d_keynext(FNAMEC);
-  d_keyread(&key);
-  if(!sameas(key.fname,fname))return 0;
-  if(db_status!=S_OKAY)return 0;
-
-  d_keynext(FNAMEC);
-  if(db_status!=S_OKAY)return 1;
-
-  d_keyread(&key);
-  if(!sameas(key.fname,fname))return 1;
-  return 2;
+	d_keylast (NUMC);
+	return db_status == S_OKAY;
 }
 
 
 int
-dbupdate(struct bltidx *blt)
+dblistnext ()
 {
-  if(!dbexists(blt->area,blt->fname))return 0;
-  d_recwrite(blt);
-  return db_status==S_OKAY;
+	d_keynext (NUMC);
+	return db_status == S_OKAY;
 }
 
 
 int
-dbdelete()
+dblistprev ()
 {
-  d_delete();
-  return db_status==S_OKAY;
+	d_keyprev (NUMC);
+	return db_status == S_OKAY;
 }
+
+
+int
+dbnumexists (int num)
+{
+	d_keyfind (NUM, &num);
+	return db_status == S_OKAY;
+}
+
+
+int
+dbchkambiguity (char *fname)
+{
+	struct fnamec key;
+
+	strcpy (key.fname, fname);
+	strcpy (key.area, "");
+
+	d_keyfind (FNAMEC, &key);
+	if (db_status != S_OKAY)
+		d_keynext (FNAMEC);
+	d_keyread (&key);
+	if (!sameas (key.fname, fname))
+		return 0;
+	if (db_status != S_OKAY)
+		return 0;
+
+	d_keynext (FNAMEC);
+	if (db_status != S_OKAY)
+		return 1;
+
+	d_keyread (&key);
+	if (!sameas (key.fname, fname))
+		return 1;
+	return 2;
+}
+
+
+int
+dbupdate (struct bltidx *blt)
+{
+	if (!dbexists (blt->area, blt->fname))
+		return 0;
+	d_recwrite (blt);
+	return db_status == S_OKAY;
+}
+
+
+int
+dbdelete ()
+{
+	d_delete ();
+	return db_status == S_OKAY;
+}
+
+
+/* End of File */

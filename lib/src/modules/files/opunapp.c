@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,55 +55,66 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static int
-traverseunapp(struct libidx *l)
+traverseunapp (struct libidx *l)
 {
-  char c;
+	char    c;
 
-  if(read(fileno(stdin),&c,1)&&
-     ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))return 0;
-  if(fmt_lastresult==PAUSE_QUIT)return 0;
+	if (read (fileno (stdin), &c, 1) &&
+	    ((c == 13) || (c == 10) || (c == 27) || (c == 15) || (c == 3)))
+		return 0;
+	if (fmt_lastresult == PAUSE_QUIT)
+		return 0;
 
-  if(!islibop(&library))return 1;
-  else {
-    struct libidx child, otherchild;
-    struct fileidx f;
-    int res;
+	if (!islibop (&library))
+		return 1;
+	else {
+		struct libidx child, otherchild;
+		struct fileidx f;
+		int     res;
 
-    /* Check if there are any unapproved files in the library. We
-       don't even mention libraries without unapproved files here. */
+		/* Check if there are any unapproved files in the library. We
+		   don't even mention libraries without unapproved files here. */
 
-    if(filegetfirst(l->libnum,&f,0)){
-      struct libidx tmp;
-      memcpy(&tmp,&library,sizeof(tmp));
-      memcpy(&library,l,sizeof(library));
-      res=filelisting(0);	/* Show the library's unapproved files */
-      memcpy(&library,&tmp,sizeof(library));
-      if(!res)return 0;
-      inp_nonblock();		/* filelisting() restores blocking mode */
-    }
+		if (filegetfirst (l->libnum, &f, 0)) {
+			struct libidx tmp;
 
-    res=libgetchild(l->libnum,"",&otherchild);
-    while(res){
-      memcpy(&child,&otherchild,sizeof(child));
-      res=libgetchild(l->libnum,child.keyname,&otherchild);
-      if(!traverseunapp(&child))return 0;
-    }
-  }
+			memcpy (&tmp, &library, sizeof (tmp));
+			memcpy (&library, l, sizeof (library));
+			res = filelisting (0);	/* Show the library's unapproved files */
+			memcpy (&library, &tmp, sizeof (library));
+			if (!res)
+				return 0;
+			inp_nonblock ();	/* filelisting() restores blocking mode */
+		}
 
-  return 1;
+		res = libgetchild (l->libnum, "", &otherchild);
+		while (res) {
+			memcpy (&child, &otherchild, sizeof (child));
+			res =
+			    libgetchild (l->libnum, child.keyname,
+					 &otherchild);
+			if (!traverseunapp (&child))
+				return 0;
+		}
+	}
+
+	return 1;
 }
 
 
 void
-op_listunapp()
+op_listunapp ()
 {
-  inp_nonblock();
-  traverseunapp(&library);
-  inp_block();
+	inp_nonblock ();
+	traverseunapp (&library);
+	inp_block ();
 }
+
+
+/* End of File */

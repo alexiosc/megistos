@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -65,248 +66,286 @@ const char *__RCS=RCS_VER;
 #define WANT_STRING_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "remsys.h"
+#include <megistos/bbs.h>
+#include <megistos/remsys.h>
 
-#include "mbk_remsys.h"
+#include <megistos/mbk_remsys.h>
 
 
 void
-listclasses()
+listclasses ()
 {
-  int i;
+	int     i;
 
-  prompt(CLSLSTHDR,NULL);
-  for(i=0;i<cls_count;i++)prompt(CLSLSTTAB,cls_classes[i].name);
-  prompt(CLSLSTEND,NULL);
+	prompt (CLSLSTHDR, NULL);
+	for (i = 0; i < cls_count; i++)
+		prompt (CLSLSTTAB, cls_classes[i].name);
+	prompt (CLSLSTEND, NULL);
 }
 
 
 
 int
-getclassname(class,msg,existing,err,def,defval)
-char *class,*defval;
-int  msg,existing,err,def;
+getclassname (class, msg, existing, err, def, defval)
+char   *class, *defval;
+int     msg, existing, err, def;
 {
-  char newclass[10];
-  int i, ok=0;
-  while(!ok){
-    memset(newclass,0,10);
-    if(cnc_more())strncpy(newclass,cnc_word(),10);
-    else {
-      prompt(msg,NULL);
-      if(def){
-	sprintf(out_buffer,msg_get(def),defval);
-	print(out_buffer,NULL);
-      }
-      inp_get(0);
-      if(margc)strncpy(newclass,margv[0],10);
-      else if(def && !inp_reprompt()){
-	strncpy(class,defval,10);
+	char    newclass[10];
+	int     i, ok = 0;
+
+	while (!ok) {
+		memset (newclass, 0, 10);
+		if (cnc_more ())
+			strncpy (newclass, cnc_word (), 10);
+		else {
+			prompt (msg, NULL);
+			if (def) {
+				sprintf (out_buffer, msg_get (def), defval);
+				print (out_buffer, NULL);
+			}
+			inp_get (0);
+			if (margc)
+				strncpy (newclass, margv[0], 10);
+			else if (def && !inp_reprompt ()) {
+				strncpy (class, defval, 10);
+				return 1;
+			} else
+				cnc_end ();
+		}
+		if (sameas (newclass, "x"))
+			return 0;
+		if (newclass[0] == '?') {
+			newclass[0] = 0;
+			listclasses ();
+			continue;
+		}
+		if (!newclass[0]) {
+			cnc_end ();
+			continue;
+		}
+		ok = (existing == 0);
+		for (i = 0; newclass[i]; i++)
+			newclass[i] = toupper (newclass[i]);
+		for (i = 0; i < cls_count; i++) {
+			if (sameas (newclass, cls_classes[i].name)) {
+				if (existing)
+					ok = 1;
+				else {
+					cnc_end ();
+					sprintf (out_buffer, msg_get (err),
+						 newclass);
+					print (out_buffer);
+					ok = 0;
+					break;
+				}
+			}
+		}
+		if (existing && !ok) {
+			sprintf (out_buffer, msg_get (err), newclass);
+			print (out_buffer);
+			cnc_end ();
+		}
+	}
+	strncpy (class, newclass, 10);
 	return 1;
-      } else cnc_end();
-    }
-    if(sameas(newclass,"x"))return 0;
-    if(newclass[0]=='?'){
-      newclass[0]=0;
-      listclasses();
-      continue;
-    }
-    if(!newclass[0]){
-      cnc_end();
-      continue;
-    }
-    ok=(existing==0);
-    for(i=0;newclass[i];i++)newclass[i]=toupper(newclass[i]);
-    for(i=0;i<cls_count;i++){
-      if(sameas(newclass,cls_classes[i].name)){
-	if(existing) ok=1;
-	else {
-	  cnc_end();
-	  sprintf(out_buffer,msg_get(err),newclass);
-	  print(out_buffer);
-	  ok=0;
-	  break;
-	}
-      }
-    }
-    if(existing && !ok){
-      sprintf(out_buffer,msg_get(err),newclass);
-      print(out_buffer);
-      cnc_end();
-    }
-  }
-  strncpy(class,newclass,10);
-  return 1;
 }
 
 
 int
-keyed(long *k)
+keyed (long *k)
 {
-  long keys[KEYLENGTH];
-  int shown=0;
-  int key;
-  char c;
+	long    keys[KEYLENGTH];
+	int     shown = 0;
+	int     key;
+	char    c;
 
-  memcpy(keys,k,KEYLENGTH*sizeof(long));
-  for(;;){
-    if(!shown){
-      char s1[65]={0},s2[65]={0};
-      int i;
-      
-      for(i=0;i<64;i++){
-	s1[i]=(keys[i/32]&(1<<(i%32)))?'X':'-';
-	s2[i]=(keys[(i+64)/32]&(1<<((i+64)%32)))?'X':'-';
-      }
-      prompt(RSKEYSTAB,s1,s2,NULL);
-      shown=1;
-    }
-    
-    key=-1;
-    for(;;){
-      if((c=cnc_more())!=0){
-	if(toupper(c)=='X')return 0;
-	key=cnc_int();
-      } else {
-	prompt(RSKEYSASK,NULL);
-	inp_get(0);
-	key=atoi(margv[0]);
-	if(!margc || inp_reprompt()){
-	  cnc_end();
-	  continue;
-	} else if(inp_isX(margv[0]))return 0;
-	else if(sameas(margv[0],"OK")){
-	  memcpy(k,keys,KEYLENGTH*sizeof(long));
-	  return 1;
-	}else if(sameas(margv[0],"ON")){
-	  int i;
-	  for(i=0;i<KEYLENGTH;i++)keys[i]=-1L;
-	  shown=0;
-	  key=-1;
-	  break;
-	}else if(sameas(margv[0],"OFF")){
-	  int i;
-	  for(i=0;i<KEYLENGTH;i++)keys[i]=0L;
-	  shown=0;
-	  key=-1;
-	  break;
-	}else if(sameas(margv[0],"?")){
-	  key=-1;
-	  shown=0;
-	  break;
+	memcpy (keys, k, KEYLENGTH * sizeof (long));
+	for (;;) {
+		if (!shown) {
+			char    s1[65] = { 0 }, s2[65] = {
+			0};
+			int     i;
+
+			for (i = 0; i < 64; i++) {
+				s1[i] =
+				    (keys[i / 32] & (1 << (i % 32))) ? 'X' :
+				    '-';
+				s2[i] =
+				    (keys[(i + 64) / 32] &
+				     (1 << ((i + 64) % 32))) ? 'X' : '-';
+			}
+			prompt (RSKEYSTAB, s1, s2, NULL);
+			shown = 1;
+		}
+
+		key = -1;
+		for (;;) {
+			if ((c = cnc_more ()) != 0) {
+				if (toupper (c) == 'X')
+					return 0;
+				key = cnc_int ();
+			} else {
+				prompt (RSKEYSASK, NULL);
+				inp_get (0);
+				key = atoi (margv[0]);
+				if (!margc || inp_reprompt ()) {
+					cnc_end ();
+					continue;
+				} else if (inp_isX (margv[0]))
+					return 0;
+				else if (sameas (margv[0], "OK")) {
+					memcpy (k, keys,
+						KEYLENGTH * sizeof (long));
+					return 1;
+				} else if (sameas (margv[0], "ON")) {
+					int     i;
+
+					for (i = 0; i < KEYLENGTH; i++)
+						keys[i] = -1L;
+					shown = 0;
+					key = -1;
+					break;
+				} else if (sameas (margv[0], "OFF")) {
+					int     i;
+
+					for (i = 0; i < KEYLENGTH; i++)
+						keys[i] = 0L;
+					shown = 0;
+					key = -1;
+					break;
+				} else if (sameas (margv[0], "?")) {
+					key = -1;
+					shown = 0;
+					break;
+				}
+			}
+			if (key < 1 || key > 128) {
+				cnc_end ();
+				prompt (NUMERR, 1, 128, NULL);
+			} else
+				break;
+		}
+
+		if (key >= 1 && key <= 128) {
+			key--;
+			keys[key / 32] ^= (1 << (key % 32));
+			prompt (RSKEYSON +
+				((keys[key / 32] & (1 << (key % 32))) == 0),
+				key + 1, NULL);
+		}
 	}
-      }
-      if(key<1 || key>128){
-	cnc_end();
-	prompt(NUMERR,1,128,NULL);
-      }else break;
-    }
-    
-    if(key>=1 && key<=128){
-      key--;
-      keys[key/32]^=(1<<(key%32));
-      prompt(RSKEYSON+((keys[key/32]&(1<<(key%32)))==0),key+1,NULL);
-    }
-  }
 }
 
 
 void
-rsys_classed()
+rsys_classed ()
 {
-  char command[256];
+	char    command[256];
 
-  sprintf(command,"%s/%s",mkfname(BINDIR),"classed");
-  runmodule(command);
+	sprintf (command, "%s/%s", mkfname (BINDIR), "classed");
+	runmodule (command);
 }
 
 
 void
-rsys_class()
+rsys_class ()
 {
-  int       getclassname();
-  char      userid[24], class[10];
-  useracc_t usracc, *uacc=&usracc;
+	int     getclassname ();
+	char    userid[24], class[10];
+	useracc_t usracc, *uacc = &usracc;
 
-  if(!get_userid(userid,RSCLASSWHO,UNKUID,0,NULL,0))return;
+	if (!get_userid (userid, RSCLASSWHO, UNKUID, 0, NULL, 0))
+		return;
 
-  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
-  else uacc=&othruseracc;
-  
-  if(!cnc_more())prompt(RSCLASSREP,uacc->userid,uacc->curclss);
+	if (!usr_insys (userid, 0))
+		usr_loadaccount (userid, uacc);
+	else
+		uacc = &othruseracc;
 
-  if(!getclassname(class,RSCLASSCLS,1,RSCLASSERR,0,""))return;
+	if (!cnc_more ())
+		prompt (RSCLASSREP, uacc->userid, uacc->curclss);
 
-  if(!usr_exists(userid)){
-    prompt(RSCLASSDEL,NULL);
-    return;
-  } else if (!usr_insys(userid,0)) {
-    useracc_t temp;
-    char oldclass[32];
+	if (!getclassname (class, RSCLASSCLS, 1, RSCLASSERR, 0, ""))
+		return;
 
-    usr_loadaccount(userid,&temp);
+	if (!usr_exists (userid)) {
+		prompt (RSCLASSDEL, NULL);
+		return;
+	} else if (!usr_insys (userid, 0)) {
+		useracc_t temp;
+		char    oldclass[32];
 
-    strcpy(oldclass,temp.curclss);
-    strncpy(temp.curclss,class,sizeof(temp.curclss));
-    strncpy(temp.tempclss,temp.curclss,sizeof(temp.tempclss));
-    temp.classdays=0;
-    audit(getenv("CHANNEL"),AUDIT(NEWCLSS),temp.userid,oldclass,
-	  temp.curclss);
+		usr_loadaccount (userid, &temp);
 
-    usr_saveaccount(&temp);
-  } else {
-    char oldclass[32];
+		strcpy (oldclass, temp.curclss);
+		strncpy (temp.curclss, class, sizeof (temp.curclss));
+		strncpy (temp.tempclss, temp.curclss, sizeof (temp.tempclss));
+		temp.classdays = 0;
+		audit (getenv ("CHANNEL"), AUDIT (NEWCLSS), temp.userid,
+		       oldclass, temp.curclss);
 
-    strcpy(oldclass,uacc->curclss);
-    strncpy(uacc->curclss,class,sizeof(uacc->tempclss));
-    strncpy(uacc->tempclss,uacc->curclss,sizeof(uacc->tempclss));
-    uacc->classdays=0;
+		usr_saveaccount (&temp);
+	} else {
+		char    oldclass[32];
 
-    audit(getenv("CHANNEL"),AUDIT(NEWCLSS),uacc->userid,oldclass,
-	  uacc->curclss);
+		strcpy (oldclass, uacc->curclss);
+		strncpy (uacc->curclss, class, sizeof (uacc->tempclss));
+		strncpy (uacc->tempclss, uacc->curclss,
+			 sizeof (uacc->tempclss));
+		uacc->classdays = 0;
 
-    sprompt_other(othrshm,out_buffer,RSCLASSNOT,uacc->curclss);
-    if(usr_injoth(&othruseronl,out_buffer,0))prompt(NOTIFIED,uacc->userid);
-  }
-  prompt(RSCLASSOK,NULL);
+		audit (getenv ("CHANNEL"), AUDIT (NEWCLSS), uacc->userid,
+		       oldclass, uacc->curclss);
+
+		sprompt_other (othrshm, out_buffer, RSCLASSNOT, uacc->curclss);
+		if (usr_injoth (&othruseronl, out_buffer, 0))
+			prompt (NOTIFIED, uacc->userid);
+	}
+	prompt (RSCLASSOK, NULL);
 }
 
 
 void
-rsys_keys()
+rsys_keys ()
 {
-  int       keyed();
-  char      userid[24];
-  useracc_t usracc, *uacc=&usracc;
-  long      keys[KEYLENGTH];
+	int     keyed ();
+	char    userid[24];
+	useracc_t usracc, *uacc = &usracc;
+	long    keys[KEYLENGTH];
 
-  if(!get_userid(userid,RSKEYSWHO,UNKUID,0,NULL,0))return;
-  if(sameas(userid,SYSOP)){
-    prompt(RSKEYSSYS,NULL);
-    return;
-  }
+	if (!get_userid (userid, RSKEYSWHO, UNKUID, 0, NULL, 0))
+		return;
+	if (sameas (userid, SYSOP)) {
+		prompt (RSKEYSSYS, NULL);
+		return;
+	}
 
-  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
-  else uacc=&othruseracc;
+	if (!usr_insys (userid, 0))
+		usr_loadaccount (userid, uacc);
+	else
+		uacc = &othruseracc;
 
-  memcpy(keys,uacc->keys,sizeof(keys));
-  if(!keyed(keys))return;
+	memcpy (keys, uacc->keys, sizeof (keys));
+	if (!keyed (keys))
+		return;
 
-  if(!usr_exists(userid)){
-    prompt(RSKEYSDEL,NULL);
-    return;
-  } else if (!usr_insys(userid,0)) {
-    useracc_t temp;
+	if (!usr_exists (userid)) {
+		prompt (RSKEYSDEL, NULL);
+		return;
+	} else if (!usr_insys (userid, 0)) {
+		useracc_t temp;
 
-    usr_loadaccount(userid,&temp);
-    memcpy(temp.keys,keys,sizeof(temp.keys));
-    usr_saveaccount(&temp);
-  } else {
-    memcpy(uacc->keys,keys,sizeof(uacc->keys));
-  }
-  prompt(RSKEYSOK,NULL);
+		usr_loadaccount (userid, &temp);
+		memcpy (temp.keys, keys, sizeof (temp.keys));
+		usr_saveaccount (&temp);
+	} else {
+		memcpy (uacc->keys, keys, sizeof (uacc->keys));
+	}
+	prompt (RSKEYSOK, NULL);
 }
 
 
 
+
+
+/* End of File */

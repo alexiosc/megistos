@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -52,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,52 +68,59 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 int
-broadcastchnall(char *curchannel, char *(*fx)(struct chanusr *u), int all)
+broadcastchnall (char *curchannel, char *(*fx) (struct chanusr * u), int all)
 {
-  struct chanusr *u;
-  int count=0;
+	struct chanusr *u;
+	int     count = 0;
 
-  if(!begscan(curchannel,TSM_PRESENT))return -1;
+	if (!begscan (curchannel, TSM_PRESENT))
+		return -1;
 
-  for(;;){
-    if((u=getscan())==NULL)break;
-    if((u->flags&CUF_PRESENT) &&
-       usr_insys(u->userid,0)&&
-       (all||strcmp(thisuseracc.userid,u->userid))){
-      
-      char *buf;
-      
-      if(othruseronl.flags&OLF_BUSY)continue;
-      if(!(othruseronl.flags&OLF_INTELECON))continue;
-      
-      if((othruseronl.flags&OLF_INVISIBLE)==0)count++;
-      
-      if((buf=fx(u))!=NULL)usr_injoth(&othruseronl,buf,0);
-    }
-  }
-  
-  endscan();
+	for (;;) {
+		if ((u = getscan ()) == NULL)
+			break;
+		if ((u->flags & CUF_PRESENT) &&
+		    usr_insys (u->userid, 0) &&
+		    (all || strcmp (thisuseracc.userid, u->userid))) {
 
-  return count;
+			char   *buf;
+
+			if (othruseronl.flags & OLF_BUSY)
+				continue;
+			if (!(othruseronl.flags & OLF_INTELECON))
+				continue;
+
+			if ((othruseronl.flags & OLF_INVISIBLE) == 0)
+				count++;
+
+			if ((buf = fx (u)) != NULL)
+				usr_injoth (&othruseronl, buf, 0);
+		}
+	}
+
+	endscan ();
+
+	return count;
 }
 
 
 int
-broadcastchn(char *curchannel, char *(*fx)(struct chanusr *u))
+broadcastchn (char *curchannel, char *(*fx) (struct chanusr * u))
 {
-  return broadcastchnall(curchannel, fx, 0);
+	return broadcastchnall (curchannel, fx, 0);
 }
 
 
-int broadcast(char *(*fx)(struct chanusr *u))
+int
+broadcast (char *(*fx) (struct chanusr * u))
 {
-  return broadcastchnall(curchannel,fx,0);
+	return broadcastchnall (curchannel, fx, 0);
 }
 
 
@@ -121,81 +129,90 @@ static char tmp[16384];
 
 
 static char *
-fx_msg(struct chanusr *u)
+fx_msg (struct chanusr *u)
 {
-  tmp[0]=out_buffer[0]=0;
-  sprompt_other(othrshm,tmp,TDELIM);
-  sprompt_other(othrshm,out_buffer,fxprompt,
-		msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
-			     othruseracc.language-1),
-		thisuseracc.userid);
-  strcat(tmp,out_buffer);
-  return tmp;
+	tmp[0] = out_buffer[0] = 0;
+	sprompt_other (othrshm, tmp, TDELIM);
+	sprompt_other (othrshm, out_buffer, fxprompt,
+		       msg_getunitl (SEXM1, thisuseracc.sex == USX_MALE,
+				     othruseracc.language - 1),
+		       thisuseracc.userid);
+	strcat (tmp, out_buffer);
+	return tmp;
 }
 
 
 static char *
-fx_enter(struct chanusr *u)
+fx_enter (struct chanusr *u)
 {
-  tmp[0]=out_buffer[0]=0;
-  sprompt_other(othrshm,tmp,TDELIM);
+	tmp[0] = out_buffer[0] = 0;
+	sprompt_other (othrshm, tmp, TDELIM);
 
-  if(tlcu.entrystg[0]){
-    sprompt_other(othrshm,out_buffer,ENTEXTS,getcolour(),tlcu.entrystg);
-    strcat(tmp,out_buffer);
-  } else {
-    sprompt_other(othrshm,out_buffer,fxprompt,
-		  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
-			       othruseracc.language-1),
-		  thisuseracc.userid);
-    strcat(tmp,out_buffer);
-  }
-  return tmp;
+	if (tlcu.entrystg[0]) {
+		sprompt_other (othrshm, out_buffer, ENTEXTS, getcolour (),
+			       tlcu.entrystg);
+		strcat (tmp, out_buffer);
+	} else {
+		sprompt_other (othrshm, out_buffer, fxprompt,
+			       msg_getunitl (SEXM1,
+					     thisuseracc.sex == USX_MALE,
+					     othruseracc.language - 1),
+			       thisuseracc.userid);
+		strcat (tmp, out_buffer);
+	}
+	return tmp;
 }
 
 
 static char *
-fx_leave(struct chanusr *u)
+fx_leave (struct chanusr *u)
 {
-  sprompt_other(othrshm,tmp,TDELIM);
+	sprompt_other (othrshm, tmp, TDELIM);
 
-  if(tlcu.exitstg[0]){
-    sprompt_other(othrshm,out_buffer,ENTEXTS,getcolour(),tlcu.exitstg);
-    strcat(tmp,out_buffer);
-  } else {
-    sprompt_other(othrshm,out_buffer,fxprompt,
-		  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
-			       othruseracc.language-1),
-		  thisuseracc.userid);
-    strcat(tmp,out_buffer);
-  }
-  return tmp;
+	if (tlcu.exitstg[0]) {
+		sprompt_other (othrshm, out_buffer, ENTEXTS, getcolour (),
+			       tlcu.exitstg);
+		strcat (tmp, out_buffer);
+	} else {
+		sprompt_other (othrshm, out_buffer, fxprompt,
+			       msg_getunitl (SEXM1,
+					     thisuseracc.sex == USX_MALE,
+					     othruseracc.language - 1),
+			       thisuseracc.userid);
+		strcat (tmp, out_buffer);
+	}
+	return tmp;
 }
 
 
 void
-usermsg(int pr)
+usermsg (int pr)
 {
-  fxprompt=pr;
-  broadcast(fx_msg);
+	fxprompt = pr;
+	broadcast (fx_msg);
 }
 
 
 void
-userent(int pr)
+userent (int pr)
 {
-  if(thisuseronl.flags&OLF_INVISIBLE)return;
-  fxprompt=pr;
-  broadcast(fx_enter);
+	if (thisuseronl.flags & OLF_INVISIBLE)
+		return;
+	fxprompt = pr;
+	broadcast (fx_enter);
 }
 
 
 void
-userexit(int pr)
+userexit (int pr)
 {
-  if(thisuseronl.flags&OLF_INVISIBLE)return;
-  fxprompt=pr;
-  broadcast(fx_leave);
+	if (thisuseronl.flags & OLF_INVISIBLE)
+		return;
+	fxprompt = pr;
+	broadcast (fx_leave);
 }
 
 
+
+
+/* End of File */

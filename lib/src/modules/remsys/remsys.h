@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -56,9 +59,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,80 +69,83 @@
 #define HASAXS(a,x) (a[x/32]&(1<<(x%32)))
 
 struct rsysopt {
-  char command[16];
-  int  group;
-  long accessflag;
-  void (*action)(void);
+	char    command[16];
+	int     group;
+	long    accessflag;
+	void    (*action) (void);
 };
 
-extern int            COMMANDS;
-extern promptblock_t      *msg;
+extern int COMMANDS;
+extern promptblock_t *msg;
 extern struct rsysopt commands[];
 
 
 extern char *unixsh;
 extern char *sxfdesc;
-extern int  keychu;
-extern int  kydnam;
-extern int  kydcom;
-extern int  kydadr;
-extern int  kydpho;
-extern int  kydage;
-extern int  kydsex;
-extern int  kydpss;
-extern int  hidepass;
-extern int  dfwarn;
-extern int  dfcrit;
-extern int  pgstmo;
+extern int keychu;
+extern int kydnam;
+extern int kydcom;
+extern int kydadr;
+extern int kydpho;
+extern int kydage;
+extern int kydsex;
+extern int kydpss;
+extern int hidepass;
+extern int dfwarn;
+extern int dfcrit;
+extern int pgstmo;
 
-extern void rsys_change();
-extern void rsys_emulate();
-extern void rsys_monitor();
-extern void rsys_send();
+extern void rsys_change ();
+extern void rsys_emulate ();
+extern void rsys_monitor ();
+extern void rsys_send ();
 
-extern void rsys_delete();
-extern void rsys_exempt();
-extern void rsys_post();
-extern void rsys_hangup();
-extern void rsys_suspend();
-extern void rsys_detail();
-extern void rsys_search();
+extern void rsys_delete ();
+extern void rsys_exempt ();
+extern void rsys_post ();
+extern void rsys_hangup ();
+extern void rsys_suspend ();
+extern void rsys_detail ();
+extern void rsys_search ();
 
-extern void rsys_classed();
-extern void rsys_class();
-extern void rsys_keys();
+extern void rsys_classed ();
+extern void rsys_class ();
+extern void rsys_keys ();
 
-extern void rsys_event();
-extern void rsys_transfer();
-extern void rsys_pageaudit();
-extern void rsys_invis();
-extern void rsys_gdet();
-extern void rsys_sysop();
-extern void rsys_audit();
-extern void rsys_cleanup();
-extern void rsys_logon();
-extern void rsys_security();
-extern void rsys_filtaud();
-extern void rsys_signups();
+extern void rsys_event ();
+extern void rsys_transfer ();
+extern void rsys_pageaudit ();
+extern void rsys_invis ();
+extern void rsys_gdet ();
+extern void rsys_sysop ();
+extern void rsys_audit ();
+extern void rsys_cleanup ();
+extern void rsys_logon ();
+extern void rsys_security ();
+extern void rsys_filtaud ();
+extern void rsys_signups ();
 
-extern void rsys_agestats();
-extern void rsys_clsstats();
-extern void rsys_modstats();
-extern void rsys_systats();
-extern void rsys_linstats();
-extern void rsys_genstats();
-extern void rsys_top();
+extern void rsys_agestats ();
+extern void rsys_clsstats ();
+extern void rsys_modstats ();
+extern void rsys_systats ();
+extern void rsys_linstats ();
+extern void rsys_genstats ();
+extern void rsys_top ();
 
-extern void rsys_type();
-extern void rsys_copy();
-extern void rsys_ren();
-extern void rsys_dir();
-extern void rsys_del();
-extern void rsys_sys();
-extern void rsys_editor();
-extern void rsys_shell();
+extern void rsys_type ();
+extern void rsys_copy ();
+extern void rsys_ren ();
+extern void rsys_dir ();
+extern void rsys_del ();
+extern void rsys_sys ();
+extern void rsys_editor ();
+extern void rsys_shell ();
 
 
-extern int runcommand(char *s);
-extern int getchanname(char *dev, int msg, int all);
+extern int runcommand (char *s);
+extern int getchanname (char *dev, int msg, int all);
 
+
+
+/* End of File */

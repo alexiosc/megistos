@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -62,8 +63,8 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
 
 
 static char *svnomm, *svnomf;
@@ -74,115 +75,122 @@ extern char fx_target[24], fx_targetsex;
 extern int fx_targetcol;
 
 
-char *
-sv_usrcol()
+char   *
+sv_usrcol ()
 {
-  static char buf[16];
-  sprintf(buf,"\033[%sm",colours[thisuseraux.colour]);
-  return buf;
+	static char buf[16];
+
+	sprintf (buf, "\033[%sm", colours[thisuseraux.colour]);
+	return buf;
 }
 
 
-char *
-sv_artnom()
+char   *
+sv_artnom ()
 {
-  return (thisuseracc.sex==USX_MALE)?svnomm:svnomf;
+	return (thisuseracc.sex == USX_MALE) ? svnomm : svnomf;
 }
 
 
-char *
-sv_artgen()
+char   *
+sv_artgen ()
 {
-  return (thisuseracc.sex==USX_MALE)?svgenm:svgenf;
+	return (thisuseracc.sex == USX_MALE) ? svgenm : svgenf;
 }
 
 
-char *
-sv_artdat()
+char   *
+sv_artdat ()
 {
-  return (thisuseracc.sex==USX_MALE)?svdatm:svdatf;
+	return (thisuseracc.sex == USX_MALE) ? svdatm : svdatf;
 }
 
 
-char *
-sv_artacc()
+char   *
+sv_artacc ()
 {
-  return (thisuseracc.sex==USX_MALE)?svaccm:svaccf;
+	return (thisuseracc.sex == USX_MALE) ? svaccm : svaccf;
 }
 
 
-char *sv_othuid()
+char   *
+sv_othuid ()
 {
-  return fx_target;
+	return fx_target;
 }
 
 
-char *
-sv_othcol()
+char   *
+sv_othcol ()
 {
-  static char buf[16];
-  sprintf(buf,"\033[%sm",colours[fx_targetcol]);
-  return buf;
+	static char buf[16];
+
+	sprintf (buf, "\033[%sm", colours[fx_targetcol]);
+	return buf;
 }
 
 
-char *
-sv_othnom()
+char   *
+sv_othnom ()
 {
-  return (fx_targetsex==USX_MALE)?svnomm:svnomf;
+	return (fx_targetsex == USX_MALE) ? svnomm : svnomf;
 }
 
 
-char *
-sv_othgen()
+char   *
+sv_othgen ()
 {
-  return (fx_targetsex==USX_MALE)?svgenm:svgenf;
+	return (fx_targetsex == USX_MALE) ? svgenm : svgenf;
 }
 
 
-char *
-sv_othdat()
+char   *
+sv_othdat ()
 {
-  return (fx_targetsex==USX_MALE)?svdatm:svdatf;
+	return (fx_targetsex == USX_MALE) ? svdatm : svdatf;
 }
 
 
-char *
-sv_othacc()
+char   *
+sv_othacc ()
 {
-  return (fx_targetsex==USX_MALE)?svaccm:svaccf;
+	return (fx_targetsex == USX_MALE) ? svaccm : svaccf;
 }
 
 
 void
-initvars()
+initvars ()
 {
-  struct substvar table []={
-    {"@USRCOL@", sv_usrcol, NULL},
-    {"@ARTNOM@", sv_artnom, NULL},
-    {"@ARTGEN@", sv_artgen, NULL},
-    {"@ARTDAT@", sv_artdat, NULL},
-    {"@ARTACC@", sv_artacc, NULL},
-    {"@OTHUID@", sv_othuid, NULL},
-    {"@OTHCOL@", sv_othcol, NULL},
-    {"@OTHNOM@", sv_othnom, NULL},
-    {"@OTHGEN@", sv_othgen, NULL},
-    {"@OTHDAT@", sv_othdat, NULL},
-    {"@OTHACC@", sv_othacc, NULL},
-    {"",NULL,NULL}
-  };
-  int i=0;
-  while(table[i].varname[0]){
-    out_addsubstvar(table[i].varname,table[i].varcalc);
-    i++;
-  }
+	struct substvar table[] = {
+		{"@USRCOL@", sv_usrcol, NULL},
+		{"@ARTNOM@", sv_artnom, NULL},
+		{"@ARTGEN@", sv_artgen, NULL},
+		{"@ARTDAT@", sv_artdat, NULL},
+		{"@ARTACC@", sv_artacc, NULL},
+		{"@OTHUID@", sv_othuid, NULL},
+		{"@OTHCOL@", sv_othcol, NULL},
+		{"@OTHNOM@", sv_othnom, NULL},
+		{"@OTHGEN@", sv_othgen, NULL},
+		{"@OTHDAT@", sv_othdat, NULL},
+		{"@OTHACC@", sv_othacc, NULL},
+		{"", NULL, NULL}
+	};
+	int     i = 0;
 
-  svnomm=strdup(msg_get(SVNOMM));
-  svnomf=strdup(msg_get(SVNOMF));
-  svgenm=strdup(msg_get(SVGENM));
-  svgenf=strdup(msg_get(SVGENF));
-  svdatm=strdup(msg_get(SVDATM));
-  svdatf=strdup(msg_get(SVDATF));
-  svaccm=strdup(msg_get(SVACCM));
-  svaccf=strdup(msg_get(SVACCF));
+	while (table[i].varname[0]) {
+		out_addsubstvar (table[i].varname, table[i].varcalc);
+		i++;
+	}
+
+	svnomm = strdup (msg_get (SVNOMM));
+	svnomf = strdup (msg_get (SVNOMF));
+	svgenm = strdup (msg_get (SVGENM));
+	svgenf = strdup (msg_get (SVGENF));
+	svdatm = strdup (msg_get (SVDATM));
+	svdatf = strdup (msg_get (SVDATF));
+	svaccm = strdup (msg_get (SVACCM));
+	svaccf = strdup (msg_get (SVACCF));
 }
+
+
+/* End of File */

@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -37,10 +40,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -53,149 +54,175 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 int
-attsel(const struct dirent *d)
+attsel (const struct dirent *d)
 {
-  return !strcmp(&(d->d_name[strlen(d->d_name)-4]),".att");
+	return !strcmp (&(d->d_name[strlen (d->d_name) - 4]), ".att");
 }
 
 
 int
-numsort(const struct dirent **a, const struct dirent **b)
+numsort (const struct dirent **a, const struct dirent **b)
 {
-  int A=0,B=0;
-  sscanf((*a)->d_name,"%d",&A);
-  sscanf((*b)->d_name,"%d",&B);
-  return A-B;
+	int     A = 0, B = 0;
+
+	sscanf ((*a)->d_name, "%d", &A);
+	sscanf ((*b)->d_name, "%d", &B);
+	return A - B;
 }
 
 
 void
-autoins()
+autoins ()
 {
-  char insclub[64], dir[256];
-  int i,j, abort=0;
-  struct dirent **files;
+	char    insclub[64], dir[256];
+	int     i, j, abort = 0;
+	struct dirent **files;
 
-  prompt(AUTOINS);
+	prompt (AUTOINS);
 
-  if(getaccess(club)<flaxes)return;
+	if (getaccess (club) < flaxes)
+		return;
 
-  if(!club[0]){
-    if(!getclub(insclub,AISIG,AISIGR,
-		thisuseracc.lastclub[0]?AIDEF:0,thisuseracc.lastclub)){
-      prompt(BLTCAN);
-      return;
-    }
-  } else strcpy(insclub,club);
-  prompt(BGNAINS,insclub);
+	if (!club[0]) {
+		if (!getclub (insclub, AISIG, AISIGR,
+			      thisuseracc.lastclub[0] ? AIDEF : 0,
+			      thisuseracc.lastclub)) {
+			prompt (BLTCAN);
+			return;
+		}
+	} else
+		strcpy (insclub, club);
+	prompt (BGNAINS, insclub);
 
-  strcpy(dir,mkfname(MSGSDIR"/%s/"MSGATTDIR,insclub));
-  i=scandir(dir,&files,attsel,numsort);
+	strcpy (dir, mkfname (MSGSDIR "/%s/" MSGATTDIR, insclub));
+	i = scandir (dir, &files, attsel, numsort);
 
-  if(i<0){
-    prompt(AIDIRR,insclub);
-    return;
-  } else if(!i){
-    prompt(NOFILES);
-    return;
-  }
-
-  for(j=0;j<i;free(files[j]),j++){
-    struct stat st;
-    char fname[256];
-    struct message msg;
-    int msgno=0;
-    
-    if(abort)continue;
-
-    sprintf(fname,"%s/%s",dir,files[j]->d_name);
-    if(stat(fname,&st))continue;
-
-    prompt(FNDFILE,
-	   files[j]->d_name,st.st_size,msg_getunit(BYTESNG,st.st_size));
-
-    strncpy(fname,files[j]->d_name,strlen(files[j]->d_name)-4);
-    fname[strlen(files[j]->d_name)-4]=0;
-    strcat(fname,".blt");
-
-    if(dbexists(insclub,fname)){
-      prompt(ALREXS);
-      continue;
-    }
-
-    sscanf(fname,"%d",&msgno);
-    if(!getmsgheader(insclub,msgno,&msg)){
-      prompt(MSGDEL);
-      continue;
-    }
-    
-    {
-      struct bltidx blt;
-      int yes=0;
-      prompt(AIINFO);
-
-      bzero(&blt,sizeof(struct bltidx));
-      blt.num=dbgetlast()+1;
-      blt.date=today();
-      sprintf(blt.fname,"%d.blt",msgno);
-      strcpy(blt.area,insclub);
-      strncpy(blt.author,msg.from,sizeof(blt.author));
-      strcpy(blt.descr,msg.subject);
-
-      bltinfo(&blt);
-
-      if(!get_bool(&yes,ASKINS,ASKERR,DEFLTC,ainsdef?'Y':'N')){
-	prompt(ABORT);
-	abort=1;
-	continue;
-      } else if(yes){
-	char source[256], target[256];
-
-	/* Link or copy the file */
-
-	strcpy(source,mkfname(MSGSDIR"/%s/%s/%d.att",insclub,MSGATTDIR,msgno));
-	strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",insclub,MSGBLTDIR,blt.fname));
-
-	if(link(source,target)<0){
-	  if(fcopy(source,target)<0){
-	    prompt(NBCPR);
-	    abort=1;
-	    continue;
-	  }
+	if (i < 0) {
+		prompt (AIDIRR, insclub);
+		return;
+	} else if (!i) {
+		prompt (NOFILES);
+		return;
 	}
 
-	/* Insert it into the database */
-	
-	blt.num=dbgetlast()+1; /* Just in case */
-	if(!dbins(&blt)){
-	  prompt(AIERR);
-	  abort=1;
-	  continue;
-	} else prompt(AIOK);
+	for (j = 0; j < i; free (files[j]), j++) {
+		struct stat st;
+		char    fname[256];
+		struct message msg;
+		int     msgno = 0;
+
+		if (abort)
+			continue;
+
+		sprintf (fname, "%s/%s", dir, files[j]->d_name);
+		if (stat (fname, &st))
+			continue;
+
+		prompt (FNDFILE,
+			files[j]->d_name, st.st_size, msg_getunit (BYTESNG,
+								   st.
+								   st_size));
+
+		strncpy (fname, files[j]->d_name,
+			 strlen (files[j]->d_name) - 4);
+		fname[strlen (files[j]->d_name) - 4] = 0;
+		strcat (fname, ".blt");
+
+		if (dbexists (insclub, fname)) {
+			prompt (ALREXS);
+			continue;
+		}
+
+		sscanf (fname, "%d", &msgno);
+		if (!getmsgheader (insclub, msgno, &msg)) {
+			prompt (MSGDEL);
+			continue;
+		}
+
+		{
+			struct bltidx blt;
+			int     yes = 0;
+
+			prompt (AIINFO);
+
+			bzero (&blt, sizeof (struct bltidx));
+			blt.num = dbgetlast () + 1;
+			blt.date = today ();
+			sprintf (blt.fname, "%d.blt", msgno);
+			strcpy (blt.area, insclub);
+			strncpy (blt.author, msg.from, sizeof (blt.author));
+			strcpy (blt.descr, msg.subject);
+
+			bltinfo (&blt);
+
+			if (!get_bool
+			    (&yes, ASKINS, ASKERR, DEFLTC,
+			     ainsdef ? 'Y' : 'N')) {
+				prompt (ABORT);
+				abort = 1;
+				continue;
+			} else if (yes) {
+				char    source[256], target[256];
+
+				/* Link or copy the file */
+
+				strcpy (source,
+					mkfname (MSGSDIR "/%s/%s/%d.att",
+						 insclub, MSGATTDIR, msgno));
+				strcpy (target,
+					mkfname (MSGSDIR "/%s/%s/%s", insclub,
+						 MSGBLTDIR, blt.fname));
+
+				if (link (source, target) < 0) {
+					if (fcopy (source, target) < 0) {
+						prompt (NBCPR);
+						abort = 1;
+						continue;
+					}
+				}
+
+				/* Insert it into the database */
+
+				blt.num = dbgetlast () + 1;	/* Just in case */
+				if (!dbins (&blt)) {
+					prompt (AIERR);
+					abort = 1;
+					continue;
+				} else
+					prompt (AIOK);
 
 
-	/* Update the club header */
+				/* Update the club header */
 
-	loadclubhdr(club);
-	clubhdr.nblts++;
-	saveclubhdr(&clubhdr);
+				loadclubhdr (club);
+				clubhdr.nblts++;
+				saveclubhdr (&clubhdr);
 
 
-	/* Audit it */
+				/* Audit it */
 
-	if(audins)audit(thisuseronl.channel,AUDIT(BLTINS),
-			thisuseracc.userid,blt.fname,blt.area);
-      }
-    }
-  }
+				if (audins)
+					audit (thisuseronl.channel,
+					       AUDIT (BLTINS),
+					       thisuseracc.userid, blt.fname,
+					       blt.area);
+			}
+		}
+	}
 
-  free(files);
-  prompt(ENDAINS);
+	free (files);
+	prompt (ENDAINS);
 }
+
+
+/* End of File */
+
+
+/* End of File */

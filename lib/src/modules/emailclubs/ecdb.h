@@ -2,27 +2,27 @@
 /* alignment is 4 */
 
 /*---------- structures ----------*/
-struct ecidx {  /* size 232 */
-    long    num;
-    char    from[80];
-    char    to[80];
-    char    subject[64];
-    long    flags;
+struct ecidx {			/* size 232 */
+	long    num;
+	char    from[80];
+	char    to[80];
+	char    subject[64];
+	long    flags;
 };
 
-struct fromc {  /* size 84 */
-    char    from[80];
-    long    num;
+struct fromc {			/* size 84 */
+	char    from[80];
+	long    num;
 };
 
-struct toc {  /* size 84 */
-    char    to[80];
-    long    num;
+struct toc {			/* size 84 */
+	char    to[80];
+	long    num;
 };
 
-struct subjectc {  /* size 68 */
-    char    subject[64];
-    long    num;
+struct subjectc {		/* size 68 */
+	char    subject[64];
+	long    num;
 };
 
 /*---------- record names ----------*/
@@ -44,3 +44,6 @@ struct subjectc {  /* size 68 */
 /*---------- integer constants ----------*/
 #define UID_LEN 80
 #define SUBJ_LEN 64
+
+
+/* End of File */

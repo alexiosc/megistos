@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,93 +60,111 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
-#include "config.h"
-#include "cnvutils.h"
-#include "files.h"
+#include <megistos/bbs.h>
+#include <megistos/config.h>
+#include <megistos/cnvutils.h>
+#include <megistos/files.h>
 
 
 void
-libkey(char *arg_majordir)
+libkey (char *arg_majordir)
 {
-  FILE              *fp;
-  char               rec[16384], c, *fname=rec;
-  int                reclen;
-  int                num=0;
-  struct libidx      lib;
-  struct keywordidx  keyword;
+	FILE   *fp;
+	char    rec[16384], c, *fname = rec;
+	int     reclen;
+	int     num = 0;
+	struct libidx lib;
+	struct keywordidx keyword;
 
-  bzero(&lib,sizeof(lib));
+	bzero (&lib, sizeof (lib));
 
-  sprintf(fname,"%s/libkwd.txt",arg_majordir?arg_majordir:".");
-  fp=fopen(fname,"r");
-  if(fp==NULL){
-    sprintf(fname,"%s/LIBKWD.TXT",arg_majordir?arg_majordir:".");
-    if((fp=fopen(fname,"r"))==NULL){
-      fprintf(stderr,"libcnv: libkey(): unable to find libkwd.txt or LIBKWD.TXT.\n");
-      exit(1);
-    }
-  }
+	sprintf (fname, "%s/libkwd.txt", arg_majordir ? arg_majordir : ".");
+	fp = fopen (fname, "r");
+	if (fp == NULL) {
+		sprintf (fname, "%s/LIBKWD.TXT",
+			 arg_majordir ? arg_majordir : ".");
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fprintf (stderr,
+				 "libcnv: libkey(): unable to find libkwd.txt or LIBKWD.TXT.\n");
+			exit (1);
+		}
+	}
 
-  printf("\nInstalling Keywords... "); fflush(stdout);
+	printf ("\nInstalling Keywords... ");
+	fflush (stdout);
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%d\n",&reclen)==0){
-      if(feof(fp))break;
-      fprintf(stderr,"libcnv: libkey(): unable to parse record length. Corrupted file?\n");
-      exit(1);
-    }
-    if(feof(fp))break;
-    fgetc(fp);			/* Get rid of the comma after the record length */
+	while (!feof (fp)) {
+		if (fscanf (fp, "%d\n", &reclen) == 0) {
+			if (feof (fp))
+				break;
+			fprintf (stderr,
+				 "libcnv: libkey(): unable to parse record length. Corrupted file?\n");
+			exit (1);
+		}
+		if (feof (fp))
+			break;
+		fgetc (fp);	/* Get rid of the comma after the record length */
 
-    if(fread(rec,reclen,1,fp)!=1){
-      fprintf(stderr,"libcnv: libkey(): unable to read record around pos=%ld.\n",ftell(fp));
-      exit(1);
-    }
+		if (fread (rec, reclen, 1, fp) != 1) {
+			fprintf (stderr,
+				 "libcnv: libkey(): unable to read record around pos=%ld.\n",
+				 ftell (fp));
+			exit (1);
+		}
 
-    bzero(&keyword,sizeof(keyword));
+		bzero (&keyword, sizeof (keyword));
 
-    /* Major has some REALLY strange use for keywords, some kind of timestamp
-       which we don't want. All those seem to have a keyword starting with a
-       blank, which is forbidden to the normal ones. We use it to tell them
-       apart. */
+		/* Major has some REALLY strange use for keywords, some kind of timestamp
+		   which we don't want. All those seem to have a keyword starting with a
+		   blank, which is forbidden to the normal ones. We use it to tell them
+		   apart. */
 
-    if(!isspace(rec[23]))strcpy(keyword.keyword,&rec[23]);
-    else goto skipnl;
+		if (!isspace (rec[23]))
+			strcpy (keyword.keyword, &rec[23]);
+		else
+			goto skipnl;
 
-    strcpy(keyword.fname,lcase(&rec[10]));
-    keyword.approved=toupper(rec[0])=='A';
+		strcpy (keyword.fname, lcase (&rec[10]));
+		keyword.approved = toupper (rec[0]) == 'A';
 
-    /* Convert the Major LIB string to our own libnum index */
+		/* Convert the Major LIB string to our own libnum index */
 
-    if(!sameas(&rec[1],lib.keyname)){
-      char tmp[10];
-      strcpy(tmp,&rec[1]);
-      if(libread(tmp, library.libnum, &lib)!=1){
-	printf("\nWarning: Library %s doesn't exist. Skipping key %s.\n",
-	       lib.fullname, keyword.keyword);
-      }
-    }
-    keyword.klibnum=lib.libnum;
+		if (!sameas (&rec[1], lib.keyname)) {
+			char    tmp[10];
 
-    /* Major adds one extra keyword per file, that actually contains the file's
-       name as a keyword. This is used to speed up searchin, but we don't need
-       it due to different design. So we skip those keywords as well. */
-    
-    if(!strcmp(keyword.fname,keyword.keyword))goto skipnl;
+			strcpy (tmp, &rec[1]);
+			if (libread (tmp, library.libnum, &lib) != 1) {
+				printf
+				    ("\nWarning: Library %s doesn't exist. Skipping key %s.\n",
+				     lib.fullname, keyword.keyword);
+			}
+		}
+		keyword.klibnum = lib.libnum;
 
-    addkeyword(&keyword);
+		/* Major adds one extra keyword per file, that actually contains the file's
+		   name as a keyword. This is used to speed up searchin, but we don't need
+		   it due to different design. So we skip those keywords as well. */
 
-    /* DONE! */
-    if((++num%100)==0){
-      printf("%d ",num); 
-      fflush(stdout);
-    }
+		if (!strcmp (keyword.fname, keyword.keyword))
+			goto skipnl;
 
-  skipnl:
-    do c=fgetc(fp); while(c=='\n' || c=='\r' || c==26);
-    ungetc(c,fp);
-  }
-  printf("\n\nInstalled %d keywords.\n",num);
+		addkeyword (&keyword);
+
+		/* DONE! */
+		if ((++num % 100) == 0) {
+			printf ("%d ", num);
+			fflush (stdout);
+		}
+
+	      skipnl:
+		do
+			c = fgetc (fp);
+		while (c == '\n' || c == '\r' || c == 26);
+		ungetc (c, fp);
+	}
+	printf ("\n\nInstalled %d keywords.\n", num);
 
 }
+
+
+/* End of File */

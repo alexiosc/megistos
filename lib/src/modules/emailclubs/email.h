@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,73 +57,72 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
 
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
-#include "ecdbase.h"
+#include <megistos/ecdbase.h>
 
 extern promptblock_t *msg;
 
 
 /* email stuff */
 
-extern int  entrykey;
-extern int  sopkey;
-extern int  wrtkey;
-extern int  netkey;
-extern int  rrrkey;
-extern int  attkey;
-extern int  dnlchg;
-extern int  wrtchg;
-extern int  netchg;
-extern int  rrrchg;
-extern int  attchg;
-extern int  mkaudd;
-extern int  mkaudu;
-extern int  maxccs;
-extern int  emllif;
-extern int  msglen;
+extern int entrykey;
+extern int sopkey;
+extern int wrtkey;
+extern int netkey;
+extern int rrrkey;
+extern int attkey;
+extern int dnlchg;
+extern int wrtchg;
+extern int netchg;
+extern int rrrchg;
+extern int attchg;
+extern int mkaudd;
+extern int mkaudu;
+extern int maxccs;
+extern int emllif;
+extern int msglen;
 extern char *eattupl;
-extern int  sigbmax;
-extern int  siglmax;
-extern int  sigckey;
-extern int  sigchg;
-extern int  afwkey;
-extern int  dlkey;
-extern int  maxdlm;
-extern int  msskey;
+extern int sigbmax;
+extern int siglmax;
+extern int sigckey;
+extern int sigchg;
+extern int afwkey;
+extern int dlkey;
+extern int maxdlm;
+extern int msskey;
 
 /* club stuff */
 
-extern int  clntrkey;
-extern int  clsopkey;
-extern int  tlckey;
-extern int  bltkey;
-extern int  clbwchg;
-extern int  clbuchg;
-extern int  clbdchg;
-extern int  clblif;
-extern int  cdnlaud;
-extern int  cuplaud;
+extern int clntrkey;
+extern int clsopkey;
+extern int tlckey;
+extern int bltkey;
+extern int clbwchg;
+extern int clbuchg;
+extern int clbdchg;
+extern int clblif;
+extern int cdnlaud;
+extern int cuplaud;
 extern char *defclub;
-extern int  modaxkey;
-extern int  modchkey;
-extern int  modhdkey;
-extern int  tlckey;
-extern int  bltkey;
+extern int modaxkey;
+extern int modchkey;
+extern int modhdkey;
+extern int tlckey;
+extern int bltkey;
 extern char *tlcpag;
 extern char *bltpag;
-extern int  addnew;
-extern int  drdaxkey;
-extern int  ddlaxkey;
-extern int  dwraxkey;
-extern int  dulaxkey;
+extern int addnew;
+extern int drdaxkey;
+extern int ddlaxkey;
+extern int dwraxkey;
+extern int dulaxkey;
 
 
 extern char defaultclub[32];
@@ -136,19 +138,19 @@ extern char defaultclub[32];
 
 /* write.c */
 
-char clubdir[256];
+char    clubdir[256];
 
-void emailwrite();
+void    emailwrite ();
 
-int getrecipient(int pr,char *rec);
+int     getrecipient (int pr, char *rec);
 
-int getclubrecipient(int pr, int err, int help, char *rec);
+int     getclubrecipient (int pr, int err, int help, char *rec);
 
-int getsubject(char *subject);
+int     getsubject (char *subject);
 
-void uploadatt(char *attname, int num);
+void    uploadatt (char *attname, int num);
 
-char *getattname(char *subject, int num);
+char   *getattname (char *subject, int num);
 
 
 
@@ -156,53 +158,53 @@ char *getattname(char *subject, int num);
 
 #define LASTMSG (1<<29)
 
-int readmsg(struct message *msg);
+int     readmsg (struct message *msg);
 
-void emailread();
+void    emailread ();
 
-int startreading(int mode, int startmsg);
+int     startreading (int mode, int startmsg);
 
 
 
 /* receipt.c */
 
-void sendreceipt(struct message *msg);
+void    sendreceipt (struct message *msg);
 
 
 
 /* download.c */
 
-void downloadatt(struct message *msg);
+void    downloadatt (struct message *msg);
 
 
 /* funcs.c */
 
 
-int getrdmsgno(int *num,int msg,int help,int err,int def);
+int     getrdmsgno (int *num, int msg, int help, int err, int def);
 
-int askyesno(int *boolean,int msg,int err,int charge);
+int     askyesno (int *boolean, int msg, int err, int charge);
 
-int confirmcancel();
+int     confirmcancel ();
 
-void showheader(char *sig,struct message *msg);
+void    showheader (char *sig, struct message *msg);
 
-int writeecuser(char *uid, struct emailuser *user);
+int     writeecuser (char *uid, struct emailuser *user);
 
-int readecuser(char *uid, struct emailuser *user);
+int     readecuser (char *uid, struct emailuser *user);
 
-void appendsignature(char *into);
+void    appendsignature (char *into);
 
-char *addhistory(char *h, char *s, int len);
+char   *addhistory (char *h, char *s, int len);
 
-void bbscrypt(char *buf,int size,int key);
+void    bbscrypt (char *buf, int size, int key);
 
-int checklocks(struct message *msg);
+int     checklocks (struct message *msg);
 
-int askmsgno();
+int     askmsgno ();
 
-void decompressmsg(struct message *msg);
+void    decompressmsg (struct message *msg);
 
-void compressmsg(struct message *msg);
+void    compressmsg (struct message *msg);
 
 
 
@@ -230,101 +232,101 @@ void compressmsg(struct message *msg);
 struct message header;
 
 
-int getmsgheader(int msgno,struct message *msg);
+int     getmsgheader (int msgno, struct message *msg);
 
-int writemsgheader(struct message *msg);
+int     writemsgheader (struct message *msg);
 
-void dbrm(struct message *msg);
+void    dbrm (struct message *msg);
 
-int dbgetindex(struct ecidx *idx);
+int     dbgetindex (struct ecidx *idx);
 
-int dbchkemail(int msgno);
+int     dbchkemail (int msgno);
 
-void setclub(char *club);
+void    setclub (char *club);
 
 
 /* dbnum.c */
 
-int findmsgnum(int *msgno, int targetnum, int direction);
+int     findmsgnum (int *msgno, int targetnum, int direction);
 
-int npmsgnum(int *msgno, int targetnum, int dir);
+int     npmsgnum (int *msgno, int targetnum, int dir);
 
 
 
 /* dbfrom.c */
 
-int findmsgfrom(int *msgno, char *who, int targetnum, int direction);
+int     findmsgfrom (int *msgno, char *who, int targetnum, int direction);
 
-int npmsgfrom(int *msgno, char *who, int targetnum, int dir);
+int     npmsgfrom (int *msgno, char *who, int targetnum, int dir);
 
 
 
 /* dbto.c */
 
-int findmsgto(int *msgno, char *whom, int targetnum, int direction);
+int     findmsgto (int *msgno, char *whom, int targetnum, int direction);
 
-int npmsgto(int *msgno, char *whom, int targetnum, int dir);
+int     npmsgto (int *msgno, char *whom, int targetnum, int dir);
 
 
 
 /* dbsubj.c */
 
-int findmsgsubj(int *msgno, char *subject, int targetnum, int direction);
+int     findmsgsubj (int *msgno, char *subject, int targetnum, int direction);
 
-int npmsgsubj(int *msgno, char *subject, int targetnum, int dir);
+int     npmsgsubj (int *msgno, char *subject, int targetnum, int dir);
 
 
 
 /* preferences.c */
 
-void preferences();
+void    preferences ();
 
 
 
 /* misc.c */
 
-void stopautofw(struct message *msg);
+void    stopautofw (struct message *msg);
 
-void erasemsg(int forward, struct message *msg);
+void    erasemsg (int forward, struct message *msg);
 
-void copymsg(struct message *msg);
+void    copymsg (struct message *msg);
 
-void forwardmsg(struct message *msg);
+void    forwardmsg (struct message *msg);
 
-int backtrack(struct message *msg);
+int     backtrack (struct message *msg);
 
-void deleteuser(struct message *msg);
+void    deleteuser (struct message *msg);
 
-void rmlocks();
+void    rmlocks ();
 
 
 /* reply.c */
 
-void reply(struct message *msg, int forceemail);
+void    reply (struct message *msg, int forceemail);
 
-int quotemessage(struct message *msg, char *fname);
+int     quotemessage (struct message *msg, char *fname);
 
 
 /* modify.c */
 
-void modifymail();
+void    modifymail ();
 
-void modifyclubmsg(struct message *msg);
+void    modifyclubmsg (struct message *msg);
 
-void clubopmodify(struct message *msg);
+void    clubopmodify (struct message *msg);
 
 
 /* distlist.c */
 
-void initlist();
+void    initlist ();
 
-void confdistlist();
+void    confdistlist ();
 
-int opendistribution(char *dist);
+int     opendistribution (char *dist);
 
-char *readdistribution();
+char   *readdistribution ();
 
-void closedistribution();
+void    closedistribution ();
 
 
 /* clubhdr.c */
@@ -333,31 +335,33 @@ void closedistribution();
 extern struct clubheader clubhdr;
 
 
-int hdrselect(const struct dirent *d);
+int     hdrselect (const struct dirent *d);
 
-int ncsalphasort(const struct dirent **,
-		 const struct dirent **);
+int     ncsalphasort (const struct dirent **, const struct dirent **);
 
-int findclub(char *club);
+int     findclub (char *club);
 
-int getclubid();
+int     getclubid ();
 
-int loadclubhdr(char *club);
+int     loadclubhdr (char *club);
 
-int saveclubhdr(struct clubheader *hdr);
+int     saveclubhdr (struct clubheader *hdr);
 
-int getdefaultax(useracc_t *uacc, char *club);
+int     getdefaultax (useracc_t * uacc, char *club);
 
-int getclubax(useracc_t *uacc, char *club);
+int     getclubax (useracc_t * uacc, char *club);
 
-void setclubax(useracc_t *uacc, char *club, int ax);
+void    setclubax (useracc_t * uacc, char *club, int ax);
 
 
 /* substvars.c */
 
-void initecsubstvars();
+void    initecsubstvars ();
 
 
 /* mailcleanup.c */
 
-int handler_cleanup(int argc, char **argv);
+int     handler_cleanup (int argc, char **argv);
+
+
+/* End of File */

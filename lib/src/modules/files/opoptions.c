@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,118 +62,134 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 
 static int flags[10] = {
-  LBF_READONLY,
-  LBF_SLOW,
-  LBF_OSDIR,
-  LBF_FILELIST,
-  LBF_AUTOAPP,
-  LBF_NOINDEX,
-  LBF_UPLAUD,
-  LBF_DNLAUD,
-  LBF_DOS83,
-  0};
+	LBF_READONLY,
+	LBF_SLOW,
+	LBF_OSDIR,
+	LBF_FILELIST,
+	LBF_AUTOAPP,
+	LBF_NOINDEX,
+	LBF_UPLAUD,
+	LBF_DNLAUD,
+	LBF_DOS83,
+	0
+};
 
 
 
 static void
-update_options(struct libidx *lib,int libnum,int *changes,int recursive)
+update_options (struct libidx *lib, int libnum, int *changes, int recursive)
 {
-  struct libidx l;
-  int res;
+	struct libidx l;
+	int     res;
 
-  if(lib->libnum==libnum){
-    libupdate(lib);
-  }
+	if (lib->libnum == libnum) {
+		libupdate (lib);
+	}
 
-  if(!recursive)return;
-  else if(lib->libnum==libnum)goto children;
+	if (!recursive)
+		return;
+	else if (lib->libnum == libnum)
+		goto children;
 
-  if(!libreadnum(libnum,&l))return;
+	if (!libreadnum (libnum, &l))
+		return;
 
-  if(!adminlock(libnum)){
-    prompt(OOPTREC2,l.fullname);
-  } else {
-    int i;
+	if (!adminlock (libnum)) {
+		prompt (OOPTREC2, l.fullname);
+	} else {
+		int     i;
 
-    for(i=0;i<9;i++){
-      if(!changes[i])continue;
-      setflag(l.flags,flags[i],lib->flags&flags[i]);
-    }
+		for (i = 0; i < 9; i++) {
+			if (!changes[i])
+				continue;
+			setflag (l.flags, flags[i], lib->flags & flags[i]);
+		}
 
-    libupdate(&l);
+		libupdate (&l);
 
-    prompt(OOPTREC1,l.fullname);
-  }
+		prompt (OOPTREC1, l.fullname);
+	}
 
-  libnum=l.libnum;
+	libnum = l.libnum;
 
-children:
-  res=libgetchild(libnum,"",&l);
-  while(res){
-    char keyname[20];
-    update_options(lib,l.libnum,changes,recursive);
-    strcpy(keyname,l.keyname);
-    res=libgetchild(libnum,keyname,&l);
-  }
+      children:
+	res = libgetchild (libnum, "", &l);
+	while (res) {
+		char    keyname[20];
+
+		update_options (lib, l.libnum, changes, recursive);
+		strcpy (keyname, l.keyname);
+		res = libgetchild (libnum, keyname, &l);
+	}
 }
 
 
 void
-op_options()
+op_options ()
 {
-  int i;
-  struct libidx lib;
-  int changes[8];
-  int recursive=0;
+	int     i;
+	struct libidx lib;
+	int     changes[8];
+	int     recursive = 0;
 
-  memcpy(&lib,&library,sizeof(lib));
-  if(!adminlock(lib.libnum))return;
+	memcpy (&lib, &library, sizeof (lib));
+	if (!adminlock (lib.libnum))
+		return;
 
-  inp_buffer[0]='\0';
-  for(i=0;i<9;i++){
-    char tmp[40];
-    sprintf(tmp,"%s\n",lib.flags&flags[i]?"on":"off");
-    strcat(inp_buffer,tmp);
-  }
-  strcat(inp_buffer,"off\nOK\nCancel\n");
+	inp_buffer[0] = '\0';
+	for (i = 0; i < 9; i++) {
+		char    tmp[40];
 
-  if(dialog_run("files",OOPTVT,OOPTLT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    adminunlock();
-    return;
-  }
+		sprintf (tmp, "%s\n", lib.flags & flags[i] ? "on" : "off");
+		strcat (inp_buffer, tmp);
+	}
+	strcat (inp_buffer, "off\nOK\nCancel\n");
 
-  dialog_parse(inp_buffer);
+	if (dialog_run ("files", OOPTVT, OOPTLT, inp_buffer, MAXINPLEN) != 0) {
+		error_log ("Unable to run data entry subsystem");
+		adminunlock ();
+		return;
+	}
 
-  if(sameas(margv[12],"OK")||sameas(margv[12],margv[10])){
-    for(i=0;i<13;i++){
-      char *s=margv[i];
-      if(i<9){
-	int old=lib.flags;
-	setflag(lib.flags,flags[i],sameas(s,"on"));
-	if(lib.flags!=old)changes[i]=1;
-      } else if(i==9){
-	if((recursive=sameas(s,"on"))!=0)prompt(OOPTREC);
-	break;
-      }
-    }
-  } else {
-    prompt(OPCAN);
-    adminunlock();
-    return;
-  }
+	dialog_parse (inp_buffer);
 
-  memcpy(&library,&lib,sizeof(library));
+	if (sameas (margv[12], "OK") || sameas (margv[12], margv[10])) {
+		for (i = 0; i < 13; i++) {
+			char   *s = margv[i];
 
-  update_options(&lib,lib.libnum,changes,recursive);
+			if (i < 9) {
+				int     old = lib.flags;
 
-  adminunlock();
+				setflag (lib.flags, flags[i],
+					 sameas (s, "on"));
+				if (lib.flags != old)
+					changes[i] = 1;
+			} else if (i == 9) {
+				if ((recursive = sameas (s, "on")) != 0)
+					prompt (OOPTREC);
+				break;
+			}
+		}
+	} else {
+		prompt (OPCAN);
+		adminunlock ();
+		return;
+	}
+
+	memcpy (&library, &lib, sizeof (library));
+
+	update_options (&lib, lib.libnum, changes, recursive);
+
+	adminunlock ();
 }
 
+
+
+/* End of File */

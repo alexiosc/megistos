@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,173 +65,193 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "typhoon.h"
-#include "email.h"
-#include "ecdbase.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/typhoon.h>
+#include <megistos/email.h>
+#include <megistos/ecdbase.h>
 
 
 static int
-getfl(int *first, int *last)
+getfl (int *first, int *last)
 {
 
-  /* Get the first key of the database. If there isn't one, the db is empty. */
+	/* Get the first key of the database. If there isn't one, the db is empty. */
 
-  if(d_keyfrst(NUM)!=S_OKAY)return BSE_NFOUND;
-
-
-  /* Read the first key. If we can't something's VERY wrong. Panic. */
-
-  if(d_keyread(first)!=S_OKAY){
-    error_fatal("Unable to read first NUM key.");
-  }
+	if (d_keyfrst (NUM) != S_OKAY)
+		return BSE_NFOUND;
 
 
-  /* Get the last key of the database, panic if unable to do so */
+	/* Read the first key. If we can't something's VERY wrong. Panic. */
 
-  if(d_keylast(NUM)!=S_OKAY) {
-    error_fatal("Got first NUM key but can't get last one.");
-  }
-
-
-  /* Read the last key. Panic if we can't. */
-
-  if(d_keyread(last)!=S_OKAY){
-    error_fatal("Unable to read last NUM key.");
-    exit(1);
-  }
+	if (d_keyread (first) != S_OKAY) {
+		error_fatal ("Unable to read first NUM key.");
+	}
 
 
-  /* We've found the first and last records. Say so. */
+	/* Get the last key of the database, panic if unable to do so */
 
-  return BSE_FOUND;
+	if (d_keylast (NUM) != S_OKAY) {
+		error_fatal ("Got first NUM key but can't get last one.");
+	}
+
+
+	/* Read the last key. Panic if we can't. */
+
+	if (d_keyread (last) != S_OKAY) {
+		error_fatal ("Unable to read last NUM key.");
+		exit (1);
+	}
+
+
+	/* We've found the first and last records. Say so. */
+
+	return BSE_FOUND;
 }
 
 
 static int
-getmsgno(int *msgno, int dir)
+getmsgno (int *msgno, int dir)
 {
-  int first, last;
+	int     first, last;
 
-  /* Look for a message # msgno */
+	/* Look for a message # msgno */
 
-  if(d_keyfind(NUM,msgno)==S_OKAY)return BSE_FOUND;
+	if (d_keyfind (NUM, msgno) == S_OKAY)
+		return BSE_FOUND;
 
-  /* Couldn't find that specific message. Let's look for another one. */
-  /* Start by getting first and last messages. */
+	/* Couldn't find that specific message. Let's look for another one. */
+	/* Start by getting first and last messages. */
 
-  if(getfl(&first,&last)==BSE_NFOUND) return BSE_NFOUND;
+	if (getfl (&first, &last) == BSE_NFOUND)
+		return BSE_NFOUND;
 
-  /* Now handle up (GT) and down (LT) directions slightly differently. */
+	/* Now handle up (GT) and down (LT) directions slightly differently. */
 
-  if(dir&BSD_LT){
+	if (dir & BSD_LT) {
 
-    /* Moving down (LT). Distinguish three sub-cases. */
-
-
-    /* msgno < first number? No record found. */
-
-    if(*msgno<first) return BSE_BEGIN;
+		/* Moving down (LT). Distinguish three sub-cases. */
 
 
-    /* msgno > last number? Since we're going down, the last # applies. */
+		/* msgno < first number? No record found. */
 
-    if(*msgno>last) return (*msgno=last, BSE_FOUND);
-
-
-    /* Otherwise, we've hit a gap between messages. Choose the next one. */
-
-    d_keyfind(NUM,msgno);
-
-    if(d_keynext(NUM)!=S_OKAY){
-      error_fatal("No next NUM key. This should never happen.");
-    }
-    
-    if(d_keyread(msgno)!=S_OKAY){
-      error_fatal("Unable to read NUM key. Should never happen.");
-    }
+		if (*msgno < first)
+			return BSE_BEGIN;
 
 
-  } else {
+		/* msgno > last number? Since we're going down, the last # applies. */
 
-    /* Moving up (GT) */
-
-    /* Distinguish the same three cases, but treat things a bit different. */
-
-
-    /* msgno < first message. We're going up, so we choose #first. */
-
-    if(*msgno<first) return (*msgno=first, BSE_FOUND);
-    
-    
-    /* msgno > last. Since we're going up, we're out of messages. */
-
-    if(*msgno>last) return BSE_END;
+		if (*msgno > last)
+			return (*msgno = last, BSE_FOUND);
 
 
-    /* This is the same as before. Got two copies of it for clarity. */
+		/* Otherwise, we've hit a gap between messages. Choose the next one. */
 
-    d_keyfind(NUM,msgno);
+		d_keyfind (NUM, msgno);
 
-    if(d_keynext(NUM)!=S_OKAY){
-      error_fatal("No next NUM key. This should never happen.");
-    }
-    
-    if(d_keyread(msgno)!=S_OKAY){
-      error_fatal("Unable to read NUM key. Should never happen.");
-    }
-  }
+		if (d_keynext (NUM) != S_OKAY) {
+			error_fatal
+			    ("No next NUM key. This should never happen.");
+		}
 
-  /* We've chosen a value for msgno, now say so. */
+		if (d_keyread (msgno) != S_OKAY) {
+			error_fatal
+			    ("Unable to read NUM key. Should never happen.");
+		}
 
-  return BSE_FOUND;
+
+	} else {
+
+		/* Moving up (GT) */
+
+		/* Distinguish the same three cases, but treat things a bit different. */
+
+
+		/* msgno < first message. We're going up, so we choose #first. */
+
+		if (*msgno < first)
+			return (*msgno = first, BSE_FOUND);
+
+
+		/* msgno > last. Since we're going up, we're out of messages. */
+
+		if (*msgno > last)
+			return BSE_END;
+
+
+		/* This is the same as before. Got two copies of it for clarity. */
+
+		d_keyfind (NUM, msgno);
+
+		if (d_keynext (NUM) != S_OKAY) {
+			error_fatal
+			    ("No next NUM key. This should never happen.");
+		}
+
+		if (d_keyread (msgno) != S_OKAY) {
+			error_fatal
+			    ("Unable to read NUM key. Should never happen.");
+		}
+	}
+
+	/* We've chosen a value for msgno, now say so. */
+
+	return BSE_FOUND;
 }
 
-int x;
+int     x;
 
 int
-findmsgnum(int *msgno, int targetnum, int direction)
+findmsgnum (int *msgno, int targetnum, int direction)
 {
-  long res;
+	long    res;
 
-  d_keyfind(NUM,&targetnum);
+	d_keyfind (NUM, &targetnum);
 
 
-  /* If we're only checking for existence, return now */
+	/* If we're only checking for existence, return now */
 
-  if(direction==BSD_EQ) return (db_status==S_OKAY)? BSE_FOUND: BSE_NFOUND;
+	if (direction == BSD_EQ)
+		return (db_status == S_OKAY) ? BSE_FOUND : BSE_NFOUND;
 
-  
-  /* Now look for other applicable message numbers. */
 
-  *msgno=targetnum;
-  if((res=getmsgno(msgno, direction))==BSE_FOUND){
-    d_keyfind(NUM,msgno);
-    return BSE_FOUND;
-  }
-  return res;
+	/* Now look for other applicable message numbers. */
+
+	*msgno = targetnum;
+	if ((res = getmsgno (msgno, direction)) == BSE_FOUND) {
+		d_keyfind (NUM, msgno);
+		return BSE_FOUND;
+	}
+	return res;
 }
 
 
 int
-npmsgnum(int *msgno, int targetnum, int dir)
+npmsgnum (int *msgno, int targetnum, int dir)
 {
-  int j;
+	int     j;
 
-  if(dir==BSD_GT)j=d_keynext(NUM);
-  else j=d_keyprev(NUM);
+	if (dir == BSD_GT)
+		j = d_keynext (NUM);
+	else
+		j = d_keyprev (NUM);
 
-  if(j!=S_OKAY)return BSE_NFOUND;
-  
-  if(d_keyread(&j)!=S_OKAY){
-    error_fatal("Unable to read key though it exists.\n");
-  }
+	if (j != S_OKAY)
+		return BSE_NFOUND;
 
-  if(dir==BSD_GT && j<targetnum)return BSE_NFOUND;
-  if(dir==BSD_LT && j>targetnum)return BSE_NFOUND;
+	if (d_keyread (&j) != S_OKAY) {
+		error_fatal ("Unable to read key though it exists.\n");
+	}
 
-  *msgno=j;
-  return BSE_FOUND;
+	if (dir == BSD_GT && j < targetnum)
+		return BSE_NFOUND;
+	if (dir == BSD_LT && j > targetnum)
+		return BSE_NFOUND;
+
+	*msgno = j;
+	return BSE_FOUND;
 }
 
+
+
+/* End of File */

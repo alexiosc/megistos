@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,120 +62,131 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 
 
 static void
-update_limits(struct libidx *lib,int libnum,int *changes,int recursive)
+update_limits (struct libidx *lib, int libnum, int *changes, int recursive)
 {
-  struct libidx l;
-  int res;
+	struct libidx l;
+	int     res;
 
-  if(lib->libnum==libnum){
-    libupdate(lib);
-  }
+	if (lib->libnum == libnum) {
+		libupdate (lib);
+	}
 
-  if(!recursive)return;
-  else if(lib->libnum==libnum)goto children;
+	if (!recursive)
+		return;
+	else if (lib->libnum == libnum)
+		goto children;
 
-  if(!libreadnum(libnum,&l))return;
+	if (!libreadnum (libnum, &l))
+		return;
 
-  if(!adminlock(libnum)){
-    prompt(OLIMREC2,l.fullname);
-  } else {
-    int i;
+	if (!adminlock (libnum)) {
+		prompt (OLIMREC2, l.fullname);
+	} else {
+		int     i;
 
-    for(i=0;i<3;i++){
-      if(!changes[i])continue;
-      switch(i){
-      case 0:
-	l.filelimit=lib->filelimit;
-	break;
-      case 1:
-	l.filesizelimit=lib->filesizelimit;
-	break;
-      default:
-	l.libsizelimit=lib->libsizelimit;
-	break;
-      }
-    }
+		for (i = 0; i < 3; i++) {
+			if (!changes[i])
+				continue;
+			switch (i) {
+			case 0:
+				l.filelimit = lib->filelimit;
+				break;
+			case 1:
+				l.filesizelimit = lib->filesizelimit;
+				break;
+			default:
+				l.libsizelimit = lib->libsizelimit;
+				break;
+			}
+		}
 
-    libupdate(&l);
+		libupdate (&l);
 
-    prompt(OLIMREC1,l.fullname);
-  }
+		prompt (OLIMREC1, l.fullname);
+	}
 
-  libnum=l.libnum;
+	libnum = l.libnum;
 
-children:
-  res=libgetchild(libnum,"",&l);
-  while(res){
-    char keyname[20];
-    update_limits(lib,l.libnum,changes,recursive);
-    strcpy(keyname,l.keyname);
-    res=libgetchild(libnum,keyname,&l);
-  }
+      children:
+	res = libgetchild (libnum, "", &l);
+	while (res) {
+		char    keyname[20];
+
+		update_limits (lib, l.libnum, changes, recursive);
+		strcpy (keyname, l.keyname);
+		res = libgetchild (libnum, keyname, &l);
+	}
 }
 
 
 void
-op_limits()
+op_limits ()
 {
-  int i;
-  struct libidx lib;
-  int changes[3];
-  int recursive=0;
+	int     i;
+	struct libidx lib;
+	int     changes[3];
+	int     recursive = 0;
 
-  memcpy(&lib,&library,sizeof(lib));
-  if(!adminlock(lib.libnum))return;
+	memcpy (&lib, &library, sizeof (lib));
+	if (!adminlock (lib.libnum))
+		return;
 
-  sprintf(inp_buffer,"%d\n%d\n%d\noff\nOK\nCANCEL\n",
-	  lib.filelimit,lib.filesizelimit,lib.libsizelimit);
+	sprintf (inp_buffer, "%d\n%d\n%d\noff\nOK\nCANCEL\n",
+		 lib.filelimit, lib.filesizelimit, lib.libsizelimit);
 
-  if(dialog_run("files",OLIMVT,OLIMLT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    adminunlock();
-    return;
-  }
+	if (dialog_run ("files", OLIMVT, OLIMLT, inp_buffer, MAXINPLEN) != 0) {
+		error_log ("Unable to run data entry subsystem");
+		adminunlock ();
+		return;
+	}
 
-  dialog_parse(inp_buffer);
+	dialog_parse (inp_buffer);
 
-  if(sameas(margv[6],"OK")||sameas(margv[4],margv[6])){
-    for(i=0;i<7;i++){
-      char *s=margv[i];
-      switch(i){
-      case 0:
-	changes[i]=lib.filelimit!=atoi(s);
-	lib.filelimit=atoi(s);
-	break;
-      case 1:
-	changes[i]=lib.filesizelimit!=atoi(s);
-	lib.filesizelimit=atoi(s);
-	break;
-      case 2:
-	changes[i]=lib.libsizelimit!=atoi(s);
-	lib.libsizelimit=atoi(s);
-	break;
-      case 3:
-	if((recursive=sameas(s,"on"))!=0)prompt(OLIMREC);
-	break;
-      }
-    }
-  } else {
-    prompt(OPCAN);
-    adminunlock();
-    return;
-  }
+	if (sameas (margv[6], "OK") || sameas (margv[4], margv[6])) {
+		for (i = 0; i < 7; i++) {
+			char   *s = margv[i];
 
-  memcpy(&library,&lib,sizeof(library));
+			switch (i) {
+			case 0:
+				changes[i] = lib.filelimit != atoi (s);
+				lib.filelimit = atoi (s);
+				break;
+			case 1:
+				changes[i] = lib.filesizelimit != atoi (s);
+				lib.filesizelimit = atoi (s);
+				break;
+			case 2:
+				changes[i] = lib.libsizelimit != atoi (s);
+				lib.libsizelimit = atoi (s);
+				break;
+			case 3:
+				if ((recursive = sameas (s, "on")) != 0)
+					prompt (OLIMREC);
+				break;
+			}
+		}
+	} else {
+		prompt (OPCAN);
+		adminunlock ();
+		return;
+	}
 
-  update_limits(&lib,lib.libnum,changes,recursive);
+	memcpy (&library, &lib, sizeof (library));
 
-  adminunlock();
-  return;
+	update_limits (&lib, lib.libnum, changes, recursive);
+
+	adminunlock ();
+	return;
 }
 
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -42,10 +45,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -58,102 +59,119 @@ const char *__RCS=RCS_VER;
 #define WANT_REGEX_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 #define DELTA 10
 
 
-static int    oldlibnum=-1;
-static int    numchildren=0;
-static int    currentchild=0;
-static int    arraysize=0;
-static int   *children=NULL;
+static int oldlibnum = -1;
+static int numchildren = 0;
+static int currentchild = 0;
+static int arraysize = 0;
+static int *children = NULL;
 
 
-void reset_childarray()
+void
+reset_childarray ()
 {
-  numchildren=0;
+	numchildren = 0;
 }
 
 
-int firstchild()
+int
+firstchild ()
 {
-  if(numchildren==0)return -1;	/* Should never happen */
-  currentchild=1;
-  return children[0];
+	if (numchildren == 0)
+		return -1;	/* Should never happen */
+	currentchild = 1;
+	return children[0];
 }
 
 
-int nextchild()
+int
+nextchild ()
 {
-  if(currentchild>=numchildren)return -1;
-  return children[currentchild++];
+	if (currentchild >= numchildren)
+		return -1;
+	return children[currentchild++];
 }
 
 
-static void grow_array()
+static void
+grow_array ()
 {
-  if(children==NULL||numchildren>=arraysize){
-    int *tmp;
-    arraysize+=DELTA;
-    tmp=alcmem(arraysize*sizeof(int));
-    bzero(tmp,sizeof(tmp));
-    if(children!=NULL){
-      memcpy(tmp,children,sizeof(int)*numchildren);
-      free(children);
-    }
-    children=tmp;
-  }
+	if (children == NULL || numchildren >= arraysize) {
+		int    *tmp;
+
+		arraysize += DELTA;
+		tmp = alcmem (arraysize * sizeof (int));
+		bzero (tmp, sizeof (tmp));
+		if (children != NULL) {
+			memcpy (tmp, children, sizeof (int) * numchildren);
+			free (children);
+		}
+		children = tmp;
+	}
 }
 
 
-static void add_child(int libnum)
+static void
+add_child (int libnum)
 {
-  grow_array();
-  children[numchildren++]=libnum;
+	grow_array ();
+	children[numchildren++] = libnum;
 }
 
 
-static int add_subtree(int libnum)
+static int
+add_subtree (int libnum)
 {
-  struct libidx l;
+	struct libidx l;
 
-  if(!libreadnum(libnum,&l))return 0;
-  else if(!getlibaccess(&l,ACC_VISIBLE))return 0;
-  else {
-    int res;
-    struct libidx child, otherchild;
+	if (!libreadnum (libnum, &l))
+		return 0;
+	else if (!getlibaccess (&l, ACC_VISIBLE))
+		return 0;
+	else {
+		int     res;
+		struct libidx child, otherchild;
 
-    res=libgetchild(l.libnum,"",&otherchild);
-    while(res){
-      memcpy(&child,&otherchild,sizeof(child));
-      add_child(child.libnum);
-      res=libgetchild(l.libnum,child.keyname,&otherchild);
-      if(!add_subtree(child.libnum))return 0;
-    }
-  }
-  return 1;
+		res = libgetchild (l.libnum, "", &otherchild);
+		while (res) {
+			memcpy (&child, &otherchild, sizeof (child));
+			add_child (child.libnum);
+			res =
+			    libgetchild (l.libnum, child.keyname, &otherchild);
+			if (!add_subtree (child.libnum))
+				return 0;
+		}
+	}
+	return 1;
 }
 
 
 void
-get_children()
+get_children ()
 {
-  /* Don't recalculate the list of children unless necessary */
+	/* Don't recalculate the list of children unless necessary */
 
-  if(oldlibnum==library.libnum && children!=NULL && numchildren>0)return;
-  reset_childarray();
-  
-  /* Add *this* library as well. Not exactly consistent with the term
-     'children', but we need it. */
+	if (oldlibnum == library.libnum && children != NULL && numchildren > 0)
+		return;
+	reset_childarray ();
 
-  add_child(library.libnum);
+	/* Add *this* library as well. Not exactly consistent with the term
+	   'children', but we need it. */
 
-  /* Now add the actual children */
+	add_child (library.libnum);
 
-  add_subtree(library.libnum);
-  oldlibnum=library.libnum;
+	/* Now add the actual children */
+
+	add_subtree (library.libnum);
+	oldlibnum = library.libnum;
 }
+
+
+/* End of File */

@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /*
  * zip.c
@@ -88,7 +89,7 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <bbs.h>
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 
 
@@ -97,32 +98,32 @@ static void configure (zbyte_t, zbyte_t);
 
 
 void
-done()
+done ()
 {
-  mod_done(INI_ALL);
-  exit(0);
+	mod_done (INI_ALL);
+	exit (0);
 }
 
 
 
 void
-settermios()
+settermios ()
 {
-  static struct termios setterm;
-  
-  tcgetattr(0,&setterm);
-  
-  /* Cause Ctrl-C to generate SIGINT */
-  
-  setterm.c_lflag|=ISIG;
-  setterm.c_cc[VINTR]=3;
-  setterm.c_cc[VMIN]=1;
-  
-  /* Set the terminal */
-  
-  tcsetattr(0,TCSANOW,&setterm);
-  tcsetattr(1,TCSANOW,&setterm);
-  tcsetattr(2,TCSANOW,&setterm);
+	static struct termios setterm;
+
+	tcgetattr (0, &setterm);
+
+	/* Cause Ctrl-C to generate SIGINT */
+
+	setterm.c_lflag |= ISIG;
+	setterm.c_cc[VINTR] = 3;
+	setterm.c_cc[VMIN] = 1;
+
+	/* Set the terminal */
+
+	tcsetattr (0, TCSANOW, &setterm);
+	tcsetattr (1, TCSANOW, &setterm);
+	tcsetattr (2, TCSANOW, &setterm);
 }
 
 
@@ -131,16 +132,16 @@ promptblock_t *msg;
 
 
 static void
-init()
+init ()
 {
-  mod_init(INI_ALL);
-  msg=msg_open("adventure");
-  msg_setlanguage(thisuseracc.language);
-  screen_cols=thisuseracc.scnwidth;
-  screen_rows=thisuseracc.scnheight;
-  settermios();
-  signal(SIGINT,done);
-  out_clearflags(OFL_WAITTOCLEAR);
+	mod_init (INI_ALL);
+	msg = msg_open ("adventure");
+	msg_setlanguage (thisuseracc.language);
+	screen_cols = thisuseracc.scnwidth;
+	screen_rows = thisuseracc.scnheight;
+	settermios ();
+	signal (SIGINT, done);
+	out_clearflags (OFL_WAITTOCLEAR);
 }
 
 
@@ -153,19 +154,20 @@ init()
  */
 
 
-int main (int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
-  init();
-  process_arguments (argc, argv);
-  configure (V1, V8);
-  initialize_screen ();
-  load_cache ();
-  restart ();
-  interpret ();
-  unload_cache ();
-  close_story ();
-  close_script ();
-  return 0;
+	init ();
+	process_arguments (argc, argv);
+	configure (V1, V8);
+	initialize_screen ();
+	load_cache ();
+	restart ();
+	interpret ();
+	unload_cache ();
+	close_story ();
+	close_script ();
+	return 0;
 }
 
 
@@ -177,51 +179,67 @@ int main (int argc, char *argv[])
  *
  */
 
-static void configure (zbyte_t min_version, zbyte_t max_version)
+static void
+configure (zbyte_t min_version, zbyte_t max_version)
 {
-  zbyte_t header[PAGE_SIZE];
-  
-  read_page (0, header);
-  datap = header;
-  
-  h_type = get_byte (H_TYPE);
+	zbyte_t header[PAGE_SIZE];
 
-  /* Hack, add support for V6 (?) V7 and V8 games. */
-  if (h_type == 6) { h_type=V5; story_scaler = 6; }
-  if (h_type == 7) { h_type=V5; story_scaler = 7; }
-  if (h_type == 8) { h_type=V5; story_scaler = 8; }
+	read_page (0, header);
+	datap = header;
 
-  if (h_type < min_version || h_type > max_version ||
-      (get_byte (H_CONFIG) & CONFIG_BYTE_SWAPPED))
-    error_fatal("Wrong game or version.");
-  
-  if (h_type < V4) {
-    story_scaler = 2;
-    story_shift = 1;
-    property_mask = P3_MAX_PROPERTIES - 1;
-    property_size_mask = 0xe0;
-  } else {
-    story_scaler = 4;
-    story_shift = 2;
-    property_mask = P4_MAX_PROPERTIES - 1;
-    property_size_mask = 0x3f;
-  }
-  
-  h_config = get_byte (H_CONFIG);
-  h_version = get_word (H_VERSION);
-  h_data_size = get_word (H_DATA_SIZE);
-  h_start_pc = get_word (H_START_PC);
-  h_words_offset = get_word (H_WORDS_OFFSET);
-  h_objects_offset = get_word (H_OBJECTS_OFFSET);
-  h_globals_offset = get_word (H_GLOBALS_OFFSET);
-  h_restart_size = get_word (H_RESTART_SIZE);
-  h_flags = get_word (H_FLAGS);
-  h_synonyms_offset = get_word (H_SYNONYMS_OFFSET);
-  h_file_size = get_word (H_FILE_SIZE);
-  if (h_file_size == 0)
-    h_file_size = get_story_size ();
-  h_checksum = get_word (H_CHECKSUM);
-  h_alternate_alphabet_offset = get_word (H_ALTERNATE_ALPHABET_OFFSET);
-  
-  datap = NULL;
+	h_type = get_byte (H_TYPE);
+
+	/* Hack, add support for V6 (?) V7 and V8 games. */
+	if (h_type == 6) {
+		h_type = V5;
+		story_scaler = 6;
+	}
+	if (h_type == 7) {
+		h_type = V5;
+		story_scaler = 7;
+	}
+	if (h_type == 8) {
+		h_type = V5;
+		story_scaler = 8;
+	}
+
+	if (h_type < min_version || h_type > max_version ||
+	    (get_byte (H_CONFIG) & CONFIG_BYTE_SWAPPED))
+		error_fatal ("Wrong game or version.");
+
+	if (h_type < V4) {
+		story_scaler = 2;
+		story_shift = 1;
+		property_mask = P3_MAX_PROPERTIES - 1;
+		property_size_mask = 0xe0;
+	} else {
+		story_scaler = 4;
+		story_shift = 2;
+		property_mask = P4_MAX_PROPERTIES - 1;
+		property_size_mask = 0x3f;
+	}
+
+	h_config = get_byte (H_CONFIG);
+	h_version = get_word (H_VERSION);
+	h_data_size = get_word (H_DATA_SIZE);
+	h_start_pc = get_word (H_START_PC);
+	h_words_offset = get_word (H_WORDS_OFFSET);
+	h_objects_offset = get_word (H_OBJECTS_OFFSET);
+	h_globals_offset = get_word (H_GLOBALS_OFFSET);
+	h_restart_size = get_word (H_RESTART_SIZE);
+	h_flags = get_word (H_FLAGS);
+	h_synonyms_offset = get_word (H_SYNONYMS_OFFSET);
+	h_file_size = get_word (H_FILE_SIZE);
+	if (h_file_size == 0)
+		h_file_size = get_story_size ();
+	h_checksum = get_word (H_CHECKSUM);
+	h_alternate_alphabet_offset = get_word (H_ALTERNATE_ALPHABET_OFFSET);
+
+	datap = NULL;
 }
+
+
+/* End of File */
+
+
+/* End of File */

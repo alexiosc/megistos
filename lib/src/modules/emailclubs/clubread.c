@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,238 +68,264 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "clubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/clubs.h>
+#include <megistos/email.h>
 
 
-char *keywords[128];
-char *phonetic[128];
-int numkeys=0;
+char   *keywords[128];
+char   *phonetic[128];
+int     numkeys = 0;
 
-int quickscan;            /* Quickscanning */
-int filescan;             /* Filescanning */
-int keyscan;              /* Keyscanning */
-int inemail=OPT_ALL;      /* Scanning from within email (readopt) */
-int allclubs=0;           /* Scan ALL clubs, not just in quickscan */
-int savecounter=0;        /* Countdown to saving last read msgnos */
-int lastkey=0;            /* Last key compared or # of key found */
+int     quickscan;		/* Quickscanning */
+int     filescan;		/* Filescanning */
+int     keyscan;		/* Keyscanning */
+int     inemail = OPT_ALL;	/* Scanning from within email (readopt) */
+int     allclubs = 0;		/* Scan ALL clubs, not just in quickscan */
+int     savecounter = 0;	/* Countdown to saving last read msgnos */
+int     lastkey = 0;		/* Last key compared or # of key found */
 
 
 void
-showkeywords()
+showkeywords ()
 {
-  int i;
+	int     i;
 
-  if(numkeys==1)prompt(RKSCAN1,keywords[0]);
-  else {
-    prompt(RKSCAN2,keywords[0]);
-    for(i=1;i<numkeys-1;i++)prompt(RKSCAN3,keywords[i]);
-    prompt(RKSCAN4,keywords[numkeys-1]);
-  }
+	if (numkeys == 1)
+		prompt (RKSCAN1, keywords[0]);
+	else {
+		prompt (RKSCAN2, keywords[0]);
+		for (i = 1; i < numkeys - 1; i++)
+			prompt (RKSCAN3, keywords[i]);
+		prompt (RKSCAN4, keywords[numkeys - 1]);
+	}
 }
 
 
 int
-methodmenu(int d)
+methodmenu (int d)
 {
-  char opt;
-  int i;
+	char    opt;
+	int     i;
 
-  for(;;){
-    inp_setflags(INF_HELP);
-    if(!d)i=get_menu(&opt,0,0,RCMNU,RCMNUR,"SFTLKQ",RCMNUD,'S');
-    else i=get_menu(&opt,0,0,DMNU,DMNUR,"SFTLKQ",DMNUD,'S');
-    inp_clearflags(INF_HELP);
-    if(!i)return 0;
-    if(i==-1){
-      prompt(d?DMNUH:RCMNUH);
-      cnc_end();
-      continue;
-    } else return opt;
-  }
-  return 0;
+	for (;;) {
+		inp_setflags (INF_HELP);
+		if (!d)
+			i = get_menu (&opt, 0, 0, RCMNU, RCMNUR, "SFTLKQ",
+				      RCMNUD, 'S');
+		else
+			i = get_menu (&opt, 0, 0, DMNU, DMNUR, "SFTLKQ", DMNUD,
+				      'S');
+		inp_clearflags (INF_HELP);
+		if (!i)
+			return 0;
+		if (i == -1) {
+			prompt (d ? DMNUH : RCMNUH);
+			cnc_end ();
+			continue;
+		} else
+			return opt;
+	}
+	return 0;
 }
 
 
 void
-quickmenu(int file)
+quickmenu (int file)
 {
-  char opt, fname[256];
-  int i;
-  struct stat st;
-  struct emailuser ecuser;
+	char    opt, fname[256];
+	int     i;
+	struct stat st;
+	struct emailuser ecuser;
 
-  if(!readecuser(thisuseracc.userid,&ecuser))return;
-  sprintf(fname,"%s/%s",mkfname(QSCDIR),thisuseracc.userid);
-  if(stat(fname,&st)||st.st_size==0||(ecuser.flags&ECF_QSCCFG)==0){
-    prompt(RQCFH);
-    cnc_end();
-    configurequickscan(1);
-    return;
-  }
+	if (!readecuser (thisuseracc.userid, &ecuser))
+		return;
+	sprintf (fname, "%s/%s", mkfname (QSCDIR), thisuseracc.userid);
+	if (stat (fname, &st) || st.st_size == 0 ||
+	    (ecuser.flags & ECF_QSCCFG) == 0) {
+		prompt (RQCFH);
+		cnc_end ();
+		configurequickscan (1);
+		return;
+	}
 
-  for(;;){
-    inp_setflags(INF_HELP);
-    i=get_menu(&opt,0,0,RQMNU,RCMNUR,"SFTLKC",RCMNUD,'S');
-    inp_clearflags(INF_HELP);
-    if(!i)return;
-    if(i==-1){
-      prompt(RQMNUH);
-      cnc_end();
-      continue;
-    } else break;
-  }
+	for (;;) {
+		inp_setflags (INF_HELP);
+		i = get_menu (&opt, 0, 0, RQMNU, RCMNUR, "SFTLKC", RCMNUD,
+			      'S');
+		inp_clearflags (INF_HELP);
+		if (!i)
+			return;
+		if (i == -1) {
+			prompt (RQMNUH);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  quickscan=1;
-  switch(opt){
-  case 'S':
-    scanmessages();
-    return;
-  case 'T':
-    inemail=OPT_TOYOU;
-    scanmessages();
-    inemail=OPT_ALL;
-    return;
-  case 'F':
-    inemail=OPT_FROMYOU;
-    scanmessages();
-    inemail=OPT_ALL;
-    return;
-  case 'L':
-    listmessages(file);
-    return;
-  case 'K':
-    keywordscan();
-    return;
-  case 'C':
-    configurequickscan(0);
-    return;
-  }
+	quickscan = 1;
+	switch (opt) {
+	case 'S':
+		scanmessages ();
+		return;
+	case 'T':
+		inemail = OPT_TOYOU;
+		scanmessages ();
+		inemail = OPT_ALL;
+		return;
+	case 'F':
+		inemail = OPT_FROMYOU;
+		scanmessages ();
+		inemail = OPT_ALL;
+		return;
+	case 'L':
+		listmessages (file);
+		return;
+	case 'K':
+		keywordscan ();
+		return;
+	case 'C':
+		configurequickscan (0);
+		return;
+	}
 }
 
 
 void
-clubread(int file)
+clubread (int file)
 {
-  int method;
+	int     method;
 
-  if(file&&(getclubax(&thisuseracc,clubhdr.club)<CAX_DNLOAD)){
-    prompt(DNLNAX);
-    cnc_end();
-    return;
-  }
+	if (file && (getclubax (&thisuseracc, clubhdr.club) < CAX_DNLOAD)) {
+		prompt (DNLNAX);
+		cnc_end ();
+		return;
+	}
 
 
-  /* Configure scanning */
-  
-  filescan=file;
-  quickscan=0;
+	/* Configure scanning */
 
-  method=methodmenu(file);
-  switch(method){
-  case 0:
-    return;
-  case 'S':
-    scanmessages();
-    break;
-  case 'T':
-    inemail=OPT_TOYOU;
-    scanmessages();
-    inemail=OPT_ALL;
-    break;
-  case 'F':
-    inemail=OPT_FROMYOU;
-    scanmessages();
-    inemail=OPT_ALL;
-    break;
-  case 'L':
-    listmessages(file);
-    break;
-  case 'K':
-    keywordscan();
-    break;
-  case 'Q':
-    quickscan=1;
-    quickmenu(file);
-    break;
-  }
+	filescan = file;
+	quickscan = 0;
+
+	method = methodmenu (file);
+	switch (method) {
+	case 0:
+		return;
+	case 'S':
+		scanmessages ();
+		break;
+	case 'T':
+		inemail = OPT_TOYOU;
+		scanmessages ();
+		inemail = OPT_ALL;
+		break;
+	case 'F':
+		inemail = OPT_FROMYOU;
+		scanmessages ();
+		inemail = OPT_ALL;
+		break;
+	case 'L':
+		listmessages (file);
+		break;
+	case 'K':
+		keywordscan ();
+		break;
+	case 'Q':
+		quickscan = 1;
+		quickmenu (file);
+		break;
+	}
 }
 
 
 void
-keywordscan()
+keywordscan ()
 {
-  char *i;
-  char tmp[MAXINPLEN];
-  int n;
+	char   *i;
+	char    tmp[MAXINPLEN];
+	int     n;
 
-  if(quickscan)startqsc();
-  for(;;){
-    if(cnc_more()){
-      i=cnc_nxtcmd;
-      strcpy(tmp,cnc_nxtcmd);
-      strcpy(inp_buffer,cnc_nxtcmd);
-      inp_parsin();
-    } else {
-      prompt(RKASK);
-      inp_get(0);
-      if(!margc)continue;
-    }
-    i=margv[0];
-    
-    if(!i[0])continue;
-    else if(inp_isX(i))return;
-    else if(sameas("?",i)){
-      prompt(RKHELP);
-      cnc_end();
-      continue;
-    } else {
-      char s[256], *cp;
+	if (quickscan)
+		startqsc ();
+	for (;;) {
+		if (cnc_more ()) {
+			i = cnc_nxtcmd;
+			strcpy (tmp, cnc_nxtcmd);
+			strcpy (inp_buffer, cnc_nxtcmd);
+			inp_parsin ();
+		} else {
+			prompt (RKASK);
+			inp_get (0);
+			if (!margc)
+				continue;
+		}
+		i = margv[0];
 
-      memset(keywords,0,sizeof(keywords));
-      for(numkeys=0,n=0;n<margc && n<128;n++,numkeys++){
-	strncpy(s,margv[n],sizeof(s));
-	while(s[strlen(s)-1]==32)s[strlen(s)-1]=0;
-	for(cp=s;*cp&&(*cp==32);cp++);
-	keywords[n]=alcmem(strlen(cp)+1);
-	strcpy(keywords[n],cp);
-	phonetic[n]=alcmem(strlen(cp)+1);
-	strcpy(phonetic[n],stgxlate(cp,KEYSCAN));
-      }
-      break;
-    }
-  }
+		if (!i[0])
+			continue;
+		else if (inp_isX (i))
+			return;
+		else if (sameas ("?", i)) {
+			prompt (RKHELP);
+			cnc_end ();
+			continue;
+		} else {
+			char    s[256], *cp;
 
-  if(!quickscan)showkeywords();
-  
-  keyscan=1;
-  if(quickscan)doquickscan();
-  else startscanning(-1,BSD_GT);
-  keyscan=0;
+			memset (keywords, 0, sizeof (keywords));
+			for (numkeys = 0, n = 0; n < margc && n < 128;
+			     n++, numkeys++) {
+				strncpy (s, margv[n], sizeof (s));
+				while (s[strlen (s) - 1] == 32)
+					s[strlen (s) - 1] = 0;
+				for (cp = s; *cp && (*cp == 32); cp++);
+				keywords[n] = alcmem (strlen (cp) + 1);
+				strcpy (keywords[n], cp);
+				phonetic[n] = alcmem (strlen (cp) + 1);
+				strcpy (phonetic[n], stgxlate (cp, KEYSCAN));
+			}
+			break;
+		}
+	}
 
-  for(n=0;n<numkeys;n++)if(keywords[n]){
-    free(keywords[n]);
-    free(phonetic[n]);
-    keywords[n]=NULL;
-  }
-  numkeys=0;
+	if (!quickscan)
+		showkeywords ();
+
+	keyscan = 1;
+	if (quickscan)
+		doquickscan ();
+	else
+		startscanning (-1, BSD_GT);
+	keyscan = 0;
+
+	for (n = 0; n < numkeys; n++)
+		if (keywords[n]) {
+			free (keywords[n]);
+			free (phonetic[n]);
+			keywords[n] = NULL;
+		}
+	numkeys = 0;
 }
 
 
 void
-fileapp()
+fileapp ()
 {
-  prompt(FAPPSCN);
+	prompt (FAPPSCN);
 
-  keyscan=0;
-  filescan=2;
+	keyscan = 0;
+	filescan = 2;
 
-  startqsc();
+	startqsc ();
 
-  startscanning(0,BSD_GT);
-  keyscan=filescan=0;
+	startscanning (0, BSD_GT);
+	keyscan = filescan = 0;
 
-  rmlocks();
+	rmlocks ();
 }
+
+
+/* End of File */

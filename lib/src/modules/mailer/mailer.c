@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -57,10 +60,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,197 +72,215 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailer.h"
-#include "mbk_mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/mailer.h>
+#include <megistos/mbk_mailer.h>
 
 
 promptblock_t *msg, *archivers, *mailer_msg;
 
 
-char *bbsid;
-char *ctlname[6];
-int entrykey;
-int sopkey;
-int chgdnl;
-int defgrk;
-int stpncnf;
-int qwkuc;
-int auddnl;
-int audupl;
-int uplkey;
+char   *bbsid;
+char   *ctlname[6];
+int     entrykey;
+int     sopkey;
+int     chgdnl;
+int     defgrk;
+int     stpncnf;
+int     qwkuc;
+int     auddnl;
+int     audupl;
+int     uplkey;
 
 
 void
-about()
+about ()
 {
-  prompt(ABOUT);
+	prompt (ABOUT);
 }
 
 
 void
-init()
+init ()
 {
-  int i;
+	int     i;
 
-  mod_init(INI_ALL);
-  archivers=msg_open("archivers");
-  msg=mailer_msg=msg_open("mailer");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	archivers = msg_open ("archivers");
+	msg = mailer_msg = msg_open ("mailer");
+	msg_setlanguage (thisuseracc.language);
 
-  bbsid=msg_string(BBSID);
-  entrykey=msg_int(ENTRYKEY,0,129);
-  chgdnl=msg_int(CHGDNL,-100000,100000);
-  defgrk=msg_bool(DEFGRK);
-  stpncnf=msg_bool(STPNCNF);
-  if((qwkuc=msg_token(QWKUC,"LOWERCASE","UPPERCASE"))==0){
-    error_fatal("Option QWKUC in mailer.msg has bad value.");
-  }else qwkuc--;
-  auddnl=msg_bool(AUDDNL);
-  audupl=msg_bool(AUDUPL);
-  for(i=0;i<6;i++)ctlname[i]=msg_string(CTLNAME1+i);
-  uplkey=msg_int(UPLKEY,0,129);
+	bbsid = msg_string (BBSID);
+	entrykey = msg_int (ENTRYKEY, 0, 129);
+	chgdnl = msg_int (CHGDNL, -100000, 100000);
+	defgrk = msg_bool (DEFGRK);
+	stpncnf = msg_bool (STPNCNF);
+	if ((qwkuc = msg_token (QWKUC, "LOWERCASE", "UPPERCASE")) == 0) {
+		error_fatal ("Option QWKUC in mailer.msg has bad value.");
+	} else
+		qwkuc--;
+	auddnl = msg_bool (AUDDNL);
+	audupl = msg_bool (AUDUPL);
+	for (i = 0; i < 6; i++)
+		ctlname[i] = msg_string (CTLNAME1 + i);
+	uplkey = msg_int (UPLKEY, 0, 129);
 
-  parseplugindef();
+	parseplugindef ();
 }
 
 
 void
-run()
+run ()
 {
-  int shownmenu=0;
-  char c=0;
+	int     shownmenu = 0;
+	char    c = 0;
 
-  bzero(&userqwk,sizeof(userqwk));
+	bzero (&userqwk, sizeof (userqwk));
 
-  if(!key_owns(&thisuseracc,entrykey)){
-    prompt(NOAXES);
-    return;
-  }
-
-  if(loadprefs(USERQWK,&userqwk)<0){
-    cnc_end();
-    prompt(NEWCNF);
-    setup();
-    cnc_end();
-  }
-
-  for(;;){
-    thisuseronl.flags&=~OLF_BUSY;
-    if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-      if(!shownmenu){
-	prompt(MENU);
-	shownmenu=2;
-      }
-    } else shownmenu=1;
-    if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
-      thisuseronl.input[0]=0;
-    } else {
-      if(!cnc_nxtcmd){
-	if(thisuseronl.flags&OLF_MMCONCAT){
-	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return;
+	if (!key_owns (&thisuseracc, entrykey)) {
+		prompt (NOAXES);
+		return;
 	}
-	if(shownmenu==1){
-	  prompt(SHORT);
-	} else shownmenu=1;
-	inp_get(0);
-	cnc_begin();
-      }
-    }
 
-    if((c=cnc_more())!=0){
-      cnc_chr();
-      switch (c) {
-      case 'A':
-	about();
-	break;
-      case 'S':
-	setup();
-	break;
-      case 'D':
-	download();
-	break;
-      case 'U':
-	upload();
-	break;
-      case 'X':
-	prompt(LEAVE);
-	return;
-      case '?':
-	shownmenu=0;
-	break;
-      default:
-	prompt(ERRSEL,c);
-	cnc_end();
-	continue;
-      }
-    }
-    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
-    cnc_end();
+	if (loadprefs (USERQWK, &userqwk) < 0) {
+		cnc_end ();
+		prompt (NEWCNF);
+		setup ();
+		cnc_end ();
+	}
 
-  }
+	for (;;) {
+		thisuseronl.flags &= ~OLF_BUSY;
+		if (!
+		    (thisuseronl.flags & OLF_MMCALLING &&
+		     thisuseronl.input[0])) {
+			if (!shownmenu) {
+				prompt (MENU);
+				shownmenu = 2;
+			}
+		} else
+			shownmenu = 1;
+		if (thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0]) {
+			thisuseronl.input[0] = 0;
+		} else {
+			if (!cnc_nxtcmd) {
+				if (thisuseronl.flags & OLF_MMCONCAT) {
+					thisuseronl.flags &= ~OLF_MMCONCAT;
+					return;
+				}
+				if (shownmenu == 1) {
+					prompt (SHORT);
+				} else
+					shownmenu = 1;
+				inp_get (0);
+				cnc_begin ();
+			}
+		}
+
+		if ((c = cnc_more ()) != 0) {
+			cnc_chr ();
+			switch (c) {
+			case 'A':
+				about ();
+				break;
+			case 'S':
+				setup ();
+				break;
+			case 'D':
+				download ();
+				break;
+			case 'U':
+				upload ();
+				break;
+			case 'X':
+				prompt (LEAVE);
+				return;
+			case '?':
+				shownmenu = 0;
+				break;
+			default:
+				prompt (ERRSEL, c);
+				cnc_end ();
+				continue;
+			}
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			fmt_resetvpos (0);
+		cnc_end ();
+
+	}
 }
 
 
 void
-done()
+done ()
 {
-  msg_close(msg);
+	msg_close (msg);
 }
 
 
 int
-handler_run(int argc, char *argv[])
+handler_run (int argc, char *argv[])
 {
-  atexit(done);
-  init();
-  run();
-  done();
-  return 0;
+	atexit (done);
+	init ();
+	run ();
+	done ();
+	return 0;
 }
 
 
-int handler_userdel(int argc, char **argv)
+int
+handler_userdel (int argc, char **argv)
 {
-  char *victim=argv[2], fname[1024];
+	char   *victim = argv[2], fname[1024];
 
-  if(strcmp(argv[1],"--userdel")||argc!=3){
-    fprintf(stderr,"User deletion handler: syntax error\n");
-    return 1;
-  }
+	if (strcmp (argv[1], "--userdel") || argc != 3) {
+		fprintf (stderr, "User deletion handler: syntax error\n");
+		return 1;
+	}
 
-  if(!usr_exists(victim)){
-    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
-    return 1;
-  }
+	if (!usr_exists (victim)) {
+		fprintf (stderr,
+			 "User deletion handler: user %s does not exist\n",
+			 victim);
+		return 1;
+	}
 
-  sprintf(fname,"%s/%s",mkfname(MAILERUSRDIR),victim);
-  unlink(fname);
+	sprintf (fname, "%s/%s", mkfname (MAILERUSRDIR), victim);
+	unlink (fname);
 
-  return 0;
+	return 0;
 }
 
 
 mod_info_t mod_info_mailer = {
-  "mailer",
-  "Off-Line Mailer",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Packages parts of the BBS for off-line browsing and use.",
-  RCS_VER,
-  VERSION,
-  {0,NULL},			/* Login handler */
-  {0,handler_run},		/* Interactive handler */
-  {0,NULL},			/* Install logout handler */
-  {0,NULL},			/* Hangup handler */
-  {0,NULL},			/* Cleanup handler */
-  {50,handler_userdel}		/* Delete user handler */
+	"mailer",
+	"Off-Line Mailer",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Packages parts of the BBS for off-line browsing and use.",
+	RCS_VER,
+	VERSION,
+	{0, NULL}
+	,			/* Login handler */
+	{0, handler_run}
+	,			/* Interactive handler */
+	{0, NULL}
+	,			/* Install logout handler */
+	{0, NULL}
+	,			/* Hangup handler */
+	{0, NULL}
+	,			/* Cleanup handler */
+	{50, handler_userdel}	/* Delete user handler */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setinfo(&mod_info_mailer);
-  return mod_main(argc,argv);
+	mod_setinfo (&mod_info_mailer);
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,120 +55,136 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static char *
-getfilenames(int pr)
+getfilenames (int pr)
 {
-  static char fn[256];
+	static char fn[256];
 
-  for(;;){
-    if(cnc_more()){
-      strcpy(fn,cnc_word());
-    } else {
-      prompt(pr);
-      inp_get(sizeof(fn)-1);
-      strcpy(fn,inp_buffer);
-    }
+	for (;;) {
+		if (cnc_more ()) {
+			strcpy (fn, cnc_word ());
+		} else {
+			prompt (pr);
+			inp_get (sizeof (fn) - 1);
+			strcpy (fn, inp_buffer);
+		}
 
-    if(inp_isX(fn))return NULL;
-    else if(!strlen(fn)){
-      cnc_end();
-      continue;
-    } else if(!strcmp(fn,"?")){
-      listapproved();
-      cnc_end();
-      continue;
-    } else break;
-  }
+		if (inp_isX (fn))
+			return NULL;
+		else if (!strlen (fn)) {
+			cnc_end ();
+			continue;
+		} else if (!strcmp (fn, "?")) {
+			listapproved ();
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  return fn;
+	return fn;
 }
 
 
 static
-void dodelete(struct fileidx *f, int mode)
+    void
+dodelete (struct fileidx *f, int mode)
 {
-  char fname[512];
-  struct stat st;
+	char    fname[512];
+	struct stat st;
 
-  delfilekeywords(&library,f);
-  filedelete(f);
+	delfilekeywords (&library, f);
+	filedelete (f);
 
-  sprintf(fname,"%s/%s",library.dir,f->fname);
-  stat(fname,&st);
-  libinstfile(&library,f,st.st_size,LIF_DEL);
+	sprintf (fname, "%s/%s", library.dir, f->fname);
+	stat (fname, &st);
+	libinstfile (&library, f, st.st_size, LIF_DEL);
 
-  if(mode){
-    unlink(fname);
-    prompt(ODELOKD,f->fname);
-  } else prompt(ODELOK,f->fname);
+	if (mode) {
+		unlink (fname);
+		prompt (ODELOKD, f->fname);
+	} else
+		prompt (ODELOK, f->fname);
 }
 
 
 void
-op_del()
+op_del ()
 {
-  char *spec;
-  int numfiles;
-  struct filerec *fr;
-  struct fileidx f;
-  int i, mode=0, all=0;
-  char c;
+	char   *spec;
+	int     numfiles;
+	struct filerec *fr;
+	struct fileidx f;
+	int     i, mode = 0, all = 0;
+	char    c;
 
-  if(library.flags&LBF_OSDIR){
-    prompt(ODELOS);
-    mode=1;
-  }
-
-  if((spec=getfilenames(ODELASK))==NULL)return;
-  numfiles=expandspec(spec,1);
-  if(numfiles==0){
-    prompt(ODELERR);
-    cnc_end();
-    return;
-  } else if(numfiles>0){
-    prompt(ODELNUM,numfiles);
-  }
-
-  cnc_end();
-  if(!mode)
-    if(!get_bool(&mode,ODELMOD,ODELMOD,0,0))return;
-
-  fr=firstfile();
-  i=1;
-  while(fr){
-    if(!fileread(library.libnum,fr->fname,1,&f))
-      if(!fileread(library.libnum,fr->fname,0,&f)) continue;
-
-    for(;;){
-      int res;
-
-      if(!all){
-	prompt(ODELINF,i,numfiles);
-	fileinfo(&library,&f);
-	inp_setflags(INF_HELP);
-	res=get_menu(&c,0,0,ODELMNU,0,"YNA",0,0);
-	inp_clearflags(INF_HELP);
-	if(res<0)continue;
-	if(res==0)goto done;
-	if(c=='A'){
-	  all=1;
-	  c='Y';
+	if (library.flags & LBF_OSDIR) {
+		prompt (ODELOS);
+		mode = 1;
 	}
-      } else c='Y';
 
-      if(c=='Y')dodelete(&f,mode);
-      break;
-    }
+	if ((spec = getfilenames (ODELASK)) == NULL)
+		return;
+	numfiles = expandspec (spec, 1);
+	if (numfiles == 0) {
+		prompt (ODELERR);
+		cnc_end ();
+		return;
+	} else if (numfiles > 0) {
+		prompt (ODELNUM, numfiles);
+	}
 
-    i++;
-    fr=nextfile();
-  }
+	cnc_end ();
+	if (!mode)
+		if (!get_bool (&mode, ODELMOD, ODELMOD, 0, 0))
+			return;
 
-done:
-  reset_filearray();
+	fr = firstfile ();
+	i = 1;
+	while (fr) {
+		if (!fileread (library.libnum, fr->fname, 1, &f))
+			if (!fileread (library.libnum, fr->fname, 0, &f))
+				continue;
+
+		for (;;) {
+			int     res;
+
+			if (!all) {
+				prompt (ODELINF, i, numfiles);
+				fileinfo (&library, &f);
+				inp_setflags (INF_HELP);
+				res =
+				    get_menu (&c, 0, 0, ODELMNU, 0, "YNA", 0,
+					      0);
+				inp_clearflags (INF_HELP);
+				if (res < 0)
+					continue;
+				if (res == 0)
+					goto done;
+				if (c == 'A') {
+					all = 1;
+					c = 'Y';
+				}
+			} else
+				c = 'Y';
+
+			if (c == 'Y')
+				dodelete (&f, mode);
+			break;
+		}
+
+		i++;
+		fr = nextfile ();
+	}
+
+      done:
+	reset_filearray ();
 }
+
+
+/* End of File */

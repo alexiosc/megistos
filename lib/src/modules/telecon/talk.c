@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -62,97 +63,106 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 static char tmp[16384], tmp2[4096];
 
 
 int
-checkax()
+checkax ()
 {
-  if(thisuseraux.access&CUF_READONLY){
-    prompt(TLKSQU);
-    return 0;
-  }
-  return 1;
+	if (thisuseraux.access & CUF_READONLY) {
+		prompt (TLKSQU);
+		return 0;
+	}
+	return 1;
 }
 
 
 static char *
-fx_say(struct chanusr *u)
+fx_say (struct chanusr *u)
 {
-  tmp[0]=out_buffer[0]=0;
-  sprintf(out_buffer,msg_getl(TFROM,othruseracc.language-1),
-	  getcolour(),thisuseracc.userid,tmp2);
-  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
-  strcat(tmp,out_buffer);
-  return tmp;
+	tmp[0] = out_buffer[0] = 0;
+	sprintf (out_buffer, msg_getl (TFROM, othruseracc.language - 1),
+		 getcolour (), thisuseracc.userid, tmp2);
+	strcpy (tmp, msg_getl (TDELIM, othruseracc.language - 1));
+	strcat (tmp, out_buffer);
+	return tmp;
 }
 
 
 void
-say(char *s)
+say (char *s)
 {
-  if(!checkax())return;
+	if (!checkax ())
+		return;
 
-  strcpy(tmp2,s);
-  if(broadcast(fx_say)>0)prompt(TSENT);
-  else prompt(SIU0);
+	strcpy (tmp2, s);
+	if (broadcast (fx_say) > 0)
+		prompt (TSENT);
+	else
+		prompt (SIU0);
 }
 
 
 void
-whisper(char *s)
+whisper (char *s)
 {
-  char *cp=s, userid[256];
-  int i;
+	char   *cp = s, userid[256];
+	int     i;
 
-  if(!checkax())return;
+	if (!checkax ())
+		return;
 
-  cp=&s[strlen(s)];
-  while((cp!=s)&&(*cp==32))*(cp--)=0;
-  cp=s;
+	cp = &s[strlen (s)];
+	while ((cp != s) && (*cp == 32))
+		*(cp--) = 0;
+	cp = s;
 
-  if(sameas(inp_buffer,"/")||sameas(inp_buffer,"WHISPER TO")){
-    prompt(HLPWHIS);
-    cnc_end();
-    return;
-  }
+	if (sameas (inp_buffer, "/") || sameas (inp_buffer, "WHISPER TO")) {
+		prompt (HLPWHIS);
+		cnc_end ();
+		return;
+	}
 
-  if(s[0]=='/'){
-    cp=s+1;
-    if(sscanf(cp,"%s %n",userid,&i)!=1 || strlen(&cp[i])==0){
-      prompt(HLPWHIS);
-      cnc_end();
-      return;
-    } else cp+=i;
-  } else if(sameto("WHISPER TO ",s)){
-    char dummy1[16],dummy2[16];
+	if (s[0] == '/') {
+		cp = s + 1;
+		if (sscanf (cp, "%s %n", userid, &i) != 1 ||
+		    strlen (&cp[i]) == 0) {
+			prompt (HLPWHIS);
+			cnc_end ();
+			return;
+		} else
+			cp += i;
+	} else if (sameto ("WHISPER TO ", s)) {
+		char    dummy1[16], dummy2[16];
 
-    if(sscanf(s,"%s %s %s %n",dummy1,dummy2,userid,&i)!=3 ||
-       strlen(&cp[i])==0){
-      prompt(HLPWHIS);
-      cnc_end();
-      return;
-    } else cp=&s[i];
-  } else return;
+		if (sscanf (s, "%s %s %s %n", dummy1, dummy2, userid, &i) != 3
+		    || strlen (&cp[i]) == 0) {
+			prompt (HLPWHIS);
+			cnc_end ();
+			return;
+		} else
+			cp = &s[i];
+	} else
+		return;
 
-  if(!tlcuidxref(userid,1)){
-    cnc_end();
-    prompt(UIDNINC);
-    return;
-  }
-  if(usr_insys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
-    sprompt_other(othrshm,out_buffer,TDELIM);
-    usr_injoth(&othruseronl,out_buffer,0);
-    sprompt_other(othrshm,out_buffer,TFROMP,
-		  getcolour(),thisuseracc.userid,cp);
-    usr_injoth(&othruseronl,out_buffer,0);
-    prompt(TSENTP,othruseronl.userid);
-  }
+	if (!tlcuidxref (userid, 1)) {
+		cnc_end ();
+		prompt (UIDNINC);
+		return;
+	}
+	if (usr_insys (userid, 1) && ((thisuseronl.flags & OLF_BUSY) == 0)) {
+		sprompt_other (othrshm, out_buffer, TDELIM);
+		usr_injoth (&othruseronl, out_buffer, 0);
+		sprompt_other (othrshm, out_buffer, TFROMP,
+			       getcolour (), thisuseracc.userid, cp);
+		usr_injoth (&othruseronl, out_buffer, 0);
+		prompt (TSENTP, othruseronl.userid);
+	}
 }
 
 
@@ -160,71 +170,85 @@ static char *fxuser, *fxmsg;
 
 
 static char *
-fx_sayto(struct chanusr *u)
+fx_sayto (struct chanusr *u)
 {
-  sprompt_other(othrshm,out_buffer,TDELIM);
-  usr_injoth(&othruseronl,out_buffer,0);
-  if(sameas(u->userid,fxuser)){
-    sprompt_other(othrshm,out_buffer,TFROM2U,
-		  getcolour(),thisuseracc.userid,fxmsg);
-  } else {
-    sprompt_other(othrshm,out_buffer,TFROMT,
-		  getcolour(),thisuseracc.userid,fxuser,fxmsg);
-  }
-  return out_buffer;
+	sprompt_other (othrshm, out_buffer, TDELIM);
+	usr_injoth (&othruseronl, out_buffer, 0);
+	if (sameas (u->userid, fxuser)) {
+		sprompt_other (othrshm, out_buffer, TFROM2U,
+			       getcolour (), thisuseracc.userid, fxmsg);
+	} else {
+		sprompt_other (othrshm, out_buffer, TFROMT,
+			       getcolour (), thisuseracc.userid, fxuser,
+			       fxmsg);
+	}
+	return out_buffer;
 }
 
 
 void
-sayto(char *s)
+sayto (char *s)
 {
-  char *cp=s, userid[256];
-  int i;
-  
-  if(!checkax())return;
+	char   *cp = s, userid[256];
+	int     i;
 
-  cp=&s[strlen(s)];
-  while((cp!=s)&&(*cp==32))*(cp--)=0;
-  cp=s;
+	if (!checkax ())
+		return;
 
-  if(sameas(inp_buffer,"\\")||sameas(inp_buffer,">")||sameas(inp_buffer,"SAY TO")){
-    prompt(HLPSAY);
-    cnc_end();
-    return;
-  }
+	cp = &s[strlen (s)];
+	while ((cp != s) && (*cp == 32))
+		*(cp--) = 0;
+	cp = s;
 
-  if(s[0]=='\\'||s[0]=='>'){
-    cp=s+1;
-    if(sscanf(cp,"%s %n",userid,&i)!=1 || strlen(&cp[i])==0){
-      prompt(HLPSAY);
-      cnc_end();
-      return;
-    } else cp+=i;
-  } else if(sameto("SAY TO ",s)){
-    if(sscanf(s,"%*s %*s %s %n",userid,&i)!=3
-       || strlen(&cp[i])==0){
-      prompt(HLPSAY);
-      cnc_end();
-      return;
-    } else cp=&s[i];
-  } else return;
+	if (sameas (inp_buffer, "\\") || sameas (inp_buffer, ">") ||
+	    sameas (inp_buffer, "SAY TO")) {
+		prompt (HLPSAY);
+		cnc_end ();
+		return;
+	}
 
-  if(!tlcuidxref(userid,1)){
-    cnc_end();
-    prompt(UIDNINC);
-    return;
-  }
-  if(usr_insys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
-    int i;
-    if(sameas(userid,thisuseracc.userid)){
-      prompt(TWHYU);
-      cnc_end();
-      return;
-    }
-    fxuser=userid;
-    fxmsg=cp;
-    i=broadcast(fx_sayto);
-    if(i>0)prompt(TSENTT,userid);
-    else if(!i)prompt(SIU0);
-  }
+	if (s[0] == '\\' || s[0] == '>') {
+		cp = s + 1;
+		if (sscanf (cp, "%s %n", userid, &i) != 1 ||
+		    strlen (&cp[i]) == 0) {
+			prompt (HLPSAY);
+			cnc_end ();
+			return;
+		} else
+			cp += i;
+	} else if (sameto ("SAY TO ", s)) {
+		if (sscanf (s, "%*s %*s %s %n", userid, &i) != 3
+		    || strlen (&cp[i]) == 0) {
+			prompt (HLPSAY);
+			cnc_end ();
+			return;
+		} else
+			cp = &s[i];
+	} else
+		return;
+
+	if (!tlcuidxref (userid, 1)) {
+		cnc_end ();
+		prompt (UIDNINC);
+		return;
+	}
+	if (usr_insys (userid, 1) && ((thisuseronl.flags & OLF_BUSY) == 0)) {
+		int     i;
+
+		if (sameas (userid, thisuseracc.userid)) {
+			prompt (TWHYU);
+			cnc_end ();
+			return;
+		}
+		fxuser = userid;
+		fxmsg = cp;
+		i = broadcast (fx_sayto);
+		if (i > 0)
+			prompt (TSENTT, userid);
+		else if (!i)
+			prompt (SIU0);
+	}
 }
+
+
+/* End of File */

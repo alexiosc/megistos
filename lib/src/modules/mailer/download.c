@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -69,10 +72,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -86,225 +87,247 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "systemversion.h"
-#include "mailer.h"
-#include "mbk_mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/systemversion.h>
+#include <megistos/mailer.h>
+#include <megistos/mbk_mailer.h>
 #define __ARCHIVERS_UNAMBIGUOUS__
-#include "mbk_archivers.h"
+#include <megistos/mbk_archivers.h>
 
 
 static int
-plugindnl(int n)
+plugindnl (int n)
 {
-  char command[256];
-  int res;
-  sprintf(command,"%s --download",plugins[n].name);
-  res=runcommand(command);
-  cnc_end();
-  if(res)return res==512?2:1;
-  return 0;
+	char    command[256];
+	int     res;
+
+	sprintf (command, "%s --download", plugins[n].name);
+	res = runcommand (command);
+	cnc_end ();
+	if (res)
+		return res == 512 ? 2 : 1;
+	return 0;
 }
 
 
 static int
-mkfiles(char *dir)
+mkfiles (char *dir)
 {
-  FILE *fp;
-  char fname[256];
+	FILE   *fp;
+	char    fname[256];
 
-  sprintf(fname,"%s/door.id",dir);
-  if((fp=fopen(fname,"w"))==NULL){
-    prompt(ERRQWK);
-    fclose(fp);
-    return 0;
-  }
-  fprintf(fp,"DOOR = MegistosMail\r\n");
-  fprintf(fp,"VERSION = %s\r\n",VERSION);
-  fprintf(fp,"SYSTEM = %s\r\n",bbs_systemversion);
-  fprintf(fp,"CONTROLNAME = %s\r\n",ctlname[0]);
-  fprintf(fp,"MIXEDCASE = YES\r\n");
-  if(userqwk.flags&USQ_GREEKQWK)fprintf(fp,"GREEKQWK\r\n");
-  fclose(fp);
+	sprintf (fname, "%s/door.id", dir);
+	if ((fp = fopen (fname, "w")) == NULL) {
+		prompt (ERRQWK);
+		fclose (fp);
+		return 0;
+	}
+	fprintf (fp, "DOOR = MegistosMail\r\n");
+	fprintf (fp, "VERSION = %s\r\n", VERSION);
+	fprintf (fp, "SYSTEM = %s\r\n", bbs_systemversion);
+	fprintf (fp, "CONTROLNAME = %s\r\n", ctlname[0]);
+	fprintf (fp, "MIXEDCASE = YES\r\n");
+	if (userqwk.flags & USQ_GREEKQWK)
+		fprintf (fp, "GREEKQWK\r\n");
+	fclose (fp);
 
-  return 1;
+	return 1;
 }
 
 
-static int filesel(const struct dirent *d)
+static int
+filesel (const struct dirent *d)
 {
-  return d->d_name[0]!='.';
+	return d->d_name[0] != '.';
 }
 
 
 static void
-copyfiles(char *dir)
+copyfiles (char *dir)
 {
-  struct dirent **d=NULL;
-  int i,j=scandir(mkfname(MAILERFILESDIR),&d,filesel,alphasort);
-  for(i=0;i<j;i++){
-    char fname1[256], fname2[256];
-    sprintf(fname1,"%s/%s",mkfname(MAILERFILESDIR),d[i]->d_name);
-    sprintf(fname2,"%s/%s",dir,d[i]->d_name);
-    unix2dos(fname1,fname2);
-    free(d[i]);
-  }
-  if(d!=NULL)free(d);
+	struct dirent **d = NULL;
+	int     i, j =
+	    scandir (mkfname (MAILERFILESDIR), &d, filesel, alphasort);
+	for (i = 0; i < j; i++) {
+		char    fname1[256], fname2[256];
+
+		sprintf (fname1, "%s/%s", mkfname (MAILERFILESDIR),
+			 d[i]->d_name);
+		sprintf (fname2, "%s/%s", dir, d[i]->d_name);
+		unix2dos (fname1, fname2);
+		free (d[i]);
+	}
+	if (d != NULL)
+		free (d);
 }
 
 
 static int
-compress(char *packetname,char *dir)
+compress (char *packetname, char *dir)
 {
-  char command[256];
-  char fname[256];
-  char tmp[256];
+	char    command[256];
+	char    fname[256];
+	char    tmp[256];
 
-  /* Now compress the packet */
+	/* Now compress the packet */
 
-  msg_set(archivers);
-  sprintf(tmp,"%s >&/dev/null",msg_get(ARCHIVERS_COMPRESS1+userqwk.compressor*7));
-  sprintf(command,tmp,packetname,"*");
-  strcpy(tmp,msg_get(ARCHIVERS_NAME1+userqwk.compressor*7));
-  msg_reset();
-  prompt(PACKING,tmp);
-  if(system(command)){
-    prompt(PACKERR);
-    return 0;
-  }
-  prompt(PACKOK);
-  
+	msg_set (archivers);
+	sprintf (tmp, "%s >&/dev/null",
+		 msg_get (ARCHIVERS_COMPRESS1 + userqwk.compressor * 7));
+	sprintf (command, tmp, packetname, "*");
+	strcpy (tmp, msg_get (ARCHIVERS_NAME1 + userqwk.compressor * 7));
+	msg_reset ();
+	prompt (PACKING, tmp);
+	if (system (command)) {
+		prompt (PACKERR);
+		return 0;
+	}
+	prompt (PACKOK);
 
-  /* Erase all the other files */
 
-  sprintf(fname,"%s/.tmp",dir);
-  rename(packetname,fname);
-  sprintf(command,"\\rm -rf %s/*",dir);
-  system(command);
-  rename(fname,packetname);
-  
-  return 1;
+	/* Erase all the other files */
+
+	sprintf (fname, "%s/.tmp", dir);
+	rename (packetname, fname);
+	sprintf (command, "\\rm -rf %s/*", dir);
+	system (command);
+	rename (fname, packetname);
+
+	return 1;
 }
 
 
-static int offer(char *fname,char *dir)
+static int
+offer (char *fname, char *dir)
 {
-  struct stat st;
-  char descr[256];
-  char audit[2][80];
+	struct stat st;
+	char    descr[256];
+	char    audit[2][80];
 
-  if(stat(fname,&st)){
-    prompt(ERRQWK);
-    return 0;
-  }
-
-
-  /* Set the description */
-
-  sprintf(descr,msg_get(QWKDESC));
+	if (stat (fname, &st)) {
+		prompt (ERRQWK);
+		return 0;
+	}
 
 
-  /* Set the audit messages */
+	/* Set the description */
 
-  strcpy(audit[0],AUS_QWKDNL);
-  sprintf(audit[1],AUD_QWKDNL,thisuseracc.userid,(int)st.st_size);
-  xfer_setaudit(AUT_QWKDNL,audit[0],audit[1],0,NULL,NULL);
+	sprintf (descr, msg_get (QWKDESC));
 
 
-  /* Register the file for downloading */
+	/* Set the audit messages */
 
-  xfer_add(FXM_TRANSIENT,fname,descr,chgdnl,-1);
+	strcpy (audit[0], AUS_QWKDNL);
+	sprintf (audit[1], AUD_QWKDNL, thisuseracc.userid, (int) st.st_size);
+	xfer_setaudit (AUT_QWKDNL, audit[0], audit[1], 0, NULL, NULL);
 
 
-  /* Perform the transfer */
+	/* Register the file for downloading */
 
-  xfer_run();
-  xfer_kill_list();
-  cnc_end();
-  return 1;
+	xfer_add (FXM_TRANSIENT, fname, descr, chgdnl, -1);
+
+
+	/* Perform the transfer */
+
+	xfer_run ();
+	xfer_kill_list ();
+	cnc_end ();
+	return 1;
 }
 
 
 void
-download()
+download ()
 {
-  int i, fail;
-  char dir[256], command[256];
+	int     i, fail;
+	char    dir[256], command[256];
 
-  if(!usr_canpay(chgdnl)){
-    prompt(DNLNCRD);
-    return;
-  }
+	if (!usr_canpay (chgdnl)) {
+		prompt (DNLNCRD);
+		return;
+	}
 
-  if(loadprefs(USERQWK,&userqwk)!=1){
-    prompt(stpncnf?NOTCFG2:NOTCFG);
-    if(stpncnf)return;
-    else defaultvals();
-  }
+	if (loadprefs (USERQWK, &userqwk) != 1) {
+		prompt (stpncnf ? NOTCFG2 : NOTCFG);
+		if (stpncnf)
+			return;
+		else
+			defaultvals ();
+	}
 
-  readxlation();
-  xlationtable=(userqwk.flags&OMF_TR)>>OMF_SHIFT;
+	readxlation ();
+	xlationtable = (userqwk.flags & OMF_TR) >> OMF_SHIFT;
 
-  prompt(BEGINQWK,userqwk.packetname);
+	prompt (BEGINQWK, userqwk.packetname);
 
 
-  /* Make the directory and cd to it */
+	/* Make the directory and cd to it */
 
-  sprintf(dir,TMPDIR"/mailer.%lx%x",time(0),getpid());
-  sprintf(command,"\\rm -rf %s",dir);
-  system(command);
-  if(mkdir(dir,0770)){
-    error_fatalsys("Unable to make directory %s",dir);
-  }
-  chdir(dir);
-  
-  
-  /* Create any general purpose files, like DOOR.ID */
+	sprintf (dir, TMPDIR "/mailer.%lx%x", time (0), getpid ());
+	sprintf (command, "\\rm -rf %s", dir);
+	system (command);
+	if (mkdir (dir, 0770)) {
+		error_fatalsys ("Unable to make directory %s", dir);
+	}
+	chdir (dir);
 
-  if(!mkfiles(dir))goto kill;
 
-  /* Run all plugins */
+	/* Create any general purpose files, like DOOR.ID */
 
-  for(fail=i=0;i<numplugins;i++){
-    if(plugins[i].flags&PLF_DOWNLOAD)if((fail=plugindnl(i))!=0)break;
-  }
+	if (!mkfiles (dir))
+		goto kill;
 
-  if(fail){
-    prompt(fail==1?ERRQWK:ABOQWK);
-    goto kill;
-  } else {
+	/* Run all plugins */
 
-    /* Produce the packet's filename */
+	for (fail = i = 0; i < numplugins; i++) {
+		if (plugins[i].flags & PLF_DOWNLOAD)
+			if ((fail = plugindnl (i)) != 0)
+				break;
+	}
 
-    char fname[64], *s=userqwk.packetname;
-    for(i=0;s[i];i++)s[i]=qwkuc?toupper(s[i]):tolower(s[i]);
-    sprintf(fname,"%s/%s.%s",dir,s,qwkuc?"QWK":"qwk");
+	if (fail) {
+		prompt (fail == 1 ? ERRQWK : ABOQWK);
+		goto kill;
+	} else {
 
-    /* Copy any mandatory files to the temporary directory */
+		/* Produce the packet's filename */
 
-    copyfiles(dir);
+		char    fname[64], *s = userqwk.packetname;
 
-    /* Compress the packet */
+		for (i = 0; s[i]; i++)
+			s[i] = qwkuc ? toupper (s[i]) : tolower (s[i]);
+		sprintf (fname, "%s/%s.%s", dir, s, qwkuc ? "QWK" : "qwk");
 
-    if(!compress(fname,dir))goto kill;
+		/* Copy any mandatory files to the temporary directory */
 
-    /* Charge the user */
+		copyfiles (dir);
 
-    usr_chargecredits(chgdnl);
+		/* Compress the packet */
 
-    /* Offer it for download */
+		if (!compress (fname, dir))
+			goto kill;
 
-    if(!offer(fname,dir))goto kill;
-  }
+		/* Charge the user */
 
-  chdir("/");
-  return;
+		usr_chargecredits (chgdnl);
 
-  /* Delete the directory */
+		/* Offer it for download */
 
-kill:
-  chdir("/");
-  if(system(command)){
-    error_fatal("Unable to rm -rf directory %s",dir);
-  }
+		if (!offer (fname, dir))
+			goto kill;
+	}
+
+	chdir ("/");
+	return;
+
+	/* Delete the directory */
+
+      kill:
+	chdir ("/");
+	if (system (command)) {
+		error_fatal ("Unable to rm -rf directory %s", dir);
+	}
 }
+
+
+/* End of File */

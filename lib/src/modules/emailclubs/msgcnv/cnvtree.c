@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,132 +62,162 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
-#include "email.h"
-#include "clubs.h"
-#include "../files/cnvutils.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/email.h>
+#include <megistos/clubs.h>
+#include <megistos/../files/cnvutils.h>
+#include <megistos/mbk_emailclubs.h>
 
 
-void addmsg(FILE *fp,char *club,int msgno,int fpos,int flen);
+void    addmsg (FILE * fp, char *club, int msgno, int fpos, int flen);
 
 
 struct msgnum {
-  unsigned int    majornum;
-  char            club[32];
-  int             msgno;
-  int             fpos;
-  int             flen;
-  struct msgnum  *lt,*gt;
+	unsigned int majornum;
+	char    club[32];
+	int     msgno;
+	int     fpos;
+	int     flen;
+	struct msgnum *lt, *gt;
 };
 
 
 
-struct msgnum *root=NULL;
+struct msgnum *root = NULL;
 
 
 
 static struct msgnum *
-mknode(int majornum, char *club, int msgno, int fpos, int flen)
+mknode (int majornum, char *club, int msgno, int fpos, int flen)
 {
-  struct msgnum *n=malloc(sizeof(struct msgnum));
-  n->majornum=majornum;
-  strcpy(n->club,club);
-  n->msgno=msgno;
-  n->gt=n->lt=NULL;
-  n->fpos=fpos;
-  n->flen=flen;
-  return n;
+	struct msgnum *n = malloc (sizeof (struct msgnum));
+
+	n->majornum = majornum;
+	strcpy (n->club, club);
+	n->msgno = msgno;
+	n->gt = n->lt = NULL;
+	n->fpos = fpos;
+	n->flen = flen;
+	return n;
 }
 
 
 
 static void
-recurse(struct msgnum *node, int majornum, char *club, int msgno,
-	int fpos, int flen)
+recurse (struct msgnum *node, int majornum, char *club, int msgno,
+	 int fpos, int flen)
 {
-  int delta=strcmp(club,node->club);
+	int     delta = strcmp (club, node->club);
 
-  if(delta<0){
-    if(node->lt!=NULL)recurse(node->lt,majornum,club,msgno,fpos,flen);
-    else node->lt=mknode(majornum,club,msgno,fpos,flen);
-  } else if(delta>0){
-    if(node->gt!=NULL)recurse(node->gt,majornum,club,msgno,fpos,flen);
-    else node->gt=mknode(majornum,club,msgno,fpos,flen);
-  } else {
-    if(majornum<node->majornum){
-      if(node->lt!=NULL)recurse(node->lt,majornum,club,msgno,fpos,flen);
-      else node->lt=mknode(majornum,club,msgno,fpos,flen);
-    } else if(majornum>node->majornum){
-      if(node->gt!=NULL)recurse(node->gt,majornum,club,msgno,fpos,flen);
-      else node->gt=mknode(majornum,club,msgno,fpos,flen);
-    } else {
-      fprintf(stderr,"ERROR: Duplicate message #%d! Argh!\n",majornum);
-    }
-  }
+	if (delta < 0) {
+		if (node->lt != NULL)
+			recurse (node->lt, majornum, club, msgno, fpos, flen);
+		else
+			node->lt = mknode (majornum, club, msgno, fpos, flen);
+	} else if (delta > 0) {
+		if (node->gt != NULL)
+			recurse (node->gt, majornum, club, msgno, fpos, flen);
+		else
+			node->gt = mknode (majornum, club, msgno, fpos, flen);
+	} else {
+		if (majornum < node->majornum) {
+			if (node->lt != NULL)
+				recurse (node->lt, majornum, club, msgno, fpos,
+					 flen);
+			else
+				node->lt =
+				    mknode (majornum, club, msgno, fpos, flen);
+		} else if (majornum > node->majornum) {
+			if (node->gt != NULL)
+				recurse (node->gt, majornum, club, msgno, fpos,
+					 flen);
+			else
+				node->gt =
+				    mknode (majornum, club, msgno, fpos, flen);
+		} else {
+			fprintf (stderr,
+				 "ERROR: Duplicate message #%d! Argh!\n",
+				 majornum);
+		}
+	}
 }
 
 
 
-void indexmsg(int majornum, char *club, int msgno, int fpos, int flen)
+void
+indexmsg (int majornum, char *club, int msgno, int fpos, int flen)
 {
-  if(root==NULL)root=mknode(majornum,club,msgno,fpos,flen);
-  else recurse(root,majornum,club,msgno,fpos,flen);
+	if (root == NULL)
+		root = mknode (majornum, club, msgno, fpos, flen);
+	else
+		recurse (root, majornum, club, msgno, fpos, flen);
 }
 
 
 
 static char *
-findrecurse(struct msgnum *node, char *club, int majornum)
+findrecurse (struct msgnum *node, char *club, int majornum)
 {
-  static char res[256];
-  int delta;
+	static char res[256];
+	int     delta;
 
-  if(node==NULL)return NULL;
+	if (node == NULL)
+		return NULL;
 
-  delta=strcmp(club,node->club);
-  if(delta<0)return findrecurse(node->lt,club,majornum);
-  if(delta>0)return findrecurse(node->gt,club,majornum);
-  if(majornum<node->majornum)return findrecurse(node->lt,club,majornum);
-  if(majornum>node->majornum)return findrecurse(node->gt,club,majornum);
-  sprintf(res,"%s/%d",node->club,node->msgno);
-  return res;
+	delta = strcmp (club, node->club);
+	if (delta < 0)
+		return findrecurse (node->lt, club, majornum);
+	if (delta > 0)
+		return findrecurse (node->gt, club, majornum);
+	if (majornum < node->majornum)
+		return findrecurse (node->lt, club, majornum);
+	if (majornum > node->majornum)
+		return findrecurse (node->gt, club, majornum);
+	sprintf (res, "%s/%d", node->club, node->msgno);
+	return res;
 }
 
 
 
-char*
-findmsg(char *club, int majornum)
+char   *
+findmsg (char *club, int majornum)
 {
-  return findrecurse(root,club,majornum);
+	return findrecurse (root, club, majornum);
 }
 
 
 
 static char lastclub[32];
-static int  lastno=0;
+static int lastno = 0;
 
 
-void inorder(struct msgnum *n,FILE *fp)
+void
+inorder (struct msgnum *n, FILE * fp)
 {
-  if(n==NULL)return;
-  inorder(n->lt,fp);
-  if(strcmp(lastclub,n->club)){
-    if(lastclub[0])printf("Converted %5d message(s) for %s\n",lastno,lastclub);
-    lastno=1;
-    strcpy(lastclub,n->club);
-  }
-  else lastno++;
-  n->msgno=lastno;
-  addmsg(fp,n->club,n->msgno,n->fpos,n->flen);
-  inorder(n->gt,fp);
+	if (n == NULL)
+		return;
+	inorder (n->lt, fp);
+	if (strcmp (lastclub, n->club)) {
+		if (lastclub[0])
+			printf ("Converted %5d message(s) for %s\n", lastno,
+				lastclub);
+		lastno = 1;
+		strcpy (lastclub, n->club);
+	} else
+		lastno++;
+	n->msgno = lastno;
+	addmsg (fp, n->club, n->msgno, n->fpos, n->flen);
+	inorder (n->gt, fp);
 }
 
 
 void
-traverse(FILE *fp)
+traverse (FILE * fp)
 {
-  lastno=0;
-  lastclub[0]=0;
-  inorder(root,fp);
+	lastno = 0;
+	lastclub[0] = 0;
+	inorder (root, fp);
 }
+
+
+/* End of File */

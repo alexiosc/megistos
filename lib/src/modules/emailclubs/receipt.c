@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -49,10 +52,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -65,61 +66,68 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/email.h>
 
 
 void
-sendreceipt(struct message *msg)
+sendreceipt (struct message *msg)
 {
-  struct message rrr;
-  char hdrname[256], fname[256], s1[256], s2[256];
-  char command[256];
-  FILE *fp;
+	struct message rrr;
+	char    hdrname[256], fname[256], s1[256], s2[256];
+	char    command[256];
+	FILE   *fp;
 
-  if(strcmp(msg->to,thisuseracc.userid))return;
-  sprintf(fname,TMPDIR"/rrrB%d%lx",getpid(),time(0));
-  if((fp=fopen(fname,"w"))==NULL)return;
+	if (strcmp (msg->to, thisuseracc.userid))
+		return;
+	sprintf (fname, TMPDIR "/rrrB%d%lx", getpid (), time (0));
+	if ((fp = fopen (fname, "w")) == NULL)
+		return;
 
-  strcpy(s1,msg_get(MHDAY0+getdow(msg->crdate)));
-  strcpy(s2,msg_get(MHJAN+tdmonth(msg->crdate)));
-  
-  fprintf(fp,msg_get(RRRBODY),
-	  msg_getunit(SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
-	  EMAILCLUBNAME,msg->msgno,
-	  s1, tdday(msg->crdate), s2, tdyear(msg->crdate),
-	  strtime(msg->crtime,1));
-  
-  fclose(fp);
+	strcpy (s1, msg_get (MHDAY0 + getdow (msg->crdate)));
+	strcpy (s2, msg_get (MHJAN + tdmonth (msg->crdate)));
 
-  memset(&rrr,0,sizeof(rrr));
-  strcpy(rrr.from,thisuseracc.userid);
-  strcpy(rrr.to,msg->from);
-  sprintf(rrr.subject,msg_get(RRRSUBJ),EMAILCLUBNAME,msg->msgno);
-  sprintf(rrr.history,HST_RECEIPT" %s/%d",EMAILCLUBNAME,msg->msgno);
-  rrr.flags=MSF_CANTMOD;
+	fprintf (fp, msg_get (RRRBODY),
+		 msg_getunit (SEXMALE, thisuseracc.sex == USX_MALE),
+		 thisuseracc.userid, EMAILCLUBNAME, msg->msgno, s1,
+		 tdday (msg->crdate), s2, tdyear (msg->crdate),
+		 strtime (msg->crtime, 1));
 
-  sprintf(hdrname,TMPDIR"/rrrH%d%lx",getpid(),time(0));
-  if((fp=fopen(hdrname,"w"))==NULL){
-    unlink(fname);
-    return;
-  }
-  fwrite(&rrr,sizeof(rrr),1,fp);
-  fclose(fp);
+	fclose (fp);
 
-  sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),hdrname,fname);
-  system(command);
-  unlink(hdrname);
-  unlink(fname);
+	memset (&rrr, 0, sizeof (rrr));
+	strcpy (rrr.from, thisuseracc.userid);
+	strcpy (rrr.to, msg->from);
+	sprintf (rrr.subject, msg_get (RRRSUBJ), EMAILCLUBNAME, msg->msgno);
+	sprintf (rrr.history, HST_RECEIPT " %s/%d", EMAILCLUBNAME, msg->msgno);
+	rrr.flags = MSF_CANTMOD;
 
-  prompt(RRRGEN);
-  
-  if(usr_insys(msg->from,1)){
-    sprompt_other(othrshm,out_buffer,RRRINJ,thisuseracc.userid);
-    if(usr_injoth(&othruseronl,out_buffer,0))prompt(RRRNOT,othruseronl.userid);
-  }
-  
-  msg->flags&=~MSF_RECEIPT;
+	sprintf (hdrname, TMPDIR "/rrrH%d%lx", getpid (), time (0));
+	if ((fp = fopen (hdrname, "w")) == NULL) {
+		unlink (fname);
+		return;
+	}
+	fwrite (&rrr, sizeof (rrr), 1, fp);
+	fclose (fp);
+
+	sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), hdrname, fname);
+	system (command);
+	unlink (hdrname);
+	unlink (fname);
+
+	prompt (RRRGEN);
+
+	if (usr_insys (msg->from, 1)) {
+		sprompt_other (othrshm, out_buffer, RRRINJ,
+			       thisuseracc.userid);
+		if (usr_injoth (&othruseronl, out_buffer, 0))
+			prompt (RRRNOT, othruseronl.userid);
+	}
+
+	msg->flags &= ~MSF_RECEIPT;
 }
 
+
+
+/* End of File */

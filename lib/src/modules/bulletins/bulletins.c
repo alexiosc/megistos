@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,230 +65,255 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 promptblock_t *msg, *clubmsg;
 
-int   entrykey;
-int   sopkey;
-int   flaxes;
-int   audins;
-int   auddel;
-int   audedt;
-int   audrd;
-int   askdef;
-int   indsel;
-int   indspd;
-int   ainsdef;
-char *dnldesc;
+int     entrykey;
+int     sopkey;
+int     flaxes;
+int     audins;
+int     auddel;
+int     audedt;
+int     audrd;
+int     askdef;
+int     indsel;
+int     indspd;
+int     ainsdef;
+char   *dnldesc;
 
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
-  clubmsg=msg_open("emailclubs");
-  msg=msg_open("bulletins");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	clubmsg = msg_open ("emailclubs");
+	msg = msg_open ("bulletins");
+	msg_setlanguage (thisuseracc.language);
 
-  initbltsubstvars();
+	initbltsubstvars ();
 
-  entrykey=msg_int(ENTRYKEY,0,129);
-  sopkey=msg_int(SOPKEY,0,129);
-  if((flaxes=msg_token(FLAXES,"CO-OPS","CLUBOP","PRIVILEGED")-1)<0){
-    error_fatal("LEVEL2 option FLAXES (bulletins.msg) has bad value.");
-  }
-  audins=msg_bool(AUDINS);
-  auddel=msg_bool(AUDDEL);
-  audedt=msg_bool(AUDEDT);
-  audrd=msg_bool(AUDRD);
-  askdef=msg_bool(ASKDEF);
-  ainsdef=msg_bool(AINSDEF);
-  indsel=msg_bool(INDSEL);
-  indspd=msg_int(INDSPD,1,500);
-  dnldesc=msg_string(DNLDESC);
+	entrykey = msg_int (ENTRYKEY, 0, 129);
+	sopkey = msg_int (SOPKEY, 0, 129);
+	if ((flaxes =
+	     msg_token (FLAXES, "CO-OPS", "CLUBOP", "PRIVILEGED") - 1) < 0) {
+		error_fatal
+		    ("LEVEL2 option FLAXES (bulletins.msg) has bad value.");
+	}
+	audins = msg_bool (AUDINS);
+	auddel = msg_bool (AUDDEL);
+	audedt = msg_bool (AUDEDT);
+	audrd = msg_bool (AUDRD);
+	askdef = msg_bool (ASKDEF);
+	ainsdef = msg_bool (AINSDEF);
+	indsel = msg_bool (INDSEL);
+	indspd = msg_int (INDSPD, 1, 500);
+	dnldesc = msg_string (DNLDESC);
 
-  dbopen();
+	dbopen ();
 }
 
 
 void
-about()
+about ()
 {
-  prompt(ABOUT);
+	prompt (ABOUT);
 }
 
 
 void
-run()
+run ()
 {
-  int shownmenu=0, ax;
-  char c=0;
+	int     shownmenu = 0, ax;
+	char    c = 0;
 
-  if(thisuseronl.flags&OLF_JMP2BLT){
-    strcpy(club,thisuseracc.lastclub);
-    thisuseronl.flags&=~OLF_JMP2BLT;
-  }
+	if (thisuseronl.flags & OLF_JMP2BLT) {
+		strcpy (club, thisuseracc.lastclub);
+		thisuseronl.flags &= ~OLF_JMP2BLT;
+	}
 
-  if(!key_owns(&thisuseracc,entrykey)){
-    prompt(NOAXES);
-    return;
-  }
+	if (!key_owns (&thisuseracc, entrykey)) {
+		prompt (NOAXES);
+		return;
+	}
 
-  for(;;){
-    ax=getaccess(club)>=flaxes;
-    thisuseronl.flags&=~OLF_BUSY;
-    if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-      if(!shownmenu){
-	prompt(ax?SMENU:MENU);
-	shownmenu=2;
-      }
-    } else shownmenu=1;
-    if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
-      thisuseronl.input[0]=0;
-    } else {
-      if(!cnc_nxtcmd){
-	if(thisuseronl.flags&OLF_MMCONCAT){
-	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return;
-	}
-	if(shownmenu==1){
-	  if(club[0])prompt(CURSIG,club);
-	  prompt(ax?SSHMENU:SHMENU);
-	} else shownmenu=1;
-	inp_get(0);
-	cnc_begin();
-      }
-    }
+	for (;;) {
+		ax = getaccess (club) >= flaxes;
+		thisuseronl.flags &= ~OLF_BUSY;
+		if (!
+		    (thisuseronl.flags & OLF_MMCALLING &&
+		     thisuseronl.input[0])) {
+			if (!shownmenu) {
+				prompt (ax ? SMENU : MENU);
+				shownmenu = 2;
+			}
+		} else
+			shownmenu = 1;
+		if (thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0]) {
+			thisuseronl.input[0] = 0;
+		} else {
+			if (!cnc_nxtcmd) {
+				if (thisuseronl.flags & OLF_MMCONCAT) {
+					thisuseronl.flags &= ~OLF_MMCONCAT;
+					return;
+				}
+				if (shownmenu == 1) {
+					if (club[0])
+						prompt (CURSIG, club);
+					prompt (ax ? SSHMENU : SHMENU);
+				} else
+					shownmenu = 1;
+				inp_get (0);
+				cnc_begin ();
+			}
+		}
 
-    if((c=cnc_more())!=0){
-      cnc_chr();
-      switch (c) {
-      case 'H':
-	about();
-	break;
-      case 'S':
-	selectclub();
-	thisuseronl.flags&=~OLF_MMCONCAT;
-	if(!cnc_more())cnc_end();
-	break;
-      case 'I':
-	if(getaccess(club)>=flaxes)insertblt();
-	else {
-	  prompt(ERRSEL,c);
-	  cnc_end();
-	  continue;
-	}
-	break;
-      case 'P':
-	if(getaccess(club)>=flaxes)bltdel();
-	else {
-	  prompt(ERRSEL,c);
-	  cnc_end();
-	  continue;
-	}
-	break;
-      case 'E':
-	if(getaccess(club)>=flaxes)bltedt();
-	else {
-	  prompt(ERRSEL,c);
-	  cnc_end();
-	  continue;
-	}
-	break;
-      case 'A':
-	if(getaccess(club)>=flaxes)autoins();
-	else {
-	  prompt(ERRSEL,c);
-	  cnc_end();
-	  continue;
-	}
-	break;
-      case 'L':
-	list(0);
-	break;
-      case 'F':
-	list(1);
-	break;
-      case 'R':
-	bltread();
-	break;
-      case 'D':
-	bltdnl();
-	break;
-      case 'K':
-	keysearch();
-	break;
-      case 'X':
-	prompt(LEAVE);
-	return;
-      case '?':
-	shownmenu=0;
-	break;
-      default:
-	prompt(ERRSEL,c);
-	cnc_end();
-	continue;
-      }
-    }
-    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
-    cnc_end();
+		if ((c = cnc_more ()) != 0) {
+			cnc_chr ();
+			switch (c) {
+			case 'H':
+				about ();
+				break;
+			case 'S':
+				selectclub ();
+				thisuseronl.flags &= ~OLF_MMCONCAT;
+				if (!cnc_more ())
+					cnc_end ();
+				break;
+			case 'I':
+				if (getaccess (club) >= flaxes)
+					insertblt ();
+				else {
+					prompt (ERRSEL, c);
+					cnc_end ();
+					continue;
+				}
+				break;
+			case 'P':
+				if (getaccess (club) >= flaxes)
+					bltdel ();
+				else {
+					prompt (ERRSEL, c);
+					cnc_end ();
+					continue;
+				}
+				break;
+			case 'E':
+				if (getaccess (club) >= flaxes)
+					bltedt ();
+				else {
+					prompt (ERRSEL, c);
+					cnc_end ();
+					continue;
+				}
+				break;
+			case 'A':
+				if (getaccess (club) >= flaxes)
+					autoins ();
+				else {
+					prompt (ERRSEL, c);
+					cnc_end ();
+					continue;
+				}
+				break;
+			case 'L':
+				list (0);
+				break;
+			case 'F':
+				list (1);
+				break;
+			case 'R':
+				bltread ();
+				break;
+			case 'D':
+				bltdnl ();
+				break;
+			case 'K':
+				keysearch ();
+				break;
+			case 'X':
+				prompt (LEAVE);
+				return;
+			case '?':
+				shownmenu = 0;
+				break;
+			default:
+				prompt (ERRSEL, c);
+				cnc_end ();
+				continue;
+			}
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			fmt_resetvpos (0);
+		cnc_end ();
 
-  }
+	}
 }
 
 
 void
-done()
+done ()
 {
-  msg_close(msg);
-  dbclose();
+	msg_close (msg);
+	dbclose ();
 }
 
 
-int bltcnv_main(int argc, char *argv[]);
+int     bltcnv_main (int argc, char *argv[]);
 
 
 int
-handler_run(int argc, char *argv[])
+handler_run (int argc, char *argv[])
 {
-  atexit(done);
-  init();
-  run();
-  return 0;
+	atexit (done);
+	init ();
+	run ();
+	return 0;
 }
 
 
 
 mod_info_t mod_info_bulletins = {
-  "bulletins",
-  "Bulletin reader",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Permanent archive of interesting club articles et al",
-  RCS_VER,
-  "1.0",
-  {50,login},			/* Login handler */
-  {0,handler_run},		/* Interactive handler */
-  {0,NULL},			/* Install logout handler */
-  {0,NULL},			/* Hangup handler */
-  {50,cleanup},			/* Cleanup handler */
-  {0,NULL}			/* Delete user handler */
+	"bulletins",
+	"Bulletin reader",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Permanent archive of interesting club articles et al",
+	RCS_VER,
+	"1.0",
+	{50, login}
+	,			/* Login handler */
+	{0, handler_run}
+	,			/* Interactive handler */
+	{0, NULL}
+	,			/* Install logout handler */
+	{0, NULL}
+	,			/* Hangup handler */
+	{50, cleanup}
+	,			/* Cleanup handler */
+	{0, NULL}		/* Delete user handler */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  if(strstr(argv[0],"bltcnv"))return bltcnv_main(argc,argv);
-  if(argc==3 && !strcmp(argv[1],"--insert")){
-    init();
-    return extins(argv[2]);
-  }
+	if (strstr (argv[0], "bltcnv"))
+		return bltcnv_main (argc, argv);
+	if (argc == 3 && !strcmp (argv[1], "--insert")) {
+		init ();
+		return extins (argv[2]);
+	}
 
-  mod_setinfo(&mod_info_bulletins);
-  return mod_main(argc,argv);
+	mod_setinfo (&mod_info_bulletins);
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */
+
+
+/* End of File */

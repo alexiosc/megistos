@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -60,61 +61,70 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <bbs.h>
-#include "mailer.h"
+#include <megistos/mailer.h>
 
 
 
-char kbdxlation[NUMXLATIONS][256];
-char xlation[NUMXLATIONS][256];
-int  xlationtable;
+char    kbdxlation[NUMXLATIONS][256];
+char    xlation[NUMXLATIONS][256];
+int     xlationtable;
 
 
 void
-readxlation()
+readxlation ()
 {
-  FILE *fp;
-  if((fp=fopen(mkfname(XLATIONFILE),"r"))==NULL){
-    error_fatalsys("unable to open %s",mkfname(XLATIONFILE));
-  }
-  if(fread(xlation,sizeof(xlation),1,fp)!=1){
-    error_fatalsys("unable to read %s",mkfname(XLATIONFILE));
-  }
-  if(fread(kbdxlation,sizeof(kbdxlation),1,fp)!=1){
-    error_fatalsys("unable to read %s",mkfname(XLATIONFILE));
-  }
-  fclose(fp);
+	FILE   *fp;
+
+	if ((fp = fopen (mkfname (XLATIONFILE), "r")) == NULL) {
+		error_fatalsys ("unable to open %s", mkfname (XLATIONFILE));
+	}
+	if (fread (xlation, sizeof (xlation), 1, fp) != 1) {
+		error_fatalsys ("unable to read %s", mkfname (XLATIONFILE));
+	}
+	if (fread (kbdxlation, sizeof (kbdxlation), 1, fp) != 1) {
+		error_fatalsys ("unable to read %s", mkfname (XLATIONFILE));
+	}
+	fclose (fp);
 }
 
 
 void
-unix2dos(char *fname, char *target)
+unix2dos (char *fname, char *target)
 {
-  char buf [16384];
-  FILE *fpi, *fpo;
-  char fname2[256];
+	char    buf[16384];
+	FILE   *fpi, *fpo;
+	char    fname2[256];
 
-  if(!strcmp(fname,target))sprintf(fname2,"%s~",fname);
-  else strcpy(fname2,target);
+	if (!strcmp (fname, target))
+		sprintf (fname2, "%s~", fname);
+	else
+		strcpy (fname2, target);
 
-  if((fpi=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open %s for DOS conversion",fname);
-  }
-  if((fpo=fopen(fname2,"w"))==NULL){
-    error_fatalsys("Unable to create %s",fname2);
-  }
+	if ((fpi = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s for DOS conversion", fname);
+	}
+	if ((fpo = fopen (fname2, "w")) == NULL) {
+		error_fatalsys ("Unable to create %s", fname2);
+	}
 
-  do{
-    int i;
-    if(!fgets(buf,sizeof(buf),fpi))break;
-    i=strcspn(buf,"\r\n");
-    buf[i]=0;
-    xlate_out(buf);
-    fputs(buf,fpo);
-    fputs("\r\n",fpo);
-  }while(!feof(fpi));
+	do {
+		int     i;
 
-  fclose(fpo);
-  fclose(fpi);
+		if (!fgets (buf, sizeof (buf), fpi))
+			break;
+		i = strcspn (buf, "\r\n");
+		buf[i] = 0;
+		xlate_out (buf);
+		fputs (buf, fpo);
+		fputs ("\r\n", fpo);
+	} while (!feof (fpi));
 
-  if(!strcmp(fname,target))rename(fname2,fname);
+	fclose (fpo);
+	fclose (fpi);
+
+	if (!strcmp (fname, target))
+		rename (fname2, fname);
 }
+
+
+/* End of File */

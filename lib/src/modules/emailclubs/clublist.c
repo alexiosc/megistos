@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,227 +65,274 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "clubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/clubs.h>
+#include <megistos/email.h>
 
 
 static void
-msglist(int msg, int method, int files)
+msglist (int msg, int method, int files)
 {
-  int j,msgno=msg;
-  struct message m;
-  int f=1, c;
+	int     j, msgno = msg;
+	struct message m;
+	int     f = 1, c;
 
-  j=findmsgnum(&msgno,msg,BSD_GT);
-  if(msgno<0 || j!=BSE_FOUND){
-    j=findmsgnum(&msgno,msg,BSD_LT);
-    if(msgno<0 || j!=BSE_FOUND){
-      prompt(RLBNMSG);
-      cnc_end();
-      return;
-    }
-  }
+	j = findmsgnum (&msgno, msg, BSD_GT);
+	if (msgno < 0 || j != BSE_FOUND) {
+		j = findmsgnum (&msgno, msg, BSD_LT);
+		if (msgno < 0 || j != BSE_FOUND) {
+			prompt (RLBNMSG);
+			cnc_end ();
+			return;
+		}
+	}
 
-  if(msgno!=msg && msg!=LASTMSG && msg>=0)prompt(RLMISS,msg);
+	if (msgno != msg && msg != LASTMSG && msg >= 0)
+		prompt (RLMISS, msg);
 
-  inp_nonblock();
+	inp_nonblock ();
 
-  for(;msgno>0;){
-    int i=0;
-    if(getmsgheader(msgno,&m)==BSE_FOUND){
-      char subj[256], date[16];
-      int k;
+	for (; msgno > 0;) {
+		int     i = 0;
 
-      if(read(fileno(stdin),&c,1)&&
-	 ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-	fmt_lastresult=PAUSE_QUIT;
+		if (getmsgheader (msgno, &m) == BSE_FOUND) {
+			char    subj[256], date[16];
+			int     k;
 
-      if(files && ((m.flags&MSF_FILEATT)==0))goto nextone;
+			if (read (fileno (stdin), &c, 1) &&
+			    ((c == 13) || (c == 10) || (c == 27) || (c == 15)
+			     || (c == 3)))
+				fmt_lastresult = PAUSE_QUIT;
 
-      if(f){
-	if(!method)prompt(RLBHDR);
-	else prompt(RLTHDR);
-	f=0;
-      }
+			if (files && ((m.flags & MSF_FILEATT) == 0))
+				goto nextone;
 
-      if(fmt_lastresult==PAUSE_QUIT)break;
-      if(!method){
-	strcpy(subj,m.subject);
-	k=max(0,thisuseracc.scnwidth-35);
-	if(k<256)subj[k]=0;
+			if (f) {
+				if (!method)
+					prompt (RLBHDR);
+				else
+					prompt (RLTHDR);
+				f = 0;
+			}
 
-	strcpy(date,strdate(m.crdate));
-	/*memcpy(&date[7],&date[9],3);*/
-	prompt(RLBTAB,msgno,m.from,date,strtime(m.crtime,1),subj);
-      } else showheader(clubhdr.club,&m);
-      if(method==2)readmsg(&m);
-    }
-    i=msgno;
+			if (fmt_lastresult == PAUSE_QUIT)
+				break;
+			if (!method) {
+				strcpy (subj, m.subject);
+				k = max (0, thisuseracc.scnwidth - 35);
+				if (k < 256)
+					subj[k] = 0;
 
-  nextone:
-    msg=msgno+1;
-    j=npmsgnum(&msgno,msg,BSD_GT);
-    if(j==BSE_NFOUND)break;
-    if(i==msgno)break;
-  }
+				strcpy (date, strdate (m.crdate));
+				/*memcpy(&date[7],&date[9],3); */
+				prompt (RLBTAB, msgno, m.from, date,
+					strtime (m.crtime, 1), subj);
+			} else
+				showheader (clubhdr.club, &m);
+			if (method == 2)
+				readmsg (&m);
+		}
+		i = msgno;
 
-  inp_block();
+	      nextone:
+		msg = msgno + 1;
+		j = npmsgnum (&msgno, msg, BSD_GT);
+		if (j == BSE_NFOUND)
+			break;
+		if (i == msgno)
+			break;
+	}
 
-  if(fmt_lastresult==PAUSE_QUIT)prompt(RLABORT);
-  else if(!f)prompt(method?RLDONE:RLBFTR);
-  else {
-    prompt(RLBNMSG);
-  }
+	inp_block ();
+
+	if (fmt_lastresult == PAUSE_QUIT)
+		prompt (RLABORT);
+	else if (!f)
+		prompt (method ? RLDONE : RLBFTR);
+	else {
+		prompt (RLBNMSG);
+	}
 }
 
 
 static void
-qmsglist(int method, int files)
+qmsglist (int method, int files)
 {
-  int j,msgno=0,msg=0;
-  struct message m;
-  int first=1, count=0, newmsg=0, f=1;
-  int c;
+	int     j, msgno = 0, msg = 0;
+	struct message m;
+	int     first = 1, count = 0, newmsg = 0, f = 1;
+	int     c;
 
-  startqsc();
+	startqsc ();
 
-  inp_nonblock();
+	inp_nonblock ();
 
-  do{
-    struct lastread *lastread=getqsc();
+	do {
+		struct lastread *lastread = getqsc ();
 
-    if(read(fileno(stdin),&c,1)&&
-       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-      fmt_lastresult=PAUSE_QUIT;
+		if (read (fileno (stdin), &c, 1) &&
+		    ((c == 13) || (c == 10) || (c == 27) || (c == 15) ||
+		     (c == 3)))
+			fmt_lastresult = PAUSE_QUIT;
 
-    if(first && (lastread==NULL)){
-      prompt(QSEMPTY);
-      inp_block();
-      return;
-    }
-    first=0;
+		if (first && (lastread == NULL)) {
+			prompt (QSEMPTY);
+			inp_block ();
+			return;
+		}
+		first = 0;
 
-    if((lastread->flags&LRF_QUICKSCAN)==0)continue;
-    if(getclubax(&thisuseracc,lastread->club)<CAX_READ)continue;
-    
-    count++;
+		if ((lastread->flags & LRF_QUICKSCAN) == 0)
+			continue;
+		if (getclubax (&thisuseracc, lastread->club) < CAX_READ)
+			continue;
 
-    if(fmt_lastresult==PAUSE_QUIT){
-      prompt(RLABORT);
-      inp_block();
-      return;
-    }
+		count++;
 
-    prompt(QSSCAN,lastread->club);
-    enterclub(lastread->club);
-    msgno=msg=lastread->lastmsg+1;
+		if (fmt_lastresult == PAUSE_QUIT) {
+			prompt (RLABORT);
+			inp_block ();
+			return;
+		}
 
-    j=findmsgnum(&msgno,msg,BSD_GT);
-    if(msgno<0 || j!=BSE_FOUND)continue;
+		prompt (QSSCAN, lastread->club);
+		enterclub (lastread->club);
+		msgno = msg = lastread->lastmsg + 1;
 
-    newmsg++;
-    f=1;
+		j = findmsgnum (&msgno, msg, BSD_GT);
+		if (msgno < 0 || j != BSE_FOUND)
+			continue;
 
-    for(;msgno>0;){
-      int i=0;
-      if(getmsgheader(msgno,&m)==BSE_FOUND){
-	char subj[256], date[16];
-	int k;
-	
-	if(read(fileno(stdin),&c,1)&&
-	   ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-	  fmt_lastresult=PAUSE_QUIT;
+		newmsg++;
+		f = 1;
 
-	if(files && ((m.flags&MSF_FILEATT)==0))goto nextone;
+		for (; msgno > 0;) {
+			int     i = 0;
 
-	if(f){
-	  if(!method)prompt(RLBHDR);
-	  else prompt(RLTHDR);
-	  f=0;
-	}
-	
-	if(fmt_lastresult==PAUSE_QUIT){
-	  prompt(RLABORT);
-	  break;
-	}
-	if(!method){
-	  strcpy(subj,m.subject);
-	  k=max(0,thisuseracc.scnwidth-35);
-	  if(k<256)subj[k]=0;
-	  
-	  strcpy(date,strdate(m.crdate));
-	  /*memcpy(&date[7],&date[9],3);*/
-	  prompt(RLBTAB,msgno,m.from,date,strtime(m.crtime,1),subj);
-	} else showheader(clubhdr.club,&m);
-	if(method==2)readmsg(&m);
-      }
-      if(fmt_lastresult==PAUSE_QUIT){
-	prompt(RLABORT);
-	break;
-      }
-      i=msgno;
-      
-    nextone:
-      msg=msgno+1;
-      j=findmsgnum(&msgno,msg,BSD_GT);
-      if(i==msgno || j!=BSE_FOUND)break;
-    }
-    if(fmt_lastresult==PAUSE_QUIT)prompt(RLABORT);
-    else if(!f)prompt(method?RLDONE:RLBFTR);
+			if (getmsgheader (msgno, &m) == BSE_FOUND) {
+				char    subj[256], date[16];
+				int     k;
 
-    if(fmt_lastresult==PAUSE_QUIT){
-      inp_block();
-      return;
-    }
-  } while (nextqsc());
+				if (read (fileno (stdin), &c, 1) &&
+				    ((c == 13) || (c == 10) || (c == 27) ||
+				     (c == 15) || (c == 3)))
+					fmt_lastresult = PAUSE_QUIT;
 
-  inp_block();
+				if (files && ((m.flags & MSF_FILEATT) == 0))
+					goto nextone;
 
-  if(!count)prompt(QSEMPTY);
-  else if(!newmsg)prompt(QSNONEW);
-  else prompt(QSEND);
+				if (f) {
+					if (!method)
+						prompt (RLBHDR);
+					else
+						prompt (RLTHDR);
+					f = 0;
+				}
+
+				if (fmt_lastresult == PAUSE_QUIT) {
+					prompt (RLABORT);
+					break;
+				}
+				if (!method) {
+					strcpy (subj, m.subject);
+					k = max (0, thisuseracc.scnwidth - 35);
+					if (k < 256)
+						subj[k] = 0;
+
+					strcpy (date, strdate (m.crdate));
+					/*memcpy(&date[7],&date[9],3); */
+					prompt (RLBTAB, msgno, m.from, date,
+						strtime (m.crtime, 1), subj);
+				} else
+					showheader (clubhdr.club, &m);
+				if (method == 2)
+					readmsg (&m);
+			}
+			if (fmt_lastresult == PAUSE_QUIT) {
+				prompt (RLABORT);
+				break;
+			}
+			i = msgno;
+
+		      nextone:
+			msg = msgno + 1;
+			j = findmsgnum (&msgno, msg, BSD_GT);
+			if (i == msgno || j != BSE_FOUND)
+				break;
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			prompt (RLABORT);
+		else if (!f)
+			prompt (method ? RLDONE : RLBFTR);
+
+		if (fmt_lastresult == PAUSE_QUIT) {
+			inp_block ();
+			return;
+		}
+	} while (nextqsc ());
+
+	inp_block ();
+
+	if (!count)
+		prompt (QSEMPTY);
+	else if (!newmsg)
+		prompt (QSNONEW);
+	else
+		prompt (QSEND);
 }
 
 
 void
-listmessages(int file)
+listmessages (int file)
 {
-  char opt;
-  int i, msg=0;
+	char    opt;
+	int     i, msg = 0;
 
-  for(;;){
-    inp_setflags(INF_HELP);
-    i=get_menu(&opt,0,0,RLMNU,RLMNUR,"BTF",0,0);
-    inp_clearflags(INF_HELP);
-    if(!i)return;
-    if(i==-1){
-      prompt(RLMNUH);
-      cnc_end();
-      continue;
-    } else break;
-  }
+	for (;;) {
+		inp_setflags (INF_HELP);
+		i = get_menu (&opt, 0, 0, RLMNU, RLMNUR, "BTF", 0, 0);
+		inp_clearflags (INF_HELP);
+		if (!i)
+			return;
+		if (i == -1) {
+			prompt (RLMNUH);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  if(!quickscan){
-    startqsc();
-    if(!getrdmsgno(&msg,RLASK,RLASKH,RLASKR,getlastread(clubhdr.club))){
-      doneqsc();
-      return;
-    }
-  }
+	if (!quickscan) {
+		startqsc ();
+		if (!getrdmsgno
+		    (&msg, RLASK, RLASKH, RLASKR,
+		     getlastread (clubhdr.club))) {
+			doneqsc ();
+			return;
+		}
+	}
 
-  switch(opt){
-  case 'B':
-    if(quickscan)qmsglist(0,file);
-    else msglist(msg,0,file);
-    break;
-  case 'T':
-    if(quickscan)qmsglist(1,file);
-    else msglist(msg,1,file);
-    break;
-  case 'F':
-    if(quickscan)qmsglist(2,file);
-    else msglist(msg,2,file);
-  }
+	switch (opt) {
+	case 'B':
+		if (quickscan)
+			qmsglist (0, file);
+		else
+			msglist (msg, 0, file);
+		break;
+	case 'T':
+		if (quickscan)
+			qmsglist (1, file);
+		else
+			msglist (msg, 1, file);
+		break;
+	case 'F':
+		if (quickscan)
+			qmsglist (2, file);
+		else
+			msglist (msg, 2, file);
+	}
 }
+
+
+/* End of File */

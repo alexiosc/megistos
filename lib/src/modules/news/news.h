@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,9 +44,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -52,18 +54,21 @@
 
 
 struct newsbulletin {
-  int  date;
-  int  time;
-  int  numdays;
-  int  priority;
-  int  enabled;
-  char class[12];
-  int  key;
-  int  info;
-  int  num;
-  char dummy[256-44];
+	int     date;
+	int     time;
+	int     numdays;
+	int     priority;
+	int     enabled;
+	char    class[12];
+	int     key;
+	int     info;
+	int     num;
+	char    dummy[256 - 44];
 };
 
 
 
 
+
+
+/* End of File */

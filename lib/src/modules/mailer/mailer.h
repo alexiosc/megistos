@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -53,9 +56,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define VERSION "0.9"
@@ -80,16 +82,16 @@ extern int uplkey;
 
 extern char kbdxlation[NUMXLATIONS][256];
 extern char xlation[NUMXLATIONS][256];
-extern int  xlationtable;
+extern int xlationtable;
 
 #define xlate_in(s)    faststgxlate(s,kbdxlation[xlationtable]);
 #define xlate_out(s)   faststgxlate(s,xlation[xlationtable]);
 
-void readxlation();
+void    readxlation ();
 
 /* Specifying source==target does not clobber source. */
 
-void unix2dos(char *source, char *target);
+void    unix2dos (char *source, char *target);
 
 
 /* plugindef.c */
@@ -100,14 +102,14 @@ void unix2dos(char *source, char *target);
 #define DESCRLEN   64
 
 struct plugin {
-  char name[NAMELEN];
-  char descr[NUMLANGUAGES][DESCRLEN];
-  int  flags;
+	char    name[NAMELEN];
+	char    descr[NUMLANGUAGES][DESCRLEN];
+	int     flags;
 };
 
 
 extern struct plugin *plugins;
-extern int            numplugins;
+extern int numplugins;
 
 
 #define PLF_SETUP    0x01
@@ -120,35 +122,35 @@ extern int            numplugins;
 #define PLUGINDEFFILE MAILERDIR"/plugins"
 
 
-void parseplugindef();
+void    parseplugindef ();
 
 
 /* setup.c */
 
-void defaultvals();
+void    defaultvals ();
 
-void setup();
+void    setup ();
 
 
 /* usr.c */
 
 struct usrtag {
-  char plugin[NAMELEN];
-  int  len;
+	char    plugin[NAMELEN];
+	int     len;
 };
 
 
 #define NUMOLDREP 4
 
 struct usrqwk {
-  int            compressor;
-  int            decompressor;
-  int            flags;
-  char           packetname[11];
-  unsigned long  oldcrc[NUMOLDREP];
-  int            oldlen[NUMOLDREP];
+	int     compressor;
+	int     decompressor;
+	int     flags;
+	char    packetname[11];
+	unsigned long oldcrc[NUMOLDREP];
+	int     oldlen[NUMOLDREP];
 
-  char dummy[64];
+	char    dummy[64];
 };
 
 #define USQ_GREEKQWK 0x0001
@@ -165,20 +167,23 @@ struct usrqwk {
 
 extern struct usrqwk userqwk;
 
-int loadprefs(char *plugin, void *buffer);
+int     loadprefs (char *plugin, void *buffer);
 
-void saveprefs(char *plugin, int len, void *buffer);
+void    saveprefs (char *plugin, int len, void *buffer);
 
 
 /* download.c */
 
-void download();
+void    download ();
 
 
 /* upload.c */
 
-void upload();
+void    upload ();
 
 /* cksum.c */
 
-int cksum (char *file, unsigned long *retcrc, int *retlen);
+int     cksum (char *file, unsigned long *retcrc, int *retlen);
+
+
+/* End of File */

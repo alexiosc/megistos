@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -60,10 +63,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -77,647 +78,715 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/email.h>
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
 
 
 void
-stopautofw(struct message *msg) 
+stopautofw (struct message *msg)
 {
-  struct emailuser user;
-  char userid[256], *cp;
-  int ok=0, yes=0;
+	struct emailuser user;
+	char    userid[256], *cp;
+	int     ok = 0, yes = 0;
 
-  if((msg->flags&MSF_AUTOFW)&&((cp=strstr(msg->history,HST_AUTOFW))!=NULL)){
-    ok=(sscanf(cp,"%*s %s",userid)==1);
-  }
-
-  if(!ok){
-    prompt(RDSAR1);
-    return;
-  }
-
-  if(!usr_exists(userid)){
-    prompt(RDSAR2,userid);
-    return;
-  }
-
-  readecuser(userid,&user);
-  
-  if(strcmp(thisuseracc.userid,user.forwardto)){
-    prompt(RDSAR3,userid);
-    return;
-  }
-
-  prompt(RDSAI,userid);
-  if(!get_bool(&yes,RDSAQ,RDSAQR,0,0)){
-    prompt(RDSAC);
-    return;
-  }
-  if(!yes){
-    prompt(RDSAC);
-    return;
-  }
-
-  readecuser(userid,&user);
-  if(!strcmp(user.forwardto,thisuseracc.userid)){
-    strcpy(user.forwardto,userid);
-    writeecuser(userid,&user);
-  }
-  prompt(RDSAS);
-}
-
-
-void
-erasemsg(int forward, struct message *msg)
-{
-  char fname[512], clubdir[256];
-
-  /* Can't modify the message */
-
-  if(msg->flags&MSF_CANTMOD && (!hassysaxs(&thisuseracc,USY_MASTERKEY))){
-    prompt(EMERR);
-    return;
-  }
-
-
-  /* The message is exempt from deletions */
-
-  if(msg->flags&MSF_EXEMPT){
-    prompt(EMXMPT);
-    return;
-  }
-
-
-  /* The message is locked */
-
-  if(!checklocks(msg)){
-    prompt(forward?FWCONF:USING);
-    return;
-  }
-
-
-  /* Remove the message files */
-
-  if(msg->club[0])sprintf(clubdir,"%s/%s",mkfname(MSGSDIR),msg->club);
-  else strcpy(clubdir,mkfname(EMAILDIR));
-
-  sprintf(fname,"%s/"MESSAGEFILE,clubdir,msg->msgno);
-  unlink(fname);
-  sprintf(fname,"%s/.ATT/%d.att",clubdir,msg->msgno);
-  unlink(fname);
-
-
-  /* Remove the database index */
-
-  dbrm(msg);
-
-
-  /* Adjust club header if it's a club message */
-
-  if(msg->club[0]){
-    loadclubhdr(msg->club);
-    clubhdr.nmsgs--;
-    if(msg->flags&MSF_FILEATT)clubhdr.nfiles--;
-    if(msg->period)clubhdr.nper--;
-    if(msg->flags&MSF_FILEATT && ((msg->flags&MSF_APPROVD)==0))clubhdr.nfunapp--;
-    saveclubhdr(&clubhdr);
-  }
-
-
-  /* Decrease the number of replies of the parent message */
-  
-  if(msg->replyto && msg->flags&MSF_REPLY){
-    FILE *fp;
-    
-    struct message replied;
-    char lock[256],s[64],*cp,club[256],t[256],*clp;
-    int ok;
-
-
-    /* Parse the message history */
-
-    if((cp=strstr(msg->history,HST_REPLY))!=NULL){
-      ok=(sscanf(cp,"%*s %s",t)==1);
-      if(ok){
-	ok=(clp=strchr(t,'/'))!=NULL;
-	if(ok){
-	  *clp=0;
-	  strcpy(club,t);
+	if ((msg->flags & MSF_AUTOFW) &&
+	    ((cp = strstr (msg->history, HST_AUTOFW)) != NULL)) {
+		ok = (sscanf (cp, "%*s %s", userid) == 1);
 	}
-      }
-      if(sameas(club,EMAILCLUBNAME))strcpy(club,EMAILDIRNAME);
-    }
 
-
-    /* Lock the parent message */
-
-    sprintf(s,"%d",msg->replyto);
-    sprintf(lock,MESSAGELOCK,club,s);
-    if(lock_wait(lock,10)==LKR_TIMEOUT)return;
-    lock_place(lock,"updating");
-
-
-    /* And update it */
-    
-    decompressmsg(msg);
-    sprintf(fname,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),club,msg->replyto);
-    if((fp=fopen(fname,"r+"))!=NULL){
-      if(fread(&replied,sizeof(replied),1,fp)){
-	int i=replied.replies;
-	if((--replied.replies)<0)replied.replies=0;
-	if(replied.replies!=i){
-	  rewind(fp);
-	  fwrite(&replied,sizeof(replied),1,fp);
+	if (!ok) {
+		prompt (RDSAR1);
+		return;
 	}
-      }
-    }
-    compressmsg(msg);
-    fclose(fp);
-    lock_rm(lock);
-  }
+
+	if (!usr_exists (userid)) {
+		prompt (RDSAR2, userid);
+		return;
+	}
+
+	readecuser (userid, &user);
+
+	if (strcmp (thisuseracc.userid, user.forwardto)) {
+		prompt (RDSAR3, userid);
+		return;
+	}
+
+	prompt (RDSAI, userid);
+	if (!get_bool (&yes, RDSAQ, RDSAQR, 0, 0)) {
+		prompt (RDSAC);
+		return;
+	}
+	if (!yes) {
+		prompt (RDSAC);
+		return;
+	}
+
+	readecuser (userid, &user);
+	if (!strcmp (user.forwardto, thisuseracc.userid)) {
+		strcpy (user.forwardto, userid);
+		writeecuser (userid, &user);
+	}
+	prompt (RDSAS);
 }
 
 
 void
-copymsg(struct message *msg)
+erasemsg (int forward, struct message *msg)
 {
-  FILE *fp1, *fp2, *fp3;
-  int net=0;
-  struct message checkmsg;
-  char temp[256], source[256], fatt[256], lock[256], clubdir[256];
-  char clubname[256];
-  char header[256], body[256], command[256], original[256], origclub[256];
-  char origdir[256];
-  int bytes, res, clubmsg=0;
+	char    fname[512], clubdir[256];
 
-  if(msg->club[0])strcpy(origclub,msg->club);
-  else strcpy(origclub,EMAILCLUBNAME);
-  strcpy(origdir,msg->club);
+	/* Can't modify the message */
 
-  /* Get message recipient */
-
-  for(;;){
-    res=getrecipient(CPWHO,msg->to);
-    if(!res)return;
-    else if(res==2){
-      strcpy(msg->club,msg->to);
-      if(getclubax(&thisuseracc,msg->club)<CAX_WRITE){
-	prompt(CPCERR,msg->club);
-	cnc_end();
-	continue;
-      }
-      strcpy(msg->to,MSG_ALL);
-      clubmsg=1;
-      strcpy(clubdir,msg->club);
-      strcpy(clubname,clubdir);
-      loadclubhdr(msg->club);
-      if(cnc_more()=='-'){
-	cnc_chr();
-	if(!getclubrecipient(WEFCAU,WEFCAUR,WEFCAUR,msg->to))return;
-      }
-      break;
-    } else {
-      strcpy(msg->club,"");
-      if(!key_owns(&thisuseracc,wrtkey)){
-	prompt(CPNOAXES);
-	return;
-      }
-      clubmsg=0;
-      if(msg->to[0]=='!')prompt(FWERR);
-      strcpy(clubdir,EMAILDIRNAME);
-      strcpy(clubname,EMAILCLUBNAME);
-      break;
-    }
-  }
-  net=strchr(msg->to,'@')||strchr(msg->to,'%');
-  prompt(net?CPRCPOKN:CPRCPOK,msg->to);
+	if (msg->flags & MSF_CANTMOD &&
+	    (!hassysaxs (&thisuseracc, USY_MASTERKEY))) {
+		prompt (EMERR);
+		return;
+	}
 
 
-  /* Check if we can copy the file attachment */
+	/* The message is exempt from deletions */
 
-  if(clubmsg && (msg->flags&MSF_FILEATT)){
-    int ax=getclubax(&thisuseracc,msg->club);
-    if(ax<CAX_UPLOAD){
-      prompt(CPCERR2,msg->club);
-      msg->flags&=~(MSF_FILEATT|MSF_APPROVD);
-    } else if(ax>=CAX_COOP){
-      msg->flags|=MSF_APPROVD;
-    }
-  }
+	if (msg->flags & MSF_EXEMPT) {
+		prompt (EMXMPT);
+		return;
+	}
 
 
-  /* Check if user has enough credits */
-  
-  if(!clubmsg){
-    if(!usr_canpay((net?wrtchg+netchg:wrtchg)+
-	       (msg->flags&MSF_FILEATT?attchg:0))){
-      prompt(WERNEC);
-      return;
-    }
-  } else {
-    if(!usr_canpay(clubhdr.postchg+(msg->flags&MSF_FILEATT?clubhdr.uploadchg:0))){
-      prompt(WCRNEC);
-      return;
-    }
-  }
+	/* The message is locked */
+
+	if (!checklocks (msg)) {
+		prompt (forward ? FWCONF : USING);
+		return;
+	}
 
 
-  /* Mail the message */
-  
-  sprintf(temp,"%d",msg->msgno);
-  sprintf(lock,MESSAGELOCK,clubname,temp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return;
-  lock_place(lock,"reading");
-  decompressmsg(msg);
+	/* Remove the message files */
 
-  sprintf(original,"%s/%d",clubdir,msg->msgno);
-  sprintf(temp,"%s %s",HST_CP,thisuseracc.userid);
-  addhistory(msg->history,temp,sizeof(msg->history));
-  msg->flags&=(MSF_COPYMASK|MSF_APPROVD);
-  msg->replies=0;
-  msg->timesread=0;
-  msg->timesdnl=0;
-  msg->period=0;
+	if (msg->club[0])
+		sprintf (clubdir, "%s/%s", mkfname (MSGSDIR), msg->club);
+	else
+		strcpy (clubdir, mkfname (EMAILDIR));
 
-  if(!origdir[0]){
-    strcpy(source,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
-  } else {
-    strcpy(source,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,origdir,msg->msgno));
-  }
-
-  if((fp1=fopen(source,"r"))==NULL){
-    prompt(CPIO);
-    return;
-  }
-
-  sprintf(body,TMPDIR"/cc%05dB",getpid());
-  if((fp2=fopen(body,"w"))==NULL){
-    prompt(CPIO);
-    return;
-  }
-
-  sprintf(header,TMPDIR"/cc%05dH",getpid());
-  if((fp3=fopen(header,"w"))==NULL){
-    prompt(CPIO);
-    return;
-  }
-
-  fwrite(msg,sizeof(struct message),1,fp3);
-  fclose(fp3);
-
-  fseek(fp1,sizeof(struct message),SEEK_SET);
-  do{
-    if((bytes=fread(temp,1,sizeof(temp),fp1))!=0){
-      if(msg->cryptkey)bbscrypt(temp,bytes,msg->cryptkey);
-      fwrite(temp,bytes,1,fp2);
-    }
-  }while(bytes);
-  
-  fclose(fp1);
-  fclose(fp2);
-
-  lock_rm(lock);
-
-  if(!origdir[0]){
-    strcpy(fatt,mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno));
-  } else {
-    sprintf(fatt,"%s/%s/%s/"FILEATTACHMENT,
-	    mkfname(MSGSDIR),origdir,MSGATTDIR,msg->msgno);
-  }
-
-  if(!(msg->flags&MSF_FILEATT)){
-    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
-  }else {
-    sprintf(command,"%s %s %s -h %s",mkfname(BBSMAILBIN),header,body,fatt);
-  }
-  system(command);
-
-    
-  /* Notify the user(s) */
-    
-  if((fp1=fopen(header,"r"))==NULL){
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  if(fread(&checkmsg,sizeof(checkmsg),1,fp1)!=1){
-    int i=errno;
-    fclose(fp1);
-    errno=i;
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  fclose(fp1);
-
-  if(checkmsg.msgno)prompt(WECONFC,origclub,msg->msgno,clubname,
-			   checkmsg.msgno,checkmsg.to);
-      
-  if(usr_insys(checkmsg.to,1)){
-    if(!clubmsg){
-      sprompt_other(othrshm,out_buffer,WERNOTC,
-		    checkmsg.from,checkmsg.subject);
-    } else {
-      sprompt_other(othrshm,out_buffer,WERNOTCC,
-		    checkmsg.from,checkmsg.club,checkmsg.subject);
-    }
-    if(usr_injoth(&othruseronl,out_buffer,0))
-      prompt(WENOTFD,othruseronl.userid);
-  }
+	sprintf (fname, "%s/" MESSAGEFILE, clubdir, msg->msgno);
+	unlink (fname);
+	sprintf (fname, "%s/.ATT/%d.att", clubdir, msg->msgno);
+	unlink (fname);
 
 
-  /* Clean up */
+	/* Remove the database index */
 
-  if(!clubmsg){
-    usr_chargecredits((net?wrtchg+netchg:wrtchg)+
-		  (msg->flags&MSF_FILEATT?attchg:0));
-  } else {
-    usr_chargecredits(clubhdr.postchg+
-		  (msg->flags&MSF_FILEATT?clubhdr.uploadchg:0));
-  }
-  thisuseracc.msgswritten++;
-  unlink(header);
-  unlink(body);
+	dbrm (msg);
+
+
+	/* Adjust club header if it's a club message */
+
+	if (msg->club[0]) {
+		loadclubhdr (msg->club);
+		clubhdr.nmsgs--;
+		if (msg->flags & MSF_FILEATT)
+			clubhdr.nfiles--;
+		if (msg->period)
+			clubhdr.nper--;
+		if (msg->flags & MSF_FILEATT &&
+		    ((msg->flags & MSF_APPROVD) == 0))
+			clubhdr.nfunapp--;
+		saveclubhdr (&clubhdr);
+	}
+
+
+	/* Decrease the number of replies of the parent message */
+
+	if (msg->replyto && msg->flags & MSF_REPLY) {
+		FILE   *fp;
+
+		struct message replied;
+		char    lock[256], s[64], *cp, club[256], t[256], *clp;
+		int     ok;
+
+
+		/* Parse the message history */
+
+		if ((cp = strstr (msg->history, HST_REPLY)) != NULL) {
+			ok = (sscanf (cp, "%*s %s", t) == 1);
+			if (ok) {
+				ok = (clp = strchr (t, '/')) != NULL;
+				if (ok) {
+					*clp = 0;
+					strcpy (club, t);
+				}
+			}
+			if (sameas (club, EMAILCLUBNAME))
+				strcpy (club, EMAILDIRNAME);
+		}
+
+
+		/* Lock the parent message */
+
+		sprintf (s, "%d", msg->replyto);
+		sprintf (lock, MESSAGELOCK, club, s);
+		if (lock_wait (lock, 10) == LKR_TIMEOUT)
+			return;
+		lock_place (lock, "updating");
+
+
+		/* And update it */
+
+		decompressmsg (msg);
+		sprintf (fname, "%s/%s/" MESSAGEFILE, mkfname (MSGSDIR), club,
+			 msg->replyto);
+		if ((fp = fopen (fname, "r+")) != NULL) {
+			if (fread (&replied, sizeof (replied), 1, fp)) {
+				int     i = replied.replies;
+
+				if ((--replied.replies) < 0)
+					replied.replies = 0;
+				if (replied.replies != i) {
+					rewind (fp);
+					fwrite (&replied, sizeof (replied), 1,
+						fp);
+				}
+			}
+		}
+		compressmsg (msg);
+		fclose (fp);
+		lock_rm (lock);
+	}
 }
 
 
 void
-forwardmsg(struct message *msg)
+copymsg (struct message *msg)
 {
-  FILE *fp1, *fp2, *fp3;
-  int net=0;
-  struct message checkmsg, orig;
-  char temp[256], source[256], fatt[256], lock[256], clubdir[256];
-  char clubname[256];
-  char header[256], body[256], command[256], original[256], origclub[256];
-  char origdir[256];
-  int bytes, res, clubmsg=0;
+	FILE   *fp1, *fp2, *fp3;
+	int     net = 0;
+	struct message checkmsg;
+	char    temp[256], source[256], fatt[256], lock[256], clubdir[256];
+	char    clubname[256];
+	char    header[256], body[256], command[256], original[256],
+	    origclub[256];
+	char    origdir[256];
+	int     bytes, res, clubmsg = 0;
 
-  memcpy(&orig,msg,sizeof(orig));
+	if (msg->club[0])
+		strcpy (origclub, msg->club);
+	else
+		strcpy (origclub, EMAILCLUBNAME);
+	strcpy (origdir, msg->club);
 
-  if(msg->club[0])strcpy(origclub,msg->club);
-  else strcpy(origclub,EMAILCLUBNAME);
-  strcpy(origdir,msg->club);
+	/* Get message recipient */
 
-  /* Get message recipient */
-
-  for(;;){
-    res=getrecipient(FWWHO,msg->to);
-    if(!res)return;
-    else if(res==2){
-      strcpy(msg->club,msg->to);
-      if(getclubax(&thisuseracc,msg->club)<CAX_WRITE){
-	prompt(CPCERR,msg->club);
-	cnc_end();
-	continue;
-      }
-      strcpy(msg->to,MSG_ALL);
-      clubmsg=1;
-      strcpy(clubdir,msg->club);
-      strcpy(clubname,clubdir);
-      loadclubhdr(msg->club);
-      if(cnc_more()=='-'){
-	cnc_chr();
-	if(!getclubrecipient(WEFCAU,WEFCAUR,WEFCAUR,msg->to))return;
-      }
-      break;
-    } else {
-      strcpy(msg->club,"");
-      if(!key_owns(&thisuseracc,wrtkey)){
-	prompt(FWNOAXES);
-	return;
-      }
-      clubmsg=0;
-      if(msg->to[0]=='!')prompt(FWERR);
-      strcpy(clubdir,EMAILDIRNAME);
-      strcpy(clubname,EMAILCLUBNAME);
-      break;
-    }
-  }
-  net=strchr(msg->to,'@')||strchr(msg->to,'%');
-  prompt(net?FWRCPOKN:FWRCPOK,msg->to);
-
-
-  /* Check if we can copy the file attachment */
-
-  if(clubmsg && (msg->flags&MSF_FILEATT)){
-    int ax=getclubax(&thisuseracc,msg->club);
-    if(ax<CAX_UPLOAD){
-      prompt(FWCERR2,msg->club);
-      return;
-    } else if(ax>=CAX_COOP){
-      msg->flags|=MSF_APPROVD;
-    }
-  }
+	for (;;) {
+		res = getrecipient (CPWHO, msg->to);
+		if (!res)
+			return;
+		else if (res == 2) {
+			strcpy (msg->club, msg->to);
+			if (getclubax (&thisuseracc, msg->club) < CAX_WRITE) {
+				prompt (CPCERR, msg->club);
+				cnc_end ();
+				continue;
+			}
+			strcpy (msg->to, MSG_ALL);
+			clubmsg = 1;
+			strcpy (clubdir, msg->club);
+			strcpy (clubname, clubdir);
+			loadclubhdr (msg->club);
+			if (cnc_more () == '-') {
+				cnc_chr ();
+				if (!getclubrecipient
+				    (WEFCAU, WEFCAUR, WEFCAUR, msg->to))
+					return;
+			}
+			break;
+		} else {
+			strcpy (msg->club, "");
+			if (!key_owns (&thisuseracc, wrtkey)) {
+				prompt (CPNOAXES);
+				return;
+			}
+			clubmsg = 0;
+			if (msg->to[0] == '!')
+				prompt (FWERR);
+			strcpy (clubdir, EMAILDIRNAME);
+			strcpy (clubname, EMAILCLUBNAME);
+			break;
+		}
+	}
+	net = strchr (msg->to, '@') || strchr (msg->to, '%');
+	prompt (net ? CPRCPOKN : CPRCPOK, msg->to);
 
 
-  /* Check if user has enough credits */
-  
-  if(!clubmsg){
-    if(!usr_canpay((net?wrtchg+netchg:wrtchg)+
-	       (msg->flags&MSF_FILEATT?attchg:0))){
-      prompt(WERNEC);
-      return;
-    }
-  } else {
-    if(!usr_canpay(clubhdr.postchg+(msg->flags&MSF_FILEATT?clubhdr.uploadchg:0))){
-      prompt(WCRNEC);
-      return;
-    }
-  }
+	/* Check if we can copy the file attachment */
+
+	if (clubmsg && (msg->flags & MSF_FILEATT)) {
+		int     ax = getclubax (&thisuseracc, msg->club);
+
+		if (ax < CAX_UPLOAD) {
+			prompt (CPCERR2, msg->club);
+			msg->flags &= ~(MSF_FILEATT | MSF_APPROVD);
+		} else if (ax >= CAX_COOP) {
+			msg->flags |= MSF_APPROVD;
+		}
+	}
 
 
-  /* Mail the message */
-  
-  sprintf(temp,"%d",msg->msgno);
-  sprintf(lock,MESSAGELOCK,clubname,temp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return;
-  lock_place(lock,"reading");
+	/* Check if user has enough credits */
 
-  sprintf(original,"%s/%d",clubdir,msg->msgno);
-  sprintf(temp,"%s %s",HST_FW,thisuseracc.userid);
-  addhistory(msg->history,temp,sizeof(msg->history));
-  msg->flags&=(MSF_COPYMASK|MSF_APPROVD);
-  msg->replies=0;
-  msg->timesread=0;
-  msg->timesdnl=0;
-  msg->period=0;
-
-  if(!origdir[0]){
-    strcpy(source,mkfname(EMAILDIR"/"MESSAGEFILE,msg->msgno));
-  } else {
-    sprintf(source,"%s/%s/"MESSAGEFILE,mkfname(MSGSDIR),origdir,msg->msgno);
-  }
-
-  if((fp1=fopen(source,"r"))==NULL){
-    prompt(FWIO);
-    return;
-  }
-
-  sprintf(body,TMPDIR"/cc%05dB",getpid());
-  if((fp2=fopen(body,"w"))==NULL){
-    prompt(FWIO);
-    return;
-  }
-
-  sprintf(header,TMPDIR"/cc%05dH",getpid());
-  if((fp3=fopen(header,"w"))==NULL){
-    prompt(FWIO);
-    return;
-  }
-
-  fwrite(msg,sizeof(struct message),1,fp3);
-  fclose(fp3);
-
-  fseek(fp1,sizeof(struct message),SEEK_SET);
-  do{
-    if((bytes=fread(temp,1,sizeof(temp),fp1))!=0){
-      if(msg->cryptkey)bbscrypt(temp,bytes,msg->cryptkey);
-      fwrite(temp,bytes,1,fp2);
-    }
-  }while(bytes);
-  
-  fclose(fp1);
-  fclose(fp2);
-
-  lock_rm(lock);
-
-  if(!origdir[0]){
-    strcpy(fatt,mkfname(EMAILDIR"/"MSGATTDIR"/"FILEATTACHMENT,msg->msgno));
-  } else {
-    sprintf(fatt,"%s/%s/%s/"FILEATTACHMENT,
-	    mkfname(MSGSDIR),origdir,MSGATTDIR,msg->msgno);
-  }
-
-  if(!(msg->flags&MSF_FILEATT)){
-    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
-  }else {
-    sprintf(command,"%s %s %s -h %s",mkfname(BBSMAILBIN),header,body,fatt);
-  }
-  system(command);
-    
-  /* Notify the user(s) */
-    
-  if((fp1=fopen(header,"r"))==NULL){
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  if(fread(&checkmsg,sizeof(checkmsg),1,fp1)!=1){
-    int i=errno;
-    fclose(fp1);
-    errno=i;
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  fclose(fp1);
-
-  if(checkmsg.msgno)prompt(WECONFC,origclub,msg->msgno,clubname,
-			   checkmsg.msgno,checkmsg.to);
-      
-  if(usr_insys(checkmsg.to,1)){
-    if(!clubmsg){
-      sprompt_other(othrshm,out_buffer,WERNOTC,
-	      checkmsg.from,checkmsg.subject);
-    } else {
-      sprompt_other(othrshm,out_buffer,WERNOTFW,
-		    checkmsg.from,checkmsg.club,checkmsg.subject);
-    }
-    if(usr_injoth(&othruseronl,out_buffer,0))
-      prompt(WENOTFD,othruseronl.userid);
-  }
+	if (!clubmsg) {
+		if (!usr_canpay ((net ? wrtchg + netchg : wrtchg) +
+				 (msg->flags & MSF_FILEATT ? attchg : 0))) {
+			prompt (WERNEC);
+			return;
+		}
+	} else {
+		if (!usr_canpay
+		    (clubhdr.postchg +
+		     (msg->flags & MSF_FILEATT ? clubhdr.uploadchg : 0))) {
+			prompt (WCRNEC);
+			return;
+		}
+	}
 
 
-  /* Clean up */
+	/* Mail the message */
 
-  if(!clubmsg){
-    usr_chargecredits((net?wrtchg+netchg:wrtchg)+
-		  (msg->flags&MSF_FILEATT?attchg:0));
-  } else {
-    usr_chargecredits(clubhdr.postchg+
-		  (msg->flags&MSF_FILEATT?clubhdr.uploadchg:0));
-  }
-  thisuseracc.msgswritten++;
-  unlink(header);
-  unlink(body);
-  erasemsg(1,&orig);
+	sprintf (temp, "%d", msg->msgno);
+	sprintf (lock, MESSAGELOCK, clubname, temp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return;
+	lock_place (lock, "reading");
+	decompressmsg (msg);
+
+	sprintf (original, "%s/%d", clubdir, msg->msgno);
+	sprintf (temp, "%s %s", HST_CP, thisuseracc.userid);
+	addhistory (msg->history, temp, sizeof (msg->history));
+	msg->flags &= (MSF_COPYMASK | MSF_APPROVD);
+	msg->replies = 0;
+	msg->timesread = 0;
+	msg->timesdnl = 0;
+	msg->period = 0;
+
+	if (!origdir[0]) {
+		strcpy (source,
+			mkfname (EMAILDIR "/" MESSAGEFILE, msg->msgno));
+	} else {
+		strcpy (source,
+			mkfname ("%s/%s/" MESSAGEFILE, MSGSDIR, origdir,
+				 msg->msgno));
+	}
+
+	if ((fp1 = fopen (source, "r")) == NULL) {
+		prompt (CPIO);
+		return;
+	}
+
+	sprintf (body, TMPDIR "/cc%05dB", getpid ());
+	if ((fp2 = fopen (body, "w")) == NULL) {
+		prompt (CPIO);
+		return;
+	}
+
+	sprintf (header, TMPDIR "/cc%05dH", getpid ());
+	if ((fp3 = fopen (header, "w")) == NULL) {
+		prompt (CPIO);
+		return;
+	}
+
+	fwrite (msg, sizeof (struct message), 1, fp3);
+	fclose (fp3);
+
+	fseek (fp1, sizeof (struct message), SEEK_SET);
+	do {
+		if ((bytes = fread (temp, 1, sizeof (temp), fp1)) != 0) {
+			if (msg->cryptkey)
+				bbscrypt (temp, bytes, msg->cryptkey);
+			fwrite (temp, bytes, 1, fp2);
+		}
+	} while (bytes);
+
+	fclose (fp1);
+	fclose (fp2);
+
+	lock_rm (lock);
+
+	if (!origdir[0]) {
+		strcpy (fatt,
+			mkfname (EMAILDIR "/" MSGATTDIR "/" FILEATTACHMENT,
+				 msg->msgno));
+	} else {
+		sprintf (fatt, "%s/%s/%s/" FILEATTACHMENT,
+			 mkfname (MSGSDIR), origdir, MSGATTDIR, msg->msgno);
+	}
+
+	if (!(msg->flags & MSF_FILEATT)) {
+		sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), header,
+			 body);
+	} else {
+		sprintf (command, "%s %s %s -h %s", mkfname (BBSMAILBIN),
+			 header, body, fatt);
+	}
+	system (command);
+
+
+	/* Notify the user(s) */
+
+	if ((fp1 = fopen (header, "r")) == NULL) {
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	if (fread (&checkmsg, sizeof (checkmsg), 1, fp1) != 1) {
+		int     i = errno;
+
+		fclose (fp1);
+		errno = i;
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	fclose (fp1);
+
+	if (checkmsg.msgno)
+		prompt (WECONFC, origclub, msg->msgno, clubname,
+			checkmsg.msgno, checkmsg.to);
+
+	if (usr_insys (checkmsg.to, 1)) {
+		if (!clubmsg) {
+			sprompt_other (othrshm, out_buffer, WERNOTC,
+				       checkmsg.from, checkmsg.subject);
+		} else {
+			sprompt_other (othrshm, out_buffer, WERNOTCC,
+				       checkmsg.from, checkmsg.club,
+				       checkmsg.subject);
+		}
+		if (usr_injoth (&othruseronl, out_buffer, 0))
+			prompt (WENOTFD, othruseronl.userid);
+	}
+
+
+	/* Clean up */
+
+	if (!clubmsg) {
+		usr_chargecredits ((net ? wrtchg + netchg : wrtchg) +
+				   (msg->flags & MSF_FILEATT ? attchg : 0));
+	} else {
+		usr_chargecredits (clubhdr.postchg +
+				   (msg->flags & MSF_FILEATT ? clubhdr.
+				    uploadchg : 0));
+	}
+	thisuseracc.msgswritten++;
+	unlink (header);
+	unlink (body);
+}
+
+
+void
+forwardmsg (struct message *msg)
+{
+	FILE   *fp1, *fp2, *fp3;
+	int     net = 0;
+	struct message checkmsg, orig;
+	char    temp[256], source[256], fatt[256], lock[256], clubdir[256];
+	char    clubname[256];
+	char    header[256], body[256], command[256], original[256],
+	    origclub[256];
+	char    origdir[256];
+	int     bytes, res, clubmsg = 0;
+
+	memcpy (&orig, msg, sizeof (orig));
+
+	if (msg->club[0])
+		strcpy (origclub, msg->club);
+	else
+		strcpy (origclub, EMAILCLUBNAME);
+	strcpy (origdir, msg->club);
+
+	/* Get message recipient */
+
+	for (;;) {
+		res = getrecipient (FWWHO, msg->to);
+		if (!res)
+			return;
+		else if (res == 2) {
+			strcpy (msg->club, msg->to);
+			if (getclubax (&thisuseracc, msg->club) < CAX_WRITE) {
+				prompt (CPCERR, msg->club);
+				cnc_end ();
+				continue;
+			}
+			strcpy (msg->to, MSG_ALL);
+			clubmsg = 1;
+			strcpy (clubdir, msg->club);
+			strcpy (clubname, clubdir);
+			loadclubhdr (msg->club);
+			if (cnc_more () == '-') {
+				cnc_chr ();
+				if (!getclubrecipient
+				    (WEFCAU, WEFCAUR, WEFCAUR, msg->to))
+					return;
+			}
+			break;
+		} else {
+			strcpy (msg->club, "");
+			if (!key_owns (&thisuseracc, wrtkey)) {
+				prompt (FWNOAXES);
+				return;
+			}
+			clubmsg = 0;
+			if (msg->to[0] == '!')
+				prompt (FWERR);
+			strcpy (clubdir, EMAILDIRNAME);
+			strcpy (clubname, EMAILCLUBNAME);
+			break;
+		}
+	}
+	net = strchr (msg->to, '@') || strchr (msg->to, '%');
+	prompt (net ? FWRCPOKN : FWRCPOK, msg->to);
+
+
+	/* Check if we can copy the file attachment */
+
+	if (clubmsg && (msg->flags & MSF_FILEATT)) {
+		int     ax = getclubax (&thisuseracc, msg->club);
+
+		if (ax < CAX_UPLOAD) {
+			prompt (FWCERR2, msg->club);
+			return;
+		} else if (ax >= CAX_COOP) {
+			msg->flags |= MSF_APPROVD;
+		}
+	}
+
+
+	/* Check if user has enough credits */
+
+	if (!clubmsg) {
+		if (!usr_canpay ((net ? wrtchg + netchg : wrtchg) +
+				 (msg->flags & MSF_FILEATT ? attchg : 0))) {
+			prompt (WERNEC);
+			return;
+		}
+	} else {
+		if (!usr_canpay
+		    (clubhdr.postchg +
+		     (msg->flags & MSF_FILEATT ? clubhdr.uploadchg : 0))) {
+			prompt (WCRNEC);
+			return;
+		}
+	}
+
+
+	/* Mail the message */
+
+	sprintf (temp, "%d", msg->msgno);
+	sprintf (lock, MESSAGELOCK, clubname, temp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return;
+	lock_place (lock, "reading");
+
+	sprintf (original, "%s/%d", clubdir, msg->msgno);
+	sprintf (temp, "%s %s", HST_FW, thisuseracc.userid);
+	addhistory (msg->history, temp, sizeof (msg->history));
+	msg->flags &= (MSF_COPYMASK | MSF_APPROVD);
+	msg->replies = 0;
+	msg->timesread = 0;
+	msg->timesdnl = 0;
+	msg->period = 0;
+
+	if (!origdir[0]) {
+		strcpy (source,
+			mkfname (EMAILDIR "/" MESSAGEFILE, msg->msgno));
+	} else {
+		sprintf (source, "%s/%s/" MESSAGEFILE, mkfname (MSGSDIR),
+			 origdir, msg->msgno);
+	}
+
+	if ((fp1 = fopen (source, "r")) == NULL) {
+		prompt (FWIO);
+		return;
+	}
+
+	sprintf (body, TMPDIR "/cc%05dB", getpid ());
+	if ((fp2 = fopen (body, "w")) == NULL) {
+		prompt (FWIO);
+		return;
+	}
+
+	sprintf (header, TMPDIR "/cc%05dH", getpid ());
+	if ((fp3 = fopen (header, "w")) == NULL) {
+		prompt (FWIO);
+		return;
+	}
+
+	fwrite (msg, sizeof (struct message), 1, fp3);
+	fclose (fp3);
+
+	fseek (fp1, sizeof (struct message), SEEK_SET);
+	do {
+		if ((bytes = fread (temp, 1, sizeof (temp), fp1)) != 0) {
+			if (msg->cryptkey)
+				bbscrypt (temp, bytes, msg->cryptkey);
+			fwrite (temp, bytes, 1, fp2);
+		}
+	} while (bytes);
+
+	fclose (fp1);
+	fclose (fp2);
+
+	lock_rm (lock);
+
+	if (!origdir[0]) {
+		strcpy (fatt,
+			mkfname (EMAILDIR "/" MSGATTDIR "/" FILEATTACHMENT,
+				 msg->msgno));
+	} else {
+		sprintf (fatt, "%s/%s/%s/" FILEATTACHMENT,
+			 mkfname (MSGSDIR), origdir, MSGATTDIR, msg->msgno);
+	}
+
+	if (!(msg->flags & MSF_FILEATT)) {
+		sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), header,
+			 body);
+	} else {
+		sprintf (command, "%s %s %s -h %s", mkfname (BBSMAILBIN),
+			 header, body, fatt);
+	}
+	system (command);
+
+	/* Notify the user(s) */
+
+	if ((fp1 = fopen (header, "r")) == NULL) {
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	if (fread (&checkmsg, sizeof (checkmsg), 1, fp1) != 1) {
+		int     i = errno;
+
+		fclose (fp1);
+		errno = i;
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	fclose (fp1);
+
+	if (checkmsg.msgno)
+		prompt (WECONFC, origclub, msg->msgno, clubname,
+			checkmsg.msgno, checkmsg.to);
+
+	if (usr_insys (checkmsg.to, 1)) {
+		if (!clubmsg) {
+			sprompt_other (othrshm, out_buffer, WERNOTC,
+				       checkmsg.from, checkmsg.subject);
+		} else {
+			sprompt_other (othrshm, out_buffer, WERNOTFW,
+				       checkmsg.from, checkmsg.club,
+				       checkmsg.subject);
+		}
+		if (usr_injoth (&othruseronl, out_buffer, 0))
+			prompt (WENOTFD, othruseronl.userid);
+	}
+
+
+	/* Clean up */
+
+	if (!clubmsg) {
+		usr_chargecredits ((net ? wrtchg + netchg : wrtchg) +
+				   (msg->flags & MSF_FILEATT ? attchg : 0));
+	} else {
+		usr_chargecredits (clubhdr.postchg +
+				   (msg->flags & MSF_FILEATT ? clubhdr.
+				    uploadchg : 0));
+	}
+	thisuseracc.msgswritten++;
+	unlink (header);
+	unlink (body);
+	erasemsg (1, &orig);
 }
 
 
 
 int
-backtrack(struct message *msg)
+backtrack (struct message *msg)
 {
-  char replyto[256], *cp;
-  int msgno=0, ok=0, i, j;
-  char fname[256];
-  struct stat st;
+	char    replyto[256], *cp;
+	int     msgno = 0, ok = 0, i, j;
+	char    fname[256];
+	struct stat st;
 
-  if((msg->flags&MSF_REPLY)&&((cp=strstr(msg->history,HST_REPLY))!=NULL)){
-    ok=(sscanf(cp,"%*s %s",replyto)==1);
-  }
+	if ((msg->flags & MSF_REPLY) &&
+	    ((cp = strstr (msg->history, HST_REPLY)) != NULL)) {
+		ok = (sscanf (cp, "%*s %s", replyto) == 1);
+	}
 
-  if(ok){
-    if((cp=strchr(replyto,'/'))!=NULL){
-      cp++;
-      ok=(sscanf(cp,"%d",&msgno)==1);
-    }
-  }
+	if (ok) {
+		if ((cp = strchr (replyto, '/')) != NULL) {
+			cp++;
+			ok = (sscanf (cp, "%d", &msgno) == 1);
+		}
+	}
 
-  if(ok){
-    j=findmsgnum(&i,msgno,BSD_GT);
-    if(j!=BSE_FOUND) {
-      ok=0;
-    } else if(!dbchkemail(msgno)) ok=0;
-  }
+	if (ok) {
+		j = findmsgnum (&i, msgno, BSD_GT);
+		if (j != BSE_FOUND) {
+			ok = 0;
+		} else if (!dbchkemail (msgno))
+			ok = 0;
+	}
 
-  if(ok){
-    strcpy(fname,mkfname(EMAILDIR"/"MESSAGEFILE,msgno));
-    ok=(stat(fname,&st)==0);
-  }
+	if (ok) {
+		strcpy (fname, mkfname (EMAILDIR "/" MESSAGEFILE, msgno));
+		ok = (stat (fname, &st) == 0);
+	}
 
-  if(!ok){
-    prompt(BKERR);
-    return 0;
-  }
+	if (!ok) {
+		prompt (BKERR);
+		return 0;
+	}
 
-  return msgno;
+	return msgno;
 }
 
 
 void
-deleteuser(struct message *msg)
+deleteuser (struct message *msg)
 {
-  useracc_t usracc, *uacc=&usracc;
+	useracc_t usracc, *uacc = &usracc;
 
-  if(!(msg->flags&MSF_SIGNUP && strcmp(msg->from,thisuseracc.userid) &&
-       (sameas(thisuseracc.userid,SYSOP)||hassysaxs(&thisuseracc,USY_DELETE))))
-    return;
-  
-  if(!usr_exists(msg->from)){
-    prompt(DUERR);
-    return;
-  }
-  
-  if(!usr_insys(msg->from,0))usr_loadaccount(msg->from,uacc);
-  else uacc=&othruseracc;
+	if (!
+	    (msg->flags & MSF_SIGNUP && strcmp (msg->from, thisuseracc.userid)
+	     && (sameas (thisuseracc.userid, SYSOP) ||
+		 hassysaxs (&thisuseracc, USY_DELETE))))
+		return;
 
-  if((uacc->flags&UFL_EXEMPT||sameas(msg->from,SYSOP))
-     &&(!(uacc->flags&UFL_DELETED))){
-    prompt(DUXM);
-    return;
-  }
-  
-  if(uacc->flags&UFL_DELETED){
-    prompt(DUDEL);
-    return;
-  }
+	if (!usr_exists (msg->from)) {
+		prompt (DUERR);
+		return;
+	}
 
-  uacc->flags|=UFL_DELETED;
-  
-  if (!usr_insys(msg->from,0))usr_saveaccount(uacc);
-  else bbsdcommand("hangup",othruseronl.channel,"");
+	if (!usr_insys (msg->from, 0))
+		usr_loadaccount (msg->from, uacc);
+	else
+		uacc = &othruseracc;
 
-  prompt(DUOK);
-  audit(getenv("CHANNEL"),AUDIT(RSMDEL),thisuseracc.userid,msg->from);
+	if ((uacc->flags & UFL_EXEMPT || sameas (msg->from, SYSOP))
+	    && (!(uacc->flags & UFL_DELETED))) {
+		prompt (DUXM);
+		return;
+	}
+
+	if (uacc->flags & UFL_DELETED) {
+		prompt (DUDEL);
+		return;
+	}
+
+	uacc->flags |= UFL_DELETED;
+
+	if (!usr_insys (msg->from, 0))
+		usr_saveaccount (uacc);
+	else
+		bbsdcommand ("hangup", othruseronl.channel, "");
+
+	prompt (DUOK);
+	audit (getenv ("CHANNEL"), AUDIT (RSMDEL), thisuseracc.userid,
+	       msg->from);
 }
 
 
@@ -725,28 +794,32 @@ deleteuser(struct message *msg)
 static char lockchk[256];
 
 int
-lockselect(const struct dirent *d)
+lockselect (const struct dirent *d)
 {
-  return sameto(lockchk,((struct dirent *)d)->d_name);
+	return sameto (lockchk, ((struct dirent *) d)->d_name);
 }
 
 
 void
-rmlocks()
+rmlocks ()
 {
-  char *cp, fname[256];
-  struct dirent **locks;
-  int i,n;
+	char   *cp, fname[256];
+	struct dirent **locks;
+	int     i, n;
 
-  sprintf(lockchk,MSGREADLOCK,thisuseronl.channel,"*","*");
-  if((cp=strchr(lockchk,'*'))!=NULL)*cp=0;
+	sprintf (lockchk, MSGREADLOCK, thisuseronl.channel, "*", "*");
+	if ((cp = strchr (lockchk, '*')) != NULL)
+		*cp = 0;
 
-  n=scandir(mkfname(LOCKDIR),&locks,lockselect,ncsalphasort);
+	n = scandir (mkfname (LOCKDIR), &locks, lockselect, ncsalphasort);
 
-  for(i=0;i<n;i++){
-    sprintf(fname,"%s/%s",mkfname(LOCKDIR),locks[i]->d_name);
-    unlink(fname);
-    free(locks[i]);
-  }
-  free(locks);
+	for (i = 0; i < n; i++) {
+		sprintf (fname, "%s/%s", mkfname (LOCKDIR), locks[i]->d_name);
+		unlink (fname);
+		free (locks[i]);
+	}
+	free (locks);
 }
+
+
+/* End of File */

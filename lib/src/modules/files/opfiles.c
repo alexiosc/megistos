@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,37 +55,46 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 void
-op_files()
+op_files ()
 {
-  FILE *pp;
-  char command[512];
+	FILE   *pp;
+	char    command[512];
 
-  sprintf(command,"cd %s; file -L *",library.dir);
-  if((pp=popen(command,"r"))==NULL){
-    fclose(pp);
-    error_logsys("Unable to popen(\"%s\",\"r\").",command);
-    return;
-  }
+	sprintf (command, "cd %s; file -L *", library.dir);
+	if ((pp = popen (command, "r")) == NULL) {
+		fclose (pp);
+		error_logsys ("Unable to popen(\"%s\",\"r\").", command);
+		return;
+	}
 
-  prompt(OFILHD);
-  inp_nonblock();
-  while(!feof(pp)){
-    char line[8192], *type;
-    if(!fgets(line,sizeof(line),pp))break;
-    if((type=strstr(line,": "))==NULL)continue;
-    type++;
-    while(*type==32)type++;
-    *(type-1)=0;
-    prompt(OFILLN,line,type);
-    if(fmt_lastresult==PAUSE_QUIT)break;
-  }
-  inp_block();
-  if(fmt_lastresult!=PAUSE_QUIT)prompt(OFILFT);
-  pclose(pp);
+	prompt (OFILHD);
+	inp_nonblock ();
+	while (!feof (pp)) {
+		char    line[8192], *type;
+
+		if (!fgets (line, sizeof (line), pp))
+			break;
+		if ((type = strstr (line, ": ")) == NULL)
+			continue;
+		type++;
+		while (*type == 32)
+			type++;
+		*(type - 1) = 0;
+		prompt (OFILLN, line, type);
+		if (fmt_lastresult == PAUSE_QUIT)
+			break;
+	}
+	inp_block ();
+	if (fmt_lastresult != PAUSE_QUIT)
+		prompt (OFILFT);
+	pclose (pp);
 }
+
+
+/* End of File */

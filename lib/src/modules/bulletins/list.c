@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -37,10 +40,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -51,120 +52,139 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
-#include "typhoon.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
+#include <megistos/typhoon.h>
 
 
 void
-list(int full)
+list (int full)
 {
-  struct bltidx blt;
-  char oldclub[16]={0}, c;
-  int i=0, skip=0;
-  int first=1;
+	struct bltidx blt;
+	char    oldclub[16] = { 0 }, c;
+	int     i = 0, skip = 0;
+	int     first = 1;
 
-  if(!(club[0]?dblistfind(club,1):dblistfirst())){
-    if(!club[0])prompt(BLTNOBT);
-    else prompt(CLBNOBT,club);
-    return;
-  }
+	if (!(club[0] ? dblistfind (club, 1) : dblistfirst ())) {
+		if (!club[0])
+			prompt (BLTNOBT);
+		else
+			prompt (CLBNOBT, club);
+		return;
+	}
 
-  inp_nonblock();
-  do{
-    dbget(&blt);
+	inp_nonblock ();
+	do {
+		dbget (&blt);
 
-    if(read(fileno(stdin),&c,1)&&
-       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))fmt_lastresult=PAUSE_QUIT;
+		if (read (fileno (stdin), &c, 1) &&
+		    ((c == 13) || (c == 10) || (c == 27) || (c == 15) ||
+		     (c == 3)))
+			fmt_lastresult = PAUSE_QUIT;
 
-    if(club[0] && strcmp(blt.area,club))break;
+		if (club[0] && strcmp (blt.area, club))
+			break;
 
-    if(strcmp(oldclub,blt.area)){
-      first=0;
-      if(i&&oldclub[0])prompt(full?LSTEND2:LSTEND);
-      skip=getclubax(&thisuseracc,blt.area)<CAX_READ;
-      i=0;
-      if(!skip){
-	prompt((full?BLTLSHD2:BLTLSHD),blt.area);
-	strcpy(oldclub,blt.area);
-      }
-    }
+		if (strcmp (oldclub, blt.area)) {
+			first = 0;
+			if (i && oldclub[0])
+				prompt (full ? LSTEND2 : LSTEND);
+			skip = getclubax (&thisuseracc, blt.area) < CAX_READ;
+			i = 0;
+			if (!skip) {
+				prompt ((full ? BLTLSHD2 : BLTLSHD), blt.area);
+				strcpy (oldclub, blt.area);
+			}
+		}
 
-    if(fmt_lastresult==PAUSE_QUIT){
-      prompt(LSTCAN);
-      inp_block();
-      return;
-    }
+		if (fmt_lastresult == PAUSE_QUIT) {
+			prompt (LSTCAN);
+			inp_block ();
+			return;
+		}
 
-    if(skip)continue;
+		if (skip)
+			continue;
 
-    i++;
-    if(full){
-      prompt(BLTLST2,blt.num,blt.fname,blt.author,blt.descr,blt.timesread);
-    } else {
-      prompt(BLTLST,blt.num,blt.author,blt.descr);
-    }
-    if(fmt_lastresult==PAUSE_QUIT){
-      prompt(LSTCAN);
-      inp_block();
-      return;
-    }
-  }while(dblistnext());
+		i++;
+		if (full) {
+			prompt (BLTLST2, blt.num, blt.fname, blt.author,
+				blt.descr, blt.timesread);
+		} else {
+			prompt (BLTLST, blt.num, blt.author, blt.descr);
+		}
+		if (fmt_lastresult == PAUSE_QUIT) {
+			prompt (LSTCAN);
+			inp_block ();
+			return;
+		}
+	} while (dblistnext ());
 
-  if(fmt_lastresult!=PAUSE_QUIT && first==1){
-    if(!club[0])prompt(BLTNOBT);
-    else prompt(CLBNOBT,club);
-  }
-  
-  inp_block();
-  if(i)prompt(full?LSTEND2:LSTEND);
+	if (fmt_lastresult != PAUSE_QUIT && first == 1) {
+		if (!club[0])
+			prompt (BLTNOBT);
+		else
+			prompt (CLBNOBT, club);
+	}
+
+	inp_block ();
+	if (i)
+		prompt (full ? LSTEND2 : LSTEND);
 }
 
 
 int
-bltcmp(const void *a, const void *b)
+bltcmp (const void *a, const void *b)
 {
-  struct bltidx *A=(struct bltidx*)a;
-  struct bltidx *B=(struct bltidx*)b;
-  return strcmp(A->area,B->area);
+	struct bltidx *A = (struct bltidx *) a;
+	struct bltidx *B = (struct bltidx *) b;
+
+	return strcmp (A->area, B->area);
 }
 
 
 void
-listambiguous(char *fname)
+listambiguous (char *fname)
 {
-  struct fnamec key;
-  struct bltidx *blt=NULL, *tmp=NULL, x;
-  int num=0, i;
+	struct fnamec key;
+	struct bltidx *blt = NULL, *tmp = NULL, x;
+	int     num = 0, i;
 
-  strcpy(key.fname,fname);
-  strcpy(key.area,"");
+	strcpy (key.fname, fname);
+	strcpy (key.area, "");
 
-  d_keyfind(FNAMEC,&key);
-  if(db_status!=S_OKAY)d_keynext(FNAMEC);
-  
-  do{
-    d_recread(&x);
-    if(!sameas(fname,x.fname))continue;
-    if(getclubax(&thisuseracc,x.area)<CAX_READ)continue;
-    num++;
-    tmp=alcmem(num*sizeof(struct bltidx));
-    memcpy(tmp,blt,(num-1)*sizeof(struct bltidx));
-    if(blt)free(blt);
-    blt=tmp;
-    memcpy(&blt[num-1],&x,sizeof(struct bltidx));
-    d_keynext(FNAMEC);
-  }while(db_status==S_OKAY && sameas(fname,tmp->fname));
+	d_keyfind (FNAMEC, &key);
+	if (db_status != S_OKAY)
+		d_keynext (FNAMEC);
 
-  qsort(blt,num,sizeof(struct bltidx),bltcmp);
+	do {
+		d_recread (&x);
+		if (!sameas (fname, x.fname))
+			continue;
+		if (getclubax (&thisuseracc, x.area) < CAX_READ)
+			continue;
+		num++;
+		tmp = alcmem (num * sizeof (struct bltidx));
+		memcpy (tmp, blt, (num - 1) * sizeof (struct bltidx));
+		if (blt)
+			free (blt);
+		blt = tmp;
+		memcpy (&blt[num - 1], &x, sizeof (struct bltidx));
+		d_keynext (FNAMEC);
+	} while (db_status == S_OKAY && sameas (fname, tmp->fname));
 
-  prompt(AMBLSHD);
-  for(i=0;i<num;i++){
-    tmp=&blt[i];
-    prompt(AMBLST,tmp->num,tmp->area,tmp->descr);
-  }
-  free(blt);
-  prompt(AMBEND);
+	qsort (blt, num, sizeof (struct bltidx), bltcmp);
+
+	prompt (AMBLSHD);
+	for (i = 0; i < num; i++) {
+		tmp = &blt[i];
+		prompt (AMBLST, tmp->num, tmp->area, tmp->descr);
+	}
+	free (blt);
+	prompt (AMBEND);
 }
+
+
+/* End of File */

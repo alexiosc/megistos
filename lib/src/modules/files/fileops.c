@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -63,11 +64,11 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 #define __ARCHIVERS_UNAMBIGUOUS__
-#include "mbk_archivers.h"
+#include <megistos/mbk_archivers.h>
 
 
 static int numdevs[16];
@@ -75,245 +76,278 @@ static int *slowdevs[16];
 
 
 void
-saveslowdevs()
+saveslowdevs ()
 {
-  FILE *fp=fopen(mkfname(SLOWDEVFILE),"w");
-  int i;
+	FILE   *fp = fopen (mkfname (SLOWDEVFILE), "w");
+	int     i;
 
-  if(fp==NULL){
-    error_fatalsys("Unable to open %s for writing.",mkfname(SLOWDEVFILE));
-  }
-  
-  for(i=0;i<16;i++){
-    if(fwrite(&numdevs[i],sizeof(int),1,fp)!=1){
-      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
-    }
-
-    if(numdevs[i]==0)continue;
-
-    if(fwrite(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
-    }
-  }
-
-  /*
-  {
-    int a,b;
-    print("Saving...\n");
-    for(a=0;a<16;a++){
-      print("Group %2d (#%2d): ",a,numdevs[a]);
-      if(numdevs[a]==0){
-	print("\n");
-	continue;
-      }
-      for(b=0;b<numdevs[a];b++)print("0x%04x ",slowdevs[a][b]);
-      print("\n");
-    }
-  }
-  */
-
-  fclose(fp);
-}
-
-
-void
-loadslowdevs()
-{
-  FILE *fp=fopen(mkfname(SLOWDEVFILE),"r");
-  int i;
-
-  if(fp==NULL){
-    error_fatalsys("Unable to open %s for reading.",mkfname(SLOWDEVFILE));
-  }
-
-  for(i=0;i<16;i++){
-    if(fread(&numdevs[i],sizeof(int),1,fp)!=1){
-      error_fatalsys("Unable to read from %s",mkfname(SLOWDEVFILE));
-    }
-
-    if(numdevs[i]==0){
-      slowdevs[i]=NULL;
-      continue;
-    }
-
-    slowdevs[i]=alcmem(numdevs[i]*sizeof(int));
-    if(fread(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      error_fatalsys("Unable to write to %s",mkfname(SLOWDEVFILE));
-    }
-
-  }
-
-  /*
-  {
-    int a,b;
-    print("Loading...\n");
-    for(a=0;a<16;a++){
-      print("Group %2d (#%2d, %p): ",a,numdevs[a],slowdevs[a]);
-      if(numdevs[a]==0){
-	print("\n");
-	continue;
-      }
-      for(b=0;b<numdevs[a];b++)print("0x%04x ",slowdevs[a][b]);
-      print("\n");
-    }
-  }
-  */
-
-  fclose(fp);
-}
-
-
-void
-initslowdevs()
-{
-  struct stat st1, st2;
-  char fname[256];
-  int i;
-
-
-  /* Check if we need to reprocess the table */
-
-  sprintf(fname,"%s/files.mbk",mkfname(MBKDIR));
-  if(stat(fname,&st1)){
-    error_fatalsys("Sanity check failed: unable to stat %s",fname);
-  }
-
-  if(stat(mkfname(SLOWDEVFILE),&st2))st2.st_mtime=0;
-
-  if(st1.st_mtime<st2.st_mtime){
-    loadslowdevs();
-    return;
-  }
-
-
-  /* Process all 16 groups */
-
-  bzero(numdevs,sizeof(numdevs));
-  bzero(slowdevs,sizeof(slowdevs));
-
-  for(i=0;i<15;i++){
-    char command[256];
-    FILE *pp;
-    int  devs[512], ndevs=0;
-
-    if(!strlen(msg_get(SLOWDEV0+i)))continue;
-
-    sprintf(command,"echo %s|tr \" \" \"\\012\" 2>/dev/null 2>/dev/null",
-	    msg_get(SLOWDEV0+i));
-    if((pp=popen(command,"r"))==NULL){
-      error_fatalsys("Unable to pipe-in wildcard expansion!");
-    }
-
-    memset(devs,-1,sizeof(devs));
-    ndevs=0;
-    while(!feof(pp)){
-      char line[1024], *cp;
-      struct stat st;
-
-      if(!fgets(line,sizeof(line),pp))break;
-      if((cp=strchr(line,'\n'))!=NULL)*cp=0;
-
-      if(!stat(line,&st)){
-	if(!S_ISBLK(st.st_mode)){
-	  error_fatal("\"%s\" in group SLOWDEV%c is not a block device",
-		line,i+(i<10?'0':('A'-10)));
+	if (fp == NULL) {
+		error_fatalsys ("Unable to open %s for writing.",
+				mkfname (SLOWDEVFILE));
 	}
 
-	if(ndevs>=(sizeof(devs)/sizeof(int))){
-	  error_fatal("Too many devices (>=512) in group SLOWDEV%c",
-		i+(i<10?'0':('A'-10)));
+	for (i = 0; i < 16; i++) {
+		if (fwrite (&numdevs[i], sizeof (int), 1, fp) != 1) {
+			error_fatalsys ("Unable to write to %s",
+					mkfname (SLOWDEVFILE));
+		}
+
+		if (numdevs[i] == 0)
+			continue;
+
+		if (fwrite (slowdevs[i], sizeof (int), numdevs[i], fp) !=
+		    numdevs[i]) {
+			error_fatalsys ("Unable to write to %s",
+					mkfname (SLOWDEVFILE));
+		}
 	}
-	devs[ndevs++]=st.st_rdev;
-      }
-    }
 
-    slowdevs[i]=alcmem(ndevs*sizeof(int));
-    memcpy(slowdevs[i],devs,sizeof(int)*ndevs);
-    numdevs[i]=ndevs;
+	/*
+	   {
+	   int a,b;
+	   print("Saving...\n");
+	   for(a=0;a<16;a++){
+	   print("Group %2d (#%2d): ",a,numdevs[a]);
+	   if(numdevs[a]==0){
+	   print("\n");
+	   continue;
+	   }
+	   for(b=0;b<numdevs[a];b++)print("0x%04x ",slowdevs[a][b]);
+	   print("\n");
+	   }
+	   }
+	 */
 
-    pclose(pp);
-  }
-
-  saveslowdevs();
-}
-
-
-static int lastlibnum=-1, lastgroup=-1;
-
-
-int
-getlibgroup(struct libidx *lib)
-{
-  int a,b;
-  if(lib->libnum==lastlibnum)return lastgroup;
-  lastlibnum=lib->libnum;
-  for(a=0;a<16;a++){
-    if(numdevs[a]==0)continue;
-    for(b=0;b<numdevs[a];b++)if(lib->device==slowdevs[a][b])
-      return lastgroup=a;
-  }
-  return lastgroup=-1;		/* -1 means lib is not on a slow device */
-}
-
-
-int
-checkliblock(struct libidx *lib)
-{
-  int group=getlibgroup(lib);
-  if(group<0)return 0;
-  else {  
-    char fname[256], dummy[256];
-    sprintf(fname,SLOWDEVLOCK,group);
-    return lock_check(fname,dummy);
-  }
-  return 0;			/* Never happens */
-}
-
-
-int
-obtainliblock(struct libidx *lib, int timeout, char *reason)
-{
-  char fname[256], dummy[256];
-  int  group=getlibgroup(lib);
-
-  if(group<0)return 1;
-
-  sprintf(fname,SLOWDEVLOCK,group);
-
-  if(lock_check(fname,dummy)>0){
-    prompt(LIBWLCK);
-    if(lock_wait(fname,timeout)==LKR_TIMEOUT){
-      prompt(LIBFLCK);
-      return 0;
-    }
-  }
-  lock_place(fname,reason);
-  return 1;
+	fclose (fp);
 }
 
 
 void
-rmliblock(struct libidx *lib)
+loadslowdevs ()
 {
-  int group=getlibgroup(lib);
-  char fname[256];
+	FILE   *fp = fopen (mkfname (SLOWDEVFILE), "r");
+	int     i;
 
-  if(group<0)return;
-  sprintf(fname,SLOWDEVLOCK,group);
-  lock_rm(fname);
+	if (fp == NULL) {
+		error_fatalsys ("Unable to open %s for reading.",
+				mkfname (SLOWDEVFILE));
+	}
+
+	for (i = 0; i < 16; i++) {
+		if (fread (&numdevs[i], sizeof (int), 1, fp) != 1) {
+			error_fatalsys ("Unable to read from %s",
+					mkfname (SLOWDEVFILE));
+		}
+
+		if (numdevs[i] == 0) {
+			slowdevs[i] = NULL;
+			continue;
+		}
+
+		slowdevs[i] = alcmem (numdevs[i] * sizeof (int));
+		if (fread (slowdevs[i], sizeof (int), numdevs[i], fp) !=
+		    numdevs[i]) {
+			error_fatalsys ("Unable to write to %s",
+					mkfname (SLOWDEVFILE));
+		}
+
+	}
+
+	/*
+	   {
+	   int a,b;
+	   print("Loading...\n");
+	   for(a=0;a<16;a++){
+	   print("Group %2d (#%2d, %p): ",a,numdevs[a],slowdevs[a]);
+	   if(numdevs[a]==0){
+	   print("\n");
+	   continue;
+	   }
+	   for(b=0;b<numdevs[a];b++)print("0x%04x ",slowdevs[a][b]);
+	   print("\n");
+	   }
+	   }
+	 */
+
+	fclose (fp);
+}
+
+
+void
+initslowdevs ()
+{
+	struct stat st1, st2;
+	char    fname[256];
+	int     i;
+
+
+	/* Check if we need to reprocess the table */
+
+	sprintf (fname, "%s/files.mbk", mkfname (MBKDIR));
+	if (stat (fname, &st1)) {
+		error_fatalsys ("Sanity check failed: unable to stat %s",
+				fname);
+	}
+
+	if (stat (mkfname (SLOWDEVFILE), &st2))
+		st2.st_mtime = 0;
+
+	if (st1.st_mtime < st2.st_mtime) {
+		loadslowdevs ();
+		return;
+	}
+
+
+	/* Process all 16 groups */
+
+	bzero (numdevs, sizeof (numdevs));
+	bzero (slowdevs, sizeof (slowdevs));
+
+	for (i = 0; i < 15; i++) {
+		char    command[256];
+		FILE   *pp;
+		int     devs[512], ndevs = 0;
+
+		if (!strlen (msg_get (SLOWDEV0 + i)))
+			continue;
+
+		sprintf (command,
+			 "echo %s|tr \" \" \"\\012\" 2>/dev/null 2>/dev/null",
+			 msg_get (SLOWDEV0 + i));
+		if ((pp = popen (command, "r")) == NULL) {
+			error_fatalsys
+			    ("Unable to pipe-in wildcard expansion!");
+		}
+
+		memset (devs, -1, sizeof (devs));
+		ndevs = 0;
+		while (!feof (pp)) {
+			char    line[1024], *cp;
+			struct stat st;
+
+			if (!fgets (line, sizeof (line), pp))
+				break;
+			if ((cp = strchr (line, '\n')) != NULL)
+				*cp = 0;
+
+			if (!stat (line, &st)) {
+				if (!S_ISBLK (st.st_mode)) {
+					error_fatal
+					    ("\"%s\" in group SLOWDEV%c is not a block device",
+					     line,
+					     i + (i < 10 ? '0' : ('A' - 10)));
+				}
+
+				if (ndevs >= (sizeof (devs) / sizeof (int))) {
+					error_fatal
+					    ("Too many devices (>=512) in group SLOWDEV%c",
+					     i + (i < 10 ? '0' : ('A' - 10)));
+				}
+				devs[ndevs++] = st.st_rdev;
+			}
+		}
+
+		slowdevs[i] = alcmem (ndevs * sizeof (int));
+		memcpy (slowdevs[i], devs, sizeof (int) * ndevs);
+		numdevs[i] = ndevs;
+
+		pclose (pp);
+	}
+
+	saveslowdevs ();
+}
+
+
+static int lastlibnum = -1, lastgroup = -1;
+
+
+int
+getlibgroup (struct libidx *lib)
+{
+	int     a, b;
+
+	if (lib->libnum == lastlibnum)
+		return lastgroup;
+	lastlibnum = lib->libnum;
+	for (a = 0; a < 16; a++) {
+		if (numdevs[a] == 0)
+			continue;
+		for (b = 0; b < numdevs[a]; b++)
+			if (lib->device == slowdevs[a][b])
+				return lastgroup = a;
+	}
+	return lastgroup = -1;	/* -1 means lib is not on a slow device */
 }
 
 
 int
-installfile(char *source,char *finalname,struct libidx *lib)
+checkliblock (struct libidx *lib)
 {
-  char target[1024];
-  int res=1;
+	int     group = getlibgroup (lib);
 
-  prompt(FILEINST);
-  if(!obtainliblock(lib,sldevto,"installing"))return 0;
-  sprintf(target,"%s/%s",lib->dir,finalname);
-  if(fcopy(source,target))res=0;
-  rmliblock(lib);
-  return res;
+	if (group < 0)
+		return 0;
+	else {
+		char    fname[256], dummy[256];
+
+		sprintf (fname, SLOWDEVLOCK, group);
+		return lock_check (fname, dummy);
+	}
+	return 0;		/* Never happens */
 }
+
+
+int
+obtainliblock (struct libidx *lib, int timeout, char *reason)
+{
+	char    fname[256], dummy[256];
+	int     group = getlibgroup (lib);
+
+	if (group < 0)
+		return 1;
+
+	sprintf (fname, SLOWDEVLOCK, group);
+
+	if (lock_check (fname, dummy) > 0) {
+		prompt (LIBWLCK);
+		if (lock_wait (fname, timeout) == LKR_TIMEOUT) {
+			prompt (LIBFLCK);
+			return 0;
+		}
+	}
+	lock_place (fname, reason);
+	return 1;
+}
+
+
+void
+rmliblock (struct libidx *lib)
+{
+	int     group = getlibgroup (lib);
+	char    fname[256];
+
+	if (group < 0)
+		return;
+	sprintf (fname, SLOWDEVLOCK, group);
+	lock_rm (fname);
+}
+
+
+int
+installfile (char *source, char *finalname, struct libidx *lib)
+{
+	char    target[1024];
+	int     res = 1;
+
+	prompt (FILEINST);
+	if (!obtainliblock (lib, sldevto, "installing"))
+		return 0;
+	sprintf (target, "%s/%s", lib->dir, finalname);
+	if (fcopy (source, target))
+		res = 0;
+	rmliblock (lib);
+	return res;
+}
+
+
+/* End of File */

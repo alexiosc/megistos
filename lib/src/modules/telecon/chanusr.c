@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -58,10 +61,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -73,109 +74,121 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 struct chanusr *
-makechanusr(char *userid, int access)
+makechanusr (char *userid, int access)
 {
-  static struct chanusr usr;
-  memset(&usr,0,sizeof(usr));
-  strcpy(usr.userid,userid);
+	static struct chanusr usr;
 
-  usr.flags=access;
+	memset (&usr, 0, sizeof (usr));
+	strcpy (usr.userid, userid);
 
-  usr_insys(userid,0);
-  if(strcmp(userid,othruseracc.userid)){
-    error_fatal("Unable to read account for user %s",userid);
-  }
+	usr.flags = access;
 
-  usr.sex=othruseracc.sex;
-  if(thisuseronl.flags&OLF_TLCUNLIST)usr.flags|=CUF_UNLISTED;
-    
-  return &usr;
+	usr_insys (userid, 0);
+	if (strcmp (userid, othruseracc.userid)) {
+		error_fatal ("Unable to read account for user %s", userid);
+	}
+
+	usr.sex = othruseracc.sex;
+	if (thisuseronl.flags & OLF_TLCUNLIST)
+		usr.flags |= CUF_UNLISTED;
+
+	return &usr;
 }
 
 
 struct chanusr *
-readchanusr(char *channel, char *userid)
+readchanusr (char *channel, char *userid)
 {
-  FILE *fp;
-  char fname[256];
-  struct stat st;
-  static struct chanusr retval;
-  
-  /* Locate channel user file, return NULL if doesn't exist */
+	FILE   *fp;
+	char    fname[256];
+	struct stat st;
+	static struct chanusr retval;
 
-  sprintf(fname,"%s/%s/%s-",mkfname(TELEDIR),mkchfn(channel),userid);
-  if(stat(fname,&st)){
-    sprintf(fname,"%s/%s/%s+",mkfname(TELEDIR),mkchfn(channel),userid);
-    if(stat(fname,&st))return NULL;
-  }
+	/* Locate channel user file, return NULL if doesn't exist */
 
-  if((fp=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open existing channel user file %s",fname);
-  }
+	sprintf (fname, "%s/%s/%s-", mkfname (TELEDIR), mkchfn (channel),
+		 userid);
+	if (stat (fname, &st)) {
+		sprintf (fname, "%s/%s/%s+", mkfname (TELEDIR),
+			 mkchfn (channel), userid);
+		if (stat (fname, &st))
+			return NULL;
+	}
 
-  if(fread(&retval,sizeof(struct chanusr),1,fp)!=1){
-    error_fatalsys("Unable to write to channel user file %s",fname);
-  }
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open existing channel user file %s",
+				fname);
+	}
 
-  fclose(fp);
-  
-  /* Delete leftover channel files for users who aren't on-line now */
+	if (fread (&retval, sizeof (struct chanusr), 1, fp) != 1) {
+		error_fatalsys ("Unable to write to channel user file %s",
+				fname);
+	}
 
-  if(!usr_insys(userid,0)){
-    unlink(fname);
-    return NULL;
-  }
+	fclose (fp);
 
-  return &retval;
+	/* Delete leftover channel files for users who aren't on-line now */
+
+	if (!usr_insys (userid, 0)) {
+		unlink (fname);
+		return NULL;
+	}
+
+	return &retval;
 }
 
 
 int
-writechanusr(char *channel, struct chanusr *wusr)
+writechanusr (char *channel, struct chanusr *wusr)
 {
-  FILE *fp;
-  char fname[256];
+	FILE   *fp;
+	char    fname[256];
 
-  /* Unlink old channel user file, if available */
+	/* Unlink old channel user file, if available */
 
-  sprintf(fname,"%s/%s/%s%s",mkfname(TELEDIR),mkchfn(channel),wusr->userid,
-	  wusr->flags&CUF_PRESENT?"-":"+");
-  unlink(fname);
+	sprintf (fname, "%s/%s/%s%s", mkfname (TELEDIR), mkchfn (channel),
+		 wusr->userid, wusr->flags & CUF_PRESENT ? "-" : "+");
+	unlink (fname);
 
 
-  /* Create the new one */
+	/* Create the new one */
 
-  sprintf(fname,"%s/%s/%s%s",mkfname(TELEDIR),mkchfn(channel),wusr->userid,
-	  wusr->flags&CUF_PRESENT?"+":"-");
-  if((fp=fopen(fname,"w"))==NULL){
-    error_fatalsys("Unable to open channel user file %s",fname);
-  }
+	sprintf (fname, "%s/%s/%s%s", mkfname (TELEDIR), mkchfn (channel),
+		 wusr->userid, wusr->flags & CUF_PRESENT ? "+" : "-");
+	if ((fp = fopen (fname, "w")) == NULL) {
+		error_fatalsys ("Unable to open channel user file %s", fname);
+	}
 
-  if(fwrite(wusr,sizeof(struct chanusr),1,fp)!=1){
-    error_fatalsys("Unable to write to channel user file %s",fname);
-  }
+	if (fwrite (wusr, sizeof (struct chanusr), 1, fp) != 1) {
+		error_fatalsys ("Unable to write to channel user file %s",
+				fname);
+	}
 
-  fclose(fp);
+	fclose (fp);
 
-  return 2;
+	return 2;
 }
 
 
 void
-chanusrflags(char *userid, char *channel, int flagson, int flagsoff)
+chanusrflags (char *userid, char *channel, int flagson, int flagsoff)
 {
-  struct chanusr *usr;
+	struct chanusr *usr;
 
-  if((usr=readchanusr(channel,userid))==NULL)return;
+	if ((usr = readchanusr (channel, userid)) == NULL)
+		return;
 
-  usr->flags&=~flagsoff;
-  usr->flags|=flagson;
+	usr->flags &= ~flagsoff;
+	usr->flags |= flagson;
 
-  writechanusr(channel,usr);
+	writechanusr (channel, usr);
 }
+
+
+/* End of File */

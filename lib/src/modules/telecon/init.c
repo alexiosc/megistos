@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -45,10 +48,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,75 +65,83 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_MSG_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 promptblock_t *msg;
 
-int  entrkey;
-int  normkey;
-int  npaymx;
-int  maxcht;
-int  lnvcht1;
-int  lnvcht2;
-int  lnvcht3;
-int  tinpsz;
-int  msgkey;
-int  amsgch;
-int  msgchg;
-char *maintopic;
-int  defcol;
-int  sopkey;
-int  chtkey;
-int  ichtkey;
-int  defint;
-int  chatcol1;
-int  chatcol2;
-char *stgall1;
-char *stgall2;
-char *stgsec1;
-char *stgsec2;
-int  actkey;
-int  defact;
+int     entrkey;
+int     normkey;
+int     npaymx;
+int     maxcht;
+int     lnvcht1;
+int     lnvcht2;
+int     lnvcht3;
+int     tinpsz;
+int     msgkey;
+int     amsgch;
+int     msgchg;
+char   *maintopic;
+int     defcol;
+int     sopkey;
+int     chtkey;
+int     ichtkey;
+int     defint;
+int     chatcol1;
+int     chatcol2;
+char   *stgall1;
+char   *stgall2;
+char   *stgsec1;
+char   *stgsec2;
+int     actkey;
+int     defact;
 
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
+	mod_init (INI_ALL);
 
-  msg=msg_open("telecon");
-  msg_setlanguage(thisuseracc.language);
+	msg = msg_open ("telecon");
+	msg_setlanguage (thisuseracc.language);
 
-  entrkey=msg_int(ENTRKEY,0,129);
-  normkey=msg_int(NORMKEY,0,129);
-  npaymx=msg_int(NPAYMX,-1,32767);
-  maxcht=msg_int(MAXCHT,0,32767);
-  tinpsz=msg_int(TINPSZ,1,2047);
-  msgkey=msg_int(MSGKEY,0,129);
-  actkey=msg_int(ACTKEY,0,129);
-  amsgch=msg_bool(AMSGCH);
-  msgchg=msg_int(MSGCHG,-32767,32767);
-  defcol=msg_token(DEFCOL,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
-		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
-		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  sopkey=msg_int(SOPKEY,0,129);
-  chtkey=msg_int(CHTKEY,0,129);
-  ichtkey=msg_int(ICHTKEY,0,129);
-  defint=msg_int(DEFINT,0,999);
-  defact=msg_bool(DEFACT);
-  chatcol1=msg_token(CHATCOL1,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
-		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
-		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  chatcol2=msg_token(CHATCOL2,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
-		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
-		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  stgall1=strdup(msg_get(STGALL1));
-  stgall2=strdup(msg_get(STGALL2));
-  stgsec1=strdup(msg_get(STGSEC1));
-  stgsec2=strdup(msg_get(STGSEC2));
+	entrkey = msg_int (ENTRKEY, 0, 129);
+	normkey = msg_int (NORMKEY, 0, 129);
+	npaymx = msg_int (NPAYMX, -1, 32767);
+	maxcht = msg_int (MAXCHT, 0, 32767);
+	tinpsz = msg_int (TINPSZ, 1, 2047);
+	msgkey = msg_int (MSGKEY, 0, 129);
+	actkey = msg_int (ACTKEY, 0, 129);
+	amsgch = msg_bool (AMSGCH);
+	msgchg = msg_int (MSGCHG, -32767, 32767);
+	defcol =
+	    msg_token (DEFCOL, "DARKBLUE", "DARKGREEN", "DARKCYAN", "DARKRED",
+		       "DARKMAGENTA", "BROWN", "GREY", "DARKGREY", "BLUE",
+		       "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE");
+	sopkey = msg_int (SOPKEY, 0, 129);
+	chtkey = msg_int (CHTKEY, 0, 129);
+	ichtkey = msg_int (ICHTKEY, 0, 129);
+	defint = msg_int (DEFINT, 0, 999);
+	defact = msg_bool (DEFACT);
+	chatcol1 =
+	    msg_token (CHATCOL1, "DARKBLUE", "DARKGREEN", "DARKCYAN",
+		       "DARKRED", "DARKMAGENTA", "BROWN", "GREY", "DARKGREY",
+		       "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW",
+		       "WHITE");
+	chatcol2 =
+	    msg_token (CHATCOL2, "DARKBLUE", "DARKGREEN", "DARKCYAN",
+		       "DARKRED", "DARKMAGENTA", "BROWN", "GREY", "DARKGREY",
+		       "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW",
+		       "WHITE");
+	stgall1 = strdup (msg_get (STGALL1));
+	stgall2 = strdup (msg_get (STGALL2));
+	stgsec1 = strdup (msg_get (STGSEC1));
+	stgsec2 = strdup (msg_get (STGSEC2));
 
-  signal(SIGMAIN,actionhandler);
+	signal (SIGMAIN, actionhandler);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,23 +68,28 @@ const char *__RCS=RCS_VER;
 #define WANT_TERMIOS_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailcleanup.h"
+#include <megistos/bbs.h>
+#include <megistos/mailcleanup.h>
 
 
 void
-doreindex()
+doreindex ()
 {
-  fflush(stdout);
-  fflush(stderr);
-  if(!getuid()){
-    char cmd[1024];
-    strcat(cmd,"su bbs -c ");
-    strcat(cmd,mkfname(BINDIR"/mailfixup"));
-    system(cmd);
-  } else {
-    char cmd[1024];
-    strcat(cmd,mkfname(BINDIR"/mailfixup"));
-    system(cmd);
-  }
+	fflush (stdout);
+	fflush (stderr);
+	if (!getuid ()) {
+		char    cmd[1024];
+
+		strcat (cmd, "su bbs -c ");
+		strcat (cmd, mkfname (BINDIR "/mailfixup"));
+		system (cmd);
+	} else {
+		char    cmd[1024];
+
+		strcat (cmd, mkfname (BINDIR "/mailfixup"));
+		system (cmd);
+	}
 }
+
+
+/* End of File */

@@ -2,31 +2,31 @@
 /* alignment is 4 */
 
 /*---------- structures ----------*/
-struct ihaverec {  /* size 153 */
-    long    time;
-    char    bbs[80];
-    char    msgid[32];
-    char    orgclub[16];
-    char    club[16];
-    int     num;
-    char    type;
+struct ihaverec {		/* size 153 */
+	long    time;
+	char    bbs[80];
+	char    msgid[32];
+	char    orgclub[16];
+	char    club[16];
+	int     num;
+	char    type;
 };
 
-struct clubqueryc {  /* size 24 */
-    char    type;
-    int     num;
-    char    club[16];
+struct clubqueryc {		/* size 24 */
+	char    type;
+	int     num;
+	char    club[16];
 };
 
-struct netqueryc {  /* size 128 */
-    char    msgid[32];
-    char    orgclub[16];
-    char    bbs[80];
+struct netqueryc {		/* size 128 */
+	char    msgid[32];
+	char    orgclub[16];
+	char    bbs[80];
 };
 
-struct ihavelistc {  /* size 20 */
-    char    club[16];
-    long    time;
+struct ihavelistc {		/* size 20 */
+	char    club[16];
+	long    time;
 };
 
 /*---------- record names ----------*/
@@ -42,3 +42,6 @@ struct ihavelistc {  /* size 20 */
 /*---------- sequence names ----------*/
 
 /*---------- integer constants ----------*/
+
+
+/* End of File */

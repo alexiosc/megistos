@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,28 +47,25 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
-
-
-
 #define WALLFILE BBSDATADIR"/graffiti/graffiti.wall"
 #define WALLLOCK "LCK.graffiti"
 
 
 struct wallmsg {
-  char userid[24];
-  char message[256];
+	char    userid[24];
+	char    message[256];
 };
 
 
 #ifndef NOCOLORS
-char *colors[11]={
-  "\033[1;31m", "\033[1;32m", "\033[1;33m", "\033[1;35m", "\033[1;36m", 
-  "\033[1;37m"
+char   *colors[11] = {
+	"\033[1;31m", "\033[1;32m", "\033[1;33m", "\033[1;35m", "\033[1;36m",
+	"\033[1;37m"
 };
 
 #define MAXCOLOR 6
 
-#endif /* NOCOLORS */
+#endif				/* NOCOLORS */
+
+
+/* End of File */

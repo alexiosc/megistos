@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -52,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,267 +68,289 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "remsys.h"
+#include <megistos/bbs.h>
+#include <megistos/remsys.h>
 
-#include "mbk_remsys.h"
+#include <megistos/mbk_remsys.h>
 
 
 void
-rsys_type()
+rsys_type ()
 {
-  char fname[256]={0}, *cp;
+	char    fname[256] = { 0 }, *cp;
 
-  for(;;){
-    if(cnc_more()){
-      inp_raw();
-      strcpy(fname,cnc_nxtcmd);
-      break;
-    }else{
-      prompt(RSTYPEASK,NULL);
-      inp_get(0);
-      cnc_begin();
-      if(!margc || inp_reprompt()) {
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return;
-      else {
-	inp_raw();
-	strcpy(fname,cnc_nxtcmd);
-	break;
-      }
-    }
-  }
+	for (;;) {
+		if (cnc_more ()) {
+			inp_raw ();
+			strcpy (fname, cnc_nxtcmd);
+			break;
+		} else {
+			prompt (RSTYPEASK, NULL);
+			inp_get (0);
+			cnc_begin ();
+			if (!margc || inp_reprompt ()) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return;
+			else {
+				inp_raw ();
+				strcpy (fname, cnc_nxtcmd);
+				break;
+			}
+		}
+	}
 
-  fname[255]=0;
-  cp=fname;
-  while(*cp && !isspace(*cp))cp++;
-  *cp=0;
-  
-  if(!out_catfile(fname))prompt(RSTYPEERR,fname);
+	fname[255] = 0;
+	cp = fname;
+	while (*cp && !isspace (*cp))
+		cp++;
+	*cp = 0;
+
+	if (!out_catfile (fname))
+		prompt (RSTYPEERR, fname);
 }
 
 
 void
-cpmv(int asksrc,int asktrg,int ok, int err, char *cmd)
+cpmv (int asksrc, int asktrg, int ok, int err, char *cmd)
 {
-  char source[256]={0},target[256]={0}, command [515]={0};
-  char *cp;
+	char    source[256] = { 0 }, target[256] = {
+	0}, command[515] = {
+	0};
+	char   *cp;
 
-  for(;;){
-    if(cnc_more()){
-      inp_raw();
-      strcpy(source,cnc_nxtcmd);
-      break;
-    }else{
-      prompt(asksrc,NULL);
-      inp_get(0);
-      cnc_begin();
-       if(!margc || inp_reprompt()) {
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return;
-      else {
-	inp_raw();
-	strcpy(source,cnc_nxtcmd);
-	break;
-      }
-    }
-  }
+	for (;;) {
+		if (cnc_more ()) {
+			inp_raw ();
+			strcpy (source, cnc_nxtcmd);
+			break;
+		} else {
+			prompt (asksrc, NULL);
+			inp_get (0);
+			cnc_begin ();
+			if (!margc || inp_reprompt ()) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return;
+			else {
+				inp_raw ();
+				strcpy (source, cnc_nxtcmd);
+				break;
+			}
+		}
+	}
 
-  cnc_word();
-  cp=source;
-  while(*cp && !isspace(*cp))cp++;
-  *cp=0;
+	cnc_word ();
+	cp = source;
+	while (*cp && !isspace (*cp))
+		cp++;
+	*cp = 0;
 
-  for(;;){
-    if(cnc_more()){
-      inp_raw();
-      strcpy(target,cnc_nxtcmd);
-      break;
-    }else{
-      prompt(asktrg,NULL);
-      inp_get(0);
-      cnc_begin();
-      if(!margc || inp_reprompt()) {
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return;
-      else {
-	inp_raw();
-	strcpy(target,cnc_nxtcmd);
-	break;
-      }
-    }
-  }
+	for (;;) {
+		if (cnc_more ()) {
+			inp_raw ();
+			strcpy (target, cnc_nxtcmd);
+			break;
+		} else {
+			prompt (asktrg, NULL);
+			inp_get (0);
+			cnc_begin ();
+			if (!margc || inp_reprompt ()) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return;
+			else {
+				inp_raw ();
+				strcpy (target, cnc_nxtcmd);
+				break;
+			}
+		}
+	}
 
-  cp=target;
-  while(*cp && !isspace(*cp))cp++;
-  *cp=0;
-  cnc_end();
+	cp = target;
+	while (*cp && !isspace (*cp))
+		cp++;
+	*cp = 0;
+	cnc_end ();
 
-  sprintf(command,"%s %s %s",cmd,source,target);
-  prompt(runcommand(command)?err:ok);
+	sprintf (command, "%s %s %s", cmd, source, target);
+	prompt (runcommand (command) ? err : ok);
 }
 
 
 void
-rsys_copy()
+rsys_copy ()
 {
-  cpmv(RSCOPYSRC,RSCOPYTRG,RSCOPYOK,RSCOPYERR,"\\cp");
+	cpmv (RSCOPYSRC, RSCOPYTRG, RSCOPYOK, RSCOPYERR, "\\cp");
 }
 
 
 void
-rsys_ren()
+rsys_ren ()
 {
-  cpmv(RSRENSRC,RSRENTRG,RSRENOK,RSRENERR,"\\mv");
+	cpmv (RSRENSRC, RSRENTRG, RSRENOK, RSRENERR, "\\mv");
 }
 
 
 void
-rsys_dir()
+rsys_dir ()
 {
-  char fname[256]={0};
-  char command[512]={0};
-  char *cp=fname;
+	char    fname[256] = { 0 };
+	char    command[512] = { 0 };
+	char   *cp = fname;
 
-  for(;;){
-    if(cnc_more()){
-      inp_raw();
-      strcpy(fname,cnc_nxtcmd);
-      break;
-    }else{
-      prompt(RSDIRASK,NULL);
-      inp_get(0);
-      cnc_begin();
-      if(!margc || inp_reprompt()) {
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return;
-      else {
-	inp_raw();
-	strcpy(fname,cnc_nxtcmd);
-	break;
-      }
-    }
-  }
+	for (;;) {
+		if (cnc_more ()) {
+			inp_raw ();
+			strcpy (fname, cnc_nxtcmd);
+			break;
+		} else {
+			prompt (RSDIRASK, NULL);
+			inp_get (0);
+			cnc_begin ();
+			if (!margc || inp_reprompt ()) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return;
+			else {
+				inp_raw ();
+				strcpy (fname, cnc_nxtcmd);
+				break;
+			}
+		}
+	}
 
-  fname[255]=0;
-  cp=fname;
-  while(*cp && !isspace(*cp))cp++;
-  *cp=0;
-  
-  sprintf(command,"\\ls -la %s",fname);
-  if(runcommand(command))prompt(RSDIRERR,fname);
+	fname[255] = 0;
+	cp = fname;
+	while (*cp && !isspace (*cp))
+		cp++;
+	*cp = 0;
+
+	sprintf (command, "\\ls -la %s", fname);
+	if (runcommand (command))
+		prompt (RSDIRERR, fname);
 }
 
 
 void
-rsys_del()
+rsys_del ()
 {
-  char fname[256]={0};
-  char command[512]={0};
-  char *cp=fname;
+	char    fname[256] = { 0 };
+	char    command[512] = { 0 };
+	char   *cp = fname;
 
-  for(;;){
-    if(cnc_more()){
-      inp_raw();
-      strcpy(fname,cnc_nxtcmd);
-      break;
-    }else{
-      prompt(RSDELASK,NULL);
-      inp_get(0);
-      cnc_begin();
-      if(!margc || inp_reprompt()) {
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return;
-      else {
-	inp_raw();
-	strcpy(fname,cnc_nxtcmd);
-	break;
-      }
-    }
-  }
+	for (;;) {
+		if (cnc_more ()) {
+			inp_raw ();
+			strcpy (fname, cnc_nxtcmd);
+			break;
+		} else {
+			prompt (RSDELASK, NULL);
+			inp_get (0);
+			cnc_begin ();
+			if (!margc || inp_reprompt ()) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return;
+			else {
+				inp_raw ();
+				strcpy (fname, cnc_nxtcmd);
+				break;
+			}
+		}
+	}
 
-  fname[255]=0;
-  cp=fname;
-  while(*cp && !isspace(*cp))cp++;
-  *cp=0;
-  
-  sprintf(command,"\\rm -f %s",fname);
-  if(runcommand(command))prompt(RSDELERR,fname);
+	fname[255] = 0;
+	cp = fname;
+	while (*cp && !isspace (*cp))
+		cp++;
+	*cp = 0;
+
+	sprintf (command, "\\rm -f %s", fname);
+	if (runcommand (command))
+		prompt (RSDELERR, fname);
 }
 
 
 void
-rsys_sys()
+rsys_sys ()
 {
-  if(cnc_more()){
-    inp_raw();
-  }else{
-    prompt(RSSYSASK,NULL);
-    inp_get(0);
-    cnc_begin();
-  }
-  if(!cnc_nxtcmd || !*cnc_nxtcmd)return;
-  if(inp_isX(cnc_nxtcmd))return;
-  {
-    char command[512]={0};
-    strcpy(command,cnc_nxtcmd);
-    runcommand(command);
-  }
+	if (cnc_more ()) {
+		inp_raw ();
+	} else {
+		prompt (RSSYSASK, NULL);
+		inp_get (0);
+		cnc_begin ();
+	}
+	if (!cnc_nxtcmd || !*cnc_nxtcmd)
+		return;
+	if (inp_isX (cnc_nxtcmd))
+		return;
+	{
+		char    command[512] = { 0 };
+
+		strcpy (command, cnc_nxtcmd);
+		runcommand (command);
+	}
 }
 
 
 void
-rsys_shell()
+rsys_shell ()
 {
-  runcommand(unixsh);
+	runcommand (unixsh);
 }
 
 
 void
-rsys_editor()
+rsys_editor ()
 {
-  char fname[256],c;
-  FILE *fp;
+	char    fname[256], c;
+	FILE   *fp;
 
-  for(;;){
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return;
-    } else {
-      prompt(RSEDITWHF);
-      inp_get(0);
-      cnc_nxtcmd=inp_buffer;
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return;
-      }
-    }
+	for (;;) {
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return;
+		} else {
+			prompt (RSEDITWHF);
+			inp_get (0);
+			cnc_nxtcmd = inp_buffer;
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return;
+			}
+		}
 
-    strcpy(fname,cnc_word());
-    if((fp=fopen(fname,"r"))==NULL){
-      fclose(fp);
-      prompt(RSXFERERR,fname);
-      cnc_end();
-      continue;
-    } else {
-      char tempname[256];
+		strcpy (fname, cnc_word ());
+		if ((fp = fopen (fname, "r")) == NULL) {
+			fclose (fp);
+			prompt (RSXFERERR, fname);
+			cnc_end ();
+			continue;
+		} else {
+			char    tempname[256];
 
-      sprintf(tempname,TMPDIR"/rsys%08lx",time(0));
-      unlink(tempname);
-      symlink(fname,tempname);
-      fclose(fp);
-      editor(tempname,4<<20);
-      unlink(tempname);
-      return;
-    }
-  }
+			sprintf (tempname, TMPDIR "/rsys%08lx", time (0));
+			unlink (tempname);
+			symlink (fname, tempname);
+			fclose (fp);
+			editor (tempname, 4 << 20);
+			unlink (tempname);
+			return;
+		}
+	}
 }
 
 
+
+
+/* End of File */

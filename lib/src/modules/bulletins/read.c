@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -50,190 +51,214 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 int
-fnamexref(char *fname)   /* Not much of an xref function yet */
-{
-  int res;
-  if(club[0])return dbexists(club,fname);
-  if((res=dbchkambiguity(fname))==2){
-    prompt(BLTAMB,fname);
-    listambiguous(fname);
-  }
-  return res;
+fnamexref (char *fname)
+{				/* Not much of an xref function yet */
+	int     res;
+
+	if (club[0])
+		return dbexists (club, fname);
+	if ((res = dbchkambiguity (fname)) == 2) {
+		prompt (BLTAMB, fname);
+		listambiguous (fname);
+	}
+	return res;
 }
 
 
 int
-getblt(int pr, struct bltidx *blt)
+getblt (int pr, struct bltidx *blt)
 {
-  char *i;
-  char c;
+	char   *i;
+	char    c;
 
-again:
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	list(0);
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(pr);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if(!margc || (margc==1 && sameas(margv[0],"."))){
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return 0;
-      if(sameas(margv[0],"?")){
-	list(0);
-	cnc_end();
-	continue;
-      }
-    }
+      again:
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				list (0);
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (pr);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc || (margc == 1 && sameas (margv[0], "."))) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return 0;
+			if (sameas (margv[0], "?")) {
+				list (0);
+				cnc_end ();
+				continue;
+			}
+		}
 
-    if(!i[0] || sameas(i,".")){
-      cnc_end();
-      continue;
-    } else if(dbnumexists(atoi(i))){
-      break;
-    } else {
-      int res=fnamexref(i);
-      if(res==1)break;
-      else if(!res){
-	if(club[0])prompt(UNKBLTC,club);
-	else prompt(UNKBLT);
-      }
-      cnc_end();
-      continue;
-    }
-  }
-  dbget(blt);
-  if((club[0]&&strcmp(club,blt->area))||
-     getclubax(&thisuseracc,blt->area)<CAX_READ){
-    prompt(UNKBLTC,club);
-    cnc_end();
-    goto again;
-  }
-  return 1;
+		if (!i[0] || sameas (i, ".")) {
+			cnc_end ();
+			continue;
+		} else if (dbnumexists (atoi (i))) {
+			break;
+		} else {
+			int     res = fnamexref (i);
+
+			if (res == 1)
+				break;
+			else if (!res) {
+				if (club[0])
+					prompt (UNKBLTC, club);
+				else
+					prompt (UNKBLT);
+			}
+			cnc_end ();
+			continue;
+		}
+	}
+	dbget (blt);
+	if ((club[0] && strcmp (club, blt->area)) ||
+	    getclubax (&thisuseracc, blt->area) < CAX_READ) {
+		prompt (UNKBLTC, club);
+		cnc_end ();
+		goto again;
+	}
+	return 1;
 }
 
 
 
 void
-bltread()
+bltread ()
 {
-  struct bltidx blt;
+	struct bltidx blt;
 
-  if(!(club[0]?dblistfind(club,1):dblistfirst())){
-    if(!club[0])prompt(BLTNOBT);
-    else prompt(CLBNOBT,club);
-    return;
-  }
+	if (!(club[0] ? dblistfind (club, 1) : dblistfirst ())) {
+		if (!club[0])
+			prompt (BLTNOBT);
+		else
+			prompt (CLBNOBT, club);
+		return;
+	}
 
-  if(!getblt(READBLT,&blt))return;
+	if (!getblt (READBLT, &blt))
+		return;
 
-  bltinfo(&blt);
+	bltinfo (&blt);
 
-  showblt(&blt);
+	showblt (&blt);
 }
 
 
 
 static void
-offerblt(struct bltidx *blt)
+offerblt (struct bltidx *blt)
 {
-  char fname[256], lock[256];
-  char a[256];
+	char    fname[256], lock[256];
+	char    a[256];
 
-  prompt(BLTHDR);
+	prompt (BLTHDR);
 
-  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname));
-  sprintf(lock,"%s-%s-%s-%s",
-	  BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/%s/%s", blt->area, MSGBLTDIR,
+			 blt->fname));
+	sprintf (lock, "%s-%s-%s-%s", BLTREADLOCK, thisuseracc.userid,
+		 blt->area, blt->fname);
 
-  lock_place(lock,"downloading");
-  fmt_lastresult=PAUSE_CONTINUE;
+	lock_place (lock, "downloading");
+	fmt_lastresult = PAUSE_CONTINUE;
 
-  sprintf(a,AUD_BLTDNL,thisuseracc.userid,blt->fname,blt->area);
-  xfer_setaudit(AUT_BLTDNL,AUS_BLTDNL,a,0,NULL,NULL);
+	sprintf (a, AUD_BLTDNL, thisuseracc.userid, blt->fname, blt->area);
+	xfer_setaudit (AUT_BLTDNL, AUS_BLTDNL, a, 0, NULL, NULL);
 
-  if(xfer_add(FXM_DOWNLOAD,fname,dnldesc,0,-1)){
-    xfer_run();
-    xfer_kill_list();
-  }
+	if (xfer_add (FXM_DOWNLOAD, fname, dnldesc, 0, -1)) {
+		xfer_run ();
+		xfer_kill_list ();
+	}
 
-  blt->timesread++;
-  dbupdate(blt);
-  lock_rm(lock);
+	blt->timesread++;
+	dbupdate (blt);
+	lock_rm (lock);
 }
 
 
 
 void
-bltdnl()
+bltdnl ()
 {
-  struct bltidx blt;
+	struct bltidx blt;
 
-  if(!(club[0]?dblistfind(club,1):dblistfirst())){
-    if(!club[0])prompt(BLTNOBT);
-    else prompt(CLBNOBT,club);
-    return;
-  }
+	if (!(club[0] ? dblistfind (club, 1) : dblistfirst ())) {
+		if (!club[0])
+			prompt (BLTNOBT);
+		else
+			prompt (CLBNOBT, club);
+		return;
+	}
 
-  if(!getblt(DNLBLT,&blt))return;
+	if (!getblt (DNLBLT, &blt))
+		return;
 
-  bltinfo(&blt);
+	bltinfo (&blt);
 
-  offerblt(&blt);
+	offerblt (&blt);
 }
 
 
 
 void
-showblt(struct bltidx *blt)
+showblt (struct bltidx *blt)
 {
-  char fname[256], lock[256];
-  prompt(BLTHDR);
+	char    fname[256], lock[256];
 
-  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname));
-  sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
+	prompt (BLTHDR);
 
-  thisuseronl.flags|=OLF_BUSY;
-  lock_place(lock,"reading");
-  fmt_lastresult=PAUSE_CONTINUE;
-  if(!out_catfile(fname)){
-    prompt(PANIC1,blt->fname);
-    lock_rm(lock);
-    thisuseronl.flags&=~OLF_BUSY;
-    return;
-  }
-  if(fmt_lastresult==PAUSE_QUIT){
-    prompt(ABORT);
-    lock_rm(lock);
-    thisuseronl.flags&=~OLF_BUSY;
-    return;
-  }
-  prompt(ENDBLT);
-  thisuseronl.flags&=~OLF_BUSY;
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/%s/%s", blt->area, MSGBLTDIR,
+			 blt->fname));
+	sprintf (lock, "%s-%s-%s-%s", BLTREADLOCK, thisuseracc.userid,
+		 blt->area, blt->fname);
 
-  blt->timesread++;
-  dbupdate(blt);
-  lock_rm(lock);
+	thisuseronl.flags |= OLF_BUSY;
+	lock_place (lock, "reading");
+	fmt_lastresult = PAUSE_CONTINUE;
+	if (!out_catfile (fname)) {
+		prompt (PANIC1, blt->fname);
+		lock_rm (lock);
+		thisuseronl.flags &= ~OLF_BUSY;
+		return;
+	}
+	if (fmt_lastresult == PAUSE_QUIT) {
+		prompt (ABORT);
+		lock_rm (lock);
+		thisuseronl.flags &= ~OLF_BUSY;
+		return;
+	}
+	prompt (ENDBLT);
+	thisuseronl.flags &= ~OLF_BUSY;
+
+	blt->timesread++;
+	dbupdate (blt);
+	lock_rm (lock);
 
 
-  /* Audit it */
+	/* Audit it */
 
-  if(audrd)audit(thisuseronl.channel,AUDIT(BLTRD),
-		  thisuseracc.userid,blt->fname,blt->area);
+	if (audrd)
+		audit (thisuseronl.channel, AUDIT (BLTRD),
+		       thisuseracc.userid, blt->fname, blt->area);
 }
+
+
+/* End of File */

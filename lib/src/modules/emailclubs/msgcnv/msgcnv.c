@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -60,96 +61,106 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
-#include "clubs.h"
-#include "email.h"
+#include <megistos/bbs.h>
+#include <megistos/clubs.h>
+#include <megistos/email.h>
 
 
 
-void convert(char *);
+void    convert (char *);
 
 
 
-static int bigendian=0;
+static int bigendian = 0;
 
 
 
 static void
-print_endian_warning()
+print_endian_warning ()
 {
-  short int eat=0xbeef; /* moo */
-  unsigned char  *tmp2=(char*)&eat;
-  if(*tmp2==0xbe){
-    printf("Argh, this is a big endian machine! This won't work properly.\n");
-    bigendian=1;
-    exit(1);
-  }
+	short int eat = 0xbeef;	/* moo */
+	unsigned char *tmp2 = (char *) &eat;
+
+	if (*tmp2 == 0xbe) {
+		printf
+		    ("Argh, this is a big endian machine! This won't work properly.\n");
+		bigendian = 1;
+		exit (1);
+	}
 }
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"msgcnv: convert MajorBBS 5.xx VESIGS database to Megistos format.\n\n"\
-	  "Syntax: msgcnv options.\n\nOptions:\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "msgcnv: convert MajorBBS 5.xx VESIGS database to Megistos format.\n\n"
+		 "Syntax: msgcnv options.\n\nOptions:\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"majordir", 1, 0, 'm'},
-  {0, 0, 0, 0}
+	{"majordir", 1, 0, 'm'},
+	{0, 0, 0, 0}
 };
 
 
-static char *arg_majordir=".";
+static char *arg_majordir = ".";
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "m:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "m:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 int
-msgcnv_main(int argc, char **argv)
+msgcnv_main (int argc, char **argv)
 {
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
-  print_endian_warning();
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
+	print_endian_warning ();
 
-  fprintf(stderr,"WARNING WARNING WARNING!!!\n");
-  fprintf(stderr,"I'm expecting you to have a COMPLETELY EMPTY "\
-	  "Megistos message base.\n");
-  fprintf(stderr,"Last chance to quit and clean it up: press ctrl-c.\n\n");
-  {
-    char line[1024];
-    fgets(line,sizeof(line),stdin);
-  }
+	fprintf (stderr, "WARNING WARNING WARNING!!!\n");
+	fprintf (stderr, "I'm expecting you to have a COMPLETELY EMPTY "
+		 "Megistos message base.\n");
+	fprintf (stderr,
+		 "Last chance to quit and clean it up: press ctrl-c.\n\n");
+	{
+		char    line[1024];
 
-  convert(arg_majordir);
-  
-  printf("Syncing disks...\n");
-  fflush(stdout);
-  system("sync");
+		fgets (line, sizeof (line), stdin);
+	}
 
-  return 0;
+	convert (arg_majordir);
+
+	printf ("Syncing disks...\n");
+	fflush (stdout);
+	system ("sync");
+
+	return 0;
 }
+
+
+/* End of File */

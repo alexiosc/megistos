@@ -19,18 +19,21 @@
 #define GN_MAXSHIFT           17
 
 struct question {
-  char *text;
-  char *chorep;
-  unsigned int  qtype;
+	char   *text;
+	char   *chorep;
+	unsigned int qtype;
 };
 
 struct {
-  unsigned int numquestions;
-  char filename[GI_MAXFNLEN];
-  char *description;
-  char flags;
+	unsigned int numquestions;
+	char    filename[GI_MAXFNLEN];
+	char   *description;
+	char    flags;
 } pollinfo;
 
-const unsigned int MAXCHOICES = (2 << sizeof(int)) - 2;
+const unsigned int MAXCHOICES = (2 << sizeof (int)) - 2;
 
 #endif
+
+
+/* End of File */

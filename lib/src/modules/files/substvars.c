@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -65,350 +66,386 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 static char *
-sv_libnum()
+sv_libnum ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.libnum);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.libnum);
+	return conv;
 }
 
 
 static char *
-sv_lib()
+sv_lib ()
 {
-  return leafname(library.fullname);
+	return leafname (library.fullname);
 }
 
 
 static char *
-sv_libfull()
+sv_libfull ()
 {
-  return library.fullname;
+	return library.fullname;
 }
 
 
 static char *
-sv_libdir()
+sv_libdir ()
 {
-  return library.dir;
+	return library.dir;
 }
 
 
 static char *
-sv_libclub()
+sv_libclub ()
 {
-  return library.club;
+	return library.club;
 }
 
 
 static char *
-sv_libdevice()
+sv_libdevice ()
 {
-  static char conv[12];
-  sprintf(conv,"%02x:%02x",(library.device&0xff00)>>8,library.device&0xff);
-  return conv;
+	static char conv[12];
+
+	sprintf (conv, "%02x:%02x", (library.device & 0xff00) >> 8,
+		 library.device & 0xff);
+	return conv;
 }
 
 
 static char *
-sv_libdescr()
+sv_libdescr ()
 {
-  return library.descr;
+	return library.descr;
 }
 
 
 static char *
-sv_libcrdate()
+sv_libcrdate ()
 {
-  static char conv[12];
-  strncpy(conv,strdate(library.crdate),12);
-  return conv;
+	static char conv[12];
+
+	strncpy (conv, strdate (library.crdate), 12);
+	return conv;
 }
 
 
 static char *
-sv_libcrtime()
+sv_libcrtime ()
 {
-  static char conv[9];
-  strncpy(conv,strtime(library.crtime,1),9);
-  return conv;
+	static char conv[9];
+
+	strncpy (conv, strtime (library.crtime, 1), 9);
+	return conv;
 }
 
 
 static char *oplhdr, *oplcomma, *opllast, *oplftr, *oplnone;
 
 static char *
-sv_libops()
+sv_libops ()
 {
-  static char conv[256];
-  int i,c;
-  for(i=c=0;i<5;i++){
-    c+=((library.libops[i][0]!=0)&&!sameas(library.libops[i],SYSOP));
-  }
-  if(!c)return oplnone;
-  else {
-    strcpy(conv,oplhdr);
-    for(i=0;c;i++){
-      if(library.libops[i][0]){
-	c--;
-	strcat(conv,library.libops[i]);
-	if(c>1)strcat(conv,oplcomma);
-	else if(c==1)strcat(conv,opllast);
-      }
-    }
-    strcat(conv,oplftr);
-  }
-  return conv;
+	static char conv[256];
+	int     i, c;
+
+	for (i = c = 0; i < 5; i++) {
+		c += ((library.libops[i][0] != 0) &&
+		      !sameas (library.libops[i], SYSOP));
+	}
+	if (!c)
+		return oplnone;
+	else {
+		strcpy (conv, oplhdr);
+		for (i = 0; c; i++) {
+			if (library.libops[i][0]) {
+				c--;
+				strcat (conv, library.libops[i]);
+				if (c > 1)
+					strcat (conv, oplcomma);
+				else if (c == 1)
+					strcat (conv, opllast);
+			}
+		}
+		strcat (conv, oplftr);
+	}
+	return conv;
 }
 
 
 static char *
-sv_libfilelimit()
+sv_libfilelimit ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.filelimit);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.filelimit);
+	return conv;
 }
 
 
 static char *
-sv_libfsizelimit()
+sv_libfsizelimit ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.filesizelimit);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.filesizelimit);
+	return conv;
 }
 
 
 static char *
-sv_liblsizelimit()
+sv_liblsizelimit ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.libsizelimit);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.libsizelimit);
+	return conv;
 }
 
 
 static char *
-sv_libnumfiles()
+sv_libnumfiles ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.numfiles);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.numfiles);
+	return conv;
 }
 
 
 static char *
-sv_libnumbytes()
+sv_libnumbytes ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.numbytes);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.numbytes);
+	return conv;
 }
 
 
 static char *
-sv_libnumkbytes()
+sv_libnumkbytes ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.numbytes>>10);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.numbytes >> 10);
+	return conv;
 }
 
 
 static char *
-sv_libnummbytes()
+sv_libnummbytes ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.numbytes>>20);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.numbytes >> 20);
+	return conv;
 }
 
 
 static char *
-sv_libnumunapp()
+sv_libnumunapp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.numunapp);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.numunapp);
+	return conv;
 }
 
 
 static char *
-sv_libbytesunapp()
+sv_libbytesunapp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.bytesunapp);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.bytesunapp);
+	return conv;
 }
 
 
 static char *
-sv_libkbytesunapp()
+sv_libkbytesunapp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.bytesunapp>>10);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.bytesunapp >> 10);
+	return conv;
 }
 
 
 static char *
-sv_libmbytesunapp()
+sv_libmbytesunapp ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.bytesunapp>>20);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.bytesunapp >> 20);
+	return conv;
 }
 
 
 static char *
-sv_libuplstoday()
+sv_libuplstoday ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.uploadsperday[0]);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.uploadsperday[0]);
+	return conv;
 }
 
 
 static char *
-sv_libuplsweek()
+sv_libuplsweek ()
 {
-  int i,s;
-  static char conv[32];
-  for(i=s=0;i<7;i++)s+=library.uploadsperday[i];
-  sprintf(conv,"%d",s);
-  return conv;
+	int     i, s;
+	static char conv[32];
+
+	for (i = s = 0; i < 7; i++)
+		s += library.uploadsperday[i];
+	sprintf (conv, "%d", s);
+	return conv;
 }
 
 
 static char *
-sv_libkuplstoday()
+sv_libkuplstoday ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.bytesperday[0]>>10);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.bytesperday[0] >> 10);
+	return conv;
 }
 
 
 static char *
-sv_libkuplsweek()
+sv_libkuplsweek ()
 {
-  int i,s;
-  static char conv[32];
-  for(i=s=0;i<7;i++)s+=library.bytesperday[i];
-  sprintf(conv,"%d",s>>10);
-  return conv;
+	int     i, s;
+	static char conv[32];
+
+	for (i = s = 0; i < 7; i++)
+		s += library.bytesperday[i];
+	sprintf (conv, "%d", s >> 10);
+	return conv;
 }
 
 
 static char *
-sv_libchupl()
+sv_libchupl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.uplcharge);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.uplcharge);
+	return conv;
 }
 
 
 static char *
-sv_libchdnl()
+sv_libchdnl ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",library.dnlcharge);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", library.dnlcharge);
+	return conv;
 }
 
 
 static char *
-sv_librebate()
+sv_librebate ()
 {
-  static char conv[32];
-  sprintf(conv,"%d%%",library.rebate);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d%%", library.rebate);
+	return conv;
 }
 
 
 static char *
-sv_maxkeyw()
+sv_maxkeyw ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",maxkeyw);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", maxkeyw);
+	return conv;
 }
 
 
 static char *
-sv_deslen()
+sv_deslen ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",deslen);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", deslen);
+	return conv;
 }
 
 
 static char *
-sv_entriesperpage()
+sv_entriesperpage ()
 {
-  static char conv[32];
-  sprintf(conv,"%d",srlstln);
-  return conv;
+	static char conv[32];
+
+	sprintf (conv, "%d", srlstln);
+	return conv;
 }
 
 
 void
-initlibsubstvars()
+initlibsubstvars ()
 {
-  struct substvar table []={
-    {"@LIBNUM@",sv_libnum,NULL},
-    {"@LIB@",sv_lib,NULL},
-    {"@LIBFULL@",sv_libfull,NULL},
-    {"@LIBDIR@",sv_libdir,NULL},
-    {"@LIBCLUB@",sv_libclub,NULL},
-    {"@LIBDEVICE@",sv_libdevice,NULL},
-    {"@LIBDESCR@",sv_libdescr,NULL},
-    {"@LIBCRDATE@",sv_libcrdate,NULL},
-    {"@LIBCRTIME@",sv_libcrtime,NULL},
-    {"@LIBOPS@",sv_libops,NULL},
-    {"@LIBFILELIMIT@",sv_libfilelimit,NULL},
-    {"@LIBFSIZELIMIT@",sv_libfsizelimit,NULL},
-    {"@LIBLSIZELIMIT@",sv_liblsizelimit,NULL},
-    {"@LIBNUMFILES@",sv_libnumfiles,NULL},
-    {"@LIBNUMBYTES@",sv_libnumbytes,NULL},
-    {"@LIBNUMKBYTES@",sv_libnumkbytes,NULL},
-    {"@LIBNUMMBYTES@",sv_libnummbytes,NULL},
-    {"@LIBNUMUNAPP@",sv_libnumunapp,NULL},
-    {"@LIBBYTESUNAPP@",sv_libbytesunapp,NULL},
-    {"@LIBKBYTESUNAPP@",sv_libkbytesunapp,NULL},
-    {"@LIBMBYTESUNAPP@",sv_libmbytesunapp,NULL},
-    {"@LIBUPLSTODAY@",sv_libuplstoday,NULL},
-    {"@LIBUPLSWEEK@",sv_libuplsweek,NULL},
-    {"@LIBKUPLSTODAY@",sv_libkuplstoday,NULL},
-    {"@LIBKUPLSWEEK@",sv_libkuplsweek,NULL},
-    {"@LIBCHUPL@",sv_libchupl,NULL},
-    {"@LIBCHDNL@",sv_libchdnl,NULL},
-    {"@LIBREBATE@",sv_librebate,NULL},
-    {"@MAXKEYW@",sv_maxkeyw,NULL},
-    {"@DESLEN@",sv_deslen,NULL},
-    {"@ENTRIESPERPAGE@",sv_entriesperpage,NULL},
-    {"",NULL,NULL}
-  };
-  
-  int i=0;
-  
-  while(table[i].varname[0]){
-    out_addsubstvar(table[i].varname,table[i].varcalc);
-    i++;
-  }
+	struct substvar table[] = {
+		{"@LIBNUM@", sv_libnum, NULL},
+		{"@LIB@", sv_lib, NULL},
+		{"@LIBFULL@", sv_libfull, NULL},
+		{"@LIBDIR@", sv_libdir, NULL},
+		{"@LIBCLUB@", sv_libclub, NULL},
+		{"@LIBDEVICE@", sv_libdevice, NULL},
+		{"@LIBDESCR@", sv_libdescr, NULL},
+		{"@LIBCRDATE@", sv_libcrdate, NULL},
+		{"@LIBCRTIME@", sv_libcrtime, NULL},
+		{"@LIBOPS@", sv_libops, NULL},
+		{"@LIBFILELIMIT@", sv_libfilelimit, NULL},
+		{"@LIBFSIZELIMIT@", sv_libfsizelimit, NULL},
+		{"@LIBLSIZELIMIT@", sv_liblsizelimit, NULL},
+		{"@LIBNUMFILES@", sv_libnumfiles, NULL},
+		{"@LIBNUMBYTES@", sv_libnumbytes, NULL},
+		{"@LIBNUMKBYTES@", sv_libnumkbytes, NULL},
+		{"@LIBNUMMBYTES@", sv_libnummbytes, NULL},
+		{"@LIBNUMUNAPP@", sv_libnumunapp, NULL},
+		{"@LIBBYTESUNAPP@", sv_libbytesunapp, NULL},
+		{"@LIBKBYTESUNAPP@", sv_libkbytesunapp, NULL},
+		{"@LIBMBYTESUNAPP@", sv_libmbytesunapp, NULL},
+		{"@LIBUPLSTODAY@", sv_libuplstoday, NULL},
+		{"@LIBUPLSWEEK@", sv_libuplsweek, NULL},
+		{"@LIBKUPLSTODAY@", sv_libkuplstoday, NULL},
+		{"@LIBKUPLSWEEK@", sv_libkuplsweek, NULL},
+		{"@LIBCHUPL@", sv_libchupl, NULL},
+		{"@LIBCHDNL@", sv_libchdnl, NULL},
+		{"@LIBREBATE@", sv_librebate, NULL},
+		{"@MAXKEYW@", sv_maxkeyw, NULL},
+		{"@DESLEN@", sv_deslen, NULL},
+		{"@ENTRIESPERPAGE@", sv_entriesperpage, NULL},
+		{"", NULL, NULL}
+	};
 
-  oplhdr=msg_string(OPLHDR);
-  oplcomma=msg_string(OPLCOMMA);
-  opllast=msg_string(OPLLAST);
-  oplftr=msg_string(OPLFTR);
-  oplnone=msg_string(OPLNONE);
+	int     i = 0;
+
+	while (table[i].varname[0]) {
+		out_addsubstvar (table[i].varname, table[i].varcalc);
+		i++;
+	}
+
+	oplhdr = msg_string (OPLHDR);
+	oplcomma = msg_string (OPLCOMMA);
+	opllast = msg_string (OPLLAST);
+	oplftr = msg_string (OPLFTR);
+	oplnone = msg_string (OPLNONE);
 }
+
+
+/* End of File */

@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -37,10 +40,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,196 +55,213 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static int
-getnewlibname(char *s)
+getnewlibname (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(OADTASK);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(strlen(i)>sizeof(library.keyname)-1){
-      prompt(OCRE2LN,sizeof(library.keyname)-1);
-    } else if(strspn(i,FNAMECHARS)!=strlen(i)){
-      prompt(OCRECHR);
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (OADTASK);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (strlen (i) > sizeof (library.keyname) - 1) {
+			prompt (OCRE2LN, sizeof (library.keyname) - 1);
+		} else if (strspn (i, FNAMECHARS) != strlen (i)) {
+			prompt (OCRECHR);
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
 static int
-getdir(char *s)
+getdir (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(OADTDIR);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-    }
-    if(i[0]!='/'){
-      prompt(OADTDR);
-      cnc_end();
-      continue;
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (OADTDIR);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+		}
+		if (i[0] != '/') {
+			prompt (OADTDR);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
-char *dir;
+char   *dir;
 
-static int dirselect(const struct dirent *d)
+static int
+dirselect (const struct dirent *d)
 {
-  char fname[1024];
-  struct stat st;
-  sprintf(fname,"%s/%s",dir,d->d_name);
-  if(!(strcmp(d->d_name,".")&&strcmp(d->d_name,"..")))return 0;
-  if(stat(fname,&st))return 0;
-  return S_ISDIR(st.st_mode);
+	char    fname[1024];
+	struct stat st;
+
+	sprintf (fname, "%s/%s", dir, d->d_name);
+	if (!(strcmp (d->d_name, ".") && strcmp (d->d_name, "..")))
+		return 0;
+	if (stat (fname, &st))
+		return 0;
+	return S_ISDIR (st.st_mode);
 }
 
 
 
 static void
-addtree(struct libidx *lib)
+addtree (struct libidx *lib)
 {
-  int              i,j;
-  struct dirent  **d=NULL;
+	int     i, j;
+	struct dirent **d = NULL;
 
-  dir=lib->dir;
+	dir = lib->dir;
 
-  j=scandir(lib->dir,&d,dirselect,alphasort);
-  if(j<=0||d==NULL)return;
+	j = scandir (lib->dir, &d, dirselect, alphasort);
+	if (j <= 0 || d == NULL)
+		return;
 
-  for(i=0;i<j;i++){
-    struct libidx tmp;
+	for (i = 0; i < j; i++) {
+		struct libidx tmp;
 
-    bzero(&tmp,sizeof(tmp));
-    strcpy(tmp.keyname,d[i]->d_name);
-    free(d[i]);
+		bzero (&tmp, sizeof (tmp));
+		strcpy (tmp.keyname, d[i]->d_name);
+		free (d[i]);
 
-    sprintf(tmp.fullname,"%s/%s",lib->fullname,tmp.keyname);
-    sprintf(tmp.dir,"%s/%s",lib->dir,tmp.keyname);
-    tmp.parent=lib->libnum;
-    lcase(tmp.keyname);
+		sprintf (tmp.fullname, "%s/%s", lib->fullname, tmp.keyname);
+		sprintf (tmp.dir, "%s/%s", lib->dir, tmp.keyname);
+		tmp.parent = lib->libnum;
+		lcase (tmp.keyname);
 
 
-    prompt(OADTCRE,tmp.fullname);
+		prompt (OADTCRE, tmp.fullname);
 
-    mklib(&tmp,0,LBF_OSDIR|LBF_NOINDEX);
-    addtree(&tmp);
-  }
+		mklib (&tmp, 0, LBF_OSDIR | LBF_NOINDEX);
+		addtree (&tmp);
+	}
 
-  free(d);
+	free (d);
 }
 
 
 void
-op_addtree()
+op_addtree ()
 {
-  char s[1024], tmp[1024];
-  struct libidx lib;
+	char    s[1024], tmp[1024];
+	struct libidx lib;
 
-  if(nesting(library.fullname)>maxnest){
-    prompt(OCRENST,maxnest);
-    return;
-  }
+	if (nesting (library.fullname) > maxnest) {
+		prompt (OCRENST, maxnest);
+		return;
+	}
 
-  for(;;){
-    if(!getnewlibname(s))return;
+	for (;;) {
+		if (!getnewlibname (s))
+			return;
 
-    if(libexists(s,library.libnum)){
-      prompt(OCREEXS,s);
-      cnc_end();
-      continue;
-    } else break;
-  }
+		if (libexists (s, library.libnum)) {
+			prompt (OCREEXS, s);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  memcpy(&lib,&library,sizeof(lib));
+	memcpy (&lib, &library, sizeof (lib));
 
-  strcpy(lib.keyname,s);
-  lowerc(lib.keyname);
-  sprintf(lib.fullname,"%s/%s",library.fullname,s);
-  sprintf(lib.dir,"%s/%s",library.dir,s);
-  lib.descr[0]=0;
-  lib.parent=library.libnum;
-  lib.numfiles=lib.numbytes=lib.numunapp=lib.bytesunapp=0;
-  bzero(lib.uploadsperday,sizeof(lib.uploadsperday));
-  bzero(lib.bytesperday,sizeof(lib.bytesperday));
-  strcpy(tmp,s);
-  if(findclub(tmp))strcpy(lib.club,tmp);
+	strcpy (lib.keyname, s);
+	lowerc (lib.keyname);
+	sprintf (lib.fullname, "%s/%s", library.fullname, s);
+	sprintf (lib.dir, "%s/%s", library.dir, s);
+	lib.descr[0] = 0;
+	lib.parent = library.libnum;
+	lib.numfiles = lib.numbytes = lib.numunapp = lib.bytesunapp = 0;
+	bzero (lib.uploadsperday, sizeof (lib.uploadsperday));
+	bzero (lib.bytesperday, sizeof (lib.bytesperday));
+	strcpy (tmp, s);
+	if (findclub (tmp))
+		strcpy (lib.club, tmp);
 
-  for(;;){
-    struct stat st;
-    if(!getdir(s))return;
-    if(stat(s,&st)){
-      prompt(OADTDR2,s);
-      cnc_end();
-    } else if(!S_ISDIR(st.st_mode)){
-      prompt(OADTDR2);
-      cnc_end();
-    }
-    break;
-  }
-  strcpy(lib.dir,s);
+	for (;;) {
+		struct stat st;
 
-  mklib(&lib,0,LBF_OSDIR|LBF_NOINDEX);
-  prompt(OCREOK,lib.fullname);
-  enterlib(lib.libnum,0);
+		if (!getdir (s))
+			return;
+		if (stat (s, &st)) {
+			prompt (OADTDR2, s);
+			cnc_end ();
+		} else if (!S_ISDIR (st.st_mode)) {
+			prompt (OADTDR2);
+			cnc_end ();
+		}
+		break;
+	}
+	strcpy (lib.dir, s);
 
-  addtree(&lib);
+	mklib (&lib, 0, LBF_OSDIR | LBF_NOINDEX);
+	prompt (OCREOK, lib.fullname);
+	enterlib (lib.libnum, 0);
 
-  enterlib(lib.libnum,0);
+	addtree (&lib);
+
+	enterlib (lib.libnum, 0);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -61,9 +64,8 @@
 #define _TELECON_H
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -78,8 +80,8 @@
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_telecon.h>
 
 
 /*                   123456789012345678901234567890 */
@@ -103,15 +105,15 @@
 
 
 struct tlcuser {
-  int  colour;
-  char entrystg[80];
-  char exitstg[80];
-  char topic[64];
-  int  flags;
-  int  chatinterval;
-  int  actions;
+	int     colour;
+	char    entrystg[80];
+	char    exitstg[80];
+	char    topic[64];
+	int     flags;
+	int     chatinterval;
+	int     actions;
 
-  char dummy[1024-240];
+	char    dummy[1024 - 240];
 };
 
 #define TLF_STARTMAIN  0x00001
@@ -125,9 +127,9 @@ struct tlcuser {
 
 
 struct chanhdr {
-  char moderator[24];
-  char topic[64];
-  int  flags;
+	char    moderator[24];
+	char    topic[64];
+	int     flags;
 };
 
 
@@ -139,41 +141,41 @@ struct chanhdr {
 
 
 struct chanusr {
-  char userid[24];
-  char sex;
-  int  flags;
+	char    userid[24];
+	char    sex;
+	int     flags;
 };
 
 
-#define CUF_NONE       0x000   /* No flags                            */
-#define CUF_PRESENT    0x001   /* Is currently present in the channel */
-#define CUF_UNLISTED   0x002   /* Has UNLIST on                       */
-#define CUF_EXPLICIT   0x004   /* Explicitly invited or uninvited     */
-#define CUF_ACCESS     0x008   /* Allowed into the channel            */
-#define CUF_READONLY   0x010   /* Can't write messages                */
-#define CUF_MODERATOR  0x020   /* Is the moderator for this channel   */
-#define CUF_CHATTING   0x040   /* Was in this channel, now chatting   */
-#define CUF_ALL        0xfff   /* All flags                           */
+#define CUF_NONE       0x000	/* No flags                            */
+#define CUF_PRESENT    0x001	/* Is currently present in the channel */
+#define CUF_UNLISTED   0x002	/* Has UNLIST on                       */
+#define CUF_EXPLICIT   0x004	/* Explicitly invited or uninvited     */
+#define CUF_ACCESS     0x008	/* Allowed into the channel            */
+#define CUF_READONLY   0x010	/* Can't write messages                */
+#define CUF_MODERATOR  0x020	/* Is the moderator for this channel   */
+#define CUF_CHATTING   0x040	/* Was in this channel, now chatting   */
+#define CUF_ALL        0xfff	/* All flags                           */
 
 
-#define TELEAUX_MAGIC  0x54454c45 /* "TELE" */
+#define TELEAUX_MAGIC  0x54454c45	/* "TELE" */
 
 
 struct usraux {
-  int   magic;
-  int   action;
-  int   access;
-  char  chatparty[24];
-  int   chatting;
-  int   lastinvitation;
-  int   interval;
-  int   chatid;
-  int   colour;
-  int   entrytick;
-  int   numentries;
-  int   actions;
-  char  plugin[16];
-  int   pluginq;
+	int     magic;
+	int     action;
+	int     access;
+	char    chatparty[24];
+	int     chatting;
+	int     lastinvitation;
+	int     interval;
+	int     chatid;
+	int     colour;
+	int     entrytick;
+	int     numentries;
+	int     actions;
+	char    plugin[16];
+	int     pluginq;
 };
 
 
@@ -192,33 +194,33 @@ struct usraux {
 
 extern promptblock_t *msg;
 
-extern int  entrkey;
-extern int  normkey;
-extern int  npaymx;
-extern int  maxcht;
-extern int  lnvcht1;
-extern int  lnvcht2;
-extern int  lnvcht3;
-extern int  tinpsz;
-extern int  msgkey;
-extern int  amsgch;
-extern int  msgchg;
-extern int  defcol;
-extern int  sopkey;
-extern int  chtkey;
-extern int  ichtkey;
-extern int  defint;
-extern int  chatcol1;
-extern int  chatcol2;
+extern int entrkey;
+extern int normkey;
+extern int npaymx;
+extern int maxcht;
+extern int lnvcht1;
+extern int lnvcht2;
+extern int lnvcht3;
+extern int tinpsz;
+extern int msgkey;
+extern int amsgch;
+extern int msgchg;
+extern int defcol;
+extern int sopkey;
+extern int chtkey;
+extern int ichtkey;
+extern int defint;
+extern int chatcol1;
+extern int chatcol2;
 extern char *stgall1;
 extern char *stgall2;
 extern char *stgsec1;
 extern char *stgsec2;
-extern int  actkey;
-extern int  defact;
+extern int actkey;
+extern int defact;
 
 
-void init();
+void    init ();
 
 
 /* channel.c */
@@ -227,110 +229,111 @@ extern char curchannel[];
 
 extern struct chanhdr chanhdr;
 
-int enterchannel(char *channel);
+int     enterchannel (char *channel);
 
-void leavechannel();
+void    leavechannel ();
 
-void killpersonalchannel();
+void    killpersonalchannel ();
 
-void leavechannels();
+void    leavechannels ();
 
-struct chanhdr *readchanhdr(char *channel);
+struct chanhdr *readchanhdr (char *channel);
 
-void writechanhdr(char *channel, struct chanhdr *c);
+void    writechanhdr (char *channel, struct chanhdr *c);
 
-int makechannel(char *channel, char *userid);
+int     makechannel (char *channel, char *userid);
 
-void setchanax(int ax);
+void    setchanax (int ax);
 
-void chanscan();
+void    chanscan ();
 
 
 /* usr.c */
 
 extern struct tlcuser tlcu;
 
-int loadtlcuser(char *userid, struct tlcuser *tlc);
+int     loadtlcuser (char *userid, struct tlcuser *tlc);
 
-int savetlcuser(char *userid, struct tlcuser *tlc);
+int     savetlcuser (char *userid, struct tlcuser *tlc);
 
-void makenewuser();
+void    makenewuser ();
 
 
 /* broadcast.c */
 
 
-int broadcastchnall(char *curchannel, char *(*fx)(struct chanusr *u), int all);
+int     broadcastchnall (char *curchannel, char *(*fx) (struct chanusr * u),
+			 int all);
 
-int broadcastchn(char *curchannel, char *(*fx)(struct chanusr *u));
+int     broadcastchn (char *curchannel, char *(*fx) (struct chanusr * u));
 
-int broadcast(char *(*fx)(struct chanusr *u));
+int     broadcast (char *(*fx) (struct chanusr * u));
 
-void usermsg(int pr);
+void    usermsg (int pr);
 
-void userent(int pr);
+void    userent (int pr);
 
-void userexit(int pr);
+void    userexit (int pr);
 
-void miscinfo(char *buf);
+void    miscinfo (char *buf);
 
 
 /* talk.c */
 
-void say(char *s);
+void    say (char *s);
 
-void whisper(char *s);
+void    whisper (char *s);
 
-void sayto(char *s);
+void    sayto (char *s);
 
 
 /* utils.c */
 
 extern const char *colours[];
 
-char *getcolour();
+char   *getcolour ();
 
-int tlcuidxref(char *userid, int inchannel);
+int     tlcuidxref (char *userid, int inchannel);
 
-void showinfo();
+void    showinfo ();
 
-char *getcolour();
+char   *getcolour ();
 
-char *mkchfn(char *chan);
+char   *mkchfn (char *chan);
 
-char *gettopic(char *chan);
+char   *gettopic (char *chan);
 
-void countdown();
+void    countdown ();
 
-int checktick();
+int     checktick ();
 
 
 /* editprefs.c */
 
-void editprefs();
+void    editprefs ();
 
 
 /* misc.c */
 
-int chanselect(const struct dirent *d);
+int     chanselect (const struct dirent *d);
 
-void joinchan(char *s);
+void    joinchan (char *s);
 
-void flagunlist(int on);
+void    flagunlist (int on);
 
-void sendmain(char *tty);
+void    sendmain (char *tty);
 
-void sendaction(char *userid, int action);
+void    sendaction (char *userid, int action);
 
-void actionhandler();
+void    actionhandler ();
 
-void droptomain();
+void    droptomain ();
 
-void squelch(char *s);
+void    squelch (char *s);
 
-void unsquelch(char *s);
+void    unsquelch (char *s);
 
-void topic(char *s);
+void    topic (char *s);
 
 
 /* clubhdr.c */
@@ -339,24 +342,25 @@ void topic(char *s);
 extern struct clubheader clubhdr;
 
 
-int findclub(char *club);
+int     findclub (char *club);
 
-int loadclubhdr(char *club);
+int     loadclubhdr (char *club);
 
-int getclubax(useracc_t *ucac, char *club);
+int     getclubax (useracc_t * ucac, char *club);
 
 
 /* accesses.c */
 
-int getaccess(char *chan);
+int     getaccess (char *chan);
 
-int getdefusrax(char *channel, char *userid);
+int     getdefusrax (char *channel, char *userid);
 
-int getusrax(char *channel, char *userid);
+int     getusrax (char *channel, char *userid);
 
-void setusrax(char *channel, char *userid, char sex, int flagson, int flagsoff);
+void    setusrax (char *channel, char *userid, char sex, int flagson,
+		  int flagsoff);
 
-void moderate(char *channel, char *userid, char *moderator);
+void    moderate (char *channel, char *userid, char *moderator);
 
 
 /* scan.c */
@@ -365,68 +369,71 @@ void moderate(char *channel, char *userid, char *moderator);
 #define TSM_PRESENT 1
 #define TSM_ABSENT  2
 
-struct chanhdr *begscan(char *channel, int mode);
+struct chanhdr *begscan (char *channel, int mode);
 
-struct chanusr *getscan();
+struct chanusr *getscan ();
 
-void endscan();
+void    endscan ();
 
 
 
 /* chanusr.c */
 
 
-struct chanusr *makechanusr(char *userid, int access);
+struct chanusr *makechanusr (char *userid, int access);
 
-struct chanusr *readchanusr(char *channel, char *userid);
+struct chanusr *readchanusr (char *channel, char *userid);
 
-int writechanusr(char *channel, struct chanusr *wusr);
+int     writechanusr (char *channel, struct chanusr *wusr);
 
-void chanusrflags(char *userid, char *channel, int flagson, int flagsoff);
+void    chanusrflags (char *userid, char *channel, int flagson, int flagsoff);
 
 
 
 /* invitations.c */
 
-void invite(char *s);
+void    invite (char *s);
 
-void uninvite(char *s);
+void    uninvite (char *s);
 
-void invitero(char *s);
+void    invitero (char *s);
 
 
 /* chat.c */
 
-void chat(char *s);
+void    chat (char *s);
 
-void originatechat(char *userid);
+void    originatechat (char *userid);
 
-void startchat();
+void    startchat ();
 
-void finishchat();
+void    finishchat ();
 
 
 /* actions.c */
 
-void initactions();
+void    initactions ();
 
-int handleaction(char *inp_buffer);
+int     handleaction (char *inp_buffer);
 
-void actionctl(char *inp_buffer);
+void    actionctl (char *inp_buffer);
 
 
 /* substvars.c */
 
-void initvars();
+void    initvars ();
 
 
 /* plugins.c */
 
-void initplugins();
+void    initplugins ();
 
-void listplugins();
+void    listplugins ();
 
-int  handleplugins(char *s);
+int     handleplugins (char *s);
 
 
 #endif
+
+
+/* End of File */

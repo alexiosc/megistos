@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,138 +55,157 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static void
-disapprovekeywords(struct libidx *l, struct fileidx *f)
+disapprovekeywords (struct libidx *l, struct fileidx *f)
 {
-  struct filekey k;
-  int    morekeys, keys=0;
-  char   keystg[8192];
-      
-  keystg[0]=0;
-  morekeys=keyfilefirst(l->libnum,f->fname,1,&k);
-  while(morekeys){
-    char tmp[32];
-    keys++;
-    sprintf(tmp,"%s ",k.keyword);
-    strcat(keystg,tmp);
-    morekeys=keyfilenext(l->libnum,f->fname,1,&k);
-  }
-  if(keys){
-    char k[8192],*cp;
-    strcpy(k,keystg);
-    for(cp=strtok(k," ");cp;cp=strtok(NULL," ")){
-      deletekeyword(l->libnum,f->fname,1,cp);
-    }
-    addkeywords(keystg,0,f);
-  }
+	struct filekey k;
+	int     morekeys, keys = 0;
+	char    keystg[8192];
+
+	keystg[0] = 0;
+	morekeys = keyfilefirst (l->libnum, f->fname, 1, &k);
+	while (morekeys) {
+		char    tmp[32];
+
+		keys++;
+		sprintf (tmp, "%s ", k.keyword);
+		strcat (keystg, tmp);
+		morekeys = keyfilenext (l->libnum, f->fname, 1, &k);
+	}
+	if (keys) {
+		char    k[8192], *cp;
+
+		strcpy (k, keystg);
+		for (cp = strtok (k, " "); cp; cp = strtok (NULL, " ")) {
+			deletekeyword (l->libnum, f->fname, 1, cp);
+		}
+		addkeywords (keystg, 0, f);
+	}
 }
 
 
 static int
-disapprovefile(struct libidx *l, char *fname)
+disapprovefile (struct libidx *l, char *fname)
 {
-  struct fileidx f;
-  char c;
+	struct fileidx f;
+	char    c;
 
-  /* Read the file and ask whether the user wants it approved or not */
+	/* Read the file and ask whether the user wants it approved or not */
 
-  if(!fileread(l->libnum,fname,1,&f)) return 1;
+	if (!fileread (l->libnum, fname, 1, &f))
+		return 1;
 
-  for(;;){
-    int res;
-    fileinfo(l,&f);
-  nohelp:
-    inp_setflags(INF_HELP);
-    res=get_menu(&c,0,0,ODISASK,ODISERR,"YND",0,0);
-    inp_clearflags(INF_HELP);
-    if(res<0)continue;
-    else if(!res)return 0;
+	for (;;) {
+		int     res;
 
-    if(c=='N')return 1;
-    else if(c=='D'){
-      struct libidx tmp;
-      memcpy(&tmp,&library,sizeof(library));
-      download(fname);
-      memcpy(&library,&tmp,sizeof(library));
-      goto nohelp;
-    } else if(c=='Y')break;
-  }
+		fileinfo (l, &f);
+	      nohelp:
+		inp_setflags (INF_HELP);
+		res = get_menu (&c, 0, 0, ODISASK, ODISERR, "YND", 0, 0);
+		inp_clearflags (INF_HELP);
+		if (res < 0)
+			continue;
+		else if (!res)
+			return 0;
 
+		if (c == 'N')
+			return 1;
+		else if (c == 'D') {
+			struct libidx tmp;
 
-  /* Ok, let's remove the file approval. First re-read the file. */
-
-  if(!fileread(l->libnum,fname,1,&f))return 1;
-  filedelete(&f); /* This is needed to properly update the approved field */
-  f.approved=0;
-  strcpy(f.approved_by,thisuseracc.userid);
-  filecreate(&f);
-  prompt(ODISOK);
+			memcpy (&tmp, &library, sizeof (library));
+			download (fname);
+			memcpy (&library, &tmp, sizeof (library));
+			goto nohelp;
+		} else if (c == 'Y')
+			break;
+	}
 
 
-  /* Now we have to approve its keywords, one by one. */
+	/* Ok, let's remove the file approval. First re-read the file. */
 
-  disapprovekeywords(l,&f);
+	if (!fileread (l->libnum, fname, 1, &f))
+		return 1;
+	filedelete (&f);	/* This is needed to properly update the approved field */
+	f.approved = 0;
+	strcpy (f.approved_by, thisuseracc.userid);
+	filecreate (&f);
+	prompt (ODISOK);
 
 
-  /* Finally, update the library */
+	/* Now we have to approve its keywords, one by one. */
 
-  {
-    struct libidx lib;
-    char fn[1024];
-    struct stat st;
-    if(libreadnum(l->libnum,&lib)){
-      sprintf(fn,"%s/%s",lib.dir,fname);
-      if(!stat(fn,&st)){
-	lib.numbytes-=st.st_size;
-	lib.bytesunapp+=st.st_size;
-      }
-      lib.numfiles--;
-      lib.numunapp++;
+	disapprovekeywords (l, &f);
 
-      libupdate(&lib);
-    }
-  }
 
-  return 1;
+	/* Finally, update the library */
+
+	{
+		struct libidx lib;
+		char    fn[1024];
+		struct stat st;
+
+		if (libreadnum (l->libnum, &lib)) {
+			sprintf (fn, "%s/%s", lib.dir, fname);
+			if (!stat (fn, &st)) {
+				lib.numbytes -= st.st_size;
+				lib.bytesunapp += st.st_size;
+			}
+			lib.numfiles--;
+			lib.numunapp++;
+
+			libupdate (&lib);
+		}
+	}
+
+	return 1;
 }
 
 
 static char *
-getfilename()
+getfilename ()
 {
-  static char fn[256];
+	static char fn[256];
 
-  for(;;){
-    if(cnc_more()){
-      strcpy(fn,cnc_word());
-    } else {
-      prompt(ODISQ);
-      inp_get(sizeof(fn)-1);
-      strcpy(fn,inp_buffer);
-    }
+	for (;;) {
+		if (cnc_more ()) {
+			strcpy (fn, cnc_word ());
+		} else {
+			prompt (ODISQ);
+			inp_get (sizeof (fn) - 1);
+			strcpy (fn, inp_buffer);
+		}
 
-    if(inp_isX(fn))return NULL;
-    else if(!strlen(fn)) continue;
+		if (inp_isX (fn))
+			return NULL;
+		else if (!strlen (fn))
+			continue;
 
-    if(!fileexists(library.libnum,fn,1)){
-      cnc_end();
-      prompt(ODISR);
-      continue;
-    } else break;
-  }
-  return fn;
+		if (!fileexists (library.libnum, fn, 1)) {
+			cnc_end ();
+			prompt (ODISR);
+			continue;
+		} else
+			break;
+	}
+	return fn;
 }
 
 
 void
-op_disapprove()
+op_disapprove ()
 {
-  char *fn=getfilename();
-  if(fn==NULL)return;
-  disapprovefile(&library,fn);
+	char   *fn = getfilename ();
+
+	if (fn == NULL)
+		return;
+	disapprovefile (&library, fn);
 }
+
+
+/* End of File */

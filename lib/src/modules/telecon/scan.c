@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -59,10 +62,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -75,135 +76,152 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
-static int             scan=0;
-static char            scanfname[256];
-static int             numusers, scanpos;
-static struct dirent **users=NULL;
+static int scan = 0;
+static char scanfname[256];
+static int numusers, scanpos;
+static struct dirent **users = NULL;
 
 
-static int usrselect_all(const struct dirent *d)
+static int
+usrselect_all (const struct dirent *d)
 {
-  return d->d_name[0]!='.';
+	return d->d_name[0] != '.';
 }
 
-static int usrselect_present(const struct dirent *d)
+static int
+usrselect_present (const struct dirent *d)
 {
-  return d->d_name[0]!='.'&&d->d_name[strlen(d->d_name)-1]=='+';
+	return d->d_name[0] != '.' && d->d_name[strlen (d->d_name) - 1] == '+';
 }
 
-static int usrselect_absent(const struct dirent *d)
+static int
+usrselect_absent (const struct dirent *d)
 {
-  return d->d_name[0]!='.'&&d->d_name[strlen(d->d_name)-1]=='-';
+	return d->d_name[0] != '.' && d->d_name[strlen (d->d_name) - 1] == '-';
 }
 
 
 struct chanhdr *
-begscan(char *channel, int mode)
+begscan (char *channel, int mode)
 {
-  static struct chanhdr c;
-  struct stat st;
-  char fname[256];
-  FILE *fp;
-  int i;
-  
-  sprintf(fname,"%s/%s",mkfname(TELEDIR),mkchfn(channel));
+	static struct chanhdr c;
+	struct stat st;
+	char    fname[256];
+	FILE   *fp;
+	int     i;
 
-  if(stat(fname,&st))return NULL;
+	sprintf (fname, "%s/%s", mkfname (TELEDIR), mkchfn (channel));
 
-  scanpos=0;
-  if(users!=NULL){
-    for(i=0;i<numusers;i++)free(users[i]);
-    free(users);
-  }
-  users=NULL;
-  numusers=0;
-  switch(mode){
-  case TSM_PRESENT:
-    numusers=scandir(fname,&users,usrselect_present,alphasort);
-    break;
-  case TSM_ABSENT:
-    numusers=scandir(fname,&users,usrselect_absent,alphasort);
-    break;
-  case TSM_ALL:
-  default:
-    numusers=scandir(fname,&users,usrselect_all,alphasort);
-    break;
-  }
-  strcpy(scanfname,fname);
-  
-  if(channel[0]==0)return NULL;
+	if (stat (fname, &st))
+		return NULL;
 
-  sprintf(fname,"%s/%s/.header",mkfname(TELEDIR),mkchfn(channel));
-  if((fp=fopen(fname,"r"))==NULL){
-    error_fatalsys("Unable to open channel header %s (chan=%s)",fname,channel);
-  }
-  if(fread(&c,sizeof(c),1,fp)!=1){
-    int i=errno;
-    fclose(fp);
-    errno=i;
-    error_fatalsys("Unable to read channel file %s",fname);
-  }
-  fclose(fp);
+	scanpos = 0;
+	if (users != NULL) {
+		for (i = 0; i < numusers; i++)
+			free (users[i]);
+		free (users);
+	}
+	users = NULL;
+	numusers = 0;
+	switch (mode) {
+	case TSM_PRESENT:
+		numusers =
+		    scandir (fname, &users, usrselect_present, alphasort);
+		break;
+	case TSM_ABSENT:
+		numusers =
+		    scandir (fname, &users, usrselect_absent, alphasort);
+		break;
+	case TSM_ALL:
+	default:
+		numusers = scandir (fname, &users, usrselect_all, alphasort);
+		break;
+	}
+	strcpy (scanfname, fname);
 
-  scan=1;
+	if (channel[0] == 0)
+		return NULL;
 
-  return &c;
+	sprintf (fname, "%s/%s/.header", mkfname (TELEDIR), mkchfn (channel));
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open channel header %s (chan=%s)",
+				fname, channel);
+	}
+	if (fread (&c, sizeof (c), 1, fp) != 1) {
+		int     i = errno;
+
+		fclose (fp);
+		errno = i;
+		error_fatalsys ("Unable to read channel file %s", fname);
+	}
+	fclose (fp);
+
+	scan = 1;
+
+	return &c;
 }
 
 
 struct chanusr *
-getscan()
+getscan ()
 {
-  static struct chanusr u;
-  FILE *fp;
-  char fname[256];
+	static struct chanusr u;
+	FILE   *fp;
+	char    fname[256];
 
-  if(scanpos>=numusers)return NULL;
+	if (scanpos >= numusers)
+		return NULL;
 
-  sprintf(fname,"%s/%s",scanfname,users[scanpos]->d_name);
-  if((fp=fopen(fname,"r"))==NULL){
-    scanpos++;
+	sprintf (fname, "%s/%s", scanfname, users[scanpos]->d_name);
+	if ((fp = fopen (fname, "r")) == NULL) {
+		scanpos++;
 
-    /* Recursively get the next user if this one doesn't exist */
-    return getscan();
-  }
+		/* Recursively get the next user if this one doesn't exist */
+		return getscan ();
+	}
 
-  if(fread(&u,sizeof(u),1,fp)!=1){
-    error_fatalsys("Unable to read channel user %s",fname);
-  }
+	if (fread (&u, sizeof (u), 1, fp) != 1) {
+		error_fatalsys ("Unable to read channel user %s", fname);
+	}
 
-  fclose(fp);
+	fclose (fp);
 
-  /* Delete leftover channel files for users who aren't on-line now */
+	/* Delete leftover channel files for users who aren't on-line now */
 
-  {
-    char userid[64];
-    strcpy(userid,users[scanpos]->d_name);
-    userid[strlen(userid)-1]=0;
-    if(!usr_insys(userid,0)){
-      unlink(fname);
-      return getscan();
-    }
-  }
+	{
+		char    userid[64];
 
-  scanpos++;
-  return &u;
+		strcpy (userid, users[scanpos]->d_name);
+		userid[strlen (userid) - 1] = 0;
+		if (!usr_insys (userid, 0)) {
+			unlink (fname);
+			return getscan ();
+		}
+	}
+
+	scanpos++;
+	return &u;
 }
 
 
 void
-endscan()
+endscan ()
 {
-  int i;
-  if(users!=NULL){
-    for(i=0;i<numusers;i++)free(users[i]);
-    free(users);
-  }
-  users=NULL;
-  numusers=0;
+	int     i;
+
+	if (users != NULL) {
+		for (i = 0; i < numusers; i++)
+			free (users[i]);
+		free (users);
+	}
+	users = NULL;
+	numusers = 0;
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,67 +60,73 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 void
-invite(char *s)
+invite (char *s)
 {
-  char userid[2048]={0};
-  int i;
+	char    userid[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",userid);
+	i = sscanf (s, "%*s %s", userid);
 
-  if((i<1)||sameas(userid,"?")){
-    prompt(INVHELP);
-    return;
-  }
+	if ((i < 1) || sameas (userid, "?")) {
+		prompt (INVHELP);
+		return;
+	}
 
-  if(sameas(userid,"ALL")){
-    setchanax(CHF_OPEN);
-    prompt(INOKALL);
-    if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
-    return;
-  }
+	if (sameas (userid, "ALL")) {
+		setchanax (CHF_OPEN);
+		prompt (INOKALL);
+		if (!sameas (thisuseronl.telechan, thisuseracc.userid))
+			prompt (INVWRN);
+		return;
+	}
 
-  if(!usr_uidxref(userid,1)){
-    prompt(IUNKUSR,userid);
-    return;
-  }
-  
-  if(sameas(thisuseracc.userid,userid)){
-    prompt(IWHYU);
-    return;
-  }
+	if (!usr_uidxref (userid, 1)) {
+		prompt (IUNKUSR, userid);
+		return;
+	}
 
-  usr_insys(userid,0);
+	if (sameas (thisuseracc.userid, userid)) {
+		prompt (IWHYU);
+		return;
+	}
 
-  setusrax(thisuseracc.userid,userid,0,CUF_EXPLICIT|CUF_ACCESS,0);
+	usr_insys (userid, 0);
 
-  {
-    char article[2048];
+	setusrax (thisuseracc.userid, userid, 0, CUF_EXPLICIT | CUF_ACCESS, 0);
 
-    strcpy(article,msg_getunit(IRECHE,thisuseracc.sex==USX_MALE));
+	{
+		char    article[2048];
 
-    sprompt_other(othrshm,out_buffer,IRECIP,
-		  article,thisuseracc.userid,
-		  msg_getunit(IRECHIS,thisuseracc.sex==USX_MALE));
+		strcpy (article,
+			msg_getunit (IRECHE, thisuseracc.sex == USX_MALE));
 
-    if(!usr_injoth(&othruseronl,out_buffer,0)){
-      prompt(UNNOT,othruseronl.userid);
-    }
-    
-    if(othruseronl.flags&OLF_INTELECON){
-      sprompt_other(othrshm,out_buffer,IJOIN,thisuseracc.userid);
-      usr_injoth(&othruseronl,out_buffer,0);
-    }
-  }
-  
-  prompt(ISENDR,msg_getunit(ISNDM,othruseracc.sex==USX_MALE),userid);
+		sprompt_other (othrshm, out_buffer, IRECIP,
+			       article, thisuseracc.userid,
+			       msg_getunit (IRECHIS,
+					    thisuseracc.sex == USX_MALE));
 
-  if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
+		if (!usr_injoth (&othruseronl, out_buffer, 0)) {
+			prompt (UNNOT, othruseronl.userid);
+		}
+
+		if (othruseronl.flags & OLF_INTELECON) {
+			sprompt_other (othrshm, out_buffer, IJOIN,
+				       thisuseracc.userid);
+			usr_injoth (&othruseronl, out_buffer, 0);
+		}
+	}
+
+	prompt (ISENDR, msg_getunit (ISNDM, othruseracc.sex == USX_MALE),
+		userid);
+
+	if (!sameas (thisuseronl.telechan, thisuseracc.userid))
+		prompt (INVWRN);
 }
 
 
@@ -127,139 +134,154 @@ static char fx_sex, fx_id[24];
 
 
 static char *
-fx_kickout(struct chanusr *u)
+fx_kickout (struct chanusr *u)
 {
-  char tmp[8192];
-  strcpy(out_buffer,msg_getl(TDELIM,othruseracc.language-1));
+	char    tmp[8192];
 
-  sprintf(tmp,msg_getl(UOTHER,othruseracc.language-1),
-	  msg_getunitl(SEXM1,fx_sex==USX_MALE,othruseracc.language-1),
-	  fx_id);
-  strcat(out_buffer,tmp);
-  return out_buffer;
+	strcpy (out_buffer, msg_getl (TDELIM, othruseracc.language - 1));
+
+	sprintf (tmp, msg_getl (UOTHER, othruseracc.language - 1),
+		 msg_getunitl (SEXM1, fx_sex == USX_MALE,
+			       othruseracc.language - 1), fx_id);
+	strcat (out_buffer, tmp);
+	return out_buffer;
 }
 
 
 void
-uninvite(char *s)
+uninvite (char *s)
 {
-  char userid[2048]={0};
-  int i;
+	char    userid[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",userid);
+	i = sscanf (s, "%*s %s", userid);
 
-  if((i<1)||sameas(userid,"?")){
-    prompt(UNVHELP);
-    return;
-  }
+	if ((i < 1) || sameas (userid, "?")) {
+		prompt (UNVHELP);
+		return;
+	}
 
-  if(sameas(userid,"ALL")){
-    setchanax(CHF_PRIVATE);
-    prompt(UNOKALL);
-    return;
-  }
+	if (sameas (userid, "ALL")) {
+		setchanax (CHF_PRIVATE);
+		prompt (UNOKALL);
+		return;
+	}
 
-  if(!usr_uidxref(userid,1)){
-    prompt(UUNKUSR,userid);
-    return;
-  }
-  
-  if(sameas(thisuseracc.userid,userid)){
-    prompt(UWHYU);
-    return;
-  }
+	if (!usr_uidxref (userid, 1)) {
+		prompt (UUNKUSR, userid);
+		return;
+	}
 
-  usr_insys(userid,0);
+	if (sameas (thisuseracc.userid, userid)) {
+		prompt (UWHYU);
+		return;
+	}
 
-  {
-    char article[2048];
+	usr_insys (userid, 0);
 
-    strcpy(article,msg_getunit(URECHE,thisuseracc.sex==USX_MALE));
+	{
+		char    article[2048];
 
-    sprompt_other(othrshm,out_buffer,URECIP,
-		  article,thisuseracc.userid,
-		  msg_getunit(URECHIS,thisuseracc.sex==USX_MALE));
-    
-    if(!usr_injoth(&othruseronl,out_buffer,0)){
-      prompt(UNNOT,othruseronl.userid);
-    }
-    
-    setusrax(thisuseracc.userid,userid,0,CUF_EXPLICIT,CUF_PRESENT|CUF_ACCESS);
+		strcpy (article,
+			msg_getunit (URECHE, thisuseracc.sex == USX_MALE));
 
-    if(othruseronl.flags&OLF_INTELECON){
-      char tty[16];
+		sprompt_other (othrshm, out_buffer, URECIP,
+			       article, thisuseracc.userid,
+			       msg_getunit (URECHIS,
+					    thisuseracc.sex == USX_MALE));
 
-      strcpy(tty,othruseronl.channel);
-      strcpy(fx_id,userid);
-      fx_sex=othruseracc.sex;
-      if(!strcmp(othruseronl.telechan,thisuseracc.userid)){
-	broadcastchn(thisuseracc.userid,fx_kickout);
-      }
-      sendmain(userid);
-    }
-  }
-  
-  prompt(USENDR,msg_getunit(USNDM,othruseracc.sex==USX_MALE),userid);
+		if (!usr_injoth (&othruseronl, out_buffer, 0)) {
+			prompt (UNNOT, othruseronl.userid);
+		}
+
+		setusrax (thisuseracc.userid, userid, 0, CUF_EXPLICIT,
+			  CUF_PRESENT | CUF_ACCESS);
+
+		if (othruseronl.flags & OLF_INTELECON) {
+			char    tty[16];
+
+			strcpy (tty, othruseronl.channel);
+			strcpy (fx_id, userid);
+			fx_sex = othruseracc.sex;
+			if (!strcmp (othruseronl.telechan, thisuseracc.userid)) {
+				broadcastchn (thisuseracc.userid, fx_kickout);
+			}
+			sendmain (userid);
+		}
+	}
+
+	prompt (USENDR, msg_getunit (USNDM, othruseracc.sex == USX_MALE),
+		userid);
 }
 
 
 void
-invitero(char *s)
+invitero (char *s)
 {
-  char userid[2048]={0};
-  int i;
+	char    userid[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",userid);
+	i = sscanf (s, "%*s %s", userid);
 
-  if((i<1)||sameas(userid,"?")){
-    prompt(ROHELP);
-    return;
-  }
+	if ((i < 1) || sameas (userid, "?")) {
+		prompt (ROHELP);
+		return;
+	}
 
-  if(sameas(userid,"ALL")){
-    setchanax(CHF_READONLY);
-    prompt(ROOKALL);
-    if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
-    return;
-  }
+	if (sameas (userid, "ALL")) {
+		setchanax (CHF_READONLY);
+		prompt (ROOKALL);
+		if (!sameas (thisuseronl.telechan, thisuseracc.userid))
+			prompt (INVWRN);
+		return;
+	}
 
-  if(!usr_uidxref(userid,1)){
-    prompt(RUNKUSR,userid);
-    return;
-  }
-  
-  if(sameas(thisuseracc.userid,userid)){
-    prompt(RWHYU);
-    return;
-  }
+	if (!usr_uidxref (userid, 1)) {
+		prompt (RUNKUSR, userid);
+		return;
+	}
 
-  usr_insys(userid,0);
+	if (sameas (thisuseracc.userid, userid)) {
+		prompt (RWHYU);
+		return;
+	}
 
-  setusrax(thisuseracc.userid,userid,0,CUF_EXPLICIT|CUF_ACCESS|CUF_READONLY,0);
+	usr_insys (userid, 0);
 
-  {
-    char article[2048];
+	setusrax (thisuseracc.userid, userid, 0,
+		  CUF_EXPLICIT | CUF_ACCESS | CUF_READONLY, 0);
 
-    strcpy(article,msg_getunit(RRECHE,thisuseracc.sex==USX_MALE));
+	{
+		char    article[2048];
 
-    sprompt_other(othrshm,out_buffer,RRECIP,
-		  article,thisuseracc.userid,
-		  msg_getunit(RRECHIS,thisuseracc.sex==USX_MALE));
-    
-    if(!usr_injoth(&othruseronl,out_buffer,0)){
-      prompt(UNNOT,othruseronl.userid);
-    }
-    
-    if(othruseronl.flags&OLF_INTELECON){
-      sprompt_other(othrshm,out_buffer,RJOIN,thisuseracc.userid);
-      usr_injoth(&othruseronl,out_buffer,0);
-    }
-  }
-  
-  prompt(RSENDR,msg_getunit(RSNDM,othruseracc.sex==USX_MALE),userid);
+		strcpy (article,
+			msg_getunit (RRECHE, thisuseracc.sex == USX_MALE));
 
-  if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
+		sprompt_other (othrshm, out_buffer, RRECIP,
+			       article, thisuseracc.userid,
+			       msg_getunit (RRECHIS,
+					    thisuseracc.sex == USX_MALE));
+
+		if (!usr_injoth (&othruseronl, out_buffer, 0)) {
+			prompt (UNNOT, othruseronl.userid);
+		}
+
+		if (othruseronl.flags & OLF_INTELECON) {
+			sprompt_other (othrshm, out_buffer, RJOIN,
+				       thisuseracc.userid);
+			usr_injoth (&othruseronl, out_buffer, 0);
+		}
+	}
+
+	prompt (RSENDR, msg_getunit (RSNDM, othruseracc.sex == USX_MALE),
+		userid);
+
+	if (!sameas (thisuseronl.telechan, thisuseracc.userid))
+		prompt (INVWRN);
 }
 
 
 
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -67,126 +68,150 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <math.h>
-#include "typhoon.h"
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/typhoon.h>
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
-char *
-leafname(char *s)
+char   *
+leafname (char *s)
 {
-  char *cp=strrchr(s,'/');
-  if(cp==NULL)return s;
-  else return cp+1;
+	char   *cp = strrchr (s, '/');
+
+	if (cp == NULL)
+		return s;
+	else
+		return cp + 1;
 }
 
 
 char
-*zonkdir(char *s)
+       *
+zonkdir (char *s)
 {
-  static char tmp[256];
-  int i,j;
+	static char tmp[256];
+	int     i, j;
 
-  bzero(tmp,sizeof(tmp));
-  for(i=j=0;s[i];i++,j++){
-    if(s[i]=='/'){
-      if(s[i+1]=='/')j--;
-      else if(s[i+1]==0)break;
-      else tmp[j]=s[i];
-    } else tmp[j]=s[i];
-  }
+	bzero (tmp, sizeof (tmp));
+	for (i = j = 0; s[i]; i++, j++) {
+		if (s[i] == '/') {
+			if (s[i + 1] == '/')
+				j--;
+			else if (s[i + 1] == 0)
+				break;
+			else
+				tmp[j] = s[i];
+		} else
+			tmp[j] = s[i];
+	}
 
-  return tmp;
+	return tmp;
 }
 
 
 int
-nesting(char *s)
+nesting (char *s)
 {
-  int i,c;
-  for(i=c=0;s[i];i++)c+=(s[i]=='/'||s[i]=='\\');
-  return c;
+	int     i, c;
+
+	for (i = c = 0; s[i]; i++)
+		c += (s[i] == '/' || s[i] == '\\');
+	return c;
 }
 
 
 void
-libinfo()
+libinfo ()
 {
-  struct stat st;
-  char fname[256], *cp, *s=strdup(othrdme);
+	struct stat st;
+	char    fname[256], *cp, *s = strdup (othrdme);
 
-  libreadnum(library.libnum,&library);
-  sprintf(fname,"%s/%s",library.dir,rdmefil);
-  if(!stat(fname,&st)){
-    prompt(INFOHDR);
-    out_printfile(fname);
-  } else {
-    cp=strtok(s," \n\r\t,");
-    while(cp){
-      if(!strlen(cp))continue;
-      sprintf(fname,"%s/%s",library.dir,cp);
-      if(!stat(fname,&st)){
-	prompt(INFOHDR);
-	out_printfile(fname);
-	break;
-      }
-      cp=strtok(NULL," \n\r\t");
-    }
-  }
-  free(s);
+	libreadnum (library.libnum, &library);
+	sprintf (fname, "%s/%s", library.dir, rdmefil);
+	if (!stat (fname, &st)) {
+		prompt (INFOHDR);
+		out_printfile (fname);
+	} else {
+		cp = strtok (s, " \n\r\t,");
+		while (cp) {
+			if (!strlen (cp))
+				continue;
+			sprintf (fname, "%s/%s", library.dir, cp);
+			if (!stat (fname, &st)) {
+				prompt (INFOHDR);
+				out_printfile (fname);
+				break;
+			}
+			cp = strtok (NULL, " \n\r\t");
+		}
+	}
+	free (s);
 }
 
 
 void
-fullinfo()
+fullinfo ()
 {
-  char tmp[16386];
+	char    tmp[16386];
 
-  libinfo();
-  if(library.flags&LBF_OSDIR){
-    strcpy(tmp,msg_get(LIBINFOO));
-    strcat(tmp,msg_get(LIBINFO9));
-  } else strcpy(tmp,msg_get(libop?LIBINFO2:LIBINFO1));
-  if(library.flags&LBF_UPLAUD)strcat(tmp,msg_get(LIBINFO3));
-  if(library.flags&LBF_DNLAUD)strcat(tmp,msg_get(LIBINFO4));
-  if(library.flags&(LBF_LOCKUPL|LBF_LOCKDNL|LBF_LOCKENTR))
-    strcat(tmp,msg_get(LIBINFO5));
-  if(library.flags&LBF_READONLY)strcat(tmp,msg_get(LIBINFO6));
-  if((library.flags&LBF_OSDIR)==0)strcat(tmp,msg_get(LIBINFO10));
-  strcat(tmp,msg_get(LIBINFOF));
-  print(tmp);
+	libinfo ();
+	if (library.flags & LBF_OSDIR) {
+		strcpy (tmp, msg_get (LIBINFOO));
+		strcat (tmp, msg_get (LIBINFO9));
+	} else
+		strcpy (tmp, msg_get (libop ? LIBINFO2 : LIBINFO1));
+	if (library.flags & LBF_UPLAUD)
+		strcat (tmp, msg_get (LIBINFO3));
+	if (library.flags & LBF_DNLAUD)
+		strcat (tmp, msg_get (LIBINFO4));
+	if (library.flags & (LBF_LOCKUPL | LBF_LOCKDNL | LBF_LOCKENTR))
+		strcat (tmp, msg_get (LIBINFO5));
+	if (library.flags & LBF_READONLY)
+		strcat (tmp, msg_get (LIBINFO6));
+	if ((library.flags & LBF_OSDIR) == 0)
+		strcat (tmp, msg_get (LIBINFO10));
+	strcat (tmp, msg_get (LIBINFOF));
+	print (tmp);
 }
 
 
-char *
-_getfiletype(char *fname,int recurse)
+char   *
+_getfiletype (char *fname, int recurse)
 {
-  FILE *fp;
-  static char filetype[256];
-  char command[256], line[1024], *cp=line;
+	FILE   *fp;
+	static char filetype[256];
+	char    command[256], line[1024], *cp = line;
 
-  strcpy(filetype,msg_get(FTUNK));
-  if(!recurse)return filetype;
+	strcpy (filetype, msg_get (FTUNK));
+	if (!recurse)
+		return filetype;
 
-  sprintf(command,"file %s",fname);
-  if((fp=popen(command,"r"))==NULL)return filetype;
-  line[0]=0;
-  fgets(line,sizeof(line),fp);
-  fclose(fp);
+	sprintf (command, "file %s", fname);
+	if ((fp = popen (command, "r")) == NULL)
+		return filetype;
+	line[0] = 0;
+	fgets (line, sizeof (line), fp);
+	fclose (fp);
 
-  if((cp=strchr(line,10))!=NULL)*cp=0;
-  if((cp=strchr(line,13))!=NULL)*cp=0;
-  if(!line[0]) return filetype;
+	if ((cp = strchr (line, 10)) != NULL)
+		*cp = 0;
+	if ((cp = strchr (line, 13)) != NULL)
+		*cp = 0;
+	if (!line[0])
+		return filetype;
 
-  if((cp=strchr(line,32))==NULL)return filetype;
-  else cp++;
-  if(sameto(SYMLINKTO,cp)){
-    cp+=strlen(SYMLINKTO);
-    return _getfiletype(cp,recurse-1);
-  } else strcpy(filetype,cp);
+	if ((cp = strchr (line, 32)) == NULL)
+		return filetype;
+	else
+		cp++;
+	if (sameto (SYMLINKTO, cp)) {
+		cp += strlen (SYMLINKTO);
+		return _getfiletype (cp, recurse - 1);
+	} else
+		strcpy (filetype, cp);
 
-  return filetype;
+	return filetype;
 }
 
 
@@ -206,21 +231,26 @@ _getfiletype(char *fname,int recurse)
      time in mins = ---------------------------------
                       60 * efficiency * (bps/38400) */
 
-int calcxfertime(int size, int inseconds)
+int
+calcxfertime (int size, int inseconds)
 {
-  return (int)
-    (rint(((double)size) /
-	  ((((double)(thisuseronl.baudrate?thisuseronl.baudrate:38400)/10.0)*
-	    (((double)peffic/100.0))) * (inseconds?1.0:60.0))));
+	return (int)
+	    (rint (((double) size) /
+		   ((((double)
+		      (thisuseronl.baudrate ? thisuseronl.baudrate : 38400) /
+		      10.0) * (((double) peffic / 100.0))) *
+		    (inseconds ? 1.0 : 60.0))));
 }
 
-int calccharge(int size, struct libidx *l)
+int
+calccharge (int size, struct libidx *l)
 {
-  return (int)
-    (rint(((double)l->dnlcharge) + (((double)thisuseronl.credspermin)/100.0) * 
-	  ((double)size) /
-	  ((((double)(thisuseronl.baudrate?thisuseronl.baudrate:38400)/10.0)*
-	    (((double)peffic/100.0))) * 60.0)));
+	return (int)
+	    (rint
+	     (((double) l->dnlcharge) +
+	      (((double) thisuseronl.credspermin) / 100.0) * ((double) size) /
+	      ((((double) (thisuseronl.baudrate ? thisuseronl.baudrate : 38400)
+		 / 10.0) * (((double) peffic / 100.0))) * 60.0)));
 }
 
 
@@ -228,98 +258,115 @@ int calccharge(int size, struct libidx *l)
 #define fracK(bytes) ((int)((float)((bytes)%(1<<10))/10.24))
 #define fracM(bytes) ((int)((float)((bytes)%(1<<20))/10485.76))
 
-int fileinfo(struct libidx *l, struct fileidx *f)
+int
+fileinfo (struct libidx *l, struct fileidx *f)
 {
-  char         *filetype;
-  struct stat   st;
-  struct tm    *dt;
-  char          fname[512];
-  char          sizestg[256], timestg[256], chargestg[256];
-  long          xfertime, charge;
+	char   *filetype;
+	struct stat st;
+	struct tm *dt;
+	char    fname[512];
+	char    sizestg[256], timestg[256], chargestg[256];
+	long    xfertime, charge;
 
 
-  /* Get the file's actual full pathname and its type */
-  sprintf(fname,"%s/%s",l->dir,f->fname);
-  filetype=getfiletype(fname);
+	/* Get the file's actual full pathname and its type */
+	sprintf (fname, "%s/%s", l->dir, f->fname);
+	filetype = getfiletype (fname);
 
 
-  /* Line 1: get size and its suitable unit (bytes, kbytes, Mbytes) */
-  bzero(&st,sizeof(st));
-  stat(fname,&st);
-  if(st.st_size<(128<<10))
-    sprintf(sizestg,msg_get(FILINSB),st.st_size);
-  else if(st.st_size<(1440<<10))
-    sprintf(sizestg,msg_get(FILINSK),st.st_size>>10,fracK(st.st_size));
-  else
-    sprintf(sizestg,msg_get(FILINSK),st.st_size>>10,fracM(st.st_size));
-
-  
-  /* Line 2: calculate download time and charge. */
-  xfertime=calcxfertime(st.st_size,0);
-  charge=calccharge(st.st_size,&library);
-
-  if(xfertime>0)sprintf(timestg,msg_get(FILINTA),xfertime);
-  else strcpy(timestg,msg_get(FILINTL));
-  strcpy(chargestg,msg_getunit(CRDSNG,charge));
+	/* Line 1: get size and its suitable unit (bytes, kbytes, Mbytes) */
+	bzero (&st, sizeof (st));
+	stat (fname, &st);
+	if (st.st_size < (128 << 10))
+		sprintf (sizestg, msg_get (FILINSB), st.st_size);
+	else if (st.st_size < (1440 << 10))
+		sprintf (sizestg, msg_get (FILINSK), st.st_size >> 10,
+			 fracK (st.st_size));
+	else
+		sprintf (sizestg, msg_get (FILINSK), st.st_size >> 10,
+			 fracM (st.st_size));
 
 
-  dt=localtime((const time_t *)&(f->timestamp));
-  prompt(FILINFO,
-	 f->fname,sizestg,
-	 timestg,charge,chargestg,
-	 f->uploader,f->approved_by,
-	 strdate(makedate(dt->tm_mday,dt->tm_mon+1,1900+dt->tm_year)),
-	 strtime(maketime(dt->tm_hour,dt->tm_min,dt->tm_sec),1),
-	 f->downloaded,msg_getunit(TIMSNG,f->downloaded),
-	 filetype,
-	 f->summary);
+	/* Line 2: calculate download time and charge. */
+	xfertime = calcxfertime (st.st_size, 0);
+	charge = calccharge (st.st_size, &library);
+
+	if (xfertime > 0)
+		sprintf (timestg, msg_get (FILINTA), xfertime);
+	else
+		strcpy (timestg, msg_get (FILINTL));
+	strcpy (chargestg, msg_getunit (CRDSNG, charge));
 
 
-  /* Now scan the keywords */
+	dt = localtime ((const time_t *) &(f->timestamp));
+	prompt (FILINFO,
+		f->fname, sizestg,
+		timestg, charge, chargestg,
+		f->uploader, f->approved_by,
+		strdate (makedate
+			 (dt->tm_mday, dt->tm_mon + 1, 1900 + dt->tm_year)),
+		strtime (maketime (dt->tm_hour, dt->tm_min, dt->tm_sec), 1),
+		f->downloaded, msg_getunit (TIMSNG, f->downloaded), filetype,
+		f->summary);
 
-  {
-    struct filekey k;
-    int    morekeys, keys=0;
-    char   keystg[8192];
-      
-    keystg[0]=0;
-    morekeys=keyfilefirst(l->libnum,f->fname,1,&k);
-    while(morekeys){
-      char tmp[32];
-      keys++;
-      sprintf(tmp,"%s ",k.keyword);
-      strcat(keystg,tmp);
-      morekeys=keyfilenext(l->libnum,f->fname,1,&k);
-    }
-    if(keys)prompt(FILINFOK,keystg);
-    else {
 
-      /* Try looking for unapproved keys */
+	/* Now scan the keywords */
 
-      keystg[0]=0;
-      morekeys=keyfilefirst(l->libnum,f->fname,0,&k);
-      while(morekeys){
-	char tmp[32];
-	keys++;
-	sprintf(tmp,"%s ",k.keyword);
-	strcat(keystg,tmp);
-	morekeys=keyfilenext(l->libnum,f->fname,0,&k);
-      }
-      if(keys)prompt(FILINFOK,keystg);
-    }
-  }
+	{
+		struct filekey k;
+		int     morekeys, keys = 0;
+		char    keystg[8192];
 
-  /* Finally, show the long description */
+		keystg[0] = 0;
+		morekeys = keyfilefirst (l->libnum, f->fname, 1, &k);
+		while (morekeys) {
+			char    tmp[32];
 
-  if(strlen(f->description))prompt(FILINFOD,f->description);
+			keys++;
+			sprintf (tmp, "%s ", k.keyword);
+			strcat (keystg, tmp);
+			morekeys = keyfilenext (l->libnum, f->fname, 1, &k);
+		}
+		if (keys)
+			prompt (FILINFOK, keystg);
+		else {
 
-  return st.st_size;
+			/* Try looking for unapproved keys */
+
+			keystg[0] = 0;
+			morekeys = keyfilefirst (l->libnum, f->fname, 0, &k);
+			while (morekeys) {
+				char    tmp[32];
+
+				keys++;
+				sprintf (tmp, "%s ", k.keyword);
+				strcat (keystg, tmp);
+				morekeys =
+				    keyfilenext (l->libnum, f->fname, 0, &k);
+			}
+			if (keys)
+				prompt (FILINFOK, keystg);
+		}
+	}
+
+	/* Finally, show the long description */
+
+	if (strlen (f->description))
+		prompt (FILINFOD, f->description);
+
+	return st.st_size;
 }
 
 
-char *lcase(char *s)
+char   *
+lcase (char *s)
 {
-  char *cp;
-  for(cp=s;*cp;cp++)*cp=tolower(*cp);
-  return s;
+	char   *cp;
+
+	for (cp = s; *cp; cp++)
+		*cp = tolower (*cp);
+	return s;
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -45,18 +48,17 @@
 #define _PLUGINS_H
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
 
 struct plugin {
-  char keyword[16];
-  char exec[128];
-  int  key;
-  char descr[ML][64];
+	char    keyword[16];
+	char    exec[128];
+	int     key;
+	char    descr[ML][64];
 };
 
 
@@ -65,9 +67,9 @@ struct plugin {
 
 
 struct pluginmsg {
-  long mtype;
-  char userid[24];
-  char text[2048];
+	long    mtype;
+	char    userid[24];
+	char    text[2048];
 };
 
 #define SIZE(s) (24*sizeof(char)+strlen(s)+1)
@@ -82,18 +84,18 @@ struct pluginmsg {
 
 
 extern char *keyword, *channel, *userid;
-extern int  qid;
+extern int qid;
 
-void initplugin(int argc, char **argv);
+void    initplugin (int argc, char **argv);
 
-void doneplugin();
+void    doneplugin ();
 
-void becomeserver();
+void    becomeserver ();
 
-void doneserver();
+void    doneserver ();
 
 
-#endif /* __TELEPLUGIN__ */
+#endif				/* __TELEPLUGIN__ */
 
 
 
@@ -108,20 +110,24 @@ void doneserver();
 
 
 struct keyword {
-  char keyword[12];
-  int  code;
-} keywords[]={
-  {"descr",  CODE_DESCR},
-  {"exec",   CODE_EXEC},
-  {"key",    CODE_KEY},
-  {"plugin", CODE_PLUGIN},
-  {"",-1}};
+	char    keyword[12];
+	int     code;
+} keywords[] = {
+	{
+	"descr", CODE_DESCR}, {
+	"exec", CODE_EXEC}, {
+	"key", CODE_KEY}, {
+	"plugin", CODE_PLUGIN}, {
+"", -1}};
 
 
 #define STRING(s) (s?s:"")
 
 
-#endif /* __MKPLUGIN__ */
+#endif				/* __MKPLUGIN__ */
 
 
-#endif /* _PLUGINS_H */
+#endif				/* _PLUGINS_H */
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -46,10 +49,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -60,9 +61,9 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 #define LIBLOCK   "LCK..lib.%s.%d"
@@ -71,181 +72,215 @@ const char *__RCS=RCS_VER;
 
 /* This an extern, defined in clubhdr.o */
 
-int getclubax(useracc_t *uacc, char *club);
+int     getclubax (useracc_t * uacc, char *club);
 
 
-static int lastlibnum=-1;
-static int lastadmin=-1;
+static int lastlibnum = -1;
+static int lastadmin = -1;
 
 
-int islibop(struct libidx *l)
+int
+islibop (struct libidx *l)
 {
-  int i;
-  if(key_owns(&thisuseracc,libopkey))return 1;
-  for(i=0;i<5;i++){
-    if(sameas(thisuseracc.userid,l->libops[i]))return 1;
-  }
-  
-  /* Recurse looking at the parent libraries, too */
+	int     i;
 
-  {
-    struct libidx lib;
-    if(libreadnum(l->parent,&lib)){
-      return islibop(&lib);
-    }
-  }
+	if (key_owns (&thisuseracc, libopkey))
+		return 1;
+	for (i = 0; i < 5; i++) {
+		if (sameas (thisuseracc.userid, l->libops[i]))
+			return 1;
+	}
 
-  return 0;
+	/* Recurse looking at the parent libraries, too */
+
+	{
+		struct libidx lib;
+
+		if (libreadnum (l->parent, &lib)) {
+			return islibop (&lib);
+		}
+	}
+
+	return 0;
 }
 
 
-static int forcefail=0;
+static int forcefail = 0;
 
 
 void
-forcepasswordfail()
+forcepasswordfail ()
 {
-  forcefail=1;
+	forcefail = 1;
 }
 
 
 static int
-getlibpasswd(struct libidx *l)
+getlibpasswd (struct libidx *l)
 {
-  int i;
-  if(forcefail)return 0;
-  for(i=0;i<numtries;i++){
-    prompt(ENTPASS);
-    inp_setflags(INF_PASSWD);
-    inp_get(15);
-    inp_clearflags(INF_PASSWD);
-    if(sameas(inp_buffer,l->passwd))return 1;
-    cnc_end();
-    if(i+1<numtries)prompt(WRNGPSS);
-  }
-  prompt(FAILPASS);
-  return 0;
+	int     i;
+
+	if (forcefail)
+		return 0;
+	for (i = 0; i < numtries; i++) {
+		prompt (ENTPASS);
+		inp_setflags (INF_PASSWD);
+		inp_get (15);
+		inp_clearflags (INF_PASSWD);
+		if (sameas (inp_buffer, l->passwd))
+			return 1;
+		cnc_end ();
+		if (i + 1 < numtries)
+			prompt (WRNGPSS);
+	}
+	prompt (FAILPASS);
+	return 0;
 }
 
 
 int
-getlibaccess(struct libidx *l, int access_type)
+getlibaccess (struct libidx *l, int access_type)
 {
-  /* Check for the Operator, but still ask for a password if applicable We'll
-     allow the operator access to the library, as long as they provide a
-     correct password (if required). We skip the other tests (club and mere
-     mortal test). */
+	/* Check for the Operator, but still ask for a password if applicable We'll
+	   allow the operator access to the library, as long as they provide a
+	   correct password (if required). We skip the other tests (club and mere
+	   mortal test). */
 
-  if(islibop(l)){
-    if(access_type==ACC_ENTER&&l->flags&LBF_LOCKENTR)return getlibpasswd(l);
-    if(access_type==ACC_DOWNLOAD&&l->flags&LBF_LOCKDNL)return getlibpasswd(l);
-    if(access_type==ACC_UPLOAD&&l->flags&LBF_LOCKUPL)return getlibpasswd(l);
-    return 1;
-  }
+	if (islibop (l)) {
+		if (access_type == ACC_ENTER && l->flags & LBF_LOCKENTR)
+			return getlibpasswd (l);
+		if (access_type == ACC_DOWNLOAD && l->flags & LBF_LOCKDNL)
+			return getlibpasswd (l);
+		if (access_type == ACC_UPLOAD && l->flags & LBF_LOCKUPL)
+			return getlibpasswd (l);
+		return 1;
+	}
 
-  /* If library is attached to a club, check club permissions */
+	/* If library is attached to a club, check club permissions */
 
-  if(l->club[0]){
-    int clubax=getclubax(&thisuseracc,l->club);
-    if(access_type==ACC_VISIBLE && clubax<CAX_READ)return 0;
-    if(access_type==ACC_ENTER && clubax<CAX_READ)return 0;
-    if(access_type==ACC_DOWNLOAD && clubax<CAX_DNLOAD)return 0;
-    if(access_type==ACC_UPLOAD && clubax<CAX_UPLOAD)return 0;
-  }
+	if (l->club[0]) {
+		int     clubax = getclubax (&thisuseracc, l->club);
 
-  /* Check for mere mortals */
+		if (access_type == ACC_VISIBLE && clubax < CAX_READ)
+			return 0;
+		if (access_type == ACC_ENTER && clubax < CAX_READ)
+			return 0;
+		if (access_type == ACC_DOWNLOAD && clubax < CAX_DNLOAD)
+			return 0;
+		if (access_type == ACC_UPLOAD && clubax < CAX_UPLOAD)
+			return 0;
+	}
 
-  if(access_type==ACC_VISIBLE) return key_owns(&thisuseracc,l->readkey);
-  else if(access_type==ACC_ENTER){
-    if(!key_owns(&thisuseracc,l->readkey))return 0;
-    if(l->flags&LBF_LOCKENTR)return getlibpasswd(l);
-  } else if(access_type==ACC_DOWNLOAD){
-    if(!key_owns(&thisuseracc,l->downloadkey))return 0;
-    if(l->flags&LBF_LOCKDNL)return getlibpasswd(l);
-  } else if(access_type==ACC_UPLOAD){
-    if(!key_owns(&thisuseracc,l->uploadkey))return 0;
-    if(l->flags&LBF_LOCKUPL)return getlibpasswd(l);
-  }
+	/* Check for mere mortals */
 
-  return 1;
+	if (access_type == ACC_VISIBLE)
+		return key_owns (&thisuseracc, l->readkey);
+	else if (access_type == ACC_ENTER) {
+		if (!key_owns (&thisuseracc, l->readkey))
+			return 0;
+		if (l->flags & LBF_LOCKENTR)
+			return getlibpasswd (l);
+	} else if (access_type == ACC_DOWNLOAD) {
+		if (!key_owns (&thisuseracc, l->downloadkey))
+			return 0;
+		if (l->flags & LBF_LOCKDNL)
+			return getlibpasswd (l);
+	} else if (access_type == ACC_UPLOAD) {
+		if (!key_owns (&thisuseracc, l->uploadkey))
+			return 0;
+		if (l->flags & LBF_LOCKUPL)
+			return getlibpasswd (l);
+	}
+
+	return 1;
 }
 
 
 void
-locklib()
+locklib ()
 {
-  char lock[256];
-  unlocklib();
-  sprintf(lock,LIBLOCK,thisuseronl.channel,lastlibnum=library.libnum);
-  lock_place(lock,"inlib");
+	char    lock[256];
+
+	unlocklib ();
+	sprintf (lock, LIBLOCK, thisuseronl.channel, lastlibnum =
+		 library.libnum);
+	lock_place (lock, "inlib");
 }
 
 
 void
-unlocklib()
+unlocklib ()
 {
-  char lock[256];
-  if(lastlibnum!=-1){
-    sprintf(lock,LIBLOCK,thisuseronl.channel,lastlibnum);
-    lock_rm(lock);
-    lastlibnum=-1;
-  }
+	char    lock[256];
+
+	if (lastlibnum != -1) {
+		sprintf (lock, LIBLOCK, thisuseronl.channel, lastlibnum);
+		lock_rm (lock);
+		lastlibnum = -1;
+	}
 }
 
 
 int
-checklocks(int libnum)
+checklocks (int libnum)
 {
-  int  i;
-  char lock[256],dummy[64];
-  channel_status_t status;
+	int     i;
+	char    lock[256], dummy[64];
+	channel_status_t status;
 
-  for(i=0;i<chan_count;i++){
-    if(channel_getstatus(channels[i].ttyname,&status)){
-      if((status.result==LSR_USER)
-	 &&(!sameas(status.user,thisuseracc.userid))){
-	sprintf(lock,LIBLOCK,channels[i].ttyname,libnum);
-	if(lock_check(lock,dummy)>0)return 0;
-      }
-    }
-  }
-  return 1;
+	for (i = 0; i < chan_count; i++) {
+		if (channel_getstatus (channels[i].ttyname, &status)) {
+			if ((status.result == LSR_USER)
+			    && (!sameas (status.user, thisuseracc.userid))) {
+				sprintf (lock, LIBLOCK, channels[i].ttyname,
+					 libnum);
+				if (lock_check (lock, dummy) > 0)
+					return 0;
+			}
+		}
+	}
+	return 1;
 }
 
 
 int
-adminlock(int libnum)
+adminlock (int libnum)
 {
-  char lock[256];
-  adminunlock();
-  sprintf(lock,ADMINLOCK,libnum);
-  if(lock_check(lock,NULL)){
-    prompt(LIBCOL);
-    if(lock_wait(lock,5)){
-      prompt(LIBFAIL);
-      return 0;
-    }
-  }
-  lock_place(lock,"admin");
-  lastadmin=libnum;
-  return 1;
+	char    lock[256];
+
+	adminunlock ();
+	sprintf (lock, ADMINLOCK, libnum);
+	if (lock_check (lock, NULL)) {
+		prompt (LIBCOL);
+		if (lock_wait (lock, 5)) {
+			prompt (LIBFAIL);
+			return 0;
+		}
+	}
+	lock_place (lock, "admin");
+	lastadmin = libnum;
+	return 1;
 }
 
 
 void
-adminunlock()
+adminunlock ()
 {
-  char lock[256];
-  if(lastadmin!=-1){
-    sprintf(lock,ADMINLOCK,lastadmin);
-    lock_rm(lock);
-    lastadmin=-1;
-  }
+	char    lock[256];
+
+	if (lastadmin != -1) {
+		sprintf (lock, ADMINLOCK, lastadmin);
+		lock_rm (lock);
+		lastadmin = -1;
+	}
 }
 
 
 int
-autoapp(struct libidx *l)
+autoapp (struct libidx *l)
 {
-  return islibop(l)||l->flags&LBF_AUTOAPP;
+	return islibop (l) || l->flags & LBF_AUTOAPP;
 }
+
+
+/* End of File */

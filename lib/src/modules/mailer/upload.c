@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -63,10 +66,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -81,278 +82,311 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mailer.h"
-#include "mbk_mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/mailer.h>
+#include <megistos/mbk_mailer.h>
 #define __ARCHIVERS_UNAMBIGUOUS__
-#include "mbk_archivers.h"
+#include <megistos/mbk_archivers.h>
 
 
 static char dir[256];
 
 
 static void
-killdir()
+killdir ()
 {
-  char command[256];
-  sprintf(command,"rm -rf %s",dir);
-  system(command);
-  xfer_kill_list();
+	char    command[256];
+
+	sprintf (command, "rm -rf %s", dir);
+	system (command);
+	xfer_kill_list ();
 }
 
 
 static int
-receivefile()
+receivefile ()
 {
-  char fname[256], *cp, name[256], source[256];
-  FILE *fp;
-  int  count=-1;
+	char    fname[256], *cp, name[256], source[256];
+	FILE   *fp;
+	int     count = -1;
 
 
-  /* Upload the file */
-  
-  xfer_setaudit(AUT_QWKUPL,AUS_QWKUPL,AUD_QWKUPL,0,NULL,NULL);
-  sprintf(source,"%s.rep",thisuseracc.userid);
-  xfer_add(FXM_UPLOAD,source,"",0,0);
-  xfer_run();
-  cnc_end();
+	/* Upload the file */
+
+	xfer_setaudit (AUT_QWKUPL, AUS_QWKUPL, AUD_QWKUPL, 0, NULL, NULL);
+	sprintf (source, "%s.rep", thisuseracc.userid);
+	xfer_add (FXM_UPLOAD, source, "", 0, 0);
+	xfer_run ();
+	cnc_end ();
 
 
-  /* Scan the uploaded file(s) */
-  
-  sprintf(fname,XFERLIST,getpid());
-  
-  if((fp=fopen(fname,"r"))==NULL){
-    prompt(ABORT);
-    unlink(fname);
-    killdir();
-    return 0;
-  }
-  
-  while (!feof(fp)){
-    char line[1024];
-    
-    if(fgets(line,sizeof(line),fp)){
-      count++;
-      if(!count)strcpy(dir,line);
-      else if(count==1)strcpy(name,line);
-    }
-  }
-  
-  if((cp=strchr(dir,'\n'))!=NULL)*cp=0;
-  if((cp=strchr(name,'\n'))!=NULL)*cp=0;
-  fclose(fp);
-  unlink(fname);
-  
-  if(count<1){
-    prompt(ABORT);
-    killdir();
-    return 0;
-  } else if(count>1){
-    prompt(UPL2MF);
-    return 2;
-  } else prompt(UPL1F);
-  return 1;
+	/* Scan the uploaded file(s) */
+
+	sprintf (fname, XFERLIST, getpid ());
+
+	if ((fp = fopen (fname, "r")) == NULL) {
+		prompt (ABORT);
+		unlink (fname);
+		killdir ();
+		return 0;
+	}
+
+	while (!feof (fp)) {
+		char    line[1024];
+
+		if (fgets (line, sizeof (line), fp)) {
+			count++;
+			if (!count)
+				strcpy (dir, line);
+			else if (count == 1)
+				strcpy (name, line);
+		}
+	}
+
+	if ((cp = strchr (dir, '\n')) != NULL)
+		*cp = 0;
+	if ((cp = strchr (name, '\n')) != NULL)
+		*cp = 0;
+	fclose (fp);
+	unlink (fname);
+
+	if (count < 1) {
+		prompt (ABORT);
+		killdir ();
+		return 0;
+	} else if (count > 1) {
+		prompt (UPL2MF);
+		return 2;
+	} else
+		prompt (UPL1F);
+	return 1;
 }
 
 
 static void
-makedir()
+makedir ()
 {
-  char command[256];
+	char    command[256];
 
-  /* Make a unique directory and chdir() to it */
+	/* Make a unique directory and chdir() to it */
 
-  sprintf(dir,TMPDIR"/rep.%lx%x",time(0),getpid());
-  sprintf(command,"\\rm -rf %s",dir);
-  system(command);
-  if(mkdir(dir,0770)){
-    error_fatalsys("Unable to make directory %s",dir);
-  }
-  chdir(dir);
+	sprintf (dir, TMPDIR "/rep.%lx%x", time (0), getpid ());
+	sprintf (command, "\\rm -rf %s", dir);
+	system (command);
+	if (mkdir (dir, 0770)) {
+		error_fatalsys ("Unable to make directory %s", dir);
+	}
+	chdir (dir);
 }
 
 
 static int
-uplsel(const struct dirent *d)
+uplsel (const struct dirent *d)
 {
-  return d->d_name[0]!='.';
+	return d->d_name[0] != '.';
 }
 
 
 static int
-askdupl()
+askdupl ()
 {
-  int shown=0, yes=0, res;
-  for(;;){
-    if(!shown)prompt(WRNDUPL);
-    inp_setflags(INF_HELP);
-    res=get_bool(&yes,ASKDUPL,ASKDUPR,ASKDUPD,0);
-    inp_clearflags(INF_HELP);
-    if(res<0)shown=0;
-    else if(!res)prompt(ASKDUPR);
-    else return yes;
-  }
+	int     shown = 0, yes = 0, res;
+
+	for (;;) {
+		if (!shown)
+			prompt (WRNDUPL);
+		inp_setflags (INF_HELP);
+		res = get_bool (&yes, ASKDUPL, ASKDUPR, ASKDUPD, 0);
+		inp_clearflags (INF_HELP);
+		if (res < 0)
+			shown = 0;
+		else if (!res)
+			prompt (ASKDUPR);
+		else
+			return yes;
+	}
 }
 
 
 static int
-chkcrc(char *fname)
+chkcrc (char *fname)
 {
-  unsigned long crc;
-  int len, i, add=1;
+	unsigned long crc;
+	int     len, i, add = 1;
 
-  /* Obtain CRC32 of the file to see if it's already been uploaded */
+	/* Obtain CRC32 of the file to see if it's already been uploaded */
 
-  if(cksum(fname,&crc,&len)){
-    prompt(REPRPRE);
-    return 0;
-  }
+	if (cksum (fname, &crc, &len)) {
+		prompt (REPRPRE);
+		return 0;
+	}
 
-  for(i=0;i<NUMOLDREP;i++){
-    if(userqwk.oldcrc[i]==crc && userqwk.oldlen[i]==len){
-      if(!askdupl()) return 0;
-      else add=0;
-    }
-  }
+	for (i = 0; i < NUMOLDREP; i++) {
+		if (userqwk.oldcrc[i] == crc && userqwk.oldlen[i] == len) {
+			if (!askdupl ())
+				return 0;
+			else
+				add = 0;
+		}
+	}
 
-  /* If necessary, store the new CRC for later */
+	/* If necessary, store the new CRC for later */
 
-  if(add){
-    memcpy(&(userqwk.oldcrc[1]),&(userqwk.oldcrc[0]),
-	   sizeof(userqwk.oldcrc[0]*(NUMOLDREP-1)));
-    userqwk.oldcrc[NUMOLDREP-1]=crc;
-    
-    memcpy(&(userqwk.oldlen[1]),&(userqwk.oldlen[0]),
-	   sizeof(userqwk.oldlen[0]*(NUMOLDREP-1)));
-    userqwk.oldlen[NUMOLDREP-1]=len;
-  }
-  return 1;
+	if (add) {
+		memcpy (&(userqwk.oldcrc[1]), &(userqwk.oldcrc[0]),
+			sizeof (userqwk.oldcrc[0] * (NUMOLDREP - 1)));
+		userqwk.oldcrc[NUMOLDREP - 1] = crc;
+
+		memcpy (&(userqwk.oldlen[1]), &(userqwk.oldlen[0]),
+			sizeof (userqwk.oldlen[0] * (NUMOLDREP - 1)));
+		userqwk.oldlen[NUMOLDREP - 1] = len;
+	}
+	return 1;
 }
 
 
 static int
-decompress(char *fname)
+decompress (char *fname)
 {
-  char command[256], tmp[256];
+	char    command[256], tmp[256];
 
-  /* Decompress the packet */
+	/* Decompress the packet */
 
-  msg_set(archivers);
-  sprintf(tmp,"%s >&/dev/null",msg_get(ARCHIVERS_UNCOMPRESS1+userqwk.decompressor*7));
-  sprintf(command,tmp,fname,"");
-  strcpy(tmp,msg_get(ARCHIVERS_NAME1+userqwk.decompressor*7));
-  msg_reset();
-  prompt(UNPACK,tmp);
-  if(system(command)){
-    prompt(UPACKR);
-    return 0;
-  }
-  prompt(UPACKOK);
-  
+	msg_set (archivers);
+	sprintf (tmp, "%s >&/dev/null",
+		 msg_get (ARCHIVERS_UNCOMPRESS1 + userqwk.decompressor * 7));
+	sprintf (command, tmp, fname, "");
+	strcpy (tmp, msg_get (ARCHIVERS_NAME1 + userqwk.decompressor * 7));
+	msg_reset ();
+	prompt (UNPACK, tmp);
+	if (system (command)) {
+		prompt (UPACKR);
+		return 0;
+	}
+	prompt (UPACKOK);
 
-  /* Erase the packet itself */
 
-  unlink(fname);
+	/* Erase the packet itself */
 
-  return 1;
+	unlink (fname);
+
+	return 1;
 }
 
 
 static int
-pluginupl(int n, int reqman)
+pluginupl (int n, int reqman)
 {
-  char command[256];
-  int res;
-  sprintf(command,"%s --%s",plugins[n].name,reqman?"reqman":"upload");
-  res=runcommand(command);
-  cnc_end();
-  if(res)return res==512?2:1;
-  return 0;
+	char    command[256];
+	int     res;
+
+	sprintf (command, "%s --%s", plugins[n].name,
+		 reqman ? "reqman" : "upload");
+	res = runcommand (command);
+	cnc_end ();
+	if (res)
+		return res == 512 ? 2 : 1;
+	return 0;
 }
 
 
 static int
-process(char *name)
+process (char *name)
 {
-  char fname[256];
-  int ok;
+	char    fname[256];
+	int     ok;
 
-  sprintf(fname,"%s/%s",dir,name);
+	sprintf (fname, "%s/%s", dir, name);
 
-  /* Prepare the packet */
+	/* Prepare the packet */
 
-  makedir();
-  ok=chkcrc(fname);
-  if(ok)ok=decompress(fname);
+	makedir ();
+	ok = chkcrc (fname);
+	if (ok)
+		ok = decompress (fname);
 
-  /* Run all plugins to process the packet */
+	/* Run all plugins to process the packet */
 
-  if(ok){
-    int fail=0, i;
-    for(fail=i=0;i<numplugins;i++){
-      if(plugins[i].flags&PLF_UPLOAD)if((fail=pluginupl(i,0))!=0)break;
-    }
+	if (ok) {
+		int     fail = 0, i;
 
-    if(fail){
-      prompt(fail==1?ERRREP:ABOREP);
-      ok=0;
-    } else for(fail=i=0;i<numplugins;i++){
-      if(plugins[i].flags&PLF_REQMAN)if((fail=pluginupl(i,1))!=0)break;
-    }
-  }
+		for (fail = i = 0; i < numplugins; i++) {
+			if (plugins[i].flags & PLF_UPLOAD)
+				if ((fail = pluginupl (i, 0)) != 0)
+					break;
+		}
 
-  if(ok)return 1;
+		if (fail) {
+			prompt (fail == 1 ? ERRREP : ABOREP);
+			ok = 0;
+		} else
+			for (fail = i = 0; i < numplugins; i++) {
+				if (plugins[i].flags & PLF_REQMAN)
+					if ((fail = pluginupl (i, 1)) != 0)
+						break;
+			}
+	}
 
-  unlink(fname);
-  return 0;
+	if (ok)
+		return 1;
+
+	unlink (fname);
+	return 0;
 }
 
 
 void
-upload()
+upload ()
 {
-  struct dirent **d=NULL;
-  int i,j,res=1;
+	struct dirent **d = NULL;
+	int     i, j, res = 1;
 
-  /* Are we allowed to upload? */
+	/* Are we allowed to upload? */
 
-  if(!key_owns(&thisuseracc,uplkey)){
-    prompt(UPLNAX);
-    cnc_end();
-    return;
-  }
+	if (!key_owns (&thisuseracc, uplkey)) {
+		prompt (UPLNAX);
+		cnc_end ();
+		return;
+	}
 
-  /* Load the user preferences, complain if we have to */
+	/* Load the user preferences, complain if we have to */
 
-  if(loadprefs(USERQWK,&userqwk)!=1){
-    prompt(stpncnf?NOTCFG2:NOTCFG);
-    if(stpncnf)return;
-    else defaultvals();
-  }
+	if (loadprefs (USERQWK, &userqwk) != 1) {
+		prompt (stpncnf ? NOTCFG2 : NOTCFG);
+		if (stpncnf)
+			return;
+		else
+			defaultvals ();
+	}
 
-  /* Allow the user to upload file(s) */
+	/* Allow the user to upload file(s) */
 
-  if(!receivefile())return;
+	if (!receivefile ())
+		return;
 
-  /* Scan through all the files, processing them */
+	/* Scan through all the files, processing them */
 
-  j=scandir(dir,&d,uplsel,alphasort);
-  if(!j){
-    if(d)free(d);
-    return;
-  }
+	j = scandir (dir, &d, uplsel, alphasort);
+	if (!j) {
+		if (d)
+			free (d);
+		return;
+	}
 
-  for(i=0;i<j;i++){
-    if(res){
-      if(j>1)prompt(REPF,i+1,j);
-      res=process(d[i]->d_name);
-    }
-    free(d[i]);
-  }
-  
-  free(d);
-  chdir("/");
-  killdir();
-  saveprefs(USERQWK,sizeof(userqwk),&userqwk);
+	for (i = 0; i < j; i++) {
+		if (res) {
+			if (j > 1)
+				prompt (REPF, i + 1, j);
+			res = process (d[i]->d_name);
+		}
+		free (d[i]);
+	}
+
+	free (d);
+	chdir ("/");
+	killdir ();
+	saveprefs (USERQWK, sizeof (userqwk), &userqwk);
 }
+
+
+/* End of File */

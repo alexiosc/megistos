@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -66,433 +67,463 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "actions.h"
-#include "mbk_teleactions.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/actions.h>
+#include <megistos/mbk_teleactions.h>
 
 
-static struct actionidx *actions=NULL;
+static struct actionidx *actions = NULL;
 
-static int numactions=0;
+static int numactions = 0;
 
-static promptblock_t *actionblk=NULL;
+static promptblock_t *actionblk = NULL;
 
 static char *inpptr;
 
 
 void
-initactions()
+initactions ()
 {
-  int i, pr;
-  char type;
+	int     i, pr;
+	char    type;
 
-  actionblk=msg_open("teleactions");
-  numactions=msg_int(NUMVERBS,0,1<<20);  /* 1M actions SHOULD suffice */
-  if(!numactions)return;
+	actionblk = msg_open ("teleactions");
+	numactions = msg_int (NUMVERBS, 0, 1 << 20);	/* 1M actions SHOULD suffice */
+	if (!numactions)
+		return;
 
-  if(actions)free(actions);
-  actions=alcmem(numactions*sizeof(struct actionidx));
+	if (actions)
+		free (actions);
+	actions = alcmem (numactions * sizeof (struct actionidx));
 
-  pr=BEGNVERB+1;
+	pr = BEGNVERB + 1;
 
-  for(i=0;i<numactions;i++){
+	for (i = 0; i < numactions; i++) {
 /*  print("%d. ",pr);fflush(stdout); */
-    actions[i].index=pr;
-    actions[i].verb=strdup(msg_get(pr));
-    type=msg_char(pr+1);
+		actions[i].index = pr;
+		actions[i].verb = strdup (msg_get (pr));
+		type = msg_char (pr + 1);
 /*  print("%c (%s)\n",type,actions[i].verb); */
-    switch(type){
-    case TYPE_SIMPLE:
-      pr+=4+2*NUMLANGUAGES;
-      break;
-    case TYPE_OBJECT:
-      pr+=4+5*NUMLANGUAGES;
-      break;
-    case TYPE_DOUBLE:
-      pr+=4+6*NUMLANGUAGES;
-      break;
-    case TYPE_ADVERB:
-      pr+=4+3*NUMLANGUAGES;
-      break;
-    case TYPE_GENERIC:
-      pr+=4+2*NUMLANGUAGES;
-      break;
-    default:
-      error_fatal("Action verb '%s' has invalid type '%c'.",
-	    actions[i].verb,type);
-    }
-  }
+		switch (type) {
+		case TYPE_SIMPLE:
+			pr += 4 + 2 * NUMLANGUAGES;
+			break;
+		case TYPE_OBJECT:
+			pr += 4 + 5 * NUMLANGUAGES;
+			break;
+		case TYPE_DOUBLE:
+			pr += 4 + 6 * NUMLANGUAGES;
+			break;
+		case TYPE_ADVERB:
+			pr += 4 + 3 * NUMLANGUAGES;
+			break;
+		case TYPE_GENERIC:
+			pr += 4 + 2 * NUMLANGUAGES;
+			break;
+		default:
+			error_fatal ("Action verb '%s' has invalid type '%c'.",
+				     actions[i].verb, type);
+		}
+	}
 }
 
 
 static int fx_pr, fx_objopt;
-static char *fx_fmtuser=NULL, *fx_fmtsmpl=NULL, *fx_fmtothr=NULL;
-static char *fx_fmtall=NULL, *fx_fmttrgt=NULL, *fx_fmtscrt=NULL;
-static char *fx_fmtadvb=NULL, *fx_fmtgnrc=NULL, *fx_fmtusec=NULL;
+static char *fx_fmtuser = NULL, *fx_fmtsmpl = NULL, *fx_fmtothr = NULL;
+static char *fx_fmtall = NULL, *fx_fmttrgt = NULL, *fx_fmtscrt = NULL;
+static char *fx_fmtadvb = NULL, *fx_fmtgnrc = NULL, *fx_fmtusec = NULL;
 static char fx_tmp[8192];
-char fx_target[24], fx_targetsex;
-int  fx_targetcol;
+char    fx_target[24], fx_targetsex;
+int     fx_targetcol;
 
 
 
 void
-sendusermsg(int pr)
+sendusermsg (int pr)
 {
-  int lang;
-  
-  if(fx_objopt&OBJ_SECRETLY){
-    if(!fx_fmtusec){
-      msg_set(msg);
-      fx_fmtusec=strdup(msg_get(FMTUSEC));
-    }
-  } else {
-    if(!fx_fmtuser){
-      msg_set(msg);
-      fx_fmtuser=strdup(msg_get(FMTUSER));
-    }
-  }
+	int     lang;
 
-  msg_set(actionblk);
-  for(lang=thisuseracc.language-1;lang>=0;lang--){
-    char *s=msg_get(pr+4+lang);
-    if(s&&*s){
-      print(fx_objopt&OBJ_SECRETLY?fx_fmtusec:fx_fmtuser,s);
-      return;
-    }
-  }
-  msg_set(msg);
-  prompt(VERBSENT);
+	if (fx_objopt & OBJ_SECRETLY) {
+		if (!fx_fmtusec) {
+			msg_set (msg);
+			fx_fmtusec = strdup (msg_get (FMTUSEC));
+		}
+	} else {
+		if (!fx_fmtuser) {
+			msg_set (msg);
+			fx_fmtuser = strdup (msg_get (FMTUSER));
+		}
+	}
+
+	msg_set (actionblk);
+	for (lang = thisuseracc.language - 1; lang >= 0; lang--) {
+		char   *s = msg_get (pr + 4 + lang);
+
+		if (s && *s) {
+			print (fx_objopt & OBJ_SECRETLY ? fx_fmtusec :
+			       fx_fmtuser, s);
+			return;
+		}
+	}
+	msg_set (msg);
+	prompt (VERBSENT);
 }
 
 
-char *
-fx_simple(struct chanusr *u)
+char   *
+fx_simple (struct chanusr *u)
 {
-  msg_set(actionblk);
-  sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(out_buffer,fx_fmtsmpl,fx_tmp);
-  return out_buffer;
-}
-
-
-void
-simpleaction(int pr)
-{
-  fx_pr=pr+4+ML;
-  if(!fx_fmtsmpl){
-    msg_set(msg);
-    fx_fmtsmpl=strdup(msg_get(FMTSMPL));
-  }
-  if(broadcast(fx_simple)>0)sendusermsg(pr);
-  else {
-    msg_set(msg);
-    prompt(SIU0);
-    msg_set(actionblk);
-  }
-}
-
-
-char *
-fx_generic(struct chanusr *u)
-{
-  msg_set(actionblk);
-  sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(out_buffer,fx_fmtgnrc,fx_tmp,inpptr);
-  return out_buffer;
+	msg_set (actionblk);
+	sprompt (fx_tmp, fx_pr + othruseracc.language - 1);
+	sprint (out_buffer, fx_fmtsmpl, fx_tmp);
+	return out_buffer;
 }
 
 
 void
-genericaction(int pr, char *verb)
+simpleaction (int pr)
 {
-  if(!inpptr||inpptr[0]==0){
-    msg_set(msg);
-    prompt(VERBNMT,verb);
-    return;
-  }
-  fx_pr=pr+4+ML;
-  if(!fx_fmtgnrc){
-    msg_set(msg);
-    fx_fmtgnrc=strdup(msg_get(FMTGNRC));
-  }
-  if(broadcast(fx_generic)>0)sendusermsg(pr);
-  else {
-    msg_set(msg);
-    prompt(SIU0);
-    msg_set(actionblk);
-  }
+	fx_pr = pr + 4 + ML;
+	if (!fx_fmtsmpl) {
+		msg_set (msg);
+		fx_fmtsmpl = strdup (msg_get (FMTSMPL));
+	}
+	if (broadcast (fx_simple) > 0)
+		sendusermsg (pr);
+	else {
+		msg_set (msg);
+		prompt (SIU0);
+		msg_set (actionblk);
+	}
 }
 
 
-char *
-fx_adverb(struct chanusr *u)
+char   *
+fx_generic (struct chanusr *u)
 {
-  msg_set(actionblk);
-  sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(out_buffer,fx_fmtadvb,fx_tmp,inpptr);
-  return out_buffer;
+	msg_set (actionblk);
+	sprompt (fx_tmp, fx_pr + othruseracc.language - 1);
+	sprint (out_buffer, fx_fmtgnrc, fx_tmp, inpptr);
+	return out_buffer;
 }
 
 
 void
-adverbaction(int pr)
+genericaction (int pr, char *verb)
 {
-  if(!inpptr||inpptr[0]==0){
-    simpleaction(pr);
-    return;
-  }
-
-  fx_pr=pr+4+2*ML;
-  if(!fx_fmtadvb){
-    msg_set(msg);
-    fx_fmtadvb=strdup(msg_get(FMTADVB));
-  }
-  if(broadcast(fx_adverb)>0){
-    msg_set(msg);
-    prompt(VERBSENT);
-  } else {
-    msg_set(msg);
-    prompt(SIU0);
-    msg_set(actionblk);
-  }
+	if (!inpptr || inpptr[0] == 0) {
+		msg_set (msg);
+		prompt (VERBNMT, verb);
+		return;
+	}
+	fx_pr = pr + 4 + ML;
+	if (!fx_fmtgnrc) {
+		msg_set (msg);
+		fx_fmtgnrc = strdup (msg_get (FMTGNRC));
+	}
+	if (broadcast (fx_generic) > 0)
+		sendusermsg (pr);
+	else {
+		msg_set (msg);
+		prompt (SIU0);
+		msg_set (actionblk);
+	}
 }
 
 
-char *
-fx_object(struct chanusr *u)
+char   *
+fx_adverb (struct chanusr *u)
 {
-  msg_set(actionblk);
-  if(fx_objopt&OBJ_ALL){
-    sprompt(fx_tmp,fx_pr+(4+2*ML)+othruseracc.language-1);
-    sprint(out_buffer,fx_fmtall,fx_tmp);
-  } else if(fx_objopt&OBJ_SECRETLY) {
-    if(!sameas(u->userid,fx_target))return NULL;
-    sprompt(fx_tmp,fx_pr+(4+4*ML)+othruseracc.language-1);
-    sprint(out_buffer,fx_fmtscrt,fx_tmp);
-  } else if(sameas(u->userid,fx_target)){
-    sprompt(fx_tmp,fx_pr+(4+3*ML)+othruseracc.language-1);
-    sprint(out_buffer,fx_fmttrgt,fx_tmp);
-  } else {
-    sprompt(fx_tmp,fx_pr+(4+ML)+othruseracc.language-1);
-    sprint(out_buffer,fx_fmtothr,fx_tmp);
-  }
-  return out_buffer;
+	msg_set (actionblk);
+	sprompt (fx_tmp, fx_pr + othruseracc.language - 1);
+	sprint (out_buffer, fx_fmtadvb, fx_tmp, inpptr);
+	return out_buffer;
 }
 
 
 void
-objectaction(int pr, char *verb, int typeD)
+adverbaction (int pr)
 {
-  char tmp[8192];
+	if (!inpptr || inpptr[0] == 0) {
+		simpleaction (pr);
+		return;
+	}
 
-  msg_set(msg);
-  if(!inpptr||inpptr[0]==0){
-    prompt(VERBNOBJ,verb);
-    return;
-  }
+	fx_pr = pr + 4 + 2 * ML;
+	if (!fx_fmtadvb) {
+		msg_set (msg);
+		fx_fmtadvb = strdup (msg_get (FMTADVB));
+	}
+	if (broadcast (fx_adverb) > 0) {
+		msg_set (msg);
+		prompt (VERBSENT);
+	} else {
+		msg_set (msg);
+		prompt (SIU0);
+		msg_set (actionblk);
+	}
+}
 
-  tmp[0]=fx_objopt=OBJ_NORMAL;
-  switch(sscanf(inpptr,"%s %s",fx_tmp,tmp)){
-  case 0:
-    prompt(VERBNOBJ,verb);
-    return;
-  case 1:
-    fx_objopt=OBJ_NORMAL;
-    break;
-  case 2:
-    if(sameas(tmp,stgsec1)||sameas(tmp,stgsec2))fx_objopt|=OBJ_SECRETLY;
-  }
 
-  if(sameas(fx_tmp,stgall1)||sameas(fx_tmp,stgall2)){
-    fx_objopt|=OBJ_ALL;
-    if(fx_objopt&OBJ_SECRETLY){
-      prompt(VERBNAS);
-      return;
-    }
-  } else {
-    strncpy(fx_target,fx_tmp,sizeof(fx_target));
-    if(!tlcuidxref(fx_target,0)){
-      prompt(VERBUID,fx_target);
-      return;
-    }
-    usr_insys(fx_target,0);
-    fx_targetsex=othruseracc.sex;
-    fx_targetcol=othruseraux.colour;
-  }
-
-  msg_set(actionblk);
-  fx_pr=typeD?pr+ML:pr;
-
-  if(!fx_fmtothr){
-    msg_set(msg);
-    fx_fmtothr=strdup(msg_get(FMTOTHR));
-  }
-  if(!fx_fmttrgt){
-    msg_set(msg);
-    fx_fmttrgt=strdup(msg_get(FMTTRGT));
-  }
-  if(!fx_fmtall){
-    msg_set(msg);
-    fx_fmtall=strdup(msg_get(FMTALL));
-  }
-  if(!fx_fmtscrt){
-    msg_set(msg);
-    fx_fmtscrt=strdup(msg_get(FMTSCRT));
-  }
-
-  if(broadcast(fx_object)>0)sendusermsg(pr);
-  else {
-    msg_set(msg);
-    prompt(SIU0);
-    msg_set(actionblk);
-  }
+char   *
+fx_object (struct chanusr *u)
+{
+	msg_set (actionblk);
+	if (fx_objopt & OBJ_ALL) {
+		sprompt (fx_tmp,
+			 fx_pr + (4 + 2 * ML) + othruseracc.language - 1);
+		sprint (out_buffer, fx_fmtall, fx_tmp);
+	} else if (fx_objopt & OBJ_SECRETLY) {
+		if (!sameas (u->userid, fx_target))
+			return NULL;
+		sprompt (fx_tmp,
+			 fx_pr + (4 + 4 * ML) + othruseracc.language - 1);
+		sprint (out_buffer, fx_fmtscrt, fx_tmp);
+	} else if (sameas (u->userid, fx_target)) {
+		sprompt (fx_tmp,
+			 fx_pr + (4 + 3 * ML) + othruseracc.language - 1);
+		sprint (out_buffer, fx_fmttrgt, fx_tmp);
+	} else {
+		sprompt (fx_tmp, fx_pr + (4 + ML) + othruseracc.language - 1);
+		sprint (out_buffer, fx_fmtothr, fx_tmp);
+	}
+	return out_buffer;
 }
 
 
 void
-doubleaction(int pr, char *verb)
+objectaction (int pr, char *verb, int typeD)
 {
-  if(!inpptr||inpptr[0]==0)simpleaction(pr);
-  else objectaction(pr,verb,1);
+	char    tmp[8192];
+
+	msg_set (msg);
+	if (!inpptr || inpptr[0] == 0) {
+		prompt (VERBNOBJ, verb);
+		return;
+	}
+
+	tmp[0] = fx_objopt = OBJ_NORMAL;
+	switch (sscanf (inpptr, "%s %s", fx_tmp, tmp)) {
+	case 0:
+		prompt (VERBNOBJ, verb);
+		return;
+	case 1:
+		fx_objopt = OBJ_NORMAL;
+		break;
+	case 2:
+		if (sameas (tmp, stgsec1) || sameas (tmp, stgsec2))
+			fx_objopt |= OBJ_SECRETLY;
+	}
+
+	if (sameas (fx_tmp, stgall1) || sameas (fx_tmp, stgall2)) {
+		fx_objopt |= OBJ_ALL;
+		if (fx_objopt & OBJ_SECRETLY) {
+			prompt (VERBNAS);
+			return;
+		}
+	} else {
+		strncpy (fx_target, fx_tmp, sizeof (fx_target));
+		if (!tlcuidxref (fx_target, 0)) {
+			prompt (VERBUID, fx_target);
+			return;
+		}
+		usr_insys (fx_target, 0);
+		fx_targetsex = othruseracc.sex;
+		fx_targetcol = othruseraux.colour;
+	}
+
+	msg_set (actionblk);
+	fx_pr = typeD ? pr + ML : pr;
+
+	if (!fx_fmtothr) {
+		msg_set (msg);
+		fx_fmtothr = strdup (msg_get (FMTOTHR));
+	}
+	if (!fx_fmttrgt) {
+		msg_set (msg);
+		fx_fmttrgt = strdup (msg_get (FMTTRGT));
+	}
+	if (!fx_fmtall) {
+		msg_set (msg);
+		fx_fmtall = strdup (msg_get (FMTALL));
+	}
+	if (!fx_fmtscrt) {
+		msg_set (msg);
+		fx_fmtscrt = strdup (msg_get (FMTSCRT));
+	}
+
+	if (broadcast (fx_object) > 0)
+		sendusermsg (pr);
+	else {
+		msg_set (msg);
+		prompt (SIU0);
+		msg_set (actionblk);
+	}
 }
 
 
-int actionax(int pr)
+void
+doubleaction (int pr, char *verb)
 {
-  if(!key_owns(&thisuseracc,msg_int(pr+2,0,129)))return 0;
-  else {
-    char *access=strdup(msg_get(pr+3));
-    char userid[26];
+	if (!inpptr || inpptr[0] == 0)
+		simpleaction (pr);
+	else
+		objectaction (pr, verb, 1);
+}
 
-    if(!access[0]){
-      free(access);
-      return 1;
-    } else {
-      sprintf(userid,"(%s)",thisuseracc.userid);
-      if(!strstr(msg_get(pr+3),userid)){
-	free(access);
+
+int
+actionax (int pr)
+{
+	if (!key_owns (&thisuseracc, msg_int (pr + 2, 0, 129)))
+		return 0;
+	else {
+		char   *access = strdup (msg_get (pr + 3));
+		char    userid[26];
+
+		if (!access[0]) {
+			free (access);
+			return 1;
+		} else {
+			sprintf (userid, "(%s)", thisuseracc.userid);
+			if (!strstr (msg_get (pr + 3), userid)) {
+				free (access);
+				return 0;
+			}
+		}
+	}
 	return 0;
-      }
-    }
-  }
-  return 0;
 }
 
 
 struct actionidx *
-bsrch(char *key, int left, int right)
+bsrch (char *key, int left, int right)
 {
-  if(left>right)return NULL;
-  else {
-    int m=(left+right)/2;
-    int c=strcasecmp(key,actions[m].verb);
-    if(!c)return &actions[m];
-    else if(c<0)return bsrch(key,left,m-1);
-    return bsrch(key,m+1,right);
-  }
-  return NULL; /* just to avoid warnings */
+	if (left > right)
+		return NULL;
+	else {
+		int     m = (left + right) / 2;
+		int     c = strcasecmp (key, actions[m].verb);
+
+		if (!c)
+			return &actions[m];
+		else if (c < 0)
+			return bsrch (key, left, m - 1);
+		return bsrch (key, m + 1, right);
+	}
+	return NULL;		/* just to avoid warnings */
 }
 
 
 struct actionidx *
-bs(char *key)
+bs (char *key)
 {
-  return bsrch(key,0,numactions-1);
+	return bsrch (key, 0, numactions - 1);
 }
 
 
-int handleaction(char *s)
+int
+handleaction (char *s)
 {
-  struct actionidx *a=NULL;
-  char *key;
-  int n;
+	struct actionidx *a = NULL;
+	char   *key;
+	int     n;
 
-  if(*s=='/')return 0;
+	if (*s == '/')
+		return 0;
 
-  if(!key_owns(&thisuseracc,actkey))return 0;
-  if(!thisuseraux.actions)return 0;
+	if (!key_owns (&thisuseracc, actkey))
+		return 0;
+	if (!thisuseraux.actions)
+		return 0;
 
-  fx_objopt=OBJ_NORMAL;
+	fx_objopt = OBJ_NORMAL;
 
-  key=alcmem(strlen(s)+1);
+	key = alcmem (strlen (s) + 1);
 
-  n=0;
-  if(!sscanf(s,"%s %n",key,&n)) {
-    free(key);
-    msg_set(msg);
-    return 0;
-  }
-  
-  if(!n)inpptr=NULL; else inpptr=s+n;
+	n = 0;
+	if (!sscanf (s, "%s %n", key, &n)) {
+		free (key);
+		msg_set (msg);
+		return 0;
+	}
 
-  a=bs(key);
+	if (!n)
+		inpptr = NULL;
+	else
+		inpptr = s + n;
 
-  free(key);
+	a = bs (key);
 
-  if(!a){
-    msg_set(msg);
-    return 0;
-  }
+	free (key);
 
-  /*  print("Action=(%s), Index=%d\n",a->verb,a->index); */
-  
-  msg_set(actionblk);
-  if(!actionax(a->index)){
-    msg_set(msg);
-    return 0;
-  }
-  
-  switch(msg_char(a->index+1)){
-  case TYPE_SIMPLE:
-    simpleaction(a->index);
-    break;
-  case TYPE_OBJECT:
-    objectaction(a->index,a->verb,0);
-    break;
-  case TYPE_DOUBLE:
-    doubleaction(a->index,a->verb);
-    break;
-  case TYPE_ADVERB:
-    adverbaction(a->index);
-    break;
-  case TYPE_GENERIC:
-    genericaction(a->index,a->verb);
-    break;
-  }
+	if (!a) {
+		msg_set (msg);
+		return 0;
+	}
 
-  msg_set(msg);
-  return 1;
+	/*  print("Action=(%s), Index=%d\n",a->verb,a->index); */
+
+	msg_set (actionblk);
+	if (!actionax (a->index)) {
+		msg_set (msg);
+		return 0;
+	}
+
+	switch (msg_char (a->index + 1)) {
+	case TYPE_SIMPLE:
+		simpleaction (a->index);
+		break;
+	case TYPE_OBJECT:
+		objectaction (a->index, a->verb, 0);
+		break;
+	case TYPE_DOUBLE:
+		doubleaction (a->index, a->verb);
+		break;
+	case TYPE_ADVERB:
+		adverbaction (a->index);
+		break;
+	case TYPE_GENERIC:
+		genericaction (a->index, a->verb);
+		break;
+	}
+
+	msg_set (msg);
+	return 1;
 }
 
 
 void
-actionctl(char *s)
+actionctl (char *s)
 {
-  char cmd[2048]={0};
-  int i;
+	char    cmd[2048] = { 0 };
+	int     i;
 
-  i=sscanf(s,"%*s %s",cmd);
+	i = sscanf (s, "%*s %s", cmd);
 
-  if((i<1)||sameas(cmd,"?")||sameas(cmd,"HELP")){
-    prompt(ACTHLP);
-    return;
-  } else if(!key_owns(&thisuseracc,actkey)){
-    prompt(ACTNAX);
-    return;
-  } else if(sameas(cmd,"ON")){
-    thisuseraux.actions=1;
-    prompt(ACTON);
-    return;
-  } else if(sameas(cmd,"OFF")){
-    thisuseraux.actions=0;
-    prompt(ACTOFF);
-    return;
-  } else if(sameas(cmd,"LIST")){
-    prompt(ACTLST);
-    return;
-  } else {
-    prompt(ACTHLP);
-    return;
-  }
+	if ((i < 1) || sameas (cmd, "?") || sameas (cmd, "HELP")) {
+		prompt (ACTHLP);
+		return;
+	} else if (!key_owns (&thisuseracc, actkey)) {
+		prompt (ACTNAX);
+		return;
+	} else if (sameas (cmd, "ON")) {
+		thisuseraux.actions = 1;
+		prompt (ACTON);
+		return;
+	} else if (sameas (cmd, "OFF")) {
+		thisuseraux.actions = 0;
+		prompt (ACTOFF);
+		return;
+	} else if (sameas (cmd, "LIST")) {
+		prompt (ACTLST);
+		return;
+	} else {
+		prompt (ACTHLP);
+		return;
+	}
 }
+
+
+/* End of File */

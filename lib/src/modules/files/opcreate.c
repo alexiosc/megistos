@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -66,130 +67,142 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static int
-getnewlibname(char *s)
+getnewlibname (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(OCREASK);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(strlen(i)>sizeof(library.keyname)-1){
-      prompt(OCRE2LN,sizeof(library.keyname)-1);
-    } else if(strspn(i,FNAMECHARS)!=strlen(i)){
-      prompt(OCRECHR);
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (OCREASK);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (strlen (i) > sizeof (library.keyname) - 1) {
+			prompt (OCRE2LN, sizeof (library.keyname) - 1);
+		} else if (strspn (i, FNAMECHARS) != strlen (i)) {
+			prompt (OCRECHR);
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
 static int
-edit(struct libidx *lib)
+edit (struct libidx *lib)
 {
-  sprintf(inp_buffer,"%s\n%s\n%s\n%s\nOK\nCANCEL\n",
-	  lib->descr,lib->passwd,lib->club,lib->dir);
+	sprintf (inp_buffer, "%s\n%s\n%s\n%s\nOK\nCANCEL\n",
+		 lib->descr, lib->passwd, lib->club, lib->dir);
 
-  if(dialog_run("files",OCREVT,OCRELT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    return 0;
-  }
+	if (dialog_run ("files", OCREVT, OCRELT, inp_buffer, MAXINPLEN) != 0) {
+		error_log ("Unable to run data entry subsystem");
+		return 0;
+	}
 
-  dialog_parse(inp_buffer);
+	dialog_parse (inp_buffer);
 
-  if(sameas(margv[6],"OK")||sameas(margv[6],margv[4])){
-    bzero(lib->descr,sizeof(lib->descr));
-    strncpy(lib->descr,margv[0],sizeof(lib->descr)-1);
+	if (sameas (margv[6], "OK") || sameas (margv[6], margv[4])) {
+		bzero (lib->descr, sizeof (lib->descr));
+		strncpy (lib->descr, margv[0], sizeof (lib->descr) - 1);
 
-    bzero(lib->passwd,sizeof(lib->passwd));
-    strncpy(lib->passwd,margv[1],sizeof(lib->passwd)-1);
+		bzero (lib->passwd, sizeof (lib->passwd));
+		strncpy (lib->passwd, margv[1], sizeof (lib->passwd) - 1);
 
-    bzero(lib->club,sizeof(lib->club));
-    if(strlen(margv[2])){
-      if(findclub(margv[2])) strncpy(lib->club,margv[2],sizeof(lib->club)-1);
-      else prompt(OCRECNE,margv[2]);
-    }
+		bzero (lib->club, sizeof (lib->club));
+		if (strlen (margv[2])) {
+			if (findclub (margv[2]))
+				strncpy (lib->club, margv[2],
+					 sizeof (lib->club) - 1);
+			else
+				prompt (OCRECNE, margv[2]);
+		}
 
-    bzero(lib->dir,sizeof(lib->dir));
-    strncpy(lib->dir,zonkdir(margv[3]),sizeof(lib->dir)-1);
-  } else {
-    prompt(OPCAN);
-    return 0;
-  }
+		bzero (lib->dir, sizeof (lib->dir));
+		strncpy (lib->dir, zonkdir (margv[3]), sizeof (lib->dir) - 1);
+	} else {
+		prompt (OPCAN);
+		return 0;
+	}
 
-  return 1;
+	return 1;
 }
 
 
 void
-op_create()
+op_create ()
 {
-  char s[20], tmp[20];
-  struct libidx lib;
+	char    s[20], tmp[20];
+	struct libidx lib;
 
-  if(nesting(library.fullname)>maxnest){
-    prompt(OCRENST,maxnest);
-    return;
-  }
+	if (nesting (library.fullname) > maxnest) {
+		prompt (OCRENST, maxnest);
+		return;
+	}
 
-  for(;;){
-    if(!getnewlibname(s))return;
+	for (;;) {
+		if (!getnewlibname (s))
+			return;
 
-    if(libexists(s,library.libnum)){
-      prompt(OCREEXS,s);
-      cnc_end();
-      continue;
-    } else break;
-  }
+		if (libexists (s, library.libnum)) {
+			prompt (OCREEXS, s);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  memcpy(&lib,&library,sizeof(lib));
+	memcpy (&lib, &library, sizeof (lib));
 
-  strcpy(lib.keyname,s);
-  lowerc(lib.keyname);
-  sprintf(lib.fullname,"%s/%s",library.fullname,s);
-  sprintf(lib.dir,"%s/%s",library.dir,s);
-  lib.descr[0]=0;
-  lib.parent=library.libnum;
-  lib.numfiles=lib.numbytes=lib.numunapp=lib.bytesunapp=0;
-  bzero(lib.uploadsperday,sizeof(lib.uploadsperday));
-  bzero(lib.bytesperday,sizeof(lib.bytesperday));
-  strcpy(tmp,s);
-  if(findclub(tmp))strcpy(lib.club,tmp);
+	strcpy (lib.keyname, s);
+	lowerc (lib.keyname);
+	sprintf (lib.fullname, "%s/%s", library.fullname, s);
+	sprintf (lib.dir, "%s/%s", library.dir, s);
+	lib.descr[0] = 0;
+	lib.parent = library.libnum;
+	lib.numfiles = lib.numbytes = lib.numunapp = lib.bytesunapp = 0;
+	bzero (lib.uploadsperday, sizeof (lib.uploadsperday));
+	bzero (lib.bytesperday, sizeof (lib.bytesperday));
+	strcpy (tmp, s);
+	if (findclub (tmp))
+		strcpy (lib.club, tmp);
 
-  if(!edit(&lib))return;
+	if (!edit (&lib))
+		return;
 
-  mklib(&lib,0,0);
-  prompt(OCREOK,lib.fullname);
-  enterlib(lib.libnum,0);
+	mklib (&lib, 0, 0);
+	prompt (OCREOK, lib.fullname);
+	enterlib (lib.libnum, 0);
 }
+
+
+/* End of File */

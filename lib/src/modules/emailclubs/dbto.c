@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,193 +68,221 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "typhoon.h"
-#include "email.h"
-#include "ecdbase.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/typhoon.h>
+#include <megistos/email.h>
+#include <megistos/ecdbase.h>
 
 
 static struct toc toc;
 
 
 static int
-getfl(int *first, int *last)
+getfl (int *first, int *last)
 {
-  struct ecidx f, l;
-  struct toc toc1;
+	struct ecidx f, l;
+	struct toc toc1;
 
-  /* Get the first key of the database. */
+	/* Get the first key of the database. */
 
-  strcpy(toc1.to,toc.to);
-  toc1.num=0;
-  if(d_keyfind(TOC,&toc1)!=S_OKAY) if(d_keynext(TOC)!=S_OKAY) return BSE_NFOUND;
-
-
-  /* Read the first record. If we can't something's VERY wrong. Panic. */
-
-  if(d_recread(&f)!=S_OKAY){
-    error_fatal("Unable to read first TO key.");
-  }
+	strcpy (toc1.to, toc.to);
+	toc1.num = 0;
+	if (d_keyfind (TOC, &toc1) != S_OKAY)
+		if (d_keynext (TOC) != S_OKAY)
+			return BSE_NFOUND;
 
 
-  /* Now get the last key. */
+	/* Read the first record. If we can't something's VERY wrong. Panic. */
 
-  l.num=toc1.num=f.num;
-  strcpy(toc1.to,f.to);
-  for(;;){
-    if(d_keynext(TOC)!=S_OKAY)break;
-    if(d_keyread(&toc1)!=S_OKAY)break;
-    if(strcmp(toc1.to,toc.to))break;
-    else l.num=toc1.num;
-  }
- 
-  *first=f.num;
-  *last=l.num;
+	if (d_recread (&f) != S_OKAY) {
+		error_fatal ("Unable to read first TO key.");
+	}
 
-  return BSE_FOUND;
+
+	/* Now get the last key. */
+
+	l.num = toc1.num = f.num;
+	strcpy (toc1.to, f.to);
+	for (;;) {
+		if (d_keynext (TOC) != S_OKAY)
+			break;
+		if (d_keyread (&toc1) != S_OKAY)
+			break;
+		if (strcmp (toc1.to, toc.to))
+			break;
+		else
+			l.num = toc1.num;
+	}
+
+	*first = f.num;
+	*last = l.num;
+
+	return BSE_FOUND;
 }
 
 
 static int
-getmsgno(int *msgno, int dir)
+getmsgno (int *msgno, int dir)
 {
-  int first, last;
-  struct toc f;
+	int     first, last;
+	struct toc f;
 
 
-  /* Look for the desired message. */
+	/* Look for the desired message. */
 
-  if(d_keyfind(TOC,&toc)==S_OKAY) return BSE_FOUND;
-
-
-  /* Couldn't find that specific message. Let's look for another one. */
-  /* Start by getting first and last messages. */
-
-  if(getfl(&first,&last)==BSE_NFOUND) return BSE_NFOUND;
-
-  if(dir==BSD_LT){
-
-    /* Moving backwards. Three subcases here as well. */
+	if (d_keyfind (TOC, &toc) == S_OKAY)
+		return BSE_FOUND;
 
 
-    /* msgno < first number? No record found. */
+	/* Couldn't find that specific message. Let's look for another one. */
+	/* Start by getting first and last messages. */
 
-    if(*msgno<first) return BSE_BEGIN;
+	if (getfl (&first, &last) == BSE_NFOUND)
+		return BSE_NFOUND;
 
+	if (dir == BSD_LT) {
 
-    /* msgno > last number? Since we're going down, the last # applies. */
-
-    if(*msgno>last) return (*msgno=last, BSE_FOUND);
-
-
-    /* Otherwise, we've hit a gap between messages. Choose the next one. */
-
-    d_keyfind(TOC,&toc);
-    
-    if(d_keynext(TOC)!=S_OKAY){
-      error_fatal("No next TOC key. This should never happen.");
-    }
-
-    if(d_keyread(&f)!=S_OKAY){
-      error_fatal("Unable to read TOC key. Should never happen.");
-    }
-    
-    *msgno=f.num;
-
-  } else {
-
-    /* Moving up (GT) */
-
-    /* Distinguish the same three cases, but treat things a bit different. */
+		/* Moving backwards. Three subcases here as well. */
 
 
-    /* msgno < first message. We're going up, so we choose #first. */
-    if(*msgno<first) return (*msgno=first, BSE_FOUND);
+		/* msgno < first number? No record found. */
+
+		if (*msgno < first)
+			return BSE_BEGIN;
 
 
-    /* msgno > last. Since we're going up, we're out of messages. */
-    
-    if(*msgno>last) return BSE_END;
+		/* msgno > last number? Since we're going down, the last # applies. */
+
+		if (*msgno > last)
+			return (*msgno = last, BSE_FOUND);
 
 
-    /* This is the same as before. Got two copies of it for clarity. */
+		/* Otherwise, we've hit a gap between messages. Choose the next one. */
 
-    d_keyfind(TOC,&toc);
-    if(d_keynext(TOC)!=S_OKAY){
-      error_fatal("No next TOC key. This should never happen.");
-    }
+		d_keyfind (TOC, &toc);
 
-    if(d_keyread(&f)!=S_OKAY){
-      error_fatal("Unable to read TOC key. Should never happen.");
-    }
+		if (d_keynext (TOC) != S_OKAY) {
+			error_fatal
+			    ("No next TOC key. This should never happen.");
+		}
 
-    *msgno=f.num;
-  }
+		if (d_keyread (&f) != S_OKAY) {
+			error_fatal
+			    ("Unable to read TOC key. Should never happen.");
+		}
 
-  /* We've chosen a value for msgno, now say so. */
+		*msgno = f.num;
 
-  return BSE_FOUND;
+	} else {
+
+		/* Moving up (GT) */
+
+		/* Distinguish the same three cases, but treat things a bit different. */
+
+
+		/* msgno < first message. We're going up, so we choose #first. */
+		if (*msgno < first)
+			return (*msgno = first, BSE_FOUND);
+
+
+		/* msgno > last. Since we're going up, we're out of messages. */
+
+		if (*msgno > last)
+			return BSE_END;
+
+
+		/* This is the same as before. Got two copies of it for clarity. */
+
+		d_keyfind (TOC, &toc);
+		if (d_keynext (TOC) != S_OKAY) {
+			error_fatal
+			    ("No next TOC key. This should never happen.");
+		}
+
+		if (d_keyread (&f) != S_OKAY) {
+			error_fatal
+			    ("Unable to read TOC key. Should never happen.");
+		}
+
+		*msgno = f.num;
+	}
+
+	/* We've chosen a value for msgno, now say so. */
+
+	return BSE_FOUND;
 }
 
 
 int
-findmsgto(int *msgno, char *whom, int targetnum, int direction)
+findmsgto (int *msgno, char *whom, int targetnum, int direction)
 {
-  int res;
+	int     res;
 
-  /* Prepare the key */
+	/* Prepare the key */
 
-  strcpy(toc.to,whom);
-  toc.num=targetnum;
-
-
-  /* Check for existence */
-
-  d_keyfind(TOC,&toc);
+	strcpy (toc.to, whom);
+	toc.num = targetnum;
 
 
-  /* If we're only checking for existence, return now */
+	/* Check for existence */
 
-  if(direction==BSD_EQ) return (db_status==S_OKAY)? BSE_FOUND: BSE_NFOUND;
+	d_keyfind (TOC, &toc);
 
 
-  /* Now look for other applicable message numbers. */
-  
-  *msgno=targetnum;
+	/* If we're only checking for existence, return now */
 
-  if((res=getmsgno(msgno, direction))==BSE_FOUND){
-    DB_ADDR rec;
-    toc.num=*msgno;
-    d_keyfind(TOC,&toc);
-    if(d_crget(&rec)==S_OKAY)d_keyread(&toc);
-    else {
-      return BSE_NFOUND;
-    }
-    return strcmp(toc.to,whom)?BSE_NFOUND:BSE_FOUND;
-  }
-  return res;
+	if (direction == BSD_EQ)
+		return (db_status == S_OKAY) ? BSE_FOUND : BSE_NFOUND;
+
+
+	/* Now look for other applicable message numbers. */
+
+	*msgno = targetnum;
+
+	if ((res = getmsgno (msgno, direction)) == BSE_FOUND) {
+		DB_ADDR rec;
+
+		toc.num = *msgno;
+		d_keyfind (TOC, &toc);
+		if (d_crget (&rec) == S_OKAY)
+			d_keyread (&toc);
+		else {
+			return BSE_NFOUND;
+		}
+		return strcmp (toc.to, whom) ? BSE_NFOUND : BSE_FOUND;
+	}
+	return res;
 }
 
 
 int
-npmsgto(int *msgno, char *whom, int targetnum, int dir)
+npmsgto (int *msgno, char *whom, int targetnum, int dir)
 {
-  int j;
+	int     j;
 
-  if(dir==BSD_GT)j=d_keynext(TOC);
-  else j=d_keyprev(TOC);
+	if (dir == BSD_GT)
+		j = d_keynext (TOC);
+	else
+		j = d_keyprev (TOC);
 
-  if(j!=S_OKAY)return BSE_NFOUND;
-  
-  if(d_keyread(&toc)!=S_OKAY){
-    error_fatal("Unable to read key though it exists.\n");
-  }
+	if (j != S_OKAY)
+		return BSE_NFOUND;
 
-  if(strcmp(whom,toc.to))return BSE_NFOUND;
-  if(dir==BSD_GT && toc.num<targetnum)return BSE_NFOUND;
-  if(dir==BSD_LT && toc.num>targetnum)return BSE_NFOUND;
+	if (d_keyread (&toc) != S_OKAY) {
+		error_fatal ("Unable to read key though it exists.\n");
+	}
 
-  *msgno=toc.num;
-  return BSE_FOUND;
+	if (strcmp (whom, toc.to))
+		return BSE_NFOUND;
+	if (dir == BSD_GT && toc.num < targetnum)
+		return BSE_NFOUND;
+	if (dir == BSD_LT && toc.num > targetnum)
+		return BSE_NFOUND;
+
+	*msgno = toc.num;
+	return BSE_FOUND;
 }
+
+
+/* End of File */

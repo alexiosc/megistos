@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,194 +65,221 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 
 
 static void
-update_access(struct libidx *lib,int libnum,
-	      int *changes,char *passwd,int recursive)
+update_access (struct libidx *lib, int libnum,
+	       int *changes, char *passwd, int recursive)
 {
-  struct libidx l;
-  int res;
+	struct libidx l;
+	int     res;
 
-  if(lib->libnum==libnum){
-    if(!strcmp(libmain,lib->fullname)){
-      if(lib->flags&LBF_LOCKENTR||lib->readkey){
-	lib->flags&=~LBF_LOCKENTR;
-	lib->readkey=0;
-	prompt(OACNMAIN);
-      }
-    }
-    libupdate(lib);
-  }
+	if (lib->libnum == libnum) {
+		if (!strcmp (libmain, lib->fullname)) {
+			if (lib->flags & LBF_LOCKENTR || lib->readkey) {
+				lib->flags &= ~LBF_LOCKENTR;
+				lib->readkey = 0;
+				prompt (OACNMAIN);
+			}
+		}
+		libupdate (lib);
+	}
 
-  if(!recursive)return;
-  else if(lib->libnum==libnum)goto children;
+	if (!recursive)
+		return;
+	else if (lib->libnum == libnum)
+		goto children;
 
-  if(!libreadnum(libnum,&l))return;
+	if (!libreadnum (libnum, &l))
+		return;
 
-  if(!adminlock(libnum)){
-    prompt(OACCREC2,l.fullname);
-  } else {
-    int i;
+	if (!adminlock (libnum)) {
+		prompt (OACCREC2, l.fullname);
+	} else {
+		int     i;
 
-    for(i=0;i<7;i++){
-      if(!changes[i])continue;
-      switch(i){
-      case 0:
-	l.readkey=lib->readkey;
-	break;
-      case 1:
-	setflag(l.flags,LBF_LOCKENTR,lib->flags&LBF_LOCKENTR);
-	break;
-      case 2:
-	l.uploadkey=lib->uploadkey;
-	break;
-      case 3:
-	setflag(l.flags,LBF_LOCKUPL,lib->flags&LBF_LOCKUPL);
-	break;
-      case 4:
-	l.downloadkey=lib->downloadkey;
-	break;
-      case 5:
-	setflag(l.flags,LBF_LOCKDNL,lib->flags&LBF_LOCKDNL);
-	break;
-      case 6:
-	strcpy(l.passwd,passwd);
-	break;
-      default:
-      }
-    }
+		for (i = 0; i < 7; i++) {
+			if (!changes[i])
+				continue;
+			switch (i) {
+			case 0:
+				l.readkey = lib->readkey;
+				break;
+			case 1:
+				setflag (l.flags, LBF_LOCKENTR,
+					 lib->flags & LBF_LOCKENTR);
+				break;
+			case 2:
+				l.uploadkey = lib->uploadkey;
+				break;
+			case 3:
+				setflag (l.flags, LBF_LOCKUPL,
+					 lib->flags & LBF_LOCKUPL);
+				break;
+			case 4:
+				l.downloadkey = lib->downloadkey;
+				break;
+			case 5:
+				setflag (l.flags, LBF_LOCKDNL,
+					 lib->flags & LBF_LOCKDNL);
+				break;
+			case 6:
+				strcpy (l.passwd, passwd);
+				break;
+			default:
+			}
+		}
 
-    libupdate(&l);
+		libupdate (&l);
 
-    prompt(OACCREC1,l.fullname);
-  }
+		prompt (OACCREC1, l.fullname);
+	}
 
-  libnum=l.libnum;
+	libnum = l.libnum;
 
-children:
-  res=libgetchild(libnum,"",&l);
-  while(res){
-    char keyname[20];
-    update_access(lib,l.libnum,changes,passwd,recursive);
-    strcpy(keyname,l.keyname);
-    res=libgetchild(libnum,keyname,&l);
-  }
+      children:
+	res = libgetchild (libnum, "", &l);
+	while (res) {
+		char    keyname[20];
+
+		update_access (lib, l.libnum, changes, passwd, recursive);
+		strcpy (keyname, l.keyname);
+		res = libgetchild (libnum, keyname, &l);
+	}
 }
 
 
 void
-op_access()
+op_access ()
 {
-  struct libidx lib;
-  int changes[7];
-  int recursive=0;
-  int warned=0;
+	struct libidx lib;
+	int     changes[7];
+	int     recursive = 0;
+	int     warned = 0;
 
-  memcpy(&lib,&library,sizeof(lib));
-  if(!adminlock(lib.libnum))return;
+	memcpy (&lib, &library, sizeof (lib));
+	if (!adminlock (lib.libnum))
+		return;
 
-  sprintf(inp_buffer,
-	  "%d\n%s\n%d\n%s\n%d\n%s\n%s\n%s\n%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
-	  lib.readkey,
-	  lib.flags&LBF_LOCKENTR?"on":"off",
-	  lib.uploadkey,
-	  lib.flags&LBF_LOCKUPL?"on":"off",
-	  lib.downloadkey,
-	  lib.flags&LBF_LOCKDNL?"on":"off",
-	  lib.passwd,
-	  lib.libops[0],
-	  lib.libops[1],
-	  lib.libops[2],
-	  lib.libops[3],
-	  lib.libops[4]);
+	sprintf (inp_buffer,
+		 "%d\n%s\n%d\n%s\n%d\n%s\n%s\n%s\n%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
+		 lib.readkey,
+		 lib.flags & LBF_LOCKENTR ? "on" : "off",
+		 lib.uploadkey,
+		 lib.flags & LBF_LOCKUPL ? "on" : "off",
+		 lib.downloadkey,
+		 lib.flags & LBF_LOCKDNL ? "on" : "off",
+		 lib.passwd,
+		 lib.libops[0],
+		 lib.libops[1], lib.libops[2], lib.libops[3], lib.libops[4]);
 
-  if(dialog_run("files",OACCVT,OACCLT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    adminunlock();
-    return;
-  }
-
-  dialog_parse(inp_buffer);
-
-  if(sameas(margv[15],"OK")||sameas(margv[13],margv[15])){
-    int i;
-    for(i=0;i<16;i++){
-      char *s=margv[i];
-      switch(i){
-      case 0:
-	changes[i]=lib.readkey!=atoi(s);
-	lib.readkey=atoi(s);
-	break;
-      case 1:
-	{
-	  int old=lib.flags;
-	  setflag(lib.flags,LBF_LOCKENTR,sameas(s,"on"));
-	  if(lib.flags!=old)changes[i]=1;
-	  break;
+	if (dialog_run ("files", OACCVT, OACCLT, inp_buffer, MAXINPLEN) != 0) {
+		error_log ("Unable to run data entry subsystem");
+		adminunlock ();
+		return;
 	}
-      case 2:
-	changes[i]=lib.uploadkey!=atoi(s);
-	lib.uploadkey=atoi(s);
-	break;
-      case 3:
-	{
-	  int old=lib.flags;
-	  setflag(lib.flags,LBF_LOCKUPL,sameas(s,"on"));
-	  if(lib.flags!=old)changes[i]=1;
-	  break;
+
+	dialog_parse (inp_buffer);
+
+	if (sameas (margv[15], "OK") || sameas (margv[13], margv[15])) {
+		int     i;
+
+		for (i = 0; i < 16; i++) {
+			char   *s = margv[i];
+
+			switch (i) {
+			case 0:
+				changes[i] = lib.readkey != atoi (s);
+				lib.readkey = atoi (s);
+				break;
+			case 1:
+				{
+					int     old = lib.flags;
+
+					setflag (lib.flags, LBF_LOCKENTR,
+						 sameas (s, "on"));
+					if (lib.flags != old)
+						changes[i] = 1;
+					break;
+				}
+			case 2:
+				changes[i] = lib.uploadkey != atoi (s);
+				lib.uploadkey = atoi (s);
+				break;
+			case 3:
+				{
+					int     old = lib.flags;
+
+					setflag (lib.flags, LBF_LOCKUPL,
+						 sameas (s, "on"));
+					if (lib.flags != old)
+						changes[i] = 1;
+					break;
+				}
+			case 4:
+				changes[i] = lib.downloadkey != atoi (s);
+				lib.downloadkey = atoi (s);
+				break;
+			case 5:
+				{
+					int     old = lib.flags;
+
+					setflag (lib.flags, LBF_LOCKDNL,
+						 sameas (s, "on"));
+					if (lib.flags != old)
+						changes[i] = 1;
+					break;
+				}
+			case 6:
+				changes[i] = 1;
+				strcpy (lib.passwd, s);
+				break;
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+			case 11:
+				if (masterlibop)
+					strcpy (lib.libops[i - 7], s);
+				else {
+					if (strcmp (lib.libops[i - 7], s) &&
+					    !warned) {
+						prompt (OACCNOP);
+						warned = 1;
+					}
+				}
+				break;
+			case 12:
+				if ((recursive = sameas (s, "on")) != 0)
+					prompt (OACCREC);
+				break;
+			}
+		}
+	} else {
+		prompt (OPCAN);
+		adminunlock ();
+		return;
 	}
-      case 4:
-	changes[i]=lib.downloadkey!=atoi(s);
-	lib.downloadkey=atoi(s);
-	break;
-      case 5:
-	{
-	  int old=lib.flags;
-	  setflag(lib.flags,LBF_LOCKDNL,sameas(s,"on"));
-	  if(lib.flags!=old)changes[i]=1;
-	  break;
+
+	memcpy (&library, &lib, sizeof (library));
+
+	update_access (&lib, lib.libnum, changes, lib.passwd, recursive);
+
+	if (!strcmp (libmain, library.fullname)) {
+		if (library.flags & LBF_LOCKENTR || library.readkey) {
+			library.flags &= ~LBF_LOCKENTR;
+			library.readkey = 0;
+		}
 	}
-      case 6:
-	changes[i]=1;
-	strcpy(lib.passwd,s);
-	break;
-      case 7: case 8: case 9: case 10: case 11:
-	if(masterlibop)strcpy(lib.libops[i-7],s);
-	else {
-	  if(strcmp(lib.libops[i-7],s)&&!warned){
-	    prompt(OACCNOP);
-	    warned=1;
-	  }
-	}
-	break;
-      case 12:
-	if((recursive=sameas(s,"on"))!=0)prompt(OACCREC);
-	break;
-      }
-    }
-  } else {
-    prompt(OPCAN);
-    adminunlock();
-    return;
-  }
 
-  memcpy(&library,&lib,sizeof(library));
-
-  update_access(&lib,lib.libnum,changes,lib.passwd,recursive);
-
-  if(!strcmp(libmain,library.fullname)){
-    if(library.flags&LBF_LOCKENTR||library.readkey){
-      library.flags&=~LBF_LOCKENTR;
-      library.readkey=0;
-    }
-  }
-
-  adminunlock();
-  return;
+	adminunlock ();
+	return;
 }
+
+
+/* End of File */

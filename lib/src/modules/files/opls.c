@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,21 +55,25 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 void
-op_ls()
+op_ls ()
 {
-  char command[512];
-  print("\n");
-  fflush(stdout);
-  sprintf(command,"ls -la --color=yes %s >%s/ls-%d",
-	  library.dir,TMPDIR,(int)getpid());
-  system(command);
-  sprintf(command,TMPDIR"/ls-%d",(int)getpid());
-  out_catfile(command);
-  unlink(command);
+	char    command[512];
+
+	print ("\n");
+	fflush (stdout);
+	sprintf (command, "ls -la --color=yes %s >%s/ls-%d",
+		 library.dir, TMPDIR, (int) getpid ());
+	system (command);
+	sprintf (command, TMPDIR "/ls-%d", (int) getpid ());
+	out_catfile (command);
+	unlink (command);
 }
+
+
+/* End of File */

@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -37,10 +40,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -53,151 +54,160 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static int
-getdellibname(char *s)
+getdellibname (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(ODLTASK);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(strlen(i)>sizeof(library.keyname)-1){
-      prompt(OCRE2LN,sizeof(library.keyname)-1);
-    } else if(strspn(i,FNAMECHARS)!=strlen(i)){
-      prompt(OCRECHR);
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (ODLTASK);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (strlen (i) > sizeof (library.keyname) - 1) {
+			prompt (OCRE2LN, sizeof (library.keyname) - 1);
+		} else if (strspn (i, FNAMECHARS) != strlen (i)) {
+			prompt (OCRECHR);
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
 static void
-delkeywords(struct libidx *l)
+delkeywords (struct libidx *l)
 {
-  struct fileidx f;
-  int approved;
-  
-  for(approved=0;approved<=1;approved++){
-    if(filegetfirst(l->libnum,&f,approved)){
-      do{
-	delfilekeywords(l,&f);
-	
-      } while(filegetnext(l->libnum,&f));
-    }
-  }
+	struct fileidx f;
+	int     approved;
+
+	for (approved = 0; approved <= 1; approved++) {
+		if (filegetfirst (l->libnum, &f, approved)) {
+			do {
+				delfilekeywords (l, &f);
+
+			} while (filegetnext (l->libnum, &f));
+		}
+	}
 }
 
 
 
 static void
-delfiles(struct libidx *l)
+delfiles (struct libidx *l)
 {
-  struct fileidx f;
-  int approved;
-  
-  for(approved=0;approved<=1;approved++){
-    if(filegetfirst(l->libnum,&f,approved)){
-      do{
-	char fname[512];
-	struct stat st;
-	bzero(&st,sizeof(st));
-	sprintf(fname,"%s/%s",l->dir,f.fname);
-	stat(fname,&st);
-	libinstfile(l,&f,st.st_size,LIF_DEL);
-      } while(filegetnext(l->libnum,&f));
-    }
-  }
+	struct fileidx f;
+	int     approved;
+
+	for (approved = 0; approved <= 1; approved++) {
+		if (filegetfirst (l->libnum, &f, approved)) {
+			do {
+				char    fname[512];
+				struct stat st;
+
+				bzero (&st, sizeof (st));
+				sprintf (fname, "%s/%s", l->dir, f.fname);
+				stat (fname, &st);
+				libinstfile (l, &f, st.st_size, LIF_DEL);
+			} while (filegetnext (l->libnum, &f));
+		}
+	}
 }
 
 
 static void
-deltree(struct libidx *lib)
+deltree (struct libidx *lib)
 {
-  struct libidx tmp;
+	struct libidx tmp;
 
 
-  /* First delete keywords */
+	/* First delete keywords */
 
-  prompt(ODLTINF,lib->fullname);
-  delkeywords(lib);
-
-
-  /* Then delete all the files */
-
-  prompt(ODLTINF2);
-  delfiles(lib);
-  
-  prompt(ODLTINF3);
+	prompt (ODLTINF, lib->fullname);
+	delkeywords (lib);
 
 
-  /* Now recurse, deleting child libraries. We always check for the
-     existence of the first child. Every time we recurse, the first
-     child will be deleted, pusing the second one up. */
+	/* Then delete all the files */
 
-  while(libgetchild(lib->libnum,"",&tmp))deltree(&tmp);
+	prompt (ODLTINF2);
+	delfiles (lib);
+
+	prompt (ODLTINF3);
 
 
-  /* And, finally, delete the library */
+	/* Now recurse, deleting child libraries. We always check for the
+	   existence of the first child. Every time we recurse, the first
+	   child will be deleted, pusing the second one up. */
 
-  libdelete(lib->libnum);
+	while (libgetchild (lib->libnum, "", &tmp))
+		deltree (&tmp);
+
+
+	/* And, finally, delete the library */
+
+	libdelete (lib->libnum);
 }
 
 
 
 void
-op_deltree()
+op_deltree ()
 {
-  char s[20];
-  struct libidx lib;
+	char    s[20];
+	struct libidx lib;
 
-  for(;;){
-    cnc_end();
-    if(!getdellibname(s))return;
+	for (;;) {
+		cnc_end ();
+		if (!getdellibname (s))
+			return;
 
-    if(!libread(s,library.libnum,&lib)){
-      prompt(OLDLNEX,s);
-      cnc_end();
-      continue;
-    } else break;
-  }
+		if (!libread (s, library.libnum, &lib)) {
+			prompt (OLDLNEX, s);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
 
-  /* Refuse to delete the main library */
-  
-  if(sameas(lib.fullname,libmain)){
-    prompt(OLDLMAI,libmain);
-  }
+	/* Refuse to delete the main library */
+
+	if (sameas (lib.fullname, libmain)) {
+		prompt (OLDLMAI, libmain);
+	}
 
 
-  deltree(&lib);
+	deltree (&lib);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,174 +68,196 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "email.h"
-#include "clubs.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/email.h>
+#include <megistos/clubs.h>
 
 
 void
-clubwrite()
+clubwrite ()
 {
-  struct message msg, checkmsg;
-  struct stat    st;
-  char           body[256],header[256],command[1024];
-  FILE           *fp;
-  int            attachment=0;
-  int            cleanupattachment=1, killit=0;
-  int            clubmsg=1;
-  uint32         original=0;
-  char           attfile[256], *cp;
+	struct message msg, checkmsg;
+	struct stat st;
+	char    body[256], header[256], command[1024];
+	FILE   *fp;
+	int     attachment = 0;
+	int     cleanupattachment = 1, killit = 0;
+	int     clubmsg = 1;
+	uint32  original = 0;
+	char    attfile[256], *cp;
 
-  if(getclubax(&thisuseracc,clubhdr.club)<CAX_WRITE){
-    prompt(WCNAXES);
-    return;
-  }
-  
-  if(!usr_canpay(clubhdr.postchg)){
-    prompt(WCNCRDS);
-    return;
-  }
-
-  memset(&msg,0,sizeof(msg));
-  strcpy(msg.from,thisuseracc.userid);
-  strcpy(msg.club,clubhdr.club);
-  strcpy(clubdir,clubhdr.club);
-
-  /* Get message recipient */
-
-  if(!getclubrecipient(WCWHO,WCUNKID,WCHELP,msg.to))return;
-  if(sameas(MSG_ALL,msg.to))prompt(WCRCPALL);
-  else prompt(WCRCPOK,msg.to);
-      
-  
-  /* Get message subject */
-      
-  if(!getsubject(msg.subject))return;
-      
-      
-  /* Edit the message body */
-      
-  sprintf(body,TMPDIR"/B%d%08lx",getpid(),time(0));
-  appendsignature(body);
-  sprintf(header,TMPDIR"/H%d%08lx",getpid(),time(0));
-      
-  if(editor(body,msglen)||stat(body,&st)){
-    unlink(body);
-    unlink(header);
-    cnc_end();
-    return;
-  } else cnc_end();
-      
-      
-  /* Ask for file attachment */
-  
-  if((getclubax(&thisuseracc,clubhdr.club)>=CAX_UPLOAD)&&
-     usr_canpay(clubhdr.uploadchg)){
-    for(;;){
-      if(!askyesno(&attachment,WCATT,WCRRSEL,clubhdr.uploadchg)){
-	if(confirmcancel()){
-	  unlink(body);
-	  unlink(header);
-	  return;
-	} else continue;
-      } else break;
-    }
-
-    if(attachment){
-      uploadatt(attfile,clubmsg?clubhdr.msgno+1:sysvar->emessages+1);
-      if(attfile[0]){
-	usr_chargecredits(clubhdr.uploadchg);
-	msg.flags|=MSF_FILEATT;
-	if(getclubax(&thisuseracc,msg.club)>=CAX_COOP){
-	  prompt(WCATTAPP);
-	  msg.flags|=MSF_APPROVD;
-	} else {
-	  char lock[256];
-
-	  prompt(WCATTNAP);
-	  sprintf(lock,CLUBLOCK,msg.club);
-	  if(lock_wait(lock,10)==LKR_TIMEOUT)return;
-	  lock_place(lock,"updating");
-	  loadclubhdr(msg.club);
-	  clubhdr.nfunapp++;
-	  saveclubhdr(&clubhdr);
-	  lock_rm(lock);
+	if (getclubax (&thisuseracc, clubhdr.club) < CAX_WRITE) {
+		prompt (WCNAXES);
+		return;
 	}
-      }
-		
-      cp=getattname(msg.subject,clubhdr.msgno+1);
-      if(!cp){
-	unlink(body);
-	unlink(header);
-	unlink(attfile);
-	return;
-      } else strcpy(msg.fatt,cp);
-    }
-  }
-      
-  /* Check if user has enough credits */
 
-  if(!usr_canpay(clubhdr.postchg)){
-    prompt(WCRNEC);
-    killit=1;
-  }
-    
-  /* Mail the message */
+	if (!usr_canpay (clubhdr.postchg)) {
+		prompt (WCNCRDS);
+		return;
+	}
 
-  if((fp=fopen(header,"w"))==NULL){
-    error_fatalsys("Unable to create message header %s",header);
-  }
-  if(fwrite(&msg,sizeof(msg),1,fp)!=1){
-    int i=errno;
-    fclose(fp);
-    errno=i;
-    error_fatalsys("Unable to write message header %s",header);
-  }
-  fclose(fp);
-      
-  if(!attfile[0])sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),header,body);
-  else sprintf(command,"%s %s %s -%c %s",
-	       mkfname(BBSMAILBIN),header,body,'c',attfile);
-  system(command);
-      
-      
-  /* Notify the user(s) */
-      
-  if((fp=fopen(header,"r"))==NULL){
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  if(fread(&checkmsg,sizeof(msg),1,fp)!=1){
-    int i=errno;
-    fclose(fp);
-    errno=i;
-    error_fatalsys("Unable to read message header %s",header);
-  }
-  fclose(fp);
-      
-  if(checkmsg.msgno){
-    prompt(WECONFS,checkmsg.club,checkmsg.msgno);
-	
-    if(usr_insys(checkmsg.to,1)){
-      sprompt_other(othrshm,out_buffer,WCRNOT,
-	      checkmsg.from,checkmsg.club,checkmsg.subject);
-      if(usr_injoth(&othruseronl,out_buffer,0))
-	prompt(WENOTFD,othruseronl.userid);
-    }
-  }
-      
-      
-  /* Clean up */
-      
-  usr_chargecredits(clubhdr.postchg);
-  thisuseracc.msgswritten++;
-  unlink(header);
-  if(attfile[0] && cleanupattachment){
-    unlink(attfile);
-    sprintf(attfile,"%s/%s/"MSGATTDIR"/"FILEATTACHMENT,
-	    mkfname(MSGSDIR),
-	    clubmsg?clubhdr.club:EMAILDIRNAME,
-	    original);
-  }
-  unlink(body);
+	memset (&msg, 0, sizeof (msg));
+	strcpy (msg.from, thisuseracc.userid);
+	strcpy (msg.club, clubhdr.club);
+	strcpy (clubdir, clubhdr.club);
+
+	/* Get message recipient */
+
+	if (!getclubrecipient (WCWHO, WCUNKID, WCHELP, msg.to))
+		return;
+	if (sameas (MSG_ALL, msg.to))
+		prompt (WCRCPALL);
+	else
+		prompt (WCRCPOK, msg.to);
+
+
+	/* Get message subject */
+
+	if (!getsubject (msg.subject))
+		return;
+
+
+	/* Edit the message body */
+
+	sprintf (body, TMPDIR "/B%d%08lx", getpid (), time (0));
+	appendsignature (body);
+	sprintf (header, TMPDIR "/H%d%08lx", getpid (), time (0));
+
+	if (editor (body, msglen) || stat (body, &st)) {
+		unlink (body);
+		unlink (header);
+		cnc_end ();
+		return;
+	} else
+		cnc_end ();
+
+
+	/* Ask for file attachment */
+
+	if ((getclubax (&thisuseracc, clubhdr.club) >= CAX_UPLOAD) &&
+	    usr_canpay (clubhdr.uploadchg)) {
+		for (;;) {
+			if (!askyesno
+			    (&attachment, WCATT, WCRRSEL, clubhdr.uploadchg)) {
+				if (confirmcancel ()) {
+					unlink (body);
+					unlink (header);
+					return;
+				} else
+					continue;
+			} else
+				break;
+		}
+
+		if (attachment) {
+			uploadatt (attfile,
+				   clubmsg ? clubhdr.msgno +
+				   1 : sysvar->emessages + 1);
+			if (attfile[0]) {
+				usr_chargecredits (clubhdr.uploadchg);
+				msg.flags |= MSF_FILEATT;
+				if (getclubax (&thisuseracc, msg.club) >=
+				    CAX_COOP) {
+					prompt (WCATTAPP);
+					msg.flags |= MSF_APPROVD;
+				} else {
+					char    lock[256];
+
+					prompt (WCATTNAP);
+					sprintf (lock, CLUBLOCK, msg.club);
+					if (lock_wait (lock, 10) ==
+					    LKR_TIMEOUT)
+						return;
+					lock_place (lock, "updating");
+					loadclubhdr (msg.club);
+					clubhdr.nfunapp++;
+					saveclubhdr (&clubhdr);
+					lock_rm (lock);
+				}
+			}
+
+			cp = getattname (msg.subject, clubhdr.msgno + 1);
+			if (!cp) {
+				unlink (body);
+				unlink (header);
+				unlink (attfile);
+				return;
+			} else
+				strcpy (msg.fatt, cp);
+		}
+	}
+
+	/* Check if user has enough credits */
+
+	if (!usr_canpay (clubhdr.postchg)) {
+		prompt (WCRNEC);
+		killit = 1;
+	}
+
+	/* Mail the message */
+
+	if ((fp = fopen (header, "w")) == NULL) {
+		error_fatalsys ("Unable to create message header %s", header);
+	}
+	if (fwrite (&msg, sizeof (msg), 1, fp) != 1) {
+		int     i = errno;
+
+		fclose (fp);
+		errno = i;
+		error_fatalsys ("Unable to write message header %s", header);
+	}
+	fclose (fp);
+
+	if (!attfile[0])
+		sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), header,
+			 body);
+	else
+		sprintf (command, "%s %s %s -%c %s",
+			 mkfname (BBSMAILBIN), header, body, 'c', attfile);
+	system (command);
+
+
+	/* Notify the user(s) */
+
+	if ((fp = fopen (header, "r")) == NULL) {
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	if (fread (&checkmsg, sizeof (msg), 1, fp) != 1) {
+		int     i = errno;
+
+		fclose (fp);
+		errno = i;
+		error_fatalsys ("Unable to read message header %s", header);
+	}
+	fclose (fp);
+
+	if (checkmsg.msgno) {
+		prompt (WECONFS, checkmsg.club, checkmsg.msgno);
+
+		if (usr_insys (checkmsg.to, 1)) {
+			sprompt_other (othrshm, out_buffer, WCRNOT,
+				       checkmsg.from, checkmsg.club,
+				       checkmsg.subject);
+			if (usr_injoth (&othruseronl, out_buffer, 0))
+				prompt (WENOTFD, othruseronl.userid);
+		}
+	}
+
+
+	/* Clean up */
+
+	usr_chargecredits (clubhdr.postchg);
+	thisuseracc.msgswritten++;
+	unlink (header);
+	if (attfile[0] && cleanupattachment) {
+		unlink (attfile);
+		sprintf (attfile, "%s/%s/" MSGATTDIR "/" FILEATTACHMENT,
+			 mkfname (MSGSDIR),
+			 clubmsg ? clubhdr.club : EMAILDIRNAME, original);
+	}
+	unlink (body);
 }
+
+
+/* End of File */

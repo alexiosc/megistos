@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -57,7 +58,7 @@ const char *__RCS=RCS_VER;
  *
  */
 
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 
 
@@ -70,9 +71,10 @@ const char *__RCS=RCS_VER;
 
 
 
-void load (zword_t variable)
+void
+load (zword_t variable)
 {
-  store_operand (load_variable (variable));
+	store_operand (load_variable (variable));
 }
 
 
@@ -84,9 +86,10 @@ void load (zword_t variable)
  *
  */
 
-void push_var (zword_t value)
+void
+push_var (zword_t value)
 {
-  stack[--sp] = value;
+	stack[--sp] = value;
 }
 
 
@@ -98,9 +101,10 @@ void push_var (zword_t value)
  *
  */
 
-void pop_var (zword_t variable)
+void
+pop_var (zword_t variable)
 {
-  store_variable (variable, stack[sp++]);
+	store_variable (variable, stack[sp++]);
 }
 
 
@@ -112,9 +116,10 @@ void pop_var (zword_t variable)
  *
  */
 
-void increment (zword_t variable)
+void
+increment (zword_t variable)
 {
-  store_variable (variable, load_variable (variable) + 1);
+	store_variable (variable, load_variable (variable) + 1);
 }
 
 
@@ -126,9 +131,10 @@ void increment (zword_t variable)
  *
  */
 
-void decrement (zword_t variable)
+void
+decrement (zword_t variable)
 {
-  store_variable (variable, load_variable (variable) - 1);
+	store_variable (variable, load_variable (variable) - 1);
 }
 
 
@@ -140,13 +146,14 @@ void decrement (zword_t variable)
  *
  */
 
-void increment_check (zword_t variable, zword_t target)
+void
+increment_check (zword_t variable, zword_t target)
 {
-  short value;
-  
-  value = (short) load_variable (variable);
-  store_variable (variable, ++value);
-  conditional_jump (value > (short) target);
+	short   value;
+
+	value = (short) load_variable (variable);
+	store_variable (variable, ++value);
+	conditional_jump (value > (short) target);
 }
 
 
@@ -158,12 +165,19 @@ void increment_check (zword_t variable, zword_t target)
  *
  */
 
-void decrement_check (zword_t variable, zword_t target)
+void
+decrement_check (zword_t variable, zword_t target)
 {
-  short value;
-  
-  value = (short) load_variable (variable);
-  store_variable (variable, --value);
-  conditional_jump (value < (short) target);
-  
+	short   value;
+
+	value = (short) load_variable (variable);
+	store_variable (variable, --value);
+	conditional_jump (value < (short) target);
+
 }
+
+
+/* End of File */
+
+
+/* End of File */

@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,10 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -55,11 +56,11 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mail.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mail.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
@@ -67,57 +68,66 @@ const char *__RCS=RCS_VER;
 
 
 static char *
-askclub()
+askclub ()
 {
-  static char insclub[16];
+	static char insclub[16];
 
-  strcpy(insclub,club);
+	strcpy (insclub, club);
 
-  if(!club[0]){
-    if(!getclub(insclub,NBCLUB,NBRCLB,
-		thisuseracc.lastclub[0]?DEFLTS:0,thisuseracc.lastclub)){
-      return NULL;
-    }
-  } else prompt(NBCLUB1);
+	if (!club[0]) {
+		if (!getclub (insclub, NBCLUB, NBRCLB,
+			      thisuseracc.lastclub[0] ? DEFLTS : 0,
+			      thisuseracc.lastclub)) {
+			return NULL;
+		}
+	} else
+		prompt (NBCLUB1);
 
-  return insclub;
+	return insclub;
 }
 
 
 static int
-askfile(char *club)
+askfile (char *club)
 {
-  int i;
-  char c;
-  static char fname[256];
-  struct stat st;
+	int     i;
+	char    c;
+	static char fname[256];
+	struct stat st;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"."))return -1;
-      i=cnc_int();
-    } else {
-      prompt(NBMSGN);
-      inp_get(0);
-      i=atoi(margv[0]);
-      if((!margc||(margc==1&&sameas(margv[0],"."))) && !inp_reprompt()) {
-	return -1;
-      } else if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0]))return 0;
-    }
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "."))
+				return -1;
+			i = cnc_int ();
+		} else {
+			prompt (NBMSGN);
+			inp_get (0);
+			i = atoi (margv[0]);
+			if ((!margc || (margc == 1 && sameas (margv[0], ".")))
+			    && !inp_reprompt ()) {
+				return -1;
+			} else if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0]))
+				return 0;
+		}
 
-    strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)i));
-    if(stat(fname,&st)){
-      prompt(NBMSGNR,club,i);
-      cnc_end();
-    } else return i;
-  }
-  return 0;
+		strcpy (fname,
+			mkfname (MSGSDIR "/%s/" MESSAGEFILE, club,
+				 (uint32) i));
+		if (stat (fname, &st)) {
+			prompt (NBMSGNR, club, i);
+			cnc_end ();
+		} else
+			return i;
+	}
+	return 0;
 }
 
 
@@ -125,495 +135,517 @@ askfile(char *club)
 
 
 int
-getmsgheader(char *club, int msgno,struct message *msg)
+getmsgheader (char *club, int msgno, struct message *msg)
 {
-  char lock[256], fname[256], tmp[256];
-  gzFile *zfp;
+	char    lock[256], fname[256], tmp[256];
+	gzFile *zfp;
 
-  sprintf(tmp,"%d",msgno);
-  sprintf(lock,MESSAGELOCK,club,tmp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
-  lock_place(lock,"reading");
+	sprintf (tmp, "%d", msgno);
+	sprintf (lock, MESSAGELOCK, club, tmp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return 0;
+	lock_place (lock, "reading");
 
-  strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno));
-  if((zfp=gzopen(fname,"rb"))==NULL){
-    gzclose(zfp);
-    lock_rm(lock);
-    return 0;
-  } else if(gzread(zfp,msg,sizeof(struct message))<=0){
-    gzclose(zfp);
-    lock_rm(lock);
-    return 0;
-  }
-  gzclose(zfp);
-  lock_rm(lock);
-  return 1;
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/" MESSAGEFILE, club, (long) msgno));
+	if ((zfp = gzopen (fname, "rb")) == NULL) {
+		gzclose (zfp);
+		lock_rm (lock);
+		return 0;
+	} else if (gzread (zfp, msg, sizeof (struct message)) <= 0) {
+		gzclose (zfp);
+		lock_rm (lock);
+		return 0;
+	}
+	gzclose (zfp);
+	lock_rm (lock);
+	return 1;
 }
 
 
 static int
-fcopymsg(char *source, char *target)
+fcopymsg (char *source, char *target)
 {
-  gzFile *zs;
-  FILE *t;
-  int br, bw, tr, tw;
-  char buf[8192];
+	gzFile *zs;
+	FILE   *t;
+	int     br, bw, tr, tw;
+	char    buf[8192];
 
-  if((zs=gzopen(source,"rb"))==NULL){
-    return -1;
-  }
-  if((t=fopen(target,"w"))==NULL){
-    gzclose(zs);
-    return -1;
-  }
+	if ((zs = gzopen (source, "rb")) == NULL) {
+		return -1;
+	}
+	if ((t = fopen (target, "w")) == NULL) {
+		gzclose (zs);
+		return -1;
+	}
 
-  if(gzread(zs,buf,sizeof(struct message))<=0){
-    gzclose(zs);
-    fclose(t);
-    unlink(target);
-    return -1;
-  }
+	if (gzread (zs, buf, sizeof (struct message)) <= 0) {
+		gzclose (zs);
+		fclose (t);
+		unlink (target);
+		return -1;
+	}
 
-  for(br=bw=tr=tw=0;br==bw;){
-    br=gzread(zs,buf,sizeof(buf));
-    if(br<0){
-      gzclose(zs);
-      fclose(t);
-      unlink(target);
-      return -1;
-    }
-    if(!br)break;
-    bw=fwrite(buf,1,br,t);
-    if(bw<0){
-      gzclose(zs);
-      fclose(t);
-      unlink(target);
-      return -1;
-    }
-    tr+=br;
-    tw+=bw;
-  }
-  gzclose(zs);
-  fclose(t);
-  if(tr!=tw){
-    unlink(target);
-    return -1;
-  }
-  return 0;
+	for (br = bw = tr = tw = 0; br == bw;) {
+		br = gzread (zs, buf, sizeof (buf));
+		if (br < 0) {
+			gzclose (zs);
+			fclose (t);
+			unlink (target);
+			return -1;
+		}
+		if (!br)
+			break;
+		bw = fwrite (buf, 1, br, t);
+		if (bw < 0) {
+			gzclose (zs);
+			fclose (t);
+			unlink (target);
+			return -1;
+		}
+		tr += br;
+		tw += bw;
+	}
+	gzclose (zs);
+	fclose (t);
+	if (tr != tw) {
+		unlink (target);
+		return -1;
+	}
+	return 0;
 }
 
 
-#else /* DON'T USE_LIBZ */
+#else				/* DON'T USE_LIBZ */
 
 
 int
-getmsgheader(char *club, int msgno,struct message *msg)
+getmsgheader (char *club, int msgno, struct message *msg)
 {
-  char lock[256], fname[256], tmp[256];
-  FILE *fp;
+	char    lock[256], fname[256], tmp[256];
+	FILE   *fp;
 
-  sprintf(tmp,"%d",msgno);
-  sprintf(lock,MESSAGELOCK,club,tmp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
-  lock_place(lock,"reading");
+	sprintf (tmp, "%d", msgno);
+	sprintf (lock, MESSAGELOCK, club, tmp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return 0;
+	lock_place (lock, "reading");
 
-  strcpy(fname,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)msgno));
-  if((fp=fopen(fname,"r"))==NULL){
-    fclose(fp);
-    lock_rm(lock);
-    return 0;
-  } else if(fread(msg,sizeof(struct message),1,fp)!=1){
-    fclose(fp);
-    lock_rm(lock);
-    return 0;
-  }
-  fclose(fp);
-  lock_rm(lock);
-  return 1;
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/" MESSAGEFILE, club, (uint32) msgno));
+	if ((fp = fopen (fname, "r")) == NULL) {
+		fclose (fp);
+		lock_rm (lock);
+		return 0;
+	} else if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+		fclose (fp);
+		lock_rm (lock);
+		return 0;
+	}
+	fclose (fp);
+	lock_rm (lock);
+	return 1;
 }
 
 
 static int
-fcopymsg(char *source, char *target)
+fcopymsg (char *source, char *target)
 {
-  FILE *s, *t;
-  int br, bw, tr, tw;
-  char buf[8192];
+	FILE   *s, *t;
+	int     br, bw, tr, tw;
+	char    buf[8192];
 
-  if((s=fopen(source,"r"))==NULL){
-    return -1;
-  }
-  if((t=fopen(target,"w"))==NULL){
-    fclose(s);
-    return -1;
-  }
+	if ((s = fopen (source, "r")) == NULL) {
+		return -1;
+	}
+	if ((t = fopen (target, "w")) == NULL) {
+		fclose (s);
+		return -1;
+	}
 
-  if(fseek(s,sizeof(struct message),SEEK_SET)){
-    fclose(s);
-    fclose(t);
-    unlink(target);
-    return -1;
-  }
+	if (fseek (s, sizeof (struct message), SEEK_SET)) {
+		fclose (s);
+		fclose (t);
+		unlink (target);
+		return -1;
+	}
 
-  for(br=bw=tr=tw=0;br==bw;){
-    br=fread(buf,1,sizeof(buf),s);
-    if(br<0){
-      fclose(s);
-      fclose(t);
-      unlink(target);
-      return -1;
-    }
-    if(!br)break;
-    bw=fwrite(buf,1,br,t);
-    if(bw<0){
-      fclose(s);
-      fclose(t);
-      unlink(target);
-      return -1;
-    }
-    tr+=br;
-    tw+=bw;
-  }
-  fclose(s);
-  fclose(t);
-  if(tr!=tw){
-    unlink(target);
-    return -1;
-  }
-  return 0;
+	for (br = bw = tr = tw = 0; br == bw;) {
+		br = fread (buf, 1, sizeof (buf), s);
+		if (br < 0) {
+			fclose (s);
+			fclose (t);
+			unlink (target);
+			return -1;
+		}
+		if (!br)
+			break;
+		bw = fwrite (buf, 1, br, t);
+		if (bw < 0) {
+			fclose (s);
+			fclose (t);
+			unlink (target);
+			return -1;
+		}
+		tr += br;
+		tw += bw;
+	}
+	fclose (s);
+	fclose (t);
+	if (tr != tw) {
+		unlink (target);
+		return -1;
+	}
+	return 0;
 }
 
 
-#endif /* USE_ZLIB */
+#endif				/* USE_ZLIB */
 
 
 static void
-insmsg(char *club, uint32 msgno)
+insmsg (char *club, uint32 msgno)
 {
-  struct message msg;
-  struct bltidx blt;
-  char source[256], target[256], opt='B';
-  struct stat st;
+	struct message msg;
+	struct bltidx blt;
+	char    source[256], target[256], opt = 'B';
+	struct stat st;
 
 
-  /* Get the message header -- we'll copy most of the record from here */
+	/* Get the message header -- we'll copy most of the record from here */
 
-  if(!getmsgheader(club,msgno,&msg)){
-    prompt(NBIO,club,msgno);
-    return;
-  }
-
-
-  /* Prepare the new bulletin record */
-
-  bzero(&blt,sizeof(struct bltidx));
-
-  blt.num=dbgetlast()+1;
-  blt.date=today();
-  sprintf(blt.fname,"%d.blt",msgno);
-  strcpy(blt.area,club);
-  strncpy(blt.author,msg.from,sizeof(blt.author));
-  strcpy(blt.descr,msg.subject);
+	if (!getmsgheader (club, msgno, &msg)) {
+		prompt (NBIO, club, msgno);
+		return;
+	}
 
 
-  /* Set the source and target files for linking/copying the bulletin */
+	/* Prepare the new bulletin record */
 
-  strcpy(source,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,msgno));
-  strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname));
+	bzero (&blt, sizeof (struct bltidx));
 
-
-  /* Check if the article already exists in the database */
-
-  if(dbexists(blt.area,blt.fname)){
-    struct bltidx tmp;
-    dbget(&tmp);
-    prompt(NBFNXS,tmp.fname,tmp.area,tmp.num);
-    return;
-  }
+	blt.num = dbgetlast () + 1;
+	blt.date = today ();
+	sprintf (blt.fname, "%d.blt", msgno);
+	strcpy (blt.area, club);
+	strncpy (blt.author, msg.from, sizeof (blt.author));
+	strcpy (blt.descr, msg.subject);
 
 
-  /* Prompt the user if the message has a file attachment */
+	/* Set the source and target files for linking/copying the bulletin */
 
-  if(msg.flags&MSF_FILEATT){
-    int i;
-    char fatt[256];
-    struct stat st1, st2;
-
-    strcpy(source,mkfname(MSGSDIR"/%s/"MESSAGEFILE,club,msgno));
-    strcpy(fatt,mkfname(MSGSDIR"/%s/%s/%d.att",club,MSGATTDIR,msgno));
-
-    if(stat(fatt,&st1)){
-      prompt(NBATTR,club,msgno);
-      return;
-    }
-    if(stat(source,&st2)){
-      prompt(NBBODR,club,msgno);
-      return;
-    }
-
-    prompt(NBATT,club,msgno,st1.st_size);
-
-    for(;;){
-      inp_setflags(INF_HELP);
-      i=get_menu(&opt,0,0,NBBODATT,NBBAR,"AB",NBBAD,
-		st1.st_size>=st2.st_size?'A':'B');
-      inp_clearflags(INF_HELP);
-      if(!i){
-	prompt(BLTCAN);
-	return;
-      }
-      if(i==-1){
-	prompt(NBATT,club,msgno,st1.st_size);
-	cnc_end();
-	continue;
-      } else break;
-    }
-
-    if(opt=='A')strcpy(source,fatt);
-  }
+	strcpy (source, mkfname (MSGSDIR "/%s/" MESSAGEFILE, club, msgno));
+	strcpy (target,
+		mkfname (MSGSDIR "/%s/%s/%s", club, MSGBLTDIR, blt.fname));
 
 
-  /* Check if the target file already exists */
+	/* Check if the article already exists in the database */
 
-  if(!stat(target,&st)){
-    prompt(NBFNEX,blt.fname,blt.area);
-    return;
-  }
+	if (dbexists (blt.area, blt.fname)) {
+		struct bltidx tmp;
 
-
-  /* Link or copy the bulletin file */
-
-  if(opt=='A'){
-    if(link(source,target)<0){
-      if(fcopy(source,target)<0){
-	prompt(NBCPR);
-	return;
-      }
-    }
-  } else {
-    if(fcopymsg(source,target)<0){
-      prompt(NBCPR);
-      return;
-    }
-  }
+		dbget (&tmp);
+		prompt (NBFNXS, tmp.fname, tmp.area, tmp.num);
+		return;
+	}
 
 
-  /* Insert the database entry */
+	/* Prompt the user if the message has a file attachment */
 
-  blt.num=dbgetlast()+1; /* Just in case */
-  if(!dbins(&blt)){
-    prompt(NBERR);
-    return;
-  }
+	if (msg.flags & MSF_FILEATT) {
+		int     i;
+		char    fatt[256];
+		struct stat st1, st2;
+
+		strcpy (source,
+			mkfname (MSGSDIR "/%s/" MESSAGEFILE, club, msgno));
+		strcpy (fatt,
+			mkfname (MSGSDIR "/%s/%s/%d.att", club, MSGATTDIR,
+				 msgno));
+
+		if (stat (fatt, &st1)) {
+			prompt (NBATTR, club, msgno);
+			return;
+		}
+		if (stat (source, &st2)) {
+			prompt (NBBODR, club, msgno);
+			return;
+		}
+
+		prompt (NBATT, club, msgno, st1.st_size);
+
+		for (;;) {
+			inp_setflags (INF_HELP);
+			i = get_menu (&opt, 0, 0, NBBODATT, NBBAR, "AB", NBBAD,
+				      st1.st_size >= st2.st_size ? 'A' : 'B');
+			inp_clearflags (INF_HELP);
+			if (!i) {
+				prompt (BLTCAN);
+				return;
+			}
+			if (i == -1) {
+				prompt (NBATT, club, msgno, st1.st_size);
+				cnc_end ();
+				continue;
+			} else
+				break;
+		}
+
+		if (opt == 'A')
+			strcpy (source, fatt);
+	}
 
 
-  /* Notify the user */
+	/* Check if the target file already exists */
 
-  prompt(NBINFO,
-	 blt.num,
-	 blt.fname,
-	 blt.descr,
-	 blt.area,
-	 blt.author);
+	if (!stat (target, &st)) {
+		prompt (NBFNEX, blt.fname, blt.area);
+		return;
+	}
 
 
-  /* Update the club header */
+	/* Link or copy the bulletin file */
 
-  loadclubhdr(club);
-  clubhdr.nblts++;
-  saveclubhdr(&clubhdr);
+	if (opt == 'A') {
+		if (link (source, target) < 0) {
+			if (fcopy (source, target) < 0) {
+				prompt (NBCPR);
+				return;
+			}
+		}
+	} else {
+		if (fcopymsg (source, target) < 0) {
+			prompt (NBCPR);
+			return;
+		}
+	}
 
 
-  /* Audit it */
+	/* Insert the database entry */
 
-  if(audins)audit(thisuseronl.channel,AUDIT(BLTINS),
-		  thisuseracc.userid,blt.fname,blt.area);
+	blt.num = dbgetlast () + 1;	/* Just in case */
+	if (!dbins (&blt)) {
+		prompt (NBERR);
+		return;
+	}
+
+
+	/* Notify the user */
+
+	prompt (NBINFO, blt.num, blt.fname, blt.descr, blt.area, blt.author);
+
+
+	/* Update the club header */
+
+	loadclubhdr (club);
+	clubhdr.nblts++;
+	saveclubhdr (&clubhdr);
+
+
+	/* Audit it */
+
+	if (audins)
+		audit (thisuseronl.channel, AUDIT (BLTINS),
+		       thisuseracc.userid, blt.fname, blt.area);
 
 }
 
 
 static void
-insupl(char *club)
+insupl (char *club)
 {
-  char fname[256],command[256],*cp,name[256],dir[256];
-  char source[256],target[256];
-  FILE *fp;
-  int  count=-1;
-  struct bltidx blt;
+	char    fname[256], command[256], *cp, name[256], dir[256];
+	char    source[256], target[256];
+	FILE   *fp;
+	int     count = -1;
+	struct bltidx blt;
 
 
-  /* Upload the file */
-  
-  xfer_setaudit(0,NULL,NULL,0,NULL,NULL);
-  sprintf(source,thisuseracc.userid);
-  xfer_add(FXM_UPLOAD,source,"",0,0);
-  xfer_run();
+	/* Upload the file */
+
+	xfer_setaudit (0, NULL, NULL, 0, NULL, NULL);
+	sprintf (source, thisuseracc.userid);
+	xfer_add (FXM_UPLOAD, source, "", 0, 0);
+	xfer_run ();
 
 
-  /* Scan the uploaded file(s) */
-  
-  sprintf(fname,XFERLIST,getpid());
-  
-  if((fp=fopen(fname,"r"))==NULL){
-    prompt(BLTCAN);
-    goto kill;
-  }
-  
-  while (!feof(fp)){
-    char line[1024];
-    
-    if(fgets(line,sizeof(line),fp)){
-      count++;
-      if(!count)strcpy(dir,line);
-      else if(count==1)strcpy(name,line);
-    }
-  }
-  
-  if((cp=strchr(dir,'\n'))!=NULL)*cp=0;
-  if((cp=strchr(name,'\n'))!=NULL)*cp=0;
-  fclose(fp);
-  
-  if(count<1){
-    prompt(BLTCAN);
-    goto kill;
-  } else if(count>1){
-    prompt(BLTUPL2M);
-  }
+	/* Scan the uploaded file(s) */
+
+	sprintf (fname, XFERLIST, getpid ());
+
+	if ((fp = fopen (fname, "r")) == NULL) {
+		prompt (BLTCAN);
+		goto kill;
+	}
+
+	while (!feof (fp)) {
+		char    line[1024];
+
+		if (fgets (line, sizeof (line), fp)) {
+			count++;
+			if (!count)
+				strcpy (dir, line);
+			else if (count == 1)
+				strcpy (name, line);
+		}
+	}
+
+	if ((cp = strchr (dir, '\n')) != NULL)
+		*cp = 0;
+	if ((cp = strchr (name, '\n')) != NULL)
+		*cp = 0;
+	fclose (fp);
+
+	if (count < 1) {
+		prompt (BLTCAN);
+		goto kill;
+	} else if (count > 1) {
+		prompt (BLTUPL2M);
+	}
 
 
-  /* Prepare the new bulletin record */
+	/* Prepare the new bulletin record */
 
-  bzero(&blt,sizeof(struct bltidx));
+	bzero (&blt, sizeof (struct bltidx));
 
-  blt.num=dbgetlast()+1;
-  blt.date=today();
-  strcpy(blt.area,club);
-
-
-  /* Get the author of the bulletin */
-
-  if(!get_userid(blt.author,NBUSER,NBRRUID,NBUSERD,thisuseracc.userid,0)){
-    prompt(BLTCAN);
-    goto kill;
-  }
+	blt.num = dbgetlast () + 1;
+	blt.date = today ();
+	strcpy (blt.area, club);
 
 
-  /* Get the description/title of the bulletin */
+	/* Get the author of the bulletin */
 
-  if(!getdescr(blt.descr,NBDSCR)){
-    prompt(BLTCAN);
-    goto kill;
-  }
-
-
-  /* Generate the filename */
-
-  {
-    int i;
-    struct stat st;
-    char *sp;
-    
-    if((cp=strrchr(name,'/'))!=NULL)*cp++=0;
-    if(strlen(cp)>8)cp[8]=0;
-    if((sp=strchr(cp,'.'))!=NULL){
-      *sp++=0;
-      if(strlen(sp)>3)sp[3]=0;
-    }
-    sprintf(blt.fname,"%s.%s",cp,(sp&&*sp)?sp:"blt");
-    for(i=1;;i++){
-      strcpy(target,mkfname(MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname));
-      if(stat(target,&st))break;
-      sprintf(blt.fname,"%s.%d",cp,i);
-    }
-  }
+	if (!get_userid
+	    (blt.author, NBUSER, NBRRUID, NBUSERD, thisuseracc.userid, 0)) {
+		prompt (BLTCAN);
+		goto kill;
+	}
 
 
-  /* Now copy the uploaded file over */
+	/* Get the description/title of the bulletin */
 
-  sprintf(source,"%s/%s",dir,cp);
-  if(fcopy(source,target)){
-    prompt(NBCPER2,blt.fname);
-    unlink(target);
-    goto kill;
-  }
+	if (!getdescr (blt.descr, NBDSCR)) {
+		prompt (BLTCAN);
+		goto kill;
+	}
 
 
-  /* Insert the database entry */
+	/* Generate the filename */
 
-  if(!dbins(&blt)){
-    prompt(NBERR);
-    goto kill;
-  }
+	{
+		int     i;
+		struct stat st;
+		char   *sp;
 
-  
-  /* Notify the user */
+		if ((cp = strrchr (name, '/')) != NULL)
+			*cp++ = 0;
+		if (strlen (cp) > 8)
+			cp[8] = 0;
+		if ((sp = strchr (cp, '.')) != NULL) {
+			*sp++ = 0;
+			if (strlen (sp) > 3)
+				sp[3] = 0;
+		}
+		sprintf (blt.fname, "%s.%s", cp, (sp && *sp) ? sp : "blt");
+		for (i = 1;; i++) {
+			strcpy (target,
+				mkfname (MSGSDIR "/%s/%s/%s", club, MSGBLTDIR,
+					 blt.fname));
+			if (stat (target, &st))
+				break;
+			sprintf (blt.fname, "%s.%d", cp, i);
+		}
+	}
 
-  prompt(NBINFO,
-	 blt.num,
-	 blt.fname,
-	 blt.descr,
-	 blt.area,
-	 blt.author);
+
+	/* Now copy the uploaded file over */
+
+	sprintf (source, "%s/%s", dir, cp);
+	if (fcopy (source, target)) {
+		prompt (NBCPER2, blt.fname);
+		unlink (target);
+		goto kill;
+	}
 
 
-  /* Update the club header */
+	/* Insert the database entry */
 
-  loadclubhdr(club);
-  clubhdr.nblts++;
-  saveclubhdr(&clubhdr);
+	if (!dbins (&blt)) {
+		prompt (NBERR);
+		goto kill;
+	}
 
 
-  /* Audit it */
+	/* Notify the user */
 
-  if(audins)audit(thisuseronl.channel,AUDIT(BLTINS),
-		  thisuseracc.userid,blt.fname,blt.area);
+	prompt (NBINFO, blt.num, blt.fname, blt.descr, blt.area, blt.author);
 
- 
-  /* Kill remaining transfer files */
 
- kill:
-  sprintf(command,"rm -rf %s %s",fname,dir);
-  system(command);
-  if(name[0]){
-    sprintf(command,"rm -f %s >&/dev/null",name);
-    system(command);
-  }
-  xfer_kill_list();
+	/* Update the club header */
+
+	loadclubhdr (club);
+	clubhdr.nblts++;
+	saveclubhdr (&clubhdr);
+
+
+	/* Audit it */
+
+	if (audins)
+		audit (thisuseronl.channel, AUDIT (BLTINS),
+		       thisuseracc.userid, blt.fname, blt.area);
+
+
+	/* Kill remaining transfer files */
+
+      kill:
+	sprintf (command, "rm -rf %s %s", fname, dir);
+	system (command);
+	if (name[0]) {
+		sprintf (command, "rm -f %s >&/dev/null", name);
+		system (command);
+	}
+	xfer_kill_list ();
 }
 
 
 void
-insertblt()
+insertblt ()
 {
-  char *insclub;
-  int msgnum;
+	char   *insclub;
+	int     msgnum;
 
-  if(getaccess(club)<flaxes)return;
-  
-  if((insclub=askclub())==NULL){
-    prompt(BLTCAN);
-    return;
-  }
+	if (getaccess (club) < flaxes)
+		return;
 
-  if((msgnum=askfile(insclub))==0){
-    prompt(BLTCAN);
-    return;
-  } else if(msgnum==-1) {
-    cnc_end();
-    insupl(insclub);
-  }
-  else insmsg(insclub,msgnum);
+	if ((insclub = askclub ()) == NULL) {
+		prompt (BLTCAN);
+		return;
+	}
+
+	if ((msgnum = askfile (insclub)) == 0) {
+		prompt (BLTCAN);
+		return;
+	} else if (msgnum == -1) {
+		cnc_end ();
+		insupl (insclub);
+	} else
+		insmsg (insclub, msgnum);
 }
 
 
 int
-extins(char *msgspec)
+extins (char *msgspec)
 {
-  char *cp;
-  if((cp=strchr(msgspec,'/'))==NULL){
-    error_fatal("Syntax error running bulletins -insert %s",msgspec);
-  }
-  *cp++=0;
-  insmsg(msgspec,atoi(cp));
-  return 0;
+	char   *cp;
+
+	if ((cp = strchr (msgspec, '/')) == NULL) {
+		error_fatal ("Syntax error running bulletins -insert %s",
+			     msgspec);
+	}
+	*cp++ = 0;
+	insmsg (msgspec, atoi (cp));
+	return 0;
 }
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -49,10 +52,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -69,31 +70,31 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include <sys/wait.h>
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 /* The query result data type. Total size: 96 bytes */
 
 struct result {
-  char keyword[24];		/* The matching keyword, if available */
-  char fname  [24];		/* The filename of the matching file */
-  char summary[44];		/* Short description of the file */
-  int  libnum;			/* Library number this file belongs to */
+	char    keyword[24];	/* The matching keyword, if available */
+	char    fname[24];	/* The filename of the matching file */
+	char    summary[44];	/* Short description of the file */
+	int     libnum;		/* Library number this file belongs to */
 };
 
 
-struct  result *resultcache=NULL;  /* Enough results for one page */
-int     numresultsincache;         /* Number of results in cache */
-int     lastpage=-1;		   /* The last page displayed */
+struct result *resultcache = NULL;	/* Enough results for one page */
+int     numresultsincache;	/* Number of results in cache */
+int     lastpage = -1;		/* The last page displayed */
 
 
 struct _daemoninfo {
-  int  daemondead;		/* The daemon has finished its task */
-  int  filecreated;		/* The daemon has created the file */
-  int  nummatches;		/* Number of matches found so far */
-  int  nomore;                  /* No more matches found */
+	int     daemondead;	/* The daemon has finished its task */
+	int     filecreated;	/* The daemon has created the file */
+	int     nummatches;	/* Number of matches found so far */
+	int     nomore;		/* No more matches found */
 };
 
 
@@ -116,982 +117,1087 @@ struct _daemoninfo {
 #define SHF_REGEXP    0x80	/* Search by regular expression or wildcard */
 
 
-static char    searchfor[1024];
-static int     searchtype;
-static time_t  searchtime;
-static char    resultfname[256];
-static FILE   *resultfp;
-static int     daemonpid;
+static char searchfor[1024];
+static int searchtype;
+static time_t searchtime;
+static char resultfname[256];
+static FILE *resultfp;
+static int daemonpid;
 
-struct re_pattern_buffer *regexp=NULL;
+struct re_pattern_buffer *regexp = NULL;
 
 
 static char *
-getsearchterm()
+getsearchterm ()
 {
-  char *fn=inp_buffer;
-  
-  for(;;){
-    if(cnc_more())fn=cnc_word();
-    else {
-      prompt(SRASK);
-      inp_get(0);
-      fn=inp_buffer;
-    }
+	char   *fn = inp_buffer;
 
-    if(inp_isX(fn))return NULL;
-    else if(!strlen(fn)){
-      cnc_end();
-      continue;
-    } else if(!strcmp(fn,"?")){
-      prompt(SRHELP);
-      cnc_end();
-      continue;
-    } else break;
-  }
+	for (;;) {
+		if (cnc_more ())
+			fn = cnc_word ();
+		else {
+			prompt (SRASK);
+			inp_get (0);
+			fn = inp_buffer;
+		}
 
-  return fn;
+		if (inp_isX (fn))
+			return NULL;
+		else if (!strlen (fn)) {
+			cnc_end ();
+			continue;
+		} else if (!strcmp (fn, "?")) {
+			prompt (SRHELP);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
+
+	return fn;
 }
 
 
-int mkregexp(char *re)
+int
+mkregexp (char *re)
 {
-  int len=strlen(re);
-  char *errmsg;
+	int     len = strlen (re);
+	char   *errmsg;
 
-  lcase(re);
+	lcase (re);
 
-  if(regexp==NULL){
-    regexp=alcmem(sizeof(struct re_pattern_buffer));
-    bzero(regexp,sizeof(struct re_pattern_buffer));
-  }
+	if (regexp == NULL) {
+		regexp = alcmem (sizeof (struct re_pattern_buffer));
+		bzero (regexp, sizeof (struct re_pattern_buffer));
+	}
 
-  regexp->allocated=len*2;
-  if(regexp->buffer)free(regexp->buffer);
-  regexp->buffer=alcmem(regexp->allocated);
-  regexp->translate=NULL;
-  if(regexp->fastmap)free(regexp->fastmap);
-  regexp->fastmap=alcmem(256);
-  regexp->fastmap_accurate=0;
-  errmsg=(char*)re_compile_pattern(re,len,regexp);
-  if(errmsg!=NULL){
-    prompt(SRRXERR,re,errmsg);
-    return 0;
-  }
+	regexp->allocated = len * 2;
+	if (regexp->buffer)
+		free (regexp->buffer);
+	regexp->buffer = alcmem (regexp->allocated);
+	regexp->translate = NULL;
+	if (regexp->fastmap)
+		free (regexp->fastmap);
+	regexp->fastmap = alcmem (256);
+	regexp->fastmap_accurate = 0;
+	errmsg = (char *) re_compile_pattern (re, len, regexp);
+	if (errmsg != NULL) {
+		prompt (SRRXERR, re, errmsg);
+		return 0;
+	}
 
-  return 1;
+	return 1;
 }
 
 
-int mkwildcard (char *s)
+int
+mkwildcard (char *s)
 {
-  char tmp[2048], add[4];
-  register int i, quotenext=0;
+	char    tmp[2048], add[4];
+	register int i, quotenext = 0;
 
-  lcase(s);
-  strcpy(tmp,"^");
-  for(i=0;s[i];s++){
-    if(quotenext==1){
-      sprintf(add,"%c",s[i]);
-      strcat(tmp,add);
-    } else switch(s[i]){
-    case '?':
-      strcat(tmp,".");
-      break;
-    case '*':
-      strcat(tmp,".*");
-      break;
-    case '{': case '}': case ')': case '(':
-    case '+': case '|': case '^': case '$':
-    case '.':
-    case '\\':
-      sprintf(add,"\\%c",s[i]);
-      strcat(tmp,add);
-      quotenext=1;
-      break;
-    default:
-      tmp[strlen(tmp)+1]=0;
-      tmp[strlen(tmp)]=s[i];
-    }
-  }
-  strcat(tmp,"$");
-  return mkregexp(tmp);
-}
-
-
-static int
-grokanywhere(char *s)
-{
-  searchtype=SHF_ANYWHERE;
-  strcpy(searchfor,s);
-  return 1;
-}
-
-
-static int
-_grokterm(char *s, int type)
-{
-  searchtype=type;
-
-  /* It's a regexp */
-
-  if(*s=='/'){
-    char *end=&s[strlen(s)-1];
-    if(*end=='/')*end=0;	/* Kill trailing slash */
-    s++;			/* Kill leading slash */
-    searchtype|=SHF_REGEXP;	/* Searching by regexp */
-    if(!mkregexp(s))return 0;	/* Compile the regexp and check it */
-  }
-  
-  /* A string with wildcards. Translate DOS/Unix wildcards into a
-     regexp and treat this whole thing as a regexp search. */
-
-  else if(strcspn(s,"*?[]")!=strlen(s)){
-    searchtype|=SHF_REGEXP;
-    if(!mkwildcard(s))return 0;	/* Convert wildcards into regexp and check */
-  }
-
-  /* Aha, a literal string */
-  
-  else searchtype|=SHF_LITERAL;
-
-  strcpy(searchfor,s);
-  return 1;
+	lcase (s);
+	strcpy (tmp, "^");
+	for (i = 0; s[i]; s++) {
+		if (quotenext == 1) {
+			sprintf (add, "%c", s[i]);
+			strcat (tmp, add);
+		} else
+			switch (s[i]) {
+			case '?':
+				strcat (tmp, ".");
+				break;
+			case '*':
+				strcat (tmp, ".*");
+				break;
+			case '{':
+			case '}':
+			case ')':
+			case '(':
+			case '+':
+			case '|':
+			case '^':
+			case '$':
+			case '.':
+			case '\\':
+				sprintf (add, "\\%c", s[i]);
+				strcat (tmp, add);
+				quotenext = 1;
+				break;
+			default:
+				tmp[strlen (tmp) + 1] = 0;
+				tmp[strlen (tmp)] = s[i];
+			}
+	}
+	strcat (tmp, "$");
+	return mkregexp (tmp);
 }
 
 
 static int
-grokdate(char *s)
+grokanywhere (char *s)
 {
-  int t;
-  struct tm tm;
-
-  if(*s=='-'){
-    searchtime=time(0)-(60*60*24*(1+atoi(++s)));
-    searchtype=SHF_DAYCOUNT;
-    return 1;
-  }
-  
-  t=scandate(s);
-  if(t<0){
-    prompt(SRDTERR);
-    return 0;
-  }
-  
-  bzero(&tm,sizeof(tm));
-  tm.tm_mday=tdday(t);
-  tm.tm_mon=tdmonth(t);
-  tm.tm_year=tdyear(t)-1900;
-  searchtime=mktime(&tm);
-  searchtype=SHF_DATE;
-  return 1;
+	searchtype = SHF_ANYWHERE;
+	strcpy (searchfor, s);
+	return 1;
 }
 
 
 static int
-grokterm(char *s)
+_grokterm (char *s, int type)
 {
-  if(*s=='+')return _grokterm(++s,SHF_KEYWORD);
-  else if(*s=='-' || strchr(s,'/')>s)return grokdate(s);
-  else if(*s=='?')return grokanywhere(++s);
-  else return _grokterm(s,SHF_FNAME);
+	searchtype = type;
+
+	/* It's a regexp */
+
+	if (*s == '/') {
+		char   *end = &s[strlen (s) - 1];
+
+		if (*end == '/')
+			*end = 0;	/* Kill trailing slash */
+		s++;		/* Kill leading slash */
+		searchtype |= SHF_REGEXP;	/* Searching by regexp */
+		if (!mkregexp (s))
+			return 0;	/* Compile the regexp and check it */
+	}
+
+	/* A string with wildcards. Translate DOS/Unix wildcards into a
+	   regexp and treat this whole thing as a regexp search. */
+
+	else if (strcspn (s, "*?[]") != strlen (s)) {
+		searchtype |= SHF_REGEXP;
+		if (!mkwildcard (s))
+			return 0;	/* Convert wildcards into regexp and check */
+	}
+
+	/* Aha, a literal string */
+
+	else
+		searchtype |= SHF_LITERAL;
+
+	strcpy (searchfor, s);
+	return 1;
+}
+
+
+static int
+grokdate (char *s)
+{
+	int     t;
+	struct tm tm;
+
+	if (*s == '-') {
+		searchtime = time (0) - (60 * 60 * 24 * (1 + atoi (++s)));
+		searchtype = SHF_DAYCOUNT;
+		return 1;
+	}
+
+	t = scandate (s);
+	if (t < 0) {
+		prompt (SRDTERR);
+		return 0;
+	}
+
+	bzero (&tm, sizeof (tm));
+	tm.tm_mday = tdday (t);
+	tm.tm_mon = tdmonth (t);
+	tm.tm_year = tdyear (t) - 1900;
+	searchtime = mktime (&tm);
+	searchtype = SHF_DATE;
+	return 1;
+}
+
+
+static int
+grokterm (char *s)
+{
+	if (*s == '+')
+		return _grokterm (++s, SHF_KEYWORD);
+	else if (*s == '-' || strchr (s, '/') > s)
+		return grokdate (s);
+	else if (*s == '?')
+		return grokanywhere (++s);
+	else
+		return _grokterm (s, SHF_FNAME);
 }
 
 
 static void
-found(struct libidx *l, struct fileidx *f, char *keyword)
+found (struct libidx *l, struct fileidx *f, char *keyword)
 {
-  struct result r;
-  bzero(&r,sizeof(r));
-  if(searchtype&(SHF_DAYCOUNT|SHF_DATE)){
-    struct tm *tm=localtime(&(f->timestamp));
-    strcpy(r.keyword,strdate(makedate(tm->tm_mday,
-				      tm->tm_mon+1,
-				      tm->tm_year+1900)));
-  } else if(keyword)strcpy(r.keyword,keyword);
-  strcpy(r.fname,f->fname);
-  strcpy(r.summary,f->summary);
-  r.libnum=f->flibnum;
-  if(!fwrite(&r,sizeof(r),1,resultfp)){
-    error_fatalsys("Search daemon unable to write to %s",resultfname);
-  }
-  fflush(resultfp);		/* Keep it in sync */
-  daemoninfo.nummatches++;
+	struct result r;
+
+	bzero (&r, sizeof (r));
+	if (searchtype & (SHF_DAYCOUNT | SHF_DATE)) {
+		struct tm *tm = localtime (&(f->timestamp));
+
+		strcpy (r.keyword, strdate (makedate (tm->tm_mday,
+						      tm->tm_mon + 1,
+						      tm->tm_year + 1900)));
+	} else if (keyword)
+		strcpy (r.keyword, keyword);
+	strcpy (r.fname, f->fname);
+	strcpy (r.summary, f->summary);
+	r.libnum = f->flibnum;
+	if (!fwrite (&r, sizeof (r), 1, resultfp)) {
+		error_fatalsys ("Search daemon unable to write to %s",
+				resultfname);
+	}
+	fflush (resultfp);	/* Keep it in sync */
+	daemoninfo.nummatches++;
 }
 
 
 static void
-os_found(struct libidx *l, char *fname, struct stat *st)
+os_found (struct libidx *l, char *fname, struct stat *st)
 {
-  struct result r;
-  bzero(&r,sizeof(r));
-  if(searchtype&(SHF_DAYCOUNT|SHF_DATE)){
-    struct tm *tm=localtime(&(st->st_mtime));
-    strcpy(r.keyword,strdate(makedate(tm->tm_mday,
-				      tm->tm_mon+1,
-				      tm->tm_year+1900)));
-  }
-  strcpy(r.fname,fname);
-  strcpy(r.summary,osfdesc);
-  r.libnum=l->libnum;
-  if(!fwrite(&r,sizeof(r),1,resultfp)){
-    error_fatalsys("Search daemon unable to write to %s",resultfname);
-  }
-  fflush(resultfp);		/* Keep it in sync */
-  daemoninfo.nummatches++;
+	struct result r;
+
+	bzero (&r, sizeof (r));
+	if (searchtype & (SHF_DAYCOUNT | SHF_DATE)) {
+		struct tm *tm = localtime (&(st->st_mtime));
+
+		strcpy (r.keyword, strdate (makedate (tm->tm_mday,
+						      tm->tm_mon + 1,
+						      tm->tm_year + 1900)));
+	}
+	strcpy (r.fname, fname);
+	strcpy (r.summary, osfdesc);
+	r.libnum = l->libnum;
+	if (!fwrite (&r, sizeof (r), 1, resultfp)) {
+		error_fatalsys ("Search daemon unable to write to %s",
+				resultfname);
+	}
+	fflush (resultfp);	/* Keep it in sync */
+	daemoninfo.nummatches++;
 }
 
 
 static void
-search_fnames(struct libidx *l)
+search_fnames (struct libidx *l)
 {
-  int morefiles;
-  struct fileidx f;
+	int     morefiles;
+	struct fileidx f;
 
-  if(searchtype&SHF_LITERAL){
-    /* Quick Typhoon-based search for literal filename */
+	if (searchtype & SHF_LITERAL) {
+		/* Quick Typhoon-based search for literal filename */
 
-    if(fileread(l->libnum,searchfor,1,&f))found(l,&f,NULL);
-  } else {
-    /* Slower search for regexp */
+		if (fileread (l->libnum, searchfor, 1, &f))
+			found (l, &f, NULL);
+	} else {
+		/* Slower search for regexp */
 
-    morefiles=filegetfirst(l->libnum,&f,1);
-    while(morefiles){
-      char tmp[24];
-      int len=strlen(f.fname);
-      strcpy(tmp,f.fname);
-      lcase(tmp);
-      if(!f.approved || f.flibnum!=l->libnum)break;
-      if((len=re_search(regexp,tmp,len,0,len,NULL))>=0)found(l,&f,NULL);
-      morefiles=filegetnext(l->libnum,&f);
-    }
-  }
+		morefiles = filegetfirst (l->libnum, &f, 1);
+		while (morefiles) {
+			char    tmp[24];
+			int     len = strlen (f.fname);
+
+			strcpy (tmp, f.fname);
+			lcase (tmp);
+			if (!f.approved || f.flibnum != l->libnum)
+				break;
+			if ((len =
+			     re_search (regexp, tmp, len, 0, len, NULL)) >= 0)
+				found (l, &f, NULL);
+			morefiles = filegetnext (l->libnum, &f);
+		}
+	}
 }
 
 
 static char *match_to;
 
 
-static int insensitive_match(const struct dirent *d)
+static int
+insensitive_match (const struct dirent *d)
 {
-  return sameas(match_to,(char*)d->d_name);
+	return sameas (match_to, (char *) d->d_name);
 }
 
 
 static void
-os_search_fnames(struct libidx *l)
+os_search_fnames (struct libidx *l)
 {
-  struct stat st;
-  char        fname[1024];
+	struct stat st;
+	char    fname[1024];
 
-  if(searchtype&SHF_LITERAL){
-    int              i,j;
-    struct dirent  **d=NULL;
-    
-
-    /* Looking for one file only, the search is literal */
-    
-    match_to=searchfor;
-    if((j=scandir(l->dir,&d,insensitive_match,alphasort))==0){
-      if(d)free(d);
-      return;
-    }
-    
-    for(i=0;i<j;i++){
-      sprintf(fname,"%s/%s",library.dir,d[i]->d_name);
-      if(stat(fname,&st)==0) os_found(l,d[i]->d_name,&st);
-      free(d[i]);
-    }
-    free(d);
-  
-  } else {
-    DIR            *dp;
-    struct dirent  *d;
-    
-    /* Slower search for regexp */
+	if (searchtype & SHF_LITERAL) {
+		int     i, j;
+		struct dirent **d = NULL;
 
 
-    /* Open the library directory */
-    
-    if((dp=opendir(l->dir))==NULL){
-      error_fatalsys("Unable to open library %s (directory: %s)",
-	       l->fullname,l->dir);
-    }
+		/* Looking for one file only, the search is literal */
 
-    while((d=readdir(dp))!=NULL){
-      char tmp[24];
-      int len=strlen(d->d_name);
+		match_to = searchfor;
+		if ((j =
+		     scandir (l->dir, &d, insensitive_match,
+			      alphasort)) == 0) {
+			if (d)
+				free (d);
+			return;
+		}
 
-      strcpy(tmp,d->d_name);
-      lcase(tmp);
+		for (i = 0; i < j; i++) {
+			sprintf (fname, "%s/%s", library.dir, d[i]->d_name);
+			if (stat (fname, &st) == 0)
+				os_found (l, d[i]->d_name, &st);
+			free (d[i]);
+		}
+		free (d);
 
-      if((len=re_search(regexp,tmp,len,0,len,NULL))>=0) {
-	sprintf(fname,"%s/%s",l->dir,d->d_name);
-	if(stat(fname,&st)==0) os_found(l,d->d_name,&st);
-      }
-    }
+	} else {
+		DIR    *dp;
+		struct dirent *d;
 
-    closedir(dp);
-  }
-}
-
-
-static void
-search_keywords(struct libidx *l)
-{
-  int morekeys;
-  struct maintkey    k;
-  struct fileidx     f;
-
-  if(searchtype&SHF_LITERAL){
-    /* Quick Typhoon-based search for literal keyword */
-
-    morekeys=keywordfind(l->libnum,searchfor,&k);
-    while(morekeys){
-      if(!sameas(searchfor,k.keyword))break;
-      if(fileread(l->libnum,k.fname,1,&f))found(l,&f,k.keyword);
-      morekeys=keygetnext(l->libnum,&k);
-    }
-  } else {
-    /* Slower search for regexp */
-    
-    morekeys=keygetfirst(l->libnum,&k);
-    while(morekeys){
-      char tmp[24];
-      int len=strlen(k.keyword);
-      strcpy(tmp,k.keyword);
-      lcase(k.keyword);
-      if(!k.approved||(k.klibnum!=l->libnum))break;
-      if((len=re_search(regexp,tmp,len,0,len,NULL))>=0){
-	if(fileread(l->libnum,k.fname,1,&f))found(l,&f,k.keyword);
-      }
-      morekeys=keygetnext(l->libnum,&k);
-    }
-  }
-}
+		/* Slower search for regexp */
 
 
-static void
-search_anywhere(struct libidx *l,char *phterm)
-{
-  int morefiles;
-  struct fileidx f;
+		/* Open the library directory */
 
-  /* Ssslllooowww phonetic search */
+		if ((dp = opendir (l->dir)) == NULL) {
+			error_fatalsys
+			    ("Unable to open library %s (directory: %s)",
+			     l->fullname, l->dir);
+		}
 
-  morefiles=filegetfirst(l->libnum,&f,1);
-  while(morefiles){
-    int matched=0;
-    struct fileidx tmp;
-    if(!f.approved || f.flibnum!=l->libnum)break;
-    
-    memcpy(&tmp,&f,sizeof(struct fileidx));
-    
-    /* First search the file record itself */
-    
-    if(strstr(phonetic(tmp.fname),phterm))matched=1;
-    else if(strstr(phonetic(tmp.uploader),phterm))matched=1;
-    else if(strstr(phonetic(tmp.summary),phterm))matched=1;
-    else if(strstr(phonetic(tmp.description),phterm))matched=1;
-    
-    /* Have we found it? */
-    
-    if(matched){
-      found(l,&f,NULL);
-    } else {
-      
-      /* Nope, so do the keywords as well. */
-      
-      struct filekey k,tmp;
-      int    morekeys;
-      
-      morekeys=keyfilefirst(l->libnum,f.fname,1,&k);
-      while(morekeys){
-	memcpy(&tmp,&k,sizeof(struct filekey));
-	if(strstr(phonetic(tmp.keyword),phterm)){
-	  matched=1;
-	  break;
+		while ((d = readdir (dp)) != NULL) {
+			char    tmp[24];
+			int     len = strlen (d->d_name);
+
+			strcpy (tmp, d->d_name);
+			lcase (tmp);
+
+			if ((len =
+			     re_search (regexp, tmp, len, 0, len,
+					NULL)) >= 0) {
+				sprintf (fname, "%s/%s", l->dir, d->d_name);
+				if (stat (fname, &st) == 0)
+					os_found (l, d->d_name, &st);
+			}
+		}
+
+		closedir (dp);
 	}
-	morekeys=keyfilenext(l->libnum,f.fname,1,&k);
-      }
-      if(matched)found(l,&f,k.keyword);
-    }
-    
-    morefiles=filegetnext(l->libnum,&f);
-  }
 }
 
 
 static void
-os_search_anywhere(struct libidx *l,char *phterm)
+search_keywords (struct libidx *l)
 {
-  struct stat     st;
-  char            fname[1024];
-  DIR            *dp;
-  struct dirent  *d;
+	int     morekeys;
+	struct maintkey k;
+	struct fileidx f;
 
-  /* In OS-only libs, the only 'anywhere' we can look at is the filename */
-    
+	if (searchtype & SHF_LITERAL) {
+		/* Quick Typhoon-based search for literal keyword */
 
-  /* Open the library directory */
-    
-  if((dp=opendir(l->dir))==NULL){
-    error_fatalsys("Unable to open library %s (directory: %s)",
-	     l->fullname,l->dir);
-  }
+		morekeys = keywordfind (l->libnum, searchfor, &k);
+		while (morekeys) {
+			if (!sameas (searchfor, k.keyword))
+				break;
+			if (fileread (l->libnum, k.fname, 1, &f))
+				found (l, &f, k.keyword);
+			morekeys = keygetnext (l->libnum, &k);
+		}
+	} else {
+		/* Slower search for regexp */
 
-  while((d=readdir(dp))!=NULL){
-    if(strstr(phonetic(d->d_name),phterm)){
-      sprintf(fname,"%s/%s",l->dir,d->d_name);
-      if(stat(fname,&st)==0) os_found(l,d->d_name,&st);
-    }
-  }
-  
-  closedir(dp);
-}
+		morekeys = keygetfirst (l->libnum, &k);
+		while (morekeys) {
+			char    tmp[24];
+			int     len = strlen (k.keyword);
 
-
-static void
-search_date(struct libidx *l)
-{
-  int morefiles;
-  struct fileidx f;
-
-  /* Quick Typhoon-based search for timestamps */
-
-  morefiles=filegetoldest(l->libnum,searchtime,1,&f);
-  while(morefiles){
-    if(!f.approved || f.flibnum!=l->libnum || f.timestamp<searchtime)break;
-    found(l,&f,NULL);
-    morefiles=filegetnextoldest(l->libnum,&f);
-  }
-}
-
-
-static void
-os_search_date(struct libidx *l)
-{
-  struct stat     st;
-  char            fname[1024];
-  DIR            *dp;
-  struct dirent  *d;
-
-  /* Open the library directory */
-    
-  if((dp=opendir(l->dir))==NULL){
-    error_fatalsys("Unable to open library %s (directory: %s)",
-	     l->fullname,l->dir);
-  }
-
-  while((d=readdir(dp))!=NULL){
-    sprintf(fname,"%s/%s",l->dir,d->d_name);
-    if(stat(fname,&st))continue;
-    if(st.st_mtime>=searchtime)os_found(l,d->d_name,&st);
-  }
-  
-  closedir(dp);
-}
-
-
-static void
-daemon_search()
-{
-  int   morelibs;
-
-  if((resultfp=fopen(resultfname,"w"))==NULL){
-    error_fatalsys("Search daemon couldn't create %s",resultfname);
-  }
-
-  daemoninfo.filecreated=1;
- 
-  morelibs=firstchild();
-  while(morelibs>=0){
-    struct libidx  l;
-
-    if(!libreadnum(morelibs,&l)){
-      error_fatal("Oops, library %d disappeared while searching!",
-	    morelibs);
-    }
-
-    /* Check security */
-    forcepasswordfail();
-    if(getlibaccess(&l,ACC_ENTER)){
-      switch(searchtype&SHF_TYPE){
-      case SHF_FNAME:
-	if(l.flags&LBF_OSDIR)os_search_fnames(&l);
-	else search_fnames(&l);
-	break;
-
-      case SHF_KEYWORD:
-	if((l.flags&LBF_OSDIR)==0)search_keywords(&l);
-	break;
-
-      case SHF_ANYWHERE:
-	{
-	  /* Turn the search key into a phonetic string */
-	  char phterm[1024];
-	  strcpy(phterm,searchfor);
-	  phonetic(phterm);
-	  if(l.flags&LBF_OSDIR)os_search_anywhere(&l,phterm);
-	  else search_anywhere(&l,phterm);
+			strcpy (tmp, k.keyword);
+			lcase (k.keyword);
+			if (!k.approved || (k.klibnum != l->libnum))
+				break;
+			if ((len =
+			     re_search (regexp, tmp, len, 0, len,
+					NULL)) >= 0) {
+				if (fileread (l->libnum, k.fname, 1, &f))
+					found (l, &f, k.keyword);
+			}
+			morekeys = keygetnext (l->libnum, &k);
+		}
 	}
-	break;
-      case SHF_DAYCOUNT:
-      case SHF_DATE:
-	if(l.flags&LBF_OSDIR)os_search_date(&l);
-	else search_date(&l);
-	break;
-      }
-    }
-    morelibs=nextchild();
-  }
-
-  fclose(resultfp);
-  daemoninfo.daemondead=1;
-  exit(0);			/* End of daemon's life */
 }
 
 
 static void
-show_entry(int row, struct libidx *l, struct result *r)
+search_anywhere (struct libidx *l, char *phterm)
 {
-  char tmp1[256], tmp2[256];
+	int     morefiles;
+	struct fileidx f;
 
-  tmp1[0]=tmp2[0]=0;
-  sprintf(tmp2,"%s/%s",&(l->fullname[strlen(library.fullname)+1]),r->fname);
-  if(tmp2[0]=='/')strcpy(tmp2,r->fname);
-  if(strlen(tmp2)+strlen(r->keyword)>47){
-    char *s=&tmp2[strlen(tmp2)+strlen(r->keyword)-44];
-    sprintf(tmp1,"...%s",s);
-  } else strcpy(tmp1,tmp2);
-  
-  prompt(SRTABL,row,r->keyword,strlen(r->keyword)?" ":"",
-	 46-strlen(r->keyword)-(strlen(r->keyword)>0),
-	 tmp1,r->summary);
+	/* Ssslllooowww phonetic search */
+
+	morefiles = filegetfirst (l->libnum, &f, 1);
+	while (morefiles) {
+		int     matched = 0;
+		struct fileidx tmp;
+
+		if (!f.approved || f.flibnum != l->libnum)
+			break;
+
+		memcpy (&tmp, &f, sizeof (struct fileidx));
+
+		/* First search the file record itself */
+
+		if (strstr (phonetic (tmp.fname), phterm))
+			matched = 1;
+		else if (strstr (phonetic (tmp.uploader), phterm))
+			matched = 1;
+		else if (strstr (phonetic (tmp.summary), phterm))
+			matched = 1;
+		else if (strstr (phonetic (tmp.description), phterm))
+			matched = 1;
+
+		/* Have we found it? */
+
+		if (matched) {
+			found (l, &f, NULL);
+		} else {
+
+			/* Nope, so do the keywords as well. */
+
+			struct filekey k, tmp;
+			int     morekeys;
+
+			morekeys = keyfilefirst (l->libnum, f.fname, 1, &k);
+			while (morekeys) {
+				memcpy (&tmp, &k, sizeof (struct filekey));
+				if (strstr (phonetic (tmp.keyword), phterm)) {
+					matched = 1;
+					break;
+				}
+				morekeys =
+				    keyfilenext (l->libnum, f.fname, 1, &k);
+			}
+			if (matched)
+				found (l, &f, k.keyword);
+		}
+
+		morefiles = filegetnext (l->libnum, &f);
+	}
+}
+
+
+static void
+os_search_anywhere (struct libidx *l, char *phterm)
+{
+	struct stat st;
+	char    fname[1024];
+	DIR    *dp;
+	struct dirent *d;
+
+	/* In OS-only libs, the only 'anywhere' we can look at is the filename */
+
+
+	/* Open the library directory */
+
+	if ((dp = opendir (l->dir)) == NULL) {
+		error_fatalsys ("Unable to open library %s (directory: %s)",
+				l->fullname, l->dir);
+	}
+
+	while ((d = readdir (dp)) != NULL) {
+		if (strstr (phonetic (d->d_name), phterm)) {
+			sprintf (fname, "%s/%s", l->dir, d->d_name);
+			if (stat (fname, &st) == 0)
+				os_found (l, d->d_name, &st);
+		}
+	}
+
+	closedir (dp);
+}
+
+
+static void
+search_date (struct libidx *l)
+{
+	int     morefiles;
+	struct fileidx f;
+
+	/* Quick Typhoon-based search for timestamps */
+
+	morefiles = filegetoldest (l->libnum, searchtime, 1, &f);
+	while (morefiles) {
+		if (!f.approved || f.flibnum != l->libnum ||
+		    f.timestamp < searchtime)
+			break;
+		found (l, &f, NULL);
+		morefiles = filegetnextoldest (l->libnum, &f);
+	}
+}
+
+
+static void
+os_search_date (struct libidx *l)
+{
+	struct stat st;
+	char    fname[1024];
+	DIR    *dp;
+	struct dirent *d;
+
+	/* Open the library directory */
+
+	if ((dp = opendir (l->dir)) == NULL) {
+		error_fatalsys ("Unable to open library %s (directory: %s)",
+				l->fullname, l->dir);
+	}
+
+	while ((d = readdir (dp)) != NULL) {
+		sprintf (fname, "%s/%s", l->dir, d->d_name);
+		if (stat (fname, &st))
+			continue;
+		if (st.st_mtime >= searchtime)
+			os_found (l, d->d_name, &st);
+	}
+
+	closedir (dp);
+}
+
+
+static void
+daemon_search ()
+{
+	int     morelibs;
+
+	if ((resultfp = fopen (resultfname, "w")) == NULL) {
+		error_fatalsys ("Search daemon couldn't create %s",
+				resultfname);
+	}
+
+	daemoninfo.filecreated = 1;
+
+	morelibs = firstchild ();
+	while (morelibs >= 0) {
+		struct libidx l;
+
+		if (!libreadnum (morelibs, &l)) {
+			error_fatal
+			    ("Oops, library %d disappeared while searching!",
+			     morelibs);
+		}
+
+		/* Check security */
+		forcepasswordfail ();
+		if (getlibaccess (&l, ACC_ENTER)) {
+			switch (searchtype & SHF_TYPE) {
+			case SHF_FNAME:
+				if (l.flags & LBF_OSDIR)
+					os_search_fnames (&l);
+				else
+					search_fnames (&l);
+				break;
+
+			case SHF_KEYWORD:
+				if ((l.flags & LBF_OSDIR) == 0)
+					search_keywords (&l);
+				break;
+
+			case SHF_ANYWHERE:
+				{
+					/* Turn the search key into a phonetic string */
+					char    phterm[1024];
+
+					strcpy (phterm, searchfor);
+					phonetic (phterm);
+					if (l.flags & LBF_OSDIR)
+						os_search_anywhere (&l,
+								    phterm);
+					else
+						search_anywhere (&l, phterm);
+				}
+				break;
+			case SHF_DAYCOUNT:
+			case SHF_DATE:
+				if (l.flags & LBF_OSDIR)
+					os_search_date (&l);
+				else
+					search_date (&l);
+				break;
+			}
+		}
+		morelibs = nextchild ();
+	}
+
+	fclose (resultfp);
+	daemoninfo.daemondead = 1;
+	exit (0);		/* End of daemon's life */
+}
+
+
+static void
+show_entry (int row, struct libidx *l, struct result *r)
+{
+	char    tmp1[256], tmp2[256];
+
+	tmp1[0] = tmp2[0] = 0;
+	sprintf (tmp2, "%s/%s", &(l->fullname[strlen (library.fullname) + 1]),
+		 r->fname);
+	if (tmp2[0] == '/')
+		strcpy (tmp2, r->fname);
+	if (strlen (tmp2) + strlen (r->keyword) > 47) {
+		char   *s = &tmp2[strlen (tmp2) + strlen (r->keyword) - 44];
+
+		sprintf (tmp1, "...%s", s);
+	} else
+		strcpy (tmp1, tmp2);
+
+	prompt (SRTABL, row, r->keyword, strlen (r->keyword) ? " " : "",
+		46 - strlen (r->keyword) - (strlen (r->keyword) > 0),
+		tmp1, r->summary);
 }
 
 
 static int
-display_canned_page(int page)
+display_canned_page (int page)
 {
-  int i, oldlibnum=-1;
-  struct libidx l;
+	int     i, oldlibnum = -1;
+	struct libidx l;
 
-  prompt(SRTABH);
-  for(i=0;resultcache[i].fname[0];i++){
-    if(oldlibnum!=resultcache[i].libnum){
-      oldlibnum=resultcache[i].libnum;
-      if(!libreadnum(resultcache[i].libnum,&l)){
-	error_fatal("Unable to read library %d.",resultcache[i].libnum);
-      }
-    }
-    show_entry(i+1,&l,&resultcache[i]);
-  }
-  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":msg_getunit(SRTABU,1));
-  return i;
+	prompt (SRTABH);
+	for (i = 0; resultcache[i].fname[0]; i++) {
+		if (oldlibnum != resultcache[i].libnum) {
+			oldlibnum = resultcache[i].libnum;
+			if (!libreadnum (resultcache[i].libnum, &l)) {
+				error_fatal ("Unable to read library %d.",
+					     resultcache[i].libnum);
+			}
+		}
+		show_entry (i + 1, &l, &resultcache[i]);
+	}
+	prompt (SRTABF, page + 1, NUMPAGES,
+		daemoninfo.daemondead ? "" : msg_getunit (SRTABU, 1));
+	return i;
 }
 
 
 static void
-wait_results(int page)
+wait_results (int page)
 {
-  int start=srlstln*page;
-  int end=start+srlstln;
-  int status;
+	int     start = srlstln * page;
+	int     end = start + srlstln;
+	int     status;
 
-  prompt(SRTABW);
-  while(!daemoninfo.daemondead && daemoninfo.nummatches<end){
-    usleep(100000);		/* Wait a bit */
-    
-    if(waitpid(daemonpid,&status,WNOHANG)==daemonpid){
-      msg_close(msg_sys);
-      mod_init(INI_OUTPUT);
-      msg_set(msg);
-      inp_init();
-      /*print("daemon died, %d matches, returning %d\n",
-	daemoninfo.nummatches,daemoninfo.nummatches-start);*/
-      break;
-    }
-  }
+	prompt (SRTABW);
+	while (!daemoninfo.daemondead && daemoninfo.nummatches < end) {
+		usleep (100000);	/* Wait a bit */
+
+		if (waitpid (daemonpid, &status, WNOHANG) == daemonpid) {
+			msg_close (msg_sys);
+			mod_init (INI_OUTPUT);
+			msg_set (msg);
+			inp_init ();
+			/*print("daemon died, %d matches, returning %d\n",
+			   daemoninfo.nummatches,daemoninfo.nummatches-start); */
+			break;
+		}
+	}
 }
 
 
 int
-display_page(int page)
+display_page (int page)
 {
-  int            start=srlstln*page;
-  int            end=start+srlstln;
-  int            i;
-  int            oldlibnum=-1;
-  int            numentries;
-  struct libidx  l;
+	int     start = srlstln * page;
+	int     end = start + srlstln;
+	int     i;
+	int     oldlibnum = -1;
+	int     numentries;
+	struct libidx l;
 
-  /* Should we redisplay the same old page? */
+	/* Should we redisplay the same old page? */
 
-  if(lastpage==page)return display_canned_page(page);
-
-
-  /* Don't have a full page yet, wait for it */
-
-  numentries=0;
-  daemoninfo.nomore=1;
-  if(daemoninfo.daemondead==0 && daemoninfo.nummatches<end)
-    wait_results(page);
-  numentries=min(srlstln,daemoninfo.nummatches-start);
+	if (lastpage == page)
+		return display_canned_page (page);
 
 
-  /* Check if daemon returned anything at all */
+	/* Don't have a full page yet, wait for it */
 
-  if(page==0 && !daemoninfo.nummatches){
-    prompt(SRDMNONE);
-    return -1;
-  }
-
-
-  /* Oops, not found any entries for this page */
-
-  if(!numentries){
-    prompt(SRDMNM);
-    daemoninfo.nomore=1;
-    return numentries;
-  }
-
-  /* Seek to the right place in the results file */
-
-  if(fseek(resultfp,start*sizeof(struct result),SEEK_SET)<0){
-    error_fatal("Oops, unable to fseek() results file %s",
-	  resultfname);
-  }
-
-  /* Prepare the results cache */
-  
-  bzero(resultcache,sizeof(srlstln*sizeof(struct result)));
-  numresultsincache=0;
+	numentries = 0;
+	daemoninfo.nomore = 1;
+	if (daemoninfo.daemondead == 0 && daemoninfo.nummatches < end)
+		wait_results (page);
+	numentries = min (srlstln, daemoninfo.nummatches - start);
 
 
-  /* Now print the table */
+	/* Check if daemon returned anything at all */
 
-  prompt(SRTABH);
-  for(i=0;i<numentries;i++){
-    struct result r;
-    
-
-    /* Read the result entry */
-
-    if(!fread(&r,sizeof(r),1,resultfp)){
-      error_fatalsys("Unable to read from file %s.",resultfname);
-    }
-
-
-    /* Can the entry for later */
-
-    memcpy(&resultcache[i],&r,sizeof(r));
-    numresultsincache++;
-    
-
-    /* Read the new library, if necessary */
-
-    if(oldlibnum!=r.libnum){
-      oldlibnum=r.libnum;
-      if(!libreadnum(r.libnum,&l)){
-	error_fatal("Unable to read library %d.",r.libnum);
-      }
-    }
-
-
-    /* Print the entry */
-
-    show_entry(i+1,&l,&r);
-  }
-
-  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":msg_getunit(SRTABU,1));
-
-  return numentries;
-}
-
-
-static int
-get_navigator_command(char *opt, int current_page, int shortmenu)
-{
-  int shownmenu=shortmenu;
-  char c;
-
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      c=cnc_chr();
-      shownmenu=1;
-    } else {
-      if(!shownmenu){
-	int res=display_page(current_page);
-	if(res<0) return 0;
-	if(res==0 && daemoninfo.nomore){
-	  *opt='E';		/* [E]nd */
-	  return 1;
+	if (page == 0 && !daemoninfo.nummatches) {
+		prompt (SRDMNONE);
+		return -1;
 	}
-	prompt(SRMNU,numresultsincache);
-	shownmenu=1;
-      } else prompt(SRSMNU,numresultsincache);
-      inp_get(0);
-      cnc_begin();
-      c=cnc_chr();
-    }
-    if (!margc) {
-      cnc_end();
-      continue;
-    }
-    if(inp_isX(margv[0])){
-      return 0;
-    } else if(margc && (c=='?'||sameas(margv[0],"?"))){
-      prompt(SRMNHLP);
-      shownmenu=0;
-      continue;
-    } else if(strchr("FBNPI",c)){
-      *opt=c;
-      return 1;
-    } else if(isdigit(c)){
-      int num;
-      cnc_nxtcmd--;
-      num=cnc_int();
-      if(num<1||num>numresultsincache){
-	prompt(SRMNRN,numresultsincache);
-	cnc_end();
-	continue;
-      }
-      *opt='D';
-      return -num;
-    } else {
-      prompt(SRMNER);
-      cnc_end();
-      continue;
-    }
-  }
-  return 0;
+
+
+	/* Oops, not found any entries for this page */
+
+	if (!numentries) {
+		prompt (SRDMNM);
+		daemoninfo.nomore = 1;
+		return numentries;
+	}
+
+	/* Seek to the right place in the results file */
+
+	if (fseek (resultfp, start * sizeof (struct result), SEEK_SET) < 0) {
+		error_fatal ("Oops, unable to fseek() results file %s",
+			     resultfname);
+	}
+
+	/* Prepare the results cache */
+
+	bzero (resultcache, sizeof (srlstln * sizeof (struct result)));
+	numresultsincache = 0;
+
+
+	/* Now print the table */
+
+	prompt (SRTABH);
+	for (i = 0; i < numentries; i++) {
+		struct result r;
+
+
+		/* Read the result entry */
+
+		if (!fread (&r, sizeof (r), 1, resultfp)) {
+			error_fatalsys ("Unable to read from file %s.",
+					resultfname);
+		}
+
+
+		/* Can the entry for later */
+
+		memcpy (&resultcache[i], &r, sizeof (r));
+		numresultsincache++;
+
+
+		/* Read the new library, if necessary */
+
+		if (oldlibnum != r.libnum) {
+			oldlibnum = r.libnum;
+			if (!libreadnum (r.libnum, &l)) {
+				error_fatal ("Unable to read library %d.",
+					     r.libnum);
+			}
+		}
+
+
+		/* Print the entry */
+
+		show_entry (i + 1, &l, &r);
+	}
+
+	prompt (SRTABF, page + 1, NUMPAGES,
+		daemoninfo.daemondead ? "" : msg_getunit (SRTABU, 1));
+
+	return numentries;
+}
+
+
+static int
+get_navigator_command (char *opt, int current_page, int shortmenu)
+{
+	int     shownmenu = shortmenu;
+	char    c;
+
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			c = cnc_chr ();
+			shownmenu = 1;
+		} else {
+			if (!shownmenu) {
+				int     res = display_page (current_page);
+
+				if (res < 0)
+					return 0;
+				if (res == 0 && daemoninfo.nomore) {
+					*opt = 'E';	/* [E]nd */
+					return 1;
+				}
+				prompt (SRMNU, numresultsincache);
+				shownmenu = 1;
+			} else
+				prompt (SRSMNU, numresultsincache);
+			inp_get (0);
+			cnc_begin ();
+			c = cnc_chr ();
+		}
+		if (!margc) {
+			cnc_end ();
+			continue;
+		}
+		if (inp_isX (margv[0])) {
+			return 0;
+		} else if (margc && (c == '?' || sameas (margv[0], "?"))) {
+			prompt (SRMNHLP);
+			shownmenu = 0;
+			continue;
+		} else if (strchr ("FBNPI", c)) {
+			*opt = c;
+			return 1;
+		} else if (isdigit (c)) {
+			int     num;
+
+			cnc_nxtcmd--;
+			num = cnc_int ();
+			if (num < 1 || num > numresultsincache) {
+				prompt (SRMNRN, numresultsincache);
+				cnc_end ();
+				continue;
+			}
+			*opt = 'D';
+			return -num;
+		} else {
+			prompt (SRMNER);
+			cnc_end ();
+			continue;
+		}
+	}
+	return 0;
 }
 
 
 static void
-seeinfo()
+seeinfo ()
 {
-  struct libidx  l;
-  struct fileidx f;
-  int fileno;
+	struct libidx l;
+	struct fileidx f;
+	int     fileno;
 
-  if(!get_number(&fileno,SRMNINA,1,
-		min(srlstln,numresultsincache),
-		SRMNINR,0,0))return;
-  else fileno--;
-
-
-  /* Read the library */
-
-  if(!libreadnum(resultcache[fileno].libnum,&l)){
-    error_fatal("Floor Yanked Under From Feet error, library %d.",
-	  resultcache[fileno].libnum);
-  }
+	if (!get_number (&fileno, SRMNINA, 1,
+			 min (srlstln, numresultsincache), SRMNINR, 0, 0))
+		return;
+	else
+		fileno--;
 
 
-  /* Read the file */
+	/* Read the library */
 
-  if(!fileread(resultcache[fileno].libnum,
-	       resultcache[fileno].fname,1,&f)){
-    error_fatal("Floor Yanked Under From Feet error, file %s/%s",
-	  l.fullname,resultcache[fileno].fname);
-  }
+	if (!libreadnum (resultcache[fileno].libnum, &l)) {
+		error_fatal ("Floor Yanked Under From Feet error, library %d.",
+			     resultcache[fileno].libnum);
+	}
 
-  fileinfo(&l,&f);
+
+	/* Read the file */
+
+	if (!fileread (resultcache[fileno].libnum,
+		       resultcache[fileno].fname, 1, &f)) {
+		error_fatal ("Floor Yanked Under From Feet error, file %s/%s",
+			     l.fullname, resultcache[fileno].fname);
+	}
+
+	fileinfo (&l, &f);
 }
 
 
 static void
-download_numbered_file(int n)
+download_numbered_file (int n)
 {
-  struct result *file=&resultcache[n-1];
-  struct libidx l;
+	struct result *file = &resultcache[n - 1];
+	struct libidx l;
 
-  if(!libreadnum(file->libnum,&l)){
-    cnc_end();
-    return;
-  }
-  prompt(SRLIBJMP,file->fname,l.fullname);
+	if (!libreadnum (file->libnum, &l)) {
+		cnc_end ();
+		return;
+	}
+	prompt (SRLIBJMP, file->fname, l.fullname);
 
-  if(!getlibaccess(&library,ACC_DOWNLOAD)){
-    prompt(DNLNAX);
-    return;
-  }
+	if (!getlibaccess (&library, ACC_DOWNLOAD)) {
+		prompt (DNLNAX);
+		return;
+	}
 
-  memcpy(&l,&library,sizeof(l));
-  enterlib(file->libnum,1);
-  download(file->fname);
-  memcpy(&l,&library,sizeof(l));
+	memcpy (&l, &library, sizeof (l));
+	enterlib (file->libnum, 1);
+	download (file->fname);
+	memcpy (&l, &library, sizeof (l));
 }
 
 
 static int
-browse_results()
+browse_results ()
 {
-  int current_page=0;
-  int shortmenu=0;
-  int num;
+	int     current_page = 0;
+	int     shortmenu = 0;
+	int     num;
 
-  for(;;){
-    char opt;
+	for (;;) {
+		char    opt;
 
-    if((num=get_navigator_command(&opt,current_page,shortmenu))==0)return 0;
-    switch(opt){
-    case 'E':			/* [E]nd */
-      current_page--;
-      shortmenu=1;
-      break;
-    case 'F':
-      if(daemoninfo.daemondead&&
-	 current_page+1>=NUMPAGES){
-	prompt(SRMNEN);
-	shortmenu=0;
-	continue;
-      } else {
-	current_page++;
-	shortmenu=0;
-	continue;
-      }
-    case 'B':
-      if(current_page>0){
-	current_page--;
-	shortmenu=0;
-	continue;
-      } else {
-	prompt(SRMNBG);
-	cnc_end();
-	continue;
-      }
-    case 'N':
-      return 1;
-    case 'D':
-      download_numbered_file(-num);
-      break;
-    case 'I':
-      seeinfo(current_page);
-      shortmenu=1;
-      break;
-    case 'P':
-      {
-	int pageno;
-	if(get_number(&pageno,SRMNJMA,1,NUMPAGES,SRMNJMR,0,0)){
-	  shortmenu=0;
-	  current_page=pageno-1;
-	} else shortmenu=0;
-	break;
-      }
-    }
-  }
+		if ((num =
+		     get_navigator_command (&opt, current_page,
+					    shortmenu)) == 0)
+			return 0;
+		switch (opt) {
+		case 'E':	/* [E]nd */
+			current_page--;
+			shortmenu = 1;
+			break;
+		case 'F':
+			if (daemoninfo.daemondead &&
+			    current_page + 1 >= NUMPAGES) {
+				prompt (SRMNEN);
+				shortmenu = 0;
+				continue;
+			} else {
+				current_page++;
+				shortmenu = 0;
+				continue;
+			}
+		case 'B':
+			if (current_page > 0) {
+				current_page--;
+				shortmenu = 0;
+				continue;
+			} else {
+				prompt (SRMNBG);
+				cnc_end ();
+				continue;
+			}
+		case 'N':
+			return 1;
+		case 'D':
+			download_numbered_file (-num);
+			break;
+		case 'I':
+			seeinfo (current_page);
+			shortmenu = 1;
+			break;
+		case 'P':
+			{
+				int     pageno;
 
-  return 0;
+				if (get_number
+				    (&pageno, SRMNJMA, 1, NUMPAGES, SRMNJMR, 0,
+				     0)) {
+					shortmenu = 0;
+					current_page = pageno - 1;
+				} else
+					shortmenu = 0;
+				break;
+			}
+		}
+	}
+
+	return 0;
 }
 
 
 static int
-search_client()
-{ 
-  int status, res;
+search_client ()
+{
+	int     status, res;
 
 
-  /* Wait for the results file to appear. Stop if daemon died before
-     creating the file */
+	/* Wait for the results file to appear. Stop if daemon died before
+	   creating the file */
 
-  while(!daemoninfo.daemondead&&!daemoninfo.filecreated){
-    usleep(100000);
-    if(waitpid(daemonpid,&status,WNOHANG)==daemonpid){
-      daemoninfo.daemondead=1;
-      break;
-    }
-  }
+	while (!daemoninfo.daemondead && !daemoninfo.filecreated) {
+		usleep (100000);
+		if (waitpid (daemonpid, &status, WNOHANG) == daemonpid) {
+			daemoninfo.daemondead = 1;
+			break;
+		}
+	}
 
-  if(daemoninfo.daemondead){
-    msg_close(msg_sys);
-    mod_init(INI_OUTPUT);
-    inp_init();
-    msg_set(msg);
-  }
-  
-
-  /* Early results */
-
-  if(daemoninfo.daemondead&&!daemoninfo.filecreated){
-    prompt(SRDMER1);
-    cnc_end();
-    return 0;
-  } else if(daemoninfo.daemondead&&!daemoninfo.nummatches){
-    prompt(SRDMNONE);
-    cnc_end();
-    return 0;
-  }
-
-  /* Open the file */
-
-  if((resultfp=fopen(resultfname,"r"))==NULL){
-    error_fatalsys("Unable to open %s",resultfname);
-  }
+	if (daemoninfo.daemondead) {
+		msg_close (msg_sys);
+		mod_init (INI_OUTPUT);
+		inp_init ();
+		msg_set (msg);
+	}
 
 
-  /* Browse through the results */
+	/* Early results */
 
-  res=browse_results();
+	if (daemoninfo.daemondead && !daemoninfo.filecreated) {
+		prompt (SRDMER1);
+		cnc_end ();
+		return 0;
+	} else if (daemoninfo.daemondead && !daemoninfo.nummatches) {
+		prompt (SRDMNONE);
+		cnc_end ();
+		return 0;
+	}
+
+	/* Open the file */
+
+	if ((resultfp = fopen (resultfname, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", resultfname);
+	}
 
 
-  /* Clean-up */
+	/* Browse through the results */
 
-  unlink(resultfname);
-  waitpid(0,&status,WNOHANG);
+	res = browse_results ();
 
-  return res;
+
+	/* Clean-up */
+
+	unlink (resultfname);
+	waitpid (0, &status, WNOHANG);
+
+	return res;
 }
 
 
 static int
-start_search()
+start_search ()
 {
-  sprintf(resultfname,TMPDIR"/filesrch.%d",getpid());
+	sprintf (resultfname, TMPDIR "/filesrch.%d", getpid ());
 
-  /* Prepare the results cache */
-  if(resultcache==NULL)resultcache=alcmem(srlstln*sizeof(struct result));
-  lastpage=-1;
+	/* Prepare the results cache */
+	if (resultcache == NULL)
+		resultcache = alcmem (srlstln * sizeof (struct result));
+	lastpage = -1;
 
-  bzero(&daemoninfo,sizeof(struct _daemoninfo));
+	bzero (&daemoninfo, sizeof (struct _daemoninfo));
 
-  daemonpid=fork();
+	daemonpid = fork ();
 
-  if(daemonpid==0){		/* We're the daemon */
-    close(0);
-    close(1);
-    close(2);
-    mod_done(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
-    error_setnotify(0);		/* Don't print messages */
-    inp_setidle(24*60);		/* Don't timeout */
-    daemon_search();
-  } else if(daemonpid<0){
-    error_fatal("Unable to spawn search daemon.");
-  }
+	if (daemonpid == 0) {	/* We're the daemon */
+		close (0);
+		close (1);
+		close (2);
+		mod_done (INI_OUTPUT | INI_INPUT | INI_SIGNALS);
+		error_setnotify (0);	/* Don't print messages */
+		inp_setidle (24 * 60);	/* Don't timeout */
+		daemon_search ();
+	} else if (daemonpid < 0) {
+		error_fatal ("Unable to spawn search daemon.");
+	}
 
-  mod_regpid(thisuseronl.channel);
-  error_setnotify(1);
-  inp_setidle(sysvar->idlezap);
-  inp_resetidle();
-  return search_client();	/* We're the spawner */
+	mod_regpid (thisuseronl.channel);
+	error_setnotify (1);
+	inp_setidle (sysvar->idlezap);
+	inp_resetidle ();
+	return search_client ();	/* We're the spawner */
 }
 
 
 void
-filesearch()
+filesearch ()
 {
-  for(;;){
-    char *tmp;
-    if((tmp=getsearchterm())==NULL)return;
-    if(!grokterm(tmp)){
-      cnc_end();
-      continue;
-    }
-    get_children();
-    if(!start_search())break;
-  }
+	for (;;) {
+		char   *tmp;
+
+		if ((tmp = getsearchterm ()) == NULL)
+			return;
+		if (!grokterm (tmp)) {
+			cnc_end ();
+			continue;
+		}
+		get_children ();
+		if (!start_search ())
+			break;
+	}
 }
+
+
+/* End of File */

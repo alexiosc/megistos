@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -61,9 +64,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #ifndef __GALLUPS_H
@@ -107,10 +109,10 @@
 
 struct answer {
 	union {
-		char *anstext;
-		int ansnumber;
-		int ansselect;
-		char *anscombo;
+		char   *anstext;
+		int     ansnumber;
+		int     ansselect;
+		char   *anscombo;
 	} u;
 };
 
@@ -122,36 +124,36 @@ struct answer {
 struct question {
 	unsigned char qtype;
 	unsigned int qflags;
-	int credits[2];
+	int     credits[2];
 
-	char *prompt;
+	char   *prompt;
 
 	union {
 		struct {
-			int textlen;
+			int     textlen;
 		} u_text;
-		
+
 		struct {
-			int numbermin;
-			int numbermax;
+			int     numbermin;
+			int     numbermax;
 		} u_number;
-		
+
 		struct {
-			char *selectdata;
-			int datacount;
-			char **dataidx;
+			char   *selectdata;
+			int     datacount;
+			char  **dataidx;
 		} u_select;
 
 		struct {
-			char *combodata;
-			int datacount;
-			char **dataidx;
+			char   *combodata;
+			int     datacount;
+			char  **dataidx;
 
-			char *comboprompt;
-			int promptcount;
-			char **promptidx;
-			
-			char *combochar;
+			char   *comboprompt;
+			int     promptcount;
+			char  **promptidx;
+
+			char   *combochar;
 		} u_combo;
 	} u;
 
@@ -167,7 +169,7 @@ struct question {
 #define qnummn(q)	((q)->u.u_number.numbermin)
 #define qnummx(q)	((q)->u.u_number.numbermax)
 #define qseldt(q)	((q)->u.u_select.selectdata)
-//#define qselcr(q)	((q)->u.u_select.selectcorrect)
+//#define qselcr(q)     ((q)->u.u_select.selectcorrect)
 #define qcomdt(q)	((q)->u.u_combo.combodata)
 #define qcompr(q)	((q)->u.u_combo.comboprompt)
 #define qcomch(q)	((q)->u.u_combo.combochar)
@@ -187,29 +189,29 @@ struct question {
 #define GRESFILE	"RESQ-"
 #define GSUBFILE	"SUBMIT"
 
-#define GF_VIEWRESALL	0x0000001		// all users can view the results
-#define GF_MULTISUBMIT	0x0000002		// a user can take the gallup more than once
-#define GF_LOGUSERID	0x0000004		// we are logging the user ids
-#define GF_POLL		0x1000000		// the gallup is a poll
-#define GF_QUIZ		0x2000000		// the gallup is a quiz
+#define GF_VIEWRESALL	0x0000001	// all users can view the results
+#define GF_MULTISUBMIT	0x0000002	// a user can take the gallup more than once
+#define GF_LOGUSERID	0x0000004	// we are logging the user ids
+#define GF_POLL		0x1000000	// the gallup is a poll
+#define GF_QUIZ		0x2000000	// the gallup is a quiz
 
 /* extras */
-#define GF_TIMED	0x0000010		// the quiz is timed
+#define GF_TIMED	0x0000010	// the quiz is timed
 
 /* these are to be implemented */
-#define GF_EXTRA	0x0000020		// extra checking to finish the quiz is done
-#define GF_GONEXT	0x0000040		// if GF_EXTRA also set, then when a user hangups
+#define GF_EXTRA	0x0000020	// extra checking to finish the quiz is done
+#define GF_GONEXT	0x0000040	// if GF_EXTRA also set, then when a user hangups
 						// while filling a quiz, next time he will be prompted
 						// with the *next* question in line. Otherwise, he will
 						// be prompted with the same last question
 
 /* these are to be implemented */
-#define GF_EXPONDT	0x0000080		// gallup expires on date/time
-#define GF_EXPDATE	0x0000100		// gallup expires on 23:59:59 of date
-#define GF_EXPDAYS	0x0000200		// gallup expires in days
-#define GF_EXPHOURS	0x0000400		// gallup expires in hours
-#define GF_LOGAGE	0x0001000		// log user age
-#define GF_LOGSEX	0x0002000		// log user sex
+#define GF_EXPONDT	0x0000080	// gallup expires on date/time
+#define GF_EXPDATE	0x0000100	// gallup expires on 23:59:59 of date
+#define GF_EXPDAYS	0x0000200	// gallup expires in days
+#define GF_EXPHOURS	0x0000400	// gallup expires in hours
+#define GF_LOGAGE	0x0001000	// log user age
+#define GF_LOGSEX	0x0002000	// log user sex
 
 
 /* NOTE: GF_MULTISUBMIT and GF_EXTRA are two different things. When GF_MULTISUBMIT
@@ -217,18 +219,18 @@ struct question {
    finish with the questions of the previous one. */
 
 struct gallup {
-	char magic[4];
+	char    magic[4];
 	unsigned int flags;
 	unsigned int numquestions;
-	char filename[GI_MAXFNLEN];
-	char description[GI_MAXDESCLEN];
-	int credits[3];
-	char author[24];
-	long settime;
-	long setdate;
-	long exptime;
-	long expdate;
-	char dummy[512 - 204];
+	char    filename[GI_MAXFNLEN];
+	char    description[GI_MAXDESCLEN];
+	int     credits[3];
+	char    author[24];
+	long    settime;
+	long    setdate;
+	long    exptime;
+	long    expdate;
+	char    dummy[512 - 204];
 };
 extern struct gallup *ginfo;
 
@@ -257,32 +259,32 @@ extern struct answer *answers;
 extern int gallup_loaded;
 
 /* gallups.c */
-void init();
-char *listandselectgallup (void);
-void selectgallup(void);
-void saveans();
-void takegallup();
-void viewresults();
-void newgallup(void);
-void erasegallup(void);
-int scriptcompiler(char *script);
+void    init ();
+char   *listandselectgallup (void);
+void    selectgallup (void);
+void    saveans ();
+void    takegallup ();
+void    viewresults ();
+void    newgallup (void);
+void    erasegallup (void);
+int     scriptcompiler (char *script);
 
 #ifndef __GSC__
-void addtosubmitted(useracc_t *u);
-int submitted(useracc_t *u);
+void    addtosubmitted (useracc_t * u);
+int     submitted (useracc_t * u);
 #endif
 
 /* io.c */
-int outputcharp(char *charp, FILE *filep);
-int inputcharp (char **charp, FILE *filep);
-void freegallup(void);
-void nullupgallup(void);
-int _savegallup(char *filename);
-int savegallup(void);
-void setupgallup(void);
-void splitstring(char *, char ***, int *);
-int _loadgallup(char *filename, char *fn, struct gallup *gallupinfo);
-int loadgallup(char *fn, struct gallup *gallupinfo);
+int     outputcharp (char *charp, FILE * filep);
+int     inputcharp (char **charp, FILE * filep);
+void    freegallup (void);
+void    nullupgallup (void);
+int     _savegallup (char *filename);
+int     savegallup (void);
+void    setupgallup (void);
+void    splitstring (char *, char ***, int *);
+int     _loadgallup (char *filename, char *fn, struct gallup *gallupinfo);
+int     loadgallup (char *fn, struct gallup *gallupinfo);
 
 
 
@@ -292,3 +294,6 @@ extern int gscflags;
 
 
 #endif
+
+
+/* End of File */

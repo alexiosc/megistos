@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -52,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -68,104 +69,115 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 void
-discoverdevice(struct libidx *lib)
+discoverdevice (struct libidx *lib)
 {
-  struct stat st;
+	struct stat st;
 
-  if(stat(lib->dir,&st)){
-    error_fatalsys("Unable to stat directory \"%s\"",lib->dir);
-  }
-  
-  lib->device=st.st_dev;
+	if (stat (lib->dir, &st)) {
+		error_fatalsys ("Unable to stat directory \"%s\"", lib->dir);
+	}
+
+	lib->device = st.st_dev;
 }
 
 
 void
-mklib(struct libidx *lib, int readytowrite, int flags)
+mklib (struct libidx *lib, int readytowrite, int flags)
 {
-  int i;
-  char *cp;
-  struct stat st;
+	int     i;
+	char   *cp;
+	struct stat st;
 
 
-  /* Make the library's directory */
+	/* Make the library's directory */
 
-  mkdir(lib->dir,0770);
-  if(stat(lib->dir,&st) || !S_ISDIR(st.st_mode)){
-    int i=errno;
-    error_intsys("Unable to mkdir(\"%s\")",lib->dir);
-    prompt(OCREMKD,lib->dir,i,strerror(i));
-    return;
-  }
+	mkdir (lib->dir, 0770);
+	if (stat (lib->dir, &st) || !S_ISDIR (st.st_mode)) {
+		int     i = errno;
 
+		error_intsys ("Unable to mkdir(\"%s\")", lib->dir);
+		prompt (OCREMKD, lib->dir, i, strerror (i));
+		return;
+	}
 #if 0
-  /* Make the library's long description file and initialise it to
-     contain the short description. */
+	/* Make the library's long description file and initialise it to
+	   contain the short description. */
 
-  sprintf(fname,"%s/%s",lib->dir,rdmefil);
-  if(stat(fname,&st)){
-    char s[41];
-    i=creat(fname,0660);
-    sprintf(s,"%s\n",lib->descr);
-    write(i,s,strlen(s));
-    close(i);
-  }
+	sprintf (fname, "%s/%s", lib->dir, rdmefil);
+	if (stat (fname, &st)) {
+		char    s[41];
+
+		i = creat (fname, 0660);
+		sprintf (s, "%s\n", lib->descr);
+		write (i, s, strlen (s));
+		close (i);
+	}
 #endif
-  
-  if((cp=strrchr(lib->fullname,'/'))==NULL)cp=lib->fullname;
-  else cp++;
-  for(i=0;*cp;i++)lib->keyname[i]=tolower(*cp++);
 
-  discoverdevice(lib);
+	if ((cp = strrchr (lib->fullname, '/')) == NULL)
+		cp = lib->fullname;
+	else
+		cp++;
+	for (i = 0; *cp; i++)
+		lib->keyname[i] = tolower (*cp++);
 
-  lib->libnum=libmaxnum()+1;
-  
-  if(!readytowrite){
-    lib->crdate=today();
-    lib->crtime=now();
+	discoverdevice (lib);
 
-    lib->readkey=defrkey;
-    lib->downloadkey=defdkey;
-    lib->uploadkey=defukey;
+	lib->libnum = libmaxnum () + 1;
 
-    lib->filelimit=defflim;
-    lib->filesizelimit=defslim;
-    lib->libsizelimit=defllim;
+	if (!readytowrite) {
+		lib->crdate = today ();
+		lib->crtime = now ();
 
-    lib->dnlcharge=defdchg;
-    lib->uplcharge=defuchg;
-    lib->rebate=defreb;
+		lib->readkey = defrkey;
+		lib->downloadkey = defdkey;
+		lib->uploadkey = defukey;
 
-    lib->numfiles=lib->numbytes=lib->numunapp=lib->bytesunapp=0;
+		lib->filelimit = defflim;
+		lib->filesizelimit = defslim;
+		lib->libsizelimit = defllim;
 
-    bzero(&(lib->uploadsperday),sizeof(lib->uploadsperday));
-    bzero(&(lib->bytesperday),sizeof(lib->bytesperday));
+		lib->dnlcharge = defdchg;
+		lib->uplcharge = defuchg;
+		lib->rebate = defreb;
 
-    lib->flags=flags;
-    if(defdaud)lib->flags|=LBF_DNLAUD;
-    if(defuaud)lib->flags|=LBF_UPLAUD;
-  }
+		lib->numfiles = lib->numbytes = lib->numunapp =
+		    lib->bytesunapp = 0;
 
-  libcreate(lib);
+		bzero (&(lib->uploadsperday), sizeof (lib->uploadsperday));
+		bzero (&(lib->bytesperday), sizeof (lib->bytesperday));
+
+		lib->flags = flags;
+		if (defdaud)
+			lib->flags |= LBF_DNLAUD;
+		if (defuaud)
+			lib->flags |= LBF_UPLAUD;
+	}
+
+	libcreate (lib);
 }
 
 
 void
-makemainlib()
+makemainlib ()
 {
-  struct libidx mainlib;
+	struct libidx mainlib;
 
-  if(libexists(libmain,0))return;
+	if (libexists (libmain, 0))
+		return;
 
-  bzero(&mainlib,sizeof(mainlib));
-  strcpy(mainlib.fullname,libmain);
-  strcpy(mainlib.descr,msg_get(MAINDESCR));
-  sprintf(mainlib.dir,"%s/%s",mkfname(FILELIBDIR),libmain);
-  mklib(&mainlib,0,0);
+	bzero (&mainlib, sizeof (mainlib));
+	strcpy (mainlib.fullname, libmain);
+	strcpy (mainlib.descr, msg_get (MAINDESCR));
+	sprintf (mainlib.dir, "%s/%s", mkfname (FILELIBDIR), libmain);
+	mklib (&mainlib, 0, 0);
 }
+
+
+/* End of File */

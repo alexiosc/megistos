@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.4  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,142 +65,152 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "typhoon.h"
-#include "email.h"
-#include "ecdbase.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/typhoon.h>
+#include <megistos/email.h>
+#include <megistos/ecdbase.h>
 
 
-static char dbclubname[256]=EMAILCLUBNAME;
-static char dbclubdir[256]=EMAILDIR;
-static char dbcur[256]="";
-static int  dbopen=0;
-static int  clubdbid=-1;
+static char dbclubname[256] = EMAILCLUBNAME;
+static char dbclubdir[256] = EMAILDIR;
+static char dbcur[256] = "";
+static int dbopen = 0;
+static int clubdbid = -1;
 
 
 int
-getmsgheader(int msgno,struct message *msg)
+getmsgheader (int msgno, struct message *msg)
 {
-  char lock[256], fname[256], tmp[256];
-  FILE *fp;
+	char    lock[256], fname[256], tmp[256];
+	FILE   *fp;
 
-  sprintf(tmp,"%d",msgno);
-  sprintf(lock,MESSAGELOCK,dbclubname,tmp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
-  lock_place(lock,"reading");
+	sprintf (tmp, "%d", msgno);
+	sprintf (lock, MESSAGELOCK, dbclubname, tmp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return BSE_LOCK;
+	lock_place (lock, "reading");
 
-  sprintf(fname,"%s/"MESSAGEFILE,mkfname(dbclubdir),msgno);
-  if((fp=fopen(fname,"r"))==NULL){
-    lock_rm(lock);
-    return BSE_OPEN;
-  } else if(fread(msg,sizeof(struct message),1,fp)!=1){
-    fclose(fp);
-    lock_rm(lock);
-    return BSE_READ;
-  }
-  fclose(fp);
-  lock_rm(lock);
-  return BSE_FOUND;
+	sprintf (fname, "%s/" MESSAGEFILE, mkfname (dbclubdir), msgno);
+	if ((fp = fopen (fname, "r")) == NULL) {
+		lock_rm (lock);
+		return BSE_OPEN;
+	} else if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+		fclose (fp);
+		lock_rm (lock);
+		return BSE_READ;
+	}
+	fclose (fp);
+	lock_rm (lock);
+	return BSE_FOUND;
 }
 
 
 int
-writemsgheader(struct message *msg)
+writemsgheader (struct message *msg)
 {
-  char lock[256], fname[256], tmp[256];
-  FILE *fp;
+	char    lock[256], fname[256], tmp[256];
+	FILE   *fp;
 
-  sprintf(tmp,"%d",msg->msgno);
-  sprintf(lock,MESSAGELOCK,dbclubname,tmp);
-  if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
-  lock_place(lock,"writing");
+	sprintf (tmp, "%d", msg->msgno);
+	sprintf (lock, MESSAGELOCK, dbclubname, tmp);
+	if ((lock_wait (lock, 20)) == LKR_TIMEOUT)
+		return BSE_LOCK;
+	lock_place (lock, "writing");
 
-  sprintf(fname,"%s/"MESSAGEFILE,mkfname(dbclubdir),msg->msgno);
-  if((fp=fopen(fname,"r+"))==NULL){
-    lock_rm(lock);
-    return BSE_OPEN;
-  } else if(fwrite(msg,sizeof(struct message),1,fp)!=1){
-    fclose(fp);
-    lock_rm(lock);
-    return BSE_WRITE;
-  }
-  fclose(fp);
-  lock_rm(lock);
-  return BSE_FOUND;
+	sprintf (fname, "%s/" MESSAGEFILE, mkfname (dbclubdir), msg->msgno);
+	if ((fp = fopen (fname, "r+")) == NULL) {
+		lock_rm (lock);
+		return BSE_OPEN;
+	} else if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+		fclose (fp);
+		lock_rm (lock);
+		return BSE_WRITE;
+	}
+	fclose (fp);
+	lock_rm (lock);
+	return BSE_FOUND;
 }
 
 
 void
-dbrm(struct message *msg)
+dbrm (struct message *msg)
 {
-  setclub(msg->club);
-  if(d_keyfind(NUM,&(msg->msgno))==S_OKAY)d_delete();
+	setclub (msg->club);
+	if (d_keyfind (NUM, &(msg->msgno)) == S_OKAY)
+		d_delete ();
 }
 
 
 int
-dbgetindex(struct ecidx *idx)
+dbgetindex (struct ecidx *idx)
 {
-  DB_ADDR x;
+	DB_ADDR x;
 
-  if(d_crget(&x)!=S_OKAY)return BSE_NFOUND;
-  return (d_recread(idx)==S_OKAY)?BSE_FOUND:BSE_NFOUND;
+	if (d_crget (&x) != S_OKAY)
+		return BSE_NFOUND;
+	return (d_recread (idx) == S_OKAY) ? BSE_FOUND : BSE_NFOUND;
 }
 
 
 int
-dbchkemail(int msgno)
+dbchkemail (int msgno)
 {
-  struct ecidx buf;
-  d_recread(&buf);
-  if(buf.num!=msgno)return 0;
-  return (strcmp(thisuseracc.userid,buf.from)&&
-	  strcmp(thisuseracc.userid,buf.to));
+	struct ecidx buf;
+
+	d_recread (&buf);
+	if (buf.num != msgno)
+		return 0;
+	return (strcmp (thisuseracc.userid, buf.from) &&
+		strcmp (thisuseracc.userid, buf.to));
 }
 
 
 static void
-opendb()
+opendb ()
 {
-  /* Don't open the db if it's already open */
+	/* Don't open the db if it's already open */
 
-  if(!strcmp(dbcur,dbclubname)){
-    d_dbset(clubdbid);
-  } else {
-    char fname[256];
+	if (!strcmp (dbcur, dbclubname)) {
+		d_dbset (clubdbid);
+	} else {
+		char    fname[256];
 
-    /* Close the current database */
-    if(dbopen){
-      d_dbset(clubdbid);
-      d_close();
-    }
+		/* Close the current database */
+		if (dbopen) {
+			d_dbset (clubdbid);
+			d_close ();
+		}
 
-    /* Open the new one */
-    strcpy(dbcur,dbclubname);
-    sprintf(fname,"%s/%s",mkfname(dbclubdir),DBDIR);
-    mkdir(fname,0777);
-    d_dbfpath(fname);
-    d_dbdpath(mkfname(DBDDIR));
-    if(d_open(".ecdb","s")!=S_OKAY){
-      error_fatal("Cannot open database for %s (db_status %d).",
-	    dbclubname,db_status);
-    }
-    d_dbget(&clubdbid);
-    dbopen=1;
-  }
+		/* Open the new one */
+		strcpy (dbcur, dbclubname);
+		sprintf (fname, "%s/%s", mkfname (dbclubdir), DBDIR);
+		mkdir (fname, 0777);
+		d_dbfpath (fname);
+		d_dbdpath (mkfname (DBDDIR));
+		if (d_open (".ecdb", "s") != S_OKAY) {
+			error_fatal
+			    ("Cannot open database for %s (db_status %d).",
+			     dbclubname, db_status);
+		}
+		d_dbget (&clubdbid);
+		dbopen = 1;
+	}
 }
 
 
 void
-setclub(char *club)
+setclub (char *club)
 {
-  if(!club || !club[0]){
-    strcpy(dbclubname,EMAILCLUBNAME);
-    strcpy(dbclubdir,EMAILDIR);
-  } else {
-    strcpy(dbclubname,club);
-    sprintf(dbclubdir,"%s/%s",MSGSDIR,club);
-  }
-  opendb();
+	if (!club || !club[0]) {
+		strcpy (dbclubname, EMAILCLUBNAME);
+		strcpy (dbclubdir, EMAILDIR);
+	} else {
+		strcpy (dbclubname, club);
+		sprintf (dbclubdir, "%s/%s", MSGSDIR, club);
+	}
+	opendb ();
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:09  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -56,10 +59,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,141 +72,174 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 int
-getdefusrax(char *channel, char *userid)
+getdefusrax (char *channel, char *userid)
 {
-  static struct tlcuser usr;
-  int sop;
+	static struct tlcuser usr;
+	int     sop;
 
-  if(!strcmp(channel,userid))return CUF_ACCESS|CUF_MODERATOR;
-  if(!strcmp(channel,MAINCHAN))return CUF_ACCESS;
+	if (!strcmp (channel, userid))
+		return CUF_ACCESS | CUF_MODERATOR;
+	if (!strcmp (channel, MAINCHAN))
+		return CUF_ACCESS;
 
-  usr_insys(userid,0);
-  sop=key_owns(&thisuseracc,sopkey);
+	usr_insys (userid, 0);
+	sop = key_owns (&thisuseracc, sopkey);
 
-  if(usr_exists(channel)){
-    if(!usr_insys(channel,0))return CUF_NONE;
-    
-    if(!loadtlcuser(channel,&usr)){
-      error_fatal("Can't load user record for %s",channel);
-    }
-    
-    if(sop)return CUF_ACCESS|CUF_MODERATOR;
-    else if(usr.flags&TLF_BEGUNINV)return CUF_NONE;
-    else if(usr.flags&TLF_BEGPANEL)return CUF_ACCESS|CUF_READONLY;
-    else return CUF_ACCESS;
-  } else if(channel[0]=='/'){
-    int i;
-    
-    usr_insys(userid,0);
-    i=getclubax(&othruseracc,channel);
+	if (usr_exists (channel)) {
+		if (!usr_insys (channel, 0))
+			return CUF_NONE;
 
-    if(i<CAX_READ)return -NAXCLUB;
-    else if(i<CAX_WRITE)return CUF_ACCESS|CUF_READONLY;
-    else if(i<CAX_COOP)return CUF_ACCESS;
-    else return CUF_ACCESS|CUF_MODERATOR;
-  }
+		if (!loadtlcuser (channel, &usr)) {
+			error_fatal ("Can't load user record for %s", channel);
+		}
 
-  return -UNKCHAN;
+		if (sop)
+			return CUF_ACCESS | CUF_MODERATOR;
+		else if (usr.flags & TLF_BEGUNINV)
+			return CUF_NONE;
+		else if (usr.flags & TLF_BEGPANEL)
+			return CUF_ACCESS | CUF_READONLY;
+		else
+			return CUF_ACCESS;
+	} else if (channel[0] == '/') {
+		int     i;
+
+		usr_insys (userid, 0);
+		i = getclubax (&othruseracc, channel);
+
+		if (i < CAX_READ)
+			return -NAXCLUB;
+		else if (i < CAX_WRITE)
+			return CUF_ACCESS | CUF_READONLY;
+		else if (i < CAX_COOP)
+			return CUF_ACCESS;
+		else
+			return CUF_ACCESS | CUF_MODERATOR;
+	}
+
+	return -UNKCHAN;
 }
 
 
 int
-getusrax(char *channel, char *userid)
+getusrax (char *channel, char *userid)
 {
-  int sop;
+	int     sop;
 
-  usr_insys(userid,0);
-  sop=key_owns(&thisuseracc,sopkey);
-  
-  if(sameas(channel,MAINCHAN)){                  /* Main */
-    strcpy(channel,MAINCHAN);
-    return CUF_ACCESS|(sop?CUF_MODERATOR:0);
+	usr_insys (userid, 0);
+	sop = key_owns (&thisuseracc, sopkey);
 
-  } else if(sameas(userid,channel)){             /* Own personal channel */
-    strcpy(channel,userid);
-    return CUF_ACCESS|CUF_MODERATOR;
+	if (sameas (channel, MAINCHAN)) {	/* Main */
+		strcpy (channel, MAINCHAN);
+		return CUF_ACCESS | (sop ? CUF_MODERATOR : 0);
 
-  } else {			/* Other channels, non-default ax */
-    struct chanhdr *hdr=readchanhdr(channel);
-    struct chanusr *usr=readchanusr(channel,userid);
+	} else if (sameas (userid, channel)) {	/* Own personal channel */
+		strcpy (channel, userid);
+		return CUF_ACCESS | CUF_MODERATOR;
 
-    if(hdr!=NULL && usr!=NULL){
-      if(usr->flags&CUF_EXPLICIT)return usr->flags;
-      if(hdr->flags&CHF_OPEN)return usr->flags|CUF_ACCESS;
-      else if(hdr->flags&CHF_READONLY)
-	return usr->flags|CUF_ACCESS|CUF_READONLY;
-      else if(hdr->flags&CHF_PRIVATE)return usr->flags&=~CUF_ACCESS;
-      else return usr->flags;
-    }
-  }
+	} else {		/* Other channels, non-default ax */
+		struct chanhdr *hdr = readchanhdr (channel);
+		struct chanusr *usr = readchanusr (channel, userid);
 
-  if(channel[0]=='/'){                          /* Club channel */
-    if(!findclub(channel))return -UNKCLUB;
-    else {
-      int i;
+		if (hdr != NULL && usr != NULL) {
+			if (usr->flags & CUF_EXPLICIT)
+				return usr->flags;
+			if (hdr->flags & CHF_OPEN)
+				return usr->flags | CUF_ACCESS;
+			else if (hdr->flags & CHF_READONLY)
+				return usr->flags | CUF_ACCESS | CUF_READONLY;
+			else if (hdr->flags & CHF_PRIVATE)
+				return usr->flags &= ~CUF_ACCESS;
+			else
+				return usr->flags;
+		}
+	}
 
-      usr_insys(userid,0);
-      i=getclubax(&othruseracc,channel);
+	if (channel[0] == '/') {	/* Club channel */
+		if (!findclub (channel))
+			return -UNKCLUB;
+		else {
+			int     i;
 
-      if(i<CAX_READ)return -NAXCLUB;
-      else if(i<CAX_WRITE)return CUF_ACCESS|CUF_READONLY;
-      else if(i<CAX_COOP)return CUF_ACCESS;
-      else return CUF_MODERATOR|CUF_ACCESS;
-    }
-  } else if(usr_exists(channel)){
-    struct chanhdr *hdr=readchanhdr(channel);
-    int ax=CUF_NONE;
-    if(!usr_insys(channel,0))return ax;
-    if(hdr->flags&CHF_PRIVATE)ax=CUF_NONE;
-    else if(hdr->flags&CHF_READONLY)ax=CUF_ACCESS|CUF_READONLY;
-    else if(hdr->flags&CHF_OPEN)ax=CUF_ACCESS;
-    if(sop)ax|=CUF_MODERATOR;
-    return ax;
-  }
+			usr_insys (userid, 0);
+			i = getclubax (&othruseracc, channel);
 
-  return -UNKCHAN;
+			if (i < CAX_READ)
+				return -NAXCLUB;
+			else if (i < CAX_WRITE)
+				return CUF_ACCESS | CUF_READONLY;
+			else if (i < CAX_COOP)
+				return CUF_ACCESS;
+			else
+				return CUF_MODERATOR | CUF_ACCESS;
+		}
+	} else if (usr_exists (channel)) {
+		struct chanhdr *hdr = readchanhdr (channel);
+		int     ax = CUF_NONE;
+
+		if (!usr_insys (channel, 0))
+			return ax;
+		if (hdr->flags & CHF_PRIVATE)
+			ax = CUF_NONE;
+		else if (hdr->flags & CHF_READONLY)
+			ax = CUF_ACCESS | CUF_READONLY;
+		else if (hdr->flags & CHF_OPEN)
+			ax = CUF_ACCESS;
+		if (sop)
+			ax |= CUF_MODERATOR;
+		return ax;
+	}
+
+	return -UNKCHAN;
 }
 
 
 void
-setusrax(char *channel, char *userid, char sex, int flagson, int flagsoff)
+setusrax (char *channel, char *userid, char sex, int flagson, int flagsoff)
 {
-  struct chanusr *usr=readchanusr(channel,userid);
-  
-  if(!usr){
-    usr=makechanusr(userid,flagson);
-    makechannel(channel,userid);
-  }
+	struct chanusr *usr = readchanusr (channel, userid);
 
-  usr->flags&=~flagsoff;
-  usr->flags|=flagson;
+	if (!usr) {
+		usr = makechanusr (userid, flagson);
+		makechannel (channel, userid);
+	}
 
-  if(sex)usr->sex=sex;
+	usr->flags &= ~flagsoff;
+	usr->flags |= flagson;
 
-  if(!writechanusr(channel,usr)){
-    error_fatal("Unable to write user %s to channel %s",userid,channel);
-  }
+	if (sex)
+		usr->sex = sex;
 
-  usr_insys(userid,0);
-  if(!strcmp(othruseronl.telechan,channel))othruseraux.access=usr->flags;
+	if (!writechanusr (channel, usr)) {
+		error_fatal ("Unable to write user %s to channel %s", userid,
+			     channel);
+	}
+
+	usr_insys (userid, 0);
+	if (!strcmp (othruseronl.telechan, channel))
+		othruseraux.access = usr->flags;
 }
 
 
 void
-moderate(char *channel, char *userid, char *moderator)
+moderate (char *channel, char *userid, char *moderator)
 {
-  if(sameas(channel,userid)){
-    strcpy(moderator,userid);
-    return;
-  } else if(channel[0]=='/'){
-    if(getclubax(&thisuseracc,channel)>=CAX_COOP && moderator[0]=='\0'){
-      strcpy(moderator,userid);
-    }
-  }
+	if (sameas (channel, userid)) {
+		strcpy (moderator, userid);
+		return;
+	} else if (channel[0] == '/') {
+		if (getclubax (&thisuseracc, channel) >= CAX_COOP &&
+		    moderator[0] == '\0') {
+			strcpy (moderator, userid);
+		}
+	}
 }
+
+
+/* End of File */

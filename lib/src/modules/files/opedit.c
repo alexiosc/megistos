@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -63,140 +64,159 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 static void
-update_edit(struct libidx *lib,
-	    char *olddir,
-	    int libnum,
-	    int *changes,
-	    int recursive)
+update_edit (struct libidx *lib,
+	     char *olddir, int libnum, int *changes, int recursive)
 {
-  struct libidx l;
-  int statedir=0, res;
+	struct libidx l;
+	int     statedir = 0, res;
 
-  if(lib->libnum==libnum){
-    libupdate(lib);
-  }
-
-  if(!recursive)return;
-  else if(lib->libnum==libnum)goto children;
-
-  if(!libreadnum(libnum,&l))return;
-
-  if(!adminlock(libnum)){
-    prompt(OEDIREC3,l.fullname);
-  } else {
-    int i;
-
-    for(i=0;i<4;i++){
-      if(!changes[i])continue;
-      switch(i){
-      case 0:
-	strcpy(l.descr,lib->descr);
-	break;
-      case 1:
-	strcpy(l.passwd,lib->passwd);
-	break;
-      case 2:
-	strcpy(l.club,lib->club);
-	break;
-      default:
-	if(sameto(olddir,l.dir)){
-	  char newdir[256];
-	  sprintf(newdir,"%s/%s",lib->dir,&l.dir[strlen(olddir)]);
-	  strcpy(l.dir,zonkdir(newdir));
-	  statedir=1;
+	if (lib->libnum == libnum) {
+		libupdate (lib);
 	}
-      }
-    }
 
-    libupdate(&l);
+	if (!recursive)
+		return;
+	else if (lib->libnum == libnum)
+		goto children;
 
-    prompt(OEDIREC1+statedir,l.fullname,l.dir);
-  }
+	if (!libreadnum (libnum, &l))
+		return;
 
-  libnum=l.libnum;
+	if (!adminlock (libnum)) {
+		prompt (OEDIREC3, l.fullname);
+	} else {
+		int     i;
 
-children:
-  res=libgetchild(libnum,"",&l);
-  while(res){
-    char keyname[20];
-    update_edit(lib,olddir,l.libnum,changes,recursive);
-    strcpy(keyname,l.keyname);
-    res=libgetchild(libnum,keyname,&l);
-  }
+		for (i = 0; i < 4; i++) {
+			if (!changes[i])
+				continue;
+			switch (i) {
+			case 0:
+				strcpy (l.descr, lib->descr);
+				break;
+			case 1:
+				strcpy (l.passwd, lib->passwd);
+				break;
+			case 2:
+				strcpy (l.club, lib->club);
+				break;
+			default:
+				if (sameto (olddir, l.dir)) {
+					char    newdir[256];
+
+					sprintf (newdir, "%s/%s", lib->dir,
+						 &l.dir[strlen (olddir)]);
+					strcpy (l.dir, zonkdir (newdir));
+					statedir = 1;
+				}
+			}
+		}
+
+		libupdate (&l);
+
+		prompt (OEDIREC1 + statedir, l.fullname, l.dir);
+	}
+
+	libnum = l.libnum;
+
+      children:
+	res = libgetchild (libnum, "", &l);
+	while (res) {
+		char    keyname[20];
+
+		update_edit (lib, olddir, l.libnum, changes, recursive);
+		strcpy (keyname, l.keyname);
+		res = libgetchild (libnum, keyname, &l);
+	}
 }
 
 
 void
-op_edit()
+op_edit ()
 {
-  int i;
-  struct libidx lib;
-  int changes[4];
-  int recursive=0;
+	int     i;
+	struct libidx lib;
+	int     changes[4];
+	int     recursive = 0;
 
-  memcpy(&lib,&library,sizeof(lib));
-  if(!adminlock(lib.libnum))return;
-  bzero(changes,sizeof(changes));
+	memcpy (&lib, &library, sizeof (lib));
+	if (!adminlock (lib.libnum))
+		return;
+	bzero (changes, sizeof (changes));
 
-  sprintf(inp_buffer,"%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
-	  lib.descr,lib.passwd,lib.club,lib.dir);
+	sprintf (inp_buffer, "%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
+		 lib.descr, lib.passwd, lib.club, lib.dir);
 
-  if(dialog_run("files",OEDIVT,OEDILT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    adminunlock();
-    return;
-  }
-  
-  dialog_parse(inp_buffer);
-  
-  if(sameas(margv[7],"OK")||sameas(margv[5],margv[7])){
-    for(i=0;i<8;i++){
-      char *s=margv[i];
-      if(i==0){
-	if(strcmp(lib.descr,s))changes[i]=1;
-	strcpy(lib.descr,s);
-      } else if(i==1){
-	if(strcmp(lib.passwd,s))changes[i]=1;
-	strcpy(lib.passwd,s);
-      } else if(i==2){
-	if((!masterlibop)&&strcmp(library.club,s)){
-	  prompt(OEDINOP1);
-	} else {
-	  if(s[0]){
-	    if(findclub(s))strcpy(lib.club,s);
-	    else prompt(OCRECNE,s);
-	  } else bzero(lib.club,sizeof(lib.club));
-	  if(strcmp(library.club,lib.club))changes[i]=1;
+	if (dialog_run ("files", OEDIVT, OEDILT, inp_buffer, MAXINPLEN) != 0) {
+		error_log ("Unable to run data entry subsystem");
+		adminunlock ();
+		return;
 	}
-      } else if(i==3){
-	if((!masterlibop)&&strcmp(library.dir,lib.dir)){
-	  prompt(OEDINOP2);
+
+	dialog_parse (inp_buffer);
+
+	if (sameas (margv[7], "OK") || sameas (margv[5], margv[7])) {
+		for (i = 0; i < 8; i++) {
+			char   *s = margv[i];
+
+			if (i == 0) {
+				if (strcmp (lib.descr, s))
+					changes[i] = 1;
+				strcpy (lib.descr, s);
+			} else if (i == 1) {
+				if (strcmp (lib.passwd, s))
+					changes[i] = 1;
+				strcpy (lib.passwd, s);
+			} else if (i == 2) {
+				if ((!masterlibop) && strcmp (library.club, s)) {
+					prompt (OEDINOP1);
+				} else {
+					if (s[0]) {
+						if (findclub (s))
+							strcpy (lib.club, s);
+						else
+							prompt (OCRECNE, s);
+					} else
+						bzero (lib.club,
+						       sizeof (lib.club));
+					if (strcmp (library.club, lib.club))
+						changes[i] = 1;
+				}
+			} else if (i == 3) {
+				if ((!masterlibop) &&
+				    strcmp (library.dir, lib.dir)) {
+					prompt (OEDINOP2);
+				} else {
+					strcpy (lib.dir, zonkdir (s));
+					if (strcmp (library.dir, lib.dir))
+						changes[i] = 1;
+				}
+			} else if (i == 4) {
+				if ((recursive = sameas (s, "on")) != 0)
+					prompt (OEDIREC);
+			}
+		}
 	} else {
-	  strcpy(lib.dir,zonkdir(s));
-	  if(strcmp(library.dir,lib.dir))changes[i]=1;
+		prompt (OPCAN);
+		adminunlock ();
+		return;
 	}
-      } else if(i==4){
-	if((recursive=sameas(s,"on"))!=0)prompt(OEDIREC);
-      }
-    }
-  } else {
-    prompt(OPCAN);
-    adminunlock();
-    return;
-  }
 
-  update_edit(&lib,library.dir,lib.libnum,changes,recursive);
+	update_edit (&lib, library.dir, lib.libnum, changes, recursive);
 
-  memcpy(&library,&lib,sizeof(library));
+	memcpy (&library, &lib, sizeof (library));
 
-  adminunlock();
-  return;
+	adminunlock ();
+	return;
 }
 
 
+
+
+/* End of File */

@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -33,10 +36,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -49,95 +50,108 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 static struct bltidx *tmpblt;
 
 
 static int
-lockselect(const struct dirent *d)
+lockselect (const struct dirent *d)
 {
-  char tmp[256];
-  if(strncmp(d->d_name,BLTREADLOCK,strlen(BLTREADLOCK)))return 0;
-  sprintf(tmp,"%s-%s",tmpblt->area,tmpblt->fname);
-  if(strcmp(tmp,&(d->d_name[strlen(d->d_name)-strlen(tmp)])))return 0;
-  return 1;
+	char    tmp[256];
+
+	if (strncmp (d->d_name, BLTREADLOCK, strlen (BLTREADLOCK)))
+		return 0;
+	sprintf (tmp, "%s-%s", tmpblt->area, tmpblt->fname);
+	if (strcmp (tmp, &(d->d_name[strlen (d->d_name) - strlen (tmp)])))
+		return 0;
+	return 1;
 }
 
 
 int
-checklocks(struct bltidx *blt)
+checklocks (struct bltidx *blt)
 {
-  int i,j;
-  struct dirent **d=NULL;
-  tmpblt=blt;
-  i=scandir(mkfname(LOCKDIR),&d,lockselect,alphasort);
-  for(j=0;j<i;j++)free(d[j]);
-  free(d);
-  return i;
+	int     i, j;
+	struct dirent **d = NULL;
+
+	tmpblt = blt;
+	i = scandir (mkfname (LOCKDIR), &d, lockselect, alphasort);
+	for (j = 0; j < i; j++)
+		free (d[j]);
+	free (d);
+	return i;
 }
 
 
 void
-bltdel()
+bltdel ()
 {
-  char fname[256];
-  struct bltidx blt;
-  int yes=0, x=0;
+	char    fname[256];
+	struct bltidx blt;
+	int     yes = 0, x = 0;
 
-  if(!(club[0]?dblistfind(club,1):dblistfirst())){
-    if(!club[0])prompt(BLTNOBT);
-    else prompt(CLBNOBT,club);
-    return;
-  }
+	if (!(club[0] ? dblistfind (club, 1) : dblistfirst ())) {
+		if (!club[0])
+			prompt (BLTNOBT);
+		else
+			prompt (CLBNOBT, club);
+		return;
+	}
 
-  if(!getblt(DELBLT,&blt))return;
+	if (!getblt (DELBLT, &blt))
+		return;
 
-  if(getaccess(blt.area)<flaxes){
-    prompt(DELNOAX,blt.area);
-    return;
-  }
+	if (getaccess (blt.area) < flaxes) {
+		prompt (DELNOAX, blt.area);
+		return;
+	}
 
-  /* Ask for confirmation */
+	/* Ask for confirmation */
 
-  bltinfo(&blt);
+	bltinfo (&blt);
 
-  x=get_bool(&yes,ASKDEL,ASKDELR,0,0);
-  if(x==0||yes==0){
-    prompt(ABODEL,blt.num);
-    return;
-  }
+	x = get_bool (&yes, ASKDEL, ASKDELR, 0, 0);
+	if (x == 0 || yes == 0) {
+		prompt (ABODEL, blt.num);
+		return;
+	}
 
-  /* Anyone reading this article? */
+	/* Anyone reading this article? */
 
-  if(checklocks(&blt)){
-    prompt(CONFLICT);
-    return;
-  }
+	if (checklocks (&blt)) {
+		prompt (CONFLICT);
+		return;
+	}
 
-  /* Delete it from the database */
+	/* Delete it from the database */
 
-  if(!dbdelete()){
-    prompt(DBERR);
-    return;
-  }
+	if (!dbdelete ()) {
+		prompt (DBERR);
+		return;
+	}
 
-  /* Delete the file */
+	/* Delete the file */
 
-  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",blt.area,MSGBLTDIR,blt.fname));
-  if(unlink(fname)){
-    prompt(DBERR);
-    return;
-  }
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/%s/%s", blt.area, MSGBLTDIR, blt.fname));
+	if (unlink (fname)) {
+		prompt (DBERR);
+		return;
+	}
 
-  prompt(DBDELOK);
+	prompt (DBDELOK);
 
-  /* Audit it */
+	/* Audit it */
 
-  if(auddel)audit(thisuseronl.channel,AUDIT(BLTDEL),
-		  thisuseracc.userid,blt.fname,blt.area);
+	if (auddel)
+		audit (thisuseronl.channel, AUDIT (BLTDEL),
+		       thisuseracc.userid, blt.fname, blt.area);
 }
+
+
+/* End of File */

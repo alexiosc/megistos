@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /*
  * osdepend.c
@@ -62,19 +63,19 @@ const char *__RCS=RCS_VER;
 #include <unistd.h>
 #include <bbs.h>
 
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 
 
-char *storybasename;
+char   *storybasename;
 
 
 
 /* File names will be O/S dependent */
 
-#define SAVE_NAME   "story.sav"   /* Default save name */
-#define SCRIPT_NAME "story.lis"   /* Default script name */
-#define RECORD_NAME "record.lis"  /* Default record name */
+#define SAVE_NAME   "story.sav"	/* Default save name */
+#define SCRIPT_NAME "story.lis"	/* Default script name */
+#define RECORD_NAME "record.lis"	/* Default record name */
 
 
 
@@ -87,54 +88,63 @@ char *storybasename;
  *
  */
 
-void process_arguments (int argc, char *argv[])
+void
+process_arguments (int argc, char *argv[])
 {
-  int c, errflg = 0;
-  
-  /* Parse the options */
-  
-  while ((c = getopt (argc, argv, "hl:c:r:t:")) != EOF) {
-    switch (c) {
-    case 'l': /* lines */
-      screen_rows = atoi (optarg);
-      break;
-    case 'c': /* columns */
-      screen_cols = atoi (optarg);
-      break;
-    case 'r': /* right margin */
-      right_margin = atoi (optarg);
-      break;
-    case 't': /* top margin */
-      top_margin = atoi (optarg);
-      break;
-    case 'h':
-    case '?':
-    default:
-      errflg++;
-    }
-  }
-  
-  /* Display usage */
-  
-  if (errflg || optind >= argc) {
-    fprintf (stderr, "usage: %s [options...] story-file\n\n", argv[0]);
-    fprintf (stderr, "%s - an Infocom story file interpreter. Version 2.0 by Mark Howell\n", argv[0]);
-    fprintf (stderr, "Linux patches by: Sander van Malssen & Neptho T.\n");
-    fprintf (stderr, "Megistos port by: Alexios Chouchoulas.\n");
-    fprintf (stderr, "Plays type 1 to 5 Infocom games.\n\n");
-    fprintf (stderr, "\t-l n lines in display\n");
-    fprintf (stderr, "\t-c n columns in display\n");
-    fprintf (stderr, "\t-r n text right margin (default = %d)\n", DEFAULT_RIGHT_MARGIN);
-    fprintf (stderr, "\t-t n text top margin (default = %d)\n", DEFAULT_TOP_MARGIN);
-    exit (1);
-  }
-  
-  /* Strip leading directories */
-  if ((storybasename = strrchr(argv[optind], '/'))) storybasename++;
-  else storybasename = argv[optind];
-  
-  /* Open the story file */
-  open_story (argv[optind]);
+	int     c, errflg = 0;
+
+	/* Parse the options */
+
+	while ((c = getopt (argc, argv, "hl:c:r:t:")) != EOF) {
+		switch (c) {
+		case 'l':	/* lines */
+			screen_rows = atoi (optarg);
+			break;
+		case 'c':	/* columns */
+			screen_cols = atoi (optarg);
+			break;
+		case 'r':	/* right margin */
+			right_margin = atoi (optarg);
+			break;
+		case 't':	/* top margin */
+			top_margin = atoi (optarg);
+			break;
+		case 'h':
+		case '?':
+		default:
+			errflg++;
+		}
+	}
+
+	/* Display usage */
+
+	if (errflg || optind >= argc) {
+		fprintf (stderr, "usage: %s [options...] story-file\n\n",
+			 argv[0]);
+		fprintf (stderr,
+			 "%s - an Infocom story file interpreter. Version 2.0 by Mark Howell\n",
+			 argv[0]);
+		fprintf (stderr,
+			 "Linux patches by: Sander van Malssen & Neptho T.\n");
+		fprintf (stderr, "Megistos port by: Alexios Chouchoulas.\n");
+		fprintf (stderr, "Plays type 1 to 5 Infocom games.\n\n");
+		fprintf (stderr, "\t-l n lines in display\n");
+		fprintf (stderr, "\t-c n columns in display\n");
+		fprintf (stderr, "\t-r n text right margin (default = %d)\n",
+			 DEFAULT_RIGHT_MARGIN);
+		fprintf (stderr, "\t-t n text top margin (default = %d)\n",
+			 DEFAULT_TOP_MARGIN);
+		exit (1);
+	}
+
+	/* Strip leading directories */
+	if ((storybasename = strrchr (argv[optind], '/')))
+		storybasename++;
+	else
+		storybasename = argv[optind];
+
+	/* Open the story file */
+	open_story (argv[optind]);
 }
 
 
@@ -147,9 +157,10 @@ void process_arguments (int argc, char *argv[])
  *
  */
 
-void file_cleanup (const char *file_name, int flag)
+void
+file_cleanup (const char *file_name, int flag)
 {
-  /* or maybe not. :-) */
+	/* or maybe not. :-) */
 }
 
 
@@ -199,21 +210,23 @@ void file_cleanup (const char *file_name, int flag)
  *
  */
 
-void sound (int argc, zword_t *argv)
+void
+sound (int argc, zword_t * argv)
 {
-  
-  /* Supply default parameters */
-  
-  if (argc < 4)
-    argv[3] = 0;
-  if (argc < 3)
-    argv[2] = 0xff;
-  if (argc < 2)
-    argv[1] = 2;
-  
-  /* Generic bell sounder */
-  
-  if (argc == 1 || argv[1] == 2) display_char ('\007');
+
+	/* Supply default parameters */
+
+	if (argc < 4)
+		argv[3] = 0;
+	if (argc < 3)
+		argv[2] = 0xff;
+	if (argc < 2)
+		argv[1] = 2;
+
+	/* Generic bell sounder */
+
+	if (argc == 1 || argv[1] == 2)
+		display_char ('\007');
 }
 
 
@@ -230,92 +243,98 @@ void sound (int argc, zword_t *argv)
  *
  */
 
-int get_file_name (char *file_name, char *default_name, int flag)
+int
+get_file_name (char *file_name, char *default_name, int flag)
 {
-  char buffer[127 + 2]; /* 127 is the biggest positive char */
-  int status = 0;
-  
-  /* If no default file name then supply the standard name */
-  
-  if (default_name[0] == '\0') {
-    if (flag == GAME_SCRIPT) {
-      strcpy (default_name, SCRIPT_NAME);
-    } else if (flag == GAME_RECORD || flag == GAME_PLAYBACK) {
-      strcpy (default_name, RECORD_NAME);
-    } else /* (flag == GAME_SAVE || flag == GAME_RESTORE) */
-    strcpy (default_name, storybasename);
-    strcat (default_name, ".sav");
-  }
-  
+	char    buffer[127 + 2];	/* 127 is the biggest positive char */
+	int     status = 0;
 
-  /* Prompt for the file name */
-  
-  output_line ("Enter a file name.");
-  output_string ("(Default is \"");
-  output_string (default_name);
-  output_string ("\"): ");
-  
-  buffer[0] = 127;
-  buffer[1] = 0;
-  (void) get_line (buffer, 0, 0);
-  
+	/* If no default file name then supply the standard name */
 
-  /* Copy file name from the inp_buffer buffer */
-  
-  strcpy (file_name, (h_type > V4) ? &buffer[2] : &buffer[1]);
-  
-
-  /* If nothing typed then use the default name */
-  
-  if (file_name[0] == '\0')
-    strcpy (file_name, default_name);
-  
-
-  /* Check if we are going to overwrite the file */
-  
-  if (flag == GAME_SAVE || flag == GAME_SCRIPT || flag == GAME_RECORD) {
-    FILE *tfp;
-    char c;
-    
-    /* Try to access the file */
-    
-    tfp = fopen (file_name, "r");
-    if (tfp != NULL) {
-      fclose (tfp);
-      
-      /* If it succeeded then prompt to overwrite */
-      
-      output_line ("You are about to write over an existing file.");
-      output_string ("Proceed? (Y/N) ");
-      
-      do {
-	c = (char) input_character (0);
-	c = (char) toupper (c);
-      } while (c != 'Y' && c != 'N');
-      
-      output_char (c);
-      output_new_line ();
-      
-      /* If no overwrite then fail the routine */
-      
-      if (c == 'N')
-	status = 1;
-    }
-  }
+	if (default_name[0] == '\0') {
+		if (flag == GAME_SCRIPT) {
+			strcpy (default_name, SCRIPT_NAME);
+		} else if (flag == GAME_RECORD || flag == GAME_PLAYBACK) {
+			strcpy (default_name, RECORD_NAME);
+		} else		/* (flag == GAME_SAVE || flag == GAME_RESTORE) */
+			strcpy (default_name, storybasename);
+		strcat (default_name, ".sav");
+	}
 
 
-  {
-    char *cp;
-    for(cp=file_name;*cp;cp++)if(*cp=='/')*cp='_';
-  }
+	/* Prompt for the file name */
 
-  
-  /* Record the file name if it was OK */
-  
-  if (status == 0) record_line (file_name);
-  
-  return (status);
-  
+	output_line ("Enter a file name.");
+	output_string ("(Default is \"");
+	output_string (default_name);
+	output_string ("\"): ");
+
+	buffer[0] = 127;
+	buffer[1] = 0;
+	(void) get_line (buffer, 0, 0);
+
+
+	/* Copy file name from the inp_buffer buffer */
+
+	strcpy (file_name, (h_type > V4) ? &buffer[2] : &buffer[1]);
+
+
+	/* If nothing typed then use the default name */
+
+	if (file_name[0] == '\0')
+		strcpy (file_name, default_name);
+
+
+	/* Check if we are going to overwrite the file */
+
+	if (flag == GAME_SAVE || flag == GAME_SCRIPT || flag == GAME_RECORD) {
+		FILE   *tfp;
+		char    c;
+
+		/* Try to access the file */
+
+		tfp = fopen (file_name, "r");
+		if (tfp != NULL) {
+			fclose (tfp);
+
+			/* If it succeeded then prompt to overwrite */
+
+			output_line
+			    ("You are about to write over an existing file.");
+			output_string ("Proceed? (Y/N) ");
+
+			do {
+				c = (char) input_character (0);
+				c = (char) toupper (c);
+			} while (c != 'Y' && c != 'N');
+
+			output_char (c);
+			output_new_line ();
+
+			/* If no overwrite then fail the routine */
+
+			if (c == 'N')
+				status = 1;
+		}
+	}
+
+
+	{
+		char   *cp;
+
+		for (cp = file_name; *cp; cp++)
+			if (*cp == '/')
+				*cp = '_';
+	}
+
+
+	/* Record the file name if it was OK */
+
+	if (status == 0)
+		record_line (file_name);
+
+	return (status);
+
 }
 
 
@@ -332,9 +351,10 @@ int get_file_name (char *file_name, char *default_name, int flag)
  *
  */
 
-int fit_line (const char *line_buffer, int pos, int max)
+int
+fit_line (const char *line_buffer, int pos, int max)
 {
-  return (pos < max);
+	return (pos < max);
 }
 
 
@@ -360,9 +380,10 @@ int fit_line (const char *line_buffer, int pos, int max)
  *
  */
 
-int print_status (int argc, char *argv[])
+int
+print_status (int argc, char *argv[])
 {
-  return (FALSE);
+	return (FALSE);
 }
 
 
@@ -377,7 +398,8 @@ int print_status (int argc, char *argv[])
  *
  */
 
-void set_font (int font_type)
+void
+set_font (int font_type)
 {
 }
 
@@ -390,17 +412,24 @@ void set_font (int font_type)
  *
  */
 
-static int fg,bg;
+static int fg, bg;
 
-void set_colours (int foreground, int background)
+void
+set_colours (int foreground, int background)
 {
-  if(foreground>0){
-    fg=foreground;
-    bg=background;
-    if(fg==1) fg=7; else fg--;
-    if(bg==1) bg=0; else bg--;
-  }
-  print("\e[%d;%dm",29+fg,39+bg);
+	if (foreground > 0) {
+		fg = foreground;
+		bg = background;
+		if (fg == 1)
+			fg = 7;
+		else
+			fg--;
+		if (bg == 1)
+			bg = 0;
+		else
+			bg--;
+	}
+	print ("\e[%d;%dm", 29 + fg, 39 + bg);
 }
 
 
@@ -447,7 +476,14 @@ void set_colours (int foreground, int background)
  *
  */
 
-int codes_to_text (int c, char *s)
+int
+codes_to_text (int c, char *s)
 {
-  return c;
+	return c;
 }
+
+
+/* End of File */
+
+
+/* End of File */

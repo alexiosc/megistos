@@ -42,6 +42,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -73,10 +76,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -89,8 +90,8 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
 
 
 /*                   123456789012345678901234567890 */
@@ -107,210 +108,232 @@ const char *__RCS=RCS_VER;
 
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
-  msg_setlanguage(thisuseracc.language);
-  fmt_setverticalformat(0);
+	mod_init (INI_ALL);
+	msg_setlanguage (thisuseracc.language);
+	fmt_setverticalformat (0);
 }
 
 
 void
-cleanup()
+cleanup ()
 {
-  FILE *qdb, *idx;
-  long int offset=0;
-  long int temp=0;
-  long int  seekstate=1;
-  long int  entries=0, total=0;
-  int       i, numfiles=0;
-  int dotcount=0;
-  char c;
+	FILE   *qdb, *idx;
+	long int offset = 0;
+	long int temp = 0;
+	long int seekstate = 1;
+	long int entries = 0, total = 0;
+	int     i, numfiles = 0;
+	int     dotcount = 0;
+	char    c;
 
-  mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES);
+	mod_init (INI_TTYNUM | INI_OUTPUT | INI_SYSVARS | INI_ERRMSGS |
+		  INI_CLASSES);
 
-  audit_setfile(mkfname(CLNUPAUDITFILE));
-  audit("CLEANUP",AUDIT(CKIECUB));
+	audit_setfile (mkfname (CLNUPAUDITFILE));
+	audit ("CLEANUP", AUDIT (CKIECUB));
 
-  printf("\nMegistos BBS cookie database index.\n");
-  printf("Cookie (c) 1991 Dennis Kefalinos.\n");
-  printf("This code written by Alexios Chouchoulas.\n\n");
+	printf ("\nMegistos BBS cookie database index.\n");
+	printf ("Cookie (c) 1991 Dennis Kefalinos.\n");
+	printf ("This code written by Alexios Chouchoulas.\n\n");
 
-  for(i=0;i<100;i++){
-    char cookiefile[512], cookieidxfile[512];
-    entries=0;
+	for (i = 0; i < 100; i++) {
+		char    cookiefile[512], cookieidxfile[512];
 
-    sprintf(cookiefile,mkfname(COOKIEFILE),i);
-    sprintf(cookieidxfile,mkfname(COOKIEIDXFILE),i);
+		entries = 0;
 
-    if ((qdb=fopen(cookiefile,"r")) == NULL) {
-      /*fprintf(stderr,"\nError occurred while opening %s\n",cookiefile);*/
-      /*exit(-1);*/
-      continue;
-    } else printf("Quotation Data Base:  %s\n",cookiefile);
-    numfiles++;
-    
-    if ((idx=fopen(cookieidxfile,"w")) == NULL) {
-      fprintf(stderr,"Error occured while creating %s",cookieidxfile);
-      exit(-1);
-    } else printf("Quotation index file: %s\n",cookieidxfile);
-    
-    printf("Working");
-    fflush(stdout);
-    
-    offset=0;
-    fwrite(&offset,sizeof(offset),1,idx);
-    while (!feof(qdb)) {
-      switch (c=getc(qdb)) {
-      case 13:
-      case 10:
-	seekstate=1;
-	break;
-      case '#':
-	if (seekstate == 1) {
-	  fwrite(&offset,sizeof (temp),1,idx);
-	  seekstate=0;
-	  entries++;
-	  total++;
+		sprintf (cookiefile, mkfname (COOKIEFILE), i);
+		sprintf (cookieidxfile, mkfname (COOKIEIDXFILE), i);
+
+		if ((qdb = fopen (cookiefile, "r")) == NULL) {
+			/*fprintf(stderr,"\nError occurred while opening %s\n",cookiefile); */
+			/*exit(-1); */
+			continue;
+		} else
+			printf ("Quotation Data Base:  %s\n", cookiefile);
+		numfiles++;
+
+		if ((idx = fopen (cookieidxfile, "w")) == NULL) {
+			fprintf (stderr, "Error occured while creating %s",
+				 cookieidxfile);
+			exit (-1);
+		} else
+			printf ("Quotation index file: %s\n", cookieidxfile);
+
+		printf ("Working");
+		fflush (stdout);
+
+		offset = 0;
+		fwrite (&offset, sizeof (offset), 1, idx);
+		while (!feof (qdb)) {
+			switch (c = getc (qdb)) {
+			case 13:
+			case 10:
+				seekstate = 1;
+				break;
+			case '#':
+				if (seekstate == 1) {
+					fwrite (&offset, sizeof (temp), 1,
+						idx);
+					seekstate = 0;
+					entries++;
+					total++;
+				}
+				break;
+			default:
+				seekstate = 0;
+			}
+			offset++;
+			if (!(++dotcount % (1 << 13))) {
+				printf (".");
+				fflush (stdout);
+			}
+		}
+		rewind (idx);
+		fwrite (&entries, sizeof (entries), 1, idx);
+		fclose (qdb);
+		fclose (idx);
+		printf ("Done!\n\n");
 	}
-	break;
-      default: seekstate=0;
-      }
-      offset++;
-      if (!(++dotcount%(1<<13))) {
-	printf (".");
-	fflush(stdout);
-      }
-    }
-    rewind(idx);
-    fwrite(&entries,sizeof(entries),1,idx);
-    fclose(qdb);
-    fclose(idx);
-    printf("Done!\n\n");
-  }
-  audit("CLEANUP",AUDIT(CKIECUE),total,numfiles);
-  audit_resetfile();
+	audit ("CLEANUP", AUDIT (CKIECUE), total, numfiles);
+	audit_resetfile ();
 }
 
 
-static int cookiesel(const struct dirent *d)
+static int
+cookiesel (const struct dirent *d)
 {
-  return strstr(d->d_name,"cookies-")==d->d_name &&
-    strstr(d->d_name,".idx")!=NULL;
+	return strstr (d->d_name, "cookies-") == d->d_name &&
+	    strstr (d->d_name, ".idx") != NULL;
 }
 
 
 void
-run(int begin, int end)
+run (int begin, int end)
 {
-  FILE *qdb, *idx;
-  long int choice, max=0, idxptr;
-  int newline=1, mode=0;
-  char c, *cp, buf[8192], dat[512], idxfn[512];
-  struct dirent **d;
-  int n;
+	FILE   *qdb, *idx;
+	long int choice, max = 0, idxptr;
+	int     newline = 1, mode = 0;
+	char    c, *cp, buf[8192], dat[512], idxfn[512];
+	struct dirent **d;
+	int     n;
 
-  n=scandir(mkfname(COOKIEDIR),&d,cookiesel,alphasort);
+	n = scandir (mkfname (COOKIEDIR), &d, cookiesel, alphasort);
 
-  if(n==0){
-    error_log("Didn't find any cookie files in %s",mkfname(COOKIEDIR));
-  }
+	if (n == 0) {
+		error_log ("Didn't find any cookie files in %s",
+			   mkfname (COOKIEDIR));
+	}
 
-  /* Choose a file at random. Every file has an equal chance of being
-     chosen. This means that quotes in smaller databases will appear as often
-     as quotes in huge cookie jars, making things slightly more fair. */
+	/* Choose a file at random. Every file has an equal chance of being
+	   chosen. This means that quotes in smaller databases will appear as often
+	   as quotes in huge cookie jars, making things slightly more fair. */
 
-  randomize();
-  choice=rnd(n);
-  
-  strcpy(idxfn,mkfname(COOKIEDIR"/%s",d[choice]->d_name));
-  strcpy(dat,idxfn);
-  {
-    char *cp=strstr(dat,".idx");
-    strcpy(cp,".dat");
-  }
+	randomize ();
+	choice = rnd (n);
 
-  if ((qdb=fopen(dat,"r")) == NULL) {
-    error_logsys("Unable to open %s",dat);
-  }
-  if ((idx=fopen(idxfn,"r")) == NULL) {
-    error_logsys("Unable to open %s",idxfn);
-  }
-  fread(&max,sizeof(max),1,idx);
-  choice=rnd(max)+1;
-  fseek(idx,choice*sizeof(long),SEEK_SET);
-  fread(&idxptr,sizeof(long),1,idx);
-  fseek(qdb,idxptr,SEEK_SET);
-  
-  msg_set(msg_sys);
-  prompt(begin);
-  c=getc(qdb);
-  cp=buf;
-  do {
-    c=getc(qdb);
-    if(c=='#'){
-      newline=0;
-      break;
-    } else if(c=='@' && newline){
-      *cp=0;
-      prompt(CKIELN1,buf);
-      cp=buf;
-      mode=1;
-    } else if(c==13)continue;
-    else {
-      *(cp++)=c;
-      newline=(c==10);
-    }
-  } while (!feof(qdb) && (c != '#'));
-  *cp=0;
-  prompt(mode?CKIELN2:CKIELN1,buf);
-  prompt(end);
-  fclose(qdb);
-  fclose(idx);
+	strcpy (idxfn, mkfname (COOKIEDIR "/%s", d[choice]->d_name));
+	strcpy (dat, idxfn);
+	{
+		char   *cp = strstr (dat, ".idx");
+
+		strcpy (cp, ".dat");
+	}
+
+	if ((qdb = fopen (dat, "r")) == NULL) {
+		error_logsys ("Unable to open %s", dat);
+	}
+	if ((idx = fopen (idxfn, "r")) == NULL) {
+		error_logsys ("Unable to open %s", idxfn);
+	}
+	fread (&max, sizeof (max), 1, idx);
+	choice = rnd (max) + 1;
+	fseek (idx, choice * sizeof (long), SEEK_SET);
+	fread (&idxptr, sizeof (long), 1, idx);
+	fseek (qdb, idxptr, SEEK_SET);
+
+	msg_set (msg_sys);
+	prompt (begin);
+	c = getc (qdb);
+	cp = buf;
+	do {
+		c = getc (qdb);
+		if (c == '#') {
+			newline = 0;
+			break;
+		} else if (c == '@' && newline) {
+			*cp = 0;
+			prompt (CKIELN1, buf);
+			cp = buf;
+			mode = 1;
+		} else if (c == 13)
+			continue;
+		else {
+			*(cp++) = c;
+			newline = (c == 10);
+		}
+	} while (!feof (qdb) && (c != '#'));
+	*cp = 0;
+	prompt (mode ? CKIELN2 : CKIELN1, buf);
+	prompt (end);
+	fclose (qdb);
+	fclose (idx);
 }
 
 
-int handler_run(int argc, char **argv)
+int
+handler_run (int argc, char **argv)
 {
-  init();
-  run(GCOOKIE,GCKIEEND);
-  return 0;
+	init ();
+	run (GCOOKIE, GCKIEEND);
+	return 0;
 }
 
-int handler_logout(int argc, char **argv)
+int
+handler_logout (int argc, char **argv)
 {
-  init();
-  run(COOKIE,CKIEEND);
-  return 0;
+	init ();
+	run (COOKIE, CKIEEND);
+	return 0;
 }
 
-int handler_cleanup(int argc, char **argv)
+int
+handler_cleanup (int argc, char **argv)
 {
-  cleanup();
-  return 0;
+	cleanup ();
+	return 0;
 }
 
 
 
 mod_info_t mod_info_cookie = {
-  "cookie",
-  "Cookie",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Shows random quotes a la fortune(1) at logout and when /cookie is issued.",
-  RCS_VER,
-  "2.0",
-  {0,NULL},			/* No login handler */
-  {0,handler_run},		/* No run handler, this is a simple module */
-  {20,handler_logout},		/* Install logout handler */
-  {0,NULL},			/* No hangup handler */
-  {90,handler_cleanup},		/* Low-priority cleanup handler */
-  {0,NULL}			/* No delete user handler, no per-user info */
+	"cookie",
+	"Cookie",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Shows random quotes a la fortune(1) at logout and when /cookie is issued.",
+	RCS_VER,
+	"2.0",
+	{0, NULL}
+	,			/* No login handler */
+	{0, handler_run}
+	,			/* No run handler, this is a simple module */
+	{20, handler_logout}
+	,			/* Install logout handler */
+	{0, NULL}
+	,			/* No hangup handler */
+	{90, handler_cleanup}
+	,			/* Low-priority cleanup handler */
+	{0, NULL}		/* No delete user handler, no per-user info */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setinfo(&mod_info_cookie);
-  return mod_main(argc,argv);
+	mod_setinfo (&mod_info_cookie);
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

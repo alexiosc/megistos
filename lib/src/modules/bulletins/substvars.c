@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -32,10 +35,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -46,31 +47,34 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 static char *
-sv_club()
+sv_club ()
 {
-  return club;
+	return club;
 }
 
 
 void
-initbltsubstvars()
+initbltsubstvars ()
 {
-  struct substvar table []={
-    {"@CLUB@",sv_club,NULL},
-    {"",NULL,NULL}
-  };
-  
-  int i=0;
-  
-  while(table[i].varname[0]){
-    out_addsubstvar(table[i].varname,table[i].varcalc);
-    i++;
-  }
+	struct substvar table[] = {
+		{"@CLUB@", sv_club, NULL},
+		{"", NULL, NULL}
+	};
+
+	int     i = 0;
+
+	while (table[i].varname[0]) {
+		out_addsubstvar (table[i].varname, table[i].varcalc);
+		i++;
+	}
 }
+
+
+/* End of File */

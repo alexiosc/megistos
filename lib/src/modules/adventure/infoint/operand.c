@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /*
  * operand.c
@@ -55,7 +56,7 @@ const char *__RCS=RCS_VER;
  *
  */
 
-#include "ztypes.h"
+#include <megistos/ztypes.h>
 
 /*
  * load_operand
@@ -64,33 +65,33 @@ const char *__RCS=RCS_VER;
  *
  */
 
-zword_t load_operand (int type)
+zword_t
+load_operand (int type)
 {
-  zword_t operand;
-  
-  if (type) {
-    
-    /* Type 1: byte literal, or type 2: operand specifier */
-    
-    operand = (zword_t) read_code_byte ();
-    if (type == 2) {
-      
-      /* If operand specifier non-zero then it's a variable, otherwise
-	 it's the top of the stack */
-      
-      if (operand)
-	operand = load_variable (operand);
-      else
-	operand = stack[sp++];
-    }
-  } else
-    
-    /* Type 0: word literal */
-    
-    operand = read_code_word ();
-  
-  return (operand);
-  
+	zword_t operand;
+
+	if (type) {
+
+		/* Type 1: byte literal, or type 2: operand specifier */
+
+		operand = (zword_t) read_code_byte ();
+		if (type == 2) {
+
+			/* If operand specifier non-zero then it's a variable, otherwise
+			   it's the top of the stack */
+
+			if (operand)
+				operand = load_variable (operand);
+			else
+				operand = stack[sp++];
+		}
+	} else
+		/* Type 0: word literal */
+
+		operand = read_code_word ();
+
+	return (operand);
+
 }
 
 
@@ -102,22 +103,23 @@ zword_t load_operand (int type)
  *
  */
 
-void store_operand (zword_t operand)
+void
+store_operand (zword_t operand)
 {
-  zbyte_t specifier;
-  
-  /* Read operand specifier byte */
-  
-  specifier = read_code_byte ();
-  
-  /* If operand specifier non-zero then it's a variable, otherwise it's the
-     pushed on the stack */
-  
-  if (specifier)
-    store_variable (specifier, operand);
-  else
-    stack[--sp] = operand;
-  
+	zbyte_t specifier;
+
+	/* Read operand specifier byte */
+
+	specifier = read_code_byte ();
+
+	/* If operand specifier non-zero then it's a variable, otherwise it's the
+	   pushed on the stack */
+
+	if (specifier)
+		store_variable (specifier, operand);
+	else
+		stack[--sp] = operand;
+
 }
 
 
@@ -130,29 +132,29 @@ void store_operand (zword_t operand)
  *
  */
 
-zword_t load_variable (int number)
+zword_t
+load_variable (int number)
 {
-  zword_t variable;
-  
-  if (number) {
-    if (number < 16)
-      
-      /* number in range 1 - 15, it's a stack local variable */
-      
-      variable = stack[fp - (number - 1)];
-    else
-      
-      /* number > 15, it's a global variable */
-      
-      variable = get_word (h_globals_offset + ((number - 16) * 2));
-  } else
-    
-    /* number = 0, get from top of stack */
-    
-    variable = stack[sp];
-  
-  return (variable);
-  
+	zword_t variable;
+
+	if (number) {
+		if (number < 16)
+
+			/* number in range 1 - 15, it's a stack local variable */
+
+			variable = stack[fp - (number - 1)];
+		else
+			/* number > 15, it's a global variable */
+
+			variable =
+			    get_word (h_globals_offset + ((number - 16) * 2));
+	} else
+		/* number = 0, get from top of stack */
+
+		variable = stack[sp];
+
+	return (variable);
+
 }
 
 
@@ -165,26 +167,26 @@ zword_t load_variable (int number)
  *
  */
 
-void store_variable (int number, zword_t variable)
+void
+store_variable (int number, zword_t variable)
 {
-  
-  if (number) {
-    if (number < 16)
-      
-      /* number in range 1 - 15, it's a stack local variable */
-      
-      stack[fp - (number - 1)] = variable;
-    else
-      
-      /* number > 15, it's a global variable */
-      
-      set_word (h_globals_offset + ((number - 16) * 2), variable);
-  } else
-    
-    /* number = 0, get from top of stack */
-    
-    stack[sp] = variable;
-  
+
+	if (number) {
+		if (number < 16)
+
+			/* number in range 1 - 15, it's a stack local variable */
+
+			stack[fp - (number - 1)] = variable;
+		else
+			/* number > 15, it's a global variable */
+
+			set_word (h_globals_offset + ((number - 16) * 2),
+				  variable);
+	} else
+		/* number = 0, get from top of stack */
+
+		stack[sp] = variable;
+
 }
 
 
@@ -203,49 +205,57 @@ void store_variable (int number, zword_t variable)
  *
  */
 
-void conditional_jump (int flag)
+void
+conditional_jump (int flag)
 {
-  zbyte_t specifier;
-  zword_t offset;
-  
-  /* Read the specifier byte */
-  
-  specifier = read_code_byte ();
-  
-  /* If the reverse logic flag is set then reverse the flag */
-  
-  if (specifier & 0x80)
-    flag = (flag) ? 0 : 1;
-  
-  /* Jump offset is in bottom 6 bits */
-  
-  offset = (zword_t) specifier & 0x3f;
-  
-  /* If the byte range jump flag is not set then load another offset byte */
-  
-  if ((specifier & 0x40) == 0) {
-    
-    /* Add extra offset byte to existing shifted offset */
-    
-    offset = (offset << 8) + read_code_byte ();
-    
-    /* If top bit of offset is set then propogate the sign bit */
-    
-    if (offset & 0x2000)
-      offset |= 0xc000;
-  }
-  
-  /* If the flag is false then do the jump */
-  
-  if (flag == 0){
-    
-    /* If offset equals 0 or 1 return that value instead */
-    
-    if (offset == 0 || offset == 1) ret (offset);
-    else {     
-      /* Add offset to PC */
-      
-      pc = (unsigned long) (pc + (short) offset - 2);
-    }
-  }
+	zbyte_t specifier;
+	zword_t offset;
+
+	/* Read the specifier byte */
+
+	specifier = read_code_byte ();
+
+	/* If the reverse logic flag is set then reverse the flag */
+
+	if (specifier & 0x80)
+		flag = (flag) ? 0 : 1;
+
+	/* Jump offset is in bottom 6 bits */
+
+	offset = (zword_t) specifier & 0x3f;
+
+	/* If the byte range jump flag is not set then load another offset byte */
+
+	if ((specifier & 0x40) == 0) {
+
+		/* Add extra offset byte to existing shifted offset */
+
+		offset = (offset << 8) + read_code_byte ();
+
+		/* If top bit of offset is set then propogate the sign bit */
+
+		if (offset & 0x2000)
+			offset |= 0xc000;
+	}
+
+	/* If the flag is false then do the jump */
+
+	if (flag == 0) {
+
+		/* If offset equals 0 or 1 return that value instead */
+
+		if (offset == 0 || offset == 1)
+			ret (offset);
+		else {
+			/* Add offset to PC */
+
+			pc = (unsigned long) (pc + (short) offset - 2);
+		}
+	}
 }
+
+
+/* End of File */
+
+
+/* End of File */

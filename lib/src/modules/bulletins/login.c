@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -29,10 +32,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -44,42 +45,45 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
-#include "typhoon.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
+#include <megistos/typhoon.h>
 
 
 int
-login(int argc, char **argv)
+login (int argc, char **argv)
 {
-  return 0;
-  /*
-  char **areas=NULL;
-  struct bltidx blt;
-  int cofd=cofdate(thisuseracc.datelast);
-  int newblts=0;
-  int numareas=0;
+	return 0;
+	/*
+	   char **areas=NULL;
+	   struct bltidx blt;
+	   int cofd=cofdate(thisuseracc.datelast);
+	   int newblts=0;
+	   int numareas=0;
 
-  d_keyfind(DATE,&thisuseracc.datelast);
-  if(db_status!=S_OKAY)d_keynext(DATE);
+	   d_keyfind(DATE,&thisuseracc.datelast);
+	   if(db_status!=S_OKAY)d_keynext(DATE);
 
-  while(db_status==S_OKAY){
-    d_recread(&blt);
+	   while(db_status==S_OKAY){
+	   d_recread(&blt);
 
-    if(cofdate(blt.date)>=cofd){
-      newblts++;
-      if(numareas){
-	char **newareas=alcmem(numareas*sizeof(char*))
-      }
-    }
+	   if(cofdate(blt.date)>=cofd){
+	   newblts++;
+	   if(numareas){
+	   char **newareas=alcmem(numareas*sizeof(char*))
+	   }
+	   }
 
 
-    strcpy(a,strdate(blt.date));
-    strcpy(b,strdate(thisuseracc.datelast));
-    print("%3d. %-10s, %-40s, %s %s\n",blt.num,blt.area,blt.descr,a,b);
-    d_keynext(DATE);
-  }*/
+	   strcpy(a,strdate(blt.date));
+	   strcpy(b,strdate(thisuseracc.datelast));
+	   print("%3d. %-10s, %-40s, %s %s\n",blt.num,blt.area,blt.descr,a,b);
+	   d_keynext(DATE);
+	   } */
 }
 
+
+
+/* End of File */

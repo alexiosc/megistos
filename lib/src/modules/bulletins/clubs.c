@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,10 +47,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,8 +60,8 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
 
 #undef ENTRYKEY
 #undef SOPKEY
@@ -70,50 +71,59 @@ const char *__RCS=RCS_VER;
 #undef SCASK
 #undef SCERR
 
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
-char club[16];
+char    club[16];
 
 
 void
-selectclub()
+selectclub ()
 {
-  if(!getclub(club,SCASK,SCERR,0,"."))return;
-  if(sameas(club,"."))club[0]=0;
+	if (!getclub (club, SCASK, SCERR, 0, "."))
+		return;
+	if (sameas (club, "."))
+		club[0] = 0;
 }
 
 
 static int
-hdrselect(const struct dirent *d)
+hdrselect (const struct dirent *d)
 {
-  return d->d_name[0]=='h';
+	return d->d_name[0] == 'h';
 }
 
 
 void
-listclubs()
+listclubs ()
 {
-  struct dirent **clubs;
-  int n,i;
-  
-  msg_set(clubmsg);
-  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,alphasort);
-  prompt(LCHDR);
-  for(i=0;i<n;free(clubs[i]),i++){
-    char *cp=&clubs[i]->d_name[1];
-    if(!loadclubhdr(cp))continue;
-    if(fmt_lastresult==PAUSE_QUIT)break;
-    if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
-    prompt(LCTAB,clubhdr.club,clubhdr.clubop,clubhdr.descr);
-  }
-  free(clubs);
-  if(fmt_lastresult==PAUSE_QUIT){
-    msg_set(msg);
-    return;
-  }
-  prompt(LCFTR);
-  msg_set(msg);
+	struct dirent **clubs;
+	int     n, i;
+
+	msg_set (clubmsg);
+	n = scandir (mkfname (CLUBHDRDIR), &clubs, hdrselect, alphasort);
+	prompt (LCHDR);
+	for (i = 0; i < n; free (clubs[i]), i++) {
+		char   *cp = &clubs[i]->d_name[1];
+
+		if (!loadclubhdr (cp))
+			continue;
+		if (fmt_lastresult == PAUSE_QUIT)
+			break;
+		if (getclubax (&thisuseracc, cp) == CAX_ZERO)
+			continue;
+		prompt (LCTAB, clubhdr.club, clubhdr.clubop, clubhdr.descr);
+	}
+	free (clubs);
+	if (fmt_lastresult == PAUSE_QUIT) {
+		msg_set (msg);
+		return;
+	}
+	prompt (LCFTR);
+	msg_set (msg);
 }
+
+
+/* End of File */

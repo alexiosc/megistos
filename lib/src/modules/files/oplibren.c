@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:11  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -54,116 +55,125 @@ const char *__RCS=RCS_VER;
 #define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk/mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk/mbk_files.h>
 
 
 int
-listpeerlibs()
+listpeerlibs ()
 {
-  struct libidx l;
-  int p;
-  int res;
-  char gt[20];
+	struct libidx l;
+	int     p;
+	int     res;
+	char    gt[20];
 
-  prompt(LIBLSTH);
+	prompt (LIBLSTH);
 
-  if(!libreadnum(library.parent,&l)){
-    error_fatal("Unable to get parent lib, libnum=%d",
-	  library.parent);
-  }
-  p=l.parent;
+	if (!libreadnum (library.parent, &l)) {
+		error_fatal ("Unable to get parent lib, libnum=%d",
+			     library.parent);
+	}
+	p = l.parent;
 
 
-  gt[0]=0;
+	gt[0] = 0;
 
-  do{
-    res=libgetchild(library.parent, gt, &l);
-    if(res){
-      if(getlibaccess(&l,ACC_VISIBLE))
-	prompt(LIBLSTL,leafname(l.fullname),l.numfiles,l.numbytes>>10,l.descr);
-    }
-    if(fmt_lastresult==PAUSE_QUIT)break;
-    strcpy(gt,l.keyname);
-  }while(res);
+	do {
+		res = libgetchild (library.parent, gt, &l);
+		if (res) {
+			if (getlibaccess (&l, ACC_VISIBLE))
+				prompt (LIBLSTL, leafname (l.fullname),
+					l.numfiles, l.numbytes >> 10, l.descr);
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			break;
+		strcpy (gt, l.keyname);
+	} while (res);
 
-  prompt(LIBLSTF);
+	prompt (LIBLSTF);
 
-  return fmt_lastresult!=PAUSE_QUIT;
+	return fmt_lastresult != PAUSE_QUIT;
 }
 
 
 static int
-getnewlibname(char *s)
+getnewlibname (char *s)
 {
-  char *i,c;
+	char   *i, c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(OLRNASK);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if (!margc) {
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listpeerlibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(strlen(i)>sizeof(library.keyname)-1){
-      prompt(OCRE2LN,sizeof(library.keyname)-1);
-    } else if(strspn(i,FNAMECHARS)!=strlen(i)){
-      prompt(OCRECHR);
-    } else break;
-  }
-  strcpy(s,i);
-  return 1;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (OLRNASK);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listpeerlibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (strlen (i) > sizeof (library.keyname) - 1) {
+			prompt (OCRE2LN, sizeof (library.keyname) - 1);
+		} else if (strspn (i, FNAMECHARS) != strlen (i)) {
+			prompt (OCRECHR);
+		} else
+			break;
+	}
+	strcpy (s, i);
+	return 1;
 }
 
 
 void
-op_libren()
+op_libren ()
 {
-  char s[256];
+	char    s[256];
 
-  print("not implemented\n");
-  return;
+	print ("not implemented\n");
+	return;
 
-  /* Refuse to rename the main library */
+	/* Refuse to rename the main library */
 
-  if(!nesting(library.fullname)){
-    prompt(OLRNNMN);
-    cnc_end();
-    return;
-  }
+	if (!nesting (library.fullname)) {
+		prompt (OLRNNMN);
+		cnc_end ();
+		return;
+	}
 
-  for(;;){
-    if(!getnewlibname(s))return;
-    
-    if(libexists(s,library.parent)){
-      prompt(OLRNERR);
-      cnc_end();
-      continue;
-    } else break;
-  }
+	for (;;) {
+		if (!getnewlibname (s))
+			return;
 
-  /* Rename the library */
+		if (libexists (s, library.parent)) {
+			prompt (OLRNERR);
+			cnc_end ();
+			continue;
+		} else
+			break;
+	}
+
+	/* Rename the library */
 
 }
+
+
+/* End of File */

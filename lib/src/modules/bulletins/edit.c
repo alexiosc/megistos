@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:15  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -36,10 +39,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDLIB_H 1
@@ -51,76 +52,87 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_bulletins.h"
-#include "bltidx.h"
-#include "bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bulletins.h>
+#include <megistos/bltidx.h>
+#include <megistos/bulletins.h>
 
 
 void
-bltedt()
+bltedt ()
 {
-  struct bltidx blt;
-  int i;
-  char lock[256];
+	struct bltidx blt;
+	int     i;
+	char    lock[256];
 
-  /* Get the bulletin */
+	/* Get the bulletin */
 
-  if(!getblt(EDTBLT,&blt))return;
-  if(getaccess(blt.area)<flaxes){
-    prompt(EDTNOAX,blt.area);
-    return;
-  }
+	if (!getblt (EDTBLT, &blt))
+		return;
+	if (getaccess (blt.area) < flaxes) {
+		prompt (EDTNOAX, blt.area);
+		return;
+	}
 
-  sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt.area,blt.fname);
-  lock_place(lock,"editing");
+	sprintf (lock, "%s-%s-%s-%s", BLTREADLOCK, thisuseracc.userid,
+		 blt.area, blt.fname);
+	lock_place (lock, "editing");
 
-  sprintf(inp_buffer,"%s\n%s\nOK\nCancel\n",blt.author,blt.descr);
+	sprintf (inp_buffer, "%s\n%s\nOK\nCancel\n", blt.author, blt.descr);
 
-  if(dialog_run("bulletins",EBLTVT,EBLTLT,inp_buffer,MAXINPLEN)!=0){
-    error_fatal("Unable to run data entry subsystem");
-  }
+	if (dialog_run ("bulletins", EBLTVT, EBLTLT, inp_buffer, MAXINPLEN) !=
+	    0) {
+		error_fatal ("Unable to run data entry subsystem");
+	}
 
-  dialog_parse(inp_buffer);
+	dialog_parse (inp_buffer);
 
-  if (sameas(margv[2],"OK") || sameas (margv[2],margv[4])) {
-    for(i=0;i<5;i++){
-      char *s=margv[i];
-      if(i==0)strcpy(blt.author,s);
-      else if(i==1)strcpy(blt.descr,s);
-    }
+	if (sameas (margv[2], "OK") || sameas (margv[2], margv[4])) {
+		for (i = 0; i < 5; i++) {
+			char   *s = margv[i];
 
-    if(!usr_uidxref(blt.author,0)){
-      if(margc&&inp_isX(margv[0])){
-	prompt(ABORT);
-	lock_rm(lock);
-	return;
-      }
-      cnc_end();
-      prompt(EDTAUTHR,blt.author);
-      if(!get_userid(blt.author,EDTAUTH,EDTAUTHR,0,NULL,0)){
-	prompt(ABORT);
-	lock_rm(lock);
-	return;
-      }
-    }
+			if (i == 0)
+				strcpy (blt.author, s);
+			else if (i == 1)
+				strcpy (blt.descr, s);
+		}
 
-    if(!dbupdate(&blt)){
-      prompt(EDITERR);
-      lock_rm(lock);
-      return;
-    }
+		if (!usr_uidxref (blt.author, 0)) {
+			if (margc && inp_isX (margv[0])) {
+				prompt (ABORT);
+				lock_rm (lock);
+				return;
+			}
+			cnc_end ();
+			prompt (EDTAUTHR, blt.author);
+			if (!get_userid
+			    (blt.author, EDTAUTH, EDTAUTHR, 0, NULL, 0)) {
+				prompt (ABORT);
+				lock_rm (lock);
+				return;
+			}
+		}
 
-    lock_rm(lock);
-    prompt(EDITOK);
-    bltinfo(&blt);
+		if (!dbupdate (&blt)) {
+			prompt (EDITERR);
+			lock_rm (lock);
+			return;
+		}
 
-    /* Audit it */
+		lock_rm (lock);
+		prompt (EDITOK);
+		bltinfo (&blt);
 
-    if(audedt)audit(thisuseronl.channel,AUDIT(BLTEDT),
-		    thisuseracc.userid,blt.fname,blt.area);
-  } else {
-    prompt(ABORT);
-    lock_rm(lock);
-  }
+		/* Audit it */
+
+		if (audedt)
+			audit (thisuseronl.channel, AUDIT (BLTEDT),
+			       thisuseracc.userid, blt.fname, blt.area);
+	} else {
+		prompt (ABORT);
+		lock_rm (lock);
+	}
 }
+
+
+/* End of File */

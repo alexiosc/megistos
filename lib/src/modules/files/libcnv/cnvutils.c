@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:13  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -42,10 +45,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -57,56 +58,67 @@ const char *__RCS=RCS_VER;
 #include <bbs.h>
 
 
-int convert_date(unsigned short int mbbsdate)
+int
+convert_date (unsigned short int mbbsdate)
 {
-  int day=mbbsdate&0x1f;
-  int month=(mbbsdate>>5)&0xf;
-  int year=1980+((mbbsdate>>9)&0x7f);
-  return makedate(day,month,year);
+	int     day = mbbsdate & 0x1f;
+	int     month = (mbbsdate >> 5) & 0xf;
+	int     year = 1980 + ((mbbsdate >> 9) & 0x7f);
+
+	return makedate (day, month, year);
 }
 
 
-int convert_time(unsigned short int mbbstime)
+int
+convert_time (unsigned short int mbbstime)
 {
-  int sec=(mbbstime&0x1f)<<1;	/* DOS times have a resolution of 2 secs */
-  int min=(mbbstime>>5)&0x3f;
-  unsigned int hour=(mbbstime>>11);
-  return maketime(hour,min,sec);
+	int     sec = (mbbstime & 0x1f) << 1;	/* DOS times have a resolution of 2 secs */
+	int     min = (mbbstime >> 5) & 0x3f;
+	unsigned int hour = (mbbstime >> 11);
+
+	return maketime (hour, min, sec);
 }
 
 
-time_t convert_timedate(unsigned short int mbbsdate,
-			unsigned short int mbbstime)
+time_t
+convert_timedate (unsigned short int mbbsdate, unsigned short int mbbstime)
 {
-  struct tm tm;
-  tm.tm_mday=mbbsdate&0x1f;
-  tm.tm_mon=((mbbsdate>>5)&0xf);
-  tm.tm_year=80+((mbbsdate>>9)&0x7f);
-  tm.tm_hour=(mbbstime>>11);
-  tm.tm_min=(mbbstime>>5)&0x3f;
-  tm.tm_sec=(mbbstime&0x1f)<<1;	/* DOS times have a resolution of 2 secs */
-  return mktime(&tm);
+	struct tm tm;
+
+	tm.tm_mday = mbbsdate & 0x1f;
+	tm.tm_mon = ((mbbsdate >> 5) & 0xf);
+	tm.tm_year = 80 + ((mbbsdate >> 9) & 0x7f);
+	tm.tm_hour = (mbbstime >> 11);
+	tm.tm_min = (mbbstime >> 5) & 0x3f;
+	tm.tm_sec = (mbbstime & 0x1f) << 1;	/* DOS times have a resolution of 2 secs */
+	return mktime (&tm);
 }
 
 
-char *
-stg(char *s)
+char   *
+stg (char *s)
 {
 #ifndef ASIS
-  static char ret[16386],*cp,*rp;
-  for(cp=s,rp=ret;*cp;cp++){
-    if(isprint(*cp))*rp++=*cp;
-    else {
-      char tmp[16];
-      sprintf(tmp,"\\x%02X",(*cp)&0xff);
-      *rp=0;
-      strcat(rp,tmp);
-      rp+=4;
-    }
-  }
-  *rp=0;
-  return ret;
+	static char ret[16386], *cp, *rp;
+
+	for (cp = s, rp = ret; *cp; cp++) {
+		if (isprint (*cp))
+			*rp++ = *cp;
+		else {
+			char    tmp[16];
+
+			sprintf (tmp, "\\x%02X", (*cp) & 0xff);
+			*rp = 0;
+			strcat (rp, tmp);
+			rp += 4;
+		}
+	}
+	*rp = 0;
+	return ret;
 #else
-  return s;
+	return s;
 #endif
 }
+
+
+/* End of File */

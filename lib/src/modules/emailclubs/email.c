@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:14  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -68,9 +71,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -83,352 +85,389 @@
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_emailclubs.h"
-#include "email.h"
-#include "clubs.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_emailclubs.h>
+#include <megistos/email.h>
+#include <megistos/clubs.h>
 
 
 promptblock_t *msg;
 
 
-int  entrykey;
-int  sopkey;
-int  wrtkey;
-int  netkey;
-int  rrrkey;
-int  attkey;
-int  dnlchg;
-int  wrtchg;
-int  netchg;
-int  rrrchg;
-int  attchg;
-int  mkaudd;
-int  mkaudu;
-int  maxccs;
-int  emllif;
-int  msglen;
-char *eattupl;
-int  sigbmax;
-int  siglmax;
-int  sigckey;
-int  sigchg;
-int  afwkey;
-int  dlkey;
-int  maxdlm;
-int  msskey;
-int  addnew;
-int  drdaxkey;
-int  ddlaxkey;
-int  dwraxkey;
-int  dulaxkey;
+int     entrykey;
+int     sopkey;
+int     wrtkey;
+int     netkey;
+int     rrrkey;
+int     attkey;
+int     dnlchg;
+int     wrtchg;
+int     netchg;
+int     rrrchg;
+int     attchg;
+int     mkaudd;
+int     mkaudu;
+int     maxccs;
+int     emllif;
+int     msglen;
+char   *eattupl;
+int     sigbmax;
+int     siglmax;
+int     sigckey;
+int     sigchg;
+int     afwkey;
+int     dlkey;
+int     maxdlm;
+int     msskey;
+int     addnew;
+int     drdaxkey;
+int     ddlaxkey;
+int     dwraxkey;
+int     dulaxkey;
 
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
-  msg=msg_open("emailclubs");
-  msg_setlanguage(thisuseracc.language);
+	mod_init (INI_ALL);
+	msg = msg_open ("emailclubs");
+	msg_setlanguage (thisuseracc.language);
 
-  entrykey=msg_int(ENTRYKEY,0,129);
-  sopkey=msg_int(SOPKEY,0,129);
-  wrtkey=msg_int(WRTKEY,0,129);
-  netkey=msg_int(NETKEY,0,129);
-  rrrkey=msg_int(RRRKEY,0,129);
-  attkey=msg_int(ATTKEY,0,129);
-  dnlchg=msg_int(DNLCHG,-32767,32767);
-  wrtchg=msg_int(WRTCHG,-32767,32767);
-  netchg=msg_int(NETCHG,-32767,32767);
-  rrrchg=msg_int(RRRCHG,-32767,32767);
-  attchg=msg_int(ATTCHG,-32767,32767);
-  mkaudd=msg_bool(MKAUDD);
-  mkaudu=msg_bool(MKAUDU);
-  emllif=msg_int(EMLLIF,-1,32767);
-  maxccs=msg_int(MAXCCS,0,32767);
-  msglen=msg_int(MSGLEN,1,256)<<10;
-  eattupl=msg_string(EATTUPL);
-  sigbmax=msg_int(SIGBMAX,16,1024);
-  siglmax=msg_int(SIGLMAX,1,32);
-  sigckey=msg_int(SIGCKEY,0,129);
-  sigchg=msg_int(SIGCHG,-32767,32767);
-  afwkey=msg_int(AFWKEY,0,129);
-  dlkey=msg_int(DLKEY,0,129);
-  maxdlm=msg_int(MAXDLM,2,256);
-  msskey=msg_int(MSSKEY,0,129);
-  addnew=msg_bool(ADDNEW);
-  defclub=msg_string(DEFCLUB);
-  bzero(defaultclub,sizeof(defaultclub));
-  strncpy(defaultclub,defclub,sizeof(defaultclub));
-  if(*defclub=='/')defclub++;
+	entrykey = msg_int (ENTRYKEY, 0, 129);
+	sopkey = msg_int (SOPKEY, 0, 129);
+	wrtkey = msg_int (WRTKEY, 0, 129);
+	netkey = msg_int (NETKEY, 0, 129);
+	rrrkey = msg_int (RRRKEY, 0, 129);
+	attkey = msg_int (ATTKEY, 0, 129);
+	dnlchg = msg_int (DNLCHG, -32767, 32767);
+	wrtchg = msg_int (WRTCHG, -32767, 32767);
+	netchg = msg_int (NETCHG, -32767, 32767);
+	rrrchg = msg_int (RRRCHG, -32767, 32767);
+	attchg = msg_int (ATTCHG, -32767, 32767);
+	mkaudd = msg_bool (MKAUDD);
+	mkaudu = msg_bool (MKAUDU);
+	emllif = msg_int (EMLLIF, -1, 32767);
+	maxccs = msg_int (MAXCCS, 0, 32767);
+	msglen = msg_int (MSGLEN, 1, 256) << 10;
+	eattupl = msg_string (EATTUPL);
+	sigbmax = msg_int (SIGBMAX, 16, 1024);
+	siglmax = msg_int (SIGLMAX, 1, 32);
+	sigckey = msg_int (SIGCKEY, 0, 129);
+	sigchg = msg_int (SIGCHG, -32767, 32767);
+	afwkey = msg_int (AFWKEY, 0, 129);
+	dlkey = msg_int (DLKEY, 0, 129);
+	maxdlm = msg_int (MAXDLM, 2, 256);
+	msskey = msg_int (MSSKEY, 0, 129);
+	addnew = msg_bool (ADDNEW);
+	defclub = msg_string (DEFCLUB);
+	bzero (defaultclub, sizeof (defaultclub));
+	strncpy (defaultclub, defclub, sizeof (defaultclub));
+	if (*defclub == '/')
+		defclub++;
 
-  initlist();
-  initecsubstvars();
+	initlist ();
+	initecsubstvars ();
 }
 
 
-static void makenewqsc()
+static void
+makenewqsc ()
 {
-  initialise();
-  all(1);
-  all(1);
-  saveqsc();
-  doneqsc();
-  prompt(CLUBINFO);
-}
-
-
-void
-newclubmsgs()
-{
-  struct lastread *l;
-  struct dirent **clubs;
-  int i,j,n,t,done=0,msgno;
-  struct stat st;
-  char fname[256];
-  struct emailuser ecuser;
-
-  bzero(&ecuser,sizeof(ecuser));
-  if(!readecuser(thisuseracc.userid,&ecuser))bzero(&ecuser,sizeof(ecuser));
-  sprintf(fname,"%s/%s",mkfname(QSCDIR),thisuseracc.userid);
-  if(stat(fname,&st)||st.st_size==0||(ecuser.flags&ECF_QSCCFG)==0){
-    makenewqsc();
-    return;
-  }
-
-
-  /* If it's empty, the user is new; add all the clubs. */
-
-  if(!startqsc()){
-    makenewqsc();
-    return;
-  }
-
-  /* Old user, scan for new messages */
-
-  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,ncsalphasort);
-
-  prompt(CHKNCLB);
-  for(i=0;i<n;free(clubs[i]),i++){
-    char *cp=&clubs[i]->d_name[1];
-    if(done)continue;
-    if(!loadclubhdr(cp))continue;
-    if(getclubax(&thisuseracc,cp)>=CAX_ZERO){
-      if((l=findqsc(cp))!=NULL)t=max(l->lastmsg,l->emllast)+1;
-      else t=0;
-      setclub(cp);
-      j=findmsgto(&msgno,thisuseracc.userid,t,BSD_GT);
-      if((j==BSE_FOUND)&&(msgno>=t)){
-	prompt(NEWCLUB);
-	done=1;
-      }
-    }
-  }
-  free(clubs);
-  doneqsc();
-  if(!done)prompt(NNEWCLB);
+	initialise ();
+	all (1);
+	all (1);
+	saveqsc ();
+	doneqsc ();
+	prompt (CLUBINFO);
 }
 
 
 void
-about()
+newclubmsgs ()
 {
-  prompt(ABOUT);
+	struct lastread *l;
+	struct dirent **clubs;
+	int     i, j, n, t, done = 0, msgno;
+	struct stat st;
+	char    fname[256];
+	struct emailuser ecuser;
+
+	bzero (&ecuser, sizeof (ecuser));
+	if (!readecuser (thisuseracc.userid, &ecuser))
+		bzero (&ecuser, sizeof (ecuser));
+	sprintf (fname, "%s/%s", mkfname (QSCDIR), thisuseracc.userid);
+	if (stat (fname, &st) || st.st_size == 0 ||
+	    (ecuser.flags & ECF_QSCCFG) == 0) {
+		makenewqsc ();
+		return;
+	}
+
+
+	/* If it's empty, the user is new; add all the clubs. */
+
+	if (!startqsc ()) {
+		makenewqsc ();
+		return;
+	}
+
+	/* Old user, scan for new messages */
+
+	n = scandir (mkfname (CLUBHDRDIR), &clubs, hdrselect, ncsalphasort);
+
+	prompt (CHKNCLB);
+	for (i = 0; i < n; free (clubs[i]), i++) {
+		char   *cp = &clubs[i]->d_name[1];
+
+		if (done)
+			continue;
+		if (!loadclubhdr (cp))
+			continue;
+		if (getclubax (&thisuseracc, cp) >= CAX_ZERO) {
+			if ((l = findqsc (cp)) != NULL)
+				t = max (l->lastmsg, l->emllast) + 1;
+			else
+				t = 0;
+			setclub (cp);
+			j = findmsgto (&msgno, thisuseracc.userid, t, BSD_GT);
+			if ((j == BSE_FOUND) && (msgno >= t)) {
+				prompt (NEWCLUB);
+				done = 1;
+			}
+		}
+	}
+	free (clubs);
+	doneqsc ();
+	if (!done)
+		prompt (NNEWCLB);
 }
 
 
 void
-done()
+about ()
 {
-  msg_close(msg);
-  if(uqsc)saveqsc();
-  lock_rm(inclublock);
-  rmlocks();
+	prompt (ABOUT);
+}
+
+
+void
+done ()
+{
+	msg_close (msg);
+	if (uqsc)
+		saveqsc ();
+	lock_rm (inclublock);
+	rmlocks ();
 }
 
 
 
 int
-run(int argc, char **argv)
+run (int argc, char **argv)
 {
-  int shownmenu=0;
-  char c=0;
+	int     shownmenu = 0;
+	char    c = 0;
 
-  atexit(done);
-  init();
+	atexit (done);
+	init ();
 
-  if(!key_owns(&thisuseracc,entrykey)){
-    prompt(NOENTRY);
-    return 0;
-  }
-
-  rmlocks();
-
-  for(;;){
-    thisuseronl.flags&=~OLF_BUSY;
-    if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-      if(!shownmenu){
-	prompt(key_owns(&thisuseracc,sopkey)?EMMNU:EMMNU);
-	shownmenu=2;
-      }
-    } else shownmenu=1;
-    if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
-      thisuseronl.input[0]=0;
-    } else {
-      if(!cnc_nxtcmd){
-	if(thisuseronl.flags&OLF_MMCONCAT){
-	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return 0;
+	if (!key_owns (&thisuseracc, entrykey)) {
+		prompt (NOENTRY);
+		return 0;
 	}
-	if(shownmenu==1){
-	  prompt(key_owns(&thisuseracc,sopkey)?SHEMMNU:SHEMMNU);
-	} else shownmenu=1;
-	inp_get(0);
-	cnc_begin();
-      }
-    }
 
-    if((c=cnc_more())!=0){
-      cnc_chr();
-      switch (c) {
-      case 'A':
-	about();
-	break;
-      case 'W':
-	emailwrite();
-	break;
-      case 'R':
-	emailread();
-	break;
-      case 'M':
-	modifymail();
-	break;
-      case 'P':
-	preferences();
-	break;
-      case 'D':
-	confdistlist();
-	break;
-      case 'X':
-	prompt(EMLEAVE);
+	rmlocks ();
+
+	for (;;) {
+		thisuseronl.flags &= ~OLF_BUSY;
+		if (!
+		    (thisuseronl.flags & OLF_MMCALLING &&
+		     thisuseronl.input[0])) {
+			if (!shownmenu) {
+				prompt (key_owns (&thisuseracc, sopkey) ? EMMNU
+					: EMMNU);
+				shownmenu = 2;
+			}
+		} else
+			shownmenu = 1;
+		if (thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0]) {
+			thisuseronl.input[0] = 0;
+		} else {
+			if (!cnc_nxtcmd) {
+				if (thisuseronl.flags & OLF_MMCONCAT) {
+					thisuseronl.flags &= ~OLF_MMCONCAT;
+					return 0;
+				}
+				if (shownmenu == 1) {
+					prompt (key_owns (&thisuseracc, sopkey)
+						? SHEMMNU : SHEMMNU);
+				} else
+					shownmenu = 1;
+				inp_get (0);
+				cnc_begin ();
+			}
+		}
+
+		if ((c = cnc_more ()) != 0) {
+			cnc_chr ();
+			switch (c) {
+			case 'A':
+				about ();
+				break;
+			case 'W':
+				emailwrite ();
+				break;
+			case 'R':
+				emailread ();
+				break;
+			case 'M':
+				modifymail ();
+				break;
+			case 'P':
+				preferences ();
+				break;
+			case 'D':
+				confdistlist ();
+				break;
+			case 'X':
+				prompt (EMLEAVE);
+				return 0;
+			case '?':
+				shownmenu = 0;
+				break;
+			default:
+				prompt (ERRSEL, c);
+				cnc_end ();
+				continue;
+			}
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			fmt_resetvpos (0);
+		cnc_end ();
+
+	}
+}
+
+
+int
+handler_userdel (int argc, char **argv)
+{
+	char   *victim = argv[2], fname[1024];
+
+	if (strcmp (argv[1], "--userdel") || argc != 3) {
+		fprintf (stderr, "User deletion handler: syntax error\n");
+		return 1;
+	}
+
+	if (!usr_exists (victim)) {
+		fprintf (stderr,
+			 "User deletion handler: user %s does not exist\n",
+			 victim);
+		return 1;
+	}
+
+	sprintf (fname, "%s/%s", mkfname (MSGUSRDIR), victim);
+	unlink (fname);
+	sprintf (fname, "%s/%s", mkfname (MSGSDISTDIR), victim);
+	unlink (fname);
+	sprintf (fname, "%s/%s", mkfname (MSGSIGDIR), victim);
+	unlink (fname);
+	sprintf (fname, "%s/%s", mkfname (CLUBAXDIR), victim);
+	unlink (fname);
+	sprintf (fname, "%s/%s", mkfname (QSCDIR), victim);
+	unlink (fname);
+
 	return 0;
-      case '?':
-	shownmenu=0;
-	break;
-      default:
-	prompt(ERRSEL,c);
-	cnc_end();
-	continue;
-      }
-    }
-    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
-    cnc_end();
-
-  }
-}
-
-
-int handler_userdel(int argc, char **argv)
-{
-  char *victim=argv[2], fname[1024];
-
-  if(strcmp(argv[1],"--userdel")||argc!=3){
-    fprintf(stderr,"User deletion handler: syntax error\n");
-    return 1;
-  }
-
-  if(!usr_exists(victim)){
-    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
-    return 1;
-  }
-
-  sprintf(fname,"%s/%s",mkfname(MSGUSRDIR),victim);
-  unlink(fname);
-  sprintf(fname,"%s/%s",mkfname(MSGSDISTDIR),victim);
-  unlink(fname);
-  sprintf(fname,"%s/%s",mkfname(MSGSIGDIR),victim);
-  unlink(fname);
-  sprintf(fname,"%s/%s",mkfname(CLUBAXDIR),victim);
-  unlink(fname);
-  sprintf(fname,"%s/%s",mkfname(QSCDIR),victim);
-  unlink(fname);
-
-  return 0;
 }
 
 
 int
-login(int argc, char **argv)
+login (int argc, char **argv)
 {
-  int msgno=-1, ask=0, res;
-  struct emailuser ecuser;
-  
-  init();
-  newclubmsgs();
+	int     msgno = -1, ask = 0, res;
+	struct emailuser ecuser;
 
-  if(!readecuser(thisuseracc.userid,&ecuser))return 0;
+	init ();
+	newclubmsgs ();
 
-  setclub(NULL);
-  res=findmsgto(&msgno,thisuseracc.userid,ecuser.lastemailread+1,BSD_GT);
+	if (!readecuser (thisuseracc.userid, &ecuser))
+		return 0;
 
-  if(res==BSE_FOUND){
-    prompt(NEWMAIL);
-    ask=1;
-  } else {
-    res=findmsgto(&msgno,thisuseracc.userid,0,BSD_GT);
-    if(res==BSE_FOUND)prompt(OLDMAIL);
-    else msgno=-1;
-  }
+	setclub (NULL);
+	res =
+	    findmsgto (&msgno, thisuseracc.userid, ecuser.lastemailread + 1,
+		       BSD_GT);
 
-  if(msgno>=0){
-    if(ecuser.prefs&(ECP_LOGINYES|ECP_LOGINASK)){
-      int readnow=ecuser.prefs&ECP_LOGINYES;
-      if((ecuser.prefs&ECP_LOGINASK) && ask){
-	thisuseronl.flags|=OLF_INHIBITGO;
-	if(!get_bool(&readnow,ASKRDNOW,ASKRDERR,ASKRDDEF,0)){
-	  prompt(HOW2READ);
-	  thisuseronl.flags&=~OLF_INHIBITGO;
-	  return 0;
+	if (res == BSE_FOUND) {
+		prompt (NEWMAIL);
+		ask = 1;
+	} else {
+		res = findmsgto (&msgno, thisuseracc.userid, 0, BSD_GT);
+		if (res == BSE_FOUND)
+			prompt (OLDMAIL);
+		else
+			msgno = -1;
 	}
-      }
-      if(readnow){
-	thisuseronl.flags|=OLF_INHIBITGO;
-	startreading(0,msgno);
-      } else {
-	/*	ecuser.lastemailread=msgno;
-		writeecuser(thisuseracc.userid,&ecuser);*/
-	prompt(HOW2READ);
-      }
-      thisuseronl.flags&=~OLF_INHIBITGO;
-    } else {
-      prompt(HOW2READ);
-    }
-  }
 
-  done();
-  return 0;
+	if (msgno >= 0) {
+		if (ecuser.prefs & (ECP_LOGINYES | ECP_LOGINASK)) {
+			int     readnow = ecuser.prefs & ECP_LOGINYES;
+
+			if ((ecuser.prefs & ECP_LOGINASK) && ask) {
+				thisuseronl.flags |= OLF_INHIBITGO;
+				if (!get_bool
+				    (&readnow, ASKRDNOW, ASKRDERR, ASKRDDEF,
+				     0)) {
+					prompt (HOW2READ);
+					thisuseronl.flags &= ~OLF_INHIBITGO;
+					return 0;
+				}
+			}
+			if (readnow) {
+				thisuseronl.flags |= OLF_INHIBITGO;
+				startreading (0, msgno);
+			} else {
+				/*      ecuser.lastemailread=msgno;
+				   writeecuser(thisuseracc.userid,&ecuser); */
+				prompt (HOW2READ);
+			}
+			thisuseronl.flags &= ~OLF_INHIBITGO;
+		} else {
+			prompt (HOW2READ);
+		}
+	}
+
+	done ();
+	return 0;
 }
 
 
 mod_info_t mod_info_email = {
-  "email",
-  "Email",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Read/write private BBS or Internet messages and set reading preferences.",
-  RCS_VER,
-  "1.0",
-  {99,login},		/* Login handler */
-  { 0,run},			/* Interactive handler */
-  { 0,NULL},			/* Install logout handler */
-  { 0,NULL},			/* Hangup handler */
-  { 5,handler_cleanup},		/* Cleanup handler */
-  {50,handler_userdel}		/* Delete user handler */
+	"email",
+	"Email",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Read/write private BBS or Internet messages and set reading preferences.",
+	RCS_VER,
+	"1.0",
+	{99, login}
+	,			/* Login handler */
+	{0, run}
+	,			/* Interactive handler */
+	{0, NULL}
+	,			/* Install logout handler */
+	{0, NULL}
+	,			/* Hangup handler */
+	{5, handler_cleanup}
+	,			/* Cleanup handler */
+	{50, handler_userdel}	/* Delete user handler */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setinfo(&mod_info_email);
-  return mod_main(argc,argv);
+	mod_setinfo (&mod_info_email);
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

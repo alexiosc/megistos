@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:08  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -65,54 +66,59 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "mbk_telecon.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/mbk_telecon.h>
 
 
 struct tlcuser tlcu;
 
 
 int
-loadtlcuser(char *userid, struct tlcuser *tlc)
+loadtlcuser (char *userid, struct tlcuser *tlc)
 {
-  char fname[256];
-  FILE *fp;
+	char    fname[256];
+	FILE   *fp;
 
-  sprintf(fname,"%s/%s",mkfname(TELEUSRDIR),userid);
-  if((fp=fopen(fname,"r"))==NULL)return 0;
-  if(fread(tlc,sizeof(struct tlcuser),1,fp)!=1){
-    fclose(fp);
-    return 0;
-  }
-  fclose(fp);
-  return 1;
+	sprintf (fname, "%s/%s", mkfname (TELEUSRDIR), userid);
+	if ((fp = fopen (fname, "r")) == NULL)
+		return 0;
+	if (fread (tlc, sizeof (struct tlcuser), 1, fp) != 1) {
+		fclose (fp);
+		return 0;
+	}
+	fclose (fp);
+	return 1;
 }
 
 
 int
-savetlcuser(char *userid, struct tlcuser *tlc)
+savetlcuser (char *userid, struct tlcuser *tlc)
 {
-  char fname[256];
-  FILE *fp;
+	char    fname[256];
+	FILE   *fp;
 
-  sprintf(fname,"%s/%s",mkfname(TELEUSRDIR),userid);
-  if((fp=fopen(fname,"w"))==NULL)return 0;
-  if(fwrite(tlc,sizeof(struct tlcuser),1,fp)!=1){
-    error_fatalsys("Unable to save telecon user %s",userid);
-  }
-  fclose(fp);
-  return 1;
+	sprintf (fname, "%s/%s", mkfname (TELEUSRDIR), userid);
+	if ((fp = fopen (fname, "w")) == NULL)
+		return 0;
+	if (fwrite (tlc, sizeof (struct tlcuser), 1, fp) != 1) {
+		error_fatalsys ("Unable to save telecon user %s", userid);
+	}
+	fclose (fp);
+	return 1;
 }
 
 
 void
-makenewuser()
+makenewuser ()
 {
-  memset(&tlcu,0,sizeof(tlcu));
-  tlcu.colour=defcol;
-  tlcu.flags=TLF_STARTMAIN|TLF_BEGUNINV;
-  tlcu.flags=defint;
-  tlcu.actions=defact;
-  savetlcuser(thisuseracc.userid,&tlcu);
+	memset (&tlcu, 0, sizeof (tlcu));
+	tlcu.colour = defcol;
+	tlcu.flags = TLF_STARTMAIN | TLF_BEGUNINV;
+	tlcu.flags = defint;
+	tlcu.actions = defact;
+	savetlcuser (thisuseracc.userid, &tlcu);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:10  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -65,152 +66,170 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "files.h"
-#include "mbk_files.h"
+#include <megistos/bbs.h>
+#include <megistos/files.h>
+#include <megistos/mbk_files.h>
 
 
 inline void
-enterlastlib()
+enterlastlib ()
 {
-  if(libexistsnum(thisuseronl.lastlib))enterlib(thisuseronl.lastlib,0);
-  else entermainlib();
+	if (libexistsnum (thisuseronl.lastlib))
+		enterlib (thisuseronl.lastlib, 0);
+	else
+		entermainlib ();
 }
 
 
 int
-enterlib(int libnum, int quiet)
+enterlib (int libnum, int quiet)
 {
-  if(!libreadnum(libnum,&library))return 0;
-  thisuseronl.lastlib=library.libnum;
-  locklib();
-  if((!quiet) && !(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-    libinfo();
-  }
-  return 1;
+	if (!libreadnum (libnum, &library))
+		return 0;
+	thisuseronl.lastlib = library.libnum;
+	locklib ();
+	if ((!quiet) &&
+	    !(thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0])) {
+		libinfo ();
+	}
+	return 1;
 }
 
 
 void
-entermainlib()
+entermainlib ()
 {
-  if(!libread(libmain,0,&library)){
-    error_fatal("Main library (\"%s\") not found!",libmain);
-  }
-  thisuseronl.lastlib=library.libnum;
-  locklib();
-  libinfo();
+	if (!libread (libmain, 0, &library)) {
+		error_fatal ("Main library (\"%s\") not found!", libmain);
+	}
+	thisuseronl.lastlib = library.libnum;
+	locklib ();
+	libinfo ();
 }
 
 
 int
-getsellibname(struct libidx *l)
+getsellibname (struct libidx *l)
 {
-  char *i,c;
-  int helped=0;
-  struct libidx lib;
+	char   *i, c;
+	int     helped = 0;
+	struct libidx lib;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      if(!helped){
-	prompt(SELHELP);
-	helped=1;
-      }
-      prompt(SELLIB);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if(!margc){
-	cnc_end();
-	continue;
-      }
-      if(inp_isX(margv[0])){
-	return 0;
-      }
-      if(sameas(margv[0],"?")){
-	listsublibs();
-	cnc_end();
-	continue;
-      }
-    }
-    if(sameas(i,"..")){
-      if(nesting(library.fullname)==0){
-	prompt(SELNPR);
-	cnc_end();
-	continue;
-      } else return 2;
-    } else if(sameas(i,"/")||sameas(i,"\\")){
-      if(!libread(libmain,0,&lib)){
-	error_fatal("Unable to find main library!");
-      } else goto enter;
-    } else {
-      if(!nesting(i)){
-	if(!libread(i,library.libnum,&lib)||
-	   !getlibaccess(&lib,ACC_VISIBLE)){
-	  prompt(SELERR,i,leafname(library.fullname));
-	  cnc_end();
-	  continue;
-	} else goto enter;
-      } else {
-	char s[256];
-	char *cp;
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			if (!helped) {
+				prompt (SELHELP);
+				helped = 1;
+			}
+			prompt (SELLIB);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			}
+			if (inp_isX (margv[0])) {
+				return 0;
+			}
+			if (sameas (margv[0], "?")) {
+				listsublibs ();
+				cnc_end ();
+				continue;
+			}
+		}
+		if (sameas (i, "..")) {
+			if (nesting (library.fullname) == 0) {
+				prompt (SELNPR);
+				cnc_end ();
+				continue;
+			} else
+				return 2;
+		} else if (sameas (i, "/") || sameas (i, "\\")) {
+			if (!libread (libmain, 0, &lib)) {
+				error_fatal ("Unable to find main library!");
+			} else
+				goto enter;
+		} else {
+			if (!nesting (i)) {
+				if (!libread (i, library.libnum, &lib) ||
+				    !getlibaccess (&lib, ACC_VISIBLE)) {
+					prompt (SELERR, i,
+						leafname (library.fullname));
+					cnc_end ();
+					continue;
+				} else
+					goto enter;
+			} else {
+				char    s[256];
+				char   *cp;
 
-	strcpy(s,i);
-	if(!libread(libmain,0,&lib)){
-	  error_fatal("Unable to find main library!");
+				strcpy (s, i);
+				if (!libread (libmain, 0, &lib)) {
+					error_fatal
+					    ("Unable to find main library!");
+				}
+				cp = strtok (i, "/\\");
+				while (cp) {
+					if (!strlen (cp))
+						continue;
+					if (!libread (cp, lib.libnum, &lib) ||
+					    !getlibaccess (&lib,
+							   ACC_VISIBLE)) {
+						prompt (SELERR, cp,
+							leafname (lib.
+								  fullname));
+						cnc_end ();
+						goto outerloop;
+					}
+					cp = strtok (NULL, "/\\");
+				}
+			}
+		}
+		break;
+	      outerloop:
 	}
-	cp=strtok(i,"/\\");
-	while(cp){
-	  if(!strlen(cp))continue;
-	  if(!libread(cp,lib.libnum,&lib)||
-	     !getlibaccess(&lib,ACC_VISIBLE)){
-	    prompt(SELERR,cp,leafname(lib.fullname));
-	    cnc_end();
-	    goto outerloop;
-	  }
-	  cp=strtok(NULL,"/\\");
+
+      enter:
+	if (!getlibaccess (&lib, ACC_ENTER)) {
+		cnc_end ();
+		return 0;
 	}
-      }
-    }
-    break;
-  outerloop:
-  }
 
-enter:
-  if(!getlibaccess(&lib,ACC_ENTER)){
-    cnc_end();
-    return 0;
-  }
+	memcpy (l, &lib, sizeof (lib));
 
-  memcpy(l,&lib,sizeof(lib));
-
-  return 1;
+	return 1;
 }
 
 
 void
-selectlib()
+selectlib ()
 {
-  struct libidx l;
-  switch(getsellibname(&l)){
-  case 1:
-    memcpy(&library,&l,sizeof(library));
-    thisuseronl.lastlib=library.libnum;
-    locklib();
-    libinfo();
-  case 0:
-    return;
-  case 2:
-    /*    memcpy(&library,&l,sizeof(library)); */
-    enterlib(library.parent,0);
-  }
+	struct libidx l;
+
+	switch (getsellibname (&l)) {
+	case 1:
+		memcpy (&library, &l, sizeof (library));
+		thisuseronl.lastlib = library.libnum;
+		locklib ();
+		libinfo ();
+	case 0:
+		return;
+	case 2:
+		/*    memcpy(&library,&l,sizeof(library)); */
+		enterlib (library.parent, 0);
+	}
 }
+
+
+/* End of File */

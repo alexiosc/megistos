@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/24 20:12:12  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,114 +68,124 @@ const char *__RCS=RCS_VER;
 
 #include <endian.h>
 #include <typhoon.h>
-#include "bbs.h"
-#include "config.h"
-#include "cnvutils.h"
-#include "libcnv.h"
-#include "files.h"
+#include <megistos/bbs.h>
+#include <megistos/config.h>
+#include <megistos/cnvutils.h>
+#include <megistos/libcnv.h>
+#include <megistos/files.h>
 
 
 static void
-print_endian_warning()
+print_endian_warning ()
 {
-  short int tmp1=0xbeef;
-  unsigned char  *tmp2=(char*)&tmp1;
-  if(*tmp2==0xbe)printf("This is a big endian machine, will swab() ints.\n");
+	short int tmp1 = 0xbeef;
+	unsigned char *tmp2 = (char *) &tmp1;
+
+	if (*tmp2 == 0xbe)
+		printf ("This is a big endian machine, will swab() ints.\n");
 }
 
 
 static void
-syntax()
+syntax ()
 {
-  fprintf(stderr,"libcnv: convert MajorBBS 5.xx file library databases to Megistos format.\n\n"\
-	  "Syntax: libcnv options.\n\nOptions:\n"\
-	  "  -u lib  or  --under lib: put converted libraries under given\n"\
-	  "        library. The library will be created under Main, if necessary.\n"\
-	  "        Give its SHORT pathname. Defaults to Major.\n\n"\
-	  "  -b dir   or  --basedir dir: make library directories under the\n"\
-	  "        supplied directory. By default, new directories are made under\n"\
-	  "        the parent libary's directory (see -u).\n\n"\
-	  "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"\
-	  "        Defaults to the current directory.\n\n"\
-	  "  -k key   or  --key key: initially lock all libraries with the given key.\n"\
-	  "        Key 129 (account \"Sysop\" only) is the default key.\n\n");
-  exit(1);
+	fprintf (stderr,
+		 "libcnv: convert MajorBBS 5.xx file library databases to Megistos format.\n\n"
+		 "Syntax: libcnv options.\n\nOptions:\n"
+		 "  -u lib  or  --under lib: put converted libraries under given\n"
+		 "        library. The library will be created under Main, if necessary.\n"
+		 "        Give its SHORT pathname. Defaults to Major.\n\n"
+		 "  -b dir   or  --basedir dir: make library directories under the\n"
+		 "        supplied directory. By default, new directories are made under\n"
+		 "        the parent libary's directory (see -u).\n\n"
+		 "  -m dir   or  --majordir dir: read Major databases from specified directory.\n"
+		 "        Defaults to the current directory.\n\n"
+		 "  -k key   or  --key key: initially lock all libraries with the given key.\n"
+		 "        Key 129 (account \"Sysop\" only) is the default key.\n\n");
+	exit (1);
 }
 
 
 static struct option long_options[] = {
-  {"under", 1, 0, 'u'},
-  {"basedir", 1, 0, 'b'},
-  {"majordir", 1, 0, 'm'},
-  {"key", 1, 0, 'k'},
-  {0, 0, 0, 0}
+	{"under", 1, 0, 'u'},
+	{"basedir", 1, 0, 'b'},
+	{"majordir", 1, 0, 'm'},
+	{"key", 1, 0, 'k'},
+	{0, 0, 0, 0}
 };
 
 
-static char *arg_under="Major";
-static char *arg_basedir=NULL;
-static char *arg_majordir=".";
-static int   arg_key=129;
+static char *arg_under = "Major";
+static char *arg_basedir = NULL;
+static char *arg_majordir = ".";
+static int arg_key = 129;
 
 
 static void
-parseopts(int argc, char **argv)
+parseopts (int argc, char **argv)
 {
-  int c;
+	int     c;
 
-  while (1) {
-    int option_index = 0;
+	while (1) {
+		int     option_index = 0;
 
-    c=getopt_long(argc, argv, "u:b:m:k:", long_options, &option_index);
-    if(c==-1) break;
+		c = getopt_long (argc, argv, "u:b:m:k:", long_options,
+				 &option_index);
+		if (c == -1)
+			break;
 
-    switch (c) {
-    case 'u':
-      arg_under=strdup(optarg);
-      break;
-    case 'b':
-      arg_basedir=strdup(optarg);
-      break;
-    case 'm':
-      arg_majordir=strdup(optarg);
-      break;
-    case 'k':
-      arg_key=atoi(optarg);
-      if(arg_key<0 || arg_key>129){
-	fprintf(stderr,"An access key (-k or --key) is a number between 0 and 129 inclusive.\n\n");
-	syntax();
-      }
-      break;
-    default:
-      syntax();
-    }
-  }
+		switch (c) {
+		case 'u':
+			arg_under = strdup (optarg);
+			break;
+		case 'b':
+			arg_basedir = strdup (optarg);
+			break;
+		case 'm':
+			arg_majordir = strdup (optarg);
+			break;
+		case 'k':
+			arg_key = atoi (optarg);
+			if (arg_key < 0 || arg_key > 129) {
+				fprintf (stderr,
+					 "An access key (-k or --key) is a number between 0 and 129 inclusive.\n\n");
+				syntax ();
+			}
+			break;
+		default:
+			syntax ();
+		}
+	}
 }
 
 
 int
-cnvmain(int argc, char **argv)
+cnvmain (int argc, char **argv)
 {
-  mod_setprogname(argv[0]);
-  parseopts(argc, argv);
-  print_endian_warning();
-  
-  msg=msg_open("files");
-  readsettings();
+	mod_setprogname (argv[0]);
+	parseopts (argc, argv);
+	print_endian_warning ();
 
-  dblibopen();
-  dbkeyopen();
-  dbfileopen();
+	msg = msg_open ("files");
+	readsettings ();
 
-  libsig(arg_under, arg_basedir, arg_majordir, arg_key);
-  libfil(arg_majordir);
-  libkey(arg_majordir);
+	dblibopen ();
+	dbkeyopen ();
+	dbfileopen ();
 
-  printf("Syncing disks...\n");
-  system("sync");
+	libsig (arg_under, arg_basedir, arg_majordir, arg_key);
+	libfil (arg_majordir);
+	libkey (arg_majordir);
 
-  printf("\nREMEMBER: it's entirely your responsibility to physically copy\n"\
-	 "the files to their proper directories.\n\n");
+	printf ("Syncing disks...\n");
+	system ("sync");
 
-  return 0;
+	printf
+	    ("\nREMEMBER: it's entirely your responsibility to physically copy\n"
+	     "the files to their proper directories.\n\n");
+
+	return 0;
 }
+
+
+/* End of File */
