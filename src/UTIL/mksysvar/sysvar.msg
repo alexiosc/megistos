@@ -1009,7 +1009,7 @@ The time is [32m%s.[37m
 
 
 WHOHDR {[0;1m
-‚€‹‹†    •†‘’†‘            BAUD      „ˆŽ•†
+LINE      USER               SPEED     AREA
 !FÄ
 } T Global 'who' header
 
