@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/24 18:58:41  alexios
+ * Fixed #includes; fixed download time calculation to use integer
+ * arithmetic.
+ *
  * Revision 1.5  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -72,10 +76,9 @@ static const char rcsinfo[] =
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include <math.h>
 #include <megistos/bbs.h>
-#include <megistos/updown.h>
-#include <megistos/mbk_updown.h>
+#include "updown.h"
+#include "mbk_updown.h"
 
 
 char    filetype[256];
@@ -146,15 +149,32 @@ getfilesize ()
 		}
 	}
 
+	/* Time in minutes = Size / ((bps/10) * protocol efficiency * 60) We
+	   calculate it x10 in integer arithmetic, rearranged for maximum
+	   accuracy. */
 
+	xfertime = (100 * filesize) /
+		((thisuseronl.baudrate > 0 ? thisuseronl.baudrate : 38400) *
+		 peffic * 60);
+	
+	/* Now mock-round it to the nearest minute. */
+	
+	xfertime = (xfertime + 5) / 10;
+
+
+#if 0
 	/* Time in minutes = Size / ((bps/10) * protocol efficiency * 60) */
+	
+	/* Calculate it using floating point arithmetic. */
 
 	xfertime = (int)
-	    (rint (((double) filesize) /
+	    (round (((double) filesize) /
 		   ((((double)
 		      (thisuseronl.baudrate >
 		       0 ? thisuseronl.baudrate : 38400) / 10.0) *
 		     (((double) peffic / 100.0))) * 60.0)));
+#endif
+
 }
 
 
