@@ -434,29 +434,29 @@ Any changes to the bulletin's properties have been saved, though.!)
 
 
 ASKEDT {[0;1m
-!Wƒé©«œ «¦¤ ˜¨ Ÿ£æ «¦¬ §¨¦ª œ¤£â¨à© ›œ¢«å¦¬, [33m?[37m š ˜ ™¦ãŸœ ˜, ã
-[33mX[37m š ˜ â¥¦›¦:!)[0m } T Edit bulletin: What number?
+!WEnter the bulletin number to edit, [33m?[37m for help, or
+[33mX[37m to exit:!)[0m } T Edit bulletin: What number?
 
 
 ASKUPL {[0;1m
-!W‡â¢œ«œ ¤˜ ¥˜¤˜©«œå¢œ«œ ã ¤˜ › ¦¨Ÿé©œ«œ «˜ §œ¨ œ®æ£œ¤˜ «¦¬ ›œ¢«å¦¬;
-([[33mY[37m]es=˜§¦©«¦¢ã, [[33mN[37m]o=æ® , [[33mE[37m]dit=› æ¨Ÿà©) } T Edit bulletin: re-upload bulletin?
+!WWould you like to upload a new news bulletin or edit the existing text of the news bulletin?
+([[33mY[37m]es=upload, [[33mN[37m]o=neither, or [[33mE[37m]dit) } T Edit bulletin: re-upload bulletin?
 
 
 ASKUPLD {[Enter=No]:[0m!) } T Edit bulletin: default response
 
 
 ASKERR {[0;1;31m
-!J˜¨˜¡˜¢é ›é©«œ [33mY[31m, [33mN[31m ã [33mE[31m.!)
+!JPlease enter [33mY[31m, [33mN[31m or [33mE[31m.!)
 [0;1m} T Edit bulletin: bad answer to ASKUPL
 
 
 SHEADER {[0;1;35m
-ÚÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ ƒœ¢«å¦ [37m#%-3d[35m ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ „©«á¢: [37m%-9s %-8s[35m       ³ ¨¦«œ¨˜ æ««˜: [37m%-4d[35m                       ³
-³ ƒ á¨¡œ ˜ ›œ¢«å¦¬ (£â¨œª): [37m%4d[35m  ³ „§ §¢â¦¤ §¢¨¦­¦¨åœª: [37m%-18s[35m  ³
-³ ‰¢á©: [37m%-10s[35m                ³ ‰¢œ ›å: [37m%-3d[35m                               ³
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Bulletin [37m#%-3d[35m ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Send: [37m%-9s %-8s[35m         ³ Priority: [37m%-4d[35m                            ³
+³ Bulletin lifetime (days): [37m%4d[35m   ³ Additional info: [37m%-18s[35m       ³
+³ Class: [37m%-10s[35m                ³ Key: [37m%-3d[35m                                  ³
 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 [0;1m} T Sysop version of the Bulletin Header
 
@@ -464,7 +464,7 @@ SHEADER {[0;1;35m
 LSTHDR {[0;1m
 
 ÚÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³ [33mA/A[37m ³ [33m†‹„‹†Œˆ€ ‰€ˆ —€[37m ³ [33m’[37m ³ [33mƒˆ€‰„ˆ€[37m ³ [33m‰Š€‘† ‰€ˆ ‰Š„ˆƒˆ[37m ³
+³ [33m # [37m ³ [33m   DATE AND TIME  [37m ³ [33mPRIO[37m ³ [33mLIFETIME[37m ³ [33mCLASS  AND  KEY [37m ³
 ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
 } T News bulletin list, header
 
@@ -475,13 +475,13 @@ LSTTAB {³ [32m%3d[37m ³ [32m%s %s[37m ³ [32m%+4d[37m ³  [32m%5d%c[37m  ³
 
 LSTFTR {ÀÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-(*) = ’¦ ›œ¢«å¦ œå¤˜  ˜¤œ¤œ¨šæ (›œ¤ œ£­˜¤åœ«˜ ).
+(*) = Disabled (invisible) bulletin.
 
 [0;1m} T News bulletin list, footer
 
 
 
-RDNEWS {[2J[0;1;31m’˜ «œ¢œ¬«˜å˜ £˜ª ¤â˜:
+RDNEWS {[2J[0;1;31mLatest news:
 
 } T Reading news bulletins
 
@@ -491,7 +491,7 @@ HEADER {[0;1mÛÛ  [35m%s[0;1m  ÛÛ  %s
 } T Bulletin Header
 
 
-NEWBLT {[0;1;33;5m*Œâ¦*[0;1m} T You've never read this bulletin before
+NEWBLT {[0;1;33;5m*NEW*[0;1m} T You've never read this bulletin before
 
 
 BLTDIV {[0;1m
@@ -499,35 +499,29 @@ BLTDIV {[0;1m
 
 
 NONEWS {[0;1;31m
-[!Wƒœ¤ ¬§á¨®¦¬¤ «œ¢œ¬«˜å˜ ¤â˜.!)
+[!WSorry, there aren't any news news bulletins to show.!)
 [0;1m
 } T News file is empty
 
 
 DELBLT {[0;1m
-!Wƒé©«œ «¦¤ ˜¨ Ÿ£æ «¦¬ §¨¦ª › ˜š¨˜­ã ›œ¢«å¦¬, [33m?[37m š ˜ ¡˜«á¢¦š¦, ã
-[33mX[37m š ˜ â¥¦›¦:!)[0m } T Delete bulletin: What number?
+!WEnter the number of the bulleting to delete, [33m?[37m for a list, or
+[33mX[37m to exit:!)[0m } T Delete bulletin: What number?
 
 
 NUMERR {[0;1;31m
-!W’¦ ›œ¢«å¦ [37m%d[31m ›œ¤ ¬§á¨®œ . ˜¤˜›¦¡ £á©«œ...!)
+!WSorry, bulletin [37m%d[31m does not exist.!)
 } T Delete bulletin rebuff unknown bulletin
 
 
 DELOK {[0;1m
-!W„§ ™œ™˜ éŸ¡œ:  › ˜š¨˜­ã «œ¢œåà©œ £œ œ§ «¬®å˜.!)
+!WOK, the bulletin was deleted.!)
 [0;1m} T Delete bulletin: Deletion successful
 
 
 FTOOMANY {[0;1;33m
-!J€§¦©«œå¢˜«œ §á¤à ˜§æ â¤˜ ˜¨®œå¦. ‹æ¤¦ «¦ §¨é«¦ ˜¨®œå¦ Ÿ˜
-®¨© £¦§¦ Ÿœå.!)
+!JYou've uploaded more than one file. Only the first file will be used.!)
 [0;1m} T Upload bulltin: more than one file uploaded
-
-
-
-
-
 
 
 LANGEND {}
