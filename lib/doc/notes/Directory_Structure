@@ -45,8 +45,8 @@ Here is the proposed directory structure, assuming a prefix of /usr:
 
 /usr/lib/megistos:
 
-	Top-level  library/binary directory (AD,NW).  Architecture independent,
-	network-exportable. Under which are directories such as:
+	Top-level  library/binary directory  (AD,NW).   Architecture dependent,
+	network-exportable.  Under which are directories such as:
 
 	/usr/lib/megistos/bin:
 
@@ -60,7 +60,7 @@ Here is the proposed directory structure, assuming a prefix of /usr:
 
 		The  `virgin'  instance. This  includes  an uninstantiated  BBS
 		skeleton that is  copied to /var/lib/megistos/$BBSCODE create a
-		new  system  called  $BBSCODE.  It should  optimally  be  under
+		new  system  called $BBSCODE.   It  should  optimally be  under
 		/usr/share/megistos, but is currently architecture dependent so
 		this is impossible.
 
@@ -123,6 +123,10 @@ CVS information and emacs stuff follows
 $Id$
 
 $Log$
+Revision 1.5  2003/12/24 18:18:40  alexios
+/usr/lib/megistos is architecture dependent, not independent as
+previously stated.
+
 Revision 1.4  2003/12/14 21:09:33  alexios
 Added discussion about msgidx autodetection.
 
