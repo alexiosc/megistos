@@ -12,7 +12,7 @@ PATCHLEVEL	= 3
 
 
 #
-# Directories
+# Directories:
 #
 
 BBS		= @basedir@
