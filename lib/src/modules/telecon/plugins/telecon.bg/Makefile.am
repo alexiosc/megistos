@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:00:45  alexios
+# This has been removed from the build for now; it is no longer built.
+#
 # Revision 1.1  2003/12/25 08:24:06  alexios
 # Initial revision.
 #
@@ -11,7 +14,7 @@ PROGNAMES = telecon.bg
 
 BUILT_SOURCES = mbk_telecon.bg.h
 
-telecon.bg_SOURCES = \
+telecon_bg_SOURCES = \
 	allow.c \
 	back.h \
 	board.c \
