@@ -15,10 +15,7 @@ metabbs_register_1(registration_package_t *argp, CLIENT *clnt)
 	static int clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, metabbs_register,
-		(xdrproc_t) xdr_registration_package_t, (caddr_t) argp,
-		(xdrproc_t) xdr_int, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, metabbs_register, (xdrproc_t) xdr_registration_package_t, argp, (xdrproc_t) xdr_int, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -30,10 +27,7 @@ metabbs_register_non_megistos_1(registration_package_t *argp, CLIENT *clnt)
 	static int clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, metabbs_register_non_megistos,
-		(xdrproc_t) xdr_registration_package_t, (caddr_t) argp,
-		(xdrproc_t) xdr_int, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, metabbs_register_non_megistos, (xdrproc_t) xdr_registration_package_t, argp, (xdrproc_t) xdr_int, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -45,10 +39,7 @@ metabbs_request_info_1(char **argp, CLIENT *clnt)
 	static info_package_p clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, metabbs_request_info,
-		(xdrproc_t) xdr_wrapstring, (caddr_t) argp,
-		(xdrproc_t) xdr_info_package_p, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, metabbs_request_info, (xdrproc_t) xdr_wrapstring, argp, (xdrproc_t) xdr_info_package_p, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -60,10 +51,7 @@ distclub_request_list_1(club_list_request_t *argp, CLIENT *clnt)
 	static struct club_list clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, distclub_request_list,
-		(xdrproc_t) xdr_club_list_request_t, (caddr_t) argp,
-		(xdrproc_t) xdr_club_list, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, distclub_request_list, (xdrproc_t) xdr_club_list_request_t, argp, (xdrproc_t) xdr_club_list, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -75,10 +63,7 @@ distclub_request_header_1(club_header_request_t *argp, CLIENT *clnt)
 	static struct club_header clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, distclub_request_header,
-		(xdrproc_t) xdr_club_header_request_t, (caddr_t) argp,
-		(xdrproc_t) xdr_club_header, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, distclub_request_header, (xdrproc_t) xdr_club_header_request_t, argp, (xdrproc_t) xdr_club_header, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -90,10 +75,7 @@ distclub_request_ihave_1(ihave_request_t *argp, CLIENT *clnt)
 	static struct ihave_list clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, distclub_request_ihave,
-		(xdrproc_t) xdr_ihave_request_t, (caddr_t) argp,
-		(xdrproc_t) xdr_ihave_list, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, distclub_request_ihave, (xdrproc_t) xdr_ihave_request_t, argp, (xdrproc_t) xdr_ihave_list, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);
@@ -105,10 +87,7 @@ distclub_request_message_1(message_request_t *argp, CLIENT *clnt)
 	static struct club_message clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call (clnt, distclub_request_message,
-		(xdrproc_t) xdr_message_request_t, (caddr_t) argp,
-		(xdrproc_t) xdr_club_message, (caddr_t) &clnt_res,
-		TIMEOUT) != RPC_SUCCESS) {
+	if (clnt_call(clnt, distclub_request_message, (xdrproc_t) xdr_message_request_t, argp, (xdrproc_t) xdr_club_message, &clnt_res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&clnt_res);

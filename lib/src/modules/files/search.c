@@ -26,14 +26,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:05  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Completed support for searching in OS-only libraries.
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys(). Numerous other
+ * Changed a few error_fatal() calls to error_fatalsys(). Numerous other
  * changes.
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
@@ -51,6 +52,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -128,23 +130,23 @@ struct re_pattern_buffer *regexp=NULL;
 static char *
 getsearchterm()
 {
-  char *fn=input;
+  char *fn=inp_buffer;
   
   for(;;){
-    if(morcnc())fn=cncword();
+    if(cnc_more())fn=cnc_word();
     else {
       prompt(SRASK);
-      getinput(0);
-      fn=input;
+      inp_get(0);
+      fn=inp_buffer;
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     } else if(!strcmp(fn,"?")){
       prompt(SRHELP);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -312,7 +314,7 @@ found(struct libidx *l, struct fileidx *f, char *keyword)
   strcpy(r.summary,f->summary);
   r.libnum=f->flibnum;
   if(!fwrite(&r,sizeof(r),1,resultfp)){
-    fatalsys("Search daemon unable to write to %s",resultfname);
+    error_fatalsys("Search daemon unable to write to %s",resultfname);
   }
   fflush(resultfp);		/* Keep it in sync */
   daemoninfo.nummatches++;
@@ -334,7 +336,7 @@ os_found(struct libidx *l, char *fname, struct stat *st)
   strcpy(r.summary,osfdesc);
   r.libnum=l->libnum;
   if(!fwrite(&r,sizeof(r),1,resultfp)){
-    fatalsys("Search daemon unable to write to %s",resultfname);
+    error_fatalsys("Search daemon unable to write to %s",resultfname);
   }
   fflush(resultfp);		/* Keep it in sync */
   daemoninfo.nummatches++;
@@ -413,7 +415,7 @@ os_search_fnames(struct libidx *l)
     /* Open the library directory */
     
     if((dp=opendir(l->dir))==NULL){
-      fatalsys("Unable to open library %s (directory: %s)",
+      error_fatalsys("Unable to open library %s (directory: %s)",
 	       l->fullname,l->dir);
     }
 
@@ -535,7 +537,7 @@ os_search_anywhere(struct libidx *l,char *phterm)
   /* Open the library directory */
     
   if((dp=opendir(l->dir))==NULL){
-    fatalsys("Unable to open library %s (directory: %s)",
+    error_fatalsys("Unable to open library %s (directory: %s)",
 	     l->fullname,l->dir);
   }
 
@@ -578,7 +580,7 @@ os_search_date(struct libidx *l)
   /* Open the library directory */
     
   if((dp=opendir(l->dir))==NULL){
-    fatalsys("Unable to open library %s (directory: %s)",
+    error_fatalsys("Unable to open library %s (directory: %s)",
 	     l->fullname,l->dir);
   }
 
@@ -598,7 +600,7 @@ daemon_search()
   int   morelibs;
 
   if((resultfp=fopen(resultfname,"w"))==NULL){
-    fatalsys("Search daemon couldn't create %s",resultfname);
+    error_fatalsys("Search daemon couldn't create %s",resultfname);
   }
 
   daemoninfo.filecreated=1;
@@ -608,7 +610,7 @@ daemon_search()
     struct libidx  l;
 
     if(!libreadnum(morelibs,&l)){
-      fatal("Oops, library %d disappeared while searching!",
+      error_fatal("Oops, library %d disappeared while searching!",
 	    morelibs);
     }
 
@@ -681,12 +683,12 @@ display_canned_page(int page)
     if(oldlibnum!=resultcache[i].libnum){
       oldlibnum=resultcache[i].libnum;
       if(!libreadnum(resultcache[i].libnum,&l)){
-	fatal("Unable to read library %d.",resultcache[i].libnum);
+	error_fatal("Unable to read library %d.",resultcache[i].libnum);
       }
     }
     show_entry(i+1,&l,&resultcache[i]);
   }
-  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":getpfix(SRTABU,1));
+  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":msg_getunit(SRTABU,1));
   return i;
 }
 
@@ -703,10 +705,10 @@ wait_results(int page)
     usleep(100000);		/* Wait a bit */
     
     if(waitpid(daemonpid,&status,WNOHANG)==daemonpid){
-      clsmsg(sysblk);
-      initoutput();
-      setmbk(msg);
-      initinput();
+      msg_close(msg_sys);
+      mod_init(INI_OUTPUT);
+      msg_set(msg);
+      inp_init();
       /*print("daemon died, %d matches, returning %d\n",
 	daemoninfo.nummatches,daemoninfo.nummatches-start);*/
       break;
@@ -758,7 +760,7 @@ display_page(int page)
   /* Seek to the right place in the results file */
 
   if(fseek(resultfp,start*sizeof(struct result),SEEK_SET)<0){
-    fatal("Oops, unable to fseek() results file %s",
+    error_fatal("Oops, unable to fseek() results file %s",
 	  resultfname);
   }
 
@@ -778,7 +780,7 @@ display_page(int page)
     /* Read the result entry */
 
     if(!fread(&r,sizeof(r),1,resultfp)){
-      fatalsys("Unable to read from file %s.",resultfname);
+      error_fatalsys("Unable to read from file %s.",resultfname);
     }
 
 
@@ -793,7 +795,7 @@ display_page(int page)
     if(oldlibnum!=r.libnum){
       oldlibnum=r.libnum;
       if(!libreadnum(r.libnum,&l)){
-	fatal("Unable to read library %d.",r.libnum);
+	error_fatal("Unable to read library %d.",r.libnum);
       }
     }
 
@@ -803,7 +805,7 @@ display_page(int page)
     show_entry(i+1,&l,&r);
   }
 
-  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":getpfix(SRTABU,1));
+  prompt(SRTABF,page+1,NUMPAGES,daemoninfo.daemondead?"":msg_getunit(SRTABU,1));
 
   return numentries;
 }
@@ -816,10 +818,10 @@ get_navigator_command(char *opt, int current_page, int shortmenu)
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      c=cnc_chr();
       shownmenu=1;
     } else {
       if(!shownmenu){
@@ -832,15 +834,15 @@ get_navigator_command(char *opt, int current_page, int shortmenu)
 	prompt(SRMNU,numresultsincache);
 	shownmenu=1;
       } else prompt(SRSMNU,numresultsincache);
-      getinput(0);
-      bgncnc();
-      c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      c=cnc_chr();
     }
     if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       return 0;
     } else if(margc && (c=='?'||sameas(margv[0],"?"))){
       prompt(SRMNHLP);
@@ -851,18 +853,18 @@ get_navigator_command(char *opt, int current_page, int shortmenu)
       return 1;
     } else if(isdigit(c)){
       int num;
-      nxtcmd--;
-      num=cncint();
+      cnc_nxtcmd--;
+      num=cnc_int();
       if(num<1||num>numresultsincache){
 	prompt(SRMNRN,numresultsincache);
-	endcnc();
+	cnc_end();
 	continue;
       }
       *opt='D';
       return -num;
     } else {
       prompt(SRMNER);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -877,7 +879,7 @@ seeinfo()
   struct fileidx f;
   int fileno;
 
-  if(!getnumber(&fileno,SRMNINA,1,
+  if(!get_number(&fileno,SRMNINA,1,
 		min(srlstln,numresultsincache),
 		SRMNINR,0,0))return;
   else fileno--;
@@ -886,7 +888,7 @@ seeinfo()
   /* Read the library */
 
   if(!libreadnum(resultcache[fileno].libnum,&l)){
-    fatal("Floor Yanked Under From Feet error, library %d.",
+    error_fatal("Floor Yanked Under From Feet error, library %d.",
 	  resultcache[fileno].libnum);
   }
 
@@ -895,7 +897,7 @@ seeinfo()
 
   if(!fileread(resultcache[fileno].libnum,
 	       resultcache[fileno].fname,1,&f)){
-    fatal("Floor Yanked Under From Feet error, file %s/%s",
+    error_fatal("Floor Yanked Under From Feet error, file %s/%s",
 	  l.fullname,resultcache[fileno].fname);
   }
 
@@ -910,7 +912,7 @@ download_numbered_file(int n)
   struct libidx l;
 
   if(!libreadnum(file->libnum,&l)){
-    endcnc();
+    cnc_end();
     return;
   }
   prompt(SRLIBJMP,file->fname,l.fullname);
@@ -961,7 +963,7 @@ browse_results()
 	continue;
       } else {
 	prompt(SRMNBG);
-	endcnc();
+	cnc_end();
 	continue;
       }
     case 'N':
@@ -976,7 +978,7 @@ browse_results()
     case 'P':
       {
 	int pageno;
-	if(getnumber(&pageno,SRMNJMA,1,NUMPAGES,SRMNJMR,0,0)){
+	if(get_number(&pageno,SRMNJMA,1,NUMPAGES,SRMNJMR,0,0)){
 	  shortmenu=0;
 	  current_page=pageno-1;
 	} else shortmenu=0;
@@ -1007,10 +1009,10 @@ search_client()
   }
 
   if(daemoninfo.daemondead){
-    clsmsg(sysblk);
-    initoutput();
-    initinput();
-    setmbk(msg);
+    msg_close(msg_sys);
+    mod_init(INI_OUTPUT);
+    inp_init();
+    msg_set(msg);
   }
   
 
@@ -1018,18 +1020,18 @@ search_client()
 
   if(daemoninfo.daemondead&&!daemoninfo.filecreated){
     prompt(SRDMER1);
-    endcnc();
+    cnc_end();
     return 0;
   } else if(daemoninfo.daemondead&&!daemoninfo.nummatches){
     prompt(SRDMNONE);
-    endcnc();
+    cnc_end();
     return 0;
   }
 
   /* Open the file */
 
   if((resultfp=fopen(resultfname,"r"))==NULL){
-    fatalsys("Unable to open %s",resultfname);
+    error_fatalsys("Unable to open %s",resultfname);
   }
 
 
@@ -1064,19 +1066,18 @@ start_search()
     close(0);
     close(1);
     close(2);
-    doneoutput();		/* Stop being a BBS module */
-    doneinput();
-    donesignals();
-    noerrormessages();		/* Don't print messages */
-    settimeout(24*60);		/* Don't timeout */
+    mod_done(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
+    error_setnotify(0);		/* Don't print messages */
+    inp_setidle(24*60);		/* Don't timeout */
     daemon_search();
   } else if(daemonpid<0){
-    fatal("Unable to spawn search daemon.");
+    error_fatal("Unable to spawn search daemon.");
   }
 
-  regpid(thisuseronl.channel);
-  yeserrormessages();
-  resetinactivity();
+  mod_regpid(thisuseronl.channel);
+  error_setnotify(1);
+  inp_setidle(sysvar->idlezap);
+  inp_resetidle();
   return search_client();	/* We're the spawner */
 }
 
@@ -1088,7 +1089,7 @@ filesearch()
     char *tmp;
     if((tmp=getsearchterm())==NULL)return;
     if(!grokterm(tmp)){
-      endcnc();
+      cnc_end();
       continue;
     }
     get_children();

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:59  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -86,7 +88,7 @@ periodic(struct message *msg)
 {
   int i;
   
-  if(!getnumber(&i,COPPASK,0,999999,COPPERR,COPPDEF,msg->period))return;
+  if(!get_number(&i,COPPASK,0,999999,COPPERR,COPPDEF,msg->period))return;
   
   getmsgheader(msg->msgno,msg);
   msg->period=i;
@@ -101,7 +103,7 @@ periodic(struct message *msg)
     loadclubhdr(msg->club);
     clubhdr.nper++;
     saveclubhdr(&clubhdr);
-    prompt(COPPOK2,msg->period,getpfix(DAYSNG,msg->period));
+    prompt(COPPOK2,msg->period,msg_getunit(DAYSNG,msg->period));
   }
 }
 
@@ -134,12 +136,12 @@ insatt(struct message *msg)
   int read, written;
 
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,COPIAMNU,COPIASMNU,COPIARS,"OA",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,COPIAMNU,COPIASMNU,COPIARS,"OA",0,0);
+    inp_clearflags(INF_HELP);
     if(res<0){
       prompt(COPIAH);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -177,7 +179,7 @@ insatt(struct message *msg)
   do{
     read=fread(&buf,1,sizeof(buf),fpi);
     written=fwrite(&buf,1,read,fpo);
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
   }while(read && read==written);
 
   truncpos=ftell(fpo);
@@ -205,10 +207,10 @@ insblt(struct message *msg)
 {
   char command[256];
   if(!msg->club[0]){
-    fatal("Sanity check failed: club message with no set club.");
+    error_fatal("Sanity check failed: club message with no set club.");
   }
-  sprintf(command,"%s -insert %s/%ld",BULLETINBIN,msg->club,msg->msgno);
-  runmodule(command);
+  sprintf(command,"%s --insert %s/%d",BULLETINBIN,msg->club,msg->msgno);
+  runcommand(command);
 }
 
 
@@ -224,13 +226,13 @@ clubopmenu(struct message *msg)
   strcpy(opts,(msg->flags&MSF_FILEATT?"MECFTPBAI":"MECFTPB"));
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,1,0,menu,COPERR,opts,0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,1,0,menu,COPERR,opts,0,0);
+    inp_clearflags(INF_HELP);
 
     if(!i)return 0;
     else if(i<0){
-      endcnc();
+      cnc_end();
       prompt(help);
       continue;
     } else break;

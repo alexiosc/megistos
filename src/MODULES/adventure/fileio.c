@@ -33,8 +33,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -94,7 +96,7 @@ void open_story (const char *storyname)
        return;
 
     if ((path = getenv("INFOCOM_PATH")) == NULL)
-       fatal ("Can't open game file");
+       error_fatal ("Can't open game file");
     
     p = strtok(path, ":");
     while (p)
@@ -105,7 +107,7 @@ void open_story (const char *storyname)
        p = strtok(NULL, ":");
     }
 
-    fatal ("Can't open game file");
+    error_fatal ("Can't open game file");
 
 }
 
@@ -190,7 +192,7 @@ void read_page (int page, void *buffer)
             if (fread (buffer, offset, 1, gfp) == 1)
                 return;
         }
-        fatal ("Game file read error");
+        error_fatal ("Game file read error");
     }
 
 }
@@ -314,11 +316,11 @@ check_upload(char *fname)
   if(*fname!='.')return;
 
   prompt(NAMELESS);
-  addxfer(FXM_UPLOAD,"nameless","Infocom-format saved game",0,0);
-  dofiletransfer();
+  xfer_add(FXM_UPLOAD,"nameless","Infocom-format saved game",0,0);
+  xfer_run();
   settermios();
   signal(SIGINT,done);
-  setwaittoclear(0);
+  out_clearflags(OFL_WAITTOCLEAR);
   
   sprintf(fname,XFERLIST,getpid());
 
@@ -341,12 +343,12 @@ check_upload(char *fname)
   if(!count)goto kill;
 
   if((cp=strrchr(fn,'/'))==NULL){
-    fatal("My sanity check just bounced, oh my, oh my...");
+    error_fatal("My sanity check just bounced, oh my, oh my...");
   } sprintf(command,"%s/adv-%s/%s",TMPDIR,thisuseracc.userid,++cp);
   strcpy(fname,cp);
 
   if(fcopy(fn,command)<0){
-    fatal("Argh, fcopy() failed. Dying in agony.");
+    error_fatal("Argh, fcopy() failed. Dying in agony.");
   }
   
 
@@ -355,7 +357,7 @@ check_upload(char *fname)
     sprintf(command,"rm -rf %s",dir);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -549,7 +551,7 @@ static int save_restore (const char *file_name, int flag)
 
     sp = stack[0];
     if (stack[sp++] != h_version)
-        fatal ("Wrong game or version");
+        error_fatal ("Wrong game or version");
     fp = stack[sp++];
     pc = stack[sp++];
     pc += (unsigned long) stack[sp++] * PAGE_SIZE;
@@ -797,7 +799,7 @@ void script_new_line (void)
 /*
  * open_record
  *
- * Turn on recording of all input to an output file.
+ * Turn on recording of all inp_buffer to an output file.
  *
  */
 
@@ -892,7 +894,7 @@ void record_key (int c)
 /*
  * close_record
  *
- * Turn off recording of all input to an output file.
+ * Turn off recording of all inp_buffer to an output file.
  *
  */
 
@@ -925,7 +927,7 @@ void close_record (void)
 /*
  * open_playback
  *
- * Take input from command file instead of keyboard.
+ * Take inp_buffer from command file instead of keyboard.
  *
  */
 
@@ -976,7 +978,7 @@ void open_playback (int arg)
 /*
  * playback_line
  *
- * Get a line of input from the command file.
+ * Get a line of inp_buffer from the command file.
  *
  */
 

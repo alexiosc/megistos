@@ -98,7 +98,7 @@ SUPS2U {Write E-Mail automatically to new users from Sysop? YES} B
 E2UATT {/usr/local/bbs/doc/newuser.txt} S 50 Attachment to new user E-Mail, if any
 
 
-E2UNAM {megistos.txt} S 50 Name of the new user E-Mail attachment
+E2UNAM {acrobase.txt} S 50 Name of the new user E-Mail attachment
 
 
  The message automatically sent to new users upon account
@@ -167,7 +167,13 @@ ANSBERR {
  they can do this only when they have connected with a free
  sample channel (see level 2 option "NSAMPLN").
 
-INTRO {[2J[0;1;37mЙШврйуиЯШлЬ йлЮд [1m@BBS@[0;1m.
+INTRO {[2J[0;1;36m!Z!C           ▄▄        
+██████████ ██ ███████
+██      ██ ██      ██
+██      ██ ██      ██
+███████ ██ ██████████
+        ▀▀           
+[37mЙШврйуиЯШлЬ йлЮд [1m@BBS@[0;1m.
 !)
 
 !JЛЬ аЫаШхлЬиЮ оШис йШк мзжЫЬоцгШйлЬ йлЮд гЬЪсвЮ зжажлабу ДввЮдабу ЬиШйалЬодабу
@@ -335,7 +341,7 @@ BADUID3 {[0;1;31m
 UIDOK {[0;1;32m
 !JДдШ гЮдмгс йШк, вжазцд, ЯШ нШхдЬлШа йлжмк сввжмк оиуйлЬк щк Ьеук:!)
 
-[37m    Азц %s: ПцйЬк ЪиШггтк тоЬа Ю @BBS@;
+[37m    Азц %s: ПцйШ Clubs тоЬа Ю AcroBase;
 
 !J[33mДхйлЬ абШджзжаЮгтджк гЬ лЮд ЬзавжЪу лжм пЬмЫрдчгжм;!)
                     
@@ -426,6 +432,10 @@ PSWEPI {[0;1;32m[2J[0;1;5m
 
 WELCOME {[0;1m[2J!Z!C[0;1mЙШврйуиЯШлЬ вжазцд йлЮд [1;36;5m@BBS@[0;1m!!)
 
+!JСШк ЪдрихЭжмгЬ цла лж йчйлЮгШ тоЬа [32mзтдлЬ[37m ЪиШггтк. Оа ЪиШггтк ЬхдШа жа Ьеук:
+[32m8231753[37m, [32m8815616[37m, [32m8816312[37m, [32m8220610[37m
+бШа [32m8819963[37m (33600 bps).!)
+
 !JОа ХЬаиайлтк СмйлугШлжк тожмд бсЯЬ ЫабШхргШ дШ ЫЬолжчд у дШ Шзжиихпжмд тдШд
 оиуйлЮ гЬ ЩсйЮ лжмк бШдцдЬк лжм [32mбШлШйлШлабжч[37m лЮк. ПицЯЬйу гШк
 ЬхдШа дШ йШк зижйнтижмгЬ тдШ навцеЬдж зЬиаЩсввжд бШа дШ йШк ЩжЮЯуйжмгЬ йЬ бсЯЬ
@@ -468,9 +478,9 @@ S2UTPC {ЙШврйуиЯЬк} (SUPE2U=YES) S 30 New-user auto-message topic:
 
 S2UTXT {[0;1m
   АЪШзЮлт дтЬ гШк нхвЬ(Ю),
-гЬ аЫаШхлЬиЮ оШис йЬ бШврйжихЭр йлЮд габиу бжадрдхШ лЮк [33m@BBS@[37m.
+гЬ аЫаШхлЬиЮ оШис йЬ бШврйжихЭр йлЮд габиу бжадрдхШ лЮк [33mAcrobase[37m.
 Лцдж ЪаШ йугЬиШ ЯШ тоЬак 5 вЬзлс оиуйЮк Ьдщ Шзц Шчиаж бШа Шнжч лШ йлжаоЬхШ
-зжм гцвак снЮйЬк ЬхдШа йрйлс ЯШ йжм ЫхджмгЬ 25 ЫриЬсд вЬзлс лЮд ЮгтиШ.
+зжм гцвак снЮйЬк ЬхдШа йрйлс ЯШ йжм ЫхджмгЬ 45 ЫриЬсд вЬзлс лЮд ЮгтиШ.
   Ж [33m@BBS@[0;1m ЬхдШа ЫЮгажчиЪЮгШ гЬиабщд ШдЯищзрд зжм вШлиЬчжмд лЮд
 звЮижнжиабу бШа лЮд ЬзабжадрдхШ бШа бмихрк зижйнтиЬа гтйШ Шзц лШ Club лЮк
 Шмлц ШбиаЩщк, навабу ШлгцйнШаиШ, ШдлШввШЪу аЫЬщд бШа ЪдщйЬрд, сиЯиШ ЬзайлЮ-
@@ -575,7 +585,13 @@ ANSBERR {
 } T Rebuff, wrong answer to ANSI question
 
 
-INTRO {[2J[0;1m!CWelcome to [1m@BBS@[0;1m.
+INTRO {[2J[0;1;36m!Z!C           ▄▄        
+██████████ ██ ███████
+██      ██ ██      ██
+██      ██ ██      ██
+███████ ██ ██████████
+        ▀▀           
+[37mWelcome to [1m@BBS@[0;1m.
 !)
 !JWe are happy to welcome you to the major high-quality amateur Greek bulletin
 board service. We hope you will like it.!)
@@ -741,7 +757,7 @@ Please try another one.[0;1m!)
 UIDOK {[0;1;32m
 !JOkay, other users will see messages from you like this:!)
 
-[37m    From %s: How many lines does @BBS@ have anyway?
+[37m    From %s: How many Clubs does Acrobase have anyway?
 
 !J[33mAre you satisfied with your choice of handle?!)
                     
@@ -829,6 +845,10 @@ to change it.!)
 
 
 WELCOME {[0;1m[2J!Z!C[0;1mSo, Welcome to [1;36;5m@BBS@[0;1m!!)
+
+!JThe system has [32mfive[37m lines: [32m8231753[37m,
+[32m8815616[37m, [32m8816312[37m, [32m8220610[37m and
+[32m8819963[37m (33600 bps).!)
 
 !JThe System Operators reserve the right to refuse admission to any user,
 according to the system [32mrules[37m. Our intention is to offer you a 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:52  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:48:12  alexios
  * Added autoconf support. One bug fix.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,7 +77,7 @@ openreqdb()
   d_dbfpath(MAILERREQDIR);
   d_dbdpath(MAILERREQDIR);
   if(d_open("request","s")!=S_OKAY){
-    fatal("Unable to open QWK REQUEST database (db_status %d)",
+    error_fatal("Unable to open QWK REQUEST database (db_status %d)",
 	  db_status);
   }
   d_dbget(&reqdbid);
@@ -96,7 +98,7 @@ mkrequest(char *area, char *dosfname, char *fname,
   if(d_keylast(REQNUM)!=S_OKAY)idx.reqnum=1;
   else {
     if(d_keyread(&idx.reqnum)!=S_OKAY){
-      fatal("Unable to read last key (db_status %d)",db_status);
+      error_fatal("Unable to read last key (db_status %d)",db_status);
     }
     idx.reqnum++;
   }
@@ -131,7 +133,7 @@ getfirstreq(struct reqidx *idx)
   }
   if(d_recread(idx)!=S_OKAY){
     if(db_status!=S_DELETED&&db_status!=S_NOTFOUND)
-      fatal("Unable to read request record, db_status=%d.",
+      error_fatal("Unable to read request record, db_status=%d.",
 	    db_status);
     return 0;
   }
@@ -147,16 +149,16 @@ getnextreq(struct reqidx *idx)
   d_keyfind(REQNUM,&(idx->reqnum));
   if(d_keynext(REQIDX)!=S_OKAY)return 0;
   if(d_recread(idx)!=S_OKAY){
-    fatal("Unable to read request record, db_status=%d.",
+    error_fatal("Unable to read request record, db_status=%d.",
 	  db_status);
   }
   if(n==idx->reqnum){
     if(d_keynext(REQIDX)!=S_OKAY)return 0;
     if(d_recread(idx)!=S_OKAY){
-      fatal("Unable to read request record, db_status=%d.",
+      error_fatal("Unable to read request record, db_status=%d.",
 	    db_status);
     }
-    if(n==idx->reqnum)fatal("Whoops, looping at request %d.",n);
+    if(n==idx->reqnum)error_fatal("Whoops, looping at request %d.",n);
   }
   return sameas(idx->userid,thisuseracc.userid);
 }

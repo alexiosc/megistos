@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:01:53  alexios
  * Fixed broken TRANSIENT bits.
@@ -62,6 +63,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -92,8 +94,8 @@ static char cmdfail[80]={0};
 
 
 void
-setaudit(int flok, char *sok, char *dok,
-	 int flfail, char *sfail, char *dfail)
+xfer_setaudit(uint32 flok, char *sok, char *dok,
+	      uint32 flfail, char *sfail, char *dfail)
 {
   fok=flok;
   ffail=flfail;
@@ -105,7 +107,7 @@ setaudit(int flok, char *sok, char *dok,
 
 
 void
-setcmd(char *ok, char *fail)
+xfer_setcmd(char *ok, char *fail)
 {
   strcpy(cmdok,ok?ok:"");
   strcpy(cmdfail,fail?fail:"");
@@ -113,17 +115,18 @@ setcmd(char *ok, char *fail)
 
 
 int
-addxfer(char mode, char *file, char *description, int refund, int credspermin)
+xfer_add(char mode, char *file, char *description, int refund, int credspermin)
 {
   char fname[256];
   struct stat st;
-  struct xferitem xferitem;
+  xfer_item_t xferitem;
   FILE *fp;
 
   memset(&xferitem,0,sizeof(xferitem));
 
   if((mode==FXM_DOWNLOAD||mode==FXM_TRANSIENT)&&stat(file,&st)) return 0;
 
+  strncpy((char *)&xferitem.magic,XFER_ITEM_MAGIC,sizeof(xferitem.magic));
   xferitem.dir=mode;
   xferitem.auditfok=fok;
   xferitem.auditffail=ffail;
@@ -149,7 +152,7 @@ addxfer(char mode, char *file, char *description, int refund, int credspermin)
 
 
 int
-addwild(char mode, char *filespec, char *description, int refund, int credspermin)
+xfer_addwild(char mode, char *filespec, char *description, int refund, int credspermin)
 {
   char command[1024], *dir=filespec, *wc=filespec;
   FILE *pipe;
@@ -164,7 +167,7 @@ addwild(char mode, char *filespec, char *description, int refund, int credspermi
     if(fgets(command,sizeof(command),pipe)){
       if((wc=strchr(command,'\n'))!=NULL)*wc=0;
       i++;
-      addxfer(mode,command,description,refund,credspermin);
+      xfer_add(mode,command,description,refund,credspermin);
     }
   }
   fclose(pipe);
@@ -173,27 +176,27 @@ addwild(char mode, char *filespec, char *description, int refund, int credspermi
 
 
 int
-dofiletransfer()
+xfer_run()
 {
   char command[256];
   int res;
 
-  if(morcnc()){
+  if(cnc_more()){
     thisuseronl.flags|=OLF_MMCALLING;
-    strcpy(thisuseronl.input,nxtcmd);
+    strcpy(thisuseronl.input,cnc_nxtcmd);
   } else thisuseronl.input[0]=0;
 
   sprintf(command,UPDOWNBIN " " XFERLIST " " TAGLIST,
 	  getpid(),thisuseronl.userid,thisuseronl.channel);
 
-  res=runmodule(command);
+  res=runcommand(command);
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
   return res;
 }
 
 
 int
-killxferlist()
+xfer_kill_list()
 {
   char fname[256];
 
@@ -203,7 +206,7 @@ killxferlist()
 
 
 int
-killtaglist()
+xfer_kill_taglist()
 {
   char fname[256];
 

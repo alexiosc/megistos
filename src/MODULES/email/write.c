@@ -29,18 +29,19 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/08/13 17:00:25  alexios
  * Fixed silly reprompt bug when asking for recipient name.
  *
  * Revision 0.9  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys(). Slight alterations
+ * Changed a few error_fatal() calls to error_fatalsys(). Slight alterations
  * to the message storing code.
  *
  * Revision 0.8  1998/12/27 15:33:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Migrated to new locking functions. Other minor fixes.
  *
  * Revision 0.7  1998/08/14 11:30:20  alexios
@@ -72,6 +73,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,10 +106,10 @@ emailwrite()
   int            attachment=0, rrr=0, numcopies=0, nomore=0, net=0, res=0;
   int            cleanupattachment=1, distlist=0, ndist=0, killit=0, sysop=0;
   int            clubmsg=0;
-  long           original=0;
+  uint32         original=0;
   char           attfile[256]={0}, origclub[256]={0};
 
-  if(!haskey(&thisuseracc,wrtkey)){
+  if(!key_owns(&thisuseracc,wrtkey)){
     prompt(OPONLY);
     sysop=1;
   }
@@ -129,13 +131,13 @@ emailwrite()
 	strcpy(msg.club,msg.to);
 	if(getclubax(&thisuseracc,msg.club)<CAX_WRITE){
 	  prompt(WERCLUB,msg.club);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
-	strcpy(msg.to,ALL);
+	strcpy(msg.to,MSG_ALL);
 	clubmsg=1;
 	strcpy(clubdir,msg.club);
-	if(morcnc()&&cncchr()=='-'){
+	if(cnc_more()&&cnc_chr()=='-'){
 	  if(!getclubrecipient(WEFCAU,WEFCAUR,WEFCAUR,msg.to))return;
 	}
       } else {
@@ -147,7 +149,7 @@ emailwrite()
       if(msg.to[0]!='!'){
 	net=strchr(msg.to,'@')||strchr(msg.to,'%');
 	if(!clubmsg)prompt(net?WERCPOKN:WERCPOK,msg.to);
-	else if(sameas(msg.to,ALL))prompt(WERCPOKC,msg.club);
+	else if(sameas(msg.to,MSG_ALL))prompt(WERCPOKC,msg.club);
 	else prompt(WERCPOKU,msg.club,msg.to);
       }else {
 	prompt(WERCPOKL,msg.to); /* open distributinon list */
@@ -173,16 +175,16 @@ emailwrite()
       if(editor(body,msglen)||stat(body,&st)){
 	unlink(body);
 	unlink(header);
-	endcnc();
+	cnc_end();
 	return;
-      } else endcnc();
+      } else cnc_end();
       
       
       /* Ask for file attachment */
       
-      if(((clubmsg==0)&&haskey(&thisuseracc,attkey)&&canpay(attchg))||
+      if(((clubmsg==0)&&key_owns(&thisuseracc,attkey)&&usr_canpay(attchg))||
 	 (clubmsg&&(getclubax(&thisuseracc,msg.club)>=CAX_UPLOAD)&&
-	  canpay(clubhdr.uploadchg))){
+	  usr_canpay(clubhdr.uploadchg))){
 	for(;;){
 	  if(!askyesno(&attachment,WEATT,WERRSEL,
 		       clubmsg?clubhdr.uploadchg:attchg)){
@@ -198,7 +200,7 @@ emailwrite()
 	  if(attfile[0]){
 	    char *cp=NULL;
 	    
-	    chargecredits(clubmsg?clubhdr.uploadchg:attchg);
+	    usr_chargecredits(clubmsg?clubhdr.uploadchg:attchg);
 	    msg.flags|=MSF_FILEATT;
 	    if(!clubmsg){
 	      msg.flags|=MSF_FILEATT|MSF_APPROVD;
@@ -208,12 +210,12 @@ emailwrite()
 	      } else {
 		char lock[256];
 		sprintf(lock,CLUBLOCK,msg.club);
-		if(waitlock(lock,10)==LKR_TIMEOUT)return;
-		placelock(lock,"updating");
+		if(lock_wait(lock,10)==LKR_TIMEOUT)return;
+		lock_place(lock,"updating");
 		loadclubhdr(msg.club);
 		clubhdr.nfunapp++;
 		saveclubhdr(&clubhdr);
-		rmlock(lock);
+		lock_rm(lock);
 	      }
 	    }
 		
@@ -231,7 +233,7 @@ emailwrite()
       
       /* Ask for return receipt */
       
-      if(haskey(&thisuseracc,rrrkey)&&canpay(rrrchg)&&(clubmsg==0)){
+      if(key_owns(&thisuseracc,rrrkey)&&usr_canpay(rrrchg)&&(clubmsg==0)){
 	for(;;){
 	  if(!askyesno(&rrr,WERRR,WERRSEL,rrrchg)){
 	    if(confirmcancel()){
@@ -243,7 +245,7 @@ emailwrite()
 	}
 	if(rrr){
 	  msg.flags|=MSF_RECEIPT;
-	  chargecredits(rrrchg);
+	  usr_chargecredits(rrrchg);
 	}
       }
     } else {
@@ -257,7 +259,7 @@ emailwrite()
 	}
       }
       if(rrr)msg.flags|=MSF_RECEIPT;
-      if(!distlist)sprintf(msg.history,HST_CC" %s/%ld",origclub,original);
+      if(!distlist)sprintf(msg.history,HST_CC" %s/%d",origclub,original);
       else strcpy(msg.history,HST_DIST);
     }
 
@@ -270,14 +272,14 @@ emailwrite()
 
       for(;;){
 	if((s=readdistribution())==NULL)break;
-	if(!userexists(s))prompt(WELUNKU,s);
+	if(!usr_exists(s))prompt(WELUNKU,s);
 	else break;
       }
       strcpy(msg.to,s?s:"");
       strcpy(msg.history,HST_DIST);
       if(!ndist){
 	prompt(DISTBEG);
-	nonblocking();
+	inp_nonblock();
 	thisuseronl.flags|=OLF_BUSY+OLF_NOTIMEOUT;
       } else if(read(fileno(stdin),&c,1)&&
 		((c==13)||(c==10)||(c==27)||(c==15)||(c==3))){
@@ -289,12 +291,12 @@ emailwrite()
     /* Check if user has enough credits */
 
     if(!clubmsg){
-      if(!canpay(net?wrtchg+netchg:wrtchg)){
+      if(!usr_canpay(net?wrtchg+netchg:wrtchg)){
 	prompt(distlist?WERLNEC:WERNEC);
 	killit=1;
       }
     } else {
-      if(!canpay(clubhdr.postchg)){
+      if(!usr_canpay(clubhdr.postchg)){
 	prompt(WCRNEC);
 	killit=1;
       }
@@ -304,13 +306,13 @@ emailwrite()
 
     if(msg.to[0]){                        /* handle end of distribution list */
       if((fp=fopen(header,"w"))==NULL){
-	fatalsys("Unable to create message header %s",header);
+	error_fatalsys("Unable to create message header %s",header);
       }
       if(fwrite(&msg,sizeof(msg),1,fp)!=1){
 	int i=errno;
 	fclose(fp);
 	errno=i;
-	fatalsys("Unable to write message header %s",header);
+	error_fatalsys("Unable to write message header %s",header);
       }
       fclose(fp);
 
@@ -327,13 +329,13 @@ emailwrite()
 
       if((thisuseronl.flags&OLF_INVISIBLE)==0){
 	if((fp=fopen(header,"r"))==NULL){
-	  fatalsys("Unable to read message header %s",header);
+	  error_fatalsys("Unable to read message header %s",header);
 	}
 	if(fread(&checkmsg,sizeof(msg),1,fp)!=1){
 	  int i=errno;
 	  fclose(fp);
 	  errno=i;
-	  fatalsys("Unable to read message header %s",header);
+	  error_fatalsys("Unable to read message header %s",header);
 	}
 	fclose(fp);
 	
@@ -347,19 +349,21 @@ emailwrite()
 	  else prompt(WECONFC,origclub,original,
 		      clubmsg?msg.club:EMAILCLUBNAME,
 		      checkmsg.msgno,
-		      (sameas(ALL,checkmsg.to)?getpfix(WEALL,1):checkmsg.to));
+		      (sameas(MSG_ALL,checkmsg.to)?
+		       msg_getunit(WEALL,1):checkmsg.to));
 	  
-	  if(uinsys(checkmsg.to,1)){
+	  if(usr_insys(checkmsg.to,1)){
 	    if(!clubmsg){
-	      sprintf(outbuf,getmsglang(numcopies?WERNOTC:WERNOT,
-					othruseracc.language-1),
+	      sprintf(out_buffer,msg_getl(numcopies?WERNOTC:WERNOT,
+					  othruseracc.language-1),
 		      checkmsg.from,checkmsg.subject);
 	    } else {
-	      sprintf(outbuf,getmsglang(numcopies?WCRNOTC:WCRNOT,
-					othruseracc.language-1),
+	      sprintf(out_buffer,msg_getl(numcopies?WCRNOTC:WCRNOT,
+					  othruseracc.language-1),
 		      checkmsg.from,checkmsg.club,checkmsg.subject);
 	    }
-	    if(injoth(&othruseronl,outbuf,0))prompt(WENOTFD,othruseronl.userid);
+	    if(usr_injoth(&othruseronl,out_buffer,0))
+	      prompt(WENOTFD,othruseronl.userid);
 	  }
 	}
       }
@@ -367,8 +371,8 @@ emailwrite()
       
       /* Clean up */
       
-      if(!clubmsg)chargecredits(net?wrtchg+netchg:wrtchg);
-      else chargecredits(clubhdr.postchg);
+      if(!clubmsg)usr_chargecredits(net?wrtchg+netchg:wrtchg);
+      else usr_chargecredits(clubhdr.postchg);
       thisuseracc.msgswritten++;
       if(!numcopies){
 	original=checkmsg.msgno;
@@ -384,9 +388,9 @@ emailwrite()
       }
     } else {
       closedistribution();
-      blocking();
+      inp_block();
       thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-      prompt(DISTINFO,ndist,getpfix(MSGSNG,ndist));
+      prompt(DISTINFO,ndist,msg_getunit(MSGSNG,ndist));
       distlist=0;
     }
 
@@ -413,11 +417,11 @@ emailwrite()
       nomore=0;
     }
   }
-  blocking();
+  inp_block();
   thisuseronl.flags|=OLF_BUSY+OLF_NOTIMEOUT;
   unlink(body);
   closedistribution();
-  endcnc();
+  cnc_end();
 }
 
 
@@ -431,18 +435,18 @@ recipienthelp()
   FILE *fp;
   char fname[256];
 
-  prompt(WEHELP1,netchg,getpfix(CRDSING,netchg));
+  prompt(WEHELP1,netchg,msg_getunit(CRDSING,netchg));
 
-  if(!haskey(&thisuseracc,dlkey))return;
-  if(haskey(&thisuseracc,msskey)){
+  if(!key_owns(&thisuseracc,dlkey))return;
+  if(key_owns(&thisuseracc,msskey)){
     shown=1;
     prompt(WEHELP2);
     prompt(WEHELP3,"MASS");
     prompt(WEHELP3,"ALL");
-    for(i=0;i<numuserclasses;i++){
+    for(i=0;i<cls_count;i++){
       char s[80];
-      if(lastresult==PAUSE_QUIT)return;
-      sprintf(s,"!%s",userclasses[i].name);
+      if(fmt_lastresult==PAUSE_QUIT)return;
+      sprintf(s,"!%s",cls_classes[i].name);
       prompt(WEHELP3,s);
     }
   }
@@ -450,7 +454,7 @@ recipienthelp()
   if((dp=opendir(MSGSDISTDIR))==NULL)return;
   while((dir=readdir(dp))!=NULL){
     if(sameas(dir->d_name,".")||sameas(dir->d_name,".."))continue;
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       closedir(dp);
       return;
     }
@@ -461,9 +465,9 @@ recipienthelp()
       continue;
     }
     fclose(fp);
-    if(haskey(&thisuseracc,key)&&
+    if(key_owns(&thisuseracc,key)&&
        (dir->d_name[0]!='.' || sameas(&(dir->d_name[1]),thisuseracc.userid) ||
-	haskey(&thisuseracc,sopkey))){
+	key_owns(&thisuseracc,sopkey))){
       if(!shown){
 	shown=1;
 	prompt(WEHELP2);
@@ -485,11 +489,11 @@ checklistname(char *name)
   char fname[256];
   int i, key;
 
-  if(!haskey(&thisuseracc,dlkey))return 0;
+  if(!key_owns(&thisuseracc,dlkey))return 0;
 
-  if(haskey(&thisuseracc,msskey)){
+  if(key_owns(&thisuseracc,msskey)){
     if(name[0]==name[1]){
-      for(i=0;i<numuserclasses;i++)if(sameas(userclasses[i].name,&name[2])){
+      for(i=0;i<cls_count;i++)if(sameas(cls_classes[i].name,&name[2])){
 	return 1;
       }
       prompt(EWRLERR);
@@ -515,9 +519,9 @@ checklistname(char *name)
       continue;
     }
     fclose(fp);
-    if(haskey(&thisuseracc,key)&&
+    if(key_owns(&thisuseracc,key)&&
        (dir->d_name[0]!='.' || sameas(&(dir->d_name[1]),thisuseracc.userid) ||
-	haskey(&thisuseracc,sopkey))){
+	key_owns(&thisuseracc,sopkey))){
       if(sameas(&name[1],dir->d_name)){
 	sprintf(name,"!%s",dir->d_name);
 	return 1;
@@ -537,43 +541,43 @@ getrecipient(int pr,char *rec)
   char *s=NULL;
 
   for(;;){
-    if(!canpay(wrtchg)){
-      endcnc();
+    if(!usr_canpay(wrtchg)){
+      cnc_end();
       prompt(WENCRDS);
     }
-    if(morcnc())s=cncword();
+    if(cnc_more())s=cnc_word();
     else {
       prompt(pr);
-      reprompt=0;
-      getinput(0);
-      bgncnc();
-      if(!margc && !reprompt){
+      inp_clearflags(INF_REPROMPT);
+      inp_get(0);
+      cnc_begin();
+      if(!margc && !inp_reprompt()){
 	strcpy(rec,SYSOP);
 	return 1;
       }
-      s=cncword();
+      s=cnc_word();
     }
     if(sameas(s,".")){
       strcpy(rec,SYSOP);
       return 1;
     } else if(sameas(s,"?")){
-      endcnc();
+      cnc_end();
       recipienthelp();
       continue;
-    } else if(isX(s)){
-      endcnc();
+    } else if(inp_isX(s)){
+      cnc_end();
       return 0;
     } else if(strchr(s,'@')||strchr(s,'%')){
-      if(haskey(&thisuseracc,netkey)&&canpay(netchg)){
+      if(key_owns(&thisuseracc,netkey)&&usr_canpay(netchg)){
 	strcpy(rec,s);
 	return 1;
-      } else if(!haskey(&thisuseracc,netkey)){
+      } else if(!key_owns(&thisuseracc,netkey)){
 	prompt(WERNNET);
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(!canpay(netchg)){
+      } else if(!usr_canpay(netchg)){
 	prompt(WERNNET2);
-	endcnc();
+	cnc_end();
 	continue;
       }
     } else if(s[0]=='/'){
@@ -584,24 +588,24 @@ getrecipient(int pr,char *rec)
 	prompt(WCCLUBR);
       } else if(ax<CAX_WRITE){
 	prompt(WCNAXES);
-      } else if(!canpay(clubhdr.postchg)){
+      } else if(!usr_canpay(clubhdr.postchg)){
 	prompt(WCNCRDS);
       } else {
 	if(s[0]!='/')strcpy(rec,s);
 	else strcpy(rec,&s[1]);
 	return 2;
       }
-      endcnc();
+      cnc_end();
       continue;
-    } else if(uidxref(s,0)){
+    } else if(usr_uidxref(s,0)){
       strcpy(rec,s);
-      if(canpay(wrtchg)||sameas(rec,SYSOP))return 1;
+      if(usr_canpay(wrtchg)||sameas(rec,SYSOP))return 1;
       else continue;
     }else if(checklistname(s)){
       strcpy(rec,s);
       return 1;
     } else {
-      endcnc();
+      cnc_end();
       if(s[0]!='!')prompt(WEUNKID,s);
       continue;
     }
@@ -617,32 +621,32 @@ getclubrecipient(int pr, int err, int help, char *rec)
   char *s=NULL;
 
   for(;;){
-    if(morcnc())s=cncword();
+    if(cnc_more())s=cnc_word();
     else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
       if(!margc){
-	strcpy(rec,ALL);
+	strcpy(rec,MSG_ALL);
 	return 1;
       }
-      s=cncword();
+      s=cnc_word();
     }
     if(sameas(s,".")||sameas(s,"ALL")){
-      strcpy(rec,ALL);
+      strcpy(rec,MSG_ALL);
       return 1;
     } else if(sameas(s,"?")){
-      endcnc();
+      cnc_end();
       prompt(help);
       continue;
-    } else if(isX(s)){
-      endcnc();
+    } else if(inp_isX(s)){
+      cnc_end();
       return 0;
-    } else if(uidxref(s,0)){
+    } else if(usr_uidxref(s,0)){
       strcpy(rec,s);
       return 1;
     } else {
-      endcnc();
+      cnc_end();
       prompt(err,s);
       continue;
     }
@@ -655,22 +659,22 @@ int
 getsubject(char *subject)
 {
   char *i;
-  endcnc();
+  cnc_end();
   for(;;){
-    if(morcnc()){
-      i=nxtcmd;
-      rstrin();
+    if(cnc_more()){
+      i=cnc_nxtcmd;
+      inp_raw();
     } else {
       prompt(ASKSUBJ);
-      getinput(63);
-      bgncnc();
+      inp_get(63);
+      cnc_begin();
       if(!margc)continue;
-      i=input;
-      rstrin();
+      i=inp_buffer;
+      inp_raw();
     }
 
     if(!i[0])continue;
-    else if(isX(i))return 0;
+    else if(inp_isX(i))return 0;
     else {
       strcpy(subject,i);
       while(subject[strlen(subject)-1]==32)subject[strlen(subject)-1]=0;
@@ -695,11 +699,11 @@ uploadatt(char *attname,int num)
   strcpy(audit[2],AUS_ESUPLF);
   sprintf(audit[3],AUD_ESUPLF,
 	  thisuseracc.userid,clubdir,num);
-  setaudit(AUT_ESUPLS,audit[0],audit[1],AUT_ESUPLF,audit[2],audit[3]);
+  xfer_setaudit(AUT_ESUPLS,audit[0],audit[1],AUT_ESUPLF,audit[2],audit[3]);
   sprintf(attname,"%d.att",num);
-  addxfer(FXM_UPLOAD,attname,eattupl,attchg,-1);
+  xfer_add(FXM_UPLOAD,attname,eattupl,attchg,-1);
   strcpy(attname,"");
-  dofiletransfer();
+  xfer_run();
   
   sprintf(fname,XFERLIST,getpid());
   
@@ -746,7 +750,7 @@ uploadatt(char *attname,int num)
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -783,13 +787,13 @@ getattname(char *subject,int num)
 
     for(;;){
       ok=1;
-      lastresult=0;
-      if(morcnc())s=cncword();
+      fmt_lastresult=0;
+      if(cnc_more())s=cnc_word();
       else {
 	prompt(WEFFN);
-	getinput(15);
+	inp_get(15);
 	if(margc){
-	  if(isX(margv[0])){
+	  if(inp_isX(margv[0])){
 	    if(confirmcancel())return NULL;
 	    else continue;
 	  } else s=margv[0];

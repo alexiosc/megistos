@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1999/07/18 21:01:53  alexios
- * Minor paranoia modifications to setlinestatus() (unlink line
+ * Minor paranoia modifications to channel_setstatus() (unlink line
  * status file before re-creating it).
  *
  * Revision 1.0  1998/12/27 14:31:03  alexios
@@ -42,6 +43,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -64,7 +66,7 @@
 
 /* The default linestatus */
 
-static struct linestatus default_linestatus = {
+static channel_status_t channel_default_status = {
   LST_NORMAL,			/* Reset the line to the NORMAL state */
   LSR_OK,			/* Pretend there's no error */
   0,				/* Set the bps rate to zero */
@@ -73,7 +75,7 @@ static struct linestatus default_linestatus = {
 
 
 int
-getlinestatus(char *tty, struct linestatus *status)
+channel_getstatus(char *tty, channel_status_t *status)
 {
   char fname[256], line[256], majst[64], minst[64], user[64];
   int i, n, baud;
@@ -82,7 +84,7 @@ getlinestatus(char *tty, struct linestatus *status)
 
   sprintf(fname,"%s/.status-%s",CHANDEFDIR,tty);
   if((i=open(fname,O_RDONLY))<0){
-    memcpy(status,&default_linestatus,sizeof(struct linestatus));
+    memcpy(status,&channel_default_status,sizeof(channel_status_t));
     return -1;
   }
 
@@ -98,7 +100,7 @@ getlinestatus(char *tty, struct linestatus *status)
   minst[0]=0;
   baud=0;
   user[0]=0;
-  memcpy(status,&default_linestatus,sizeof(struct linestatus));
+  memcpy(status,&channel_default_status,sizeof(channel_status_t));
 
   /* Now parse the line */
 
@@ -113,14 +115,14 @@ getlinestatus(char *tty, struct linestatus *status)
     status->baud=baud;
   case 2:
     for(n=0;n<LSR_NUMRESULTS;n++){
-      if(sameas(line_results[n],minst)){
+      if(sameas(channel_results[n],minst)){
 	status->result=n;
 	break;
       }
     }
   case 1:
     for(n=0;n<LST_NUMSTATES;n++){
-      if(sameas(line_states[n],majst)){
+      if(sameas(channel_states[n],majst)){
 	status->state=n;
 	break;
       }
@@ -132,7 +134,7 @@ getlinestatus(char *tty, struct linestatus *status)
 
 
 int
-setlinestatus(char *tty, struct linestatus *status)
+channel_setstatus(char *tty, channel_status_t *status)
 {
   char fname[256], line[256];
   int i;
@@ -142,7 +144,7 @@ setlinestatus(char *tty, struct linestatus *status)
   sprintf(fname,"%s/.status-%s",CHANDEFDIR,tty);
   unlink(fname);		/* Just in case */
   if((i=creat(fname,0666))<0){
-    fatalsys("Unable to creat(\"%s\",0666).",fname);
+    error_fatalsys("Unable to creat(\"%s\",0666).",fname);
   }
 
   /* Construct and write the status line */
@@ -150,8 +152,8 @@ setlinestatus(char *tty, struct linestatus *status)
   if(status->state>=LST_NUMSTATES || status->state<0) status->state=LST_NORMAL;
   if(status->result>=LSR_NUMRESULTS || status->result<0) status->result=LSR_OK;
   sprintf(line,"%s %s %d %s\n",
-	  line_states[status->state],
-	  line_results[status->result],
+	  channel_states[status->state],
+	  channel_results[status->result],
 	  status->baud,
 	  status->user[0]?status->user:"[NO-USER]");
   write(i,line,strlen(line));
@@ -163,31 +165,31 @@ setlinestatus(char *tty, struct linestatus *status)
 
 
 void
-setlinestate(char *tty, int state)
+channel_setstate(char *tty, int state)
 {
-  struct linestatus status;
+  channel_status_t status;
 
-  getlinestatus(tty,&status);
+  channel_getstatus(tty,&status);
   if(state>=LST_NUMSTATES || state<0) state=LST_NORMAL;
   status.state=state;
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
 }
 
 
 void
-setlineresult(char *tty, int result)
+channel_setresult(char *tty, int result)
 {
-  struct linestatus status;
+  channel_status_t status;
 
-  getlinestatus(tty,&status);
+  channel_getstatus(tty,&status);
   if(result>=LSR_NUMRESULTS || result<0) result=LSR_OK;
   status.result=result;
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
 }
 
 
 void
-hangup()
+channel_hangup()
 {
   struct termios termio;
 
@@ -199,7 +201,7 @@ hangup()
 
 
 int
-disconnect(char *ttyname)
+channel_disconnect(char *ttyname)
 {
   DIR *dp;
   struct dirent *buf;
@@ -245,13 +247,16 @@ disconnect(char *ttyname)
 
 
 char *
-baudstg(int baud)
+channel_baudstg(int baud)
 {
   static char string[10];
 
   switch(baud){
   case 0:
     strcpy(string,"[NET]");
+    break;
+  case -1:
+    strcpy(string,"[SSH]");
     break;
   default:
     sprintf(string,"%d",baud);

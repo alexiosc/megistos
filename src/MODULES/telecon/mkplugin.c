@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/28 23:13:16  alexios
  * Made main() return an int, as required.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -137,7 +139,7 @@ main(int argc, char *argv[])
   struct keyword *k;
   struct plugin p;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if((fin=fopen(TELEPISRCFILE,"r"))==NULL){
     fprintf(stderr,"%s: Unable to open %s\n",argv[0],TELEPISRCFILE);
     exit(1);

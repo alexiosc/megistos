@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:43  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  2000/09/30 09:25:13  bbs
  * changed gsc version to 2.4
@@ -107,7 +108,7 @@ struct gallup gallupsinfo;
 /* In GNU C a simple backslash would be enough, but in Borland C it doesn't */
 const char helpmsg[]="\n\
 Syntax:\n\
-	%s [-qvyiz?] [-{no}<name>] [-malt] [-c<userid>] [-xN] script\n\
+	%s [-qvyiz?] [-{no}<name>] [-malt] [-c<userid>] [-xN] [-e{td}#] script\n\
 \n\
 \n\
    compiler options\n\
@@ -133,6 +134,8 @@ Syntax:\n\
 			0: relaxed (default)\n\
 			1: strict, prompt for last question\n\
 			2: very strict, prompt for next question\n\
+	-et#	set gallup time to N (N is a longint)\n\
+	-ed#	set gallup date to N (N is a longint)\n\
 \n\
 \n";
 
@@ -179,6 +182,12 @@ int main(int argc, char *argv[])
 						case '1': gflgs(ginfo) |= GF_EXTRA; break;
 						case '2': gflgs(ginfo) |= GF_EXTRA | GF_GONEXT; break;
 						default: gflgs(ginfo) &= ~(GF_EXTRA | GF_GONEXT); break;
+					}
+					break;
+				case 'e':
+					switch(argv[i][2]) {
+						case 't': gtset(ginfo) = atoi(&argv[i][3]); break;
+						case 'd': gdset(ginfo) = atoi(&argv[i][3]); break;
 					}
 					break;
 					

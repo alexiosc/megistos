@@ -28,19 +28,20 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.11  1999/08/07 02:20:09  alexios
  * Very slight paranoia changes.
  * ,
  *
  * Revision 0.10  1999/07/18 22:00:00  alexios
- * Changed a few fatal() calls to fatalsys(). Added functions
+ * Changed a few error_fatal() calls to error_fatalsys(). Added functions
  * to perform better auditing of users.
  *
  * Revision 0.9  1998/12/27 16:21:05  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other minor fixes.
  *
  * Revision 0.8  1998/08/14 11:58:52  alexios
@@ -78,6 +79,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -123,7 +125,7 @@ logoutaudit()
     if(thisuseronl.flags&OLF_LOGGEDOUT){
       audit(thisuseronl.channel,AUDIT(LOGOUT),
 	    thisuseronl.userid,
-	    baudstg(thisuseronl.baudrate));
+	    channel_baudstg(thisuseronl.baudrate));
       return;
     }
   }
@@ -131,29 +133,29 @@ logoutaudit()
   if(thisuseronl.flags&OLF_RELOGGED)
     audit(thisuseronl.channel,AUDIT(RELOGON),
 	  thisuseronl.userid,
-	  baudstg(thisuseronl.baudrate));
+	  channel_baudstg(thisuseronl.baudrate));
   else {
     switch(thisuseronl.lastpage){
     case EXIT_CREDS:		/* User ran out of credits */
       audit(thisuseronl.channel,AUDIT(CREDHUP),
 	    thisuseronl.userid,
-	    baudstg(thisuseronl.baudrate));
+	    channel_baudstg(thisuseronl.baudrate));
       return;
     case EXIT_TIMEOUT:		/* Connection timed out */
       audit(thisuseronl.channel,AUDIT(TIMEOUT),
 	    thisuseronl.userid,
-	    baudstg(thisuseronl.baudrate));
+	    channel_baudstg(thisuseronl.baudrate));
       return;
     case EXIT_TIME:		/* Time limit reached */
       audit(thisuseronl.channel,AUDIT(TIMEHUP),
 	    thisuseronl.userid,
-	    baudstg(thisuseronl.baudrate));
+	    channel_baudstg(thisuseronl.baudrate));
       return;
     case EXIT_DISCON:		/* User disconnected or line died */
     default:
       /*audit(thisuseronl.channel,AUDIT(DISCON),
 	    thisuseronl.userid,
-	    baudstg(thisuseronl.baudrate));
+	    channel_baudstg(thisuseronl.baudrate));
 	    return;*/
     }
   }
@@ -161,7 +163,7 @@ logoutaudit()
   /* User disconnected or line died */
   audit(thisuseronl.channel,AUDIT(DISCON),
 	thisuseronl.userid,
-	baudstg(thisuseronl.baudrate));
+	channel_baudstg(thisuseronl.baudrate));
 }
 
 
@@ -174,13 +176,13 @@ dorecent()
 
   i=time(0);
   fp=fopen(RECENTFILE,"a");
-  fprintf(fp,"%s %s %08lx %08x\n",thisuseronl.userid,
+  fprintf(fp,"%s %s %08x %08x\n",thisuseronl.userid,
 	  thisuseronl.channel,thisuseronl.loggedin,i);
   fclose(fp);
   
   sprintf(fname,"%s/%s",RECENTDIR,thisuseronl.userid);
   fp=fopen(fname,"a");
-  fprintf(fp,"%s %08lx %08x\n",thisuseronl.channel,thisuseronl.loggedin,i);
+  fprintf(fp,"%s %08x %08x\n",thisuseronl.channel,thisuseronl.loggedin,i);
   fclose(fp);
   
   sprintf(command,"tail -%d %s >%s/tmp%08x;\\mv %s/tmp%08x %s;chown bbs.bbs %s",
@@ -206,10 +208,10 @@ killinjoth()
 static void
 cleanup()
 {
-  struct linestatus status;
-  getlinestatus(thisuseronl.channel,&status);
+  channel_status_t status;
+  channel_getstatus(thisuseronl.channel,&status);
   status.user[0]=0;
-  setlinestatus(thisuseronl.channel,&status);
+  channel_setstatus(thisuseronl.channel,&status);
 }
 
 
@@ -222,7 +224,7 @@ logoutuser()
 
   switch(pid=fork()){
   case -1:
-    logerrorsys("Unable to fork() while spawning getty");
+    error_logsys("Unable to fork() while spawning getty");
     return;
   case 0:
     break;
@@ -231,7 +233,7 @@ logoutuser()
   }
 
 
-  /* Kill the injoth() message queue */
+  /* Kill the usr_injoth() message queue */
 
   killinjoth();
 
@@ -266,7 +268,7 @@ refreshsysvars()
 {
   struct stat s;
   if(stat(SYSVARFILE,&s)){
-    fatalsys("Unable to stat() sysvar file (%s)!",SYSVARFILE);
+    error_fatalsys("Unable to stat() sysvar file (%s)!",SYSVARFILE);
   }
 
   if (s.st_ctime!=sysvartime && sysvar) {
@@ -288,11 +290,11 @@ refreshclasses()
 {
   struct stat s;
   if(stat(CLASSFILE,&s)){
-    fatalsys("Unable to stat() class file (%s)!",CLASSFILE);
+    error_fatalsys("Unable to stat() class file (%s)!",CLASSFILE);
   }
   if (s.st_ctime!=classtime) {
     classtime=s.st_ctime;
-    initmodule(INITCLASSES);
+    mod_init(INI_CLASSES);
   }
 }
 
@@ -302,10 +304,10 @@ byebye(struct shmuserrec *ushm,int prompt)
 {
   FILE *fp;
   char fname[64], *outbuf;
-  int  chan=getchannelindex(ushm->onl.channel);
+  int  chan=chan_getindex(ushm->onl.channel);
   
-  setmbk(sysblk);
-  outbuf=getmsglang(prompt,ushm->acc.language-1);
+  msg_set(msg_sys);
+  outbuf=msg_getl(prompt,ushm->acc.language-1);
 	    
   if(outbuf){
     sprintf(fname,DEVDIR"/%s",ushm->onl.emupty);

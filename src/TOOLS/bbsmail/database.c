@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1998/12/27 16:31:55  alexios
  * Added autoconf support. Migrated to new locking style.
@@ -51,6 +52,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,11 +80,11 @@ addtodb(struct message *msg, int email)
   /* Wait for locks to clear */
 
   sprintf(lock,CLUBLOCK,(email?EMAILCLUBNAME:msg->club));
-  if(waitlock(lock,5)==LKR_TIMEOUT){
+  if(lock_wait(lock,5)==LKR_TIMEOUT){
     if(usercaller)prompt(TIMEOUT1);
-    if(waitlock(lock,55)==LKR_TIMEOUT){
+    if(lock_wait(lock,55)==LKR_TIMEOUT){
       if(usercaller)prompt(TIMEOUT2);
-      logerror("Timed out (60 sec) waiting for %s",lock);
+      error_log("Timed out (60 sec) waiting for %s",lock);
       exit(1);
     }
   }
@@ -90,7 +92,7 @@ addtodb(struct message *msg, int email)
 
   /* Lock it */
 
-  placelock(lock,"adding");
+  lock_place(lock,"adding");
 
 
   /* Open the database */
@@ -101,8 +103,8 @@ addtodb(struct message *msg, int email)
   d_dbfpath(dir);
   d_dbdpath(DBDDIR);
   if(d_open(".ecdb","s")!=S_OKAY){
-    rmlock(lock);
-    logerror("Cannot open database for %s (db_status %d)\n",
+    lock_rm(lock);
+    error_log("Cannot open database for %s (db_status %d)\n",
 	     email?EMAILCLUBNAME:msg->club,db_status);
     return;
   }
@@ -129,5 +131,5 @@ addtodb(struct message *msg, int email)
 
   /* Done, remove lock */
 
-  rmlock(lock);
+  lock_rm(lock);
 }

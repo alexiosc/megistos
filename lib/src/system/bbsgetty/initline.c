@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys(). Added support
+ * Changed a few error_fatal() calls to error_fatalsys(). Added support
  * for the pre/postconnect fields.
  *
  * Revision 1.2  1998/12/27 16:15:40  alexios
@@ -48,6 +49,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -125,19 +127,19 @@ initline()
     while(((fd=open(devname,O_RDWR|O_NDELAY))<0)&&(errno==EBUSY))sleep(30);
     if(fd<0){
       debug(D_RUN,"Unable to open %s",devname);
-      fatalsys("Unable to open %s",devname);
+      error_fatalsys("Unable to open %s",devname);
     }
     if(fd!=0){
       debug(D_RUN,"Whoops, stdin is not filehandle 0.");
-      fatal("Whoops, stdin is not filehandle 0.");
+      error_fatal("Whoops, stdin is not filehandle 0.");
     }
     if(dup(0)!=1) {
       debug(D_RUN,"Whoops, stdout is not filehandle 1.");
-      fatal("Whoops, stdout is not filehandle 1.");
+      error_fatal("Whoops, stdout is not filehandle 1.");
     }
     if(dup(0)!=2) {
       debug(D_RUN,"Whoops, stdout is not filehandle 2.");
-      fatal("Whoops, stdout is not filehandle 2.");
+      error_fatal("Whoops, stdout is not filehandle 2.");
     }
 
     /* Arrange for the three file handles to be unbuffered */
@@ -159,7 +161,7 @@ initline()
     settermios(&itermios,0);
 
 
-    /* Set blocking input */
+    /* Set blocking inp_buffer */
     flags=fcntl(0,F_GETFL,0);
     fcntl(0,F_SETFL,flags&~O_NDELAY);
 
@@ -185,7 +187,7 @@ initline()
       /* Process the init sequence */
       if(chat(initstr)<0) {
 	debug(D_RUN,"Init sequence failed... aborting.");
-	/*fatal("Init sequence failed, aborting.");*/
+	/*error_fatal("Init sequence failed, aborting.");*/
 	exit(1);
       }
       
@@ -218,7 +220,7 @@ initline()
   if(waitchar){
     debug(D_RUN,"Waiting for a character...");
     ioctl(0,TCFLSH,0);
-    read(0,&ch,1);		/* blocking input */
+    read(0,&ch,1);		/* blocking inp_buffer */
     debug(D_RUN,"Got it!");
 
     
@@ -239,7 +241,7 @@ initline()
       /* Wait for the 'wait' sequence */
       if((*wait)&&(expect(wait)<0)){
 	debug(D_RUN,"WAITFOR match failed.");
-	/* fatal("WAITFOR match failed.");*/
+	/* error_fatal("WAITFOR match failed.");*/
 	exit(1);
       }
     }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1998/12/27 16:10:27  alexios
  * Added autoconf support. Minor bug fixes.
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -159,7 +161,7 @@ sendmain(char *userid)
 void
 sendaction(char *userid,int action)
 {
-  if(uinsys(userid,0)){
+  if(usr_insys(userid,0)){
     othruseraux.action=action;
     bbsdcommand("user2",othruseronl.channel,"");
   }
@@ -170,7 +172,7 @@ void
 actionhandler()
 {
   signal(SIGMAIN,actionhandler);
-  cancelinput();
+  inp_cancel();
 }
 
 
@@ -198,16 +200,16 @@ fx_squelch(struct chanusr *u)
   int lang=othruseracc.language-1;
   char moderator[1024], squelchee[1024];
 
-  strcpy(moderator,getpfixlang(SQUMODM,thisuseracc.sex==USX_MALE,lang));
-  strcpy(squelchee,getpfixlang(SQUMALE,othruseracc.sex==USX_MALE,lang));
+  strcpy(moderator,msg_getunitl(SQUMODM,thisuseracc.sex==USX_MALE,lang));
+  strcpy(squelchee,msg_getunitl(SQUMALE,othruseracc.sex==USX_MALE,lang));
   
   if(strcmp(sqtmp,u->userid)){
-    sprintf(outbuf,getmsglang(squelchopt?SQUOTHR:USQOTHR,lang),
+    sprintf(out_buffer,msg_getl(squelchopt?SQUOTHR:USQOTHR,lang),
 	    moderator,squelchee,sqtmp);
   } else {
-    sprintf(outbuf,getmsglang(squelchopt?SQUYOU:USQYOU,lang),moderator);
+    sprintf(out_buffer,msg_getl(squelchopt?SQUYOU:USQYOU,lang),moderator);
   }
-  return outbuf;
+  return out_buffer;
 }
 
 
@@ -224,7 +226,7 @@ squelch(char *s)
     return;
   }
 
-  if(!haskey(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
+  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
      &&(!(thisuseraux.access&CUF_MODERATOR))){
     prompt(SQNOAX);
     return;
@@ -235,7 +237,7 @@ squelch(char *s)
     return;
   }
   
-  uinsys(userid,0);
+  usr_insys(userid,0);
   
   if(strcmp(othruseronl.telechan,curchannel)||
      ((othruseronl.flags&OLF_INTELECON)==0)){
@@ -249,7 +251,7 @@ squelch(char *s)
   squelchopt=1;
   broadcast(fx_squelch);
 
-  prompt(SQUMOD,getpfix(SQUMALE,othruseracc.sex==USX_MALE),userid);
+  prompt(SQUMOD,msg_getunit(SQUMALE,othruseracc.sex==USX_MALE),userid);
 }
 
 
@@ -266,7 +268,7 @@ unsquelch(char *s)
     return;
   }
 
-  if(!haskey(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
+  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
      &&(!(thisuseraux.access&CUF_MODERATOR))){
     prompt(SQNOAX);
     return;
@@ -277,7 +279,7 @@ unsquelch(char *s)
     return;
   }
   
-  uinsys(userid,0);
+  usr_insys(userid,0);
   
   if(strcmp(othruseronl.telechan,curchannel)||
      ((othruseronl.flags&OLF_INTELECON)==0)){
@@ -291,7 +293,7 @@ unsquelch(char *s)
   squelchopt=0;
   broadcast(fx_squelch);
 
-  prompt(USQMOD,getpfix(SQUMALE,othruseracc.sex==USX_MALE),userid);
+  prompt(USQMOD,msg_getunit(SQUMALE,othruseracc.sex==USX_MALE),userid);
 }
 
 
@@ -301,10 +303,10 @@ char *
 fx_topic(struct chanusr *u)
 {
   int lang=othruseracc.language-1;
-  sprintf(outbuf,getmsglang(TOPNEW,lang),
-	  getpfixlang(TOPM,thisuseracc.sex==USX_MALE,lang),
+  sprintf(out_buffer,msg_getl(TOPNEW,lang),
+	  msg_getunitl(TOPM,thisuseracc.sex==USX_MALE,lang),
 	  thisuseracc.userid,topictmp);
-  return outbuf;
+  return out_buffer;
 }
 
 
@@ -314,7 +316,7 @@ topic(char *s)
   char *topic, *cp;
   int i=-1,n;
 
-  if(!haskey(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
+  if(!key_owns(&thisuseracc,sopkey)&&strcmp(thisuseracc.userid,curchannel)
      &&(!(thisuseraux.access&CUF_MODERATOR))){
     prompt(TOPNAX);
     return;
@@ -330,7 +332,7 @@ topic(char *s)
   if(i<0||!topic[0]){
     struct chanhdr *c;
     if((c=readchanhdr(curchannel))==NULL){
-      fatal("Unable to read channel %s",curchannel);
+      error_fatal("Unable to read channel %s",curchannel);
     }
     
     c->topic[0]=0;
@@ -343,7 +345,7 @@ topic(char *s)
   } else {
     struct chanhdr *c;
     if((c=readchanhdr(curchannel))==NULL){
-      fatal("Unable to read channel %s",curchannel);
+      error_fatal("Unable to read channel %s",curchannel);
     }
 
     strncpy(c->topic,topic,sizeof(c->topic));

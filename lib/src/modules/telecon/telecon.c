@@ -28,16 +28,17 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/28 23:13:16  alexios
  * Made the aux structure non-volatile by saving it before
  * exiting teleconferences and reloading when re-entering.
  *
  * Revision 0.5  1998/12/27 16:10:27  alexios
- * Added autoconf support. Added support for new getlinestatus().
- * Added code to better parse input commands.
+ * Added autoconf support. Added support for new channel_getstatus().
+ * Added code to better parse inp_buffer commands.
  *
  * Revision 0.4  1998/08/14 11:45:25  alexios
  * Fixed slight log-out bug.
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -85,8 +87,8 @@ run()
 
   memset(&thisuseraux,0,sizeof(struct usraux));
 
-  setmbk(msg);
-  if(!haskey(&thisuseracc,entrkey)){
+  msg_set(msg);
+  if(!key_owns(&thisuseracc,entrkey)){
     prompt(DENIED);
     return;
   }
@@ -98,7 +100,7 @@ run()
     
     if((fp=fopen(fname,"r"))!=NULL){
       if(fread(&thisuseraux,sizeof(struct usraux),1,fp)!=1){
-	logerrorsys("Unable to read from temporary aux file %s",fname);
+	error_logsys("Unable to read from temporary aux file %s",fname);
       }
       fclose(fp);
     }
@@ -113,7 +115,7 @@ run()
     thisuseraux.pluginq=-1;
   }
 
-  setmbk(msg);
+  msg_set(msg);
   prompt(INTRO);
 
   if(!thisuseronl.telecountdown){
@@ -123,7 +125,7 @@ run()
 	prompt(NOTALK);
 	thisuseronl.telecountdown=-2;
       } else if(npaymx>0){
-	prompt(NLVTALK,npaymx,getpfix(TIMSNG,npaymx));
+	prompt(NLVTALK,npaymx,msg_getunit(TIMSNG,npaymx));
 	thisuseronl.telecountdown=npaymx;
       }
     }
@@ -154,7 +156,7 @@ run()
   
   thisuseraux.numentries++;
 
-  setmbk(msg);
+  msg_set(msg);
   userent(ENTTLC);
 
   showinfo();
@@ -166,7 +168,7 @@ run()
       prompt(PROMPT3,thisuseronl.telecountdown,getcolour());
     } else if(thisuseronl.telecountdown==-2)prompt(PROMPT2,getcolour());
 
-    endcnc();
+    cnc_end();
 
     if((time(0)-thisuseraux.entrytick)>=TELETICK){
       thisuseronl.flags&=~OLF_INHIBITGO;
@@ -175,9 +177,9 @@ run()
     }
     if(thisuseraux.numentries>maxcht)thisuseronl.flags|=OLF_INHIBITGO;
 
-    getinput(tinpsz);
+    inp_get(tinpsz);
     
-    if(reprompt){
+    if(inp_reprompt()){
       int action=thisuseraux.action;
       thisuseraux.action=0;
       switch(action){
@@ -190,21 +192,21 @@ run()
       }
     }
 
-    rstrin();
+    inp_raw();
 
-    for(cp=input;isspace(*cp);cp++);
+    for(cp=inp_buffer;isspace(*cp);cp++);
 
-    if(isX(cp)){
+    if(inp_isX(cp)){
       if(!checktick())continue;
       prompt(LEAVE);
       break;
-    } else if(reprompt){
+    } else if(inp_reprompt()){
       continue;
     } else if(!cp[0]){
       showinfo();
     } else if(!strcmp(cp,"?")){
       prompt(TLCHELP);
-      endcnc();
+      cnc_end();
     } else if(sameas(cp,"EDIT")){
       editprefs();
     } else if(sameas(cp,"SCAN")||sameas(cp,"/S")){
@@ -239,7 +241,7 @@ run()
       prompt(NLVNAX);
     } else if(thisuseronl.flags&OLF_INVISIBLE){      /* CAN'T TALK IF INVIS */
       prompt(INVIS);
-      endcnc();
+      cnc_end();
     } else if(handleaction(cp)){
       continue;
     } else if((cp[0]=='/')||sameto("WHISPER TO ",cp)){
@@ -271,10 +273,10 @@ done()
     if(dont_write_aux){
       unlink(fname);
     } else if((fp=fopen(fname,"w"))==NULL){
-      logerrorsys("Unable to save temporary aux file %s",fname);
+      error_logsys("Unable to save temporary aux file %s",fname);
     } else {
       if(fwrite(&thisuseraux,sizeof(struct usraux),1,fp)!=1){
-	logerrorsys("Unable to write to temporary aux file %s",fname);
+	error_logsys("Unable to write to temporary aux file %s",fname);
       }
     }
     fclose(fp);
@@ -291,7 +293,7 @@ done()
     if(thisuseronl.telechan[0])leavechannel();
     thisuseronl.flags&=~OLF_INTELECON;
   }
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
@@ -308,17 +310,71 @@ logout()
 
 
 int
-main(int argc, char *argv[])
+handler_run(int argc, char *argv[])
 {
-  setprogname(argv[0]);
   atexit(done);
-
   initactions();
   initplugins();
   init();
   initvars();
+  run();
+  return 0;
+}
 
-  if(argc>1 && !strcmp(argv[1],"-logout"))logout();
-  else run();
-  exit(0);
+
+int
+handler_logout(int argc, char *argv[])
+{
+  atexit(done);
+  initactions();
+  initplugins();
+  init();
+  initvars();
+  logout();
+  return 0;
+}
+
+
+int handler_userdel(int argc, char **argv)
+{
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",TELEUSRDIR,victim);
+  unlink(fname);
+
+  return 0;
+}
+
+
+mod_info_t mod_info_telecon = {
+  "telecon",
+  "Teleconferences",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Chat rooms, multiplayer games, and other multiuser interactive features.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {10,handler_logout},		/* Logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {50,handler_userdel}		/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_telecon);
+  return mod_main(argc,argv);
 }

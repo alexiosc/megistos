@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1998/12/27 16:35:48  alexios
  * Added autoconf support.
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -101,7 +103,7 @@ bel(int error)
     move(0,0);
     switch(error){
     default:
-      printansi(getmsg(error));
+      printansi(msg_get(error));
     }
   }
 }

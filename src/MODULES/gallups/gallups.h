@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:20  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  2000/10/01 10:10:19  bbs
  * added macros for logging user sex and age
@@ -76,6 +77,18 @@
 
 /* EXTRA and GONEXT are not fully implemented yet, so disable them */
 /* #define ENABLE_EXTRA */
+
+
+/* audit trail flags */
+#define AUS_NEWGALLUP	"GALLUP CREATED"
+#define AUS_ERASEGALLUP	"GALLUP ERASED"
+
+#define AUD_NEWGALLUP	"%s created gallup %s"
+#define AUD_ERASEGALLUP	"%s erased gallup %s"
+
+#define AUT_NEWGALLUP	(AUF_OPERATION|AUF_INFO)
+#define AUT_ERASEGALLUP (AUF_OPERATION|AUF_INFO)
+
 
 
 #define GAL_MAGIC	"GALL"
@@ -233,6 +246,12 @@ extern struct gallup *ginfo;
 #define gcrd2(g)	((g)->credits[2])
 #define gauth(g)	((g)->author)
 
+#define gtset(g)	((g)->settime)
+#define gdset(g)	((g)->setdate)
+#define gtexp(g)	((g)->exptime)
+#define gdexp(g)	((g)->expdate)
+
+
 extern struct gallup gallupinfo;
 extern struct question *questions;
 extern struct answer *answers;
@@ -240,8 +259,8 @@ extern int gallup_loaded;
 
 /* gallups.c */
 void init();
-char *listandselectpoll (void);
-void selectpoll(void);
+char *listandselectgallup (void);
+void selectgallup(void);
 void saveans();
 void takegallup();
 void viewresults();

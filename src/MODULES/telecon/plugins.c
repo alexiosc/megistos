@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/08/13 17:03:06  alexios
  * Various bug fixes and improvements of the interface between
@@ -44,7 +45,7 @@
  * plugins.
  *
  * Revision 0.5  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -90,7 +92,9 @@
 #include "plugins.h"
 
 
+/*
 #define DEBUG 1
+*/
 
 #ifdef DEBUG
 #define debug(s...) print("PLUGIN DEBUG: "##s)
@@ -116,17 +120,17 @@ initplugins()
 {
   FILE *fp;
   if((fp=fopen(TELEPLUGINFILE,"r"))==NULL){
-    fatalsys("Unable to open %s",TELEPLUGINFILE);
+    error_fatalsys("Unable to open %s",TELEPLUGINFILE);
   }
   if(!fread(&numplugins,sizeof(int),1,fp)){
-    fatalsys("Unable to read %s",TELEPLUGINFILE);
+    error_fatalsys("Unable to read %s",TELEPLUGINFILE);
   }
 
   if(plugins)free(plugins);
   plugins=alcmem(sizeof(struct plugin)*numplugins);
 
   if(fread(plugins,sizeof(struct plugin),numplugins,fp)!=numplugins){
-    fatalsys("Unable to read plugins from %s",TELEPLUGINFILE);
+    error_fatalsys("Unable to read plugins from %s",TELEPLUGINFILE);
   }
   fclose(fp);
 }
@@ -137,7 +141,7 @@ listplugins()
 {
   int shownheader=0, i;
   for(i=0;i<numplugins;i++){
-    if(!haskey(&thisuseracc,plugins[i].key))continue;
+    if(!key_owns(&thisuseracc,plugins[i].key))continue;
     if(!shownheader){
       shownheader=1;
       prompt(PINTABL1);
@@ -171,13 +175,17 @@ getid(char *plugin, char *channel, int *pid)
   *pid=-1;
   strcpy(thisuseraux.plugin,plugin);
   sprintf(qname,PLUGINQ,plugin,curchannel);
+  debug("plugin queue = (%s)\n",qname);
   if((fp=fopen(qname,"r"))==NULL)return -1;
+  debug("plugin queue opened\n");
   if(!fscanf(fp,"%d %d",&id,pid)){
     fclose(fp);
     return -1;
   } else fclose(fp);
+  debug("plugin queue id=%d, pid=%d",id,pid);
   thisuseraux.pluginq=id;
   if(!qexists())return -1;
+  debug("plugin queue exists\n");
   return thisuseraux.pluginq;
 }
 
@@ -190,7 +198,7 @@ makequeue(char *keyword, char *channel)
   char qname[256];
   
   if(id<0){
-    fatal("Unable to create IPC message queue (errno=%d).",
+    error_fatal("Unable to create IPC message queue (errno=%d).",
 	  errno);
   }
 
@@ -198,7 +206,7 @@ makequeue(char *keyword, char *channel)
 
   sprintf(qname,PLUGINQ,keyword,channel);
   if((fp=fopen(qname,"w"))==NULL){
-    fatalsys("Unable to create %s",qname);
+    error_fatalsys("Unable to create %s",qname);
   }
   fprintf(fp,"%d -1\n",id);
   fclose(fp);
@@ -207,7 +215,7 @@ makequeue(char *keyword, char *channel)
 
 
 void
-runplugin(struct plugin *p, char *s)
+runplugin(struct plugin *p)
 {
   char tmp[256];
   int pid,status;
@@ -216,23 +224,27 @@ runplugin(struct plugin *p, char *s)
 
   switch(pid=fork()){
   case 0:
-    doneinput();
-    donesignals();
+#if 0
     if(s!=NULL && strlen(s)){
       strcpy(thisuseronl.input,s);
       thisuseronl.flags|=OLF_MMCONCAT;
     } else thisuseronl.flags&=~OLF_MMCONCAT;
 
+#endif
+    mod_done(INI_ALL);
+
     sprintf(tmp,"%d",thisuseraux.pluginq);
     execlp(p->exec,p->exec,p->keyword,curchannel,thisuseracc.userid,tmp,NULL);
-    fatalsys("Unable to execlp() teleplugin!");
+    error_fatalsys("Unable to execlp() teleplugin!");
+
   case -1:
-    fatalsys("Unable to fork and run teleplugin!");
+    error_fatalsys("Unable to fork and run teleplugin!");
+
   default:
     waitpid(pid,&status,0);
-    regpid(thisuseronl.channel);
+    mod_regpid(thisuseronl.channel);
     thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-    resetinactivity();
+    inp_resetidle();
     if(thisuseronl.flags&OLF_MMGCDGO)exit(0);
   }
 
@@ -243,7 +255,7 @@ runplugin(struct plugin *p, char *s)
 	  curchannel,
 	  thisuseracc.userid,
 	  thisuseraux.pluginq);
-  runmodule(command);
+  runcommand(command);
 #endif
 }
 
@@ -251,6 +263,7 @@ runplugin(struct plugin *p, char *s)
 int
 pluginrunning(int pid)
 {
+  debug("pluginrunning: PID=%d\n",pid);
   if(pid<0)return 0;
   else {
     char fname[256];
@@ -265,7 +278,7 @@ pluginrunning(int pid)
 void
 plugin(struct plugin *p, char *command)
 {
-  int pid=-1, res=0;
+  int pid=-1;
   char lock[256];
   struct pluginmsg msg;
 
@@ -276,31 +289,35 @@ plugin(struct plugin *p, char *command)
   pid=-1;
 
   if(qexists()){
-    debug("sending %d bytes.\n",SIZE(command));
-    res=msgsnd(thisuseraux.pluginq,(struct msgbuf *)&msg,SIZE(command),0);
+    if(getid(p->keyword,curchannel,&pid)==-1){
+      error_fatal("Unable to read plugin queue file!");
+    }
   } else {
     debug("couldn't send\n");
 
     sprintf(lock,LCKPIN,p->keyword,curchannel);
-    waitlock(lock,60);
+    lock_wait(lock,60);
 
     if(getid(p->keyword,curchannel,&pid)==-1){
       debug("making\n");
-      placelock(lock,"making");
+      lock_place(lock,"making");
       makequeue(p->keyword,curchannel);
-      rmlock(lock);
+      lock_rm(lock);
     }
+  }
+
+  if(command!=NULL && strlen(command)){
+    debug("sending %d bytes.\n",SIZE(command));
+    msgsnd(thisuseraux.pluginq,(struct msg_buffer *)&msg,SIZE(command),0);
   }
 
   debug("is plugin running?\n");
   if(!pluginrunning(pid)){
     debug("running plugin with command (%s)\n",command);
-    placelock(lock,"running");
-    runplugin(p,command);
-    rmlock(lock);
-  } else {
-    msgsnd(thisuseraux.pluginq,(struct msgbuf *)&msg,SIZE(command),0);
-  }
+    lock_place(lock,"running");
+    runplugin(p);
+    lock_rm(lock);
+  } 
 }
 
 
@@ -323,7 +340,7 @@ handleplugins(char *s)
   if((p=bsearch(&key,plugins,numplugins,sizeof(struct plugin),plugincmp))==NULL)
     return 0;
 
-  if(!haskey(&thisuseracc,p->key)){
+  if(!key_owns(&thisuseracc,p->key)){
     prompt(PINNAX,p->keyword);
     return 1;
   }
@@ -361,7 +378,7 @@ writepid()
 
   sprintf(fname,PLUGINQ,keyword,channel);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Plugin %s: Unable to create %s",keyword,fname);
+    error_fatalsys("Plugin %s: Unable to create %s",keyword,fname);
   }
 
   fprintf(fp,"%d %d\n",qid,getpid());
@@ -375,15 +392,17 @@ initplugin(int argc, char **argv)
 {
   struct stat st;
   char fname[256];
+  struct pluginmsg p;
+  int n;
 
   atexit(doneplugin);
 
-  noerrormessages();
+  error_setnotify(0);
 
   init();
 
   if(argc!=5){
-    fatal("Plugin %s called with bad arguments.",argv[0]);
+    error_fatal("Plugin %s called with bad arguments.",argv[0]);
   }
   keyword=argv[1];
   channel=argv[2];
@@ -394,12 +413,19 @@ initplugin(int argc, char **argv)
 
   sprintf(fname,"%s/%s",TELEDIR,channel);
   if(stat(fname,&st)){
-    fatalsys("Plugin %s: channel %s doesn't exist.",
+    error_fatalsys("Plugin %s: channel %s doesn't exist.",
 	  keyword,channel);
   }
 
-  if(!uinsys(userid,0)){
-    fatal("Plugin %s: user %s not on-line.",keyword,userid);
+  if(!usr_insys(userid,0)){
+    error_fatal("Plugin %s: user %s not on-line.",keyword,userid);
+  }
+
+  mod_init(INI_USER);
+  n=msgrcv(qid,(struct msgbuf*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
+  if(n>0){
+    strcpy(thisuseronl.input,p.text);
+    thisuseronl.flags|=OLF_MMCONCAT;
   }
 
   writepid();
@@ -409,7 +435,7 @@ initplugin(int argc, char **argv)
 void
 becomeserver()
 {
-  /*donemodule();*/
+  /*mod_done();*/
 
   if(fork())exit(0);
 
@@ -418,10 +444,11 @@ becomeserver()
   writepid();
 
   ioctl(0,TIOCNOTTY,NULL);
+  /*
 
   close(0);
   close(1);
-  close(2);
+  close(2); */
 }
 
 
@@ -439,11 +466,11 @@ doneserver()
   static int circular=0;
   char fname[256];
 
-  fprintf(stderr,"doneserver...\n");
+  debug("doneserver...\n");
 
   if(i&&!circular){
     circular=1;
-    fatalsys("Plugin %s: couldn't destroy msg queue id=%d.",keyword,qid);
+    error_fatalsys("Plugin %s: couldn't destroy msg queue id=%d.",keyword,qid);
   }
   sprintf(fname,PLUGINQ,keyword,channel);
   unlink(fname);

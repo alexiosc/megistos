@@ -28,18 +28,19 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:37  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.7  2000/01/06 11:35:56  alexios
  * Event names may now comprise a wider range of characters, not
  * just alphabetics.
  *
  * Revision 1.6  1999/07/18 21:12:30  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.5  1998/12/27 14:43:56  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 1.4  1998/07/24 10:07:19  alexios
  * Upgraded to version 0.6 of library.
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -81,7 +83,7 @@
 #include "bbs.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 int  entrykey;
 char *fullaxid;
@@ -115,15 +117,15 @@ static char *channelstatus[]={"NORMAL","BUSY-OUT","NO-ANSWER","OFF-LINE"};
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("eventman");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("eventman");
+  msg_setlanguage(thisuseracc.language);
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  fullaxid=stgopt(FULLAXID);
-  logshd=ynopt(LOGSHD);
-  logspn=ynopt(LOGSPN);
-  logpre=ynopt(LOGPRE);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  fullaxid=msg_string(FULLAXID);
+  logshd=msg_bool(LOGSHD);
+  logspn=msg_bool(LOGSPN);
+  logpre=msg_bool(LOGPRE);
 }
 
 
@@ -144,7 +146,7 @@ fullaccess()
 void
 newevent()
 {
-  char *s=input, fname[256];
+  char *s=inp_buffer, fname[256];
   struct event event;
   struct stat st;
   int bool;
@@ -155,24 +157,24 @@ newevent()
   /* Get name */
   
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       prompt(EVNNAME);
-      getinput(13);
-      bgncnc();
+      inp_get(13);
+      cnc_begin();
     }
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else {
       char *cp=s;
       int ok;
 
-      s=cncword();
+      s=cnc_word();
       for(ok=1;(*cp=tolower(*cp))!=0;cp++){
 	if(*cp!='_'&&*cp!='-'&&*cp!='.'&&(!isdigit(*cp))&&(!isalpha(*cp))){
 	  prompt(EVNCHR);
-	  endcnc();
+	  cnc_end();
 	  ok=0;
 	  break;
 	}
@@ -181,7 +183,7 @@ newevent()
       sprintf(fname,"%s/.%s",EVENTDIR,s);
       if(!stat(fname,&st)){
 	prompt(EVNALRX);
-	endcnc();
+	cnc_end();
 	continue;
       }
       break;
@@ -190,53 +192,53 @@ newevent()
 
   /* Get description */
 
-  endcnc();
+  cnc_end();
   for(;;){
     prompt(EVNDESC);
-    getinput(40);
-    bgncnc();
+    inp_get(40);
+    cnc_begin();
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else {
-      strncpy(event.descr,input,sizeof(event.descr));
+      strncpy(event.descr,inp_buffer,sizeof(event.descr));
       break;
     }
   }
 
   /* Get event program */
 
-  endcnc();
+  cnc_end();
   for(;;){
     prompt(EVNPROG);
-    getinput(255);
-    bgncnc();
+    inp_get(255);
+    cnc_begin();
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else {
-      strncpy(event.command,input,sizeof(event.command));
+      strncpy(event.command,inp_buffer,sizeof(event.command));
       break;
     }
   }
-  endcnc();
-  input[0]=0;
-  nxtcmd=input;
+  cnc_end();
+  inp_buffer[0]=0;
+  cnc_nxtcmd=inp_buffer;
 
-  if(!getbool(&bool,EVNONCE,ERRSEL,0,0))return;
+  if(!get_bool(&bool,EVNONCE,ERRSEL,0,0))return;
   if(!bool)event.flags|=EVF_ONLYONCE;
 
-  if(!getbool(&bool,EVNUNIQ,ERRSEL,0,0))return;
+  if(!get_bool(&bool,EVNUNIQ,ERRSEL,0,0))return;
   if(bool)event.flags|=EVF_UNIQUE;
 
-  if(!getbool(&bool,EVNWARN,ERRSEL,0,0))return;
+  if(!get_bool(&bool,EVNWARN,ERRSEL,0,0))return;
   if(bool)event.flags|=EVF_WARN;
 
   sprintf(fname,"%s/.%s",EVENTDIR,s);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create file %s",fname);
+    error_fatalsys("Unable to create file %s",fname);
   }
   fwrite(&event,sizeof(struct event),1,fp);
   fclose(fp);
@@ -250,10 +252,10 @@ listevents()
 {
   DIR    *dp;
   struct dirent *dirent;
-  char *asap=stgopt(EVLASAP);
+  char *asap=msg_string(EVLASAP);
   
   if((dp=opendir(EVENTDIR))==NULL){
-    fatalsys("Unable to opendir %s",EVENTDIR);
+    error_fatalsys("Unable to opendir %s",EVENTDIR);
   }
   prompt(EVLHDR); 
   while((dirent=readdir(dp))!=NULL){
@@ -271,7 +273,7 @@ listevents()
       sprintf(time,"%02d:%02d",event.hour,event.min);
       prompt(EVLTAB,(char *)&dirent->d_name,
 	     event.flags&EVF_ASAP?asap:time,event.descr,
-	     getpfix(EVLNO,event.flags&EVF_ONLYONCE));
+	     msg_getunit(EVLNO,event.flags&EVF_ONLYONCE));
     }
   }
   free(asap);
@@ -287,7 +289,7 @@ listprototypes()
   struct dirent *dirent;
 
   if((dp=opendir(EVENTDIR))==NULL){
-    fatalsys("Unable to opendir %s",EVENTDIR);
+    error_fatalsys("Unable to opendir %s",EVENTDIR);
   }
   prompt(EVPHDR); 
   while((dirent=readdir(dp))!=NULL){
@@ -314,7 +316,7 @@ listprototypes()
 void
 delevent()
 {
-  char *s=input, fname[256];
+  char *s=inp_buffer, fname[256];
   struct stat st;
   int bool;
 
@@ -323,35 +325,35 @@ delevent()
   /* Get name */
   
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       prompt(EVDASK);
-      getinput(13);
-      bgncnc();
+      inp_get(13);
+      cnc_begin();
     }
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else if(margc==1 && sameas(margv[0],"?")){
       listprototypes();
-      endcnc();
+      cnc_end();
       continue;
     } else {
       char *cp=s;
 
-      s=cncword();
+      s=cnc_word();
       for(;(*cp=tolower(*cp))!=0;cp++);
       sprintf(fname,"%s/.%s",EVENTDIR,s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVDNEXS);
-	endcnc();
+	cnc_end();
 	continue;
       }
       break;
     }
   }
 
-  if(!getbool(&bool,EVDCONF,ERRSEL,0,0)){
+  if(!get_bool(&bool,EVDCONF,ERRSEL,0,0)){
     prompt(CANCEL);
     return;
   } else if (bool){
@@ -369,10 +371,10 @@ void
 beginasap()
 {
   int i;
-  struct linestatus status;
+  channel_status_t status;
 
-  for(i=0;i<numchannels;i++){
-    getlinestatus(channels[i].ttyname,&status);
+  for(i=0;i<chan_count;i++){
+    channel_getstatus(channels[i].ttyname,&status);
     if(status.result!=LSR_USER)
       bbsdcommand("change",channels[i].ttyname,channelstatus[1]);
     else
@@ -399,37 +401,37 @@ makevent(char *name)
   }
 
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       if(!helped){
 	prompt(EVAWHH);
 	helped=1;
       }
       prompt(EVAWHN);
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
     }
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else if(margc==1 && sameas(margv[0],"?")){
       helped=0;
-      endcnc();
+      cnc_end();
       continue;
     } else {
       int h,m,format,t,en;
       
-      s=cncword();
+      s=cnc_word();
       if(sscanf(s,"%d:%d",&h,&m)==2){
 	if(h<0 || h>23 || m<0 || m>59){
 	  prompt(EVAWHE);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	} else format=0;
       } else if(sscanf(s,"%d",&m)==1){
 	if(m<=0){
 	  prompt(EVAWHE);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	} else format=1;
       } else if(sameas(s,"ASAP")){
@@ -438,7 +440,7 @@ makevent(char *name)
 	format=3;
       } else {
 	prompt(EVAWHE);
-	endcnc();
+	cnc_end();
 	continue;
       }
 
@@ -466,7 +468,7 @@ makevent(char *name)
 	beginasap();
 	break;
       case 3:
-	if(!getbool(&bool,EVAWARN,ERRSEL,0,0)){
+	if(!get_bool(&bool,EVAWARN,ERRSEL,0,0)){
 	  prompt(CANCEL);
 	  return;
 	}
@@ -522,21 +524,21 @@ addevent()
   char fname[256], s[256];
   
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       prompt(EVANAM);
-      getinput(13);
-      bgncnc();
+      inp_get(13);
+      cnc_begin();
     }
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else if(margc==1 && sameas(margv[0],"?")){
       listprototypes();
-      endcnc();
+      cnc_end();
       continue;
     } else {
-      strcpy(s,cncword());
+      strcpy(s,cnc_word());
       {
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
@@ -544,7 +546,7 @@ addevent()
       sprintf(fname,"%s/.%s",EVENTDIR,s);
       if(stat(fname,&st)){
 	prompt(EVANEX);
-	endcnc();
+	cnc_end();
 	continue;
       }
       makevent(s);
@@ -560,8 +562,8 @@ undoevent (char *name)
   int yes=0;
   char fname[256];
 
-  if(!morcnc())prompt(EVCWARN,name);
-  if(!getbool(&yes,EVCASK,ERRSEL,0,0))return;
+  if(!cnc_more())prompt(EVCWARN,name);
+  if(!get_bool(&yes,EVCASK,ERRSEL,0,0))return;
   if(!yes){
     prompt(CANCEL);
     return;
@@ -580,21 +582,21 @@ cancelevent()
   char fname[256], s[256];
   
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       prompt(EVCNAM);
-      getinput(16);
-      bgncnc();
+      inp_get(16);
+      cnc_begin();
     }
     if(!margc)continue;
-    else if(isX(margv[0])){
+    else if(inp_isX(margv[0])){
       prompt(CANCEL);
       return;
     } else if(margc==1 && sameas(margv[0],"?")){
       listevents();
-      endcnc();
+      cnc_end();
       continue;
     } else {
-      strcpy(s,cncword());
+      strcpy(s,cnc_word());
       {
 	int i;
 	for(i=0;s[i];i++)s[i]=tolower(s[i]);
@@ -602,7 +604,7 @@ cancelevent()
       sprintf(fname,"%s/%s",EVENTDIR,s);
       if(s[0]=='.' || stat(fname,&st)){
 	prompt(EVCNEX);
-	endcnc();
+	cnc_end();
 	continue;
       }
       undoevent(s);
@@ -616,10 +618,10 @@ void
 run()
 {
   int shownmenu=0;
-  char c;
+  char c=0;
   int hasaccess=fullaccess();
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOENTRY,NULL);
     return;
   }
@@ -635,7 +637,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -643,13 +645,13 @@ run()
 	if(shownmenu==1){
 	  prompt(hasaccess?SHPMENU:SHMENU,NULL);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'S':
 	makevent("shutdown");
@@ -685,12 +687,12 @@ run()
 	}
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -698,7 +700,7 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
   exit(0);
 }
 
@@ -706,7 +708,7 @@ done()
 int
 main(int argc, char **argv)
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   init();
   run();
   done();

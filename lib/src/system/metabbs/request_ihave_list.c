@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:50  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  2000/01/08 12:17:03  alexios
  * Added an alarm() call to set a timeout, just in case.
@@ -42,6 +43,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -129,7 +131,7 @@ distclub_request_ihave_1_svc(ihave_request_t *ihavereq, struct svc_req *req)
 
   /* Strategy: chroot to the IHAVE directory; become mortal; create a pair of
      pipes; fork; replace stdin/stdout with the pipes to allow reading from a
-     child process (input piping); execl() the dump-ihave program. */
+     child process (inp_buffer piping); execl() the dump-ihave program. */
 
 
   /* Chroot to the IHAVE directory */

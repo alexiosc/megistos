@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:19  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other slight fixes.
  *
  * Revision 0.5  1998/08/14 11:45:25  alexios
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -84,14 +86,14 @@ getdefusrax(char *channel, char *userid)
   if(!strcmp(channel,userid))return CUF_ACCESS|CUF_MODERATOR;
   if(!strcmp(channel,MAINCHAN))return CUF_ACCESS;
 
-  uinsys(userid,0);
-  sop=haskey(&thisuseracc,sopkey);
+  usr_insys(userid,0);
+  sop=key_owns(&thisuseracc,sopkey);
 
-  if(userexists(channel)){
-    if(!uinsys(channel,0))return CUF_NONE;
+  if(usr_exists(channel)){
+    if(!usr_insys(channel,0))return CUF_NONE;
     
     if(!loadtlcuser(channel,&usr)){
-      fatal("Can't load user record for %s",channel);
+      error_fatal("Can't load user record for %s",channel);
     }
     
     if(sop)return CUF_ACCESS|CUF_MODERATOR;
@@ -101,7 +103,7 @@ getdefusrax(char *channel, char *userid)
   } else if(channel[0]=='/'){
     int i;
     
-    uinsys(userid,0);
+    usr_insys(userid,0);
     i=getclubax(&othruseracc,channel);
 
     if(i<CAX_READ)return -NAXCLUB;
@@ -119,8 +121,8 @@ getusrax(char *channel, char *userid)
 {
   int sop;
 
-  uinsys(userid,0);
-  sop=haskey(&thisuseracc,sopkey);
+  usr_insys(userid,0);
+  sop=key_owns(&thisuseracc,sopkey);
   
   if(sameas(channel,MAINCHAN)){                  /* Main */
     strcpy(channel,MAINCHAN);
@@ -149,7 +151,7 @@ getusrax(char *channel, char *userid)
     else {
       int i;
 
-      uinsys(userid,0);
+      usr_insys(userid,0);
       i=getclubax(&othruseracc,channel);
 
       if(i<CAX_READ)return -NAXCLUB;
@@ -157,10 +159,10 @@ getusrax(char *channel, char *userid)
       else if(i<CAX_COOP)return CUF_ACCESS;
       else return CUF_MODERATOR|CUF_ACCESS;
     }
-  } else if(userexists(channel)){
+  } else if(usr_exists(channel)){
     struct chanhdr *hdr=readchanhdr(channel);
     int ax=CUF_NONE;
-    if(!uinsys(channel,0))return ax;
+    if(!usr_insys(channel,0))return ax;
     if(hdr->flags&CHF_PRIVATE)ax=CUF_NONE;
     else if(hdr->flags&CHF_READONLY)ax=CUF_ACCESS|CUF_READONLY;
     else if(hdr->flags&CHF_OPEN)ax=CUF_ACCESS;
@@ -188,10 +190,10 @@ setusrax(char *channel, char *userid, char sex, int flagson, int flagsoff)
   if(sex)usr->sex=sex;
 
   if(!writechanusr(channel,usr)){
-    fatal("Unable to write user %s to channel %s",userid,channel);
+    error_fatal("Unable to write user %s to channel %s",userid,channel);
   }
 
-  uinsys(userid,0);
+  usr_insys(userid,0);
   if(!strcmp(othruseronl.telechan,channel))othruseraux.access=usr->flags;
 }
 

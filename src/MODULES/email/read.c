@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -149,7 +151,7 @@ readmsg(struct message *msg)
 
   sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
 	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  (long)msg->msgno);
+	  msg->msgno);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
     prompt(RDIOERR);
@@ -181,7 +183,7 @@ readmsg(struct message *msg)
 	write(0,cp,strlen(cp));
 	*ep='\n';
 	write(0,ep,1);
- 	if(screenpause()==PAUSE_QUIT) return 1;
+ 	if(fmt_screenpause()==PAUSE_QUIT) return 1;
 	cp=ep+1;
       }
     }
@@ -251,13 +253,13 @@ readmenu(struct message *msg, char defopt)
   }
 
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,0,menu,RDMNUR,options,RDDEF,defopt);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,0,menu,RDMNUR,options,RDDEF,defopt);
+    inp_clearflags(INF_HELP);
     if(!res)return 'X';
     else if(res<0){
       prompt(menu+1);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -306,14 +308,14 @@ headermenu(char defopt)
   char opt;
 
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,0,RDSCNM,RDSCNR,"NP#RCX",RDDEF,defopt);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,0,RDSCNM,RDSCNR,"NP#RCX",RDDEF,defopt);
+    inp_clearflags(INF_HELP);
     
     if(!res)return 'X';
     else if(res==-1){
       prompt(RDSCNMH);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -399,7 +401,7 @@ startreading(int mode, int startmsg)
 
   if(startmsg<0) startmsg=oldmsgno=1;
 
-  endcnc();
+  cnc_end();
   for(i=startmsg;;){
     int msgno;
     int j;
@@ -446,10 +448,10 @@ startreading(int mode, int startmsg)
     if(msgno!=oldmsgno){
       dontshow=0;
 
-      if(lock[0])rmlock(lock);
+      if(lock[0])lock_rm(lock);
       sprintf(tmp,"%d",msgno);
       sprintf(lock,MSGREADLOCK,thisuseronl.channel,EMAILCLUBNAME,tmp);
-      placelock(lock,"reading");
+      lock_place(lock,"reading");
     }
 
 
@@ -547,7 +549,7 @@ startreading(int mode, int startmsg)
       case 'C':
       case 'X':
       default:
-	endcnc();
+	cnc_end();
 	return opt;
       }
     }
@@ -598,7 +600,7 @@ emailread()
 
   if(!readecuser(thisuseracc.userid,&ecuser))return;
 
-  if(!getmenu(&opt,1,0,RDWHAT,RDWHATR,"TPF",0,0))return;
+  if(!get_menu(&opt,1,0,RDWHAT,RDWHATR,"TPF",0,0))return;
   switch(opt){
   case 'T':
     readopt=0;
@@ -631,7 +633,7 @@ emailread()
 
   if(j!=BSE_FOUND){
     prompt(RDNOMSGT+readopt);
-    endcnc();
+    cnc_end();
     if(readopt==OPT_PTOYOU)return;
     emailscan(0,readopt,startmsg);
     rmlocks();

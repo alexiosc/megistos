@@ -53,15 +53,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.6  1999/07/28 23:19:38  alexios
  * Moved run() to its own .c file in anticipation of a united
  * bbsmail/netclub binary.
  *
  * Revision 1.5  1999/07/18 22:07:59  alexios
- * Changed a few fatal() calls to fatalsys(). Support for the
+ * Changed a few error_fatal() calls to error_fatalsys(). Support for the
  * new style IHAVE database.
  *
  * Revision 1.4  1998/12/27 16:31:55  alexios
@@ -85,6 +86,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -108,7 +110,7 @@
 /*#define DEBUG 1*/
 
 
-promptblk *msg;
+promptblock_t *msg;
 int       usercaller=0;
 char      *bbscode;
 
@@ -120,16 +122,16 @@ init()
 
   if(getenv("USERID")&&strcmp("",getenv("USERID"))){
     usercaller=1;
-    init=INITALL;
-  }else init=INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES;
-  initmodule(init);
+    init=INI_ALL;
+  }else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
+  mod_init(init);
 
-  msg=opnmsg("sysvar");
-  bbscode=stgopt(SYSVAR_BBSCOD);
-  clsmsg(msg);
+  msg=msg_open("sysvar");
+  bbscode=msg_string(SYSVAR_BBSCOD);
+  msg_close(msg);
 
-  msg=opnmsg("emailclubs");
-  if(init==INITALL)setlanguage(thisuseracc.language);
+  msg=msg_open("emailclubs");
+  if(init==INI_ALL)msg_setlanguage(thisuseracc.language);
 }
 
 
@@ -160,7 +162,7 @@ syntax()
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   init();
   if(argc!=3&&argc!=5)syntax();
   if(argc==3)bbsmail_run(argv[1],argv[2],0,"");

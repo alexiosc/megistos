@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  2000/01/06 10:36:59  alexios
  * Initial revision
@@ -39,6 +40,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -64,30 +66,30 @@ getnewlibname(char *s)
   char *i,c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OADTASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -108,31 +110,31 @@ getdir(char *s)
   char *i,c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OADTDIR);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
     }
     if(i[0]!='/'){
       prompt(OADTDR);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -205,7 +207,7 @@ op_addtree()
 
     if(libexists(s,library.libnum)){
       prompt(OCREEXS,s);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -229,10 +231,10 @@ op_addtree()
     if(!getdir(s))return;
     if(stat(s,&st)){
       prompt(OADTDR2,s);
-      endcnc();
+      cnc_end();
     } else if(!S_ISDIR(st.st_mode)){
       prompt(OADTDR2);
-      endcnc();
+      cnc_end();
     }
     break;
   }

@@ -1,9 +1,40 @@
-/*****************************************************************************\
+/** @name    audit.h
+    @memo    Auditing (logging) events.
+    @author  Alexios
+
+    @doc
+
+    This header file provides functionality needed to use Megistos logging
+    facilities. The system logs a variety of information:
+
+    \begin{itemize}
+    \item Date,
+    \item Time,
+    \item BBS channel (or daemon/service name, where a channel isn't
+	  available),
+    \item Message flags, giving the type and severity of the log entry,
+    \item Entry summary (typically a canned string), and
+    \item Detailed entry text.
+    \end{itemize}
+
+    The default log file set up by the BBS library is the Audit Trail (Major
+    users should be at home with the name). The API defined here allows you to
+    switch to other files.
+
+    In addition to the API, this include file predefines most of the entries
+    that are most widely used by the standard modules.
+
+    Original banner, legalese and change history follow.
+
+{\footnotesize
+\begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     audit.h                                                      **
  **  AUTHORS:  Alexios                                                      **
- **  REVISION: A, August 94                                                 **
- **  PURPOSE:  Interface to audit.c                                         **
+ **  REVISION: A, August 94 (originally)                                    **
+ **  PURPOSE:  Audit trail features                                         **
  **  NOTES:                                                                 **
  **  LEGALESE:                                                              **
  **                                                                         **
@@ -21,15 +52,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/07/28 23:09:07  alexios
  * Added audit entry for downloading bulletins.
@@ -73,8 +105,13 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
 
+\end{verbatim}
+}
+*/
+
+/*@{*/
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -86,20 +123,36 @@
 #define AUDIT_H
 
 
-#define AUF_SECURITY   0x0001	/* Security auditing */
-#define AUF_ACCOUNTING 0x0002	/* Accounting (statistics etc) */
-#define AUF_TRANSFER   0x0004	/* File transfers/reads, etc */
-#define AUF_EVENT      0x0008	/* Event execution/logging */
-#define AUF_OPERATION  0x0010	/* System operation of some kind */
-#define AUF_USERLOG    0x0020	/* User logs (login/logout etc) */
-#define AUF_OTHER      0x0040	/* Other kinds of auditing */
-#define AUF_INFO       0x0080   /* }                      { Informational log */
-#define AUF_CAUTION    0x0100   /* } Exactly One of these { Cautionary log */
-#define AUF_EMERGENCY  0x0200	/* }                      { Emergency */
+
+/** @name Audit entry flags
+    @filename AUF_flags
+
+    @memo Audit entry types and severity levels.
+
+    @doc Each log entry has one of more types associated with it, as well as one
+    (and only one) severity level. The types and severity levels are used for
+    log search, filtering and colour-coding.
+
+*/
+/*@{*/
+
+#define AUF_SECURITY   0x0001	/** Security auditing */
+#define AUF_ACCOUNTING 0x0002	/** Accounting (statistics etc) */
+#define AUF_TRANSFER   0x0004	/** File transfers/reads, etc */
+#define AUF_EVENT      0x0008	/** Event execution/logging */
+#define AUF_OPERATION  0x0010	/** System operation of some kind */
+#define AUF_USERLOG    0x0020	/** User logs (login/logout etc) */
+#define AUF_OTHER      0x0040	/** Other, miscellaneous kinds of auditing */
+
+#define AUF_INFO       0x0080   /** Informational (severity) */
+#define AUF_CAUTION    0x0100   /** Cautionary (severity) */
+#define AUF_EMERGENCY  0x0200	/** Emergency (severity) */
 
 #define AUF_SEVERITY   (AUF_INFO|AUF_CAUTION|AUF_EMERGENCY)
 #define AUF_SEVSHIFT   7
 #define GETSEVERITY(f) ((((f)&AUF_SEVERITY)>>AUF_SEVSHIFT)-1)
+
+/*@}*/
 
 
 /*                   123456789012345678901234567890 */
@@ -218,17 +271,88 @@
 #define AUT_FATAL   (AUF_OTHER|AUF_EMERGENCY)
 
 
-extern char auditfile[256];
+/** The main auditing function.
 
+    In most cases, this function is all you need to know. It takes quite a few
+    arguments and comes with a helper macro, AUDIT (which is quite handy).
+    
+    @param channel the name of the current user's channel, or a daemon/service
+    name if a channel is not available. A value of {\tt NULL} is equivalent to
+    {\tt thisuesronl.channel}.
+
+    @param flags the type and severity of this message, using {\tt AUF_}
+    constants.
+
+    @param summary a string summarising the logged event. This is in capital
+    letters by (Majoresque) convention.
+
+    @param format a {\tt printf()}-like fmt string that formats the detailed
+    log text. Like {\tt printf()}, this argument is followed by as many
+    additional arguments as are required by the format specifiers.
+
+    @return If the audit file could not be appended to, zero is returned, and
+    errno is set appropriately. A non-zero value denotes success.
+
+    @see AUDIT, audit_setfile(), printf()
+*/
+
+int audit(char *channel, uint32 flags, char *summary, char *format, ...);
+
+
+/** AUDIT convenience macro.
+
+    This macro shortens considerably most calls to {\tt audit()}. By
+    convention, audit entry flags, summary and detailed text are {\tt #define}d
+    as {\tt AUT_x}, {\tt AUS_x} and {\tt AUD_x} macros, where {\tt x} is a name
+    common to all three. Given an argument x, the macro expands to the triplet
+    {\tt AUT_x,AUS_x,AUD_x}. In this way, arguments 2 to 4 of {\tt audit()} can
+    be replaced by a simple {\tt AUDIT} call.
+
+    @see audit()
+*/
 
 #define AUDIT(x) AUT_##x,AUS_##x,AUD_##x
 
-int audit(char *channel, int flags, char *summary, char *format, ...);
 
-void setauditfile(char *s);
+/** Set the audit file.
 
-void resetauditfile();
+    Specifies the audit file to which subsequent calls to {\tt audit()} will
+    append entries. In default of a call to this function, the Audit Trail will
+    be used.
+
+    @param filename the full pathname of a file to set as the current audit
+    file. A value of {\tt NULL} is equivalent to calling {\tt audit_resetfile}.
+
+    @see audit_resetfile()
+*/
+
+void audit_setfile(char *filename);
+
+
+/** Revert to the previous audit file.
+
+    Resets the audit filename to the Audit Trail.
+
+    @see audit_setfile()
+*/
+
+void audit_resetfile();
 
 
 
 #endif /* AUDIT_H */
+
+
+/*@}*/
+
+/*
+LocalWords: Alexios doc Megistos BBS API legalese otnotesize alexios Exp
+LocalWords: bbs downloading sysop hangup relogons GPL AUT SIGNUP AUS AUD
+LocalWords: logerror Sysop's EVEND couplpe DISCON ifndef VER endif AUF ATT
+LocalWords: USERLOG SEVSHIFT GETSEVERITY HACKTRY UNKUSER USERID DUPUSER CL
+LocalWords: RELOGON RELOGGING CREDHUP TIMEHUP EVSPAWN CRDPOST NEWCLSS QWK
+LocalWords: USERDEL RSMDEL RSMUDEL RSSUSP RSUSUSP RSXMPT RSUXMPT ESUPLS CR
+LocalWords: UNEXEMPTED ESDNLS DOWNLOADED ESUPLF ESDNLF DOWNLOAD BLTINS tt
+LocalWords: BLTDEL BLTEDT BLTRD BLTDNL QWKDNL QWKUPL unexempted downloaded
+LocalWords: param thisuesronl Majoresque printf fmt errno setfile int uint
+LocalWords: resetfile */

@@ -31,8 +31,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:56  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/07/26 21:17:06  alexios
  * Made version more complete and OS-like.
@@ -57,8 +58,10 @@
 
 #include "ver.h"
 
-
+#ifdef I_AM_VERSION_C
 #ifndef SYSTEMVERSION
-#define SHORTVERSION  "Megistos "__MAJORVERSION"."__MINORVERSION
+#define SHORTVERSION  "Megistos "__MAJORVERSION"."__MINORVERSION"."__PATCHLEVEL
 #define SYSTEMVERSION SHORTVERSION" ("__COMPILED_BY") #"__MAKE_NUMBER" "__DATE
+
 #endif /* SYSTEMVERSION */
+#endif /* I_AM_VERSION_C */

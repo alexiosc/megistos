@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:52  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 21:44:48  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 15:48:12  alexios
  * Added autoconf support. Various fixes.
@@ -68,6 +69,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -125,7 +127,7 @@ static void
 wrtbuf()
 {
   if(!fwrite(qwkbuf,128,1,msgdat)){
-    fatalsys("Unable to write to messages.dat");
+    error_fatalsys("Unable to write to messages.dat");
   }
 }
 
@@ -157,11 +159,11 @@ makeheader(int clubid, struct message *msg)
 
   memset(&qwkhdr,0x20,sizeof(struct qwkhdr));
   qwkhdr.status=clubid?STATUS_N:STATUS_P;
-  sprintf(tmp,"%ld",msg->msgno);
+  sprintf(tmp,"%d",msg->msgno);
   mkfield(qwkhdr.number,tmp,sizeof(qwkhdr.number));
   mkfield(qwkhdr.date,qwkdate(msg->crdate),sizeof(qwkhdr.date));
   mkfield(qwkhdr.time,strtime(msg->crtime,0),sizeof(qwkhdr.time));
-  mkfielduc(qwkhdr.whoto,sameas(msg->to,ALL)?QWK_ALL:msg->to,
+  mkfielduc(qwkhdr.whoto,sameas(msg->to,MSG_ALL)?QWK_ALL:msg->to,
 	    sizeof(qwkhdr.whoto));
   mkfielduc(qwkhdr.from,msg->from,sizeof(qwkhdr.from));
   strcpy(topic,msg->subject);
@@ -169,7 +171,7 @@ makeheader(int clubid, struct message *msg)
   mkfield(qwkhdr.subject,topic,
 	  sizeof(qwkhdr.subject)+(usepass?sizeof(qwkhdr.password):0));
   if(msg->flags&MSF_REPLY){
-    sprintf(tmp,"%ld",msg->replyto);
+    sprintf(tmp,"%d",msg->replyto);
     mkfield(qwkhdr.reference,tmp,sizeof(qwkhdr.reference));
   }
   qwkhdr.active=MSG_ACT;
@@ -187,58 +189,58 @@ mkpre(int clubid, struct message *msg)
     char s1[256]={0}, s2[256]={0}, s3[256]={0}, s4[256]={0};
     char s5[256]={0}, s6[256]={0}, s7[256]={0}, m4u[256]={0};
     
-    setmbk(emailclubs_msg);
+    msg_set(emailclubs_msg);
     strcpy(s1,xlatehist(msg->history));
-    setmbk(mail_msg);
-    sprintf(s2,"%s/%ld  ",clubid?clubhdr.club:EMAILCLUBNAME,msg->msgno);
+    msg_set(mail_msg);
+    sprintf(s2,"%s/%d  ",clubid?clubhdr.club:EMAILCLUBNAME,msg->msgno);
     if(strlen(s1)+strlen(s2)>thisuseracc.scnwidth-1){
       s1[78-strlen(s2)]='*';
       s1[79-strlen(s2)]=0;
     }
     
-    strcpy(s3,getmsg(MHDAY0+getdow(msg->crdate)));
-    strcpy(s4,getmsg(MHJAN+tdmonth(msg->crdate)));
+    strcpy(s3,msg_get(MHDAY0+getdow(msg->crdate)));
+    strcpy(s4,msg_get(MHJAN+tdmonth(msg->crdate)));
     sprintf(s2,"%s, %d %s %d, %s",
 	    s3, tdday(msg->crdate), s4, tdyear(msg->crdate),
 	    strtime(msg->crtime,1));
     
-    if(clubid)strcpy(m4u,getmsg(MHFORU));
+    if(clubid)strcpy(m4u,msg_get(MHFORU));
     
     if(msg->period){
-      sprint(s3,getmsg(MHPERIOD),msg->period,getpfix(DAYSNG,msg->period));
+      sprint(s3,msg_get(MHPERIOD),msg->period,msg_getunit(DAYSNG,msg->period));
     } else {
-      strcpy(s3,msg->flags&MSF_EXEMPT?getmsg(MHXMPT):"");
+      strcpy(s3,msg->flags&MSF_EXEMPT?msg_get(MHXMPT):"");
     }
-    strcpy(s4,msg->flags&MSF_RECEIPT?getmsg(MHRRR):"");
+    strcpy(s4,msg->flags&MSF_RECEIPT?msg_get(MHRRR):"");
     
     if(msg->timesread){
-      strcpy(s6,getmsg(MHTMRD));
-      sprint(s5,s6,msg->timesread,getpfix(TIMSNG,msg->timesread));
+      strcpy(s6,msg_get(MHTMRD));
+      sprint(s5,s6,msg->timesread,msg_getunit(TIMSNG,msg->timesread));
     }else strcpy(s5,"");
     
     if(msg->replies){
-      strcpy(s7,getmsg(MHNREP));
-      sprint(s6,s7,msg->replies,getpfix(REPSNG,msg->replies));
+      strcpy(s7,msg_get(MHNREP));
+      sprint(s6,s7,msg->replies,msg_getunit(REPSNG,msg->replies));
     }else strcpy(s6,"");
     
-    sprint(outbuf,getmsg(MSGHDR1),
+    sprint(out_buffer,msg_get(MSGHDR1),
 	    clubid?clubhdr.club:EMAILCLUBNAME,msg->msgno,s1,
 	    s2,s3,
 	    msg->from,s4,
 	    (msg->club[0]&&(sameas(thisuseracc.userid,msg->to)))?m4u:"",
-	    sameas(msg->to,ALL)?getpfix(MHALL,1):msg->to,s5,
+	    sameas(msg->to,MSG_ALL)?msg_getunit(MHALL,1):msg->to,s5,
 	    msg->subject,s6);
     
     if(msg->flags&MSF_FILEATT){
       if(msg->timesdnl){
-	strcpy(s1,getmsg(MHNDNL));
-	sprint(s2,s1,msg->timesdnl,getpfix(TIMSNG,msg->timesdnl));
+	strcpy(s1,msg_get(MHNDNL));
+	sprint(s2,s1,msg->timesdnl,msg_getunit(TIMSNG,msg->timesdnl));
       } else strcpy(s2,"");
-      sprint(&outbuf[strlen(outbuf)],getmsg(MSGHDR2),msg->fatt,s2);
+      sprint(&out_buffer[strlen(out_buffer)],msg_get(MSGHDR2),msg->fatt,s2);
     }
     
-    strcat(outbuf,getmsg(MSGHDR3));
-    return strdup(outbuf);
+    strcat(out_buffer,msg_get(MSGHDR3));
+    return strdup(out_buffer);
   }
 
   return NULL;
@@ -259,13 +261,13 @@ mkbody(int clubid, struct message *msg)
 	  (long)msg->msgno);
   if((zfp=gzopen(fname,"rb"))==NULL){
     gzclose(zfp);
-    fatalsys("Unable to open message %s/%d for reading",
+    error_fatalsys("Unable to open message %s/%d for reading",
 	  msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
   } else {
     struct message dummy;
     if(gzread(zfp,&dummy,sizeof(dummy))<=0){
       gzclose(zfp);
-      fatalsys("Unable to fseek() message %s/%d",
+      error_fatalsys("Unable to fseek() message %s/%d",
 	    msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
     }
   }
@@ -304,16 +306,16 @@ mkbody(int clubid, struct message *msg)
 
   sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
 	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  (long)msg->msgno);
+	  msg->msgno);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
-    fatalsys("Unable to open message %s/%d for reading",
+    error_fatalsys("Unable to open message %s/%d for reading",
 	     msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
   } else if(fseek(fp,sizeof(struct message),SEEK_SET)){
     int i=errno;
     fclose(fp);
     errno=i;
-    fatalsys("Unable to fseek() message %s/%d",
+    error_fatalsys("Unable to fseek() message %s/%d",
 	  msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno);
   }
   while(!feof(fp)){
@@ -356,8 +358,8 @@ mkfooter(int clubid, struct message *msg)
     /* Check if the file is there */
     
     if(stat(fname,&st)){
-      sprint(outbuf,getmsg(ATTNOT6));
-      return strdup(outbuf);
+      sprint(out_buffer,msg_get(ATTNOT6));
+      return strdup(out_buffer);
     }
 
 
@@ -368,7 +370,7 @@ mkfooter(int clubid, struct message *msg)
       int i;
 
       sprintf(dosfname,"%-8.8s.att",clubid?msg->club:EMAILCLUBNAME);
-      sprintf(num,"%ld",msg->msgno);
+      sprintf(num,"%d",msg->msgno);
       strncpy(&dosfname[strlen(dosfname)-4-strlen(num)],num,strlen(num));
       for(i=0;dosfname[i];i++){
 	dosfname[i]=dosfname[i]==' '?'-':
@@ -386,22 +388,22 @@ mkfooter(int clubid, struct message *msg)
 
     if(msg->club[0]&&(msg->flags&MSF_APPROVD)==0&&
        getclubax(&thisuseracc,msg->club)<CAX_COOP){
-      sprint(outbuf,getmsg(ATTNOT5),msg->fatt,st.st_size);
+      sprint(out_buffer,msg_get(ATTNOT5),msg->fatt,st.st_size);
     } else if(msg->club[0]&&getclubax(&thisuseracc,msg->club)<CAX_DNLOAD){
-      sprint(outbuf,getmsg(ATTNOT4),msg->fatt,st.st_size);
+      sprint(out_buffer,msg_get(ATTNOT4),msg->fatt,st.st_size);
     } else if(res&&prefs.flags&OMF_ATTYES){
-      sprint(outbuf,getmsg(ATTNOT2),msg->fatt,st.st_size,
+      sprint(out_buffer,msg_get(ATTNOT2),msg->fatt,st.st_size,
 	     ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
 	     msg->msgno);
     } else if(res&&prefs.flags&OMF_ATTASK){
-      sprint(outbuf,getmsg(ATTNOT3),msg->fatt,st.st_size,
+      sprint(out_buffer,msg_get(ATTNOT3),msg->fatt,st.st_size,
 	     ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
 	     msg->msgno);
-    } else sprint(outbuf,getmsg(ATTNOT1),msg->fatt,st.st_size,
+    } else sprint(out_buffer,msg_get(ATTNOT1),msg->fatt,st.st_size,
 		  ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
 		  msg->msgno);
     
-    return strdup(outbuf);
+    return strdup(out_buffer);
   }
 
   return NULL;
@@ -423,7 +425,7 @@ dumpndx(int clubid, struct message *msg)
     
     sprint(fname,"%03d.ndx",lastconf=clubid);
     if((ndx=fopen(fname,"w"))==NULL){
-      fatalsys("Unable to create index file %s",fname);
+      error_fatalsys("Unable to create index file %s",fname);
     }
   }
 
@@ -435,7 +437,7 @@ dumpndx(int clubid, struct message *msg)
   /* Always write exactly five bytes. Ignore 32bit word alignment. */
 
   if(!fwrite(&ndxrec,5,1,ndx)){
-    fatalsys("Unable to write to index file.");
+    error_fatalsys("Unable to write to index file.");
   }
 
   /* Write to PERSONAL.NDX if we need to */
@@ -443,7 +445,7 @@ dumpndx(int clubid, struct message *msg)
   if(!sameas(msg->to,thisuseracc.userid))return;
 
   if(!fwrite(&ndxrec,5,1,ndxpers)){
-    fatalsys("Unable to write to personal.ndx.");
+    error_fatalsys("Unable to write to personal.ndx.");
   }
 }
 
@@ -467,21 +469,21 @@ dumpmsg(char *pre, char *body, char *post)
   if(pre){
     xlate_out(pre);
     if(!fwrite(pre,strlen(pre),1,msgdat)){
-      fatalsys("Unable to write to messages.dat");
+      error_fatalsys("Unable to write to messages.dat");
     }
     free(pre);
   }
   if(body){
     xlate_out(body);
     if(fwrite(body,strlen(body),1,msgdat)!=1){
-      fatalsys("Unable to write to messages.dat");
+      error_fatalsys("Unable to write to messages.dat");
     }
     free(body);
   }
   if(post){
     xlate_out(post);
     if(!fwrite(post,strlen(post),1,msgdat)){
-      fatalsys("Unable to write to messages.dat");
+      error_fatalsys("Unable to write to messages.dat");
     }
     free(post);
   }
@@ -489,7 +491,7 @@ dumpmsg(char *pre, char *body, char *post)
   clrbuf();
   if(n%128){
     if(!fwrite(qwkbuf,128-(n%128),1,msgdat)){
-      fatalsys("Unable to write to messages.dat");
+      error_fatalsys("Unable to write to messages.dat");
     }
   }
 }
@@ -517,11 +519,11 @@ receipt(int clubdid, struct message *msg)
   sprintf(fname,TMPDIR"/rrrB%d%lx",getpid(),time(0));
   if((fp=fopen(fname,"w"))==NULL)return;
 
-  strcpy(s1,getmsg(EMAILCLUBS_MHDAY0+(cofdate(msg->crdate)-4)%7));
-  strcpy(s2,getmsg(EMAILCLUBS_MHJAN+tdmonth(msg->crdate)));
+  strcpy(s1,msg_get(EMAILCLUBS_MHDAY0+(cofdate(msg->crdate)-4)%7));
+  strcpy(s2,msg_get(EMAILCLUBS_MHJAN+tdmonth(msg->crdate)));
   
-  fprintf(fp,getmsg(EMAILCLUBS_RRRBODY),
-	  getpfix(EMAILCLUBS_SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
+  fprintf(fp,msg_get(EMAILCLUBS_RRRBODY),
+	  msg_getunit(EMAILCLUBS_SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
 	  EMAILCLUBNAME,msg->msgno,
 	  s1, tdday(msg->crdate), s2, tdyear(msg->crdate),
 	  strtime(msg->crtime,1));
@@ -531,8 +533,8 @@ receipt(int clubdid, struct message *msg)
   memset(&rrr,0,sizeof(rrr));
   strcpy(rrr.from,thisuseracc.userid);
   strcpy(rrr.to,msg->from);
-  sprintf(rrr.subject,getmsg(EMAILCLUBS_RRRSUBJ),EMAILCLUBNAME,msg->msgno);
-  sprintf(rrr.history,HST_RECEIPT" %s/%ld",EMAILCLUBNAME,msg->msgno);
+  sprintf(rrr.subject,msg_get(EMAILCLUBS_RRRSUBJ),EMAILCLUBNAME,msg->msgno);
+  sprintf(rrr.history,HST_RECEIPT" %s/%d",EMAILCLUBNAME,msg->msgno);
   rrr.flags=MSF_CANTMOD;
 
   sprintf(hdrname,TMPDIR"/rrrH%d%lx",getpid(),time(0));
@@ -548,11 +550,11 @@ receipt(int clubdid, struct message *msg)
   unlink(hdrname);
   unlink(fname);
 
-  if(uinsys(msg->from,1)){
-    setmbk(mail_msg);
-    sprintf(outbuf,getmsglang(RRRINJ,othruseracc.language-1),
+  if(usr_insys(msg->from,1)){
+    msg_set(mail_msg);
+    sprintf(out_buffer,msg_getl(RRRINJ,othruseracc.language-1),
 	    thisuseracc.userid);
-    injoth(&othruseronl,outbuf,0);
+    usr_injoth(&othruseronl,out_buffer,0);
   }
   
   msg->flags&=~MSF_RECEIPT;
@@ -573,9 +575,9 @@ outmsg(int clubid, struct message *msg)
   dumpmsg(preamble,body,footer);
   
   if(msg->flags&MSF_RECEIPT){
-    setmbk(emailclubs_msg);
+    msg_set(emailclubs_msg);
     receipt(clubid,msg);
-    setmbk(mail_msg);
+    msg_set(mail_msg);
   }
   updatemsg(clubid,msg);
 }
@@ -585,7 +587,7 @@ void static
 mkxlation()
 {
   if(!loadprefs(USERQWK,&userqwk)){
-    fatal("Unable to read user mailer preferences for %s",
+    error_fatal("Unable to read user mailer preferences for %s",
 	  thisuseracc.userid);
   }
 
@@ -625,12 +627,12 @@ int
 messagesdat()
 {
   if((msgdat=fopen("messages.dat","w"))==NULL){
-    logerrorsys("Unable to create messages.dat");
+    error_logsys("Unable to create messages.dat");
     return 1;
   }
 
   if((ndxpers=fopen("personal.ndx","w"))==NULL){
-    logerrorsys("Unable to create personal.ndx");
+    error_logsys("Unable to create personal.ndx");
     return 1;
   }
 

@@ -28,17 +28,18 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:45:11  alexios
  * Added autoconf support.
  *
  * Revision 0.2  1998/08/14 11:31:09  alexios
- * Removed newlines from fatal() calls. Added function
+ * Removed newlines from error_fatal() calls. Added function
  * unix2dos() to translate files to the DOS newline format.
  *
  * Revision 0.1  1998/08/11 10:10:48  alexios
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -73,13 +75,13 @@ readxlation()
 {
   FILE *fp;
   if((fp=fopen(XLATIONFILE,"r"))==NULL){
-    fatalsys("unable to open %s",XLATIONFILE);
+    error_fatalsys("unable to open %s",XLATIONFILE);
   }
   if(fread(xlation,sizeof(xlation),1,fp)!=1){
-    fatalsys("unable to read %s",XLATIONFILE);
+    error_fatalsys("unable to read %s",XLATIONFILE);
   }
   if(fread(kbdxlation,sizeof(kbdxlation),1,fp)!=1){
-    fatalsys("unable to read %s",XLATIONFILE);
+    error_fatalsys("unable to read %s",XLATIONFILE);
   }
   fclose(fp);
 }
@@ -96,10 +98,10 @@ unix2dos(char *fname, char *target)
   else strcpy(fname2,target);
 
   if((fpi=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open %s for DOS conversion",fname);
+    error_fatalsys("Unable to open %s for DOS conversion",fname);
   }
   if((fpo=fopen(fname2,"w"))==NULL){
-    fatalsys("Unable to create %s",fname2);
+    error_fatalsys("Unable to create %s",fname2);
   }
 
   do{

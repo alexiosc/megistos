@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:05  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
  * Various minor changes to accommodate for new function
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -94,7 +96,7 @@ void
 entermainlib()
 {
   if(!libread(libmain,0,&library)){
-    fatal("Main library (\"%s\") not found!",libmain);
+    error_fatal("Main library (\"%s\") not found!",libmain);
   }
   thisuseronl.lastlib=library.libnum;
   locklib();
@@ -110,53 +112,53 @@ getsellibname(struct libidx *l)
   struct libidx lib;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       if(!helped){
 	prompt(SELHELP);
 	helped=1;
       }
       prompt(SELLIB);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
     if(sameas(i,"..")){
       if(nesting(library.fullname)==0){
 	prompt(SELNPR);
-	endcnc();
+	cnc_end();
 	continue;
       } else return 2;
     } else if(sameas(i,"/")||sameas(i,"\\")){
       if(!libread(libmain,0,&lib)){
-	fatal("Unable to find main library!");
+	error_fatal("Unable to find main library!");
       } else goto enter;
     } else {
       if(!nesting(i)){
 	if(!libread(i,library.libnum,&lib)||
 	   !getlibaccess(&lib,ACC_VISIBLE)){
 	  prompt(SELERR,i,leafname(library.fullname));
-	  endcnc();
+	  cnc_end();
 	  continue;
 	} else goto enter;
       } else {
@@ -165,7 +167,7 @@ getsellibname(struct libidx *l)
 
 	strcpy(s,i);
 	if(!libread(libmain,0,&lib)){
-	  fatal("Unable to find main library!");
+	  error_fatal("Unable to find main library!");
 	}
 	cp=strtok(i,"/\\");
 	while(cp){
@@ -173,7 +175,7 @@ getsellibname(struct libidx *l)
 	  if(!libread(cp,lib.libnum,&lib)||
 	     !getlibaccess(&lib,ACC_VISIBLE)){
 	    prompt(SELERR,cp,leafname(lib.fullname));
-	    endcnc();
+	    cnc_end();
 	    goto outerloop;
 	  }
 	  cp=strtok(NULL,"/\\");
@@ -186,7 +188,7 @@ getsellibname(struct libidx *l)
 
 enter:
   if(!getlibaccess(&lib,ACC_ENTER)){
-    endcnc();
+    cnc_end();
     return 0;
   }
 

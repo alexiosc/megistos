@@ -30,15 +30,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  1999/07/28 23:19:38  alexios
  * Refuse to touch the date and time of creation of a message
  * if it came from the network.
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
- * Changed a few fatal() calls to fatalsys(). Changed message
+ * Changed a few error_fatal() calls to error_fatalsys(). Changed message
  * ID code to reflect its use in the new IHAVE database.
  *
  * Revision 1.3  1998/12/27 16:31:55  alexios
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -81,12 +83,12 @@ readmsghdr(char *fname, struct message *msg)
 {
   FILE *fp;
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open mail header file %s (%d)",fname,errno);
+    error_fatalsys("Unable to open mail header file %s (%d)",fname,errno);
   }
 
   if(fread(msg,sizeof(struct message),1,fp)!=1){
     fclose(fp);
-    fatalsys("Unable to read mail header file %s",fname);
+    error_fatalsys("Unable to read mail header file %s",fname);
     exit(1);
   }
 
@@ -113,12 +115,12 @@ writemsghdr(char *fname,struct message *msg)
 #endif
 
   if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create %s",fname);
+    error_logsys("Unable to create %s",fname);
     fclose(fp);
     exit(1);
   }
   if(fwrite(msg,sizeof(struct message),1,fp)!=1){
-    logerrorsys("Unable to write %s",fname);
+    error_logsys("Unable to write %s",fname);
     exit(1);
   }
   fclose(fp);
@@ -146,13 +148,13 @@ preparemsghdr(struct message *msg, int email)
   if(!msg->origbbs[0]){
     strcpy(msg->origbbs,bbscode);
     strcpy(msg->origclub,msg->club);
-    sprintf(msg->msgid,"%ld.%08x%04x",
+    sprintf(msg->msgid,"%d.%08x%04x",
 	    msg->msgno,
 	    (int)time(NULL),
 	    (int)getpid());	/* As unique as things go */
   }
   
-  if(!msg->fatt[0])sprintf(msg->fatt,"%ld.att",msg->msgno);
+  if(!msg->fatt[0])sprintf(msg->fatt,"%d.att",msg->msgno);
 } 
 
 
@@ -166,11 +168,11 @@ writemessage(char *srcname, struct message *msg, int email)
   /* Wait for locks to clear */
 
   sprintf(lock,CLUBLOCK,(email?EMAILCLUBNAME:msg->club));
-  if(waitlock(lock,5)==LKR_TIMEOUT){
+  if(lock_wait(lock,5)==LKR_TIMEOUT){
     if(usercaller)prompt(TIMEOUT1);
-    if(waitlock(lock,55)==LKR_TIMEOUT){
+    if(lock_wait(lock,55)==LKR_TIMEOUT){
       if(usercaller)prompt(TIMEOUT2);
-      logerror("Timed out (60 sec) waiting for %s",lock);
+      error_log("Timed out (60 sec) waiting for %s",lock);
       exit(1);
     }
   }
@@ -178,7 +180,7 @@ writemessage(char *srcname, struct message *msg, int email)
 
   /* Lock it */
 
-  placelock(lock,"adding");
+  lock_place(lock,"adding");
 
 
   /* Generate the filename */
@@ -190,15 +192,15 @@ writemessage(char *srcname, struct message *msg, int email)
   /* Write the message header */
   
   if((fp=fopen(msgname,"w"))==NULL){
-    logerrorsys("Unable to create %s",msgname);
-    rmlock(lock);
+    error_logsys("Unable to create %s",msgname);
+    lock_rm(lock);
     fclose(fp);
     exit(1);
   }
 
   if(fwrite(msg,sizeof(struct message),1,fp)!=1){
-    logerrorsys("Unable to write %s",msgname);
-    rmlock(lock);
+    error_logsys("Unable to write %s",msgname);
+    lock_rm(lock);
     exit(1);
   }
 
@@ -213,8 +215,8 @@ writemessage(char *srcname, struct message *msg, int email)
   /* Now copy the message body */
 
   if((fp2=fopen(srcname,"r"))==NULL){
-    logerrorsys("Unable to open %s",srcname);
-    rmlock(lock);
+    error_logsys("Unable to open %s",srcname);
+    lock_rm(lock);
     fclose(fp2);
     fclose(fp);
     exit(1);
@@ -223,8 +225,8 @@ writemessage(char *srcname, struct message *msg, int email)
   while((count=fread(&buff,1,sizeof(buff),fp2))>0){
     bbsencrypt(buff,sizeof(buff),msg->cryptkey);
     if(fwrite(&buff,1,count,fp)!=count){
-      logerrorsys("Unable to write %s",msgname);
-      rmlock(lock);
+      error_logsys("Unable to write %s",msgname);
+      lock_rm(lock);
       fclose(fp2);
       fclose(fp);
       exit(1);
@@ -234,7 +236,7 @@ writemessage(char *srcname, struct message *msg, int email)
 
   /* Remove the lock, close the files and adjust permissions */
   
-  rmlock(lock);
+  lock_rm(lock);
   fclose(fp2);
   fclose(fp);
   chmod(msgname,0660);

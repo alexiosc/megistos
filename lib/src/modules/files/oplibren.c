@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -69,7 +71,7 @@ listpeerlibs()
   prompt(LIBLSTH);
 
   if(!libreadnum(library.parent,&l)){
-    fatal("Unable to get parent lib, libnum=%d",
+    error_fatal("Unable to get parent lib, libnum=%d",
 	  library.parent);
   }
   p=l.parent;
@@ -83,13 +85,13 @@ listpeerlibs()
       if(getlibaccess(&l,ACC_VISIBLE))
 	prompt(LIBLSTL,leafname(l.fullname),l.numfiles,l.numbytes>>10,l.descr);
     }
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     strcpy(gt,l.keyname);
   }while(res);
 
   prompt(LIBLSTF);
 
-  return lastresult!=PAUSE_QUIT;
+  return fmt_lastresult!=PAUSE_QUIT;
 }
 
 
@@ -99,30 +101,30 @@ getnewlibname(char *s)
   char *i,c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OLRNASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	listpeerlibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -149,7 +151,7 @@ op_libren()
 
   if(!nesting(library.fullname)){
     prompt(OLRNNMN);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -158,7 +160,7 @@ op_libren()
     
     if(libexists(s,library.parent)){
       prompt(OLRNERR);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }

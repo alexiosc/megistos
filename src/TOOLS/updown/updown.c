@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 22:09:33  alexios
- * Changed a few fatal() calls to fatalsys(). Minor bug fixes
+ * Changed a few error_fatal() calls to error_fatalsys(). Minor bug fixes
  * related to the handling of transient files.
  *
  * Revision 0.6  1998/12/27 16:35:21  alexios
@@ -61,6 +62,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -91,13 +93,13 @@ int  refnd;
 int  refper;
 
 
-promptblk       *msg;
+promptblock_t       *msg;
 struct protocol *protocols=NULL;
 int             numprotocols=0;
 struct viewer   *viewers=NULL;
 int             numviewers=0;
 char            *xferlistname=NULL;
-struct xferitem *xferlist=NULL;
+xfer_item_t     *xferlist=NULL;
 int             totalitems=0;
 int             numitems=0;
 char            *taglistname=NULL;
@@ -111,17 +113,17 @@ int             logout=0;
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("updown");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("updown");
+  msg_setlanguage(thisuseracc.language);
 
-  peffic=numopt(PEFFIC,1,100);
-  vprsel=stgopt(VPRSEL);
-  dissec=numopt(DISSEC,1,32767);
-  lnkkey=numopt(LNKKEY,0,129);
-  lnksel=stgopt(LNKSEL);
-  refnd=ynopt(REFND);
-  refper=numopt(REFPER,0,100);
+  peffic=msg_int(PEFFIC,1,100);
+  vprsel=msg_string(VPRSEL);
+  dissec=msg_int(DISSEC,1,32767);
+  lnkkey=msg_int(LNKKEY,0,129);
+  lnksel=msg_string(LNKSEL);
+  refnd=msg_bool(REFND);
+  refper=msg_int(REFPER,0,100);
 
   readprotocols();
   readviewers();
@@ -144,22 +146,22 @@ writetagfile()
   int i;
 
   if((fp=fopen(taglistname,"w"))==NULL){
-    logerrorsys("Unable to write tag file %s",taglistname);
+    error_logsys("Unable to write tag file %s",taglistname);
     return;
   }
   for(i=0;i<totalitems;i++){
     if(xferlist[i].flags&XFF_KILLED)continue;
     if(xferlist[i].flags&XFF_TAGGED){
-      fwrite(&xferlist[i],sizeof(struct xferitem),1,fp);
+      fwrite(&xferlist[i],sizeof(xfer_item_t),1,fp);
     }
   }
   fclose(fp);
 
   if((fp=fopen(xferlistname,"w"))==NULL){
-    logerrorsys("Unable to write xferlist file %s",taglistname);
+    error_logsys("Unable to write xferlist file %s",taglistname);
     return;
   }
-  fwrite(xferlist,sizeof(struct xferitem),totalitems,fp);
+  fwrite(xferlist,sizeof(xfer_item_t),totalitems,fp);
   fclose(fp);
 }
 
@@ -168,7 +170,7 @@ void
 returncharges()
 {
   int      i,refund=0;
-  classrec *class=findclass(thisuseracc.curclss);
+  classrec_t *class=cls_find(thisuseracc.curclss);
 
   if(refnd==0 || refper==0)return;
 
@@ -178,9 +180,9 @@ returncharges()
     }
   }
   refund=(refund*refper)/100;
-  if(refund&&((class->flags&CF_NOCHRGE)==0)){
-    prompt(REFUND,refund,getpfix(CRDSNG,refund));
-    postcredits(thisuseracc.userid,refund,0);
+  if(refund&&((class->flags&CLF_NOCHRGE)==0)){
+    prompt(REFUND,refund,msg_getunit(CRDSNG,refund));
+    usr_postcredits(thisuseracc.userid,refund,0);
   }
 }
 
@@ -193,7 +195,7 @@ done()
     writetagfile();
     returncharges();
   }
-  clsmsg(msg);
+  msg_close(msg);
   exit(0);
 }
 
@@ -204,7 +206,7 @@ autodisconnect()
   int  i;
   char c;
 
-  nonblocking();
+  inp_nonblock();
 
   prompt(DISCON);
   for(i=dissec-1;i>=0;i--){
@@ -213,15 +215,15 @@ autodisconnect()
     c=0;
     if((read(0,&c,1)==1) && (c==27 || c==13 || c==10 || c==32)){
       prompt(ADABORT);
-      blocking();
+      inp_block();
       return;
     }
   }
 
-  blocking();
+  inp_block();
   print("\n\n\n\n");
   thisuseronl.flags|=OLF_LOGGEDOUT;
-  disconnect(thisuseronl.emupty);
+  channel_disconnect(thisuseronl.emupty);
 }
 
 
@@ -237,7 +239,7 @@ run()
     uploadrun();
     break;
   default:
-    fatal("Invalid transfer mode \"%c\"",xferlist[0].dir);
+    error_fatal("Invalid transfer mode \"%c\"",xferlist[0].dir);
   }
 }
 
@@ -245,7 +247,7 @@ run()
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc!=3 && argc!=4){
     fprintf(stderr,"syntax: %s xferlist-file taglist-file [-logout]\n\n",argv[0]);
     exit(-1);

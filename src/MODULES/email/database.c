@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -85,21 +87,21 @@ getmsgheader(int msgno,struct message *msg)
 
   sprintf(tmp,"%d",msgno);
   sprintf(lock,MESSAGELOCK,dbclubname,tmp);
-  if((waitlock(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
-  placelock(lock,"reading");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
+  lock_place(lock,"reading");
 
-  sprintf(fname,"%s/"MESSAGEFILE,dbclubdir,(long)msgno);
+  sprintf(fname,"%s/"MESSAGEFILE,dbclubdir,msgno);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return BSE_OPEN;
   } else if(fread(msg,sizeof(struct message),1,fp)!=1){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return BSE_READ;
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
   return BSE_FOUND;
 }
 
@@ -110,23 +112,23 @@ writemsgheader(struct message *msg)
   char lock[256], fname[256], tmp[256];
   FILE *fp;
 
-  sprintf(tmp,"%ld",msg->msgno);
+  sprintf(tmp,"%d",msg->msgno);
   sprintf(lock,MESSAGELOCK,dbclubname,tmp);
-  if((waitlock(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
-  placelock(lock,"writing");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return BSE_LOCK;
+  lock_place(lock,"writing");
 
   sprintf(fname,"%s/"MESSAGEFILE,dbclubdir,msg->msgno);
   if((fp=fopen(fname,"r+"))==NULL){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return BSE_OPEN;
   } else if(fwrite(msg,sizeof(struct message),1,fp)!=1){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return BSE_WRITE;
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
   return BSE_FOUND;
 }
 
@@ -183,7 +185,7 @@ opendb()
     d_dbfpath(fname);
     d_dbdpath(DBDDIR);
     if(d_open(".ecdb","s")!=S_OKAY){
-      fatal("Cannot open database for %s (db_status %d).",
+      error_fatal("Cannot open database for %s (db_status %d).",
 	    dbclubname,db_status);
     }
     d_dbget(&clubdbid);

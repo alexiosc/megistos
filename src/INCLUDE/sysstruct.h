@@ -1,4 +1,19 @@
-/*****************************************************************************\
+/** @name    sysstruct.h
+    @memo    System-wide statistics and data types.
+    @author  Alexios
+
+    @doc
+
+    Documentation for this header file is relatively scarce, since it'll soon
+    be undergoing many changes. The file contains global data structures to
+    store BBS state and global settings.
+
+    Original banner, legalese and change history follow.
+
+    {\footnotesize
+    \begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     sysstruct.h                                                  **
  **  AUTHORS:  Alexios                                                      **
@@ -21,15 +36,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:56  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 15:19:19  alexios
  * Added magic number fields etc.
@@ -53,7 +69,12 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
+
+\end{verbatim}
+} */
+
+/*@{*/
 
 
 #ifndef RCS_VER 
@@ -67,73 +88,126 @@
 #define SYSSTRUCT_H
 
 
+/** User emulation structure.
+
+    This structure contains enough information to help in emulating a user (the
+    user-to-emulator part). It isn't well documented because you won't need to
+    use it. */
+
 struct emuqueue {
-  volatile char queue [16376];
-  volatile int  index;
-  volatile int  xlation;
+  volatile char queue [16376];	/** User output queue.  */
+  volatile int  index;		/** The pointer in the queue.  */
+  volatile int  xlation;	/** Currently active translation mode. */
 }; 
 
 
+/** User monitoring structure.
+
+    This structure allows monitoring of user input, which only works where
+    supported by modules and other user-side software. This structure is less
+    than thoroughly documented because there is no need for you to use it. */
+
 struct monitor {
-  volatile long timestamp;
-  volatile char channel[24];
-  volatile char input[8192-28];
+  volatile long timestamp;	/** Time and date of last inpuit. */
+  volatile char channel[24];	/** Channel where input came from. */
+  volatile char input[8192-28];	/** The input itself. */
 };
 
 
+/** System variables blocks.
+
+    This is a very old and almost vestigial part of Megistos. It was modeled
+    after the corresponding part of the Major BBS. However, Megistos' design
+    was very different from the design that imposed the system variable block
+    on the Major BBS. As a result, this part of the system really shows its
+    age. It should be removed at some point, for a very large number of
+    reasons:
+
+    \begin{itemize}
+
+    \item Stability: even given the unbelievably paranoid backup policy of the
+    system variable file, this is the most common point-of-failure for the
+    BBS. It has numerous natural enemies, including stupidity, race conditions,
+    disk crashes, et cetera.
+
+    \item It's a binary structure (and file) and that always spells disaster
+    for maintenance and recovery.
+
+    \item Most of the fields no longer make sense. For that matter, many of the
+    fields found in Major's system variable block weren't really applicable
+    when I started programming the Major BBS in 1992. Having room for a single
+    voice phone is stupid, if your BBS has 32 lines and a telnet
+    connection. Having by-the-minute charges is silly, if you have monthly
+    subscriptions. Having {\em charges} is silly if you run a free system.
+
+    \item All of the fields here should be present because there is absolutely
+    no other place to put them. This clearly does not hold for most
+    fields. Even the statistics block could easily be moved to the {\tt
+    data/stats} directory where all the other statistics are. BBS names,
+    addresses, et cetera are handled by substitution variables. No need to
+    involve global state for things that are seldom needed.
+
+    \item The system variable block was meant to service a centralised system,
+    where everything was a single process, with a single view of
+    memory. Megistos is pretty distributed. The BBS is split among different
+    processes, with global state (such as it is) being kept by the BBS daemon
+    ({\tt bbsd}).
+
+    \end{itemize}
+
+    Given all that, I'm not going to document the entire structure.  */
+
 struct sysvar {
-  char bbstitle   [52];
-  char company    [48];
-  char address1   [48];
-  char address2   [48];
-  char city       [48];
-  char dataphone  [48];
-  char voicephone [48];
-  char livephone  [48];
-  long idlezap;
-  long saverate;
-  char chargehour [32];
-  char mincredits [32];
-  char minmoney   [32];
-  long flags;
-  long pswexpiry;
-  long injaudit;
-  int  pagekey;
-  int  pgovkey;
-  int  pallkey;
-  int  glockie;
-  int  lonaud;
-  int  lofaud;
-  int  tnlmax;
-  int  idlovr;
-  int  bbsrst;
+  char      bbstitle   [52];	/** Full name of the BBS */
+  char      company    [48];	/** Company owning the BBS, if any  */
+  char      address1   [48];	/** BBS mailing address, line 1 of 2  */
+  char      address2   [48];	/** BBS mailing address, line 2 of 2 */
+  char      city       [48];	/** City where BBS is */
+  char      dataphone  [48];	/** Main dialup phone */
+  char      voicephone [48];	/** Main voice phone */
+  char      livephone  [48];	/** Dialup for paid users */
+  uint32    idlezap;		/** Inactivity timeout (minutes, 0=off) */
+  uint32    saverate;		/** Minutes between saving sysvar to disk */
+  char      chargehour [32];	/** Charge per hour (textual description) */
+  char      mincredits [32];	/** Minimum time users can buy */
+  char      minmoney   [32];	/** Minimum charge on users */
+  uint32    flags;		/** Unknown */
+  int32     pswexpiry;		/** Password lifetime (days) */
+  int32     injaudit;	       
+  bbskey_t  pagekey;		/** Key needed to page */
+  bbskey_t  pgovkey;		/** Key needed to override page restrictions */
+  bbskey_t  pallkey;		/** Key needed to page all users */
+  int32     glockie;
+  int32     lonaud;
+  int32     lofaud;
+  int32     tnlmax;
+  int32     idlovr;
+  int32     bbsrst;
   
   char dummy1 [6144 - 540];
 
-  int  tcredspaid;        /* Total paid credits posted ever        */
-  int  tcreds;            /* Total credits (paid+free) posted ever */
-  int  timever;           /* Total on-line time ever               */
-  int  filesupl;          /* Total number of files uploaded ever   */
-  int  filesdnl;          /* Total number of files downloaded ever */
-  long bytesupl;          /* Total bytes * 100 uploaded ever       */
-  long bytesdnl;          /* Total bytes * 100 downloaded ever     */
-  int  sigmessages;       /* Total SIG messages written            */
-  int  emessages;         /* Total Email messages written          */
-  int  nmessages;         /* Total outgoing (net) messages written */
-  int  connections;       /* Total number of connections ever      */
-  int  incnetmsgs;        /* Total incoming net messages received  */
-  int  emsgslive;         /* Email messages active at this time    */
-  int  clubmsgslive;      /* Club messages active at this time     */
+  int32     tcredspaid;		/** Total paid credits posted ever        */
+  int32     tcreds;		/** Total credits (paid+free) posted ever */
+  uint32    timever;		/** Total on-line time ever               */
+  uint32    filesupl;		/** Total number of files uploaded ever   */
+  uint32    filesdnl;		/** Total number of files downloaded ever */
+  uint32    bytesupl;		/** Total bytes * 100 uploaded ever       */
+  uint32    bytesdnl;		/** Total bytes * 100 downloaded ever     */
+  uint32    sigmessages;	/** Total Club messages written           */
+  uint32    emessages;		/** Total Email messages written          */
+  uint32    nmessages;		/** Total outgoing (net) messages written */
+  uint32    connections;	/** Total number of connections ever      */
+  uint32    incnetmsgs;		/** Total incoming net messages received  */
+  uint32    emsgslive;		/** Email messages active at this time    */
+  uint32    clubmsgslive;	/** Club messages active at this time     */
 
   char dummy2 [2044 - 56];
 
-  char magic[4];	  /* Magic number is last to make sure
-                             everything has been written properly
-			     to the file */
+  char magic[4];	  /** Magic number ({\tt SYSVAR_MAGIC}) */
 };
 
 
-#define SVR_MAGIC "SVAR"
+#define SYSVAR_MAGIC "SVAR"
 
 
 #define SVR_STARTANSI  0x3
@@ -143,48 +217,48 @@ struct sysvar {
 
 
 struct clsstats {
-  char name[10];
-  long credits;
-  long minutes;
+  char   name[10];
+  uint32 credits;
+  uint32 minutes;
 };
 
 
 struct ttystats {
-  char name[32];
-  int  channel;
-  long credits;
-  long minutes;
-  long calls;
+  char   name[32];
+  uint32 channel;
+  uint32 credits;
+  uint32 minutes;
+  uint32 calls;
 };
 
 
 struct baudstats {
-  long baud;
-  long credits;
-  long minutes;
-  long calls;
+  int32  baud;
+  uint32 credits;
+  uint32 minutes;
+  uint32 calls;
 };
 
 
 struct usagestats {
-  long credits;
-  long minutes;
+  uint32 credits;
+  uint32 minutes;
 };
 
 
 struct modstats {
-  char name[44];
-  long credits;
-  long minutes;
+  char   name[44];
+  uint32 credits;
+  uint32 minutes;
 };
 
 
 struct event {
-  char descr[41];
-  char command[256];
-  int  hour, min;
-  long flags;
-  long lastrun;
+  char   descr[41];
+  char   command[256];
+  int    hour, min;
+  uint32 flags;
+  uint32 lastrun;
 };
 
 
@@ -196,10 +270,26 @@ struct event {
 
 
 struct top {
-  char label[40];
-  char scorestg[16];
-  int  score;
+  char   label[40];
+  char   scorestg[16];
+  uint32 score;
 };
 
 
 #endif /* SYSSTRUCT_H */
+
+/*@}*/
+
+/*
+LocalWords: sysstruct Alexios doc BBS legalese otnotesize structs alexios
+LocalWords: Exp bbs GPL SVR SOPAUD emuqueue ifndef VER endif struct int em
+LocalWords: xlation timestamp inpuit Megistos Major's tt stats bbsd sysvar
+LocalWords: bbstitle dataphone dialup voicephone livephone uint idlezap
+LocalWords: saverate chargehour mincredits minmoney pswexpiry injaudit min
+LocalWords: bbskey pagekey pgovkey pallkey glockie lonaud lofaud tnlmax
+LocalWords: idlovr bbsrst tcredspaid tcreds timever filesupl filesdnl SVAR
+LocalWords: bytesupl bytesdnl sigmessages emessages nmessages incnetmsgs
+LocalWords: emsgslive clubmsgslive STARTANSI ANSIOFF ANSION ANSIASK descr
+LocalWords: clsstats ttystats baudstats usagestats modstats lastrun EVF
+LocalWords: ONLYONCE scorestg
+*/

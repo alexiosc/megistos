@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -203,7 +205,7 @@ void store_property (zword_t obj, zword_t prop, zword_t value)
     else
       set_word (propp, value);
   } else
-    fatal ("No such property");
+    error_fatal ("No such property");
 }
 
 
@@ -239,7 +241,7 @@ void load_next_property (zword_t obj, zword_t prop)
     if ((zbyte_t) (get_byte (propp) & property_mask) == (zbyte_t) prop)
       propp = get_next_property (propp);
     else
-      fatal ("No such property");
+      error_fatal ("No such property");
   }
   
   /* Return the next property id */
@@ -503,7 +505,7 @@ void store_word (zword_t addr, zword_t offset, zword_t value)
   /* Check we are not writing outside of the writeable data area */
   
   if (addr > data_size)
-    fatal ("Attempted write out of data area");
+    error_fatal ("Attempted write out of data area");
   
   /* Store the word */
   
@@ -529,7 +531,7 @@ void store_byte (zword_t addr, zword_t offset, zword_t value)
   /* Check we are not writing outside of the writeable data area */
   
   if (addr > data_size)
-    fatal ("Attempted write out of data area");
+    error_fatal ("Attempted write out of data area");
   
   /* Store the byte */
   

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.6  1998/12/27 15:18:42  alexios
  * One minor fix.
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -154,14 +156,14 @@ ltoa(long l)
 }
 
 
-void
+static void
 init()
 {
   char fname[256];
   FILE *fp;
   int cof=cofdate(today());
 
-  initmodule(INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES);
+  mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES);
 
   printf("User account cleanup\n\n");
 
@@ -186,23 +188,23 @@ init()
 void
 usercleanup()
 {
-  FILE     *fp, *ufp;
-  char     command[256], name[256], fname[256];
-  useracc  usracc, *uacc=&usracc;
-  int      numdays, pass;
-  classrec *ourclass;
-  int      langstats[NUMLANGUAGES]={0};
-  int      ANSIstats=0;
-  int      visualstats=0;
-  int      malestats=0;
-  int      corpstats=0;
-  int      sysaxstats=0;
-  int      suspstats=0;
-  int      exemptstats=0;
-  int      agestats[5][8];
+  FILE       *fp, *ufp;
+  char       command[256], name[256], fname[256];
+  useracc_t  usracc, *uacc=&usracc;
+  int        numdays, pass, i;
+  classrec_t *ourclass;
+  int        langstats[NUMLANGUAGES]={0};
+  int        ANSIstats=0;
+  int        visualstats=0;
+  int        malestats=0;
+  int        corpstats=0;
+  int        sysaxstats=0;
+  int        suspstats=0;
+  int        exemptstats=0;
+  int        agestats[5][8];
 
   bzero(agestats,sizeof(agestats));
-  setauditfile(CLNUPAUDITFILE);
+  audit_setfile(CLNUPAUDITFILE);
   audit("CLEANUP",AUDIT(USERCUB),dayssince);
 
   inittop(&topcreds);
@@ -220,6 +222,8 @@ usercleanup()
   sprintf(command,"\\ls %s",USRDIR);
   if((fp=popen(command,"r"))==NULL)return;
 
+  for(i=0;i<cls_count;i++)cls_classes[i].users=0;
+
   while(!feof(fp)){
     if(fscanf(fp,"%s",name)==1){
       int save=0;
@@ -228,13 +232,13 @@ usercleanup()
       numusers++;
 
       uacc=&usracc;
-      if(!uinsys(name,0)){
+      if(!usr_insys(name,0)){
 	sprintf(fname,"%s/%s",USRDIR,name);
 	if((ufp=fopen(fname,"r"))==NULL){
 	  fclose(ufp);
 	  continue;
 	}
-	if((fread(uacc,sizeof(useracc),1,ufp))!=1){
+	if((fread(uacc,sizeof(useracc_t),1,ufp))!=1){
 	  fclose(ufp);
 	  continue;
 	}
@@ -247,15 +251,15 @@ usercleanup()
 	nummodified++;
 
 	uacc->passexp=max(uacc->passexp-dayssince,0);
-	printf("PASSEXP:  %s: %ld day(s)\n",name,uacc->passexp);
+	printf("PASSEXP:  %s: %d day(s)\n",name,uacc->passexp);
 
 	if(uacc->timetdy){
-	  printf("TIMETDAY: %s: %ld min(s)\n",name, uacc->timetdy);
+	  printf("TIMETDAY: %s: %d min(s)\n",name, uacc->timetdy);
 	  uacc->timetdy=0;
 	}
 	
 	uacc->classdays+=dayssince;
-	printf("INCLASS:  %s: %ld day(s)\n",name,uacc->classdays);
+	printf("INCLASS:  %s: %d day(s)\n",name,uacc->classdays);
 
 	if(strcmp(uacc->tempclss,uacc->curclss)){
 	  printf("TMPCLASS: %s: %s reverts-to %s\n",name,uacc->curclss,
@@ -263,9 +267,9 @@ usercleanup()
 	  strcpy(uacc->curclss,uacc->tempclss);
 	}
 
-	if((ourclass=findclass(uacc->curclss))!=NULL){
+	if((ourclass=cls_find(uacc->curclss))!=NULL){
 	  if(uacc->classdays>=ourclass->ardays){
-	    printf("AROUND:   %s: %ld day(s)\n",name, uacc->classdays);
+	    printf("AROUND:   %s: %d day(s)\n",name, uacc->classdays);
 	    if(strcmp(uacc->curclss,ourclass->around)){
 	      printf("ARCLASS:  %s: %s moves-to %s\n",name,
 		     uacc->curclss,ourclass->around);
@@ -325,11 +329,11 @@ usercleanup()
 	 (uacc->flags&UFL_DELETED||(!strcmp(uacc->curclss,DELETEDCLASS)))){
 	int i;
 	
-	if(uinsys(name,0)){
+	if(usr_insys(name,0)){
 	  bbsdcommand("hangup",othruseronl.channel,"");
 	}
-	for(i=0;i<20 && uinsys(name,0);i++)usleep(100000);
-	if(!uinsys(name,0)){
+	for(i=0;i<20 && usr_insys(name,0);i++)usleep(100000);
+	if(!usr_insys(name,0)){
 	  char lowercase[256];
 	  char *cp;
 
@@ -346,6 +350,9 @@ usercleanup()
 		uacc->userid,uacc->curclss,uacc->credits);
 	}
       } else {
+	classrec_t *ourclass=cls_find(upperc(uacc->curclss));
+	if(ourclass)ourclass->users++;
+
 	langstats[uacc->language-1]++;
 	if(uacc->prefs&UPF_ANSION)ANSIstats++;
 	if(uacc->prefs&UPF_VISUAL)visualstats++;
@@ -364,7 +371,7 @@ usercleanup()
 	  fclose(ufp);
 	  continue;
 	}
-	if((fwrite(uacc,sizeof(useracc),1,ufp))!=1){
+	if((fwrite(uacc,sizeof(useracc_t),1,ufp))!=1){
 	  fclose(ufp);
 	  continue;
 	}
@@ -394,7 +401,7 @@ usercleanup()
     char dir[256];
     
     if(!pass)strcpy(dir,STATDIR);
-    else sprintf(dir,"%s/%ld",STATDIR,tdyear(today()));
+    else sprintf(dir,"%s/%d",STATDIR,(uint32)tdyear(today()));
     
     savetop(topcreds,dir,"top-credits");
     savetop(toppaid,dir,"top-paidcreds");
@@ -427,31 +434,18 @@ usercleanup()
   }
   fclose(fp);
 
+  if((fp=fopen(CLASSFILE,"w"))!=NULL)
+    fwrite(cls_classes,sizeof(classrec_t),cls_count,fp);
+  fclose(fp);
+
   audit("CLEANUP",AUDIT(USERCUE),nummodified,numusers);
 }
 
 
-void
-done()
+int
+handler_cleanup(int argc, char *argv[])
 {
+  init();
+  usercleanup();
+  return 0;
 }
-
-
-void
-main(int argc, char *argv[])
-{
-  setprogname(argv[0]);
-  if(argc==2 && !strcmp(argv[1],"-cleanup")){
-    init();
-    usercleanup();
-    done();
-  } else {
-    fprintf(stderr,"usercleanup: This is a cleanup-only module\n");
-  }
-}
-
-
-
-
-
-

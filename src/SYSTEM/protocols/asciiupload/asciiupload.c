@@ -31,8 +31,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:01:01  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1998/12/27 16:28:54  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 

@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 16:10:27  alexios
  * Added autoconf support. One slight bug fix.
@@ -47,6 +48,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,7 +70,7 @@
 #include "mbk_telecon.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 int  entrkey;
 int  normkey;
@@ -100,38 +102,38 @@ int  defact;
 void
 init()
 {
-  initmodule(INITALL);
+  mod_init(INI_ALL);
 
-  msg=opnmsg("telecon");
-  setlanguage(thisuseracc.language);
+  msg=msg_open("telecon");
+  msg_setlanguage(thisuseracc.language);
 
-  entrkey=numopt(ENTRKEY,0,129);
-  normkey=numopt(NORMKEY,0,129);
-  npaymx=numopt(NPAYMX,-1,32767);
-  maxcht=numopt(MAXCHT,0,32767);
-  tinpsz=numopt(TINPSZ,1,2047);
-  msgkey=numopt(MSGKEY,0,129);
-  actkey=numopt(ACTKEY,0,129);
-  amsgch=ynopt(AMSGCH);
-  msgchg=numopt(MSGCHG,-32767,32767);
-  defcol=tokopt(DEFCOL,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
+  entrkey=msg_int(ENTRKEY,0,129);
+  normkey=msg_int(NORMKEY,0,129);
+  npaymx=msg_int(NPAYMX,-1,32767);
+  maxcht=msg_int(MAXCHT,0,32767);
+  tinpsz=msg_int(TINPSZ,1,2047);
+  msgkey=msg_int(MSGKEY,0,129);
+  actkey=msg_int(ACTKEY,0,129);
+  amsgch=msg_bool(AMSGCH);
+  msgchg=msg_int(MSGCHG,-32767,32767);
+  defcol=msg_token(DEFCOL,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
 		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
 		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  sopkey=numopt(SOPKEY,0,129);
-  chtkey=numopt(CHTKEY,0,129);
-  ichtkey=numopt(ICHTKEY,0,129);
-  defint=numopt(DEFINT,0,999);
-  defact=ynopt(DEFACT);
-  chatcol1=tokopt(CHATCOL1,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
+  sopkey=msg_int(SOPKEY,0,129);
+  chtkey=msg_int(CHTKEY,0,129);
+  ichtkey=msg_int(ICHTKEY,0,129);
+  defint=msg_int(DEFINT,0,999);
+  defact=msg_bool(DEFACT);
+  chatcol1=msg_token(CHATCOL1,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
 		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
 		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  chatcol2=tokopt(CHATCOL2,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
+  chatcol2=msg_token(CHATCOL2,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
 		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
 		"CYAN","RED","MAGENTA","YELLOW","WHITE");
-  stgall1=strdup(getmsg(STGALL1));
-  stgall2=strdup(getmsg(STGALL2));
-  stgsec1=strdup(getmsg(STGSEC1));
-  stgsec2=strdup(getmsg(STGSEC2));
+  stgall1=strdup(msg_get(STGALL1));
+  stgall2=strdup(msg_get(STGALL2));
+  stgsec1=strdup(msg_get(STGSEC1));
+  stgsec2=strdup(msg_get(STGSEC2));
 
   signal(SIGMAIN,actionhandler);
 }

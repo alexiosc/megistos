@@ -35,8 +35,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:47  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1999/07/21 21:32:34  bbs
  * Initial revision
@@ -44,6 +45,16 @@
  *
  */
 
+
+#if RPC_SVC
+%#include "parallelism.h"
+#endif
+
+
+/* The fork()ing daemon only does so for procedures with a number >10000. We
+   prepend "1000" to the number, which is fair enough. */
+
+#define FORK_FOR_ME(x) 1000##x
 
 
 struct registration_package_t {
@@ -116,6 +127,12 @@ struct info_package_t {
 typedef struct club_list_item_t * club_list_item_p;
 
 
+struct club_list_request_t {
+	char	codename	[9];	/* caller's BBS codename */
+	char	targetname	[9];	/* name of targeted BBS */
+};
+
+
 struct club_list_item_t {
 	char	club		[16];	/* The club name (only 16 bytes used) */
 	char	descr		[64];	/* Description of the club */
@@ -124,7 +141,34 @@ struct club_list_item_t {
 };
 
 
-union club_list switch (int errno) {
+/* Result codes for club_list: */
+
+#ifdef RPC_HDR
+%#define CLR_OK              0    /* Request ok */
+%#define CLR_UNKNOWN        -1    /* Target BBS is unknown */
+%#define CLR_NOTMEGISTOS    -2    /* Not running Megistos */
+%#define CLR_UNKNOWNCLUB    -3    /* Club does not exist/access denied */
+%#define CLR_CORRUPTMSG     -4    /* Unable to read message */
+%#define CLR_NOTAPPROVED    -5    /* Deferred, attachment not approved */
+
+%#define CLR_SIZE            6    /* size of error list array */
+%
+%char *clr_errorlist[CLR_SIZE];
+#endif
+
+#ifdef RPC_XDR
+%char *clr_errorlist[CLR_SIZE]={  /* Index must be negated, of course! */
+%	"success",
+%	"target BBS is unknown",
+%	"target is not a Megistos BBS",
+%	"unknown club or access denied",
+%	"message is corrupted",
+%	"attachment not approved, transfer deferred",
+%};
+#endif
+
+
+union club_list switch (int result_code) {
 case 0:
 	club_list_item_p        clubs;  /* Linked list of exported clubs */
 default:
@@ -135,6 +179,7 @@ default:
 
 struct club_header_request_t {
 	char	codename	[9];	/* caller's BBS codename */		
+	char    targetname	[9];	/* targetted BBS codename */
 	char	club		[16];	/* name of club */
 };
 
@@ -159,13 +204,21 @@ struct club_header_t {
 };
 
 
-union club_header switch (int errno) {
+union club_header switch (int result_code) {
 case 0:
 	club_header_t	club;		/* Returned club header */
 default:
 	void;
 };
 
+
+
+struct ihave_request_t {
+	char		codename[9];	/* caller's BBS codename */
+	char		targetname[9];	/* targetted BBS' codename */
+	char		club[16];	/* name of club */
+	unsigned int 	since_time;	/* list starting time */
+};
 
 
 typedef struct ihave_entry_t * ihave_list_p;
@@ -175,12 +228,15 @@ struct ihave_entry_t {
 	string	codename	<>;	/* originating BBS codename */
 	string	orgclub		<>;	/* originating club name */
 	string	msgid		<>;	/* system-unique message ID */
+	
+	int     time;			/* used to update the since date */
+	int	msgno;			/* local message number */
 
 	ihave_list_p		next;	/* the next one in the list */
 };
 
 
-union ihave_list switch (int errno) {
+union ihave_list switch (int result_code) {
 case 0:
 	ihave_list_p	ihave_list;	/* Linked list of IHAVE entries */
 default:
@@ -188,18 +244,31 @@ default:
 };
 
 
-struct ihave_request_t {
-	char		codename[9];	/* caller's BBS codename */		
-	unsigned int 	since_time;	/* list starting time */
-};
-
-
 struct message_request_t {
-	char	codename	[9];	/* caller's BBS codename */		
-	string	orgclub		<>;	/* originating club name */
-	string	msgid		<>;	/* system-unique message ID */
-	int     compression;		/* non-zero for gzipped reply */
+	char	codename	[9];	/* caller's BBS codename */
+	char	targetname	[9];	/* targetted BBS' codename */
+	char    targetclub	[16];	/* which club are we accessing? */
+	int	msgno;			/* message number we're asking for */
+
+	char    compression;		/* non-zero: caller can gunzip */
 };
+
+
+struct compr_t {
+	int	orig_msg_len;		/* Uncompressed message length */
+	int	orig_att_len;		/* Uncompressed attachment length */
+};
+
+
+union compr switch (char compression) {
+case 0:
+	void;
+default:
+	struct compr_t compr;
+};
+
+
+typedef union compr compr;
 
 
 struct club_message_t {
@@ -207,17 +276,17 @@ struct club_message_t {
 	char	to		[80];	/* recipient (as sender) */
 	char	subject		[64];	/* message subject */
 	char	fatt		[16];	/* name of file attachment */
-	long	msgno;			/* original number */
 	long	flags;			/* message flags */
-	char	origclub	[16];	/* original club name */
+	int	orgtime;		/* original creation time */
+	int	orgdate;		/* original creation date */
 
-	int	compression;		/* !=0 => strings are gzipped */
+	compr   comp_result;		/* compression results */
 	char	message		<>;	/* entire message body */
 	char	attachment	<>;	/* file attachment, if any */
 };
 
 
-union club_message switch (int errno) {
+union club_message switch (int result_code) {
 case 0:
 	club_message_t	message;	/* an entire club message */
 default:
@@ -252,7 +321,7 @@ program METABBS_PROG {
 
 		info_package_p
 		metabbs_request_info
-		(string<>) = 3;
+		(string<>) = FORK_FOR_ME(3);
 
 
 
@@ -264,25 +333,25 @@ program METABBS_PROG {
 
 		union club_list
 		distclub_request_list
-		(string<>) = 100;
+		(club_list_request_t) = FORK_FOR_ME(100);
 
 		/* Get a specific club's header */
 
 		union club_header
 		distclub_request_header
-		(club_header_request_t) = 101;
+		(club_header_request_t) = FORK_FOR_ME(101);
 
 		/* Obtain the IHAVE list since the specified date */
 
 		union ihave_list
 		distclub_request_ihave
-		(ihave_request_t) = 102;
+		(ihave_request_t) = FORK_FOR_ME(102);
 
 		/* Obtain an entire message */
 
 		union club_message
 		distclub_request_message
-		(message_request_t) = 103;
+		(message_request_t) = FORK_FOR_ME(103);
 
 	} = 1;
 

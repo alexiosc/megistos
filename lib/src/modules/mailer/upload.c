@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.9  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.8  1998/12/27 15:45:11  alexios
  * Added autoconf support.
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -96,7 +98,7 @@ killdir()
   char command[256];
   sprintf(command,"rm -rf %s",dir);
   system(command);
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -110,11 +112,11 @@ receivefile()
 
   /* Upload the file */
   
-  setaudit(AUT_QWKUPL,AUS_QWKUPL,AUD_QWKUPL,0,NULL,NULL);
+  xfer_setaudit(AUT_QWKUPL,AUS_QWKUPL,AUD_QWKUPL,0,NULL,NULL);
   sprintf(source,"%s.rep",thisuseracc.userid);
-  addxfer(FXM_UPLOAD,source,"",0,0);
-  dofiletransfer();
-  endcnc();
+  xfer_add(FXM_UPLOAD,source,"",0,0);
+  xfer_run();
+  cnc_end();
 
 
   /* Scan the uploaded file(s) */
@@ -166,7 +168,7 @@ makedir()
   sprintf(command,"\\rm -rf %s",dir);
   system(command);
   if(mkdir(dir,0770)){
-    fatalsys("Unable to make directory %s",dir);
+    error_fatalsys("Unable to make directory %s",dir);
   }
   chdir(dir);
 }
@@ -185,9 +187,9 @@ askdupl()
   int shown=0, yes=0, res;
   for(;;){
     if(!shown)prompt(WRNDUPL);
-    setinputflags(INF_HELP);
-    res=getbool(&yes,ASKDUPL,ASKDUPR,ASKDUPD,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_bool(&yes,ASKDUPL,ASKDUPR,ASKDUPD,0);
+    inp_clearflags(INF_HELP);
     if(res<0)shown=0;
     else if(!res)prompt(ASKDUPR);
     else return yes;
@@ -237,11 +239,11 @@ decompress(char *fname)
 
   /* Decompress the packet */
 
-  setmbk(archivers);
-  sprintf(tmp,"%s >&/dev/null",getmsg(ARCHIVERS_UNCOMPRESS1+userqwk.decompressor*7));
+  msg_set(archivers);
+  sprintf(tmp,"%s >&/dev/null",msg_get(ARCHIVERS_UNCOMPRESS1+userqwk.decompressor*7));
   sprintf(command,tmp,fname,"");
-  strcpy(tmp,getmsg(ARCHIVERS_NAME1+userqwk.decompressor*7));
-  rstmbk();
+  strcpy(tmp,msg_get(ARCHIVERS_NAME1+userqwk.decompressor*7));
+  msg_reset();
   prompt(UNPACK,tmp);
   if(system(command)){
     prompt(UPACKR);
@@ -263,9 +265,9 @@ pluginupl(int n, int reqman)
 {
   char command[256];
   int res;
-  sprintf(command,"%s -%s",plugins[n].name,reqman?"reqman":"upload");
-  res=runmodule(command);
-  endcnc();
+  sprintf(command,"%s --%s",plugins[n].name,reqman?"reqman":"upload");
+  res=runcommand(command);
+  cnc_end();
   if(res)return res==512?2:1;
   return 0;
 }
@@ -316,9 +318,9 @@ upload()
 
   /* Are we allowed to upload? */
 
-  if(!haskey(&thisuseracc,uplkey)){
+  if(!key_owns(&thisuseracc,uplkey)){
     prompt(UPLNAX);
-    endcnc();
+    cnc_end();
     return;
   }
 

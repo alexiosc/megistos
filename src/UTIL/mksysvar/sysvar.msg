@@ -7,14 +7,14 @@ LEVEL2 {}
  Please hit F2, type in the name of your BBS, and hit the
  ÄÙ key.
 
-BBSTTL {Megistos-Test} S 50 BBS name
+BBSTTL {Acrobase} S 50 BBS name
 
  This is the codename (or maybe nodename) of the BBS used to
  make ourselves known to other friendly systems. It's usually
  a shorter (up to 8 characters) version of the full title.
  NO SPACES PLEASE!
 
-BBSCOD {MEGTEST} S 8 BBS Codename for networking (NO SPACES PLEASE!)
+BBSCOD {ACRO} S 8 BBS Codename for networking (NO SPACES PLEASE!)
 
  Your company name and address are presented to users when
  they are instructed as to how to purchase system credits,
@@ -22,7 +22,7 @@ BBSCOD {MEGTEST} S 8 BBS Codename for networking (NO SPACES PLEASE!)
 
  Please hit F2, type your company name, and hit the ÄÙ key.
 
-COMPANY {Joe Doe} S 46 Company name
+COMPANY {‘«â¢ ¦ª •˜£æ›¨˜¡˜ª} S 46 Company name
 
  Your company name and address are presented to users when
  they are instructed as to how to purchase system credits,
@@ -31,7 +31,7 @@ COMPANY {Joe Doe} S 46 Company name
  Please hit F2, type your company's street address, and hit
  the ÄÙ key.
 
-ADDRES1 {[enter your address here]} S 44 Address Line 1
+ADDRES1 {”à¡åà¤¦ª Œâš¨ 62} S 44 Address Line 1
 
  Your company name and address are presented to users when
  they are instructed as to how to purchase system credits,
@@ -40,7 +40,7 @@ ADDRES1 {[enter your address here]} S 44 Address Line 1
  Please hit F2, type your company's city, state, and zip
  code, and hit the ÄÙ key.
 
-ADDRES2 {[enter your address here]} S 44 Address Line 2
+ADDRES2 {‰¬¯â¢, 113 61} S 44 Address Line 2
 
  This is the city and state where your BBS is operating.
  When your live users connect with the system, they will be
@@ -51,7 +51,7 @@ ADDRES2 {[enter your address here]} S 44 Address Line 2
  Please hit F2, type the city and state where your BBS is
  operating (in capital letters), and hit the ÄÙ key.
 
-CITY {[enter your city here]} S 40 BBS city and state
+CITY {€Ÿã¤˜} S 40 BBS city and state
 
  You may allocate some of your phone lines for demonstration
  purposes, while reserving others for live users only.
@@ -64,7 +64,7 @@ CITY {[enter your city here]} S 40 BBS city and state
  See the configuration variable SAMPLN (below) to limit
  your non-live lines.
 
-DATAPH {[main data phone]} S 32 Your main BBS phone number
+DATAPH {8231753} S 32 Your main BBS phone number
 
  You may allocate some of your phone lines for demonstration
  purposes, while reserving others for live users only (see
@@ -76,9 +76,9 @@ DATAPH {[main data phone]} S 32 Your main BBS phone number
  Users will be told that they can only use this phone number
  to dial up your BBS when their account has "live" status.
 
-LIVEPH {[secondary/subscriber phone]} S 34 Live usage phone number
+LIVEPH {8815616} S 34 Live usage phone number
 
-VOICEPH {[voice phone]} S 32 Your voice phone number
+VOICEPH {} S 32 Your voice phone number
 
  Once a user logs on, the BBS knows whether to enable ANSI
  graphics to that user.  However, when the modem connection
@@ -105,18 +105,18 @@ SVRATE {Minutes between saving system variables/statistics 3} N 3 32767
  How much are you going to charge users for each hour of
  live connect time (that is, for 3600 credits)?
 
-CHGHOUR {[charge/hour goes here]} S 30 Connect time charge per hour
+CHGHOUR {60 ›¨˜®£âª} S 30 Connect time charge per hour
 
  What is the minimum amount of live connect time that users
  may purchase?
 
-CHGTIME {[minimum time to buy]} S 29 Minimum connect time purchase
+CHGTIME {17 é¨œª} S 29 Minimum connect time purchase
 
  What is the charge for the minimum amount of live connect
  time that users may purchase?  This figure should be the
  product of the previous two.
 
-CHGMIN {[minimum subscription]} S 31 Charge for minimum purchase
+CHGMIN {1000 ›¨˜®£âª} S 31 Charge for minimum purchase
 
  The Audit trail is a database that records important events
  on The Major BBS.  The last seven entries in the audit
@@ -144,7 +144,7 @@ LONAUD {Make Audit Trail entry for each Log-on? YES} B
 LOFAUD {Make Audit Trail entry for each Log-off? YES} B
 
 
-TNLMAX {Maximum number of telnet lines occupied? 3} N 1 32767
+TNLMAX {Maximum number of telnet lines occupied? 15} N 1 32767
 
 BBSRST {Minimum time between bbs restarts (hours, 0=disable)? 12} N 0 9999
 
@@ -195,7 +195,6 @@ KGDPASS {Hide passwords from DETAIL VIEW, regardless of key? YES} B
 
 
 
-
 LEVEL3 {}
 
 W2CLR { â©«œ â¤˜ §¢ã¡«¨¦ š ˜ ©¬¤â®œ ˜.} T Press any key to clear screen
@@ -216,6 +215,9 @@ NOCRDBYE {[0;1;31m[K***
 [K
 [K
 [K ®¨æ¤¦ª ®¨ã©ª ©˜ª «œ¢œåà©œ.[0;1m
+[K
+[K[36m† Acrobase ˜¥ ¦§¦ œå «¤ §¨¦©­¦¨á ©˜ª ©«˜ Clubs, «˜ £¤ç£˜«˜ ©˜ª ã «˜
+[Ká¨Ÿ¨˜ ©˜ª £§¦¨¦ç¤ ¤˜ ˜§¦›æ©¦¬¤ ˜¨¡œ«æ ›à¨œá¤ ®¨æ¤¦ ®¨ã©œàª.
 [K
 [K[37m‘˜ª œ¬®˜¨ ©«¦ç£œ §¦¬ ¡˜¢â©˜«œ.
 [K
@@ -241,6 +243,9 @@ NOCTIMBYE {[0;1;31m[K***
 [K
 [Kœ§œ¨á©˜«œ «¦ ®¨¦¤ ¡æ ©˜ª æ¨ ¦ ˜¤á ¡¢ã©.[0;1m
 [K
+[K[36m† Acrobase ˜¥ ¦§¦ œå «¤ §¨¦©­¦¨á ©˜ª ©«˜ Clubs, «˜ £¤ç£˜«˜ ©˜ª ã «˜
+[Ká¨Ÿ¨˜ ©˜ª £§¦¨¦ç¤ ¤˜ ˜§¦›æ©¦¬¤ ˜¨¡œ«æ ›à¨œá¤ ®¨æ¤¦ ®¨ã©œàª.
+[K
 [K[37m‘˜ª œ¬®˜¨ ©«¦ç£œ §¦¬ ¡˜¢â©˜«œ.
 [K
 [K
@@ -264,6 +269,9 @@ NODTIMBYE {[0;1;31m[K***
 [K
 [K
 [Kœ§œ¨á©˜«œ «¦ £œ¨ã© ¦ ®¨¦¤ ¡æ ©˜ª æ¨ ¦.[0;1m
+[K
+[K[36m† Acrobase ˜¥ ¦§¦ œå «¤ §¨¦©­¦¨á ©˜ª ©«˜ Clubs, «˜ £¤ç£˜«˜ ©˜ª ã «˜
+[Ká¨Ÿ¨˜ ©˜ª £§¦¨¦ç¤ ¤˜ ˜§¦›æ©¦¬¤ ˜¨¡œ«æ ›à¨œá¤ ®¨æ¤¦ ®¨ã©œàª.
 [K
 [K[37m‘˜ª œ¬®˜¨ ©«¦ç£œ §¦¬ ¡˜¢â©˜«œ.
 [K
@@ -319,7 +327,6 @@ SHTDW3 {[0;1;31m[K***
 !0l
 [0;1m} T BBS Shutdown, warning type 3
 
-
 LNCHGW1 {[0;1;36m[K***
 
 !J† @BBS@ Ÿ˜ ®¨œ ˜©«œå « š¨˜££ã ©«¤ ¦§¦å˜ ™¨å©¡œ©«œ ©« ª [37m%02d:%02d[36m.
@@ -345,9 +352,6 @@ LNCHGW3 {[0;1;31m[K***
 ˜§¦©¬¤›œŸœå«œ.!)
 !0l
 [0;1m} T BBS Line change, warning type 3
-
-
-
 
 
 
@@ -581,22 +585,6 @@ CHATEND {
 [0;1m’â¢¦ª ©¬¤¦£ ¢å˜ª, œ§ ©«¨¦­ã ©«¦ ©ç©«£˜...[0m
 } T Leaving sysop chat mode
 
-
-REGHELP {[0;1;32m
-!Jƒé©«œ [33m/r ¯œ¬›é¤¬£¦[32m š ˜ ¤˜ ›œå«œ «˜ ©«¦ ®œå˜ ¡á§¦ ¦¬ ®¨ã©«.
-‚ ˜ §˜¨á›œ š£˜, £œ «¤ œ¤«¦¢ã [33m/r sysop[32m £§¦¨œå«œ ¤˜ ›œå«œ «˜
-©«¦ ®œå˜ «¦¬ ¯œ¬›à¤ç£¦¬ Sysop.!)
-[0;1m} T Registry help
-
-
-REGERR {[0;1;31m
-ƒœ¤ ¬§á¨®¦¬¤ ©«¦ ®œå˜ š ˜ ˜¬«æ «¦ ¯œ¬›é¤¬£¦.
-[0;1m} T Registry error, unknown user
-
-
-  €¬«æ œå¤˜  «¦ £ã¤¬£˜ §¦¬ Ÿ˜ §˜å¨¤œ  ¦ ®¨ã©«ª §¨ ¤
-  ˜§æ ¡áŸœ global cookie.
-                                        (€¢â¥ª)
 
 GCOOKIE {
 [33;1mÄÄ[37m  á¨«œ â¤˜ cookie![33m  !FÄ
@@ -859,6 +847,9 @@ NOCRDBYE {[0;1;31m[K***
 [K
 [KSorry, you ran out of time.[0;1m
 [K
+[K[36mAcrobase appreciates contributions to its Clubs; messages or
+[Karticles may provide you with a lot of credits.
+[K
 [K[37mThank you for calling.
 [K
 [K
@@ -882,6 +873,9 @@ NOCTIMBYE {[0;1;31m[K***
 [K
 [KYou have reached your time limit for this call.[0;1m
 [K
+[K[36mAcrobase appreciates contributions to its Clubs; messages or
+[Karticles may provide you with a lot of credits.
+[K
 [K[37mThank you for calling.
 [K
 [K
@@ -904,6 +898,9 @@ NODTIMBYE {[0;1;31m[K***
 [K
 [K
 [KYou have reached your daily time limit.[0;1m
+[K
+[K[36mAcrobase appreciates contributions to its Clubs; messages or
+[Karticles may provide you with a lot of credits.
 [K
 [K[37mThank you for calling.
 [K

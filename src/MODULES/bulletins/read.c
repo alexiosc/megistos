@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/28 23:10:22  alexios
  * Added support for downloading bulletins.
@@ -38,6 +39,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -76,33 +78,33 @@ getblt(int pr, struct bltidx *blt)
 
 again:
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	list(0);
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc || (margc==1 && sameas(margv[0],"."))){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	list(0);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
 
     if(!i[0] || sameas(i,".")){
-      endcnc();
+      cnc_end();
       continue;
     } else if(dbnumexists(atoi(i))){
       break;
@@ -113,7 +115,7 @@ again:
 	if(club[0])prompt(UNKBLTC,club);
 	else prompt(UNKBLT);
       }
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -121,7 +123,7 @@ again:
   if((club[0]&&strcmp(club,blt->area))||
      getclubax(&thisuseracc,blt->area)<CAX_READ){
     prompt(UNKBLTC,club);
-    endcnc();
+    cnc_end();
     goto again;
   }
   return 1;
@@ -160,20 +162,20 @@ offerblt(struct bltidx *blt)
   sprintf(fname,MSGSDIR"/%s/%s/%s",blt->area,MSGBLTDIR,blt->fname);
   sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
 
-  placelock(lock,"downloading");
-  lastresult=PAUSE_CONTINUE;
+  lock_place(lock,"downloading");
+  fmt_lastresult=PAUSE_CONTINUE;
 
   sprintf(a,AUD_BLTDNL,thisuseracc.userid,blt->fname,blt->area);
-  setaudit(AUT_BLTDNL,AUS_BLTDNL,a,0,NULL,NULL);
+  xfer_setaudit(AUT_BLTDNL,AUS_BLTDNL,a,0,NULL,NULL);
 
-  if(addxfer(FXM_DOWNLOAD,fname,dnldesc,0,-1)){
-    dofiletransfer();
-    killxferlist();
+  if(xfer_add(FXM_DOWNLOAD,fname,dnldesc,0,-1)){
+    xfer_run();
+    xfer_kill_list();
   }
 
   blt->timesread++;
   dbupdate(blt);
-  rmlock(lock);
+  lock_rm(lock);
 }
 
 
@@ -208,17 +210,17 @@ showblt(struct bltidx *blt)
   sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt->area,blt->fname);
 
   thisuseronl.flags|=OLF_BUSY;
-  placelock(lock,"reading");
-  lastresult=PAUSE_CONTINUE;
-  if(!catfile(fname)){
+  lock_place(lock,"reading");
+  fmt_lastresult=PAUSE_CONTINUE;
+  if(!out_catfile(fname)){
     prompt(PANIC1,blt->fname);
-    rmlock(lock);
+    lock_rm(lock);
     thisuseronl.flags&=~OLF_BUSY;
     return;
   }
-  if(lastresult==PAUSE_QUIT){
+  if(fmt_lastresult==PAUSE_QUIT){
     prompt(ABORT);
-    rmlock(lock);
+    lock_rm(lock);
     thisuseronl.flags&=~OLF_BUSY;
     return;
   }
@@ -227,7 +229,7 @@ showblt(struct bltidx *blt)
 
   blt->timesread++;
   dbupdate(blt);
-  rmlock(lock);
+  lock_rm(lock);
 
 
   /* Audit it */

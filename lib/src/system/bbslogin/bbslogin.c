@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.11  1999/08/13 17:04:25  alexios
  * Numerous MetaBBS-related fixes. Starting in this version,
@@ -48,11 +49,11 @@
  * Bug fixes related to the environment (home directories etc).
  *
  * Revision 1.8  1999/07/18 21:58:44  alexios
- * Changed a few fatal() calls to fatalsys(). Numerous changes,
+ * Changed a few error_fatal() calls to error_fatalsys(). Numerous changes,
  * including support for the MetaBBS client, security fixes, etc.
  *
  * Revision 1.7  1998/12/27 16:19:44  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Numerous other long-awaited fixes.
  *
  * Revision 1.6  1998/08/11 10:24:16  alexios
@@ -91,7 +92,7 @@
  * Replaced them with standard system calls like chown().
  *
  * Revision 0.4  1997/09/12 13:29:31  alexios
- * Added code to create the user's IPC injoth() queue. Fixed the
+ * Added code to create the user's IPC usr_injoth() queue. Fixed the
  * broken invisible-login feature. Added auditing for duplicate
  * user login attempts.
  *
@@ -107,6 +108,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -141,28 +143,28 @@
 #define STDOUT 1
 #define STDERR 2
 
-#define LOCALLINE    ((lastchandef->flags&(TTF_SERIAL|TTF_CONSOLE))!=0)
-#define ALLOWSIGNUPS ((lastchandef->flags&TTF_SIGNUPS)!=0)
-#define KEY          (lastchandef->key)
+#define LOCALLINE    ((chan_last->flags&(TTF_SERIAL|TTF_CONSOLE))!=0)
+#define ALLOWSIGNUPS ((chan_last->flags&TTF_SIGNUPS)!=0)
+#define KEY          (chan_last->key)
 
 
-char         tty[32], userid[64];
-char         *unixuid;
-int          linestate, baud, ansiopt=0;
-useracc      uacc;
-onlinerec    user;
-promptblk    *msg=NULL;
-int          lonalrm;
-char         *terminal;
-extern char  **environ;
-int          xlation=0, lang=1;
-int          setlang=0,setansi=0,setxlt=0;
-int          uid=-1,gid=-1;
-int          bbsuid=-1,bbsgid=-1;
-int          metab4, metalg;
+char          tty[32], userid[64];
+char          *unixuid;
+int           linestate, baud, ansiopt=0;
+useracc_t     uacc;
+onlinerec_t   user;
+promptblock_t *msg=NULL;
+int           lonalrm;
+char          *terminal;
+extern char   **environ;
+int           xlation=0, lang=1;
+int           setlang=0,setansi=0,setxlt=0;
+int           uid=-1,gid=-1;
+int           bbsuid=-1,bbsgid=-1;
+int           metab4, metalg;
 
 #ifdef HAVE_METABBS
-int          through_metabbs=0;
+int           through_metabbs=0;
 #endif
 
 
@@ -170,12 +172,12 @@ int          through_metabbs=0;
 void
 setchannelstate(int result, char *user) 
 {
-  struct linestatus status;
-  getlinestatus(tty,&status);
+  channel_status_t status;
+  channel_getstatus(tty,&status);
   status.result=result;
   status.baud=baud;
   strcpy(status.user,user);
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
 }
 
 
@@ -189,7 +191,7 @@ call_metabbs_client(int mode)
   switch(pid=fork()){
 
   case -1:
-    fatalsys("Unable to fork() MetaBBS client");
+    error_fatalsys("Unable to fork() MetaBBS client");
     break;
 
   case 0:			/* The child process */
@@ -211,8 +213,8 @@ call_metabbs_client(int mode)
     setenv("LANG",parm,1);
     sprintf(parm,"%d",xlation);
     setenv("XLATION",parm,1);
-    sprintf(parm,"%d",ansienable);
-    setenv("XLATION",parm,1);
+    sprintf(parm,"%d",(out_flags&OFL_ANSIENABLE)!=0);
+    setenv("ANSI",parm,1);
 
     /* Now invoke the client */
 
@@ -238,6 +240,49 @@ call_metabbs_client(int mode)
 
   return WEXITSTATUS(result);	/* Stupid sequence, but necessary... */
 }
+
+
+static int
+call_metabbs_server()
+{
+  mod_setbot(1);
+  return 0;
+
+#if 0
+  char parm[4];
+ 
+  /* Become mortal, the metabbsd server doesn't need to run as root. */
+  setgid(bbsgid);
+  setuid(bbsuid);
+  
+  /* Set line status and environment variables */
+  
+  setchannelstate(LSR_INTERBBS,"[MetaBBSd]");
+  strcpy(userid,"[SIGNUP]");
+  setenv("CHANNEL",tty,1);
+  sprintf(parm,"%d",baud);
+  setenv("SPEED",parm,1);
+  setenv("TERM",terminal,1);
+  sprintf(parm,"%d",lang%999);
+  setenv("LANG",parm,1);
+  sprintf(parm,"%d",xlation);
+  setenv("XLATION",parm,1);
+  sprintf(parm,"%d",(out_flags&OFL_ANSIENABLE)!=0);
+  setenv("ANSI",parm,1);
+
+  /* Now invoke the client */
+
+  execl(METABBSDBIN,METABBSDBIN,NULL);
+  
+  /* Oops, execl() failed. Try system() as our last resort. */
+  
+  exit(system("exec "METABBSDBIN));
+
+  exit(0);
+#endif
+}
+
+
 #endif
 
 
@@ -250,13 +295,13 @@ mkinjoth()
   user.injothqueue=msgget(IPC_PRIVATE,0620);
   if(user.injothqueue<0){
     int i=errno;
-    fatal("Unable to allocate IPC message queue (errno=%d, %s)",
+    error_fatal("Unable to allocate IPC message queue (errno=%d, %s)",
 	  i,sys_errlist[i]);
   }
 
   if(msgctl(user.injothqueue,IPC_STAT,&buf)){
     int i=errno;
-    fatal("Unable to IPC_STAT injoth queue (errno=%d, %s)",
+    error_fatal("Unable to IPC_STAT injoth queue (errno=%d, %s)",
 	  i,sys_errlist[i]);
   }
 
@@ -264,7 +309,7 @@ mkinjoth()
   buf.msg_perm.gid=gid;
   
   if(msgctl(user.injothqueue,IPC_SET,&buf)){
-    fatalsys("Unable to IPC_SET injoth queue");
+    error_fatalsys("Unable to IPC_SET injoth queue");
   }
 }
 
@@ -277,7 +322,7 @@ writeonline(char status)
 
   sprintf(fname,"%s/%s",ONLINEDIR,userid);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create on-line info for %s.",userid);
+    error_fatalsys("Unable to create on-line info for %s.",userid);
   }
   memset(&user,0,sizeof(user));
   memcpy(user.magic,ONL_MAGIC,sizeof(user.magic));
@@ -293,6 +338,9 @@ writeonline(char status)
   user.tick=0;
   user.loggedin=time(0);
   strcpy(user.input,"");
+  if(mod_isbot()){
+    user.flags|=OLF_ISBOT;
+  }
   if(hassysaxs(&uacc,USY_INVIS) && status=='!'){
     unsetenv("INVIS");
     user.flags|=OLF_INVISIBLE;
@@ -303,7 +351,7 @@ writeonline(char status)
   {
     int i;
     for(i=0;i<NUMLANGUAGES;i++){
-      strcpy(user.descr[i],getmsglang(DESCR,i));
+      strcpy(user.descr[i],msg_getl(DESCR,i));
     }
   }
 
@@ -313,30 +361,31 @@ writeonline(char status)
 #if 0
   /* Force idle timeouts if the user is connecting through telnet */
 
-  if((channels[getchannelindex(user.channel)].flags)&TTF_TELNET)
+  if((channels[chan_getindex(user.channel)].flags)&TTF_TELNET)
     user.flags|=OLF_FORCEIDLE;
 #endif
 
   /* Check if user is elligible to bypass idle zapping (eg is a sysop) */
 
-  if(haskey(&uacc,sysvar->idlovr))user.flags|=OLF_ZAPBYPASS;
+  if(key_owns(&uacc,sysvar->idlovr))user.flags|=OLF_ZAPBYPASS;
 
   user.lastpage=-100;
 
   if((uacc.prefs&UPF_TRDEF)==0){
-    setoxlation(user,getpxlation(uacc));
-    setxlationtable(getpxlation(uacc));
+    usr_setoxlation(user,usr_getpxlation(uacc));
+    out_setxlation(usr_getpxlation(uacc));
   }
 
   user.flags&=~OLF_ANSION;
-  if(uacc.prefs&(UPF_ANSIDEF|UPF_ANSIASK) && ansienable)user.flags|=OLF_ANSION;
+  if(uacc.prefs&(UPF_ANSIDEF|UPF_ANSIASK) &&
+     (out_flags&OFL_ANSIENABLE))user.flags|=OLF_ANSION;
   else if((uacc.prefs&UPF_ANSIDEF)==0 && uacc.prefs&UPF_ANSION)
     user.flags|=OLF_ANSION;
 
   mkinjoth();
 
   if(!fwrite(&user,sizeof(user),1,fp)){
-    fatalsys("Unable to write on-line info for %s.",userid);
+    error_fatalsys("Unable to write on-line info for %s.",userid);
   }
   fclose(fp);
   
@@ -405,7 +454,7 @@ waitshmid(char *user)
   }
   sprintf(userf,"%s/%s",ONLINEDIR,user);
   unlink(userf);
-  fatal("Timed out waiting for bbsd file %s",fname);
+  error_fatal("Timed out waiting for bbsd file %s",fname);
 }
 
 
@@ -417,7 +466,7 @@ void storepid()
   sprintf(fname,"%s/.pid-%s",CHANDEFDIR,tty);
   
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Cannot open PID file %s for writing",fname);
+    error_fatalsys("Cannot open PID file %s for writing",fname);
   }
 
   fprintf(fp,"%d\n",getpid());
@@ -428,12 +477,12 @@ void storepid()
 void
 resetchannel()
 {
-  struct linestatus status;
-  getlinestatus(tty,&status);
+  channel_status_t status;
+  channel_getstatus(tty,&status);
   status.result=LSR_OK;
   status.baud=baud;
   status.user[0]=0;
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
 }
 
 
@@ -463,7 +512,7 @@ init()
 	case 2:
 	  break;		/* BBS at other end (ignored) */
 	default:
-	  fatal("Sanity check failed while parsing MetaBBS variable!");
+	  error_fatal("Sanity check failed while parsing MetaBBS variable!");
 	}
       }
       
@@ -474,12 +523,12 @@ init()
 
 
   if(passwd==NULL){
-    fatal("Unable to find the BBS user %s in /etc/passwd. Aborting.",BBSUSERNAME);
+    error_fatal("Unable to find the BBS user %s in /etc/passwd. Aborting.",BBSUSERNAME);
   } else memcpy(&bbspass,passwd,sizeof(bbspass));
   
 
   if(getuid()){
-    fatal("bbslogin must be run by the super user.");
+    error_fatal("bbslogin must be run by the super user.");
   }
 
   bbsuid=bbspass.pw_uid;
@@ -493,24 +542,24 @@ init()
   setenv("BAUD",baudrate,1);
 
 
-  initmodule(INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITINPUT|
-	     INITSIGNALS|INITCLASSES|INITLANGS|INITATEXIT);
-  setwaittoclear(0);
+  mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_INPUT|
+	     INI_SIGNALS|INI_CLASSES|INI_LANGS|INI_ATEXIT);
+  out_clearflags(OFL_WAITTOCLEAR);
 
   atexit(resetchannel);
 
-  if(getchannelnum(tty)<0){
-    fatal("%s has not been registered in %s",
+  if(chan_getnum(tty)<0){
+    error_fatal("%s has not been registered in %s",
 	  tty,CHANDEFFILE);
   }
 
-  msg=opnmsg("login");
-  setlanguage(lastchandef->lang>0?lastchandef->lang:-lastchandef->lang);
-  unixuid=stgopt(UNIXUID);
-  lonalrm=numopt(LONALRM,0,32767)*60;
-  terminal=stgopt(TERMINAL);
-  metab4=ynopt(METAB4);
-  metalg=ynopt(METALG);
+  msg=msg_open("login");
+  msg_setlanguage(chan_last->lang>0?chan_last->lang:-chan_last->lang);
+  unixuid=msg_string(UNIXUID);
+  lonalrm=msg_int(LONALRM,0,32767)*60;
+  terminal=msg_string(TERMINAL);
+  metab4=msg_bool(METAB4);
+  metalg=msg_bool(METALG);
 
   sprintf(fname,"%s/.%s",ONLINEDIR,tty);
   if((fp=fopen(fname,"r"))!=NULL){
@@ -539,7 +588,7 @@ showttyinfo()
 {
   char fname[256];
   sprintf(fname,TTYINFOFILE,tty);
-  printfile(fname);
+  out_printfile(fname);
 }
 
 
@@ -548,7 +597,7 @@ timeout()
 {
   prompt(TIMEOUT);
   sleep(1);
-  hangup();
+  channel_hangup();
   exit(0);
 }
 
@@ -569,9 +618,10 @@ getinp(char *i,int passwordentry)
       c='\n';
       write(0,&c,1);
       fflush(stdout);
-      input[cp]=0;
-      monitorinput(tty);
-      strcpy(i,input);
+      inp_buffer[cp]=0;
+      inp_setmonitorid(tty);
+      inp_monitor(tty);
+      strcpy(i,inp_buffer);
       return;
     case 127:
     case 8:
@@ -585,8 +635,8 @@ getinp(char *i,int passwordentry)
       exit(0);
       break;
     default:
-      if(strlen(input)<63 && c>=0x20){
-	input[cp++]=c;
+      if(strlen(inp_buffer)<63 && c>=0x20){
+	inp_buffer[cp++]=c;
 	if(passwordentry)c='*';
 	write(0,&c,1);
       }
@@ -599,7 +649,7 @@ void
 kickout()
 {
   prompt(STRUKO);
-  hangup();
+  channel_hangup();
   sleep(5);
   exit(0);
 }
@@ -644,7 +694,7 @@ unixlogin()
   execl(LOGINBIN,"login",userid,NULL);
   execl("/bin/sh","sh","-c","exec","login",userid,NULL);
   execl("/bin/sh","sh","-c","login",userid,NULL);
-  fatalsys("Unable to execute %s",LOGINBIN);
+  error_fatalsys("Unable to execute %s",LOGINBIN);
   exit(1);
 }
 
@@ -656,7 +706,7 @@ askxlation()
   char fname[256];
   int  xltmap[10];
   int  i;
-  char input[80];
+  char inp_buffer[80];
   int  def=-1;
 
   if(setxlt)return;		/* Don't ask twice. */
@@ -673,13 +723,13 @@ askxlation()
   /* Check if this channel has a default translation table. */
 
   setxlt=1;
-  if(lastchandef->xlation)def=lastchandef->xlation;
+  if(chan_last->xlation)def=chan_last->xlation;
 
   for(;;){
     prompt(XLATEM,def);
-    getinp(input,0);
-    if(strlen(input)==1&&isdigit(*input))xlation=atoi(input);
-    else if(!strlen(input))xlation=def;
+    getinp(inp_buffer,0);
+    if(strlen(inp_buffer)==1&&isdigit(*inp_buffer))xlation=atoi(inp_buffer);
+    else if(!strlen(inp_buffer))xlation=def;
     if(!xltmap[xlation])prompt(XLATEE);
     else break;
   }
@@ -693,8 +743,8 @@ askansi()
 
   if(setansi)return;		/* Don't ask twice */
   setansi=1;
-  while(!getbool(&answer,0,QANSIERR,QANSI,lastchandef->flags&TTF_ANSI));
-  setansiflag(answer);
+  while(!get_bool(&answer,0,QANSIERR,QANSI,chan_last->flags&TTF_ANSI));
+  answer?out_setflags(OFL_ANSIENABLE):out_clearflags(OFL_ANSIENABLE);
 }
 
 
@@ -702,35 +752,35 @@ void
 asklanguage()
 {
   int  i=0,choice=0,ok=0,showmenu=1;
-  char input[80];
+  char inp_buffer[80];
   
   setlang=1;
-  if(numlangs){
+  if(msg_numlangs){
     while(!ok){
       if(showmenu){
 	showmenu=0;
 	prompt(ASKLNG1);
-	for(i=0;i<numlangs;i++)prompt(ASKLNG2,i+1,languages[i]);
+	for(i=0;i<msg_numlangs;i++)prompt(ASKLNG2,i+1,msg_langnames[i]);
       }
-      prompt(ASKLNG3,numlangs,lastchandef->lang);
-      getinp(input,0);
-      if(sameas(input,"?")){
+      prompt(ASKLNG3,msg_numlangs,chan_last->lang);
+      getinp(inp_buffer,0);
+      if(sameas(inp_buffer,"?")){
 	showmenu=1;
 	continue;
-      } else if(!input[0]){
+      } else if(!inp_buffer[0]){
 	ok=1;
-	choice=lastchandef->lang;
+	choice=chan_last->lang;
       } else {
-	choice=atoi(input);
-	if(choice<1 || choice>numlangs){
-	  prompt(ASKLNGR,numlangs);
+	choice=atoi(inp_buffer);
+	if(choice<1 || choice>msg_numlangs){
+	  prompt(ASKLNGR,msg_numlangs);
 	  continue;
 	} else ok=1;
       }
     }
   } else choice=1;
   lang=choice;
-  setlanguage(choice);
+  msg_setlanguage(choice);
 }
 
 
@@ -748,6 +798,34 @@ lowerc(char *s)
 }
 
 
+static char *magic_spaces=" \t  \t    \t        \t                \t\n";
+
+static int
+check_interbbs()
+{
+  int i,j=0;
+  char c;
+
+  inp_nonblock();
+  for(i=0;i<5;i++){
+    print(magic_spaces);
+    usleep(150000);
+
+    for(;;){
+      c=0;
+      if(read(0,&c,1)<1)break;
+      else if(c==2)j++;
+      if(j==4){
+	inp_block();
+	return 1;
+      }
+    }
+  }
+  inp_block();
+  return 0;
+}
+
+
 void
 authenticate()
 {
@@ -755,8 +833,8 @@ authenticate()
   char  status=0, filename[256];
   FILE  *fp;
   int   givenprompt=0, strikes=0, metabbs_strikes=0, signup=0;
-  int   defaultansi=(lastchandef->flags&TTF_ANSI)!=0;
-  struct linestatus linestatus;
+  int   defaultansi=(chan_last->flags&TTF_ANSI)!=0;
+  channel_status_t linestatus;
 
   /* Delay so that b.a.d comms packages have enough time to start reading the
   port after the connection. This isn't guaranteed to catch everything, but we
@@ -766,62 +844,66 @@ authenticate()
 
   baud=atoi(getenv("BAUD"));
 
-  if(!getlinestatus(tty,&linestatus)){
-    fatal("Unable to get line status for %s\n",tty);
+  if(!channel_getstatus(tty,&linestatus)){
+    error_fatal("Unable to get line status for %s\n",tty);
   }
   
 
   /* Clear any remaining remsys locks -- this is obviously a kludge */
   
   sprintf(filename,"LCK-remsys-%s",tty);
-  rmlock(filename);
+  lock_rm(filename);
 
   if((linestatus.state==LST_BUSYOUT)||(linestatus.state==LST_NOANSWER)){
     prompt(LDOWN);
     sleep(5);
-    hangup();
+    channel_hangup();
     return;
   }
   
-  setansiflag(lastchandef->flags&TTF_ANSI);
+  if(chan_last->flags&TTF_ANSI)out_setflags(OFL_ANSIENABLE);
+  else out_clearflags(OFL_ANSIENABLE);
 
 #ifdef HAVE_METABBS
-  if(through_metabbs)ansiopt=(lastchandef->flags&TTF_ANSI)?2:1;
+  if(through_metabbs)ansiopt=(chan_last->flags&TTF_ANSI)?2:1;
   else
 #endif HAVE_METABBS
 
-  if(lastchandef->flags&TTF_ASKANSI)ansiopt=3;
-  else if (lastchandef->flags&TTF_ANSI)ansiopt=2;
+  if(chan_last->flags&TTF_ASKANSI)ansiopt=3;
+  else if (chan_last->flags&TTF_ANSI)ansiopt=2;
   else ansiopt=1;
 
-
   setenv("CHANNEL",tty,1);
-  setxlationtable(xlation=lastchandef->xlation);
+  out_setxlation(xlation=chan_last->xlation);
 
   if(linestatus.state!=LST_OFFLINE){
     if(!LOCALLINE)setchannelstate(LSR_LOGIN,"[NO-USER]");
     
-    if(lastchandef->flags&TTF_TELNET && (telnetlinecount()>sysvar->tnlmax)){
+    if(chan_last->flags&TTF_TELNET && (chan_telnetlinecount()>sysvar->tnlmax)){
       prompt(TFULL);
       sleep(1);
-      hangup();
+      channel_hangup();
       return;
     }
     
-    setansiflag(0);
+    out_clearflags(OFL_ANSIENABLE);
 
-    xlation=lastchandef->xlation;
+    xlation=chan_last->xlation;
 
 #ifdef HAVE_METABBS
+    if(check_interbbs()) call_metabbs_server();
+
     if(!through_metabbs)
 #endif
-    if(lastchandef->flags&TTF_ASKXLT)askxlation();
-    setxlationtable(xlation);
-    setansiflag(1);
+    if(chan_last->flags&TTF_ASKXLT)askxlation();
+    out_setxlation(xlation);
+    out_setflags(OFL_ANSIENABLE);
     
     if(!ansiopt)ansiopt=2;
-    if(--ansiopt<2)setansiflag(ansiopt);
-    else{
+    if(--ansiopt<2){
+      if(ansiopt)out_setflags(OFL_ANSIENABLE);
+      else out_clearflags(OFL_ANSIENABLE);
+    } else{
       char c,answer=defaultansi?'Y':'N';
       int len=0,ok=0;
       
@@ -855,10 +937,12 @@ authenticate()
 	ioctl(0,TCFLSH,0);
       }
       setchannelstate(LSR_LOGIN,"[NO-USER]");
-      setansiflag(ansiopt=(answer=='Y'));
+      ansiopt=(answer=='Y');
+      if(ansiopt)out_setflags(OFL_ANSIENABLE);
+      else out_clearflags(OFL_ANSIENABLE);
 
-      if(lastchandef->lang<0){
-	lastchandef->lang=-lastchandef->lang;
+      if(chan_last->lang<0){
+	chan_last->lang=-chan_last->lang;
 
 #ifdef HAVE_METABBS
 	if(!through_metabbs)
@@ -867,14 +951,14 @@ authenticate()
       }
     }
     
-    noerrormessages();
-    loadsysvars();
+    error_setnotify(0);
+    mod_init(INI_SYSVARS);
   } else {
-    printfile(LOGINMSGFILE);
+    out_printfile(LOGINMSGFILE);
     showttyinfo();
     prompt(BBSOFF,NULL);
     sleep(10);
-    hangup();
+    channel_hangup();
     if(!LOCALLINE){
       sleep(10);
       exit(0);
@@ -887,8 +971,8 @@ authenticate()
   for(;;) {
     if((!strikes && LOCALLINE) || !givenprompt){
       givenprompt=1;
-      prompt(lastchandef->flags&TTF_TELNET?THELLO:HELLO);
-      printfile(LOGINMSGFILE);
+      prompt(chan_last->flags&TTF_TELNET?THELLO:HELLO);
+      out_printfile(LOGINMSGFILE);
       showttyinfo();
     }
 
@@ -901,7 +985,7 @@ authenticate()
        its list, too. Access to the local BBS is offered by returning here,
        rather than calling telnet. */
 
-    if(metab4 && (lastchandef->flags&TTF_METABBS)){
+    if(metab4 && (chan_last->flags&TTF_METABBS)){
 
       /* Only run the client once in this way. If remote systems are prone to
          falling over, it's best to also enable the METALG option so that users
@@ -911,7 +995,7 @@ authenticate()
       metab4=0;
 
       if(++metabbs_strikes>LOGINSTRIKES){
-	hangup();
+	channel_hangup();
 	sleep(5);
 	exit(0);
       }
@@ -921,7 +1005,7 @@ authenticate()
 	 local BBS login screen. */
 
       if(call_metabbs_client(METAB4)){
-	hangup();
+	channel_hangup();
 	sleep(1);
 	exit(0);
       } else {
@@ -935,7 +1019,7 @@ authenticate()
     /* Otherwise, offer the OUT command if this is a MetaBBS-enabled line and
        option METALG is set. */
 
-    if(lastchandef->flags&TTF_METABBS && metalg){
+    if(chan_last->flags&TTF_METABBS && metalg){
       prompt(ALLOWSIGNUPS?ENTUSIDM:LOGUIDM);
     } else {
       prompt(ALLOWSIGNUPS?ENTUSID:LOGUID);
@@ -969,7 +1053,7 @@ authenticate()
 	  continue;
 	}else{
 	  audit(tty,AUDIT(UNKUSER),userid,
-		baudstg(atoi(getenv("BAUD"))));
+		channel_baudstg(atoi(getenv("BAUD"))));
 	  kickout();
 	}
       } else {
@@ -1003,16 +1087,16 @@ authenticate()
     }
 
 #ifdef HAVE_METABBS
-    if(metalg && sameas(userid,METABBSID) && (lastchandef->flags&TTF_METABBS)){
+    if(metalg && sameas(userid,METABBSID) && (chan_last->flags&TTF_METABBS)){
       if(++metabbs_strikes>LOGINSTRIKES){
 	prompt(METAKO);
-	hangup();
+	channel_hangup();
 	sleep(5);
 	exit(0);
       }
       
       if(call_metabbs_client(METALG)){ /* !=0 means 'disconnect afterwards' */
-	hangup();
+	channel_hangup();
 	sleep(1);
 	exit(0);
       }
@@ -1027,9 +1111,9 @@ authenticate()
       strcpy(userid,&userid[1]);
     }
 
-    if(!userexists(userid) || status=='@'){
+    if(!usr_exists(userid) || status=='@'){
       if((fp=fopen("/etc/passwd","r"))==NULL){
-	fatal("Unable to open /etc/passwd!",NULL);
+	error_fatal("Unable to open /etc/passwd!",NULL);
       }
       while (!feof(fp)){
 	char line[1024], *cp;
@@ -1048,53 +1132,53 @@ authenticate()
 	prompt(ALLOWSIGNUPS?UIDNOG:LOGNOG,NULL);
 	continue;
       }else{
-	audit(tty,AUDIT(UNKUSER),userid,baudstg(baud));
+	audit(tty,AUDIT(UNKUSER),userid,channel_baudstg(baud));
 	kickout();
       }
     }
 
     sprintf(filename,"%s/%s",USRDIR,userid);
     if((fp=fopen(filename,"r"))==NULL){
-      fatal("Failed to open user account %s.",filename,NULL);
+      error_fatal("Failed to open user account %s.",filename,NULL);
     }
-    if(fread(&uacc,sizeof(useracc),1,fp)!=1){
-      fatal("Failed to read user account %s.",filename,NULL);
+    if(fread(&uacc,sizeof(useracc_t),1,fp)!=1){
+      error_fatal("Failed to read user account %s.",filename,NULL);
     }
     if(strncmp(uacc.magic,USR_MAGIC,sizeof(uacc.magic))){
-      fatal("User account for %s is corrupted (invalid magic number)",userid);
+      error_fatal("User account for %s is corrupted (invalid magic number)",userid);
     }
     fclose(fp);
 
     if(uacc.flags&(UFL_SUSPENDED|UFL_DELETED)){
       prompt(uacc.flags&UFL_DELETED?ACCDEL:ACCSUS,NULL);
-      hangup();
+      channel_hangup();
       exit(0);
     } else {
-      classrec *ourclass=findclass(uacc.curclss);
+      classrec_t *ourclass=cls_find(uacc.curclss);
 
       if(ourclass==NULL){
-	fatal("Can't find class %s for user %s!",
+	error_fatal("Can't find class %s for user %s!",
 	      uacc.curclss,uacc.userid);
       }
 
-      setlanguage(uacc.language);
-      if(uinsys(userid,0)
-	 &&((ourclass->flags&CF_LINUX)==0||status!='@')){
+      msg_setlanguage(uacc.language);
+      if(usr_insys(userid,0)
+	 &&((ourclass->flags&CLF_LINUX)==0||status!='@')){
 	prompt(ALRDON,NULL);
-	audit(tty,AUDIT(DUPUSER),userid,baudstg(baud));
-	hangup();
+	audit(tty,AUDIT(DUPUSER),userid,channel_baudstg(baud));
+	channel_hangup();
 	exit(0);
-      } else if (ourclass->flags&CF_LINUX && status=='@'){
+      } else if (ourclass->flags&CLF_LINUX && status=='@'){
 	char *cp=userid-1;
 	strcpy(cp,userid);
 	unixlogin();
       }
-      if(ourclass->flags&CF_LOCKOUT){
+      if(ourclass->flags&CLF_LOCKOUT){
 	prompt(LOKOUT,NULL);
-	hangup();
+	channel_hangup();
 	exit(0);
       } else if(KEY) {
-	if(!haskey(&uacc,KEY)){
+	if(!key_owns(&uacc,KEY)){
 	  prompt(NOKEY,NULL);
 	  kickout();
 	}
@@ -1106,7 +1190,7 @@ authenticate()
     else passwd=getpwnam(unixuid);
 
     if(passwd==NULL){
-      fatal("SECURITY HOLE: %s not found in /etc/passwd.",bbsuid);
+      error_fatal("SECURITY HOLE: %s not found in /etc/passwd.",bbsuid);
     }
 
     memcpy(&pass,passwd,sizeof(pass));
@@ -1117,7 +1201,7 @@ authenticate()
 
       if(!signup){
 	prompt(ENTPSW);
-	setpasswordentry(1);
+	inp_setflags(INF_PASSWD);
 	
 	if(lonalrm > 0 && !LOCALLINE) {
 	  signal(SIGALRM,timeout);
@@ -1125,6 +1209,7 @@ authenticate()
 	}
     
 	getinp(password,1);
+	inp_clearflags(INF_PASSWD);
       } else strcpy(password,uacc.passwd);
       alarm(0);
       
@@ -1139,36 +1224,41 @@ authenticate()
 	writeonline(status);
 
 	if(sysvar->lonaud)
-	  audit(tty,AUDIT(LOGIN),user.userid,baudstg(user.baudrate));
+	  audit(tty,AUDIT(LOGIN),user.userid,channel_baudstg(user.baudrate));
 
 	notifybbsd();
 
 	waitshmid(userid);
-	donemodule();
-	initmodule(INITALL);
-	memcpy(&thisuseracc,&uacc,sizeof(useracc));
-	memcpy(&thisuseronl,&user,sizeof(onlinerec));
+	mod_done(INI_ALL);
+	mod_init(INI_ALL);
+	memcpy(&thisuseracc,&uacc,sizeof(useracc_t));
+	memcpy(&thisuseronl,&user,sizeof(onlinerec_t));
 	setchannelstate(LSR_USER,userid);
-	setlanguage(uacc.language);
-	setscreenheight(thisuseracc.scnheight);
-	setlinelen(thisuseracc.scnwidth);
-	setwaittoclear(0);
-	afterinput=1;
-	resetvpos(0);
+	msg_setlanguage(uacc.language);
+	fmt_setscreenheight(thisuseracc.scnheight);
+	fmt_setlinelen(thisuseracc.scnwidth);
+	out_clearflags(OFL_WAITTOCLEAR);
+	out_setflags(OFL_AFTERINPUT);
+	fmt_resetvpos(0);
 
 	if(atoi(unixuid)>0)passwd=getpwuid(atoi(unixuid));
 	else passwd=getpwnam(unixuid);
 	memcpy(&pass,passwd,sizeof(pass));
 
-	setansiflag(ansiopt);
-	setmbk(msg);
+	if(ansiopt)out_setflags(OFL_ANSIENABLE);
+	else out_clearflags(OFL_ANSIENABLE);
+	msg_set(msg);
 	if(uacc.prefs&UPF_TRASK)askxlation();
-	else if(uacc.prefs&UPF_TRDEF)setxlationtable(xlation);
+	else if(uacc.prefs&UPF_TRDEF)out_setxlation(xlation);
 
 	if(uacc.prefs&UPF_ANSIASK)askansi();
-	setansiflag(ansiopt);
-	if(ansiopt)user.flags|=OLF_ANSION;
-	else user.flags&=~OLF_ANSION;
+	if(ansiopt){
+	  user.flags|=OLF_ANSION;
+	  out_setflags(OFL_ANSIENABLE);
+	} else {
+	  user.flags&=~OLF_ANSION;
+	  out_clearflags(OFL_ANSIENABLE);
+	}
 
 	if(sysvar)sysvar->connections++;
 
@@ -1212,7 +1302,7 @@ authenticate()
 	chown(tmp, pass.pw_uid,pass.pw_gid);
 	setgid(pass.pw_gid);
 	if(initgroups(pass.pw_name,pass.pw_gid)<0){
-	  fatal("Unable to init groups for user %s",pass.pw_name);
+	  error_fatal("Unable to init groups for user %s",pass.pw_name);
 	}
 	umask(0007);
 	
@@ -1227,22 +1317,22 @@ authenticate()
 	/* Even paranoids have enemies */
 
 	if(getuid()==0 || getgid()==0){
-	  fatal("User %s appears to have root uid/gid!",pass.pw_name);
+	  error_fatal("User %s appears to have root uid/gid!",pass.pw_name);
 	}
 
-	setlanguage(uacc.language);
+	msg_setlanguage(uacc.language);
 
-	setmbk(msg);
+	msg_set(msg);
 	if(signup)sendmail();
-	setmbk(msg);
+	msg_set(msg);
 
-	resetvpos(0);
+	fmt_resetvpos(0);
 	if(uacc.connections)prompt(GREETINGS,userid);
 	else prompt(NEWGREET,userid);
 	prompt(GPL);
-	donemodule();
+	mod_done(INI_ALL);
 
-	clsmsg(msg);
+	msg_close(msg);
 
 	thisuseracc.connections++;
 
@@ -1251,12 +1341,12 @@ authenticate()
 	fflush(stdout);
 
 	execl("/bin/sh","sh","-c",LOGINSCRIPT,NULL);
-	fatal("Cannot execute %s",LOGINSCRIPT);
+	error_fatal("Cannot execute %s",LOGINSCRIPT);
       } else {
 	prompt(PSWNOG,NULL);
 	strikes++;
 	if(strikes>=LOGINSTRIKES){
-	  audit(tty,AUDIT(HACKTRY),userid,baudstg(baud));
+	  audit(tty,AUDIT(HACKTRY),userid,channel_baudstg(baud));
 	  kickout();
 	}
       }
@@ -1265,10 +1355,11 @@ authenticate()
 }
 
 
+
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(getuid()){
     fprintf(stderr,"%s: not superuser.\n",argv[0]);
     exit(1);

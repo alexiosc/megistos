@@ -103,8 +103,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:30  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1998/12/27 16:40:08  alexios
  * Added autoconf support. Added code to stamp the magic number
@@ -125,6 +126,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -202,7 +204,7 @@ adjustindex(FILE *fp,long from)
 void
 parse(char *filename)
 {
-  FILE *input, *header1, *header2, *index, *output, *dict;
+  FILE *inp_buffer, *header1, *header2, *index, *output, *dict;
   char rawname[64], *cp, symbol[64];
   char hdrname[256], hdrtname[256], outname[256], idxname[256], tmpoutname[256];
   char keyword[64];
@@ -213,7 +215,7 @@ parse(char *filename)
 
   /* Open files, calculate names */
 
-  if((input=fopen(filename,"r"))==NULL){
+  if((inp_buffer=fopen(filename,"r"))==NULL){
     errp("MSGIDX: Unable to open %s\n",filename);
     exit(-1);
   }
@@ -293,12 +295,12 @@ parse(char *filename)
   fwrite(&indexsize,sizeof(long),1,index);
   fwrite(langoffs,sizeof(langoffs),1,index);
 
-  while(!feof(input)){
+  while(!feof(inp_buffer)){
     char line[1024], xlated[1024], text[16384];
     char *cp;
     int  escape;
 
-    if(!fgets(line,1024,input)) continue;
+    if(!fgets(line,1024,inp_buffer)) continue;
 
     switch(mode){
     case 0:
@@ -514,7 +516,7 @@ parse(char *filename)
 
 
   fclose(output);
-  fclose(input);
+  fclose(inp_buffer);
   fclose(index);
   fclose(dict);
 
@@ -540,7 +542,7 @@ parse(char *filename)
       char fname[256];
 
       sprintf(fname,TMPDIR"/diff%d",getpid());
-      sprintf(command,"diff %s %s >&%s",hdrname,hdrtname,fname);
+      sprintf(command,"diff %s %s 2>%s >%s",hdrname,hdrtname,fname,fname);
       system(command);
       if(stat(fname,&st)||st.st_size){
 	rename(hdrtname,hdrname);
@@ -553,14 +555,12 @@ parse(char *filename)
 }
 
 
-void
-main(argc,argv)
-     int argc;
-     char *argv[];
+int
+main(int argc, char **argv)
 {
   int i;
 
   if(argc==1)help();
   for(i=1;i<argc;i++) parse(argv[i]);
-  exit(0);
+  return 0;
 }

@@ -29,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:43  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 22:07:30  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 16:30:50  alexios
  * Added autoconf support.
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -79,7 +81,7 @@ listclasses()
   int i;
 
   prompt(CLSLSTHDR,NULL);
-  for(i=0;i<numuserclasses;i++)prompt(CLSLSTTAB,userclasses[i].name);
+  for(i=0;i<cls_count;i++)prompt(CLSLSTTAB,cls_classes[i].name);
   prompt(CLSLSTEND,NULL);
 }
 
@@ -93,19 +95,19 @@ int  msg,existing,err,def;
   int i, ok=0;
   while(!ok){
     memset(newclass,0,10);
-    if(morcnc())strncpy(newclass,cncword(),10);
+    if(cnc_more())strncpy(newclass,cnc_word(),10);
     else {
       prompt(msg,NULL);
       if(def){
-	sprintf(outbuf,getmsg(def),defval);
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),defval);
+	print(out_buffer,NULL);
       }
-      getinput(0);
+      inp_get(0);
       if(margc)strncpy(newclass,margv[0],10);
-      else if(def && !reprompt){
+      else if(def && !inp_reprompt()){
 	strncpy(class,defval,10);
 	return 1;
-      } else endcnc();
+      } else cnc_end();
     }
     if(sameas(newclass,"x"))return 0;
     if(newclass[0]=='?'){
@@ -114,27 +116,27 @@ int  msg,existing,err,def;
       continue;
     }
     if(!newclass[0]){
-      endcnc();
+      cnc_end();
       continue;
     }
     ok=(existing==0);
     for(i=0;newclass[i];i++)newclass[i]=toupper(newclass[i]);
-    for(i=0;i<numuserclasses;i++){
-      if(sameas(newclass,userclasses[i].name)){
+    for(i=0;i<cls_count;i++){
+      if(sameas(newclass,cls_classes[i].name)){
 	if(existing) ok=1;
 	else {
-	  endcnc();
-	  sprintf(outbuf,getmsg(err),newclass);
-	  print(outbuf,NULL);
+	  cnc_end();
+	  sprintf(out_buffer,msg_get(err),newclass);
+	  print(out_buffer,NULL);
 	  ok=0;
 	  break;
 	}
       }
     }
     if(existing && !ok){
-      sprintf(outbuf,getmsg(err),newclass);
-      print(outbuf,NULL);
-      endcnc();
+      sprintf(out_buffer,msg_get(err),newclass);
+      print(out_buffer,NULL);
+      cnc_end();
     }
   }
   strncpy(class,newclass,10);
@@ -151,14 +153,18 @@ parsetemplate()
   char parms[1024], *cp, *ep, dataline[257];
   int state=0, len=0;
   int quote=0, i;
-  char *msgbuf=getmsg(ltnum);
+  char *msg_buffer;
+
+  sprintf(out_buffer,"%s\033@1;\"\007OK\"b\033@1;\"\007CANCEL\"b",
+	  msg_get(ltnum));
+  msg_buffer=out_buffer;
 
   if((data=fopen(dfname,"r"))==NULL){
-    fatalsys("Unable to open data file %s",dfname);
+    error_fatalsys("Unable to open data file %s",dfname);
   }
 
   memset(buffer,0,sizeof(buffer));
-  while ((c=*(msgbuf++))!=0){
+  while ((c=*(msg_buffer++))!=0){
     if(c==13)continue;
     if (c==27 && !state) state=1;
     else if (c=='@' && state==1){
@@ -185,7 +191,7 @@ parsetemplate()
 	    if((obj.s.data=alcmem(obj.s.max+1))==NULL ||
 	       (obj.s.template=alcmem(strlen(buffer)+1))==NULL ||
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    dataline[0]=0;
 	    fgets(dataline,sizeof(dataline),data);
@@ -214,7 +220,7 @@ parsetemplate()
 	    if((obj.n.data=alcmem(obj.n.shown+1))==NULL || 
 	       (obj.n.template=alcmem(strlen(buffer)+1))==NULL ||
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    dataline[0]=0;
 	    fgets(dataline,sizeof(dataline),data);
@@ -238,7 +244,7 @@ parsetemplate()
 	    if((obj.l.options=alcmem(strlen(cp)+1))==NULL || 
 	       (obj.l.template=alcmem(strlen(buffer)+1))==NULL ||
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    memset(obj.l.options,0,strlen(cp)+1);
 	    strncpy(obj.l.options,cp,strlen(cp));
@@ -270,7 +276,7 @@ parsetemplate()
 	  cp=&parms[i];
 	  if((obj.t.template=alcmem(strlen(buffer)+1))==NULL ||
 	     (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	    fatal("Unable to allocate dialog object buffers");
+	    error_fatal("Unable to allocate dialog object buffers");
 	  }
 	  dataline[0]=0;
 	  fgets(dataline,sizeof(dataline),data);
@@ -292,7 +298,7 @@ parsetemplate()
 	    if((obj.b.template=alcmem(strlen(buffer)+1))==NULL ||
 	       (obj.b.label=alcmem(strlen(cp)+1))==NULL || 
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    if((ep=strchr(cp,'"'))!=NULL)*ep=0;
 	    obj.b.key=*cp;
@@ -376,7 +382,7 @@ showmenu()
 {
   int i;
   
-  afterinput=1;
+  out_setflags(OFL_AFTERINPUT);
   for(i=0;i<numobjects;i++){
     print(object[i].s.template);
     switch(object[i].s.type){
@@ -402,16 +408,16 @@ static void
 getstringfield(int i)
 {
   char s[MAXINPLEN], *t=s;
-  if(!morcnc()){
-    setmbk(templates);
+  if(!cnc_more()){
+    msg_set(templates);
     prompt(ltnum+1+i);
   }
-  setmbk(msg);
+  msg_set(msg);
   for(;;){
-    if((!morcnc()) || (object[i].s.flags&2)){
-      if(object[i].s.flags&2)setpasswordentry(1);
+    if((!cnc_more()) || (object[i].s.flags&2)){
+      if(object[i].s.flags&2)inp_setflags(INF_PASSWD);
       if(object[i].s.flags&8){
-	if(!getuserid(s,FIELD,UERR,0,0,0)){
+	if(!get_userid(s,FIELD,UERR,0,0,0)){
 	  prompt(FCAN);
 	  return;
 	  t=s;
@@ -424,11 +430,11 @@ getstringfield(int i)
 	}
       } else {
 	prompt(FIELD);
-	getinput(object[i].s.max);
-	bgncnc();
-	t=nxtcmd;
+	inp_get(object[i].s.max);
+	cnc_begin();
+	t=cnc_nxtcmd;
       }
-      setpasswordentry(0);
+      inp_clearflags(INF_PASSWD);
     }
     if(sameas(t,"X")){
       prompt(FCAN);
@@ -443,7 +449,7 @@ getstringfield(int i)
       }
       if((object[i].s.flags&4) && (scandate(object[i].s.data)<0)){
 	prompt(DERR);
-	endcnc();
+	cnc_end();
 	continue;
       }
       return;
@@ -457,13 +463,13 @@ getnumfield(int i)
 {
   int n;
 
-  if(!morcnc()){
-    setmbk(templates);
+  if(!cnc_more()){
+    msg_set(templates);
     prompt(ltnum+1+i);
   }
-  setmbk(msg);
+  msg_set(msg);
   
-  if(getnumber(&n,FIELD,object[i].n.min,object[i].n.max,NERR,0,0)){
+  if(get_number(&n,FIELD,object[i].n.min,object[i].n.max,NERR,0,0)){
     sprintf(object[i].n.data,"%d",n);
   } else prompt(FCAN);
 }
@@ -475,23 +481,23 @@ getlistfield(int obj)
   int shownmenu=0;
   char c;
 
-  if(!morcnc()){
-    setmbk(templates);
+  if(!cnc_more()){
+    msg_set(templates);
     prompt(ltnum+1+obj);
   }
-  setmbk(msg);
+  msg_set(msg);
   
   for(;;){
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
-      c=cncchr();
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
+      c=cnc_chr();
       shownmenu=1;
     } else {
       if(!shownmenu){
 	int i;
 	char *cp;
 
-	setmbk(msg);
+	msg_set(msg);
 	prompt(LISTMHDR);
 	for(i=1,cp=object[obj].l.options;*cp;cp+=strlen(cp)+1,i++){
 	  prompt(LISTMENU,i,cp);
@@ -499,14 +505,14 @@ getlistfield(int obj)
 	prompt(LISTMFTR);
       }
       prompt(LIST);
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
     }
     if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       return;
     } else if(margc && sameas(margv[0],"?")){
       shownmenu=0;
@@ -516,7 +522,7 @@ getlistfield(int obj)
 
       if(opt<1){
 	prompt(ERRSEL,margv[0]);
-	endcnc();
+	cnc_end();
 	continue;
       } else {
 	int i,found=0;
@@ -528,7 +534,7 @@ getlistfield(int obj)
 	}
 	if(!found){
 	  prompt(ERRSEL,margv[0]);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
       }
@@ -540,10 +546,10 @@ getlistfield(int obj)
 static void
 gettogglefield(int i)
 {
-  setmbk(templates);
+  msg_set(templates);
   prompt(ltnum+1+i);
   object[i].t.data=!object[i].t.data;
-  setmbk(msg);
+  msg_set(msg);
   prompt(TOGON+(!object[i].t.data));
 }
 
@@ -559,25 +565,25 @@ mainloop()
       shownmenu=1;
     }
     prompt(PROMPT);
-    getinput(0);
-    bgncnc();
-    if(!margc || reprompt)continue;
+    inp_get(0);
+    cnc_begin();
+    if(!margc || inp_reprompt())continue;
     else if(margc==1 && sameas(margv[0],"?"))shownmenu=0;
-    else if(margc==1 && isX(margv[0])){
+    else if(margc==1 && inp_isX(margv[0])){
       int i;
-      setmbk(msg);
-      endcnc();
-      if(getbool(&i,CONFIRM,CONFERR,0,0)){
+      msg_set(msg);
+      cnc_end();
+      if(get_bool(&i,CONFIRM,CONFERR,0,0)){
 	if(i){
-	  rstmbk();
+	  msg_reset();
 	  endsession("Cancel");
 	}
       }
-      rstmbk();
+      msg_reset();
     }
     else if(margc==1 && sameas(margv[0],"OK"))endsession("OK");
     else {
-      char *command=cncword();
+      char *command=cnc_word();
       int i,j=atoi(command),found=0;
 
       for(i=0;i<numobjects;i++){
@@ -601,21 +607,21 @@ mainloop()
 		  command[0]==object[i].b.key){
 	  if(sameas(object[i].b.label,"Cancel")){
 	    int i;
-	    setmbk(msg);
-	    endcnc();
-	    if(getbool(&i,CONFIRM,CONFERR,0,0)){
+	    msg_set(msg);
+	    cnc_end();
+	    if(get_bool(&i,CONFIRM,CONFERR,0,0)){
 	      if(i){
-		rstmbk();
+		msg_reset();
 		endsession("Cancel");
 	      }
 	    }
-	    rstmbk();
+	    msg_reset();
 	  } else endsession(object[i].b.label);
 	}
       }
       if(!found){
 	prompt(ERRSEL,command);
-	endcnc();
+	cnc_end();
       }
     }
   }
@@ -625,11 +631,11 @@ mainloop()
 void
 runlinear()
 {
-  setmbk(templates);
+  msg_set(templates);
   parsetemplate();
-  setmbk(msg);
-  toggles[0]=stgopt(NO);
-  toggles[1]=stgopt(YES);
+  msg_set(msg);
+  toggles[0]=msg_string(NO);
+  toggles[1]=msg_string(YES);
   mainloop();
   endsession("Cancel");
 }

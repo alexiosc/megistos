@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:09  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
  * Changed return value of main() from void (silly) to int.
@@ -89,7 +90,7 @@
 #include "clubs.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 
 int  entrykey;
@@ -127,37 +128,37 @@ int  dulaxkey;
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("emailclubs");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("emailclubs");
+  msg_setlanguage(thisuseracc.language);
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  sopkey=numopt(SOPKEY,0,129);
-  wrtkey=numopt(WRTKEY,0,129);
-  netkey=numopt(NETKEY,0,129);
-  rrrkey=numopt(RRRKEY,0,129);
-  attkey=numopt(ATTKEY,0,129);
-  dnlchg=numopt(DNLCHG,-32767,32767);
-  wrtchg=numopt(WRTCHG,-32767,32767);
-  netchg=numopt(NETCHG,-32767,32767);
-  rrrchg=numopt(RRRCHG,-32767,32767);
-  attchg=numopt(ATTCHG,-32767,32767);
-  mkaudd=ynopt(MKAUDD);
-  mkaudu=ynopt(MKAUDU);
-  emllif=numopt(EMLLIF,-1,32767);
-  maxccs=numopt(MAXCCS,0,32767);
-  msglen=numopt(MSGLEN,1,256)<<10;
-  eattupl=stgopt(EATTUPL);
-  sigbmax=numopt(SIGBMAX,16,1024);
-  siglmax=numopt(SIGLMAX,1,32);
-  sigckey=numopt(SIGCKEY,0,129);
-  sigchg=numopt(SIGCHG,-32767,32767);
-  afwkey=numopt(AFWKEY,0,129);
-  dlkey=numopt(DLKEY,0,129);
-  maxdlm=numopt(MAXDLM,2,256);
-  msskey=numopt(MSSKEY,0,129);
-  addnew=ynopt(ADDNEW);
-  defclub=stgopt(DEFCLUB);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  sopkey=msg_int(SOPKEY,0,129);
+  wrtkey=msg_int(WRTKEY,0,129);
+  netkey=msg_int(NETKEY,0,129);
+  rrrkey=msg_int(RRRKEY,0,129);
+  attkey=msg_int(ATTKEY,0,129);
+  dnlchg=msg_int(DNLCHG,-32767,32767);
+  wrtchg=msg_int(WRTCHG,-32767,32767);
+  netchg=msg_int(NETCHG,-32767,32767);
+  rrrchg=msg_int(RRRCHG,-32767,32767);
+  attchg=msg_int(ATTCHG,-32767,32767);
+  mkaudd=msg_bool(MKAUDD);
+  mkaudu=msg_bool(MKAUDU);
+  emllif=msg_int(EMLLIF,-1,32767);
+  maxccs=msg_int(MAXCCS,0,32767);
+  msglen=msg_int(MSGLEN,1,256)<<10;
+  eattupl=msg_string(EATTUPL);
+  sigbmax=msg_int(SIGBMAX,16,1024);
+  siglmax=msg_int(SIGLMAX,1,32);
+  sigckey=msg_int(SIGCKEY,0,129);
+  sigchg=msg_int(SIGCHG,-32767,32767);
+  afwkey=msg_int(AFWKEY,0,129);
+  dlkey=msg_int(DLKEY,0,129);
+  maxdlm=msg_int(MAXDLM,2,256);
+  msskey=msg_int(MSSKEY,0,129);
+  addnew=msg_bool(ADDNEW);
+  defclub=msg_string(DEFCLUB);
   bzero(defaultclub,sizeof(defaultclub));
   strncpy(defaultclub,defclub,sizeof(defaultclub));
   if(*defclub=='/')defclub++;
@@ -231,55 +232,6 @@ newclubmsgs()
 
 
 void
-login()
-{
-  int msgno=-1, ask=0, res;
-  struct emailuser ecuser;
-
-  newclubmsgs();
-
-  if(!readecuser(thisuseracc.userid,&ecuser))return;
-
-  setclub(NULL);
-  res=findmsgto(&msgno,thisuseracc.userid,ecuser.lastemailread+1,BSD_GT);
-
-  if(res==BSE_FOUND){
-    prompt(NEWMAIL);
-    ask=1;
-  } else {
-    res=findmsgto(&msgno,thisuseracc.userid,0,BSD_GT);
-    if(res==BSE_FOUND)prompt(OLDMAIL);
-    else msgno=-1;
-  }
-
-  if(msgno>=0){
-    if(ecuser.prefs&(ECP_LOGINYES|ECP_LOGINASK)){
-      int readnow=ecuser.prefs&ECP_LOGINYES;
-      if((ecuser.prefs&ECP_LOGINASK) && ask){
-	thisuseronl.flags|=OLF_INHIBITGO;
-	if(!getbool(&readnow,ASKRDNOW,ASKRDERR,ASKRDDEF,0)){
-	  prompt(HOW2READ);
-	  thisuseronl.flags&=~OLF_INHIBITGO;
-	  return;
-	}
-      }
-      if(readnow){
-	thisuseronl.flags|=OLF_INHIBITGO;
-	startreading(0,msgno);
-      } else {
-	/*	ecuser.lastemailread=msgno;
-		writeecuser(thisuseracc.userid,&ecuser);*/
-	prompt(HOW2READ);
-      }
-      thisuseronl.flags&=~OLF_INHIBITGO;
-    } else {
-      prompt(HOW2READ);
-    }
-  }
-}
-
-
-void
 about()
 {
   prompt(ABOUT);
@@ -287,14 +239,28 @@ about()
 
 
 void
-run()
+done()
+{
+  msg_close(msg);
+  if(uqsc)saveqsc();
+  lock_rm(inclublock);
+  rmlocks();
+}
+
+
+
+int
+run(int argc, char **argv)
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
-  if(!haskey(&thisuseracc,entrykey)){
+  atexit(done);
+  init();
+
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOENTRY);
-    return;
+    return 0;
   }
 
   rmlocks();
@@ -303,28 +269,28 @@ run()
     thisuseronl.flags&=~OLF_BUSY;
     if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
       if(!shownmenu){
-	prompt(haskey(&thisuseracc,sopkey)?EMMNU:EMMNU);
+	prompt(key_owns(&thisuseracc,sopkey)?EMMNU:EMMNU);
 	shownmenu=2;
       }
     } else shownmenu=1;
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return;
+	  return 0;
 	}
 	if(shownmenu==1){
-	  prompt(haskey(&thisuseracc,sopkey)?SHEMMNU:SHEMMNU);
+	  prompt(key_owns(&thisuseracc,sopkey)?SHEMMNU:SHEMMNU);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
 	about();
@@ -346,40 +312,124 @@ run()
 	break;
       case 'X':
 	prompt(EMLEAVE);
-	return;
+	return 0;
       case '?':
 	shownmenu=0;
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
 
   }
 }
 
 
-void
-done()
+int handler_userdel(int argc, char **argv)
 {
-  clsmsg(msg);
-  if(uqsc)saveqsc();
-  rmlock(inclublock);
-  rmlocks();
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",MSGUSRDIR,victim);
+  unlink(fname);
+  sprintf(fname,"%s/%s",MSGSDISTDIR,victim);
+  unlink(fname);
+  sprintf(fname,"%s/%s",MSGSIGDIR,victim);
+  unlink(fname);
+  sprintf(fname,"%s/%s",CLUBAXDIR,victim);
+  unlink(fname);
+  sprintf(fname,"%s/%s",QSCDIR,victim);
+  unlink(fname);
+
+  return 0;
 }
+
+
+int
+login(int argc, char **argv)
+{
+  int msgno=-1, ask=0, res;
+  struct emailuser ecuser;
+  
+  init();
+  newclubmsgs();
+
+  if(!readecuser(thisuseracc.userid,&ecuser))return 0;
+
+  setclub(NULL);
+  res=findmsgto(&msgno,thisuseracc.userid,ecuser.lastemailread+1,BSD_GT);
+
+  if(res==BSE_FOUND){
+    prompt(NEWMAIL);
+    ask=1;
+  } else {
+    res=findmsgto(&msgno,thisuseracc.userid,0,BSD_GT);
+    if(res==BSE_FOUND)prompt(OLDMAIL);
+    else msgno=-1;
+  }
+
+  if(msgno>=0){
+    if(ecuser.prefs&(ECP_LOGINYES|ECP_LOGINASK)){
+      int readnow=ecuser.prefs&ECP_LOGINYES;
+      if((ecuser.prefs&ECP_LOGINASK) && ask){
+	thisuseronl.flags|=OLF_INHIBITGO;
+	if(!get_bool(&readnow,ASKRDNOW,ASKRDERR,ASKRDDEF,0)){
+	  prompt(HOW2READ);
+	  thisuseronl.flags&=~OLF_INHIBITGO;
+	  return 0;
+	}
+      }
+      if(readnow){
+	thisuseronl.flags|=OLF_INHIBITGO;
+	startreading(0,msgno);
+      } else {
+	/*	ecuser.lastemailread=msgno;
+		writeecuser(thisuseracc.userid,&ecuser);*/
+	prompt(HOW2READ);
+      }
+      thisuseronl.flags&=~OLF_INHIBITGO;
+    } else {
+      prompt(HOW2READ);
+    }
+  }
+
+  done();
+  return 0;
+}
+
+
+mod_info_t mod_info_email = {
+  "email",
+  "Email",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Read/write private BBS or Internet messages and set reading preferences.",
+  RCS_VER,
+  "1.0",
+  {99,login},		/* Login handler */
+  { 0,run},			/* Interactive handler */
+  { 0,NULL},			/* Install logout handler */
+  { 0,NULL},			/* Hangup handler */
+  { 5,handler_cleanup},		/* Cleanup handler */
+  {50,handler_userdel}		/* Delete user handler */
+};
 
 
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  atexit(done);
-  init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else run();
-  exit(0);
+  mod_setinfo(&mod_info_email);
+  return mod_main(argc,argv);
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -83,11 +85,11 @@ checkax()
 static char *
 fx_say(struct chanusr *u)
 {
-  tmp[0]=outbuf[0]=0;
-  sprintf(outbuf,getmsglang(TFROM,othruseracc.language-1),
+  tmp[0]=out_buffer[0]=0;
+  sprintf(out_buffer,msg_getl(TFROM,othruseracc.language-1),
 	  getcolour(),thisuseracc.userid,tmp2);
-  strcpy(tmp,getmsglang(TDELIM,othruseracc.language-1));
-  strcat(tmp,outbuf);
+  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
+  strcat(tmp,out_buffer);
   return tmp;
 }
 
@@ -115,9 +117,9 @@ whisper(char *s)
   while((cp!=s)&&(*cp==32))*(cp--)=0;
   cp=s;
 
-  if(sameas(input,"/")||sameas(input,"WHISPER TO")){
+  if(sameas(inp_buffer,"/")||sameas(inp_buffer,"WHISPER TO")){
     prompt(HLPWHIS);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -125,7 +127,7 @@ whisper(char *s)
     cp=s+1;
     if(sscanf(cp,"%s %n",userid,&i)!=1 || strlen(&cp[i])==0){
       prompt(HLPWHIS);
-      endcnc();
+      cnc_end();
       return;
     } else cp+=i;
   } else if(sameto("WHISPER TO ",s)){
@@ -134,20 +136,20 @@ whisper(char *s)
     if(sscanf(s,"%s %s %s %n",dummy1,dummy2,userid,&i)!=3 ||
        strlen(&cp[i])==0){
       prompt(HLPWHIS);
-      endcnc();
+      cnc_end();
       return;
     } else cp=&s[i];
   } else return;
 
   if(!tlcuidxref(userid,1)){
-    endcnc();
+    cnc_end();
     prompt(UIDNINC);
     return;
   }
-  if(uinsys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
-    injoth(&othruseronl,getmsg(TDELIM),0);
-    sprintf(outbuf,getmsg(TFROMP),getcolour(),thisuseracc.userid,cp);
-    injoth(&othruseronl,outbuf,0);
+  if(usr_insys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
+    usr_injoth(&othruseronl,msg_get(TDELIM),0);
+    sprintf(out_buffer,msg_get(TFROMP),getcolour(),thisuseracc.userid,cp);
+    usr_injoth(&othruseronl,out_buffer,0);
     prompt(TSENTP,othruseronl.userid);
   }
 }
@@ -159,15 +161,15 @@ static char *fxuser, *fxmsg;
 static char *
 fx_sayto(struct chanusr *u)
 {
-  injoth(&othruseronl,getmsg(TDELIM),0);
+  usr_injoth(&othruseronl,msg_get(TDELIM),0);
   if(sameas(u->userid,fxuser)){
-    sprintf(outbuf,getmsglang(TFROM2U,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(TFROM2U,othruseracc.language-1),
 	    getcolour(),thisuseracc.userid,fxmsg);
   } else {
-    sprintf(outbuf,getmsglang(TFROMT,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(TFROMT,othruseracc.language-1),
 	    getcolour(),thisuseracc.userid,fxuser,fxmsg);
   }
-  return outbuf;
+  return out_buffer;
 }
 
 
@@ -183,9 +185,9 @@ sayto(char *s)
   while((cp!=s)&&(*cp==32))*(cp--)=0;
   cp=s;
 
-  if(sameas(input,"\\")||sameas(input,">")||sameas(input,"SAY TO")){
+  if(sameas(inp_buffer,"\\")||sameas(inp_buffer,">")||sameas(inp_buffer,"SAY TO")){
     prompt(HLPSAY);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -193,28 +195,28 @@ sayto(char *s)
     cp=s+1;
     if(sscanf(cp,"%s %n",userid,&i)!=1 || strlen(&cp[i])==0){
       prompt(HLPSAY);
-      endcnc();
+      cnc_end();
       return;
     } else cp+=i;
   } else if(sameto("SAY TO ",s)){
     if(sscanf(s,"%*s %*s %s %n",userid,&i)!=3
        || strlen(&cp[i])==0){
       prompt(HLPSAY);
-      endcnc();
+      cnc_end();
       return;
     } else cp=&s[i];
   } else return;
 
   if(!tlcuidxref(userid,1)){
-    endcnc();
+    cnc_end();
     prompt(UIDNINC);
     return;
   }
-  if(uinsys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
+  if(usr_insys(userid,1)&&((thisuseronl.flags&OLF_BUSY)==0)){
     int i;
     if(sameas(userid,thisuseracc.userid)){
       prompt(TWHYU);
-      endcnc();
+      cnc_end();
       return;
     }
     fxuser=userid;

@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:37  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -85,7 +87,7 @@ static cache_entry_t *update_cache (int);
  *
  * Initialise the cache and any other dynamic memory objects. The memory
  * required can be split into two areas. Firstly, three buffers are required for
- * input, output and status line. Secondly, two data areas are required for
+ * inp_buffer, output and status line. Secondly, two data areas are required for
  * writeable data and read only data. The writeable data is the first chunk of
  * the file and is put into non-paged cache. The read only data is the remainder
  * of the file which can be paged into the cache as required. Writeable data has
@@ -103,16 +105,16 @@ void load_cache (void)
   
   line = (char *) malloc (screen_cols + 1);
   if (line == NULL)
-    fatal ("Insufficient memory to play game");
+    error_fatal ("Insufficient memory to play game");
   status_line = (char *) malloc (screen_cols + 1);
   if (status_line == NULL)
-    fatal ("Insufficient memory to play game");
+    error_fatal ("Insufficient memory to play game");
   
   /* Must have at least one cache page for memory calculation */
   
   cachep = (cache_entry_t *) malloc (sizeof (cache_entry_t));
   if (cachep == NULL)
-    fatal ("Insufficient memory to play game");
+    error_fatal ("Insufficient memory to play game");
   cachep->flink = cache;
   cachep->page_number = 0;
   cache = cachep;
@@ -131,7 +133,7 @@ void load_cache (void)
   
   datap = (zbyte_t *) malloc (data_size);
   if (datap == NULL)
-    fatal ("Insufficient memory to play game");
+    error_fatal ("Insufficient memory to play game");
   for (i = 0; i < data_pages; i++)
     read_page (i, &datap[i * PAGE_SIZE]);
   

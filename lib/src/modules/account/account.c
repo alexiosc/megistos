@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:20  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:30  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.9  1999/07/18 21:19:02  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.8  1998/12/27 15:27:18  alexios
  * Added autoconf support. Fixed stupid credit transfer bug.
@@ -78,6 +79,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -121,7 +123,7 @@
 #define SETVALUE(x,f,s)  (x)=((s)?((x)|=(f)):((x)&=~(f)))
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 int syskey;
 int xfkey;
@@ -145,36 +147,36 @@ int mincxf;
 int maxcxf;
 
 
-useracc    *uacc,useraccount;
+useracc_t *uacc,useraccount;
 
 
-void
+static void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("account");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("account");
+  msg_setlanguage(thisuseracc.language);
 
-  syskey=numopt(SYSKEY,0,129);
-  xfkey=numopt(XFKEY,0,129);
-  remexp=ynopt(REMEXP);
-  strexp=ynopt(STREXP);
-  safpsw=ynopt(SAFPSW);
-  strpss=ynopt(STRPSS);
-  minpln=numopt(MINPLN,3,15);
-  mkpswd=ynopt(MKPSWD);
-  mkpwdf=ynopt(MKPWDF);
-  lipsko=numopt(LIPSKO,1,32767);
-  lognam=ynopt(LOGNAM);
-  logcmp=ynopt(LOGCMP);
-  logadr=ynopt(LOGADR);
-  logphn=ynopt(LOGPHN);
-  logage=ynopt(LOGAGE);
-  logsex=ynopt(LOGSEX);
-  logsys=ynopt(LOGSYS);
-  demcxf=ynopt(DEMCXF);
-  mincxf=numopt(MINCXF,0,1000000);
-  maxcxf=numopt(MAXCXF,0,1000000);
+  syskey=msg_int(SYSKEY,0,129);
+  xfkey=msg_int(XFKEY,0,129);
+  remexp=msg_bool(REMEXP);
+  strexp=msg_bool(STREXP);
+  safpsw=msg_bool(SAFPSW);
+  strpss=msg_bool(STRPSS);
+  minpln=msg_int(MINPLN,3,15);
+  mkpswd=msg_bool(MKPSWD);
+  mkpwdf=msg_bool(MKPWDF);
+  lipsko=msg_int(LIPSKO,1,32767);
+  lognam=msg_bool(LOGNAM);
+  logcmp=msg_bool(LOGCMP);
+  logadr=msg_bool(LOGADR);
+  logphn=msg_bool(LOGPHN);
+  logage=msg_bool(LOGAGE);
+  logsex=msg_bool(LOGSEX);
+  logsys=msg_bool(LOGSYS);
+  demcxf=msg_bool(DEMCXF);
+  mincxf=msg_int(MINCXF,0,1000000);
+  maxcxf=msg_int(MAXCXF,0,1000000);
 
   uacc=&thisuseracc;
 }
@@ -183,65 +185,44 @@ init()
 void
 editaccount()
 {
-  useracc tempacc;
-  FILE *fp;
-  char fname[256], s[80], *cp;
-  int i;
+  useracc_t tempacc;
 
   memcpy(&tempacc,uacc,sizeof(tempacc));
 
-  sprintf(fname,TMPDIR"/acc%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\n%s\n%s\n%s\n%d\n%s\n%s\nOK\nCancel\n",
+	  tempacc.username,
+	  tempacc.company,
+	  tempacc.address1,
+	  tempacc.address2,
+	  tempacc.phone,
+	  tempacc.age,
+	  msg_get(tempacc.sex=='M'?SEXM:SEXF),
+	  msg_get(tempacc.system-1+SYS1));
+
+  if(dialog_run("account",ACCVT,ACCLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%s\n",tempacc.username);
-  fprintf(fp,"%s\n",tempacc.company);
-  fprintf(fp,"%s\n",tempacc.address1);
-  fprintf(fp,"%s\n",tempacc.address2);
-  fprintf(fp,"%s\n",tempacc.phone);
-  fprintf(fp,"%d\n",tempacc.age);
-  fprintf(fp,"%s\n",getmsg(tempacc.sex=='M'?SEXM:SEXF));
-  fprintf(fp,"%s\n",getmsg(tempacc.system-1+SYS1));
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("account",ACCVT,ACCLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  for(i=0;i<11;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(tempacc.username,s);
-    else if(i==1)strcpy(tempacc.company,s);
-    else if(i==2)strcpy(tempacc.address1,s);
-    else if(i==3)strcpy(tempacc.address2,s);
-    else if(i==4)strcpy(tempacc.phone,s);
-    else if(i==5)tempacc.age=atoi(s);
-    else if(i==6)tempacc.sex=(strcmp(s,getmsg(SEXF))?'M':'F');
-    else if(i==7){
-      int j;
-
-      for(j=0;j<8;j++)if(!strcmp(s,getmsg(SYS1+j))){
-	tempacc.system=j+1;
-	break;
-      }
-    }
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
-    prompt(EDITCAN);
-    return;
-  } else {
-    prompt(EDITOK);
+  if (sameas(margv[10],"OK") || sameas (margv[10],margv[8])) { 
+    int j;
+    strcpy(tempacc.username,margv[0]);
+    strcpy(tempacc.company,margv[1]);
+    strcpy(tempacc.address1,margv[2]);
+    strcpy(tempacc.address2,margv[3]);
+    strcpy(tempacc.phone,margv[4]);
+    tempacc.age=atoi(margv[5]);
+    tempacc.sex=(strcmp(margv[6],msg_get(SEXF))?'M':'F');
     
+    for(j=0;j<8;j++)if(!strcmp(margv[7],msg_get(SYS1+j))){
+      tempacc.system=j+1;
+      break;
+    }
+
+    prompt(EDITOK);
+
     if(lognam && strcmp(tempacc.username,uacc->username))
       audit(thisuseronl.channel,AUDIT(ACCEDT1),uacc->userid,"NAME");
     if(logcmp && strcmp(tempacc.company,uacc->company))
@@ -261,6 +242,9 @@ editaccount()
 	    uacc->system,tempacc.system);
   
     memcpy(uacc,&tempacc,sizeof(tempacc));
+  } else {
+    prompt(EDITCAN);
+    return;
   }
 }
 
@@ -339,26 +323,27 @@ changepassword(char *userid, int login)
   int retries;
 
   strcpy(uid,uacc->userid);
-  if(!uinsys(userid,0)){
+  if(!usr_insys(userid,0)){
     uacc=&useraccount;
-    loaduseraccount(userid,uacc);
+    usr_loadaccount(userid,uacc);
   }
 
   if(sameas(userid,uid)){
     for(retries=1;;retries++){
       do{
 	prompt(PSCUR);
-	setpasswordentry(1);
-	getinput(15);
-      }while(reprompt);
-      if(!sameas(input,uacc->passwd)){
+	inp_setflags(INF_PASSWD);
+	inp_get(15);
+	inp_clearflags(INF_PASSWD);
+      }while(inp_reprompt());
+      if(!sameas(inp_buffer,uacc->passwd)){
 	prompt(CPSERR);
 	if(!login)return;
 	else if(retries>=lipsko){
 	  prompt(PSWKO);
 	  audit(thisuseronl.channel,AUDIT(BLGPWCH),
-		thisuseracc.userid,baudstg(thisuseronl.baudrate));
-	  disconnect(thisuseronl.emupty);
+		thisuseracc.userid,channel_baudstg(thisuseronl.baudrate));
+	  channel_disconnect(thisuseronl.emupty);
 	}
       } else break;
     }
@@ -367,46 +352,48 @@ changepassword(char *userid, int login)
   prompt(PREPSW,NULL);
   strcpy(passwd,makeapass());
   strcpy(recommended,passwd);
-  endcnc();
+  cnc_end();
   for(;;){
     if(mkpswd && mkpwdf){
       prompt(FRCPSW,recommended,NULL);
     } else {
       if(mkpswd)prompt(RECPSW,recommended,NULL);
-      setpasswordentry(1);
+      inp_setflags(INF_PASSWD);
       prompt(GPSWORD,NULL);
-      getinput(15);
-      if(!margc || isX(margv[0])){
-	setpasswordentry(0);
+      inp_get(15);
+      inp_clearflags(INF_PASSWD);
+      if(!margc || inp_isX(margv[0])){
+	inp_clearflags(INF_PASSWD);
 	if(!login){
 	  prompt(PNOTSET);
 	  return;
 	} else {
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
       }
-      rstrin();
+      inp_raw();
       
       if(safpsw){
 	int i,d=0;
-	if(strlen(input)<minpln){
+	if(strlen(inp_buffer)<minpln){
 	  prompt(BADPSW1,NULL);
 	  continue;
 	}
 	if(!strpss)d++;
 	else {
-	  for(i=0,d=0;input[i];i++)if(isupper(input[i])||!isalpha(input[i]))d++;
+	  for(i=0,d=0;inp_buffer[i];i++)
+	    if(isupper(inp_buffer[i])||!isalpha(inp_buffer[i]))d++;
 	}
 	if(!d){
 	  prompt(BADPSW1,NULL);
 	  continue;
 	}
-	if(stupidpass(input)){
+	if(stupidpass(inp_buffer)){
 	  prompt(BADPSW2,NULL);
 	  continue;
 	}
-	strcpy(passwd,input);
+	strcpy(passwd,inp_buffer);
 	if(sameas(uacc->passwd,passwd)){
 	  prompt(BADPSW4);
 	  continue;
@@ -414,28 +401,29 @@ changepassword(char *userid, int login)
       }
     }
     prompt(GPSWAGN,NULL);
-    setpasswordentry(1);
-    getinput(15);
-    rstrin();
-    if(!sameas(input,passwd)){
+    inp_setflags(INF_PASSWD);
+    inp_get(15);
+    inp_clearflags(INF_PASSWD);
+    inp_raw();
+    if(!sameas(inp_buffer,passwd)){
       prompt(BADPSW3,NULL);
-      setpasswordentry(0);
+      inp_setflags(INF_PASSWD);
       if(!login){
 	prompt(PNOTSET);
 	return;
       } else {
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
     break;
   }
-  setpasswordentry(0);
+  inp_clearflags(INF_PASSWD);
   strcpy(uacc->passwd,passwd);
   uacc->passexp=sysvar->pswexpiry;
 
-  if(!userexists(userid))return;
-  if(!uinsys(userid,0))saveuseraccount(uacc);
+  if(!usr_exists(userid))return;
+  if(!usr_insys(userid,0))usr_saveaccount(uacc);
   prompt(PSWEPI);
   if(strcmp(userid,uid)){
     audit(thisuseronl.channel,AUDIT(PASSOTH),uid,userid);
@@ -448,15 +436,17 @@ resetbbslib()
 {
   char tmp[256];
   
-  clsmsg(msg);
-  msg=opnmsg("account");
-  setlanguage(thisuseracc.language);
+  msg_close(msg);
+  msg=msg_open("account");
+  msg_setlanguage(thisuseracc.language);
   if((thisuseracc.prefs&(UPF_ANSIDEF|UPF_ANSIASK))==0){
     SETVALUE(thisuseronl.flags,OLF_ANSION,thisuseracc.prefs&UPF_ANSION);
-    setansiflag(thisuseronl.flags&OLF_ANSION);
+    if(thisuseronl.flags&OLF_ANSION)out_setflags(1);
+    else out_clearflags(0);
   }
-  setverticalformat((thisuseracc.prefs&UPF_NONSTOP)==0);
-  setwaittoclear((thisuseracc.prefs&UPF_NONSTOP)==0);
+  fmt_setverticalformat((thisuseracc.prefs&UPF_NONSTOP)==0);
+  if((thisuseracc.prefs&UPF_NONSTOP)==0)out_setflags(OFL_WAITTOCLEAR);
+  else out_clearflags(OFL_WAITTOCLEAR);
   
   sprintf(tmp,"%s rows %d columns %d ixon ixoff",STTYBIN,
 	  uacc->scnheight,uacc->scnwidth);
@@ -465,102 +455,97 @@ resetbbslib()
   setenv("COLUMNS",tmp,1);
   sprintf(tmp,"%d",uacc->scnheight);
   setenv("ROWS",tmp,1);
-  setlinelen(uacc->scnwidth);
-  setscreenheight(uacc->scnheight);
+  fmt_setlinelen(uacc->scnwidth);
+  fmt_setscreenheight(uacc->scnheight);
 
   if((thisuseracc.prefs&(UPF_TRDEF|UPF_TRASK))==0)
-    setxlationtable(getpxlation(thisuseracc));
+    out_setxlation(usr_getpxlation(thisuseracc));
 }
 
 
 void
 editprefs()
 {
-  useracc tempacc;
-  FILE *fp;
-  char fname[256], s[80], *cp;
+  useracc_t tempacc;
+  char tmp[2048];
   int i;
 
   memcpy(&tempacc,uacc,sizeof(tempacc));
 
-  sprintf(fname,TMPDIR"/acc%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  inp_buffer[0]='\0';
+  if(tempacc.prefs&UPF_ANSIDEF)sprintf(tmp,"%s\n",msg_get(ANSDEF));
+  else if(tempacc.prefs&UPF_ANSIASK)sprintf(tmp,"%s\n",msg_get(ANSASK));
+  else if(tempacc.prefs&UPF_ANSION)sprintf(tmp,"%s\n",msg_get(ANSON));
+  else sprintf(tmp,"%s\n",msg_get(ANSOFF));
+  strcat(inp_buffer,tmp);
+
+  if(tempacc.prefs&UPF_TRDEF)sprintf(tmp,"%s\n",msg_get(TRDEF));
+  else if(tempacc.prefs&UPF_TRASK)sprintf(tmp,"%s\n",msg_get(TRASK));
+  else sprintf(tmp,"%s\n",msg_get(TR0+usr_getpxlation(tempacc)));
+  strcat(inp_buffer,tmp);
+
+  sprintf(tmp,"%s\n%s\n%s\n%d\n%d\n",
+	  (tempacc.prefs&UPF_NONSTOP?"on":"off"),
+	  (tempacc.prefs&UPF_VISUAL?"on":"off"),
+	  msg_get(LANG1+tempacc.language-1),
+	  tempacc.scnwidth,
+	  tempacc.scnheight);
+  strcat(inp_buffer,tmp);
+  
+  sprintf(tmp,"%s\n%d\nOK\nCancel\n",
+	  msg_get(PGSSTR+tempacc.pagestate),
+	  tempacc.pagetime);
+  strcat(inp_buffer,tmp);
+
+  if(dialog_run("account",PRFVT,PRFLT,inp_buffer,MAXINPLEN)<0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  if(tempacc.prefs&UPF_ANSIDEF)fprintf(fp,"%s\n",getmsg(ANSDEF));
-  else if(tempacc.prefs&UPF_ANSIASK)fprintf(fp,"%s\n",getmsg(ANSASK));
-  else if(tempacc.prefs&UPF_ANSION)fprintf(fp,"%s\n",getmsg(ANSON));
-  else fprintf(fp,"%s\n",getmsg(ANSOFF));
+  dialog_parse(inp_buffer);
 
-  if(tempacc.prefs&UPF_TRDEF)fprintf(fp,"%s\n",getmsg(TRDEF));
-  else if(tempacc.prefs&UPF_TRASK)fprintf(fp,"%s\n",getmsg(TRASK));
-  else fprintf(fp,"%s\n",getmsg(TR0+getpxlation(tempacc)));
+  if (sameas(margv[11],"OK") || sameas (margv[11],margv[9])) { 
+    for(i=0;i<12;i++){
+      char *s=margv[i];
 
-  fprintf(fp,"%s\n",(tempacc.prefs&UPF_NONSTOP?"on":"off"));
-  fprintf(fp,"%s\n",(tempacc.prefs&UPF_VISUAL?"on":"off"));
-  fprintf(fp,"%s\n",getmsg(LANG1+tempacc.language-1));
-  fprintf(fp,"%d\n",tempacc.scnwidth);
-  fprintf(fp,"%d\n",tempacc.scnheight);
-  fprintf(fp,"%s\n",getmsg(PGSSTR+tempacc.pagestate));
-  fprintf(fp,"%ld\n",tempacc.pagetime);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("account",PRFVT,PRFLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  for(i=0;i<12;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-
-    if(i==0){
-      SETVALUE(tempacc.prefs,UPF_ANSIDEF,sameas(s,getmsg(ANSDEF)));
-      SETVALUE(tempacc.prefs,UPF_ANSIASK,sameas(s,getmsg(ANSASK)));
-      SETVALUE(tempacc.prefs,UPF_ANSION,sameas(s,getmsg(ANSON)));
-    } else if(i==1){
-      int n;
-      SETVALUE(tempacc.prefs,UPF_TRDEF,sameas(s,getmsg(TRDEF)));
-      SETVALUE(tempacc.prefs,UPF_TRASK,sameas(s,getmsg(TRASK)));
-      for(n=0;n<NUMXLATIONS;n++){
-	if(sameas(s,getmsg(TR0+n))){
-	  setpxlation(tempacc,n);
+      if(i==0){
+	SETVALUE(tempacc.prefs,UPF_ANSIDEF,sameas(s,msg_get(ANSDEF)));
+	SETVALUE(tempacc.prefs,UPF_ANSIASK,sameas(s,msg_get(ANSASK)));
+	SETVALUE(tempacc.prefs,UPF_ANSION,sameas(s,msg_get(ANSON)));
+      } else if(i==1){
+	int n;
+	SETVALUE(tempacc.prefs,UPF_TRDEF,sameas(s,msg_get(TRDEF)));
+	SETVALUE(tempacc.prefs,UPF_TRASK,sameas(s,msg_get(TRASK)));
+	for(n=0;n<NUMXLATIONS;n++){
+	  if(sameas(s,msg_get(TR0+n))){
+	    usr_setpxlation(tempacc,n);
+	    break;
+	  }
+	}
+      } else if(i==2)SETVALUE(tempacc.prefs,UPF_NONSTOP,sameas(s,"on"));
+      else if(i==3)SETVALUE(tempacc.prefs,UPF_VISUAL,sameas(s,"on"));
+      else if(i==4){
+	int j;
+	for(j=0;j<10;j++)if(!strcmp(s,msg_get(LANG1+j))){
+	  tempacc.language=j+1;
 	  break;
 	}
-      }
-    } else if(i==2)SETVALUE(tempacc.prefs,UPF_NONSTOP,sameas(s,"on"));
-    else if(i==3)SETVALUE(tempacc.prefs,UPF_VISUAL,sameas(s,"on"));
-    else if(i==4){
-      int j;
-      for(j=0;j<10;j++)if(!strcmp(s,getmsg(LANG1+j))){
-	tempacc.language=j+1;
-	break;
-      }
-    } else if(i==5)tempacc.scnwidth=atoi(s);
-    else if(i==6)tempacc.scnheight=atoi(s);
-    else if(i==7){
-      int j,k[4]={PGS_STORE,PGS_OK,PGS_ON,PGS_OFF};
-      for(j=0;j<4;j++)if(!strcmp(s,getmsg(PGSSTR+j))){
-	tempacc.pagestate=k[j];
-	break;
-      }
-    } else if(i==8)tempacc.pagetime=atoi(s);
-  }
+      } else if(i==5)tempacc.scnwidth=atoi(s);
+      else if(i==6)tempacc.scnheight=atoi(s);
+      else if(i==7){
+	int j,k[4]={PGS_STORE,PGS_OK,PGS_ON,PGS_OFF};
+	for(j=0;j<4;j++)if(!strcmp(s,msg_get(PGSSTR+j))){
+	  tempacc.pagestate=k[j];
+	  break;
+	}
+      } else if(i==8)tempacc.pagetime=atoi(s);
+    }
 
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
-    prompt(EDITCAN);
-    return;
-  } else {
     memcpy(uacc,&tempacc,sizeof(tempacc));
     if(sameas(uacc->userid,thisuseracc.userid))resetbbslib();
     prompt(EDITOK);
+  } else {
+    prompt(EDITCAN);
   }
 }
 
@@ -570,16 +555,16 @@ transfercredits()
 {
   int num, yes;
   char userid[80];
-  useracc ruseracc, *ruacc=&ruseracc;
-  classrec *class=findclass(uacc->curclss);
+  useracc_t ruseracc, *ruacc=&ruseracc;
+  classrec_t *class=cls_find(uacc->curclss);
 
   if(uacc->credits<mincxf){
     prompt(XFERR1,mincxf);
     return;
-  } else if((class->flags&CF_CRDXFER)==0){
+  } else if((class->flags&CLF_CRDXFER)==0){
     prompt(XFERR2);
     return;
-  } else if(!haskey(uacc,xfkey)){
+  } else if(!key_owns(uacc,xfkey)){
     prompt(XFERR2);
     return;
   } else if(!(demcxf||uacc->totpaid)){
@@ -587,7 +572,7 @@ transfercredits()
     return;
   }
 
-  if(!getnumber(&num,CREDTR,mincxf,min(uacc->credits-1,maxcxf),NUMERR,0,0)){
+  if(!get_number(&num,CREDTR,mincxf,min(uacc->credits-1,maxcxf),NUMERR,0,0)){
     prompt(CXFABO);
     return;
   }
@@ -597,7 +582,7 @@ transfercredits()
   }
 
   for(;;){
-    if(!getuserid(userid,CTWHO,UIDERR,0,NULL,0)){
+    if(!get_userid(userid,CTWHO,UIDERR,0,NULL,0)){
       prompt(CXFABO);
       return;
     }
@@ -607,27 +592,27 @@ transfercredits()
     } else break;
   }
 
-  if(!uinsys(userid,0))loaduseraccount(userid,ruacc);
+  if(!usr_insys(userid,0))usr_loadaccount(userid,ruacc);
   else ruacc=&othruseracc;
 
-  class=findclass(ruacc->curclss);
-  if(ruacc->credits<mincxf || (!haskey(ruacc,xfkey)) ||
-     (!(demcxf||uacc->totpaid)) || ((class->flags&CF_CRDXFER)==0))
+  class=cls_find(ruacc->curclss);
+  if(ruacc->credits<mincxf || (!key_owns(ruacc,xfkey)) ||
+     (!(demcxf||uacc->totpaid)) || ((class->flags&CLF_CRDXFER)==0))
     prompt(CTWARN,userid);
   
   prompt(CTCONF,num,uacc->userid,userid);
   
-  if(!getbool(&yes,CTCQUE,BOOLERR,0,0) || (!yes)){
+  if(!get_bool(&yes,CTCQUE,BOOLERR,0,0) || (!yes)){
     prompt(CXFABO);
     return;
   }
 
-  if(!userexists(userid)){
+  if(!usr_exists(userid)){
     prompt(ACCDEL,userid);
     return;
   } else {
     ruacc=&ruseracc;
-    if(!uinsys(userid,0))loaduseraccount(userid,ruacc);
+    if(!usr_insys(userid,0))usr_loadaccount(userid,ruacc);
     else ruacc=&othruseracc;
 
     if(num>=uacc->credits){
@@ -636,14 +621,14 @@ transfercredits()
     }
 
     uacc->credits-=num;
-    postcredits(userid,num,CRD_FREE);
+    usr_postcredits(userid,num,CRD_FREE);
     audit(thisuseronl.channel,AUDIT(CRDXFER),uacc->userid,num,userid);
     prompt(CXFOK,num,uacc->userid,userid);
-    if(uinsys(userid,0)){
+    if(usr_insys(userid,0)){
       char injbuf[16384];
 
-      sprintf(injbuf,getmsglang(CXFINJ,othruseracc.language-1),uacc->userid,num);
-      if(injoth(&othruseronl,injbuf,0))prompt(NOTICE,ruacc->userid);
+      sprintf(injbuf,msg_getl(CXFINJ,othruseracc.language-1),uacc->userid,num);
+      if(usr_injoth(&othruseronl,injbuf,0))prompt(NOTICE,ruacc->userid);
     }
   }
 }
@@ -655,89 +640,89 @@ showstats()
   char p1[80],p2[80],p3[80],p4[80];
   char buf[16384];
   int nod=cofdate(today())-cofdate(uacc->datecre);
-  classrec *class=findclass(uacc->curclss);
+  classrec_t *class=cls_find(uacc->curclss);
 
   prompt(ACCST1);
 
   if(uacc->datecre!=today()){
-    strcpy(p1,getmsg(DAYSNG+(nod!=1)));
-    strcpy(p2,getmsg(TIMSNG+(uacc->connections!=1)));
-    strcpy(p3,getmsg(DAYSNG+(uacc->passexp!=1)));
-    sprompt(outbuf,ACCST2,nod,p1,p2,p3);
-  } else sprompt(outbuf,ACCST2A,getpfix(DAYSNG,uacc->passexp));
-  strcat(buf,outbuf);
+    strcpy(p1,msg_get(DAYSNG+(nod!=1)));
+    strcpy(p2,msg_get(TIMSNG+(uacc->connections!=1)));
+    strcpy(p3,msg_get(DAYSNG+(uacc->passexp!=1)));
+    sprompt(out_buffer,ACCST2,nod,p1,p2,p3);
+  } else sprompt(out_buffer,ACCST2A,msg_getunit(DAYSNG,uacc->passexp));
+  strcat(buf,out_buffer);
 
-  strcpy(p1,getpfix(CRDSNG,uacc->credits));
-  strcpy(p2,getpfix(CRDSNG,uacc->totcreds));
-  strcpy(p3,getpfix(CRDSNG,uacc->credsever));
-  strcpy(p4,getpfix(MINSNG,uacc->timever));
-  sprompt(outbuf,ACCST3,p1,p2,p3,p4);
-  strcat(buf,outbuf);
+  strcpy(p1,msg_getunit(CRDSNG,uacc->credits));
+  strcpy(p2,msg_getunit(CRDSNG,uacc->totcreds));
+  strcpy(p3,msg_getunit(CRDSNG,uacc->credsever));
+  strcpy(p4,msg_getunit(MINSNG,uacc->timever));
+  sprompt(out_buffer,ACCST3,p1,p2,p3,p4);
+  strcat(buf,out_buffer);
 
-  strcpy(p1,getpfix(FILSNG,uacc->filesdnl));
-  strcpy(p2,getpfix(FILSNG,uacc->filesupl));
-  sprompt(outbuf,ACCST4,p1,p2);
-  strcat(buf,outbuf);
+  strcpy(p1,msg_getunit(FILSNG,uacc->filesdnl));
+  strcpy(p2,msg_getunit(FILSNG,uacc->filesupl));
+  sprompt(out_buffer,ACCST4,p1,p2);
+  strcat(buf,out_buffer);
   
-  strcat(buf,getmsg(ACCST5A));
+  strcat(buf,msg_get(ACCST5A));
   if(class->limpercall>=0){
-    sprompt(outbuf,ACCST5B,class->limpercall,
-	    getpfix(MINSNG,class->limpercall));
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5B,class->limpercall,
+	    msg_getunit(MINSNG,class->limpercall));
+    strcat(buf,out_buffer);
   }
   if(class->limperday>=0){
-    sprompt(outbuf,ACCST5C,class->limperday,
-	    getpfix(MINSNG,class->limperday));
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5C,class->limperday,
+	    msg_getunit(MINSNG,class->limperday));
+    strcat(buf,out_buffer);
   }
   if(class->crdperday){
     char hoften[80];
-    strcpy(hoften,getmsg(DAILY));
-    sprompt(outbuf,ACCST5D,class->crdperday,
-	    getpfix(CRDSNG,class->crdperday),hoften);
-    strcat(buf,outbuf);
+    strcpy(hoften,msg_get(DAILY));
+    sprompt(out_buffer,ACCST5D,class->crdperday,
+	    msg_getunit(CRDSNG,class->crdperday),hoften);
+    strcat(buf,out_buffer);
   }
 
   if(class->crdperweek){
     char hoften[80];
-    strcpy(hoften,getmsg(WEEKLY));
-    sprompt(outbuf,ACCST5D,class->crdperweek,
-	    getpfix(CRDSNG,class->crdperweek),hoften);
-    strcat(buf,outbuf);
+    strcpy(hoften,msg_get(WEEKLY));
+    sprompt(out_buffer,ACCST5D,class->crdperweek,
+	    msg_getunit(CRDSNG,class->crdperweek),hoften);
+    strcat(buf,out_buffer);
   }
 
   if(class->crdpermonth){
     char hoften[80];
-    strcpy(hoften,getmsg(MNTHLY));
-    sprompt(outbuf,ACCST5D,class->crdpermonth,
-	    getpfix(CRDSNG,class->crdpermonth),
+    strcpy(hoften,msg_get(MNTHLY));
+    sprompt(out_buffer,ACCST5D,class->crdpermonth,
+	    msg_getunit(CRDSNG,class->crdpermonth),
 	    hoften);
-    strcat(buf,outbuf);
+    strcat(buf,out_buffer);
   }
 
-  if(class->flags&CF_NOCHRGE)strcat(buf,getmsg(ACCST5E));
+  if(class->flags&CLF_NOCHRGE)strcat(buf,msg_get(ACCST5E));
   nod=class->ardays-uacc->classdays;
   if(class->ardays>0){
-    sprompt(outbuf,ACCST5F,nod,getpfix(DAYSNG,nod),class->around);
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5F,nod,msg_getunit(DAYSNG,nod),class->around);
+    strcat(buf,out_buffer);
   } else if(!class->ardays){
-    sprompt(outbuf,ACCST5FT,class->around);
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5FT,class->around);
+    strcat(buf,out_buffer);
   }
   if(class->nadays!=-1){
-    sprompt(outbuf,ACCST5G,class->nadays,
-	    getpfix(DAYSNG,class->nadays),class->notaround);
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5G,class->nadays,
+	    msg_getunit(DAYSNG,class->nadays),class->notaround);
+    strcat(buf,out_buffer);
   }
   if(strcmp(uacc->curclss,class->nocreds)){
-    sprompt(outbuf,ACCST5H,class->nocreds);
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5H,class->nocreds);
+    strcat(buf,out_buffer);
   }
   if(strcmp(uacc->curclss,class->credpost)){
-    sprompt(outbuf,ACCST5I,class->credpost);
-    strcat(buf,outbuf);
+    sprompt(out_buffer,ACCST5I,class->credpost);
+    strcat(buf,out_buffer);
   }
-  strcat(buf,getmsg(ACCST5J));
+  strcat(buf,msg_get(ACCST5J));
 
   print(buf);
 	 
@@ -750,7 +735,7 @@ passother()
 {
   char userid[80];
 
-  if(!getuserid(userid,OPSWHO,OUIDERR,0,NULL,0))return;
+  if(!get_userid(userid,OPSWHO,OUIDERR,0,NULL,0))return;
   else {
     prompt(PSWOTH,userid);
     changepassword(userid,0);
@@ -763,14 +748,15 @@ int
 run(int argc, char *argv[])
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
+  init();
   uacc=&thisuseracc;
 
   for(;;){
     if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
       if(!shownmenu){
-	prompt(haskey(&thisuseracc,syskey)?ACCSMNU:ACCMNU,NULL);
+	prompt(key_owns(&thisuseracc,syskey)?ACCSMNU:ACCMNU,NULL);
 	prompt(VSHMENU);
 	shownmenu=2;
       }
@@ -778,21 +764,21 @@ run(int argc, char *argv[])
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return 0;
 	}
 	if(shownmenu==1){
-	  prompt(haskey(&thisuseracc,syskey)?SHSMENU:SHMENU,NULL);
+	  prompt(key_owns(&thisuseracc,syskey)?SHSMENU:SHMENU,NULL);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
 	prompt(ABOUT,NULL);
@@ -800,7 +786,7 @@ run(int argc, char *argv[])
 	  prompt(PASSXP);
 	  if(thisuseracc.passexp>0){
 	    prompt(PXPDAYS,thisuseracc.passexp,
-		   getpfix(DAYSNG,thisuseracc.passexp));
+		   msg_getunit(DAYSNG,thisuseracc.passexp));
 	  } else {
 	    prompt(PEXPIRED);
 	  }
@@ -811,7 +797,7 @@ run(int argc, char *argv[])
 	break;
       case 'P':
 	changepassword(uacc->userid,0);
-	setpasswordentry(0);
+	inp_clearflags(INF_PASSWD);
 	break;
       case 'S':
 	editprefs();
@@ -823,10 +809,10 @@ run(int argc, char *argv[])
 	showstats();
 	break;
       case 'O':
-	if(haskey(&thisuseracc,syskey))passother();
+	if(key_owns(&thisuseracc,syskey))passother();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -838,12 +824,12 @@ run(int argc, char *argv[])
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
   return 0;
 }
@@ -852,9 +838,12 @@ run(int argc, char *argv[])
 int
 login(int argc, char *argv[])
 {
+  init();
   if(remexp && sysvar->pswexpiry){
     if(thisuseracc.passexp>0){
-      prompt(EXPDAYS,thisuseracc.passexp,getpfix(DAYSNG,thisuseracc.passexp));
+      prompt(EXPDAYS,
+	     thisuseracc.passexp,
+	     msg_getunit(DAYSNG,thisuseracc.passexp));
     } else {
       if(strexp){
 	prompt(PASSEX);
@@ -866,20 +855,51 @@ login(int argc, char *argv[])
 }
 
 
-void
-done()
+extern int handler_cleanup(int,char**);
+
+
+int handler_userdel(int argc, char **argv)
 {
-  clsmsg(msg);
-  exit(0);
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",USRDIR,victim);
+  unlink(fname);
+  sprintf(fname,"%s/%s",RECENTDIR,victim);
+  unlink(fname);
+
+  return 0;
 }
 
 
-void
+mod_info_t mod_info_account = {
+  "account",
+  "User Account Manager",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Shows and edits user's account and global preferences.",
+  RCS_VER,
+  "1.0",
+  {90,login},			/* Login handler */
+  {0,run},			/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,handler_cleanup},		/* Cleanup handler */
+  {99,handler_userdel}		/* Delete user handler */
+};
+
+
+int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login(argc,argv);
-  else run(argc,argv);
-  done();
+  mod_setinfo(&mod_info_account);
+  return mod_main(argc,argv);
 }

@@ -29,14 +29,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.8  2000/01/06 11:41:35  alexios
  * Made main() return a value.
  *
  * Revision 1.7  1999/07/18 21:47:26  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.6  1998/12/27 16:06:39  alexios
  * Added autoconf support.
@@ -70,6 +71,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -89,7 +91,7 @@
 #include "mbk_news.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 int  linkey;
 int  entrykey;
@@ -106,33 +108,33 @@ char *upldesc;
 void
 init()
 {
-  classrec *cls;
+  classrec_t *cls;
 
-  initmodule(INITALL);
-  msg=opnmsg("news");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("news");
+  msg_setlanguage(thisuseracc.language);
 
-  linkey=numopt(LINKEY,0,129);
-  entrykey=numopt(ENTRYKEY,0,129);
-  sopkey=numopt(SOPKEY,0,129);
-  defdur=numopt(DEFDUR,0,3650);
-  maxlen=numopt(MAXLEN,256,262144);
+  linkey=msg_int(LINKEY,0,129);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  sopkey=msg_int(SOPKEY,0,129);
+  defdur=msg_int(DEFDUR,0,3650);
+  maxlen=msg_int(MAXLEN,256,262144);
 
-  if((defshw=tokopt(DEFSHW,"ALWAYS","ONCE"))==0){
-    fatal("Option DEFSHW in news.msg has bad value");
+  if((defshw=msg_token(DEFSHW,"ALWAYS","ONCE"))==0){
+    error_fatal("Option DEFSHW in news.msg has bad value");
   }else defshw--;
 
-  if((defhdr=tokopt(DEFHDR,"NONE","DATE","TIME","BOTH"))==0){
-    fatal("Option DEFHDR in news.msg has bad value");
+  if((defhdr=msg_token(DEFHDR,"NONE","DATE","TIME","BOTH"))==0){
+    error_fatal("Option DEFHDR in news.msg has bad value");
   }else defhdr--;
 
-  defcls=stgopt(DEFCLS);
+  defcls=msg_string(DEFCLS);
 
-  if((*defcls!='\0')&&(cls=findclass(defcls=stgopt(DEFCLS)))==NULL){
-    fatal("User class \"%s\" does not exist!",defcls);
+  if((*defcls!='\0')&&(cls=cls_find(defcls=msg_string(DEFCLS)))==NULL){
+    error_fatal("User class \"%s\" does not exist!",defcls);
   }
 
-  upldesc=stgopt(UPLDESC);
+  upldesc=msg_string(UPLDESC);
 }
 
 
@@ -162,7 +164,7 @@ shownews(int lin, int sop)
   int numblt=0,i,shownheader=0;
 
   if((dp=opendir(NEWSDIR))==NULL){
-    fatalsys("Unable to opendir %s",NEWSDIR);
+    error_fatalsys("Unable to opendir %s",NEWSDIR);
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -177,8 +179,8 @@ shownews(int lin, int sop)
     fclose(fp);
 
     if(!blt.enabled)continue;
-    if(!haskey(&thisuseracc,sopkey)){
-      if(!haskey(&thisuseracc,blt.key))continue;
+    if(!key_owns(&thisuseracc,sopkey)){
+      if(!key_owns(&thisuseracc,blt.key))continue;
       if(blt.class[0] && !sameas(thisuseracc.curclss,blt.class))continue;
     }
     
@@ -209,7 +211,7 @@ shownews(int lin, int sop)
 	     strdate(showlist[i].date),strtime(showlist[i].time,1),
 	     showlist[i].priority,
 	     showlist[i].numdays,
-	     getpfix(VEDIT1A+showlist[i].info,1),
+	     msg_getunit(VEDIT1A+showlist[i].info,1),
 	     showlist[i].class,
 	     showlist[i].key);
     } else if(showlist[i].info){
@@ -231,7 +233,7 @@ shownews(int lin, int sop)
 	  shownheader=1;
 	  prompt(RDNEWS);
 	}
-	prompt(HEADER,hdr,getpfix(NEWBLT,1));
+	prompt(HEADER,hdr,msg_getunit(NEWBLT,1));
       } else {
 	if(!shownheader){
 	  shownheader=1;
@@ -243,10 +245,10 @@ shownews(int lin, int sop)
     
     sprintf(fname,NEWSFNAME,showlist[i].num);
     print("\n");
-    if(lastresult==PAUSE_QUIT)break;
-    printfile(fname);
+    if(fmt_lastresult==PAUSE_QUIT)break;
+    out_printfile(fname);
     prompt(BLTDIV);
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
   }
   free(showlist);
 }
@@ -263,7 +265,7 @@ listblts()
   
 
   if((dp=opendir(NEWSDIR))==NULL){
-    fatalsys("Unable to opendir %s",NEWSDIR);
+    error_fatalsys("Unable to opendir %s",NEWSDIR);
   }
 
   prompt(LSTHDR);
@@ -278,7 +280,7 @@ listblts()
       continue;
     }
     fclose(fp);
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     prompt(LSTTAB,blt.num,strdate(blt.date),strtime(blt.time,1),
 	   blt.priority,blt.numdays,blt.enabled?' ':'*',
 	   blt.class,blt.key);
@@ -297,9 +299,9 @@ askbltnum(int pr)
 
   for(;;){
     i=0;
-    setinputflags(INF_HELP);
-    r=getnumber(&i,pr,1,32767,NUMERR,0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    r=get_number(&i,pr,1,32767,NUMERR,0,0);
+    inp_clearflags(INF_HELP);
     if(!r)return 0;
     if(r==-1){
       listblts();
@@ -346,9 +348,9 @@ upload(char *uploadname)
   int  count=-1;
   
   name[0]=dir[0]=0;
-  setaudit(0,NULL,NULL,0,NULL,NULL);
-  addxfer(FXM_UPLOAD,uploadname,upldesc,0,0);
-  dofiletransfer();
+  xfer_setaudit(0,NULL,NULL,0,NULL,NULL);
+  xfer_add(FXM_UPLOAD,uploadname,upldesc,0,0);
+  xfer_run();
   
   sprintf(fname,XFERLIST,getpid());
   
@@ -384,7 +386,7 @@ upload(char *uploadname)
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -395,7 +397,7 @@ insert(int num)
   FILE *fp;
   int  duration=defdur, enabled=1, info=defhdr, key=defkey, priority=0;
   int  i, j, check;
-  char class[16], s[256], *cp, res[256], action;
+  char class[16], res[256], action;
   struct stat st;
   struct newsbulletin blt;
 
@@ -418,36 +420,27 @@ insert(int num)
     memset(&blt,0,sizeof(blt));
   }
 
-  sprintf(fname,TMPDIR"/news%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%d\n%s\n%s\n%s\n%d\n%d\nOK\nCANCEL\n",
+	  duration,
+	  enabled?"on":"",
+	  msg_get(VEDIT1A+info),
+	  class,
+	  key,
+	  priority);
+
+  if(dialog_run("news",VEDIT,LEDIT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%d\n",duration);
-  fprintf(fp,"%s\n",enabled?"on":"");
-  fprintf(fp,"%s\n",getmsg(VEDIT1A+info));
-  fprintf(fp,"%s\n",class);
-  fprintf(fp,"%d\n",key);
-  fprintf(fp,"%d\n",priority);
+  dialog_parse(inp_buffer);
   
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("news",VEDIT,LEDIT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
   for(i=0;i<12;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
+    char *s=margv[i];
     if(i==0)sscanf(s,"%d",&duration);
     else if(i==1)enabled=sameas(s,"ON");
     else if(i==2){
-      for(j=0;j<3;j++)if(!strcmp(getmsg(VEDIT1A+j),s)){
+      for(j=0;j<3;j++)if(!strcmp(msg_get(VEDIT1A+j),s)){
 	info=j;
 	break;
       }
@@ -456,17 +449,13 @@ insert(int num)
     else if(i==5)sscanf(s,"%d",&priority);
     else if(i==8)strcpy(res,s);
   }
-  if(sameas(res,"CANCEL")){
+
+  if(sameas(res,"CANCEL")||sameas(res,margv[7])){
     prompt(CANCEL);
-    fclose(fp);
-    unlink(fname);
     return;
   }
-  
-  fclose(fp);
-  unlink(fname);
 
-  if(class[0] && findclass(class)==0)prompt(WARNCLS,class);
+  if(class[0] && cls_find(class)==0)prompt(WARNCLS,class);
 
   if(!num){
     blt.date=today();
@@ -480,7 +469,7 @@ insert(int num)
   blt.info=info;
 
   if(num){
-    if(!getmenu(&action,0,0,ASKUPL,ASKERR,"YNE",ASKUPLD,'N'))action='N';
+    if(!get_menu(&action,0,0,ASKUPL,ASKERR,"YNE",ASKUPLD,'N'))action='N';
     check=action!='N';
   } else {
     check=0;
@@ -526,7 +515,7 @@ insert(int num)
     editor(fname2,maxlen);
     if(stat(fname2,&st)){
       prompt(TXTCAN);
-      endcnc();
+      cnc_end();
     } else {
       fcopy(fname2,fname);
       unlink(fname2);
@@ -591,7 +580,7 @@ cleanup()
 
 
   if((dp=opendir(NEWSDIR))==NULL){
-    fatalsys("Unable to opendir %s",NEWSDIR);
+    error_fatalsys("Unable to opendir %s",NEWSDIR);
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -628,14 +617,14 @@ void
 run()
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOENTRY);
     return;
   }
 
-  if(!haskey(&thisuseracc,sopkey)){
+  if(!key_owns(&thisuseracc,sopkey)){
     shownews(0,0);
     return;
   }
@@ -650,23 +639,23 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
 	}
 	if(shownmenu==1)prompt(SHMENU);
 	else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'R':
-	shownews(0,haskey(&thisuseracc,sopkey));
+	shownews(0,key_owns(&thisuseracc,sopkey));
 	break;
       case 'I':
 	insert(0);
@@ -688,12 +677,12 @@ run()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -709,23 +698,58 @@ login()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
   exit(0);
 }
 
 
 int
-main(int argc, char *argv[])
+handler_cleanup(int argc, char **argv)
 {
-  setprogname(argv[0]);
-  if(argc>1 && !strcmp(argv[1],"-cleanup")){
-    cleanup();
-    exit(0);
-  }
-  init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else run();
-  done();
-  return 1;
+  cleanup();
+  return 0;
 }
 
+
+int
+handler_login(int argc, char **argv)
+{
+  init();
+  login();
+  done();
+  return 0;
+}
+
+
+int
+handler_run(int argc, char *argv[])
+{
+  init();
+  run();
+  done();
+  return 9;
+}
+
+
+mod_info_t mod_info_news = {
+  "news",
+  "BBS news bulletins",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Shows bulletins to users immediately after login.",
+  RCS_VER,
+  "1.0",
+  {10,handler_login},		/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {50,handler_cleanup},		/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_news);
+  return mod_main(argc,argv);
+}

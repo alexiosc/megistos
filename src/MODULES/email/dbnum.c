@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,21 +84,21 @@ getfl(int *first, int *last)
   /* Read the first key. If we can't something's VERY wrong. Panic. */
 
   if(d_keyread(first)!=S_OKAY){
-    fatal("Unable to read first NUM key.");
+    error_fatal("Unable to read first NUM key.");
   }
 
 
   /* Get the last key of the database, panic if unable to do so */
 
   if(d_keylast(NUM)!=S_OKAY) {
-    fatal("Got first NUM key but can't get last one.");
+    error_fatal("Got first NUM key but can't get last one.");
   }
 
 
   /* Read the last key. Panic if we can't. */
 
   if(d_keyread(last)!=S_OKAY){
-    fatal("Unable to read last NUM key.");
+    error_fatal("Unable to read last NUM key.");
     exit(1);
   }
 
@@ -143,11 +145,11 @@ getmsgno(int *msgno, int dir)
     d_keyfind(NUM,msgno);
 
     if(d_keynext(NUM)!=S_OKAY){
-      fatal("No next NUM key. This should never happen.");
+      error_fatal("No next NUM key. This should never happen.");
     }
     
     if(d_keyread(msgno)!=S_OKAY){
-      fatal("Unable to read NUM key. Should never happen.");
+      error_fatal("Unable to read NUM key. Should never happen.");
     }
 
 
@@ -173,11 +175,11 @@ getmsgno(int *msgno, int dir)
     d_keyfind(NUM,msgno);
 
     if(d_keynext(NUM)!=S_OKAY){
-      fatal("No next NUM key. This should never happen.");
+      error_fatal("No next NUM key. This should never happen.");
     }
     
     if(d_keyread(msgno)!=S_OKAY){
-      fatal("Unable to read NUM key. Should never happen.");
+      error_fatal("Unable to read NUM key. Should never happen.");
     }
   }
 
@@ -223,7 +225,7 @@ npmsgnum(int *msgno, int targetnum, int dir)
   if(j!=S_OKAY)return BSE_NFOUND;
   
   if(d_keyread(&j)!=S_OKAY){
-    fatal("Unable to read key though it exists.\n");
+    error_fatal("Unable to read key though it exists.\n");
   }
 
   if(dir==BSD_GT && j<targetnum)return BSE_NFOUND;

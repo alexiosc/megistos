@@ -156,8 +156,8 @@ int	*inptr;			/* pointer to in for current player */
 int	*inopp;			/* pointer to in for opponent */
 
 int	ncin;			/* number of characters in cin */
-char	cin[100];		/* input line of current move
-				   (used for reconstructing input after
+char	cin[100];		/* inp_buffer line of current move
+				   (used for reconstructing inp_buffer after
 				   a backspace) */
 
 extern char	*color[];

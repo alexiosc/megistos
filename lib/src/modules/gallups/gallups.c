@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:20  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  2000/10/01 10:10:19  bbs
  * added options to log user age and sex (used for statistics)
@@ -103,6 +104,7 @@ time_t time_used;
 int entrykey;
 int crkey;
 char *gscpath=NULL;
+int galnew_days;
 
 char tempstr[16384];
 
@@ -142,17 +144,19 @@ void init(void)
 	entrykey=msg_int(ENTRYKEY,0,129);
 	crkey=msg_int(CRKEY,0,129);
 	gscpath=msg_string(GSCPATH);
+	galnew_days = msg_int(NEWGALDAYS, 0, 999);
 }
 
 
-char *listandselectpoll(void)
+char *listandselectgallup(void)
 {
   FILE *pipe, *pollf;
   char temp1[256], temp2[256], *dscr, **galfiles;
   unsigned int galnum=0, availgal = 0, i;
   struct gallup ghead, *gin=&ghead;
+  long int ddatenew;
   
-	sprintf(temp1,"\\ls -F %s/ | grep /$",GALLUPSDIR);
+	sprintf(temp1,"\\ls -trF %s/ | grep /$",GALLUPSDIR);
 
 	pipe=popen(temp1,"r");
 	if (pipe==NULL) { prompt(NOGALEXIST); return ""; }
@@ -169,6 +173,10 @@ char *listandselectpoll(void)
   
 	inp_nonblock();
 	fmt_lastresult=0;
+
+	/* if greater than this date then mark it as new */
+
+	ddatenew = cofdate( today() ) - galnew_days;
 
 	prompt(SELGALHEAD);
 
@@ -188,10 +196,10 @@ char *listandselectpoll(void)
 
 		fclose(pollf);
 
-		if(!memcmp(gin->magic, GAL_MAGIC, 4))
+		if(!memcmp(gin->magic, GAL_MAGIC, 4)) {
 			prompt(SELGALLIST,galnum,gflgs(gin) & GF_LOGUSERID?'*':' ',
-				galfiles[galnum-1],gdesc(&ghead));
-		else {
+				galfiles[galnum-1],gdesc(&ghead), msg_getunit(GALNEW, cofdate(gdset(gin)) >= ddatenew));
+		} else {
 			galnum--;
 			continue;
 		}
@@ -220,13 +228,14 @@ char *listandselectpoll(void)
 }
 
 
-void selectpoll(void)
+void selectgallup(void)
 {
   char fn[11];
-  strcpy(fn,listandselectpoll());
-  
+
+	strcpy(fn,listandselectgallup());
+
 	if(fn[0]=='\0') return;
-  
+
 	if(!loadgallup(fn, &gallupinfo)) {
 		prompt(OOPS);
 		if(gallup_loaded)freegallup();
@@ -356,7 +365,9 @@ void saveans()
 	if(gflgs(ginfo) & GF_QUIZ)fprintf(idx, "%08i ", points);
 	if(gflgs(ginfo) & GF_TIMED)fprintf(idx, "%08i ", (int)time_used);
 
-#if 1
+
+/* shall we enable age and sex logging when no user ids are logged? */
+#if 0
 	if(!(gflgs(ginfo) & GF_LOGUSERID)) {
 //		if(gflgs(ginfo) & GF_LOGAGE)
 		fprintf(idx, "%08i ", thisuseracc.age);
@@ -602,7 +613,7 @@ void takegallup(void)
 							if(inp_buffer[0] == qcomch(q)[m]) {
 								if(acomdt(a))strcpy(inp_buffer, acomdt(a));
 								else strcpy(inp_buffer, "");
-								c = m+48;
+								c = m+'0';
 								strncat(inp_buffer, &c, 1);
 								strcat(inp_buffer, "\n");
 								if(acomdt(a))free(acomdt(a));
@@ -715,9 +726,18 @@ void viewresults(void)
 				for(j=0;j<qseldatacnt(q);j++) {
 					selsum[j] = 0;
 				}
+
+				if(!(qflg(q) & QF_SELECTNOMENU)) {
+					print("\n");
+					for(j=0;j<qseldatacnt(q);j++)
+						prompt(MCHEADER, j+1, qseldataidx(q)[j]);
+					print("\n");
+				}
+
+
 				break;
 			case GQ_COMBO:
-				comsum = malloc(sizeof(int *) * qcomdatacnt(q));
+				comsum = malloc(sizeof(int *) * (qcomdatacnt(q)+1));
 				
 				for(j=0;j<qcomdatacnt(q)+1;j++) {
 					comsum[j] = malloc(sizeof(int) * qcompromcnt(q));
@@ -795,10 +815,10 @@ void viewresults(void)
 				if(l < 30)l=30;
 				
 				prompt(ANSCOMBOSTR, strnfill( msg_getunit(ANSCOMBOFIELDS, 1), ' ', -l));
-//				print("%30s", "œ›å˜     ");
+
 				for(n=0;n<qcompromcnt(q);n++)
 					prompt(ANSCOMBOCHAR, qcomch(q)[n]);
-//					print("%3c       ", qcomch(q)[n]);
+
 				print("\n!F-\n");
 
 				for(j=0;j<qcomdatacnt(q);j++) {
@@ -807,9 +827,6 @@ void viewresults(void)
 					for(n=0;n<qcompromcnt(q);n++)
 						prompt(ANSCOMBORES, comsum[j][n],
 						 comsum[qcomdatacnt(q)][n]?(comsum[j][n] * 100.0 / comsum[qcomdatacnt(q)][n]):0.0);
-
-//						print("%3i %4.1f%% ", comsum[j][n],
-//							comsum[qcomdatacnt(q)][n]?(comsum[j][n] * 100.0 / comsum[qcomdatacnt(q)][n]):0.0);
 
 					print("\n");
 
@@ -827,6 +844,8 @@ void viewresults(void)
 
 				free(comsum[qcomdatacnt(q)]);
 				free(comsum);
+				
+
 				break;
 		}
 					
@@ -867,7 +886,13 @@ int run_compiler(char *fname, char *oname, int vis, int *info)
 		if(gflgs(ginfo) & GF_GONEXT)strcat(cmd, " -x2");
 		else strcat(cmd, " -x1");
 	} else strcat(cmd, " -x0");
+
+	sprintf(tempstr, "%li", gtset(ginfo));
+	strcat(cmd, " -et"); strcat(cmd, tempstr);
 	
+	sprintf(tempstr, "%li", gdset(ginfo));
+	strcat(cmd, " -ed"); strcat(cmd, tempstr);
+		
 	// gallup name
 	strcat(cmd, " -n");
 	strcat(cmd, gfnam(ginfo));
@@ -886,8 +911,8 @@ int run_compiler(char *fname, char *oname, int vis, int *info)
 	strcat(cmd, fname);
   
 
+//	print("command to execute : %s\n", cmd);
 	if(vis) {
-//		print("command to execute : %s\n", cmd);
 		print("Compiling script... (output)\n!F-\n");
 	}
 
@@ -921,7 +946,7 @@ int run_compiler(char *fname, char *oname, int vis, int *info)
 void newgallup(void)
 {
   FILE *fp;
-  char filename[256], cmd[256], fedit[128], oname[256];
+  char filename[256], cmd[256], fedit[128], oname[256], *ch;
   struct stat st;
   int t1, editscript=0, rc;
   float v;
@@ -998,7 +1023,7 @@ void newgallup(void)
 
 			if(sameas(margv[8], margv[5])) {	// execute compiler to test
 				if(!editscript) {
-					print("No script text\n!P");
+					prompt(NOSCRIPT);
 					continue;
 				}
 				
@@ -1017,11 +1042,10 @@ void newgallup(void)
   	
   	unlink(fedit);
 
-  //	for(t1 = 0;t1<margc;t1++)print("margv[ %i ] = %s\n", t1, margv[t1]);
+//	for(t1 = 0;t1<=margc;t1++)print("margv[ %i ] = %s\n", t1, margv[t1]);
 
-	if(sameas(margv[9], "CANCEL") || sameas(margv[9], margv[8]))  {
+	if(sameas(margv[8], "CANCEL") || sameas(margv[8], margv[7]))  {
 		prompt(PROCCANCEL);
-//		print("† › ˜› ¡˜©å˜ ˜¡¬¨éŸž¡œ.\n");
 		unlink(filename);
 		return;
 	}
@@ -1031,6 +1055,9 @@ void newgallup(void)
 		ginfo = oldgi;
 		return;
 	}
+
+	gtset(ginfo) = now();
+	gdset(ginfo) = today();
 	
 	rc = RC_TYPE;
 	run_compiler(filename, oname, 0, &rc);
@@ -1041,7 +1068,7 @@ void newgallup(void)
 		if(!get_bool(&t1, TIMEQUIZ, SELERR, ENTERNO, 0))return;
 		if(t1)gflgs(ginfo) |= GF_TIMED;
 
-#if ENABLE_EXTRA
+#ifdef ENABLE_EXTRA
 		if(!get_bool(&t1, EXTRACHECK, SELERR, ENTERNO, 0))return;
 		if(t1) {
 			gflgs(ginfo) |= GF_EXTRA;
@@ -1050,9 +1077,14 @@ void newgallup(void)
 		}
 #endif
 
+
+#ifdef ENABLE_EXPIRATION
+		if(!get_bool(&t1, EXPIREQ, SELERR, ENTERNO, 0))return;
+#endif
+
 	}
-		
-	
+
+
 	rc = RC_DONE;
 	if(!run_compiler(filename, oname, 0, &rc)) {
 		prompt(CREATEFAIL);
@@ -1070,10 +1102,14 @@ void newgallup(void)
 		sprintf(cmd, "\\cp %s %s/%s/%s", oname, GALLUPSDIR, gfnam(ginfo), GDATAFILE);
 		system(cmd);
 		
+		/* keep back up file */ /* GREAT SECURITY RISK (IN QUIZZES) */
 		sprintf(cmd, "\\cp %s %s/%s/.script", filename, GALLUPSDIR, gfnam(ginfo));
 		system(cmd);
 		
 		prompt(CREATEOK);
+
+		if((ch=getenv("CHANNEL"))!=NULL)audit(ch, AUDIT(NEWGALLUP), thisuseracc.userid, gfnam(ginfo));
+		else audit("[no channel]", AUDIT(NEWGALLUP), thisuseracc.userid, gfnam(ginfo));
 	}
 
 	ginfo = oldgi;
@@ -1081,37 +1117,41 @@ void newgallup(void)
 	unlink(oname);
 }  
 
-void
-erasegallup(void) {
 
-  char fn[11],cmd[256];
+void erasegallup(void)
+{
+  char fn[11],cmd[256], *ch;
   int t1;
   
-  strcpy(fn,listandselectpoll());
-  if(fn[0]=='\0') return;
+	strcpy(fn,listandselectgallup());
+	if(fn[0]=='\0') return;
 
-  if(!get_bool(&t1,ERASECONFIRM,SELERR,0,0) || !t1) return;
-  if(!strcmp(fn,gfnam(ginfo))) freegallup();  
+	if(!get_bool(&t1,ERASECONFIRM,SELERR,0,0) || !t1) return;
+	if(!strcmp(fn,gfnam(ginfo))) freegallup();  
 
-  sprintf(cmd,"\\rm -Rf %s/%s", GALLUPSDIR, fn);
-  system(cmd);
+	sprintf(cmd,"\\rm -Rf %s/%s", GALLUPSDIR, fn);
+	system(cmd);
   
-  prompt(OKERASED);
+	prompt(OKERASED);
+
+	if((ch=getenv("CHANNEL"))!=NULL)audit(ch, AUDIT(ERASEGALLUP), thisuseracc.userid, fn);
+	else audit("[no channel]", AUDIT(ERASEGALLUP), thisuseracc.userid, fn);
 
 }
 
 void about(void)
 {
   int shownmenu=0;
-  char c;
-  char *path;
-
+  char c=0;				// initialize to stop gcc complaining
+  char *path=NULL;
+  char desc[50];
+  
 	for(;;) {
 		thisuseronl.flags&=~OLF_BUSY;
 		if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])) {
 			if(!shownmenu) {
-				prompt(INFOMNU);
-				prompt(SHINFOHEAD);
+				prompt(ABOUTMNU);
+				prompt(SHABOUTHEAD);
 				prompt(VSHMENU);
 				shownmenu=2;
 			}
@@ -1122,11 +1162,12 @@ void about(void)
 			if(!cnc_nxtcmd) {
 				if(thisuseronl.flags&OLF_MMCONCAT){
 					thisuseronl.flags&=~OLF_MMCONCAT;
-					return;
+					shownmenu=1;
+//					return;
 				}
 				if(shownmenu==1){
-					prompt(SHINFOHEAD);
-					prompt(SHINFOMENU);
+					prompt(SHABOUTHEAD);
+					prompt(SHABOUTMENU);
 				} else shownmenu=1;
 				inp_get(0);
 				cnc_begin();
@@ -1138,30 +1179,34 @@ void about(void)
 			switch (c) {
 				case '1':
 					path = msg_string(DOCFILE);
-					if(!path[0])break;
-					out_printfile(path); free(path);
+					sprompt(desc, DOCFILEPRM);
 					break;
-					
 				case '2':
 					path = msg_string(SECFILE);
-					if(!path[0])break;
-					out_printfile(path); free(path);
+					sprompt(desc, SECFILEPRM);
 					break;
 				case '3':
 					path = msg_string(FRMFILE);
-					if(!path[0])break;
-					out_printfile(path); free(path);
+					sprompt(desc, FRMFILEPRM);
 					break;
 				case 'X':
-					prompt(LEAVEINFO);
+					prompt(LEAVEABOUT);
 					return;
 				case '?':
 					shownmenu=0;
-				break;
+					break;
 				default:
 					prompt(ERRSEL,c);
 					cnc_end();
 					continue;
+			}
+
+			if(path) {
+				if(xfer_add(FXM_DOWNLOAD, path, desc, 0,-1)) {
+					xfer_run();
+					xfer_kill_list();
+				}
+				free(path);path=NULL;
 			}
 		}
 		if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
@@ -1169,7 +1214,32 @@ void about(void)
 	}
 }
 
-void gallup_analysis(void)
+
+/* count lines in index file */
+int count_entries(struct gallup *gin)
+{
+  FILE *idx;
+  char filename[128];
+  int entries=0;
+  
+	sprintf(filename, "%s/%s/%s", GALLUPSDIR, gfnam(gin), GINDEXFILE);
+	
+	idx = fopen(filename, "r");
+	if(!idx)return 0;
+	
+	fgets(tempstr, sizeof(tempstr), idx);
+	while(!feof(idx)) {
+		entries++;
+		fgets(tempstr, sizeof(tempstr), idx);
+	}
+	
+	fclose(idx);
+
+  return entries;
+}
+
+
+void gallup_information(void)
 {
   char *galname, fname[128];
   char yes[20], no[20];
@@ -1179,20 +1249,19 @@ void gallup_analysis(void)
 	sprompt(yes, GALYES);
 	sprompt(no, GALNO);
 
-	galname=listandselectpoll();
+	galname=listandselectgallup();
 	if(!galname[0])return;
 	
 	sprintf(fname, "%s/%s/%s", GALLUPSDIR, galname, GDATAFILE);
 	fp = fopen(fname, "r");
 	fread(gin, sizeof(struct gallup), 1, fp);
 	fclose(fp);
-		
+	
 	out_setwaittoclear(0);
 	
 	prompt(GALENTRYHEAD);
 	prompt(GALENTRYTMPL,
 		gdesc(gin),
-
 		gfnam(gin),
 		msg_getunit(GALLUPPOLL, gflgs(gin)&GF_POLL),
 		gauth(gin),
@@ -1200,20 +1269,115 @@ void gallup_analysis(void)
 		gflgs(gin)&GF_LOGUSERID?yes:no,
 		gflgs(gin)&GF_MULTISUBMIT?yes:no,
 		gflgs(gin)&GF_VIEWRESALL?yes:no,
-		gflgs(gin)&GF_TIMED?yes:no);
+		gflgs(gin)&GF_TIMED?yes:no
+	);
+
+	prompt(GALENTRYMORE,
+		strdate( gdset(gin) ),
+		cofdate( today() ) - cofdate( gdset(gin) ),
+		count_entries(gin)
+	);
+	
+
 	
 	prompt(GALENTRYFOOT);
 
 	out_setwaittoclear(1);
 }
 
-	
+#define MONOFF(g)	(g?"on":"off")
+#define GONOFF(m,g)	do { if(sameas(margv[m], "on"))g=1;else g=0; } while(0)
+void gallup_statistics(void)
+{
+   char *galname;
+   struct {
+   	int t_sexage:1;
+   	int t_sex:1;
+   	int t_age:1;
+	int t_options:1;
+   	int g_sexage:1;
+   	int g_sex:1;
+   	int g_age:1;
+   	int g_options:1;
+   } sinf = {1, 0, 0, 0, 1, 0, 0, 0};
 
+
+	galname = listandselectgallup();
+	if(!galname[0])return;
+
+
+	sprintf(inp_buffer, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\nOK\nCANCEL\n",
+		MONOFF(sinf.t_sexage),
+		MONOFF(sinf.t_sex),
+		MONOFF(sinf.t_age),
+		MONOFF(sinf.t_options),
+		MONOFF(sinf.g_sexage),
+		MONOFF(sinf.g_sex),
+		MONOFF(sinf.g_age),
+		MONOFF(sinf.g_options));
+		
+	dialog_run("gallups", STATGALVT, STATGALLT, inp_buffer, MAXINPLEN);
+
+	dialog_parse(inp_buffer);
+
+	GONOFF(0, sinf.t_sexage);
+	GONOFF(1, sinf.t_sex);
+	GONOFF(2, sinf.t_age);
+	GONOFF(3, sinf.t_options);
+	GONOFF(4, sinf.g_sexage);
+	GONOFF(5, sinf.g_sex);
+	GONOFF(6, sinf.g_age);
+	GONOFF(7, sinf.g_options);
+	
+	if(sameas(margv[10], "CANCEL") || sameas(margv[10], margv[9])) {
+		prompt(PROCCANCEL);
+		return;
+	}
+	
+	if(sameas(margv[10], "OK") || sameas(margv[10], margv[8])) {
+	  char cmd[128], out[128];
+
+		sprintf(cmd, "%s/gstat ", BINDIR);
+		if(sinf.t_sexage)strcat(cmd, "-t4 ");
+		if(sinf.t_sex)strcat(cmd, "-t2 ");
+		if(sinf.t_age)strcat(cmd, "-t3 ");
+		if(sinf.t_options)strcat(cmd, "-t1 ");
+
+		if(sinf.g_sexage)strcat(cmd, "-g4 ");
+		if(sinf.g_sex)strcat(cmd, "-g2 ");
+		if(sinf.g_age)strcat(cmd, "-g3 ");
+		if(sinf.g_options)strcat(cmd, "-g1 ");
+
+		strcat(cmd, galname);
+
+		sprintf(out, "%s/%s.rep", TMPDIR, galname);
+		
+		strcat(cmd, " >");
+		strcat(cmd, out);
+		
+		print("command to execute: %s\n", cmd);
+
+		system(cmd);
+		
+
+		if(xfer_add(FXM_TRANSIENT, out, msg_get(GALREPDESC), 0,-1)) {
+			xfer_run();
+			xfer_kill_list();
+		}
+
+
+//		out_printfile(out);
+
+		unlink(out);
+	}
+
+}
+	
 
 void operators_menu(void)
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
 	for(;;) {
 		thisuseronl.flags&=~OLF_BUSY;
@@ -1231,7 +1395,8 @@ void operators_menu(void)
 			if(!cnc_nxtcmd) {
 				if(thisuseronl.flags&OLF_MMCONCAT){
 					thisuseronl.flags&=~OLF_MMCONCAT;
-					return;
+					shownmenu=1;
+//					return;
 				}
 				if(shownmenu==1){
 					prompt(SHOPERHEAD);
@@ -1251,11 +1416,12 @@ void operators_menu(void)
 				case 'E':
 					erasegallup();
 					break;
-				case 'G':
-					gallup_analysis();
+				case 'I':
+					gallup_information();
 					break;
 				case 'S':
 					prompt(UNDERCONSTRUCT);
+					gallup_statistics();
 					break;
 				case 'X':
 					prompt(LEAVEOPER,NULL);
@@ -1279,7 +1445,7 @@ void operators_menu(void)
 void run(void)
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
 	if(!key_owns(&thisuseracc,entrykey)) {
 		prompt(NOENTRY,NULL);
@@ -1322,7 +1488,7 @@ void run(void)
 					about();
 					break;
 				case 'S':
-					selectpoll();
+					selectgallup();
 					break;
 				case 'T':
 					takegallup();
@@ -1332,6 +1498,11 @@ void run(void)
 					break;
 				case 'O':
 					if(key_owns(&thisuseracc,crkey))operators_menu();
+					else {
+						prompt(ERRSEL,c);
+						cnc_end();
+						continue;
+					}
 					break;
 				case 'X':
 					prompt(LEAVE,NULL);

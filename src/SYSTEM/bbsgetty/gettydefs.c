@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1998/12/27 16:15:40  alexios
  * Removed debugging information.
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 #define OPENTTY_C 1
@@ -121,7 +123,7 @@ addfield(struct termios *termio, char *field)
     } else if((val=findsym(field,lmodes)) != FAIL) {
       toggle(termio->c_lflag,val);
     } else {
-      logerror("Undefined LINETYPE symbol: \"%s\"",field);
+      error_log("Undefined LINETYPE symbol: \"%s\"",field);
       debug(D_GTAB,"Undefined LINETYPE symbol: \"%s\"",field);
     }
   }
@@ -135,21 +137,21 @@ parseinitial()
   char *cp;
   
 
-  /* No INITIAL specified; return */ 
+  /* No INI_IAL specified; return */ 
 
   if(!initial){
-    debug(D_GTAB,"No INITIAL specified; returning.");
+    debug(D_GTAB,"No INI_IAL specified; returning.");
     return;
   }
 
 
-  /* parse the INITIAL string */
+  /* parse the INI_IAL string */
 
-  debug(D_GTAB,"Parsing INITIAL: \"%s\"",initial);
+  debug(D_GTAB,"Parsing INI_IAL: \"%s\"",initial);
 
   cp=strtok(initial," \t\r\n");
   do{
-    debug(D_GTAB,"INITIAL: parsing token \"%s\"",cp);
+    debug(D_GTAB,"INI_IAL: parsing token \"%s\"",cp);
     addfield(&itermios,cp);
   } while((cp=strtok(NULL," \t\n\r"))!=NULL);
 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:47  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/28 23:10:22  alexios
  * Added a command to download a bulletin.
@@ -55,7 +56,7 @@
 
 /* bulletins.c */
 
-extern promptblk *msg, *clubmsg;
+extern promptblock_t *msg, *clubmsg;
 
 extern int   entrykey;
 extern int   sopkey;
@@ -130,7 +131,7 @@ int getmsgheader(char *club, int msgno,struct message *msg);
 
 void insertblt();
 
-void extins(char *msgspec);
+int extins(char *msgspec);
 
 
 /* list.c */
@@ -182,11 +183,11 @@ int loadclubhdr(char *club);
 
 int saveclubhdr(struct clubheader *hdr);
 
-int getdefaultax(useracc *uacc, char *club);
+int getdefaultax(useracc_t *uacc, char *club);
 
-int getclubax(useracc *uacc, char *club);
+int getclubax(useracc_t *uacc, char *club);
 
-void setclubax(useracc *uacc, char *club, int ax);
+void setclubax(useracc_t *uacc, char *club, int ax);
 
 
 /* delete.c */
@@ -212,9 +213,9 @@ void autoins();
 
 /* login.c */
 
-void login();
+int login(int argc, char **argv);
 
 
 /* cleanup.c */
 
-void cleanup();
+int cleanup(int argc, char **argv);

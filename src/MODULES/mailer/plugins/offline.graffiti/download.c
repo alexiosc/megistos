@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:44:25  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:47:33  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -118,7 +120,7 @@ ogdownload()
   int            numlines=0;
 
   if(!loadprefs(USERQWK,&userqwk)){
-    fatal("Unable to read user mailer preferences for %s",
+    error_fatal("Unable to read user mailer preferences for %s",
 	  thisuseracc.userid);
   }
 
@@ -130,7 +132,7 @@ ogdownload()
   if(!(prefs.flags&OGF_YES))return 0;
 
   prompt(DLHDR);
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(DLNAX);
     return 0;
   }
@@ -140,16 +142,16 @@ ogdownload()
     return 0;
   }
 
-  setmbk(graffiti_msg);
-  oldansi=ansienable;
-  setansiflag((prefs.flags&OGF_ANSI)==1);
+  msg_set(graffiti_msg);
+  oldansi=out_flags&OFL_ANSIENABLE;
+  out_setansiflag((prefs.flags&OGF_ANSI)==1);
 
   if((fp=fopen(WALLFILE,"r"))==NULL){
-    fatalsys("Unable to open %s for reading.",WALLFILE);
+    error_fatalsys("Unable to open %s for reading.",WALLFILE);
   }
 
   if((out=fopen(wallfil,"w"))==NULL){
-    fatalsys("Unable to create wall file %s",wallfil);
+    error_fatalsys("Unable to create wall file %s",wallfil);
   }
 
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -172,11 +174,11 @@ ogdownload()
   sprompt(buf,GRAFFITI_WALLEND);
   fputs(buf,out);
 
-  setansiflag(oldansi);
+  out_setansiflag(oldansi);
   fclose(fp);
   fclose(out);
   unix2dos(wallfil,wallfil);
-  rstmbk();
+  msg_reset();
   prompt(DLOK);
 
   return addtodoorid();

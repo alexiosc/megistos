@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:04  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support. Changes for the new locking functions.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,7 +84,7 @@ clubwrite()
   int            attachment=0;
   int            cleanupattachment=1, killit=0;
   int            clubmsg=1;
-  long           original=0;
+  uint32         original=0;
   char           attfile[256], *cp;
 
   if(getclubax(&thisuseracc,clubhdr.club)<CAX_WRITE){
@@ -90,7 +92,7 @@ clubwrite()
     return;
   }
   
-  if(!canpay(clubhdr.postchg)){
+  if(!usr_canpay(clubhdr.postchg)){
     prompt(WCNCRDS);
     return;
   }
@@ -103,7 +105,7 @@ clubwrite()
   /* Get message recipient */
 
   if(!getclubrecipient(WCWHO,WCUNKID,WCHELP,msg.to))return;
-  if(sameas(ALL,msg.to))prompt(WCRCPALL);
+  if(sameas(MSG_ALL,msg.to))prompt(WCRCPALL);
   else prompt(WCRCPOK,msg.to);
       
   
@@ -121,15 +123,15 @@ clubwrite()
   if(editor(body,msglen)||stat(body,&st)){
     unlink(body);
     unlink(header);
-    endcnc();
+    cnc_end();
     return;
-  } else endcnc();
+  } else cnc_end();
       
       
   /* Ask for file attachment */
   
   if((getclubax(&thisuseracc,clubhdr.club)>=CAX_UPLOAD)&&
-     canpay(clubhdr.uploadchg)){
+     usr_canpay(clubhdr.uploadchg)){
     for(;;){
       if(!askyesno(&attachment,WCATT,WCRRSEL,clubhdr.uploadchg)){
 	if(confirmcancel()){
@@ -143,7 +145,7 @@ clubwrite()
     if(attachment){
       uploadatt(attfile,clubmsg?clubhdr.msgno+1:sysvar->emessages+1);
       if(attfile[0]){
-	chargecredits(clubhdr.uploadchg);
+	usr_chargecredits(clubhdr.uploadchg);
 	msg.flags|=MSF_FILEATT;
 	if(getclubax(&thisuseracc,msg.club)>=CAX_COOP){
 	  prompt(WCATTAPP);
@@ -153,12 +155,12 @@ clubwrite()
 
 	  prompt(WCATTNAP);
 	  sprintf(lock,CLUBLOCK,msg.club);
-	  if(waitlock(lock,10)==LKR_TIMEOUT)return;
-	  placelock(lock,"updating");
+	  if(lock_wait(lock,10)==LKR_TIMEOUT)return;
+	  lock_place(lock,"updating");
 	  loadclubhdr(msg.club);
 	  clubhdr.nfunapp++;
 	  saveclubhdr(&clubhdr);
-	  rmlock(lock);
+	  lock_rm(lock);
 	}
       }
 		
@@ -174,7 +176,7 @@ clubwrite()
       
   /* Check if user has enough credits */
 
-  if(!canpay(clubhdr.postchg)){
+  if(!usr_canpay(clubhdr.postchg)){
     prompt(WCRNEC);
     killit=1;
   }
@@ -182,13 +184,13 @@ clubwrite()
   /* Mail the message */
 
   if((fp=fopen(header,"w"))==NULL){
-    fatalsys("Unable to create message header %s",header);
+    error_fatalsys("Unable to create message header %s",header);
   }
   if(fwrite(&msg,sizeof(msg),1,fp)!=1){
     int i=errno;
     fclose(fp);
     errno=i;
-    fatalsys("Unable to write message header %s",header);
+    error_fatalsys("Unable to write message header %s",header);
   }
   fclose(fp);
       
@@ -200,30 +202,31 @@ clubwrite()
   /* Notify the user(s) */
       
   if((fp=fopen(header,"r"))==NULL){
-    fatalsys("Unable to read message header %s",header);
+    error_fatalsys("Unable to read message header %s",header);
   }
   if(fread(&checkmsg,sizeof(msg),1,fp)!=1){
     int i=errno;
     fclose(fp);
     errno=i;
-    fatalsys("Unable to read message header %s",header);
+    error_fatalsys("Unable to read message header %s",header);
   }
   fclose(fp);
       
   if(checkmsg.msgno){
     prompt(WECONFS,checkmsg.club,checkmsg.msgno);
 	
-    if(uinsys(checkmsg.to,1)){
-      sprintf(outbuf,getmsglang(WCRNOT,othruseracc.language-1),
+    if(usr_insys(checkmsg.to,1)){
+      sprintf(out_buffer,msg_getl(WCRNOT,othruseracc.language-1),
 	      checkmsg.from,checkmsg.club,checkmsg.subject);
-      if(injoth(&othruseronl,outbuf,0))prompt(WENOTFD,othruseronl.userid);
+      if(usr_injoth(&othruseronl,out_buffer,0))
+	prompt(WENOTFD,othruseronl.userid);
     }
   }
       
       
   /* Clean up */
       
-  chargecredits(clubhdr.postchg);
+  usr_chargecredits(clubhdr.postchg);
   thisuseracc.msgswritten++;
   unlink(header);
   if(attfile[0] && cleanupattachment){

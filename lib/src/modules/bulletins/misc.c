@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -31,6 +32,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -55,32 +57,32 @@ getclub(char *club, int pr, int err, int def, char *defval)
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       if(pr)prompt(pr);
       if(def)prompt(def,defval);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc || (margc==1 && sameas(margv[0],"."))){
 	if(defval&&defval[0])strcpy(i,defval);
 	else {
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -90,13 +92,13 @@ getclub(char *club, int pr, int err, int def, char *defval)
     if(!i[0] || sameas(i,".")){
       if(defval&&defval[0])strcpy(i,defval);
       else {
-	endcnc();
+	cnc_end();
 	continue;
       }
       break;
     } else if(!findclub(i)){
       if(err)prompt(err,i);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -110,7 +112,7 @@ int
 getaccess(char *club)
 {
   int ax;
-  if(haskey(&thisuseracc,sopkey))return FLA_PRIVILEGED;
+  if(key_owns(&thisuseracc,sopkey))return FLA_PRIVILEGED;
   if(!club[0])return FLA_NONE;
 
   ax=getclubax(&thisuseracc,club);
@@ -126,22 +128,22 @@ getdescr(char *s, int pr)
 {
   char *i;
 
-  endcnc();
+  cnc_end();
   for(;;){
-    if(morcnc()){
-      i=nxtcmd;
-      rstrin();
+    if(cnc_more()){
+      i=cnc_nxtcmd;
+      inp_raw();
     } else {
       if(pr)prompt(pr,s);
-      getinput(DESCR_LEN-1);
-      bgncnc();
+      inp_get(DESCR_LEN-1);
+      cnc_begin();
       if(!margc)continue;
-      i=input;
-      rstrin();
+      i=inp_buffer;
+      inp_raw();
     }
 
     if(!i[0])continue;
-    else if(isX(i))return 0;
+    else if(inp_isX(i))return 0;
     else {
       strcpy(s,i);
       while(s[strlen(s)-1]==32)s[strlen(s)-1]=0;
@@ -160,5 +162,5 @@ bltinfo(struct bltidx *blt)
 	 blt->descr,
 	 blt->area,
 	 blt->author,
-	 blt->timesread,getpfix(TIMESSNG,blt->timesread));
+	 blt->timesread,msg_getunit(TIMESSNG,blt->timesread));
 }

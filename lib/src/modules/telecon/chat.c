@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -61,6 +62,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -100,7 +102,7 @@ chat(char *s)
     return;
   }
  
-  if(!haskey(&thisuseracc,chtkey)){
+  if(!key_owns(&thisuseracc,chtkey)){
     prompt(CHTNAX);
     return;
   }
@@ -110,7 +112,7 @@ chat(char *s)
     return;
   }
 
-  if(!uinsys(userid,0)||!(othruseronl.flags&OLF_INTELECON)){
+  if(!usr_insys(userid,0)||!(othruseronl.flags&OLF_INTELECON)){
     prompt(CHTUID,userid);
     return;
   }
@@ -120,13 +122,13 @@ chat(char *s)
     return;
   }
 
-  if(!haskey(&othruseracc,chtkey)){
+  if(!key_owns(&othruseracc,chtkey)){
     prompt(CHTONX,userid);
     return;
   }
 
   if(othruseraux.chatting){
-    prompt(CHTALR,getpfix(CHTM,othruseracc.sex==USX_MALE),userid);
+    prompt(CHTALR,msg_getunit(CHTM,othruseracc.sex==USX_MALE),userid);
     return;
   }
 
@@ -139,7 +141,7 @@ chat(char *s)
     originatechat(othruseracc.userid);
     startchat();
     return;
-  } else if(!haskey(&thisuseracc,ichtkey)){ 
+  } else if(!key_owns(&thisuseracc,ichtkey)){ 
     prompt(CHTNIN);
     return;
   } else {
@@ -150,8 +152,8 @@ chat(char *s)
       int i=(othruseraux.interval-dt)/60+1;
       char *sex, *mins;
 
-      sex=strdup(getpfix(CHTM,othruseracc.sex==USX_MALE));
-      mins=strdup(getpfix(CHTMINS,i));
+      sex=strdup(msg_getunit(CHTM,othruseracc.sex==USX_MALE));
+      mins=strdup(msg_getunit(CHTMINS,i));
       prompt(CHTFRQ,sex,userid,i,mins);
       free(sex);
       free(mins);
@@ -165,11 +167,11 @@ chat(char *s)
       char *his;
       int lang=othruseracc.language-1;
 
-      his=strdup(getpfix(CHTHIS,thisuseracc.sex==USX_MALE));
-      sprintf(outbuf,getmsglang(CHTREQ,lang),
-	      getpfixlang(CHTM,thisuseracc.sex==USX_MALE,lang),
+      his=strdup(msg_getunit(CHTHIS,thisuseracc.sex==USX_MALE));
+      sprintf(out_buffer,msg_getl(CHTREQ,lang),
+	      msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
 	      thisuseracc.userid,his,thisuseracc.userid);
-      if(!injoth(&othruseronl,outbuf,0)){
+      if(!usr_injoth(&othruseronl,out_buffer,0)){
 	prompt(CHTUNOT,othruseronl.userid);
 	free(his);
 	return;
@@ -177,7 +179,7 @@ chat(char *s)
       free(his);
     }
 
-    prompt(CHTROK,getpfix(CHTM,othruseracc.sex==USX_MALE),userid);
+    prompt(CHTROK,msg_getunit(CHTM,othruseracc.sex==USX_MALE),userid);
   }
 }
 
@@ -192,19 +194,19 @@ fx_chatnotify(struct chanusr *u)
   int lang=othruseracc.language-1;
   if(!strcmp(u->userid,othuid))return NULL;
   if(samechan){
-    char *sex=strdup(getpfixlang(CHTM,thisuseracc.sex==USX_MALE,lang));
-    char *sex2=strdup(getpfixlang(CHTWITHM,othsex==USX_MALE,lang));
-    sprintf(outbuf,getmsglang(CHTNOT2,lang),
+    char *sex=strdup(msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang));
+    char *sex2=strdup(msg_getunitl(CHTWITHM,othsex==USX_MALE,lang));
+    sprintf(out_buffer,msg_getl(CHTNOT2,lang),
 	    sex,thisuseracc.userid,
 	    sex2,othuid);
     free(sex);
     free(sex2);
   } else {
-    char *sex=strdup(getpfixlang(CHTM,othsex==USX_MALE,lang));
-    sprintf(outbuf,getmsglang(CHTNOT1,lang),sex,othuid);
+    char *sex=strdup(msg_getunitl(CHTM,othsex==USX_MALE,lang));
+    sprintf(out_buffer,msg_getl(CHTNOT1,lang),sex,othuid);
     free(sex);
   }
-  return outbuf;
+  return out_buffer;
 }
 
 
@@ -214,10 +216,10 @@ static void notify()
 
   prompt(CHTENT);
   
-  sprintf(outbuf,getmsg(CHTACC),
-	  getpfixlang(CHTM,thisuseracc.sex==USX_MALE,lang),
+  sprintf(out_buffer,msg_get(CHTACC),
+	  msg_getunitl(CHTM,thisuseracc.sex==USX_MALE,lang),
 	  thisuseracc.userid);
-  injoth(&othruseronl,outbuf,0);
+  usr_injoth(&othruseronl,out_buffer,0);
 
   if(!strcmp(thisuseronl.telechan,othruseronl.telechan)){
     strcpy(othuid,othruseracc.userid);
@@ -248,12 +250,12 @@ arrangecolours()
   int c1, c2;
 
   if(!loadtlcuser(thisuseracc.userid,&tlcu)){
-    fatal("Unable to load tlcuser %s",thisuseracc.userid);
+    error_fatal("Unable to load tlcuser %s",thisuseracc.userid);
   }
   c1=tlcu.colour;
 
   if(!loadtlcuser(othruseracc.userid,&tlcu)){
-    fatal("Unable to load tlcuser %s",othruseracc.userid);
+    error_fatal("Unable to load tlcuser %s",othruseracc.userid);
   }
   c2=tlcu.colour;
   
@@ -275,11 +277,11 @@ originatechat(char *userid)
 
   strcpy(tmp,userid);
   notify();
-  uinsys(tmp,0);
+  usr_insys(tmp,0);
 
   id=msgget(IPC_PRIVATE,IPC_CREAT|IPC_EXCL|0777);
   if(id<0){
-    fatal("Unable to allocate IPC message queue for chat.");
+    error_fatal("Unable to allocate IPC message queue for chat.");
   } else thisuseraux.chatid=othruseraux.chatid=id;
   
   arrangecolours();
@@ -300,20 +302,20 @@ startchat()
 
   setusrax(curchannel,thisuseracc.userid,0,CUF_CHATTING,CUF_PRESENT);
 
-  uinsys(thisuseraux.chatparty,0);
+  usr_insys(thisuseraux.chatparty,0);
 
   if(thisuseraux.chatting==2)prompt(CHTENT);
 
-  nonblocking();
+  inp_nonblock();
 
   for(;othruseraux.chatting&&state!=3;){
     usleep(25000);
     count=(count+1)%4;
-    if(!count&&state==1)if(acceptinjoth())setcolour=-1;
+    if(!count&&state==1)if(inp_acceptinjoth())setcolour=-1;
 
     if((n=read(fileno(stdin),s,sizeof(s)-1))>0){
 
-      resetinactivity();
+      inp_resetidle();
 
       if(setcolour!=0){
 	setcolour=0;
@@ -352,10 +354,10 @@ startchat()
       }
 
       msg.mtype=othruseraux.chatting;
-      if(msgsnd(thisuseraux.chatid,(struct msgbuf*)&msg,n=(strlen(msg.s)+1),0))break;
+      if(msgsnd(thisuseraux.chatid,(struct msg_buffer*)&msg,n=(strlen(msg.s)+1),0))break;
       write(fileno(stdout),msg.s,n);
     }
-    if((n=msgrcv(thisuseraux.chatid,(struct msgbuf*)&msg,sizeof(msg.s)-1,
+    if((n=msgrcv(thisuseraux.chatid,(struct msg_buffer*)&msg,sizeof(msg.s)-1,
 		 thisuseraux.chatting,IPC_NOWAIT))>0){
       if(setcolour!=1){
 	setcolour=1;
@@ -372,7 +374,7 @@ startchat()
     }
   }
 
-  blocking();
+  inp_block();
 
   finishchat();
 }
@@ -389,7 +391,7 @@ finishchat()
     struct msqid_ds buf;
     int i=msgctl(thisuseraux.chatid,IPC_RMID,&buf);
     if(i){
-      fatalsys("Unable to destroy IPC message queue.");
+      error_fatalsys("Unable to destroy IPC message queue.");
     }
   }
   thisuseraux.chatting=0;

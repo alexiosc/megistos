@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:35  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1998/12/27 15:45:11  alexios
  * Added autoconf support.
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,7 +77,7 @@
 #include "mbk_mailer.h"
 
 
-promptblk *msg, *archivers, *mailer_msg;
+promptblock_t *msg, *archivers, *mailer_msg;
 
 
 char *bbsid;
@@ -103,23 +105,23 @@ init()
 {
   int i;
 
-  initmodule(INITALL);
-  archivers=opnmsg("archivers");
-  msg=mailer_msg=opnmsg("mailer");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  archivers=msg_open("archivers");
+  msg=mailer_msg=msg_open("mailer");
+  msg_setlanguage(thisuseracc.language);
 
-  bbsid=stgopt(BBSID);
-  entrykey=numopt(ENTRYKEY,0,129);
-  chgdnl=numopt(CHGDNL,-100000,100000);
-  defgrk=ynopt(DEFGRK);
-  stpncnf=ynopt(STPNCNF);
-  if((qwkuc=tokopt(QWKUC,"LOWERCASE","UPPERCASE"))==0){
-    fatal("Option QWKUC in mailer.msg has bad value.");
+  bbsid=msg_string(BBSID);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  chgdnl=msg_int(CHGDNL,-100000,100000);
+  defgrk=msg_bool(DEFGRK);
+  stpncnf=msg_bool(STPNCNF);
+  if((qwkuc=msg_token(QWKUC,"LOWERCASE","UPPERCASE"))==0){
+    error_fatal("Option QWKUC in mailer.msg has bad value.");
   }else qwkuc--;
-  auddnl=ynopt(AUDDNL);
-  audupl=ynopt(AUDUPL);
-  for(i=0;i<6;i++)ctlname[i]=stgopt(CTLNAME1+i);
-  uplkey=numopt(UPLKEY,0,129);
+  auddnl=msg_bool(AUDDNL);
+  audupl=msg_bool(AUDUPL);
+  for(i=0;i<6;i++)ctlname[i]=msg_string(CTLNAME1+i);
+  uplkey=msg_int(UPLKEY,0,129);
 
   parseplugindef();
 }
@@ -129,20 +131,20 @@ void
 run()
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
   bzero(&userqwk,sizeof(userqwk));
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOAXES);
     return;
   }
 
   if(loadprefs(USERQWK,&userqwk)<0){
-    endcnc();
+    cnc_end();
     prompt(NEWCNF);
     setup();
-    endcnc();
+    cnc_end();
   }
 
   for(;;){
@@ -156,7 +158,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -164,13 +166,13 @@ run()
 	if(shownmenu==1){
 	  prompt(SHORT);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
 	about();
@@ -192,12 +194,12 @@ run()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
 
   }
 }
@@ -206,17 +208,61 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
 int
-main(int argc, char *argv[])
+handler_run(int argc, char *argv[])
 {
-  setprogname("mailer");
   atexit(done);
   init();
   run();
   done();
   return 0;
+}
+
+
+int handler_userdel(int argc, char **argv)
+{
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",MAILERUSRDIR,victim);
+  unlink(fname);
+
+  return 0;
+}
+
+
+mod_info_t mod_info_mailer = {
+  "mailer",
+  "Off-Line Mailer",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Packages parts of the BBS for off-line browsing and use.",
+  RCS_VER,
+  VERSION,
+  {0,NULL},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {50,handler_userdel}		/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_mailer);
+  return mod_main(argc,argv);
 }

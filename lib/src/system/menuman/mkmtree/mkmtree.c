@@ -123,8 +123,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  1998/12/27 16:06:28  alexios
  * Added autoconf support.
@@ -150,6 +151,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -159,8 +161,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  1998/12/27 16:06:28  alexios
  * Added autoconf support.
@@ -200,6 +203,7 @@
 
 #include "menuman.h"
 #include "bbs.h"
+#include "mbk_menuman.h"
 
 #define ISSPACE(c) ((c)>0 && isspace(c))
 
@@ -341,11 +345,12 @@ parse()
   union menumanpage pagerec;
   char command[256];
   float frac;
+  promptblock_t *msg;
 
+  msg=msg_open("menuman");
 
-  addsymbol("TOP");
-  addsymbol("EXIT");
-  marksymbol("EXIT");
+  addsymbol(msg_get(TOPPAG));
+  addsymbol(msg_get(EXTPAG));
 
   bzero(file,sizeof(file));
   bzero(exec,sizeof(exec));
@@ -372,7 +377,7 @@ parse()
   linenum=0;
   
   while(!feof(in)){
-    char line[1024], *cp, *sp, keyword[32], *value;
+    char line[1024], *cp, *sp, keyword[32], *value=NULL;
     int i,directive;
 
     if(!fgets(line,1024,in))continue;
@@ -784,12 +789,13 @@ graft()
 }
   
   
-void
+int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc!=2)help();
   strcpy(fname,argv[1]);
   parse();
   graft();
+  return 0;
 }

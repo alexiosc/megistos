@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -89,7 +91,7 @@ getfl(int *first, int *last)
   /* Read the first record. If we can't something's VERY wrong. Panic. */
 
   if(d_recread(&f)!=S_OKAY){
-    fatal("Unable to read first SUBJECT key.");
+    error_fatal("Unable to read first SUBJECT key.");
   }
 
 
@@ -148,11 +150,11 @@ getmsgno(int *msgno, int dir)
     d_keyfind(SUBJECTC,&subjectc);
     
     if(d_keynext(SUBJECTC)!=S_OKAY){
-      fatal("No next SUBJECTC key. This should never happen.");
+      error_fatal("No next SUBJECTC key. This should never happen.");
     }
 
     if(d_keyread(&f)!=S_OKAY){
-      fatal("Unable to read SUBJECTC key. Should never happen.");
+      error_fatal("Unable to read SUBJECTC key. Should never happen.");
     }
     
     *msgno=f.num;
@@ -178,11 +180,11 @@ getmsgno(int *msgno, int dir)
 
     d_keyfind(SUBJECTC,&subjectc);
     if(d_keynext(SUBJECTC)!=S_OKAY){
-      fatal("No next SUBJECTC key. This should never happen.");
+      error_fatal("No next SUBJECTC key. This should never happen.");
     }
 
     if(d_keyread(&f)){
-      fatal("Unable to read SUBJECTC key. Should never happen.");
+      error_fatal("Unable to read SUBJECTC key. Should never happen.");
     }
 
     *msgno=f.num;
@@ -242,7 +244,7 @@ npmsgsubj(int *msgno, char *subj, int targetnum, int dir)
   if(j!=S_OKAY)return BSE_NFOUND;
   
   if(d_keyread(&subjectc)!=S_OKAY){
-    fatal("Unable to read key though it exists.\n");
+    error_fatal("Unable to read key though it exists.\n");
   }
 
   if(strcmp(subj,subjectc.subject))return BSE_NFOUND;

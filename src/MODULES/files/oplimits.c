@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -123,8 +125,6 @@ children:
 void
 op_limits()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
   struct libidx lib;
   int changes[3];
@@ -133,51 +133,39 @@ op_limits()
   memcpy(&lib,&library,sizeof(lib));
   if(!adminlock(lib.libnum))return;
 
-  sprintf(fname,TMPDIR"/files%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%d\n%d\n%d\noff\nOK\nCANCEL\n",
+	  lib.filelimit,lib.filesizelimit,lib.libsizelimit);
+
+  if(dialog_run("files",OLIMVT,OLIMLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     adminunlock();
     return;
   }
 
-  fprintf(fp,"%d\n%d\n",lib.filelimit,lib.filesizelimit);
-  fprintf(fp,"%d\noff\n",lib.libsizelimit);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("files",OLIMVT,OLIMLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    adminunlock();
-    return;
-  }
-
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    switch(i){
-    case 0:
-      changes[i]=lib.filelimit!=atoi(s);
-      lib.filelimit=atoi(s);
-      break;
-    case 1:
-      changes[i]=lib.filesizelimit!=atoi(s);
-      lib.filesizelimit=atoi(s);
-      break;
-    case 2:
-      changes[i]=lib.libsizelimit!=atoi(s);
-      lib.libsizelimit=atoi(s);
-      break;
-    case 3:
-      if((recursive=sameas(s,"on"))!=0)prompt(OLIMREC);
-      break;
+  if(sameas(margv[6],"OK")||sameas(margv[4],margv[6])){
+    for(i=0;i<7;i++){
+      char *s=margv[i];
+      switch(i){
+      case 0:
+	changes[i]=lib.filelimit!=atoi(s);
+	lib.filelimit=atoi(s);
+	break;
+      case 1:
+	changes[i]=lib.filesizelimit!=atoi(s);
+	lib.filesizelimit=atoi(s);
+	break;
+      case 2:
+	changes[i]=lib.libsizelimit!=atoi(s);
+	lib.libsizelimit=atoi(s);
+	break;
+      case 3:
+	if((recursive=sameas(s,"on"))!=0)prompt(OLIMREC);
+	break;
+      }
     }
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
+  } else {
     prompt(OPCAN);
     adminunlock();
     return;

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Modified mklib() to accept a third argument, allowing the
@@ -37,7 +38,7 @@
  * is not set. Sanity checks and security fixes.
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,7 +80,7 @@ discoverdevice(struct libidx *lib)
   struct stat st;
 
   if(stat(lib->dir,&st)){
-    fatalsys("Unable to stat directory \"%s\"",lib->dir);
+    error_fatalsys("Unable to stat directory \"%s\"",lib->dir);
   }
   
   lib->device=st.st_dev;
@@ -98,12 +100,12 @@ mklib(struct libidx *lib, int readytowrite, int flags)
   mkdir(lib->dir,0770);
   if(stat(lib->dir,&st) || !S_ISDIR(st.st_mode)){
     int i=errno;
-    interrorsys("Unable to mkdir(\"%s\")",lib->dir);
+    error_intsys("Unable to mkdir(\"%s\")",lib->dir);
     prompt(OCREMKD,lib->dir,i,strerror(i));
     return;
   }
 
-#ifdef 0
+#if 0
   /* Make the library's long description file and initialise it to
      contain the short description. */
 
@@ -164,7 +166,7 @@ makemainlib()
 
   bzero(&mainlib,sizeof(mainlib));
   strcpy(mainlib.fullname,libmain);
-  strcpy(mainlib.descr,getmsg(MAINDESCR));
+  strcpy(mainlib.descr,msg_get(MAINDESCR));
   sprintf(mainlib.dir,"%s/%s",FILELIBDIR,libmain);
   mklib(&mainlib,0,0);
 }

@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:59  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -81,14 +83,14 @@ msglist(int msg, int method, int files)
     j=findmsgnum(&msgno,msg,BSD_LT);
     if(msgno<0 || j!=BSE_FOUND){
       prompt(RLBNMSG);
-      endcnc();
+      cnc_end();
       return;
     }
   }
 
   if(msgno!=msg && msg!=LASTMSG && msg>=0)prompt(RLMISS,msg);
 
-  nonblocking();
+  inp_nonblock();
 
   for(;msgno>0;){
     int i=0;
@@ -97,7 +99,8 @@ msglist(int msg, int method, int files)
       int k;
 
       if(read(fileno(stdin),&c,1)&&
-	 ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))lastresult=PAUSE_QUIT;
+	 ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
+	fmt_lastresult=PAUSE_QUIT;
 
       if(files && ((m.flags&MSF_FILEATT)==0))goto nextone;
 
@@ -107,7 +110,7 @@ msglist(int msg, int method, int files)
 	f=0;
       }
 
-      if(lastresult==PAUSE_QUIT)break;
+      if(fmt_lastresult==PAUSE_QUIT)break;
       if(!method){
 	strcpy(subj,m.subject);
 	k=max(0,thisuseracc.scnwidth-35);
@@ -128,9 +131,9 @@ msglist(int msg, int method, int files)
     if(i==msgno)break;
   }
 
-  blocking();
+  inp_block();
 
-  if(lastresult==PAUSE_QUIT)prompt(RLABORT);
+  if(fmt_lastresult==PAUSE_QUIT)prompt(RLABORT);
   else if(!f)prompt(method?RLDONE:RLBFTR);
   else {
     prompt(RLBNMSG);
@@ -148,17 +151,18 @@ qmsglist(int method, int files)
 
   startqsc();
 
-  nonblocking();
+  inp_nonblock();
 
   do{
     struct lastread *lastread=getqsc();
 
     if(read(fileno(stdin),&c,1)&&
-       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))lastresult=PAUSE_QUIT;
+       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
+      fmt_lastresult=PAUSE_QUIT;
 
     if(first && (lastread==NULL)){
       prompt(QSEMPTY);
-      blocking();
+      inp_block();
       return;
     }
     first=0;
@@ -168,9 +172,9 @@ qmsglist(int method, int files)
     
     count++;
 
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(RLABORT);
-      blocking();
+      inp_block();
       return;
     }
 
@@ -191,7 +195,8 @@ qmsglist(int method, int files)
 	int k;
 	
 	if(read(fileno(stdin),&c,1)&&
-	   ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))lastresult=PAUSE_QUIT;
+	   ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
+	  fmt_lastresult=PAUSE_QUIT;
 
 	if(files && ((m.flags&MSF_FILEATT)==0))goto nextone;
 
@@ -201,7 +206,7 @@ qmsglist(int method, int files)
 	  f=0;
 	}
 	
-	if(lastresult==PAUSE_QUIT){
+	if(fmt_lastresult==PAUSE_QUIT){
 	  prompt(RLABORT);
 	  break;
 	}
@@ -216,7 +221,7 @@ qmsglist(int method, int files)
 	} else showheader(clubhdr.club,&m);
 	if(method==2)readmsg(&m);
       }
-      if(lastresult==PAUSE_QUIT){
+      if(fmt_lastresult==PAUSE_QUIT){
 	prompt(RLABORT);
 	break;
       }
@@ -227,16 +232,16 @@ qmsglist(int method, int files)
       j=findmsgnum(&msgno,msg,BSD_GT);
       if(i==msgno || j!=BSE_FOUND)break;
     }
-    if(lastresult==PAUSE_QUIT)prompt(RLABORT);
+    if(fmt_lastresult==PAUSE_QUIT)prompt(RLABORT);
     else if(!f)prompt(method?RLDONE:RLBFTR);
 
-    if(lastresult==PAUSE_QUIT){
-      blocking();
+    if(fmt_lastresult==PAUSE_QUIT){
+      inp_block();
       return;
     }
   } while (nextqsc());
 
-  blocking();
+  inp_block();
 
   if(!count)prompt(QSEMPTY);
   else if(!newmsg)prompt(QSNONEW);
@@ -251,13 +256,13 @@ listmessages(int file)
   int i, msg=0;
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,0,0,RLMNU,RLMNUR,"BTF",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,0,0,RLMNU,RLMNUR,"BTF",0,0);
+    inp_clearflags(INF_HELP);
     if(!i)return;
     if(i==-1){
       prompt(RLMNUH);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }

@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:30  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1998/12/27 16:40:35  alexios
  * Added autoconf support.
@@ -42,6 +43,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -135,7 +137,7 @@ parseopts(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   parseopts(argc, argv);
   print_endian_warning();
 

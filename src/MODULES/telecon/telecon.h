@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/28 23:13:16  alexios
  * Added a magic number for the aux structure.
@@ -55,6 +56,10 @@
  *
  *
  */
+
+
+#ifndef _TELECON_H
+#define _TELECON_H
 
 
 #ifndef RCS_VER 
@@ -92,7 +97,7 @@
 #define AUT_CHMSGX (AUF_INFO|AUF_ACCOUNTING)
 
 
-#define LIVE (haskey(&thisuseracc,normkey))
+#define LIVE (key_owns(&thisuseracc,normkey))
 
 
 #define TELETICK 15
@@ -186,7 +191,7 @@ struct usraux {
 /* init.c */
 
 
-extern promptblk *msg;
+extern promptblock_t *msg;
 
 extern int  entrkey;
 extern int  normkey;
@@ -339,7 +344,7 @@ int findclub(char *club);
 
 int loadclubhdr(char *club);
 
-int getclubax(useracc *ucac, char *club);
+int getclubax(useracc_t *ucac, char *club);
 
 
 /* accesses.c */
@@ -406,9 +411,9 @@ void finishchat();
 
 void initactions();
 
-int handleaction(char *input);
+int handleaction(char *inp_buffer);
 
-void actionctl(char *input);
+void actionctl(char *inp_buffer);
 
 
 /* substvars.c */
@@ -423,3 +428,6 @@ void initplugins();
 void listplugins();
 
 int  handleplugins(char *s);
+
+
+#endif

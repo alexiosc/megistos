@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:50:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:29  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.11  1999/07/28 23:06:34  alexios
  * No changes, effectively.
@@ -81,6 +82,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -91,6 +93,7 @@
 #define WANT_DIRENT_H 1
 #define WANT_SYS_TYPES_H 1
 #define WANT_SYS_STAT_H 1
+#define WANT_FCNTL_H 1
 #include <bbsinclude.h>
 
 #include "config.h"
@@ -112,7 +115,7 @@ alcmem(size_t size)
 {
   void *ptr=malloc(size);
   if(ptr)return ptr;
-  fatal("Failed to allocate %08d bytes",size);
+  error_fatal("Failed to allocate %08d bytes",size);
   return NULL; /* Get rid of warning -- we're not returning anyway */
 }
 
@@ -152,12 +155,12 @@ sameto(char *shorts, char *longs)
 {
   while (*shorts != '\0') {
     if (tolower(*shorts) != tolower(*longs)) {
-      return(0);
+      return 0;
     }
     shorts++;
     longs++;
   }
-  return(1);
+  return 1;
 }
 
 
@@ -199,13 +202,72 @@ bbsdcommand(char *command, char *tty, char *arg)
 }
 
 
-int
-dataentry(char *msg, int visual, int linear, char *data)
+void
+dialog_parse(char *s)
 {
-  char command[256];
+  char *cp=s;
 
-  sprintf(command,"%s %s %d %d %s",BBSDIALOGBIN,msg,visual,linear,data);
-  return runmodule(command);
+  cnc_nxtcmd=NULL;
+  margc=0;
+  margv[0]=s; 
+
+  for(margc=0,margv[0]=s;*cp;cp++){
+    if(*cp=='\n'){
+      *cp=0;
+      margv[++margc]=cp+1;
+    }
+  }
+}
+
+
+int
+dialog_run(char *msg, int visual, int linear, char *data, size_t len)
+{
+  char fname[256], command[512];
+  int  result, fd;
+
+  /* Write the data */
+
+  sprintf(fname,TMPDIR"/form%05d",(int)getpid());
+  unlink(fname);		/* Just in case */
+  if((fd=open(fname,O_WRONLY|O_CREAT,0600))<0){
+    error_logsys("Unable to create data entry file %s",fname);
+    return -1;
+  }
+  if(write(fd,data,strlen(data))!=strlen(data)){
+    close(fd);
+    error_logsys("Unable to write to data entry file %s",fname);
+    return -1;
+  }
+  close(fd);
+
+
+  /* Run the dialogue */
+
+  sprintf(command,"%s %s %d %d %s",BBSDIALOGBIN,msg,visual,linear,fname);
+  result=runcommand(command);
+
+
+  /* Read back the results */
+
+  if((fd=open(fname,O_RDONLY))<0){
+    error_logsys("Unable to open data entry file %s",fname);
+    return -1;
+  }
+
+  memset(data,0,len);
+  if(read(fd,data,len)<=0){
+    error_logsys("Error reading data entry file %s",fname);
+    return -1;
+  }
+
+  close(fd);
+  if(unlink(fname)<0){
+    error_logsys("unlink(\"%s\") failed",fname);
+    return -1;
+  }
+
+  return result;
 }
 
 
@@ -246,21 +308,26 @@ search(char *string, char *keywords)
 int
 runmodule(char *s)
 {
-  int res;
+  char cmd[1024];
+  sprintf(cmd,"%s --run",s);
+  return runcommand(cmd);
+}
 
-  doneinput();
-  donesignals();
-  if(nxtcmd && *nxtcmd){
-    strcpy(thisuseronl.input,nxtcmd);
+
+int
+runcommand(char *s)
+{
+  int res;
+  mod_done(INI_INPUT|INI_SIGNALS);
+  if(cnc_nxtcmd && *cnc_nxtcmd){
+    strcpy(thisuseronl.input,cnc_nxtcmd);
     thisuseronl.flags|=OLF_MMCONCAT;
   }else thisuseronl.flags&=~OLF_MMCONCAT;
   res=system(s);
-  regpid(thisuseronl.channel);
   thisuseronl.flags&=~OLF_MMCONCAT;
-  initinput();
-  initsignals();
+  mod_init(INI_INPUT|INI_SIGNALS);
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  resetinactivity();
+  inp_resetidle();
   if(thisuseronl.flags&OLF_MMGCDGO)exit(0);
   return res;
 }
@@ -273,25 +340,25 @@ editor(char *fname,int limit)
 
   if(thisuseracc.prefs&UPF_VISUAL && thisuseronl.flags&OLF_ANSION){
     sprintf(command,"%s %s %d",VISEDBIN,fname,limit);
-    return runmodule(command);
+    return runcommand(command);
   } else {
     sprintf(command,"%s %s %d",LINEDBIN,fname,limit);
-    return runmodule(command);
+    return runcommand(command);
   }
 }
 
 
-void
-gopage(char *s)
+static void
+_gopage(char *s, int is_menuman)
 {
   union menumanpage p;
   FILE *fp;
   int found=0;
 
   if(thisuseronl.flags&OLF_INHIBITGO){
-    setmbk(sysblk);
+    msg_set(msg_sys);
     prompt(CANTGO);
-    rstmbk(sysblk);
+    msg_reset();
     return;
   }
 
@@ -299,9 +366,9 @@ gopage(char *s)
   while(!feof(fp)){
     if(fread(&p,sizeof(union menumanpage),1,fp)!=1){
       fclose(fp);
-      setmbk(sysblk);
+      msg_set(msg_sys);
       prompt(GONAX,s);
-      rstmbk(sysblk);
+      msg_reset();
       return;
     } else if (sameas(s,p.m.name)) {
       found=1;
@@ -310,22 +377,22 @@ gopage(char *s)
   }
   fclose(fp);
   if(!found){
-    setmbk(sysblk);
+    msg_set(msg_sys);
     prompt(GONAX,s);
-    rstmbk(sysblk);
+    msg_reset();
     return;
   }
   
   found=0;
   if(hassysaxs(&thisuseracc,USY_MASTERKEY)) found=1;
   if(p.m.class[0]&&!sameas(p.m.class,thisuseracc.curclss)) found=0;
-  if(!haskey(&thisuseracc,p.m.key)) found=0;
+  if(!key_owns(&thisuseracc,p.m.key)) found=0;
   else found=1;
   
   if(!found){
-    setmbk(sysblk);
+    msg_set(msg_sys);
     prompt(GONAX,s);
-    rstmbk(sysblk);
+    msg_reset();
     return;
   }
   
@@ -335,7 +402,22 @@ gopage(char *s)
   thisuseronl.flags|=OLF_MMGCDGO;
   thisuseronl.flags&=~OLF_MMCALLING;
   fflush(stdout);
-  exit(0);
+
+  if(/*!*/is_menuman)execl(BINDIR"/menuman","menuman",NULL);	/* patched by Valis */
+
+  exit(0); /* Do it the slow, ugly way if execl() fails */
+}
+
+
+void mmgopage(char *s)
+{
+  _gopage(s,1);
+}
+
+
+void gopage(char *s)
+{
+  _gopage(s,0);
 }
   
 

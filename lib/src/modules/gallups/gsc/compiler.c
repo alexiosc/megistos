@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:32  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  2000/09/30 14:39:28  bbs
  * changed the handling of errors and warnings
@@ -522,6 +523,9 @@ int scriptcompiler(char *script)
 			/* warn about multiple submits in a quiz */
 			if((gflgs(ginfo) & GF_QUIZ) && (gflgs(ginfo) & GF_MULTISUBMIT))
 				dowarning("multiple submits are enabled in a Quiz-type gallup");
+
+			if((gflgs(ginfo) & GF_QUIZ) && !(gflgs(ginfo) & GF_LOGUSERID))
+				fatal("anonymous quiz is of no interest");
 
 			/* warn and assume an error, when timing a poll */
 			if((gflgs(ginfo) & GF_POLL) && (gflgs(ginfo) & GF_TIMED)) {

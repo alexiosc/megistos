@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:16  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/08/07 02:18:29  alexios
  * Slight optimisation in calling df(1) in rsys_linstats().
@@ -61,6 +62,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -100,7 +102,7 @@ rsys_clsstats()
   char fname[256];
   struct stat st;
   FILE *fp;
-  classrec *class;
+  classrec_t *class;
   int dummy;
   
   sprintf(fname,"%s/EVER/clsstats",STATDIR);
@@ -117,7 +119,7 @@ rsys_clsstats()
     return;
   }
 
-  nonblocking();
+  inp_nonblock();
 
   prompt(RSCLSST1);
 
@@ -127,17 +129,17 @@ rsys_clsstats()
     int  creds, mins;
     
     if(read(0,&c,1))if(c==13||c==10||c==27||c==15||c==3)break;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
 
     if(fscanf(fp,"%s %d %d\n",name,&creds,&mins)==3){
-      if((class=findclass(name))!=NULL){
+      if((class=cls_find(name))!=NULL){
 	prompt(RSCLSST2,name,class->users,creds,mins);
       }
     }
   }
   fclose(fp);
   prompt(RSCLSST3);
-  blocking();
+  inp_block();
 }
 
 
@@ -164,7 +166,7 @@ rsys_modstats()
     return;
   }
 
-  nonblocking();
+  inp_nonblock();
 
   prompt(RSMODST1);
 
@@ -175,7 +177,7 @@ rsys_modstats()
       int  creds, mins, ptr, len;
       
       if(read(0,&c,1))if(c==13||c==10||c==27||c==15||c==3)break;
-      if(lastresult==PAUSE_QUIT)break;
+      if(fmt_lastresult==PAUSE_QUIT)break;
       
       if(!fgets(lin,sizeof(lin),fp))continue;
       if(!sscanf(lin,"%d %n",&len,&ptr))continue;
@@ -201,7 +203,7 @@ rsys_modstats()
   fclose(fp);
   prompt(RSMODST3);
   
-  blocking();
+  inp_block();
 }
   
 
@@ -209,7 +211,7 @@ void
 rsys_systats()
 {
   prompt(RSSYSTATS,
-	 numchannels,
+	 chan_count,
 	 sysvar->tcreds,sysvar->tcredspaid,sysvar->timever,sysvar->connections,
 	 sysvar->filesupl,sysvar->bytesupl/10,
 	 sysvar->filesdnl,sysvar->bytesdnl/10,
@@ -320,7 +322,7 @@ rsys_linstats()
     char dummy[1024];
     unsigned long int  s1=0, s2=0, s3=0;
 
-    nonblocking();
+    inp_nonblock();
 
     fgets(dummy,sizeof(dummy),fp);
     prompt(RSLINST2);
@@ -329,21 +331,21 @@ rsys_linstats()
       char dev[256],mp[256], c;
 
       if(read(0,&c,1))if(c==13||c==10||c==27||c==15||c==3)break;
-      if(lastresult==PAUSE_QUIT)break;
+      if(fmt_lastresult==PAUSE_QUIT)break;
 
       if(fscanf(fp,"%s %ld %ld %ld %*s %s\n",dev,&d1,&d2,&d3,mp)==5){
 	if(d1)perc=d2*100/d1;
 	else perc=0;
-	if(perc>=dfcrit)strcpy(dummy,getmsg(RSLINST7));
-	else if(perc>=dfwarn)strcpy(dummy,getmsg(RSLINST6));
-	else strcpy(dummy,getmsg(RSLINST5));
+	if(perc>=dfcrit)strcpy(dummy,msg_get(RSLINST7));
+	else if(perc>=dfwarn)strcpy(dummy,msg_get(RSLINST6));
+	else strcpy(dummy,msg_get(RSLINST5));
 	s1+=d1;
 	s2+=d2;
 	s3+=d3;
 	prompt(RSLINST3,dummy,dev,dummy,d1,dummy,d2,dummy,d3,dummy,mp);
       }
     }
-    blocking();
+    inp_block();
     if(feof(fp))prompt(RSLINST4,s1,s2,s3);
     pclose(fp);
   }
@@ -358,22 +360,22 @@ rsys_genstats()
   for(;;){
     switch(state){
     case 0:
-      if(!getmenu(&opts[0],1,0,RSGENST1,0,"TA",0,0))return;
+      if(!get_menu(&opts[0],1,0,RSGENST1,0,"TA",0,0))return;
       else state=1;
       break;
     case 1:
-      if(!getmenu(&opts[1],1,0,RSGENST2,0,"CML",0,0))state=0;
+      if(!get_menu(&opts[1],1,0,RSGENST2,0,"CML",0,0))state=0;
       else state=2;
       break;
     case 2:
-      if(!getmenu(&opts[2],1,0,RSGENST3,0,"BCDMT",0,0))state=1;
+      if(!get_menu(&opts[2],1,0,RSGENST3,0,"BCDMT",0,0))state=1;
       else if(!strchr("BT",opts[2])&&opts[1]=='L'){
 	prompt(RSGENSTR);
-	endcnc();
+	cnc_end();
       } else state=3;
       break;
     case 3:
-      if(!getmenu(&opts[3],1,0,RSGENST4,0,"DMYE",0,0))state=2;
+      if(!get_menu(&opts[3],1,0,RSGENST4,0,"DMYE",0,0))state=2;
       else state=4;
     }
     if(state==4)break;
@@ -427,7 +429,7 @@ rsys_top()
   strcpy(opts,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
   opts[count]=0;
 
-  if(!getmenu(&c,1,RSTOPSM,RSTOPSS,0,opts,0,0))return;
+  if(!get_menu(&c,1,RSTOPSM,RSTOPSS,0,opts,0,0))return;
   opt=c;
   
   if(isalpha(opt))opt-='A';
@@ -439,9 +441,9 @@ rsys_top()
     return;
   }
 
-  nonblocking();
+  inp_nonblock();
 
-  strcpy(s,getmsg(RSTOPSTA+opt));
+  strcpy(s,msg_get(RSTOPSTA+opt));
   prompt(RSTOPS1,s);
 
   i=1;
@@ -449,7 +451,7 @@ rsys_top()
     char value[20],userid[25],c;
 
     if(read(0,&c,1))if(c==13||c==10||c==27||c==15||c==3)break;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
 
     if(fscanf(fp,"%s %s",value,userid)==2){
       prompt(RSTOPS2,i,value,userid);
@@ -458,6 +460,6 @@ rsys_top()
   }
   if(feof(fp))prompt(RSTOPS3);
   fclose(fp);
-  blocking();
+  inp_block();
 }
 

@@ -33,8 +33,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -480,7 +482,7 @@ void write_zchar (int c)
     
     if (codes_to_text (c, xlat_buffer)) {
       
-      /* Arrow keys - these must the keyboard keys used for input */
+      /* Arrow keys - these must the keyboard keys used for inp_buffer */
       
       if (c > 23 && c < 28) {
 	char xlat[4] = { '\\', '/', '+', '-' };
@@ -772,7 +774,7 @@ void set_print_modes (zword_t type, zword_t option)
     
   } else if ((short) type == 4) {
     
-    /* Turn on input recording */
+    /* Turn on inp_buffer recording */
     
     open_record ();
     
@@ -809,7 +811,7 @@ void set_print_modes (zword_t type, zword_t option)
     
   } else if ((short) type == -4) {
     
-    /* Turn off input recording */
+    /* Turn off inp_buffer recording */
     
     close_record ();
     

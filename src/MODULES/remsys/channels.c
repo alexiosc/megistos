@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:05  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.11  2000/01/06 11:42:07  alexios
  * Various small bug fixes. The channel list now flags users who have
@@ -41,11 +42,11 @@
  * telnet lines.
  *
  * Revision 0.9  1999/07/18 21:48:04  alexios
- * Changed a few fatal() calls to fatalsys(). Removed some
+ * Changed a few error_fatal() calls to error_fatalsys(). Removed some
  * leftover debugging information.
  *
  * Revision 0.8  1998/12/27 16:07:28  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * New code for the new bbsgetty states and handling. Various
  * fixes, among which is code to generate a warning if the sysop
  * leaves emulation while the emulated user is in chat mode
@@ -70,7 +71,7 @@
  * actual username of the user on a channel unless the issuer
  * of the command has the required key (option KEYCHU). Fixed
  * rsys_emulate() bug that would cause constant SIGSEGVs. Fixed
- * extra emulation bug that would turn on blocking() mode and
+ * extra emulation bug that would turn on inp_block() mode and
  * cause the emulate screen to behave abnormally (synchronously).
  * Fixed rsys_send() so it really DOES send stuff.
  *
@@ -88,6 +89,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -113,14 +115,14 @@ void
 listchannels()
 {
   int  i, showntelnetline=0, res;
-  struct linestatus status;
+  channel_status_t status;
 
   prompt(CHNLSTHDR,NULL);
 
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
     int ch=channels[i].channel;
 
-    res=getlinestatus(channels[i].ttyname,&status);
+    res=channel_getstatus(channels[i].ttyname,&status);
     
     if(res<0 || status.result==LSR_LOGOUT){
       if(channels[i].flags&TTF_TELNET)status.result=LSR_OK;
@@ -132,7 +134,7 @@ listchannels()
 
     switch(status.result){
     case LSR_INIT:
-      prompt(CHNLSTTBI,ch,line_states[status.state]);
+      prompt(CHNLSTTBI,ch,channel_states[status.state]);
       break;
     case LSR_RING:
       prompt(CHNLSTTBR,ch);
@@ -142,38 +144,38 @@ listchannels()
       break;
 #ifdef HAVE_METABBS
     case LSR_METABBS:
-      prompt(CHNLSTTBM,ch,baudstg(status.baud),status.user);
+      prompt(CHNLSTTBM,ch,channel_baudstg(status.baud),status.user);
       break;
 #endif
     case LSR_LOGIN:
-      prompt(CHNLSTTBL,ch,baudstg(status.baud));
+      prompt(CHNLSTTBL,ch,channel_baudstg(status.baud));
       break;
     case LSR_USER:
       {
-	if(uinsys(status.user,0)){
+	if(usr_insys(status.user,0)){
 	  time_t t=time(NULL)-othruseronl.lastconsolepage;
-	  prompt(CHNLSTTBU,ch,baudstg(status.baud),status.user,
-		 t>pgstmo?"":getpfix(CHNLSTPGS,1));
+	  prompt(CHNLSTTBU,ch,channel_baudstg(status.baud),status.user,
+		 t>pgstmo?"":msg_getunit(CHNLSTPGS,1));
 	}
 	break;
       }
     case LSR_FAIL:
-      prompt(CHNLSTTBF,ch,line_states[status.state]);
+      prompt(CHNLSTTBF,ch,channel_states[status.state]);
       break;
     case LSR_RELOGON:
-      prompt(CHNLSTTBL,ch,line_states[status.state]);
+      prompt(CHNLSTTBL,ch,channel_states[status.state]);
       break;
     case LSR_LOGOUT:
-      prompt(CHNLSTTBQ,ch,line_states[status.state]);
+      prompt(CHNLSTTBQ,ch,channel_states[status.state]);
       break;
     case LSR_OK:
-      prompt(CHNLSTTBO,ch,line_states[status.state]);
+      prompt(CHNLSTTBO,ch,channel_states[status.state]);
       showntelnetline=channels[i].flags&TTF_TELNET;
       break;
     default:
       prompt(CHNLSTTBE,ch);
     }
-    if(lastresult==PAUSE_QUIT)return;
+    if(fmt_lastresult==PAUSE_QUIT)return;
   }
   prompt(CHNLSTFTR);
 }
@@ -186,20 +188,20 @@ getchanname(char *dev, int msg, int all)
   int  channel;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      i=cncword();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      i=cnc_word();
     } else {
       prompt(msg,NULL);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
     }
@@ -208,31 +210,31 @@ getchanname(char *dev, int msg, int all)
       return 1;
     } else if(sameas(i,"?")){
       listchannels();
-      endcnc();
+      cnc_end();
       continue;
     } else if(strstr(i,"tty")==i){
-      if(getchannelnum(i)!=-1){
+      if(chan_getnum(i)!=-1){
 	strcpy(dev,i);
 	return 1;
       } else {
 	prompt(GCHANBDV,NULL);
-	endcnc();
+	cnc_end();
 	continue;
       }
-    } else if(userexists(i)){
-      if(!uinsys(i,0)){
+    } else if(usr_exists(i)){
+      if(!usr_insys(i,0)){
 	prompt(GCHANBID,NULL);
-	endcnc();
+	cnc_end();
 	continue;
       } else {
 	strcpy(dev,othruseronl.channel);
 	return 1;
       }
     } else if(sscanf(i,"%x",&channel)==1){
-      char *name=getchannelname(channel);
+      char *name=chan_getname(channel);
       if(!name){
 	prompt(GCHANBCH,NULL);
-	endcnc();
+	cnc_end();
 	continue;
       } else {
 	strcpy(dev,name);
@@ -240,7 +242,7 @@ getchanname(char *dev, int msg, int all)
       }
     } else {
       prompt(GCHANHUH,i);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -254,34 +256,34 @@ rsys_change()
   int  st;
   char tty[32];
   char opt, bc[64];
-  struct linestatus status;
+  channel_status_t status;
 
   for(;;){
-    if(!morcnc())listchannels();
+    if(!cnc_more())listchannels();
     for(;;){
       if(!getchanname(tty,RSCHANGEWHT,1))return;
       if(!strcmp(tty,"*"))break;
-      getlinestatus(tty,&status);
+      channel_getstatus(tty,&status);
       if(status.result==LSR_USER){
 	prompt(RSCHANGEERR);
-	endcnc();
+	cnc_end();
       }
       else break;
     }
-    if(!getmenu(&opt,1,RSCHANGELMN,RSCHANGESMN,RSCHANGEBAD,
+    if(!get_menu(&opt,1,RSCHANGELMN,RSCHANGESMN,RSCHANGEBAD,
 		"RBNO",0,0))return;
 
     strcpy(bc,"RNBO");
     st=strchr(bc,opt)-bc;
 
-    if(strcmp(tty,"*"))bbsdcommand("change",tty,line_states[st]);
+    if(strcmp(tty,"*"))bbsdcommand("change",tty,channel_states[st]);
     else {
       int i;
       
-      for(i=0;i<numchannels;i++){
-	getlinestatus(channels[i].ttyname,&status);
+      for(i=0;i<chan_count;i++){
+	channel_getstatus(channels[i].ttyname,&status);
 	if(status.result!=LSR_USER){
-	  bbsdcommand("change",channels[i].ttyname,line_states[st]);
+	  bbsdcommand("change",channels[i].ttyname,channel_states[st]);
 	}
       }
     }
@@ -355,13 +357,13 @@ rsys_emulate()
 	char dummy[32];
 	
 	sprintf(lock,"LCK-emu-%s-%s",tty,thisuseronl.channel);
-	if(checklock(lock,dummy)>0){
+	if(lock_check(lock,dummy)>0){
 	  prompt(RSEMUHAHA);
 	  continue;
 	}
-	rmlock(lock);
+	lock_rm(lock);
 	sprintf(lock,"LCK-emu-%s-%s",thisuseronl.channel,tty);
-	placelock(lock,"");
+	lock_place(lock,"");
 	break;
       }
     }
@@ -382,7 +384,7 @@ rsys_emulate()
 
   /* Switch stdin to non blocking mode */
 
-  nonblocking();
+  inp_nonblock();
   tcgetattr(fileno(stdin), &oldkbdtermios);
   newkbdtermios = oldkbdtermios;
   newkbdtermios.c_lflag = newkbdtermios.c_lflag & ~ (ICANON | ECHO);
@@ -393,26 +395,26 @@ rsys_emulate()
   sprintf(fname,"%s/.shmid-%s",EMULOGDIR,tty);
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Error opening %s\n",fname);
+    error_fatalsys("Error opening %s\n",fname);
     err=1;
   }
   if(!fscanf(fp,"%d",&shmid)){
-    fatalsys("Error reading %s\n",fname);
+    error_fatalsys("Error reading %s\n",fname);
     err=1;
   }
   fclose(fp);
 
   if((emuq=(struct emuqueue *)shmat(shmid,NULL,0))==NULL){
-    fatalsys("Error attaching to emulation shared memory\n");
+    error_fatalsys("Error attaching to emulation shared memory\n");
     err=1;
   }
 
   sprintf(fname,"%s/.emu-%s",EMULOGDIR,tty);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Error opening %s\n",fname);
+    error_fatalsys("Error opening %s\n",fname);
     err=1;
     }
-  nonblocking();
+  inp_nonblock();
 
   j=i=emuq->index;
   if(!err){
@@ -445,10 +447,10 @@ rsys_emulate()
       if((read(fileno(stdin),&c,1))==1){
 	if(c==17)break;
 	else if(c==26){
-	  struct linestatus status;
+	  channel_status_t status;
 
 	  bbsdcommand("hangup",tty,"");
-	  getlinestatus(tty,&status);
+	  channel_getstatus(tty,&status);
 	  prompt(RSEMUHUP);
 	  break;
 	} else if(c==3){
@@ -464,7 +466,7 @@ rsys_emulate()
 
   /* Switch back to blocking mode, close files, etc */
   
-  blocking();
+  inp_block();
   tcsetattr(fileno(stdin), TCSAFLUSH, &oldkbdtermios);
   fclose(fp);
 
@@ -473,7 +475,7 @@ rsys_emulate()
   prompt(RSEMUEND);
   if(othruseronl.flags&OLF_INSYSCHAT)prompt(RSEMUCHT);
   thisuseronl.flags&=~OLF_BUSY;
-  rmlock(lock);
+  lock_rm(lock);
 }
 
 
@@ -491,7 +493,7 @@ rsys_monitor()
   }
   fclose(fp);
 
-  nonblocking();
+  inp_nonblock();
 
   for(c=0;!(read(fileno(stdin),&c,1)&&
 	    ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)));){
@@ -500,20 +502,20 @@ rsys_monitor()
     if(oldmark!=monitor->timestamp){
       char tmp[64];
       if(monitor->channel[0]!=' '){
-	sprintf(tmp,"%x",getchannelnum((char*)monitor->channel));
+	sprintf(tmp,"%x",chan_getnum((char*)monitor->channel));
       } else strcpy(tmp,&((char*)monitor->channel)[1]);
 
       prompt(RSMONITORTAB,tmp,monitor->input);
-      resetvpos(0);
+      fmt_resetvpos(0);
       oldmark=monitor->timestamp;
     }
 
-    acceptinjoth();
+    inp_acceptinjoth();
     usleep(50000);
   }
 
   prompt(RSMONITOREND,NULL);
-  blocking();
+  inp_block();
 }
 
 
@@ -523,15 +525,15 @@ rsys_send()
   char tty[32];
   char fname[256],msg[2050],tmp[2048],buf[MSGBUFSIZE];
   FILE *fp;
-  struct linestatus status;
+  channel_status_t status;
 
   for(;;){
     if(!getchanname(tty,RSSENDWHO,1))return;
     if(!strcmp(tty,"*"))break;
-    getlinestatus(tty,&status);
+    channel_getstatus(tty,&status);
     if(status.result!=LSR_USER){
       prompt(RSSENDR);
-      endcnc();
+      cnc_end();
     }
     else break;
   }
@@ -547,26 +549,26 @@ rsys_send()
     return;
   }
   if(strcmp(tty,"*")){
-    if(!uinsys(status.user,0)){
+    if(!usr_insys(status.user,0)){
       prompt(RSSENDD);
       return;
     }
-    strcpy(tmp,getmsglang(RSSENDINH,othruseracc.language-1));
-    sprintf(msgbuf,"%s%s\n\n",tmp,msg);
-    if(!injoth(&othruseronl,msgbuf,0)){
+    strcpy(tmp,msg_getl(RSSENDINH,othruseracc.language-1));
+    sprintf(msg_buffer,"%s%s\n\n",tmp,msg);
+    if(!usr_injoth(&othruseronl,msg_buffer,0)){
       prompt(RSSENDX,othruseronl.userid);
-    } else prompt(RSSEND1,getchannelnum(tty));
+    } else prompt(RSSEND1,chan_getnum(tty));
   } else {
     int i,j,n;
-    for(i=j=n=0;i<numchannels;i++){
-      getlinestatus(channels[i].ttyname,&status);
+    for(i=j=n=0;i<chan_count;i++){
+      channel_getstatus(channels[i].ttyname,&status);
       if(status.result!=LSR_USER){
-	if(uinsys(status.user,0)){
-	  strcpy(tmp,getmsglang(RSSENDINH,othruseracc.language-1));
+	if(usr_insys(status.user,0)){
+	  strcpy(tmp,msg_getl(RSSENDINH,othruseracc.language-1));
 	  sprintf(buf,"%s%s\n\n",tmp,msg);
-	  if(uinsys(status.user,0)){
+	  if(usr_insys(status.user,0)){
 	    n++;
-	    if(!injoth(&othruseronl,buf,0)){
+	    if(!usr_injoth(&othruseronl,buf,0)){
 	      prompt(RSSENDX,othruseronl.userid);
 	    } else j++;
 	  }

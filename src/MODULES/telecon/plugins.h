@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.2  1997/11/06 20:06:11  alexios
  * Added GPL legalese to the top of this file.
@@ -39,6 +40,10 @@
  *
  *
  */
+
+
+#ifndef _PLUGINS_H
+#define _PLUGINS_H
 
 
 #ifndef RCS_VER 
@@ -119,3 +124,5 @@ struct keyword {
 
 #endif /* __MKPLUGIN__ */
 
+
+#endif /* _PLUGINS_H */

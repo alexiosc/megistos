@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:52  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:44:48  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -97,70 +99,61 @@ void writeprefs(struct prefs *prefs)
 void
 setprefs()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
 
   readprefs(&prefs);
 
-  sprintf(fname,TMPDIR"/mailer%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  strcpy(inp_buffer,msg_get(OMVTN+(prefs.flags&OMF_ATT)));
+  strcat(inp_buffer,"\n");
+  strcat(inp_buffer,msg_get(OMVTN+((prefs.flags&OMF_REQ)>>2)));
+  strcat(inp_buffer,"\n");
+  strcat(inp_buffer,prefs.flags&OMF_HEADER?"on":"off");
+  strcat(inp_buffer,"\nOK\nCANCEL\n");
+  
+  if(dialog_run("offline.mail",OMVT,OMLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%s\n",getmsg(OMVTN+(prefs.flags&OMF_ATT)));
-  fprintf(fp,"%s\n",getmsg(OMVTN+((prefs.flags&OMF_REQ)>>2)));
-  fprintf(fp,"%s\n",prefs.flags&OMF_HEADER?"on":"off");
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("offline.mail",OMVT,OMLT,fname);
+  if(sameas(margv[5],"OK")||sameas(margv[5],margv[3])){
+    for(i=0;i<6;i++){
+      char *s=margv[i];
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  for(i=0;i<6;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0){
-      int i,j=-1;
-      for(i=0;i<3;i++)if(sameas(getmsg(OMVTN+i),s)){
-	j=i;
-	break;
+      if(i==0){
+	int i,j=-1;
+	for(i=0;i<3;i++)if(sameas(msg_get(OMVTN+i),s)){
+	  j=i;
+	  break;
+	}
+	if(j<0){
+	  error_fatal("Bad value \"%s\" for attachment inclusion.",s);
+	}
+	prefs.flags&=~OMF_ATT;
+	if(j)prefs.flags|=j==1?OMF_ATTYES:OMF_ATTASK;
+      } else if(i==1){
+	int i,j=-1;
+	for(i=0;i<3;i++)if(sameas(msg_get(OMVTN+i),s)){
+	  j=i;
+	  break;
+	}
+	if(j<0){
+	  error_fatal("Bad value \"%s\" for request inclusion.",s);
+	}
+	prefs.flags&=~OMF_REQ;
+	if(j)prefs.flags|=j==1?OMF_REQYES:OMF_REQASK;
+      } else if(i==2){
+	if(sameas("on",s))prefs.flags|=OMF_HEADER;
+	else prefs.flags&=~OMF_HEADER;
       }
-      if(j<0){
-	fatal("Bad value \"%s\" for attachment inclusion.",s);
-      }
-      prefs.flags&=~OMF_ATT;
-      if(j)prefs.flags|=j==1?OMF_ATTYES:OMF_ATTASK;
-    } else if(i==1){
-      int i,j=-1;
-      for(i=0;i<3;i++)if(sameas(getmsg(OMVTN+i),s)){
-	j=i;
-	break;
-      }
-      if(j<0){
-	fatal("Bad value \"%s\" for request inclusion.",s);
-      }
-      prefs.flags&=~OMF_REQ;
-      if(j)prefs.flags|=j==1?OMF_REQYES:OMF_REQASK;
-    } else if(i==2){
-      if(sameas("on",s))prefs.flags|=OMF_HEADER;
-      else prefs.flags&=~OMF_HEADER;
     }
-  }
 
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
-    prompt(OMSCAN);
-    return;
-  } else {
     saveprefs(progname,sizeof(prefs),&prefs);
     prompt(OMSOK);
+  } else {
+    prompt(OMSCAN);
+    return;
   }
 }
 
@@ -182,7 +175,7 @@ setup()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -190,13 +183,13 @@ setup()
 	if(shownmenu==1){
 	  prompt(OMSHORT);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'S':
 	setprefs();
@@ -211,11 +204,11 @@ setup()
 	break;
       default:
 	prompt(OMERR,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
  * Modified fileinfo() to display keywords even for files that
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -119,7 +121,7 @@ libinfo()
   sprintf(fname,"%s/%s",library.dir,rdmefil);
   if(!stat(fname,&st)){
     prompt(INFOHDR);
-    printfile(fname);
+    out_printfile(fname);
   } else {
     cp=strtok(s," \n\r\t,");
     while(cp){
@@ -127,7 +129,7 @@ libinfo()
       sprintf(fname,"%s/%s",library.dir,cp);
       if(!stat(fname,&st)){
 	prompt(INFOHDR);
-	printfile(fname);
+	out_printfile(fname);
 	break;
       }
       cp=strtok(NULL," \n\r\t");
@@ -144,16 +146,16 @@ fullinfo()
 
   libinfo();
   if(library.flags&LBF_OSDIR){
-    strcpy(tmp,getmsg(LIBINFOO));
-    strcat(tmp,getmsg(LIBINFO9));
-  } else strcpy(tmp,getmsg(libop?LIBINFO2:LIBINFO1));
-  if(library.flags&LBF_UPLAUD)strcat(tmp,getmsg(LIBINFO3));
-  if(library.flags&LBF_DNLAUD)strcat(tmp,getmsg(LIBINFO4));
+    strcpy(tmp,msg_get(LIBINFOO));
+    strcat(tmp,msg_get(LIBINFO9));
+  } else strcpy(tmp,msg_get(libop?LIBINFO2:LIBINFO1));
+  if(library.flags&LBF_UPLAUD)strcat(tmp,msg_get(LIBINFO3));
+  if(library.flags&LBF_DNLAUD)strcat(tmp,msg_get(LIBINFO4));
   if(library.flags&(LBF_LOCKUPL|LBF_LOCKDNL|LBF_LOCKENTR))
-    strcat(tmp,getmsg(LIBINFO5));
-  if(library.flags&LBF_READONLY)strcat(tmp,getmsg(LIBINFO6));
-  if((library.flags&LBF_OSDIR)==0)strcat(tmp,getmsg(LIBINFO10));
-  strcat(tmp,getmsg(LIBINFOF));
+    strcat(tmp,msg_get(LIBINFO5));
+  if(library.flags&LBF_READONLY)strcat(tmp,msg_get(LIBINFO6));
+  if((library.flags&LBF_OSDIR)==0)strcat(tmp,msg_get(LIBINFO10));
+  strcat(tmp,msg_get(LIBINFOF));
   print(tmp);
 }
 
@@ -165,7 +167,7 @@ _getfiletype(char *fname,int recurse)
   static char filetype[256];
   char command[256], line[1024], *cp=line;
 
-  strcpy(filetype,getmsg(FTUNK));
+  strcpy(filetype,msg_get(FTUNK));
   if(!recurse)return filetype;
 
   sprintf(command,"file %s",fname);
@@ -246,20 +248,20 @@ int fileinfo(struct libidx *l, struct fileidx *f)
   bzero(&st,sizeof(st));
   stat(fname,&st);
   if(st.st_size<(128<<10))
-    sprintf(sizestg,getmsg(FILINSB),st.st_size);
+    sprintf(sizestg,msg_get(FILINSB),st.st_size);
   else if(st.st_size<(1440<<10))
-    sprintf(sizestg,getmsg(FILINSK),st.st_size>>10,fracK(st.st_size));
+    sprintf(sizestg,msg_get(FILINSK),st.st_size>>10,fracK(st.st_size));
   else
-    sprintf(sizestg,getmsg(FILINSK),st.st_size>>10,fracM(st.st_size));
+    sprintf(sizestg,msg_get(FILINSK),st.st_size>>10,fracM(st.st_size));
 
   
   /* Line 2: calculate download time and charge. */
   xfertime=calcxfertime(st.st_size,0);
   charge=calccharge(st.st_size,&library);
 
-  if(xfertime>0)sprintf(timestg,getmsg(FILINTA),xfertime);
-  else strcpy(timestg,getmsg(FILINTL));
-  strcpy(chargestg,getpfix(CRDSNG,charge));
+  if(xfertime>0)sprintf(timestg,msg_get(FILINTA),xfertime);
+  else strcpy(timestg,msg_get(FILINTL));
+  strcpy(chargestg,msg_getunit(CRDSNG,charge));
 
 
   dt=localtime((const time_t *)&(f->timestamp));
@@ -269,7 +271,7 @@ int fileinfo(struct libidx *l, struct fileidx *f)
 	 f->uploader,f->approved_by,
 	 strdate(makedate(dt->tm_mday,dt->tm_mon+1,1900+dt->tm_year)),
 	 strtime(maketime(dt->tm_hour,dt->tm_min,dt->tm_sec),1),
-	 f->downloaded,getpfix(TIMSNG,f->downloaded),
+	 f->downloaded,msg_getunit(TIMSNG,f->downloaded),
 	 filetype,
 	 f->summary);
 

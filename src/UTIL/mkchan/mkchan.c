@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:23  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  1999/07/18 22:11:13  alexios
  * Added code to grok the new M flag that enables the MetaBBS
@@ -93,7 +94,7 @@ int main(int argc, char **argv)
   FILE *fpin, *fpout;
   int linenum=0,errors=0;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if((fpin=fopen(CHANDEFSRCFILE,"r"))==NULL){
     fprintf(stderr,"mkchan: Unable to open %s\n",CHANDEFSRCFILE);
     exit(1);
@@ -114,13 +115,13 @@ int main(int argc, char **argv)
 	      tty,&num,config,&type,&sups,&key,lang,flags)==8){
       struct channeldef *tmp=NULL;
 
-      numchannels++;
-      tmp=alcmem(sizeof(struct channeldef)*numchannels);
+      chan_count++;
+      tmp=alcmem(sizeof(struct channeldef)*chan_count);
       if(!tmp){
 	fprintf(stderr,"mkchan: Unable to allocate channel table.\n");
 	exit(1);
       }
-      memcpy(tmp,channels,sizeof(struct channeldef)*(numchannels-1));
+      memcpy(tmp,channels,sizeof(struct channeldef)*(chan_count-1));
       free(channels);
       channels=tmp;
       if(!channels){
@@ -128,76 +129,85 @@ int main(int argc, char **argv)
 	exit(1);
       }
 
-      strcpy(channels[numchannels-1].ttyname,tty);
-      channels[numchannels-1].channel=num;
-      channels[numchannels-1].key=key;
-      strcpy(channels[numchannels-1].config,config);
+      strcpy(channels[chan_count-1].ttyname,tty);
+      channels[chan_count-1].channel=num;
+      channels[chan_count-1].key=key;
+      strcpy(channels[chan_count-1].config,config);
       switch(toupper(type)){
       case 'M':
-	channels[numchannels-1].flags|=TTF_MODEM;
+	channels[chan_count-1].flags|=TTF_MODEM;
 	break;
       case 'S':
-	channels[numchannels-1].flags|=TTF_SERIAL;
+	channels[chan_count-1].flags|=TTF_SERIAL;
 	break;
       case 'C':
-	channels[numchannels-1].flags|=TTF_CONSOLE;
+	channels[chan_count-1].flags|=TTF_CONSOLE;
 	break;
       case 'T':
-	channels[numchannels-1].flags|=TTF_TELNET;
+	channels[chan_count-1].flags|=TTF_TELNET;
 	break;
       default:
 	fprintf(stderr,"mkchan: line %d: bad channel type '%c'.\n",linenum,type);
 	errors++;
       }
-      if(toupper(sups)=='Y')channels[numchannels-1].flags|=TTF_SIGNUPS;
+      if(toupper(sups)=='Y')channels[chan_count-1].flags|=TTF_SIGNUPS;
       else if(toupper(sups)!='N'){
 	fprintf(stderr,
 		"mkchan: line %d: allow_signup expects 'Y' or 'N'.\n",linenum);
 	errors++;
       }
 
-      channels[numchannels-1].lang=1;
+      channels[chan_count-1].lang=1;
       if(toupper(lang[strlen(lang)-1])=='A'){
 	lang[strlen(lang)-1]=0;
-	channels[numchannels-1].lang=-1;
+	channels[chan_count-1].lang=-1;
       }
       {
 	int i=atoi(lang);
-	if(i>=1 && i<=10)channels[numchannels-1].lang*=i;
+	if(i>=1 && i<=10)channels[chan_count-1].lang*=i;
 	else {
 	  fprintf(stderr,"mkchan: Warning: line %d: "\
 		  "language not specified, #1 assumed.\n",linenum);
-	  channels[numchannels-1].lang=1;
+	  channels[chan_count-1].lang=1;
 	}
       }
 
-      /*      channels[numchannels-1].flags|=TTF_ANSI; */
-      channels[numchannels-1].xlation=0;
+      /*      channels[chan_count-1].flags|=TTF_ANSI; */
+      channels[chan_count-1].xlation=0;
 
       for(j=0;flags[j];j++)switch(toupper(flags[j])){
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
-	channels[numchannels-1].xlation=toupper(flags[j])-'0';
+	channels[chan_count-1].xlation=toupper(flags[j])-'0';
 	break;
       case 'A':
-	channels[numchannels-1].flags|=TTF_ASKXLT;
+	channels[chan_count-1].flags|=TTF_ASKXLT;
 	break;
       case 'V':
-	channels[numchannels-1].flags|=TTF_ANSI;
+	channels[chan_count-1].flags|=TTF_ANSI;
 	break;
       case 'D':
-	channels[numchannels-1].flags&=~TTF_ANSI;
+	channels[chan_count-1].flags&=~TTF_ANSI;
 	break;
       case 'S':
-	channels[numchannels-1].flags|=TTF_ASKANSI;
+	channels[chan_count-1].flags|=TTF_ASKANSI;
 	break;
       case 'M':
 #ifdef HAVE_METABBS
-	channels[numchannels-1].flags|=TTF_METABBS;
+	channels[chan_count-1].flags|=TTF_METABBS;
 #else
 	fprintf(stderr,"mkchan: line %d: Warning: ignoring flag 'M' which "
 		"enables MetaBBS (not installed).\n",linenum);
 #endif
+	break;
+      case 'C':
+#ifdef HAVE_METABBS
+	channels[chan_count-1].flags|=TTF_INTERBBS;
+#else
+	fprintf(stderr,"mkchan: line %d: Warning: ignoring flag 'C' which "
+		"enables MetaBBS inter-BBS connections (not installed).\n",linenum);
+#endif
+	
 	break;
       default:
 	fprintf(stderr,"mkchan: line %d: bad flag '%c'.\n",linenum,flags[j]);
@@ -212,8 +222,8 @@ int main(int argc, char **argv)
     char ttyname[16]={0};
     int channel=-1;
 
-    qsort(channels,numchannels,sizeof(struct channeldef),stringcmp);
-    for(i=0;i<numchannels;i++){
+    qsort(channels,chan_count,sizeof(struct channeldef),stringcmp);
+    for(i=0;i<chan_count;i++){
       if(strcmp(ttyname,channels[i].ttyname)){
 	strcpy(ttyname,channels[i].ttyname);
       } else {
@@ -222,8 +232,8 @@ int main(int argc, char **argv)
       }
     }
        
-    qsort(channels,numchannels,sizeof(struct channeldef),chancmp);
-    for(i=0;i<numchannels;i++){
+    qsort(channels,chan_count,sizeof(struct channeldef),chancmp);
+    for(i=0;i<chan_count;i++){
       if(channel!=channels[i].channel){
 	channel=channels[i].channel;
       } else {
@@ -240,11 +250,11 @@ int main(int argc, char **argv)
 
   fputs(CHANNEL_MAGIC,fpout);	/* Stamp the magic "number". */
 
-  if(fwrite(&numchannels,sizeof(numchannels),1,fpout)!=1){
+  if(fwrite(&chan_count,sizeof(chan_count),1,fpout)!=1){
     fprintf(stderr,"mkchan: Unable to write to %s.\n",CHANDEFFILE);
     exit(1);
   }
-  if(fwrite(channels,sizeof(struct channeldef),numchannels,fpout)!=numchannels){
+  if(fwrite(channels,sizeof(struct channeldef),chan_count,fpout)!=chan_count){
     fprintf(stderr,"mkchan: Unable to write to %s.\n",CHANDEFFILE);
     exit(1);
   }

@@ -2,7 +2,7 @@ LEVEL2 {}
 
 LONALRM {Minutes before bbslogin timeout (0=disable): 1} N 0 32767
 
-TERMINAL {megistos} S 32 Default terminal type of BBS channels
+TERMINAL {linux} S 32 Default terminal type of BBS channels
 
 METAB4 {If available, run MetaBBS client before the local BBS' login screen? NO} B
 
@@ -117,53 +117,42 @@ Please enter a number in the range 1 to %d.
 
              Tap F2 to view or edit this text.
 
-HELLO {[2J[0;1m@VERSION@.
-
-[0;1;30m[37C[0;1mЫ[0mЫЫЫЫ   ‰ўйЄ гЁџ«њ ©«¦¤ ‹вљ ©«¦
-[36C[1mЫЫЫ[0mЫЫЫЫ   Ѓб©ћ: @BBS@
-[35C[1mЫЫЫЫЫ[0mЫЫЫЫ   ’®з«ћ«: @BAUD@
-[34C[1mЫЫЫЫЫЫЫ[0mЫЫЫЫ   ‘¬¤›њџгЎ«њ: @TIME@ @DATE@
-[33C[1mЫЫЫЫ[30mЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[32C[1mЫЫЫЫ[30mЫЫЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[31C[1mЫЫЫЫ[30mЫЫЫЫ [37mЫЫЫЫ[0mЫЫЫЫ
-[30C[1mЫЫЫЫ[30mЫЫЫЫ   [37mЫЫЫЫ[0mЫЫЫЫ
-[29C[1mЫЫЫЫ[30mЫЫЫЫ[5C[37mЫЫЫЫ[0mЫЫЫЫ
-[28C[1mЫЫЫЫ[30mЫЫЫЫ[7C[37mЫЫЫЫ[0mЫЫЫЫ
-[27C[1mЫЫЫЫ[30mЫЫЫЫ[9C[37mЫЫЫЫ[0mЫЫЫЫ
-[26C[1mЫЫЫЫ[30mЫЫЫЫ[11C[37mЫЫЫЫ[0mЫЫЫЫ
-[25C[1mЫЫЫЫ[30mЫЫЫЫ[13C[37mЫЫЫЫ[0mЫЫЫЫ
-[24C[1mЫЫЫЫ[30mЫЫЫЫ[15C[37mЫЫЫЫ[0mЫЫЫЫ
-[23C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[23C[37mЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-
-[24C[37mP R O J E C T   M E G I S T O S[0;1m
+HELLO {[2J[0;1m‰ўйЄ гЁџ«њ ©«ћ¤ [1;33;5m@BBS@[0;1m.
+’Ёв®¦¬Јњ [33m@VERSION@[0;1m.
+[0;1m‘¬¤›њџгЎ«њ ©« @BAUD@ baud ©«еЄ @TIMESEC@ «ћ¤ @DATE@
+[0;1;44m     ‹њ  › е«њЁћ ®Ёб ©Є Ўўа©¦Ёеќ¦¬Јњ ©«¦ ѓеЎ«¬¦ [36mAcroBase[37m &  [33mG[37m.[33mA[37m.[32mT[37m.[33mE[37m.     [40m
+[36m ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;36mї
+[1m і                 ЬЬ                [33mЬЬЬЬЬ ЬЬ  ЬЬЬЬЬЬ  [34mЫЫЬЬЬЬЬ[33m ЬЬЬЬЬЬ      [0;36mі
+[1m і     ЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫ      [33mЫЫЯЯЯЯЫЫЫ ЫЫЯЯЯЯЫЫ [34mЫЫЯЯЯЯЯ[33mЫЫЯЯЯЯЫЫ     [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ      [33mЫЫ     ЫЫ  ЬЬЬЬЬЫЫ [34mЫЫ[33m     ЫЫЬЬЬЬЫЫ     [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ      [33mЫЫЬЬЬЬЬЫЫ ЫЫЯЯЯЯЫЫ [34mЫЫ[33m     ЫЫЯЯЯЯЯ      [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ       [33mЯЯЯЯЯЯЫЫ ЫЫЬЬЬЬЫЫЬ[34mЫЫЬ[33m    ЫЫЬЬЬЬЫЫ     [0;36mі
+[1m і     ЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫ      [33mЬЬ[36m     [33mЫЫ  ЯЯЯЯЯ ЯЯ [34mЯЯ[33m     ЯЯЯЯЯЯ      [0;36mі
+[1m і              ЯЯ                  [33mЯЫЫЫЫЫЫЫЯ[34mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ     [0;36mі
+[1m А[0;36mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ
+[1;37;44m    Data : (01) 8231753 8815616 8816312 8220610 8819963  [31mwww.acrogate.org    [40m
+[36;44m     telnet://acrogate.org:1024 [37m([36mAcro[37m)[36m telnet://acrogate.org:1025 [37m([33mGATE[37m)     [40m
+[33;44m    Secure Shell ssh2 -C sshbbs acrogate.org г ssh -C sshbbs acrogate.org    [40m
 } T Greeting message when user first connects to the BBS
 
 
-THELLO {[2J[0;1m@VERSION@.
-
-[0;1;30m[37C[0;1mЫ[0mЫЫЫЫ   ‰ўйЄ гЁџ«њ ©«¦¤ ‹вљ ©«¦
-[36C[1mЫЫЫ[0mЫЫЫЫ   Ѓб©ћ: @BBS@
-[35C[1mЫЫЫЫЫ[0mЫЫЫЫ   ’®з«ћ«: @BAUD@
-[34C[1mЫЫЫЫЫЫЫ[0mЫЫЫЫ   ‘¬¤›њџгЎ«њ: @TIME@ @DATE@
-[33C[1mЫЫЫЫ[30mЫ[37mЫЫЫЫ[0mЫЫЫЫ   ‚ЁЈЈг telnet: @TNLNUM@/@TNLMAX@
-[32C[1mЫЫЫЫ[30mЫЫЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[31C[1mЫЫЫЫ[30mЫЫЫЫ [37mЫЫЫЫ[0mЫЫЫЫ
-[30C[1mЫЫЫЫ[30mЫЫЫЫ   [37mЫЫЫЫ[0mЫЫЫЫ
-[29C[1mЫЫЫЫ[30mЫЫЫЫ[5C[37mЫЫЫЫ[0mЫЫЫЫ
-[28C[1mЫЫЫЫ[30mЫЫЫЫ[7C[37mЫЫЫЫ[0mЫЫЫЫ
-[27C[1mЫЫЫЫ[30mЫЫЫЫ[9C[37mЫЫЫЫ[0mЫЫЫЫ
-[26C[1mЫЫЫЫ[30mЫЫЫЫ[11C[37mЫЫЫЫ[0mЫЫЫЫ
-[25C[1mЫЫЫЫ[30mЫЫЫЫ[13C[37mЫЫЫЫ[0mЫЫЫЫ
-[24C[1mЫЫЫЫ[30mЫЫЫЫ[15C[37mЫЫЫЫ[0mЫЫЫЫ
-[23C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[23C[37mЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-
-[24C[37mP R O J E C T   M E G I S T O S[0;1m
+THELLO {[2J[0;1m‰ўйЄ гЁџ«њ ©«ћ¤ [1;33;5m@BBS@[0;1m.
+’Ёв®¦¬Јњ [33m@VERSION@[0;1m.
+[0;1m‘¬¤›њџгЎ«њ Јв©а telnet ©«еЄ @TIMESEC@ «ћ¤ @DATE@
+‰«ўЈ™б¤њ«њ «ћ¤ @TNLNUM@ћ §ж « Є @TNLMAX@ › џв© ЈњЄ telnet љЁЈЈвЄ.
+[0;1;44m     ‹њ  › е«њЁћ ®Ёб ©Є Ўўа©¦Ёеќ¦¬Јњ ©«¦ ѓеЎ«¬¦ [36mAcroBase[37m &  [33mG[37m.[33mA[37m.[32mT[37m.[33mE[37m.     [40m
+[36m ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;36mї
+[1m і                 ЬЬ                [33mЬЬЬЬЬ ЬЬ  ЬЬЬЬЬЬ  [34mЫЫЬЬЬЬЬ[33m ЬЬЬЬЬЬ      [0;36mі
+[1m і     ЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫ      [33mЫЫЯЯЯЯЫЫЫ ЫЫЯЯЯЯЫЫ [34mЫЫЯЯЯЯЯ[33mЫЫЯЯЯЯЫЫ     [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ      [33mЫЫ     ЫЫ  ЬЬЬЬЬЫЫ [34mЫЫ[33m     ЫЫЬЬЬЬЫЫ     [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ      [33mЫЫЬЬЬЬЬЫЫ ЫЫЯЯЯЯЫЫ [34mЫЫ[33m     ЫЫЯЯЯЯЯ      [0;36mі
+[1m і     ЫЫ[7CЫЫ ЫЫ[7CЫЫ       [33mЯЯЯЯЯЯЫЫ ЫЫЬЬЬЬЫЫЬ[34mЫЫЬ[33m    ЫЫЬЬЬЬЫЫ     [0;36mі
+[1m і     ЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫ      [33mЬЬ[36m     [33mЫЫ  ЯЯЯЯЯ ЯЯ [34mЯЯ[33m     ЯЯЯЯЯЯ      [0;36mі
+[1m і              ЯЯ                  [33mЯЫЫЫЫЫЫЫЯ[34mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ     [0;36mі
+[1m А[0;36mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ
+[1;37;44m    Data : (01) 8231753 8815616 8816312 8220610 8819963  [31mwww.acrogate.org    [40m
+[36;44m     telnet://acrogate.org:1024 [37m([36mAcro[37m)[36m telnet://acrogate.org:1025 [37m([33mGATE[37m)     [40m
+[33;44m    Secure Shell ssh2 -C sshbbs acrogate.org г ssh -C sshbbs acrogate.org    [40m
 } T Greeting message for telnet connections
 
 
@@ -204,7 +193,7 @@ LOGUID {[0;1;33m
 
 
 ENTUSIDM {[0;1m
-ЏЁЎўй ›й©«њ «¦ Їњ¬›й¤¬Јж ©Є, г [33mout[0;1m љ  ©з¤›њ©ћ Јњ бўў¦ ©з©«ћЈ
+ЏЁЎўй ›й©«њ «¦ Їњ¬›й¤¬Јж ©Є, г [33mout[0;1m љ  ©з¤›њ©ћ Јњ «ћ¤ GATE
 Јв©а › Ў«з¦¬. „б¤ ње©«њ ¤в¦Є ®Ёг©«ћЄ ›й©«њ [33mnew[0;1m: [K[0m} T Asking for User-Id, free sample channel
 
  This is the first question asked of any user accessing your
@@ -307,7 +296,7 @@ METAKO {[0;1;31m
 ACCSUS {[0;1m
 
 !JЋ •њ Ё ©«гЄ ‘¬©«гЈ«¦Є в®њ  ­ Ёв©њ  §Ё¦©аЁ ¤б «ћ¤ ›¬¤«ж«ћ«б ©Є ¤ Ўб¤њ«њ
-®Ёг©ћ «¦¬ Їњ¬›а¤зЈ¦¬ ©Є ©«ћ¤ @BBS@. ЏЁЎў¦зЈњ §Ё¦©§џг©«њ ¤
+®Ёг©ћ «¦¬ Їњ¬›а¤зЈ¦¬ ©Є ©«ћ¤ AcroBase. ЏЁЎў¦зЈњ §Ё¦©§џг©«њ ¤
 њ§ Ў¦ ¤а¤г©њ«њ Јќе ЈЄ ©«ћ¤ › њзџ¬¤©ћ!)
 
 !C@COMPANY@,
@@ -324,7 +313,7 @@ ACCSUS {[0;1m
 ACCDEL {[0;1m
 
 !JЋ •њ Ё ©«гЄ ‘¬©«гЈ«¦Є в®њ  ­ Ёв©њ  «ћ¤ ›¬¤«ж«ћ«б ©Є ¤ Ўб¤њ«њ
-®Ёг©ћ «¦¬ Їњ¬›а¤зЈ¦¬ ©Є ©«ћ¤ @BBS@. ЏЁЎў¦зЈњ §Ё¦©§џг©«њ ¤
+®Ёг©ћ «¦¬ Їњ¬›а¤зЈ¦¬ ©Є ©«ћ¤ AcroBase. ЏЁЎў¦зЈњ §Ё¦©§џг©«њ ¤
 њ§ Ў¦ ¤а¤г©њ«њ Јќе ЈЄ ©«ћ¤ › њзџ¬¤©ћ!)
 
 !C@COMPANY@,
@@ -412,8 +401,7 @@ NOTICE IN ANY WAY. BY DOING SO YOU TERMINATE YOUR LICENSE AGREEMENT AND THE
 RIGHTFUL OWNERS OF THIS SOFTWARE MAY AND WILL TAKE LEGAL ACTION AGAINST YOU.
 
 GPL {[0;1m
-!J@SHORTVERSION@ Copyright (c) 1994-2000 ЂўвҐ ¦Є •¦з®¦¬ўЄ
-<alexios@@vennea.demon.co.uk>. [32mЋ ‹вљ ©«¦Є вЁ®њ« 
+!J@SHORTVERSION@ Copyright (c) 1994-98 ЂўвҐ ¦Є •¦з®¦¬ўЄ. [32mЋ ‹вљ ©«¦Є вЁ®њ« 
 ®аЁеЄ [37m‰Ђ‹‹€Ђ ЂЏЋЉ“’—‘ „‚‚“†‘†[32m. ’¦ §Ёж¤ ње¤  њўњзџњЁ¦ ў¦љ ©Ј Ўж.
 „е©«њ њ¬§Ёж©›њЎ«¦  ¤ «¦ › Ў ¤г©њ«њ [37m¬§ж ¦Ё ©Јв¤¦¬Є жЁ¦¬Є[32m. ‚ЁбЇ«њ
 [33m/GPL[32m љ  §њЁ ©©ж«њЁњЄ §ўћЁ¦­¦ЁењЄ.!)
@@ -424,7 +412,14 @@ GPL {[0;1m
  This user has confirmed his desire to log off.  He is
  reminded of the name of your BBS (option BBSTTL).
 
-SEEYA {[0;1;36m!Z
+SEEYA {[0;1;36m!Z!C             ЬЬ          
+ЫЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫЫ
+          ЯЯ             [37m
 
 †[31m @BBS@ [37m©Є њ¬®Ё ©«ње §¦¬ Јње¤«њ Јќе «ћЄ љ  @ONLINE@ ўњ§«б.
 „ў§еќ¦¬Јњ ¤ в®¦¬Јњ «ћ¤ ®Ёб ¤ ©Є Ґ¤›¦зЈњ ©з¤«¦Ј.!)
@@ -439,6 +434,15 @@ TIMEOUT {
 !JЉ¬§бЈ , ўўб ›њ¤ Ј§¦Ё¦зЈњ ¤ ЎЁ«бЈњ «ћ¤ љЁЈЈг ¤¦ Ў«г љ  §б¤а §ж в¤
 ўњ§«ж, Јв®Ё  ¤ Јбџ¦¬Јњ « ©«¦ ®ње ©Є. ЏЁЎўй Ґ¤Ўўв©«њ ж«¤ ње©«њ ©њ
 џв©ћ ¤ « ›й©њ«њ.!)
+
+!C[36m          ЬЬ       
+ЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫ
+ЫЫ     ЫЫ ЫЫ     ЫЫ
+ЫЫ     ЫЫ ЫЫ     ЫЫ
+ЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫ
+       ЯЯ          
+!)
+
 
 
 [0m} T User timed out while logging in
@@ -525,53 +529,40 @@ QANSIERR {
 
              Tap F2 to view or edit this text.
 
-HELLO {[2J[0;1m@VERSION@.
-
-[0;1;30m[37C[0;1mЫ[0mЫЫЫЫ     Welcome to Megistos BBS
-[36C[1mЫЫЫ[0mЫЫЫЫ   Name: @BBS@
-[35C[1mЫЫЫЫЫ[0mЫЫЫЫ   Speed: @BAUD@ bps
-[34C[1mЫЫЫЫЫЫЫ[0mЫЫЫЫ   Time/Date: @TIME@ @DATE@
-[33C[1mЫЫЫЫ[30mЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[32C[1mЫЫЫЫ[30mЫЫЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[31C[1mЫЫЫЫ[30mЫЫЫЫ [37mЫЫЫЫ[0mЫЫЫЫ
-[30C[1mЫЫЫЫ[30mЫЫЫЫ   [37mЫЫЫЫ[0mЫЫЫЫ
-[29C[1mЫЫЫЫ[30mЫЫЫЫ[5C[37mЫЫЫЫ[0mЫЫЫЫ
-[28C[1mЫЫЫЫ[30mЫЫЫЫ[7C[37mЫЫЫЫ[0mЫЫЫЫ
-[27C[1mЫЫЫЫ[30mЫЫЫЫ[9C[37mЫЫЫЫ[0mЫЫЫЫ
-[26C[1mЫЫЫЫ[30mЫЫЫЫ[11C[37mЫЫЫЫ[0mЫЫЫЫ
-[25C[1mЫЫЫЫ[30mЫЫЫЫ[13C[37mЫЫЫЫ[0mЫЫЫЫ
-[24C[1mЫЫЫЫ[30mЫЫЫЫ[15C[37mЫЫЫЫ[0mЫЫЫЫ
-[23C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[23C[37mЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-
-[24C[37mP R O J E C T   M E G I S T O S[0;1m
-} T Greeting message when user first connects to the BBS
+HELLO {[2J[0;1mWelcome to [1;33;5m@BBS@[0;1m.
+Running [33m@VERSION@[0;1m.
+[0;1mYou have been connected at @BAUD@ baud on @TIMESEC@ at @DATE@
+[0;1;34;47m                 ЬЬ              [37mЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;30;47mї [40m
+[1;34;47m     ЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫ     [37mі  We are very happy to welcome you to  [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі  the Greek amateur communication and  [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі        Information oriented BBS       [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі[34m            A c r o B a s e            [0;30;47mі [40m
+[1;34;47m     ЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫ     [37mі      We wish you a pleasant stay.     [0;30;47mі [40m
+[1;34;47m              ЯЯ                 [37mА[0;30;47mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ [40m
+[1;37;47m ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;30;47mї [40m
+[1;37;47m і Data : (01) 8231753 8815616 8816312 8220610 8819963  [0;31;47mwww.acrogate.org [30mі [40m
+[1;37;47m і[0;34;47m  telnet://acrogate.org:1024 ([1mAcro[0;34;47m) telnet://acrogate.org:1025 ([1;33mGATE[0;34;47m)  [30mі [40m
+[1;37;47m і[33m Secure Shell ssh2 -C sshbbs acrogate.org г ssh -C sshbbs acrogate.org [0;30;47mі [40m
+[1;37;47m А[0;30;47mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ [40m[1;37m
+} T Greeting message when user first connects to BBS
 
 
-THELLO {[2J[0;1m@VERSION@.
-
-[0;1;30m[37C[0;1mЫ[0mЫЫЫЫ     Welcome to Megistos BBS
-[36C[1mЫЫЫ[0mЫЫЫЫ   Name: @BBS@
-[35C[1mЫЫЫЫЫ[0mЫЫЫЫ   Speed: @BAUD@ bps
-[34C[1mЫЫЫЫЫЫЫ[0mЫЫЫЫ   Time/Date: @TIME@ @DATE@
-[33C[1mЫЫЫЫ[30mЫ[37mЫЫЫЫ[0mЫЫЫЫ   Telnet line: @TNLNUM@/@TNLMAX@
-[32C[1mЫЫЫЫ[30mЫЫЫ[37mЫЫЫЫ[0mЫЫЫЫ
-[31C[1mЫЫЫЫ[30mЫЫЫЫ [37mЫЫЫЫ[0mЫЫЫЫ
-[30C[1mЫЫЫЫ[30mЫЫЫЫ   [37mЫЫЫЫ[0mЫЫЫЫ
-[29C[1mЫЫЫЫ[30mЫЫЫЫ[5C[37mЫЫЫЫ[0mЫЫЫЫ
-[28C[1mЫЫЫЫ[30mЫЫЫЫ[7C[37mЫЫЫЫ[0mЫЫЫЫ
-[27C[1mЫЫЫЫ[30mЫЫЫЫ[9C[37mЫЫЫЫ[0mЫЫЫЫ
-[26C[1mЫЫЫЫ[30mЫЫЫЫ[11C[37mЫЫЫЫ[0mЫЫЫЫ
-[25C[1mЫЫЫЫ[30mЫЫЫЫ[13C[37mЫЫЫЫ[0mЫЫЫЫ
-[24C[1mЫЫЫЫ[30mЫЫЫЫ[15C[37mЫЫЫЫ[0mЫЫЫЫ
-[23C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫЫ[30mЫЫЫЫ[0mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[22C[1mЫЫЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-[23C[37mЫ[30mЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫ
-
-[24C[37mP R O J E C T   M E G I S T O S[0;1m
+THELLO {[2J[0;1mWelcome to [1;33;5m@BBS@[0;1m.
+Running [33m@VERSION@[0;1m.
+[0;1mYou have been connected on @TIMESEC@ at @DATE@ using telnet
+You are telnet line number @TNLNUM@ (out of @TNLMAX@)
+[0;1;34;47m                 ЬЬ              [37mЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;30;47mї [40m
+[1;34;47m     ЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫ     [37mі  We are very happy to welcome you to  [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі  the Greek amateur communication and  [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі        Information oriented BBS       [0;30;47mі [40m
+[1;34;47m     ЫЫ       ЫЫ ЫЫ       ЫЫ     [37mі[34m            A c r o B a s e            [0;30;47mі [40m
+[1;34;47m     ЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫ     [37mі      We wish you a pleasant stay.     [0;30;47mі [40m
+[1;34;47m              ЯЯ                 [37mА[0;30;47mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ [40m
+[1;37;47m ЪДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД[0;30;47mї [40m
+[1;37;47m і Data : (01) 8231753 8815616 8816312 8220610 8819963  [0;31;47mwww.acrogate.org [30mі [40m
+[1;37;47m і[0;34;47m  telnet://acrogate.org:1024 ([1mAcro[0;34;47m) telnet://acrogate.org:1025 ([1;33mGATE[0;34;47m)  [30mі [40m
+[1;37;47m і[33m Secure Shell ssh2 -C sshbbs acrogate.org г ssh -C sshbbs acrogate.org [0;30;47mі [40m
+[1;37;47m А[0;30;47mДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДЩ [40m[1;37m
 } T Greeting message for telnet connections
 
 
@@ -755,8 +746,7 @@ NOTICE IN ANY WAY. BY DOING SO YOU TERMINATE YOUR LICENSE AGREEMENT AND THE
 RIGHTFUL OWNERS OF THIS SOFTWARE MAY AND WILL TAKE LEGAL ACTION AGAINST YOU.
 
 GPL {[0;1m
-!J@SHORTVERSION@ Copyright (c) 1994-2000 Alexios Chouchoulas
-<alexios@@vennea.demon.co.uk>. [32mMegistos comes
+!J@SHORTVERSION@ Copyright (c) 1994-98 Alexios Chouchoulas. [32mMegistos comes
 with [37mABSOLUTELY NO WARRANTY[32m. This is free software and you are
 welcome to redistribute it under [37mcertain conditions[32m. Type
 [33m/GPL[32m for more information.!)
@@ -764,7 +754,14 @@ welcome to redistribute it under [37mcertain conditions[32m. Type
 [0;1m} T GPL report. DO NOT REMOVE OR ALTER IN ANY WAY
 
 
-SEEYA {[0;1;36m!Z
+SEEYA {[0;1;36m!Z!C             ЬЬ          
+ЫЫЫЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫ        ЫЫ ЫЫ        ЫЫ
+ЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫЫЫЫ
+          ЯЯ             [37m
 
 [31m @BBS@ [37mthanks you for staying with us for @ONLINE@ minutes.
 We hope to see you again soon.!)
@@ -778,6 +775,14 @@ TIMEOUT {
 
 !JWe're sorry, but we can't maintain the connection for more than one
 minute, unless you log in. Please call back when you are ready to do so.!)
+
+!C[36m          ЬЬ       
+ЫЫЫЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫ
+ЫЫ     ЫЫ ЫЫ     ЫЫ
+ЫЫ     ЫЫ ЫЫ     ЫЫ
+ЫЫЫЫЫЫ ЫЫ ЫЫЫЫЫЫЫЫЫ
+       ЯЯ          
+!)
 
 
 [0m} T User timed out while logging in

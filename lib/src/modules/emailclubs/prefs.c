@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:30  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -77,12 +79,12 @@ setsignature()
   struct stat st;
 
   
-  if(!haskey(&thisuseracc,sigckey)){
+  if(!key_owns(&thisuseracc,sigckey)){
     prompt(NOAXSIG);
     return;
   }
-  if(!canpay(sigchg)){
-    prompt(NOCRSIG,sigchg,getpfix(CRDSNG,sigchg));
+  if(!usr_canpay(sigchg)){
+    prompt(NOCRSIG,sigchg,msg_getunit(CRDSNG,sigchg));
     return;
   }
 
@@ -131,7 +133,7 @@ setsignature()
 
       lines++;
       if(lines>siglmax){
-	prompt(SIGLIN,siglmax,getpfix(LINSNG,siglmax));
+	prompt(SIGLIN,siglmax,msg_getunit(LINSNG,siglmax));
 	break;
       } else fputs(buffer,fp);
     } else break;
@@ -141,8 +143,8 @@ setsignature()
   unlink(fname2);
   if(truncpos!=-1)truncate(fname,truncpos);
 
-  prompt(SIGOK,sigchg,getpfix(CRDSNG,sigchg));
-  chargecredits(sigchg);
+  prompt(SIGOK,sigchg,msg_getunit(CRDSNG,sigchg));
+  usr_chargecredits(sigchg);
 }
 
 
@@ -154,18 +156,18 @@ preferences()
   int first=1;
 
   for(;;){
-    if(!getmenu(&c,first,PMENU,PMENUS,ERRSEL,"1234",0,0))return;
+    if(!get_menu(&c,first,PMENU,PMENUS,ERRSEL,"1234",0,0))return;
     first=0;
 
     switch(c-'0'){
     case 1:
-      if(!haskey(&thisuseracc,afwkey)){
+      if(!key_owns(&thisuseracc,afwkey)){
 	prompt(PQUEST1N);
 	break;
       }
 
-      if(haskey(&thisuseracc,sopkey)){
-	if(!getuserid(otheruid,PQUEST1A,PQUEST1U,PQUEST1D,thisuseracc.userid,0))
+      if(key_owns(&thisuseracc,sopkey)){
+	if(!get_userid(otheruid,PQUEST1A,PQUEST1U,PQUEST1D,thisuseracc.userid,0))
 	  return;
       } else strcpy(otheruid,thisuseracc.userid);
 
@@ -177,7 +179,7 @@ preferences()
 	prompt(PQUEST1IA,ecuser.forwardto);
       }
 
-      if(!getuserid(uid,PQUEST1B,PQUEST1U,PQUEST1D,otheruid,0))return;
+      if(!get_userid(uid,PQUEST1B,PQUEST1U,PQUEST1D,otheruid,0))return;
       else {
 	strcpy(ecuser.forwardto,uid);
 	if(sameas(otheruid,ecuser.forwardto))prompt(PQUEST1Y);
@@ -188,7 +190,7 @@ preferences()
 
     case 2:
       if(!readecuser(thisuseracc.userid,&ecuser))return;
-      if(!getmenu(&c,1,PQUEST2,PQUEST2S,PQUEST2R,"123",0,0)){
+      if(!get_menu(&c,1,PQUEST2,PQUEST2S,PQUEST2R,"123",0,0)){
 	writeecuser(thisuseracc.userid,&ecuser);
 	return;
       }
@@ -200,7 +202,7 @@ preferences()
 
     case 3:
       if(!readecuser(thisuseracc.userid,&ecuser))return;
-      if(!getmenu(&c,1,PQUEST3,PQUEST3S,PQUEST3R,"123",0,0)){
+      if(!get_menu(&c,1,PQUEST3,PQUEST3S,PQUEST3R,"123",0,0)){
 	writeecuser(thisuseracc.userid,&ecuser);
 	return;
       }

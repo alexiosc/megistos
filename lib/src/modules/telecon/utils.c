@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:37  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.5  1998/08/14 11:45:25  alexios
  * Migrated to the new channel engine.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -111,12 +113,12 @@ tlcuidxref(char *userid, int inchannel)
   int  num=0;
   int  retry=0;
   int  i, cache;
-  struct linestatus status;
+  channel_status_t status;
 
 tryagain:
   if(!strlen(userid))return 0;
   cache=cachechk(userid);
-  if(uinsys(userid,1)){
+  if(usr_insys(userid,1)){
     if(!cache)cachepush(userid);
     if(inchannel){
       if((!strcmp(curchannel,othruseronl.telechan))&&
@@ -133,11 +135,11 @@ tryagain:
   num=0;
   memset(matches,0,sizeof(matches));
 
-  for(i=0;i<numchannels;i++){
-    if(!getlinestatus(channels[i].ttyname,&status))continue;
+  for(i=0;i<chan_count;i++){
+    if(!channel_getstatus(channels[i].ttyname,&status))continue;
     
     if(status.result==LSR_USER){
-      if(uinsys(status.user,1)){
+      if(usr_insys(status.user,1)){
 	if(sameto(userid,status.user)&&(num<10)&&
 	   (othruseronl.flags|OLF_INTELECON)
 	   &&((!inchannel)||(sameas(curchannel,othruseronl.telechan)))){
@@ -164,19 +166,19 @@ tryagain:
   else {
     int i,ans=0;
     
-    setmbk(sysblk);
+    msg_set(msg_sys);
     for(;;){
-      endcnc();
+      cnc_end();
       if(num){
 	prompt(UXRF1,userid);
 	for(i=0;i<num;i++)prompt(UXRF2,i+1,matches[i]);
 	prompt(UXRF3,1,num);
       } else prompt(UXRF3A);
-      getinput(0);
+      inp_get(0);
       if(!margc){
 	continue;
-      } else if(margc && isX(margv[0])){
-	rstmbk();
+      } else if(margc && inp_isX(margv[0])){
+	msg_reset();
 	return 0;
       } else if(margc && sameas(margv[0],"?")){
 	continue;
@@ -186,11 +188,11 @@ tryagain:
 	  continue;
 	} else {
 	  cachepush(strcpy(userid,matches[ans-1]));
-	  rstmbk();
+	  msg_reset();
 	  return 1;
 	}
       } else if(margc){
-	rstmbk();
+	msg_reset();
 	strcpy(userid,margv[0]);
 	retry=1;
 	goto tryagain;
@@ -211,10 +213,10 @@ showinfo()
   if(sameas(curchannel,thisuseracc.userid))prompt(SICHYPR);
   else if(sameas(curchannel,MAINCHAN))prompt(SICHMAIN);
   else if(curchannel[0]=='/')prompt(SICHCLUB,curchannel);
-  else if(userexists(curchannel)){
-    useracc uacc;
-    if(loaduseraccount(curchannel,&uacc)){
-      prompt(SICHPRO,getpfix(OFMALE,(uacc.sex==USX_MALE)),curchannel);
+  else if(usr_exists(curchannel)){
+    useracc_t uacc;
+    if(usr_loadaccount(curchannel,&uacc)){
+      prompt(SICHPRO,msg_getunit(OFMALE,(uacc.sex==USX_MALE)),curchannel);
     }
   } else prompt(SICHTMP,curchannel);
 
@@ -230,7 +232,7 @@ showinfo()
   for(count=0;;){
     if((u=getscan())==NULL)break;
     if((u->flags&CUF_PRESENT) &&
-       uinsys(u->userid,1)&&
+       usr_insys(u->userid,1)&&
        strcmp(thisuseracc.userid,u->userid))count++;
   }
   
@@ -242,14 +244,14 @@ showinfo()
     for(i=0;i<count;){
       if((u=getscan())==NULL)break;
       if((u->flags&CUF_PRESENT) &&
-	 uinsys(u->userid,1)&&
+	 usr_insys(u->userid,1)&&
 	 strcmp(thisuseracc.userid,u->userid)){
 	if(!i){
 	  prompt(count==1?SIU1:SIUN1,
-		 getpfix(SEXM1,u->sex==USX_MALE),u->userid);
+		 msg_getunit(SEXM1,u->sex==USX_MALE),u->userid);
 	} else if((i+1)==count)
-	  prompt(SIUN3,getpfix(SEXM2,u->sex==USX_MALE),u->userid);
-	else prompt(SIUN2,getpfix(SEXM2,u->sex==USX_MALE),u->userid);
+	  prompt(SIUN3,msg_getunit(SEXM2,u->sex==USX_MALE),u->userid);
+	else prompt(SIUN2,msg_getunit(SEXM2,u->sex==USX_MALE),u->userid);
 	i++;
       }
     }
@@ -286,20 +288,20 @@ mkchfn(char *chan)
 char *
 gettopic(char *chan)
 {
-  if(!strcmp(chan,MAINCHAN))return getmsg(MAINTOPIC);
+  if(!strcmp(chan,MAINCHAN))return msg_get(MAINTOPIC);
   else if(chan[0]=='/'){
     if(!loadclubhdr(chan)){
-      fatal("Can't load club header for %s",chan);
+      error_fatal("Can't load club header for %s",chan);
     }
     return clubhdr.descr;
-  } else if(userexists(chan)){
+  } else if(usr_exists(chan)){
     static struct tlcuser usr;
     if(!loadtlcuser(chan,&usr)){
-      fatal("Can't load user record for %s",chan);
+      error_fatal("Can't load user record for %s",chan);
     }
     return usr.topic;
   }
-  return getmsg(MAINTOPIC);
+  return msg_get(MAINTOPIC);
 }
 
 

@@ -29,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:38  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1999/07/18 22:03:05  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.0  1998/12/27 16:25:21  alexios
  * Initial revision
@@ -44,6 +45,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,7 +70,7 @@ sendresult(int res)
   char buf[512];
   sprintf(buf,"%d",res);
   if(send(bbslockd_socket,buf,strlen(buf),0)<0){
-    interrorsys("Unable to write to bbslockd socket.");
+    error_intsys("Unable to write to bbslockd socket.");
   }
   return res;
 }
@@ -80,7 +82,7 @@ sendfullresult(int res,char *info)
   char buf[512];
   sprintf(buf,"%d %s",res,(info!=NULL)?info:"");
   if(send(bbslockd_socket,buf,strlen(buf),0)<0){
-    interrorsys("Unable to send to bbslockd socket.");
+    error_intsys("Unable to send to bbslockd socket.");
   }
   return res;
 }
@@ -102,7 +104,7 @@ lockd_checklock(char *name,int caller_pid)
   if(stat(fname,&st)) return sendresult(LKR_OK);
 
   if((fd=open(fname,O_RDONLY))<0){
-    interrorsys("Unable top open lock file %s",fname);
+    error_intsys("Unable top open lock file %s",fname);
     return sendresult(LKR_ERROR);
   }
 
@@ -145,7 +147,7 @@ lockd_checklock_quietly(char *name,int caller_pid)
   if(stat(fname,&st)) return LKR_OK;
 
   if((fd=open(fname,O_RDONLY))<0){
-    interrorsys("Unable top open lock file %s",fname);
+    error_intsys("Unable top open lock file %s",fname);
     return LKR_ERROR;
   }
 
@@ -184,13 +186,14 @@ lockd_placelock(char *name,char *info,int pid)
      rely on the client doing this */
 
   res=lockd_checklock_quietly(name,pid);
-  if(res>LKR_OK)return sendresult(res);
+  if(res!=LKR_OK && res!=LKR_OWN && res!=LKR_STALE)return sendresult(res);
 
   /* Create the lock */
 
   sprintf(fname,"%s/%s",LOCKDIR,name);
+  unlink(fname); /* Just in case */
   if((fd=creat(fname,0660))<0){
-    interrorsys("Unable to creat() lock file %s",fname);
+    error_intsys("Unable to creat() lock file %s",fname);
     return sendresult(LKR_ERROR);
   }
   sprintf(buf,"%d ",pid);
@@ -227,7 +230,7 @@ handlerequest (int fd)
   bzero(buf,sizeof(buf));
 
   if(recv(bbslockd_socket,buf,sizeof(buf),0)<0){
-    interrorsys("Failed to receive from socket.");
+    error_intsys("Failed to receive from socket.");
   }
 
 

@@ -1,4 +1,19 @@
-/*****************************************************************************\
+/** @name     bbs.h
+    @memo     The Mother of All BBS Include Files.
+    @author   Alexios
+
+    @doc
+
+    This is a wildcard header file that includes {\em all} of the other header
+    files. This is the strongly recommended way to include BBS header files in
+    your code.
+
+    Original banner, legalese and change history follow
+
+{\small
+\begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     bbs.h                                                        **
  **  AUTHORS:  Alexios                                                      **
@@ -21,15 +36,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:19:19  alexios
  * Now includes the new header files (channels.h and security.h).
@@ -41,8 +57,12 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
 
+\end{verbatim}
+} */
+
+/*@{*/
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -74,6 +94,14 @@
 #include "mail.h"
 #include "security.h"
 #include "channels.h"
+#include "dialog.h"
 
 
 #endif /* BBS_H */
+
+/*@}*/
+
+/*
+LocalWords: bbs Alexios doc wildcard em legalese alexios Exp GPL ifndef
+LocalWords: VER endif bbsinclude config useracc miscfx bbsmod sysstruct
+LocalWords: timedate globalcmd ttynum filexfer */

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
  * Slight changes to addkeywords() to make it more generic.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -80,7 +82,7 @@ dbkeyopen()
   d_dbfpath(FILELIBDBDIR);
   d_dbdpath(FILELIBDBDIR);
   if(d_open("dbkey","s")!=S_OKAY){
-    fatal("Cannot open keyword database (db_status %d).",
+    error_fatal("Cannot open keyword database (db_status %d).",
 	  db_status);
   }
   d_dbget(&id_dbkey);
@@ -105,7 +107,7 @@ addkeywords(char *s, int approved, struct fileidx *f)
     /*print("KEY=(%s), FNAME=(%s), LIB=%d\n",k.keyword,k.fname,k.klibnum);*/
 
     if(d_fillnew(KEYWORDIDX,&k)!=S_OKAY){
-      fatal("Typhoon call failed with db_status=%d",db_status);
+      error_fatal("Typhoon call failed with db_status=%d",db_status);
     }
 
     cp=strtok(NULL," ");
@@ -119,7 +121,7 @@ addkeyword(struct keywordidx *kw)
   d_dbset(id_dbkey);
   if(d_fillnew(KEYWORDIDX,kw)==S_OKAY)return;
   else
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
 }
 
 
@@ -137,13 +139,13 @@ deletekeyword(int libnum, char *fname, int approved, char *keyword)
   if(d_keyfind(FILEKEY,&k)==S_NOTFOUND)return;
   
   if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   
   if(d_keyread(&k)!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   
   if(d_delete()!=S_OKAY){
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
   }
 }
 
@@ -163,10 +165,10 @@ keywordfind(int libnum, char *keyword, struct maintkey *k)
     if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
 
   if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   
   return libnum==k->klibnum;
 }
@@ -187,10 +189,10 @@ keygetfirst(int libnum, struct maintkey *k)
     if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
 
   if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   
   return libnum==k->klibnum;
 }
@@ -202,14 +204,14 @@ keygetnext(int libnum, struct maintkey *k)
   d_dbset(id_dbkey);
   if(d_keyfind(MAINTKEY,k)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keynext(MAINTKEY)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 3 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
   
   return k->klibnum==libnum;
 }
@@ -222,10 +224,10 @@ keyindexfirst(struct indexkey *k)
   bzero(k,sizeof(k));
   if(d_keyfrst(INDEXKEY)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   
   return 1;
 }
@@ -237,14 +239,14 @@ keyindexnext(struct indexkey *k)
   d_dbset(id_dbkey);
   if(d_keyfind(INDEXKEY,k)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keynext(INDEXKEY)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 3 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
   
   return 1;
 }
@@ -265,10 +267,10 @@ keyfilefirst(int libnum, char *fname, int approved, struct filekey *k)
     if(d_keynext(FILEKEY)==S_NOTFOUND)return 0;
 
   if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
 
   return libnum==k->klibnum && !strcmp(k->fname,fname) &&
     approved==k->approved;
@@ -281,14 +283,14 @@ keyfilenext(int libnum, char *fname, int approved, struct filekey *k)
   d_dbset(id_dbkey);
   if(d_keyfind(FILEKEY,k)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
 
   if(d_keynext(FILEKEY)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY)
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
 
   if(d_keyread(k)!=S_OKAY)
-    fatal("Typhoon call 3 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
   
   return k->klibnum==libnum && !strcmp(k->fname,fname) &&
     k->approved==approved;

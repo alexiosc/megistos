@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.1  1998/12/15 22:11:57  alexios
  * Make sure that the debug file has file descriptor greater
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -113,7 +115,7 @@ initdebug()
 
   sprintf(fname,TMPDIR"/bbsgetty_debug.%ld",(long)getpid());
   if((df=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to open debug file \"%s\"",fname);
+    error_fatalsys("Unable to open debug file \"%s\"",fname);
   }
 
   if(fileno(df)<3){
@@ -125,7 +127,7 @@ initdebug()
     close(fd2);
     fclose(df);
     if((df=fdopen(fd3,"w"))==NULL){
-      fatalsys("Unable to open debug file \"%s\"",fname);
+      error_fatalsys("Unable to open debug file \"%s\"",fname);
     }
   }
   

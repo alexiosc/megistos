@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1998/12/27 16:35:21  alexios
  * Added autoconf support.
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -119,24 +121,24 @@ dolink()
   struct stat st;
 
   for(;;){
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      s=cncword();
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      s=cnc_word();
     } else {
       prompt(LNKASK);
-      getinput(0);
+      inp_get(0);
       s=margv[0];
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 1;
       }
     }
     
     if(stat(s,&st)){
-      endcnc();
+      cnc_end();
       prompt(LNKERR,s);
     }else{
       char s1[256],fname[256];
@@ -188,8 +190,8 @@ upload(char *prot)
     {
       char s1[80],s2[80];
       
-      strncpy(s1,getmsg(SUPLOAD),80);
-      strncpy(s2,getpfix(SSINGLE,NUMFILES),80);
+      strncpy(s1,msg_get(SUPLOAD),80);
+      strncpy(s2,msg_getunit(SSINGLE,NUMFILES),80);
       
       prompt(XFERBEG,s1,s2,protocols[f].name,protocols[f].stopkey);
     }
@@ -197,22 +199,19 @@ upload(char *prot)
     thisuseronl.flags|=OLF_BUSY;
 
     /* Turn off translation if the protocol is binary */
-    if(protocols[f].flags&PRF_BINARY)setxlationtable(XLATION_OFF);
-    clsmsg(sysblk);
-    doneoutput();
-    doneinput();
-    donesignals();
+    if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_OFF);
+    msg_close(msg_sys);
+    mod_done(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
 
     system(STTYBIN" sane intr 0x03");
     result=system(command);
     system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-    initoutput();
-    setmbk(msg);
-    initinput();
-    initsignals();
+    mod_init(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
+    msg_set(msg);
+
     /* Turn translation back on if necessary */
-    if(protocols[f].flags&PRF_BINARY)setxlationtable(XLATION_ON);
-    regpid(thisuseronl.channel);
+    if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_ON);
+    mod_regpid(thisuseronl.channel);
     thisuseronl.flags&=~OLF_BUSY;
   } else result=dolink();
 
@@ -222,7 +221,7 @@ upload(char *prot)
   if(result){
     autodis=0;
     prompt(UPLFAIL);
-    if(!getbool(&retry,URETRY,0,0,0))retry=0;
+    if(!get_bool(&retry,URETRY,0,0,0))retry=0;
     if(!retry){
       sprintf(fname,TMPDIR"/upl%05d",getpid());
       sprintf(command,"rm -rf %s &>/dev/null",fname);
@@ -313,7 +312,7 @@ uploadrun()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -323,15 +322,15 @@ uploadrun()
 	  shownmenu=1;
 	}
 	prompt(SHORT);
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if(margc)s=cncword();
+    if(margc)s=cnc_word();
     else continue;
     if(sameas(s,"?"))shownmenu=0;
-    else if(isX(s)){
+    else if(inp_isX(s)){
       char command[256];
 
       if(xferlist[firstentry].auditsfail[0] &&
@@ -345,13 +344,13 @@ uploadrun()
       sprintf(command,"\\rm -rf /tmp/upl%05d %s",getpid(),xferlistname);
       system(command);
       return;
-    } else if(!margc || reprompt)endcnc();
+    } else if(!margc || inp_reprompt())cnc_end();
     else {
       char *excl=NULL;
 
-      rstrin();
+      inp_raw();
       excl=strchr(s,'!');
-      if(excl || ((excl=strchr(nxtcmd,'!'))!=NULL)){
+      if(excl || ((excl=strchr(cnc_nxtcmd,'!'))!=NULL)){
 	autodis=1;
 	if(excl)*excl=0;
       }
@@ -361,7 +360,7 @@ uploadrun()
 	shownmenu=0;
 	break;
       case -1:
-	endcnc();
+	cnc_end();
 	break;
       case 1:
 	if(autodis)autodisconnect();
@@ -370,6 +369,6 @@ uploadrun()
 	shownmenu=0;
       }
     }
-    endcnc();
+    cnc_end();
   }
 }

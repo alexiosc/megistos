@@ -28,14 +28,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Modified calls to mklib to reflect new third argument.
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -76,30 +78,30 @@ getnewlibname(char *s)
   char *i,c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OCREASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -117,49 +119,36 @@ getnewlibname(char *s)
 static int
 edit(struct libidx *lib)
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
-  int i;
+  sprintf(inp_buffer,"%s\n%s\n%s\n%s\nOK\nCANCEL\n",
+	  lib->descr,lib->passwd,lib->club,lib->dir);
 
-  sprintf(fname,TMPDIR"/files%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  if(dialog_run("files",OCREVT,OCRELT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return 0;
   }
 
-  fprintf(fp,"%s\n",lib->descr);
-  fprintf(fp,"%s\n",lib->passwd);
-  fprintf(fp,"%s\n",lib->club);
-  fprintf(fp,"%s\n",lib->dir);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("files",OCREVT,OCRELT,fname);
+  if(sameas(margv[6],"OK")||sameas(margv[6],margv[4])){
+    bzero(lib->descr,sizeof(lib->descr));
+    strncpy(lib->descr,margv[0],sizeof(lib->descr)-1);
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return 0;
-  }
+    bzero(lib->passwd,sizeof(lib->passwd));
+    strncpy(lib->passwd,margv[1],sizeof(lib->passwd)-1);
 
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(lib->descr,s);
-    else if(i==1)strcpy(lib->passwd,s);
-    else if(i==2){
-      if(s[0]){
-	if(findclub(s))strcpy(lib->club,s);
-	else prompt(OCRECNE,s);
-      } else bzero(lib->club,sizeof(lib->club));
-    } else if(i==3)strcpy(lib->dir,zonkdir(s));
-  }
+    bzero(lib->club,sizeof(lib->club));
+    if(strlen(margv[2])){
+      if(findclub(margv[2])) strncpy(lib->club,margv[2],sizeof(lib->club)-1);
+      else prompt(OCRECNE,margv[2]);
+    }
 
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
+    bzero(lib->dir,sizeof(lib->dir));
+    strncpy(lib->dir,zonkdir(margv[3]),sizeof(lib->dir)-1);
+  } else {
     prompt(OPCAN);
     return 0;
   }
+
   return 1;
 }
 
@@ -180,7 +169,7 @@ op_create()
 
     if(libexists(s,library.libnum)){
       prompt(OCREEXS,s);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }

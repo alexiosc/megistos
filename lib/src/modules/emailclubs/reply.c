@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -92,7 +94,7 @@ quotemessage(struct message *msg, char *quotefn)
   
   readecuser(thisuseracc.userid,&ecuser);
   if(ecuser.prefs&ECP_QUOTEASK){
-    if(!getbool(&yes,QMASK,QMERR,0,0))return 0;
+    if(!get_bool(&yes,QMASK,QMERR,0,0))return 0;
   } else yes=(ecuser.prefs&ECP_QUOTEYES)!=0;
 
   if(!yes)return 1;
@@ -164,14 +166,14 @@ quotemessage(struct message *msg, char *quotefn)
   
   readecuser(thisuseracc.userid,&ecuser);
   if(ecuser.prefs&ECP_QUOTEASK){
-    if(!getbool(&yes,QMASK,QMERR,0,0))return 0;
+    if(!get_bool(&yes,QMASK,QMERR,0,0))return 0;
   } else yes=(ecuser.prefs&ECP_QUOTEYES)!=0;
 
   if(!yes)return 1;
 
   sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
 	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  (long)msg->msgno);
+	  msg->msgno);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
     return 1;
@@ -234,7 +236,7 @@ reply(struct message *org, int forceemail)
   FILE           *fp;
   int            attachment=0, rrr=0, numcopies=0, nomore=0, net=0;
   int            cleanupattachment=1;
-  long           original=0;
+  uint32         original=0;
   char           attfile[256];
   int            clubmsg=0;
 
@@ -246,7 +248,7 @@ reply(struct message *org, int forceemail)
       prompt(WCNAXES);
       return;
     }
-  } else if(!haskey(&thisuseracc,wrtkey)){
+  } else if(!key_owns(&thisuseracc,wrtkey)){
     prompt(NOAXES);
     return;
   }
@@ -281,16 +283,16 @@ reply(struct message *org, int forceemail)
 	unlink(body);
 	unlink(header);
 	return;
-      } else endcnc();
+      } else cnc_end();
       
-      sprintf(msg.history,"%s %s/%ld",HST_REPLY,
+      sprintf(msg.history,"%s %s/%d",HST_REPLY,
 	      clubmsg?org->club:EMAILCLUBNAME,
 	      org->msgno);
       msg.flags|=MSF_REPLY;
       
       /* Ask for file attachment */
       
-      if(haskey(&thisuseracc,attkey)&&canpay(attchg)){
+      if(key_owns(&thisuseracc,attkey)&&usr_canpay(attchg)){
 	for(;;){
 	  if(!askyesno(&attachment,WEATT,WERRSEL,attchg)){
 	    if(confirmcancel()){
@@ -305,7 +307,7 @@ reply(struct message *org, int forceemail)
 	  if(attfile[0]){
 	    char *cp=NULL;
 	    
-	    chargecredits(msg.club[0]?clubhdr.postchg:attchg);
+	    usr_chargecredits(msg.club[0]?clubhdr.postchg:attchg);
 	    msg.flags|=MSF_FILEATT;
 	    if(!msg.club[0])msg.flags|=MSF_APPROVD;
 	    else if(getclubax(&thisuseracc,org->club)>=CAX_COOP)
@@ -326,7 +328,7 @@ reply(struct message *org, int forceemail)
       /* Ask for return receipt */
 
       if(!msg.club[0]){
-	if(haskey(&thisuseracc,rrrkey)&&canpay(rrrchg)){
+	if(key_owns(&thisuseracc,rrrkey)&&usr_canpay(rrrchg)){
 	  for(;;){
 	    if(!askyesno(&rrr,WERRR,WERRSEL,rrrchg)){
 	      if(confirmcancel()){
@@ -338,7 +340,7 @@ reply(struct message *org, int forceemail)
 	  }
 	  if(rrr){
 	    msg.flags|=MSF_RECEIPT;
-	    chargecredits(rrrchg);
+	    usr_chargecredits(rrrchg);
 	  }
 	}
       }
@@ -346,7 +348,7 @@ reply(struct message *org, int forceemail)
       char tmp[256];
       if(attfile[0])msg.flags|=MSF_FILEATT|MSF_APPROVD;
       if(rrr)msg.flags|=MSF_RECEIPT;
-      sprintf(tmp,HST_CC" %s/%ld",EMAILCLUBNAME,original);
+      sprintf(tmp,HST_CC" %s/%d",EMAILCLUBNAME,original);
       addhistory(msg.history,tmp,sizeof(msg.history));
     }
 
@@ -354,13 +356,13 @@ reply(struct message *org, int forceemail)
     /* Mail the message */
     
     if((fp=fopen(header,"w"))==NULL){
-      fatalsys("Unable to create message header %s",header);
+      error_fatalsys("Unable to create message header %s",header);
     }
     if(fwrite(&msg,sizeof(msg),1,fp)!=1){
       int i=errno;
       fclose(fp);
       errno=i;
-      fatalsys("Unable to write message header %s",header);
+      error_fatalsys("Unable to write message header %s",header);
     }
     fclose(fp);
     
@@ -376,13 +378,13 @@ reply(struct message *org, int forceemail)
     /* Notify the user(s) */
     
     if((fp=fopen(header,"r"))==NULL){
-      fatalsys("Unable to read message header %s",header);
+      error_fatalsys("Unable to read message header %s",header);
     }
     if(fread(&checkmsg,sizeof(msg),1,fp)!=1){
       int i=errno;
       fclose(fp);
       errno=i;
-      fatalsys("Unable to read message header %s",header);
+      error_fatalsys("Unable to read message header %s",header);
     }
     fclose(fp);
 
@@ -393,23 +395,24 @@ reply(struct message *org, int forceemail)
 	writemsgheader(org);
       }else prompt(WECONFC,original,checkmsg.msgno,checkmsg.to);
       
-      if(uinsys(checkmsg.to,1)){
+      if(usr_insys(checkmsg.to,1)){
 	if(!msg.club[0]){
-	  sprintf(outbuf,getmsglang(numcopies?WERNOTC:WERNOT,
+	  sprintf(out_buffer,msg_getl(numcopies?WERNOTC:WERNOT,
 				    othruseracc.language-1),
 		  checkmsg.from,checkmsg.subject);
 	} else {
-	  sprintf(outbuf,getmsglang(WCRNOT,othruseracc.language-1),
+	  sprintf(out_buffer,msg_getl(WCRNOT,othruseracc.language-1),
 		  checkmsg.from,checkmsg.club,checkmsg.subject);
 	}
-	if(injoth(&othruseronl,outbuf,0))prompt(WENOTFD,othruseronl.userid);
+	if(usr_injoth(&othruseronl,out_buffer,0))
+	  prompt(WENOTFD,othruseronl.userid);
       }
     }
 
 
     /* Clean up */
     
-    chargecredits(msg.club[0]?clubhdr.postchg:(net?wrtchg+netchg:wrtchg));
+    usr_chargecredits(msg.club[0]?clubhdr.postchg:(net?wrtchg+netchg:wrtchg));
     thisuseracc.msgswritten++;
     if(!numcopies)original=checkmsg.msgno;
     unlink(header);

@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys(). Added support
+ * Changed a few error_fatal() calls to error_fatalsys(). Added support
  * for the pre/postconnect fields.
  *
  * Revision 1.1  1998/12/27 16:15:40  alexios
@@ -47,6 +48,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -121,7 +123,7 @@ getbbsuid()
 {
   struct passwd *bbspass=getpwnam(BBSUSERNAME);
   if(bbspass==NULL) {
-    fatal("Unable to get /etc/passwd entry for user %s",
+    error_fatal("Unable to get /etc/passwd entry for user %s",
 	  BBSUSERNAME);
   }
   bbsuid=bbspass->pw_uid;
@@ -147,7 +149,7 @@ storepid()
     int i=errno;
     debug(D_RUN, "Unable to write PID file (%s), aborting.",fname);
     errno=i;
-    fatalsys("Cannot open PID file %s for writing",fname);
+    error_fatalsys("Cannot open PID file %s for writing",fname);
   }
 
   pid=getpid();
@@ -166,11 +168,11 @@ checkbbschannel()
 {
   
   debug(D_INIT,"Making sure tty %s is managed by the BBS",device);
-  initmodule(INITTTYNUM);
-  chanidx=getchannelindex(device);
+  mod_init(INI_TTYNUM);
+  chanidx=chan_getindex(device);
   if(chanidx<0){
     debug(D_OPT,"Device %s is not defined in "CHANDEFSRCFILE,device);
-    fatal("Device %s is not defined in "CHANDEFSRCFILE,device);
+    error_fatal("Device %s is not defined in "CHANDEFSRCFILE,device);
   }
   debug(D_INIT,"Ok, device %s is known as channel %x in the BBS.",
 	device,channels[chanidx].channel);
@@ -180,7 +182,7 @@ checkbbschannel()
      defaults. */
 
   defname=strdup(channels[chanidx].config);
-  localline=(lastchandef->flags&(TTF_CONSOLE|TTF_SERIAL))!=0;
+  localline=(chan_last->flags&(TTF_CONSOLE|TTF_SERIAL))!=0;
   debug(D_INIT,"Class defaults file suffix is \"%s\".",defname);
   debug(D_INIT,"This is%s a local line (eg serial terminal).",
 	localline?"":"n't");
@@ -223,7 +225,7 @@ void init(int argc, char **argv)
   debug(D_INIT,"The "BBSUSERNAME" user has UID %d, GID %d.",bbsuid,bbsgid);
 
   /* Initialise some of the BBS facilities */
-  initmodule(INITTTYNUM|INITSYSVARS);
+  mod_init(INI_TTYNUM|INI_SYSVARS);
 
   /* Make sure the tty is one of those managed by the BBS */
   checkbbschannel();
@@ -233,7 +235,7 @@ void init(int argc, char **argv)
   parsefile(device);		/* The tty-specific file has the same
 				   name as the device itself. */
   validate();			/* Validate the setup */
-  parselinetype();		/* Convert INITAL/FINAL to termios */
+  parselinetype();		/* Convert INI_AL/FINAL to termios */
 
   /* Find out what state we need to put the line in */
   readlinestatus();

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:22  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,7 +84,7 @@ broadcastchnall(char *curchannel, char *(*fx)(struct chanusr *u), int all)
   for(;;){
     if((u=getscan())==NULL)break;
     if((u->flags&CUF_PRESENT) &&
-       uinsys(u->userid,0)&&
+       usr_insys(u->userid,0)&&
        (all||strcmp(thisuseracc.userid,u->userid))){
       
       char *buf;
@@ -92,7 +94,7 @@ broadcastchnall(char *curchannel, char *(*fx)(struct chanusr *u), int all)
       
       if((othruseronl.flags&OLF_INVISIBLE)==0)count++;
       
-      if((buf=fx(u))!=NULL)injoth(&othruseronl,buf,0);
+      if((buf=fx(u))!=NULL)usr_injoth(&othruseronl,buf,0);
     }
   }
   
@@ -122,13 +124,13 @@ static char tmp[16384];
 static char *
 fx_msg(struct chanusr *u)
 {
-  tmp[0]=outbuf[0]=0;
-  strcpy(tmp,getmsglang(TDELIM,othruseracc.language-1));
+  tmp[0]=out_buffer[0]=0;
+  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
 
-  sprintf(outbuf,getmsglang(fxprompt,othruseracc.language-1),
-	  getpfixlang(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
+  sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
+	  msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
 	  thisuseracc.userid);
-  strcat(tmp,outbuf);
+  strcat(tmp,out_buffer);
   return tmp;
 }
 
@@ -136,18 +138,18 @@ fx_msg(struct chanusr *u)
 static char *
 fx_enter(struct chanusr *u)
 {
-  tmp[0]=outbuf[0]=0;
-  strcpy(tmp,getmsglang(TDELIM,othruseracc.language-1));
+  tmp[0]=out_buffer[0]=0;
+  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
 
   if(tlcu.entrystg[0]){
-    sprintf(outbuf,getmsglang(ENTEXTS,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(ENTEXTS,othruseracc.language-1),
 	    getcolour(),tlcu.entrystg);
-    strcat(tmp,outbuf);
+    strcat(tmp,out_buffer);
   } else {
-    sprintf(outbuf,getmsglang(fxprompt,othruseracc.language-1),
-	    getpfixlang(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
+	    msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
 	    thisuseracc.userid);
-    strcat(tmp,outbuf);
+    strcat(tmp,out_buffer);
   }
   return tmp;
 }
@@ -156,17 +158,17 @@ fx_enter(struct chanusr *u)
 static char *
 fx_leave(struct chanusr *u)
 {
-  strcpy(tmp,getmsglang(TDELIM,othruseracc.language-1));
+  strcpy(tmp,msg_getl(TDELIM,othruseracc.language-1));
 
   if(tlcu.exitstg[0]){
-    sprintf(outbuf,getmsglang(ENTEXTS,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(ENTEXTS,othruseracc.language-1),
 	    getcolour(),tlcu.exitstg);
-    strcat(tmp,outbuf);
+    strcat(tmp,out_buffer);
   } else {
-    sprintf(outbuf,getmsglang(fxprompt,othruseracc.language-1),
-	    getpfixlang(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(fxprompt,othruseracc.language-1),
+	    msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,othruseracc.language-1),
 	    thisuseracc.userid);
-    strcat(tmp,outbuf);
+    strcat(tmp,out_buffer);
   }
   return tmp;
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -107,14 +109,14 @@ loadclubids()
 
   j=scandir(CLUBHDRDIR,&d,hdrsel,alphasort);
   if(!j){
-    fatal("No club headers found. Yow!.");
+    error_fatal("No club headers found. Yow!.");
   }
 
   for(i=0;i<j;i++){
     struct clubheader *tmp;
 
     if(!loadclubhdr(&(d[i]->d_name[1]))){
-      fatal("Unable to load club header for /%s",
+      error_fatal("Unable to load club header for /%s",
 	    &(d[i]->d_name[1]));
     }
 

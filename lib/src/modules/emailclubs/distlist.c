@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -60,6 +61,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -123,31 +125,31 @@ int  show,lmenu,smenu,err,def;
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      c=cnc_chr();
       shownmenu=1;
     } else {
       if(!shownmenu && lmenu)prompt(lmenu);
       shownmenu=1;
       if(smenu)prompt(smenu,current);
       if(def){
-	sprintf(outbuf,getmsg(def),defval);
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),defval);
+	print(out_buffer);
       }
-      getinput(0);
-      bgncnc();
-      c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      c=cnc_chr();
     }
-    if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !reprompt) {
+    if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !inp_reprompt()) {
       *option=defval;
       return 1;
     } else if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       return 0;
     } else if(margc && sameas(margv[0],"?")){
       shownmenu=0;
@@ -157,7 +159,7 @@ int  show,lmenu,smenu,err,def;
       return 1;
     } else {
       if(err)prompt(err,c);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -211,7 +213,7 @@ checkselectname(char *name)
   sprintf(fname,"%s/%s",MSGSDISTDIR,name);
   if((fp=fopen(fname,"r"))==NULL)return 1;
   if(fscanf(fp,"%d",&p)==1){
-    if(!haskey(&thisuseracc,p)){
+    if(!key_owns(&thisuseracc,p)){
       prompt(DLSERR3,name);
       return 0;
     }
@@ -233,17 +235,17 @@ listlists()
   prompt(LSTLST,"MASS");
   prompt(LSTLST,"ALL");
 
-  for(i=0;i<numuserclasses;i++){
+  for(i=0;i<cls_count;i++){
     char s[80];
-    if(lastresult==PAUSE_QUIT)return;
-    sprintf(s,"!%s",userclasses[i].name);
+    if(fmt_lastresult==PAUSE_QUIT)return;
+    sprintf(s,"!%s",cls_classes[i].name);
     prompt(LSTLST,s);
   }
 
   if((dp=opendir(MSGSDISTDIR))==NULL)return;
   while((dir=readdir(dp))!=NULL){
     if(sameas(dir->d_name,".")||sameas(dir->d_name,".."))continue;
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       closedir(dp);
       return;
     }
@@ -260,26 +262,26 @@ getname(char *name, int pr)
   char *i, c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      i=cncword();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      i=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
     }
     if(sameas(i,"?")){
       listlists();
-      endcnc();
+      cnc_end();
       continue;
     } else if(!checkselectname(i))continue;
     else {
@@ -294,7 +296,7 @@ getname(char *name, int pr)
 static int
 getdistlistname()
 {
-  if(!haskey(&thisuseracc,sopkey)){
+  if(!key_owns(&thisuseracc,sopkey)){
     sprintf(current,".%s",thisuseracc.userid);
     return 1;
   }
@@ -363,11 +365,11 @@ listlist()
   prompt(DLLISTH,current,protection);
   for(i=0;i<inspoint && lst[i];i++){
     prompt(DLLISTL,i+1,lst[i]);
-    if(lastresult==PAUSE_QUIT)return;
+    if(fmt_lastresult==PAUSE_QUIT)return;
     if(strchr(lst[i],'@')||strchr(lst[i],'%'))cost+=netchg;
     cost+=wrtchg;
   }
-  prompt(DLLISTF,cost,getpfix(CRDSING,cost));
+  prompt(DLLISTF,cost,msg_getunit(CRDSING,cost));
 }
 
 
@@ -377,36 +379,36 @@ getaddress(char *uid)
   char *s=NULL;
 
   for(;;){
-    if(morcnc())s=cncword();
+    if(cnc_more())s=cnc_word();
     else {
       prompt(DLAWHO);
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
       }
-      s=cncword();
+      s=cnc_word();
     }
     if(sameas(s,"?")){
-      endcnc();
+      cnc_end();
       listlist();
       continue;
-    } else if(isX(s)){
-      endcnc();
+    } else if(inp_isX(s)){
+      cnc_end();
       return 0;
     } else {
       if(strchr(s,'@')||strchr(s,'%')){
-	if(haskey(&thisuseracc,netkey)){
+	if(key_owns(&thisuseracc,netkey)){
 	  strcpy(uid,s);
 	  return 1;
 	} else {
 	  prompt(DLANNET);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
-      } else if(!uidxref(s,0)){
-	endcnc();
+      } else if(!usr_uidxref(s,0)){
+	cnc_end();
 	prompt(DLAUNKID,s);
 	continue;
       }else {
@@ -434,7 +436,7 @@ add2list()
     else {
       int i;
       for(i=0;i<inspoint;i++)if(sameas(lst[i],uid)){
-	endcnc();
+	cnc_end();
 	prompt(DLADUPL);
 	return;
       }
@@ -456,9 +458,9 @@ listdel()
   }
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getnumber(&n,DLDASK,1,inspoint,DLDERR,0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_number(&n,DLDASK,1,inspoint,DLDERR,0,0);
+    inp_clearflags(INF_HELP);
     if(!i)return;
     if(i<1)listlist();
     else break;
@@ -474,7 +476,7 @@ listdel()
 void
 getprotection()
 {
-  if(!getnumber(&protection,DLPASK,0,
+  if(!get_number(&protection,DLPASK,0,
 		sameas(thisuseracc.userid,SYSOP)?129:128,
 		DLPERR,0,0))return;
 }
@@ -486,9 +488,9 @@ confdistlist()
   char opt;
   int firsttime=1;
 
-  int sop=haskey(&thisuseracc,sopkey);
+  int sop=key_owns(&thisuseracc,sopkey);
 
-  if(!haskey(&thisuseracc,dlkey)){
+  if(!key_owns(&thisuseracc,dlkey)){
     prompt(DLNOAX);
     return;
   }
@@ -523,7 +525,7 @@ confdistlist()
     case 'K':
       {
 	int yes;
-	if(getbool(&yes,DLKASK,DLKERR,0,0)){
+	if(get_bool(&yes,DLKASK,DLKERR,0,0)){
 	  if(yes){
 	    char fname[256];
 	    sprintf(fname,"%s/%s",MSGSDISTDIR,current);
@@ -557,7 +559,7 @@ opendistribution(char *dist)
     inspoint=scandir(USRDIR,&d,usrselect,ncsalphasort);
 
     if(inspoint<0){
-      fatalsys("I/O error occured!");
+      error_fatalsys("I/O error occured!");
     }
 
     lst=alcmem(sizeof(char*)*inspoint);
@@ -581,10 +583,10 @@ opendistribution(char *dist)
 char *readdistribution()
 {
   if(current[0]=='!'){
-    useracc uacc;
+    useracc_t uacc;
     for(;readpoint<inspoint;){
       char *uid=lst[readpoint++];
-      loaduseraccount(uid,&uacc);
+      usr_loadaccount(uid,&uacc);
       if(sameas(uacc.curclss,&current[1]))return uid;
     }
     return NULL;

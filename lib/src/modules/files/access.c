@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:37  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1999/07/18 21:29:45  alexios
  * Changed islibop() to recursively look at the parent libraries
@@ -37,7 +38,7 @@
  * by his/her library.
  *
  * Revision 0.2  1998/12/27 15:40:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.1  1998/04/16 09:27:16  alexios
  * Initial version.
@@ -48,6 +49,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -70,7 +72,7 @@
 
 /* This an extern, defined in clubhdr.o */
 
-int getclubax(useracc *uacc, char *club);
+int getclubax(useracc_t *uacc, char *club);
 
 
 static int lastlibnum=-1;
@@ -80,7 +82,7 @@ static int lastadmin=-1;
 int islibop(struct libidx *l)
 {
   int i;
-  if(haskey(&thisuseracc,libopkey))return 1;
+  if(key_owns(&thisuseracc,libopkey))return 1;
   for(i=0;i<5;i++){
     if(sameas(thisuseracc.userid,l->libops[i]))return 1;
   }
@@ -115,11 +117,11 @@ getlibpasswd(struct libidx *l)
   if(forcefail)return 0;
   for(i=0;i<numtries;i++){
     prompt(ENTPASS);
-    setpasswordentry(1);
-    getinput(15);
-    setpasswordentry(0);
-    if(sameas(input,l->passwd))return 1;
-    endcnc();
+    inp_setflags(INF_PASSWD);
+    inp_get(15);
+    inp_clearflags(INF_PASSWD);
+    if(sameas(inp_buffer,l->passwd))return 1;
+    cnc_end();
     if(i+1<numtries)prompt(WRNGPSS);
   }
   prompt(FAILPASS);
@@ -154,15 +156,15 @@ getlibaccess(struct libidx *l, int access_type)
 
   /* Check for mere mortals */
 
-  if(access_type==ACC_VISIBLE) return haskey(&thisuseracc,l->readkey);
+  if(access_type==ACC_VISIBLE) return key_owns(&thisuseracc,l->readkey);
   else if(access_type==ACC_ENTER){
-    if(!haskey(&thisuseracc,l->readkey))return 0;
+    if(!key_owns(&thisuseracc,l->readkey))return 0;
     if(l->flags&LBF_LOCKENTR)return getlibpasswd(l);
   } else if(access_type==ACC_DOWNLOAD){
-    if(!haskey(&thisuseracc,l->downloadkey))return 0;
+    if(!key_owns(&thisuseracc,l->downloadkey))return 0;
     if(l->flags&LBF_LOCKDNL)return getlibpasswd(l);
   } else if(access_type==ACC_UPLOAD){
-    if(!haskey(&thisuseracc,l->uploadkey))return 0;
+    if(!key_owns(&thisuseracc,l->uploadkey))return 0;
     if(l->flags&LBF_LOCKUPL)return getlibpasswd(l);
   }
 
@@ -176,7 +178,7 @@ locklib()
   char lock[256];
   unlocklib();
   sprintf(lock,LIBLOCK,thisuseronl.channel,lastlibnum=library.libnum);
-  placelock(lock,"inlib");
+  lock_place(lock,"inlib");
 }
 
 
@@ -186,7 +188,7 @@ unlocklib()
   char lock[256];
   if(lastlibnum!=-1){
     sprintf(lock,LIBLOCK,thisuseronl.channel,lastlibnum);
-    rmlock(lock);
+    lock_rm(lock);
     lastlibnum=-1;
   }
 }
@@ -197,14 +199,14 @@ checklocks(int libnum)
 {
   int  i;
   char lock[256],dummy[64];
-  struct linestatus status;
+  channel_status_t status;
 
-  for(i=0;i<numchannels;i++){
-    if(getlinestatus(channels[i].ttyname,&status)){
+  for(i=0;i<chan_count;i++){
+    if(channel_getstatus(channels[i].ttyname,&status)){
       if((status.result==LSR_USER)
 	 &&(!sameas(status.user,thisuseracc.userid))){
 	sprintf(lock,LIBLOCK,channels[i].ttyname,libnum);
-	if(checklock(lock,dummy)>0)return 0;
+	if(lock_check(lock,dummy)>0)return 0;
       }
     }
   }
@@ -218,14 +220,14 @@ adminlock(int libnum)
   char lock[256];
   adminunlock();
   sprintf(lock,ADMINLOCK,libnum);
-  if(checklock(lock,NULL)){
+  if(lock_check(lock,NULL)){
     prompt(LIBCOL);
-    if(waitlock(lock,5)){
+    if(lock_wait(lock,5)){
       prompt(LIBFAIL);
       return 0;
     }
   }
-  placelock(lock,"admin");
+  lock_place(lock,"admin");
   lastadmin=libnum;
   return 1;
 }
@@ -237,7 +239,7 @@ adminunlock()
   char lock[256];
   if(lastadmin!=-1){
     sprintf(lock,ADMINLOCK,lastadmin);
-    rmlock(lock);
+    lock_rm(lock);
     lastadmin=-1;
   }
 }

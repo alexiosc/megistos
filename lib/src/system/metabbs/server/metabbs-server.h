@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:01:01  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  2000/01/23 20:46:33  alexios
  * Initial revision
@@ -55,9 +56,10 @@ extern int                 locksocket;
 extern struct sockaddr_in  name;
 extern int                 bbsuid,bbsgid;
 extern int                 under_inetd;
+extern char                tty[32];
 
 
-void handleconnection (int fd);
+void mainloop();
 
 
 
@@ -71,9 +73,16 @@ void handleconnection (int fd);
 
 #define RET_INF_HELLO    201	/* Welcome message(s) */
 #define RET_INF_LOGGEDIN 202	/* Client is now logged in */
+#define RET_INF_HELP     280    /* Help */
+#define RET_INF_MISC     290    /* Miscellaneous information */
 #define RET_INF_GOODBYE  299	/* Disconnecting */
 
-#define RET_ASK_LOGIN    301	/* Asking for login ("hostname.fqdn/bbscode") */
+#define RET_ASK_LOGIN    301	/* Asking for login */
 #define RET_ASK_PASSWORD 302	/* Asking for password */
+#define RET_ASK_COMMAND  303    /* Asking for command */
 
 #define RET_ERR_LOGIN    501	/* Login/password incorrect */
+#define RET_ERR_COMMAND  502	/* Unknown command */
+#define RET_ERR_LINEDOWN 503    /* This line not available */
+#define RET_ERR_TOOMANY  504    /* System too busy */
+

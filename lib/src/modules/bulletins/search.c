@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -31,6 +32,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -99,9 +101,9 @@ static int lastkey=-1;    /* Last key compared */
 static void
 startind()
 {
+  oldverticalformat=fmt_verticalformat;
   if(!indsel)return;
-  oldverticalformat=verticalformat;
-  setverticalformat(0);
+  fmt_setverticalformat(0);
   if(!indworking){
     prompt(KSIND0);
     indworking++;
@@ -127,7 +129,7 @@ endind()
   if(!indsel)return;
   indworking--;
   if(!indworking){
-    setverticalformat(oldverticalformat);
+    fmt_setverticalformat(oldverticalformat);
     prompt(KSINDE);
   }
 }
@@ -166,23 +168,23 @@ getkeywords()
   int n;
 
   for(;;){
-    if(morcnc()){
-      i=nxtcmd;
-      strcpy(tmp,nxtcmd);
-      strcpy(input,nxtcmd);
-      parsin();
+    if(cnc_more()){
+      i=cnc_nxtcmd;
+      strcpy(tmp,cnc_nxtcmd);
+      strcpy(inp_buffer,cnc_nxtcmd);
+      inp_parsin();
     } else {
       prompt(SRCHBLT);
-      getinput(0);
+      inp_get(0);
       if(!margc)continue;
     }
     i=margv[0];
     
     if(!i[0])continue;
-    else if(isX(i))return 0;
+    else if(inp_isX(i))return 0;
     else if(sameas("?",i)){
       prompt(SRCHHLP);
-      endcnc();
+      cnc_end();
       continue;
     } else {
       char s[256], *cp;
@@ -230,7 +232,7 @@ doscan()
     return;
   }
 
-  nonblocking();
+  inp_nonblock();
   do{
     char c;
     dbget(&blt);
@@ -246,7 +248,7 @@ doscan()
       prompt(LSTCAN);
       return;
     }
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(LSTCAN);
       return;
     }
@@ -273,10 +275,10 @@ doscan()
 	  }
 	  if((read(fileno(stdin),&c,1)&&
 	      ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-	     ||(lastresult==PAUSE_QUIT)){
+	     ||(fmt_lastresult==PAUSE_QUIT)){
 	    endind();
 	    prompt(ABORT);
-	    blocking();
+	    inp_block();
 	    return;
 	  }
 	}
@@ -292,27 +294,27 @@ doscan()
       
     if(found){
       int yes;
-      blocking();
+      inp_block();
       prompt(SCANFND,keywords[lastkey]);
       if(found==1)prompt(SCNENDBLT);
       bltinfo(&blt);
 
-      if(!getbool(&yes,ASKREAD,YNHUH,DEFLTC,askdef?'Y':'N')){
+      if(!get_bool(&yes,ASKREAD,YNHUH,DEFLTC,askdef?'Y':'N')){
 	prompt(ABORT);
 	return;
       } else if(yes==0){
-	nonblocking();
+	inp_nonblock();
 	showkeywords();
       } else {
 	showblt(&blt);
-	lastresult=PAUSE_CONTINUE;
-	nonblocking();
+	fmt_lastresult=PAUSE_CONTINUE;
+	inp_nonblock();
 	showkeywords();
       }
     }
   }while(dblistnext());
 
-  blocking();
+  inp_block();
   prompt(SCNEND);
 }
 

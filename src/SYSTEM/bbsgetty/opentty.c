@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys(). Added support for
+ * Changed a few error_fatal() calls to error_fatalsys(). Added support for
  * the pre/postconnect fields.
  *
  * Revision 1.2  1998/12/27 16:15:40  alexios
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,25 +84,25 @@ void opentty()
 
   /* Open the device */
   if((fd=open(devname,waitfor?(O_RDWR|O_NDELAY):(O_RDWR)))<0){
-    fatalsys("Cannot open line %s",devname);
+    error_fatalsys("Cannot open line %s",devname);
   }
 
 
   /* The file descriptor should be 0 (stdin) */
   if(fd!=0){
-    fatal("Whoops, file descriptor for stdin is not zero.");
+    error_fatal("Whoops, file descriptor for stdin is not zero.");
   }
 
 
   /* Duplicate it to get stdout */
   if(dup(0)!=1) {
-    fatal("Whoops, file descriptor for stdout is not one.");
+    error_fatal("Whoops, file descriptor for stdout is not one.");
   }
 
 
   /* And again for stderr */
   if(dup(0)!=2) {
-    fatal("Whoops, file descriptor for stderr is not two.");
+    error_fatal("Whoops, file descriptor for stderr is not two.");
   }
   
 

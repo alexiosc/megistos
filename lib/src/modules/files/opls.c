@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,6 +70,6 @@ op_ls()
 	  library.dir,TMPDIR,(int)getpid());
   system(command);
   sprintf(command,TMPDIR"/ls-%d",(int)getpid());
-  catfile(command);
+  out_catfile(command);
   unlink(command);
 }

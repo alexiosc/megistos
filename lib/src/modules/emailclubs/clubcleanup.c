@@ -30,11 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:58  alexios
- * Initial revision
- *
- * Revision 0.1  2000/12/08 15:12:45  alexios
- * Initial checkin.
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.5  1999/07/18 21:12:42  alexios
  * Changed a few error_fatal() calls to error_fatalsys().

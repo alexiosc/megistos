@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/07/18 22:09:33  alexios
- * Changed a few fatal() calls to fatalsys(). Added code to deal
+ * Changed a few error_fatal() calls to error_fatalsys(). Added code to deal
  * with transient files. Minor bug fixes.
  *
  * Revision 0.9  1998/12/27 16:34:28  alexios
@@ -74,6 +75,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -106,8 +108,8 @@ showmenu()
   
   if(NUMFILES==1)
     prompt(DNLHDR,xferlist[firstentry].filename,xferlist[firstentry].description,
-	   filesize,xfertime,getpfix(MINSNG,xfertime),filetype);
-  else prompt(DNLHDR1,filesize,xfertime,getpfix(MINSNG,xfertime));
+	   filesize,xfertime,msg_getunit(MINSNG,xfertime),filetype);
+  else prompt(DNLHDR1,filesize,xfertime,msg_getunit(MINSNG,xfertime));
 
   for(i=0;i<numprotocols;i++){
     if((protocols[i].flags&PRF_UPLOAD)==0 &&
@@ -126,7 +128,7 @@ showmenu()
   }
   if(pos)prompt(PROTLIN2,"","");
   if(!logout){
-    prompt(DNLFTR,getpfix(YES,xfertagged));
+    prompt(DNLFTR,msg_getunit(YES,xfertagged));
     prompt(DNLFTRI,NUMFILES,xfertagged?0:numtagged);
   }
   prompt(DNLFTRL);
@@ -150,14 +152,14 @@ viewcontents()
       prompt(VIEWWRK);
       
       /* Turn off translation if the protocol is binary */
-      if(protocols[i].flags&PRF_BINARY)setxlationtable(XLATION_OFF);
+      if(protocols[i].flags&PRF_BINARY)out_setxlation(XLATION_OFF);
       
       system(command);
       
       /* Turn translation back on if necessary */
-      if(protocols[i].flags&PRF_BINARY)setxlationtable(XLATION_ON);
+      if(protocols[i].flags&PRF_BINARY)out_setxlation(XLATION_ON);
       prompt(VIEWBEG,xferlist[firstentry].filename);
-      printfile(fname);
+      out_printfile(fname);
       prompt(VIEWEND);
       unlink(fname);
       break;
@@ -246,7 +248,7 @@ checksuccess(char *fname)
   if(filesleft){
     autodis=0;
     prompt(DNLFAIL,filesleft);
-    if(!getbool(&retry,RETRY,0,0,0))retry=0;
+    if(!get_bool(&retry,RETRY,0,0,0))retry=0;
   }
   
   sprintf(command,"rm -rf %s &>/dev/null",fname);
@@ -332,8 +334,8 @@ download(char *prot)
   {
     char s1[80],s2[80];
     
-    strncpy(s1,getmsg(SDNLOAD),80);
-    strncpy(s2,getpfix(SSINGLE,NUMFILES),80);
+    strncpy(s1,msg_get(SDNLOAD),80);
+    strncpy(s2,msg_getunit(SSINGLE,NUMFILES),80);
 
     prompt(XFERBEG,s1,s2,protocols[f].name,protocols[f].stopkey);
   }
@@ -350,26 +352,22 @@ download(char *prot)
       char stty[256];
 
       /* Turn off translation if the protocol is binary. It's ok to do
-         this inside the child process since setxlationtable()
+         this inside the child process since out_setxlation()
          modifies shared memory. */
-      if(protocols[f].flags&PRF_BINARY)setxlationtable(XLATION_OFF);
+      if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_OFF);
 
-      clsmsg(sysblk);
-      doneoutput();
-      doneinput();
-      donesignals();
+      msg_close(msg_sys);
+      mod_done(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
       sprintf(stty,"%s sane intr 0x03",STTYBIN);
       system(stty);
       system(command);
       system(STTYBIN" -echo start undef stop undef intr undef susp undef");
       system(stty);
-      initoutput();
-      setmbk(msg);
-      initinput();
-      initsignals();
+      mod_init(INI_OUTPUT|INI_INPUT|INI_SIGNALS);
+      msg_set(msg);
 
       /* Turn translation back on if necessary */
-      if(protocols[f].flags&PRF_BINARY)setxlationtable(XLATION_ON);
+      if(protocols[f].flags&PRF_BINARY)out_setxlation(XLATION_ON);
 
       exit(0);
     } else if(pid>0){
@@ -452,7 +450,7 @@ download(char *prot)
 	if(fp)fclose(fp);
       }
     } else {
-      fatal("Unable to fork download protocol for some obscure reason.");
+      error_fatal("Unable to fork download protocol for some obscure reason.");
     }
     
     /* Now that we know the child process is dead, wait() for it so that it
@@ -467,9 +465,8 @@ download(char *prot)
 
     /* And re-init all the necessary stuff */
 
-    initinput();
-    initsignals();
-    regpid(thisuseronl.channel);
+    mod_init(INI_INPUT|INI_SIGNALS);
+    mod_regpid(thisuseronl.channel);
     thisuseronl.flags&=~OLF_BUSY;
     chdir(cwd);
   }
@@ -503,30 +500,30 @@ tageditor()
   char c;
   int i,firsttime=1;
 
-  while(getmenu(&c,firsttime,TEMENU,TESHMNU,TEERR,"LTDS",0,0)){
+  while(get_menu(&c,firsttime,TEMENU,TESHMNU,TEERR,"LTDS",0,0)){
     firsttime=0;
     switch(c){
     case 'L':
       {
 	char mark[80];
 
-	strncpy(mark,getmsg(TELMRK),sizeof(mark));
+	strncpy(mark,msg_get(TELMRK),sizeof(mark));
 	prompt(TELHDR);
 	for(i=0;i<totalitems;i++){
 	  prompt(TELTAB,i+1,xferlist[i].filename,
 		 xferlist[i].flags&XFF_TAGGED?mark:"",
 		 xferlist[i].flags&XFF_KILLED?mark:"",
 		 xferlist[i].description);
-	  if(lastresult==PAUSE_QUIT)break;
+	  if(fmt_lastresult==PAUSE_QUIT)break;
 	}
-	if(lastresult!=PAUSE_QUIT)prompt(TELFTR);
+	if(fmt_lastresult!=PAUSE_QUIT)prompt(TELFTR);
 	break;
       }
     case 'T':
-      if(getnumber(&i,TENASK,1,totalitems,TENERR,0,0)){
+      if(get_number(&i,TENASK,1,totalitems,TENERR,0,0)){
 	if(xferlist[i-1].dir==FXM_TRANSIENT
 	   && (xferlist[i-1].flags&XFF_TAGGED)==0){
-	  endcnc();
+	  cnc_end();
 	  prompt(CANTAG,xferlist[i-1].filename);
 	} else {
 	  xferlist[--i].flags^=XFF_TAGGED;
@@ -536,7 +533,7 @@ tageditor()
       }
       break;
     case 'D':
-      if(getnumber(&i,TENASK,1,totalitems,TENERR,0,0)){
+      if(get_number(&i,TENASK,1,totalitems,TENERR,0,0)){
 	xferlist[--i].flags^=XFF_KILLED;
 	prompt(xferlist[i].flags&XFF_KILLED?TENKLL:TENUKL,
 	       i+1,xferlist[i].filename);
@@ -544,7 +541,7 @@ tageditor()
       break;
     case 'S':
       restat();
-      prompt(TESTAT,numitems,filesize,xfertime,getpfix(MINSNG,xfertime),
+      prompt(TESTAT,numitems,filesize,xfertime,msg_getunit(MINSNG,xfertime),
 	     numtagged,taggedsize);
       break;
     }
@@ -572,10 +569,10 @@ dologout()
 {
   int yes;
   if(!logout)return;
-  prompt(LOGOUT,NUMFILES,getpfix(FILSNG,NUMFILES));
-  for(;;)if(getbool(&yes,LOGOUT2,0,0,0))break;
+  prompt(LOGOUT,NUMFILES,msg_getunit(FILSNG,NUMFILES));
+  for(;;)if(get_bool(&yes,LOGOUT2,0,0,0))break;
   if(!yes)exit(0);
-  if(nxtcmd==NULL||!*nxtcmd)endcnc();
+  if(cnc_nxtcmd==NULL||!*cnc_nxtcmd)cnc_end();
 }
 
 
@@ -583,7 +580,7 @@ static int
 confirm_exit()
 {
   int retval;
-  if(!getbool(&retval,CONFX,0,0,0))return 0;
+  if(!get_bool(&retval,CONFX,0,0,0))return 0;
   return retval;
 }
 
@@ -607,7 +604,7 @@ downloadrun()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -617,17 +614,17 @@ downloadrun()
 	  shownmenu=1;
 	}
 	prompt(SHORT);
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if(!margc || reprompt){
-      endcnc();
+    if(!margc || inp_reprompt()){
+      cnc_end();
       continue;
     }
 
-    s=cncword();
+    s=cnc_word();
 
     if(sameas(s,"?"))shownmenu=0;
     else if(sameas(s,"X")){
@@ -635,9 +632,9 @@ downloadrun()
     } else {
       char *excl=NULL;
 
-      rstrin();
+      inp_raw();
       excl=strchr(s,'!');
-      if(excl || ((excl=strchr(nxtcmd,'!'))!=NULL)){
+      if(excl || ((excl=strchr(cnc_nxtcmd,'!'))!=NULL)){
 	autodis=1;
 	if(excl)*excl=0;
       }
@@ -660,7 +657,7 @@ downloadrun()
 	  return;
 	} else if(nontrans){
 	  prompt(TAGSOM);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
       } else if((!logout)&&sameas(s,"TT")){
@@ -684,7 +681,7 @@ downloadrun()
 	  shownmenu=0;
 	  break;
 	case -1:
-	  endcnc();
+	  cnc_end();
 	  break;
 	case 1:
 	  if(autodis)autodisconnect();
@@ -694,7 +691,7 @@ downloadrun()
 	}
       }
     }
-    endcnc();
+    cnc_end();
   }
 }
 

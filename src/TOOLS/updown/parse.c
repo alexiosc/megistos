@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 22:09:33  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:34:28  alexios
  * Added autoconf support.
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -126,7 +128,7 @@ readprotocols()
   struct protocol prot;
 
   if ((fp=fopen(PROTOCOLFILE,"r"))==NULL) {
-    fatalsys("Unable to open %s",PROTOCOLFILE);
+    error_fatalsys("Unable to open %s",PROTOCOLFILE);
   }
 
   memset(&prot,0,sizeof(prot));
@@ -158,7 +160,7 @@ readprotocols()
       if(sameas(protdir[i].name,keyword))directive=protdir[i].code;
     }
     if(!directive){
-      fatal("Unknown directive (%s) in %s (line %d)",
+      error_fatal("Unknown directive (%s) in %s (line %d)",
 	    keyword,PROTOCOLFILE,linenum);
     }
 
@@ -171,7 +173,7 @@ readprotocols()
       break;
     case PRT_DIR:
       if((!sameto("U",value)) && (!sameto("D",value))){
-	fatal("Bad value (%s) for DIR directive in %s (line %d)",
+	error_fatal("Bad value (%s) for DIR directive in %s (line %d)",
 	      value,PROTOCOLFILE,linenum);
       } else if (sameto("U",value)) prot.flags|=PRF_UPLOAD;
       else prot.flags&=~PRF_UPLOAD;
@@ -184,43 +186,43 @@ readprotocols()
       break;
     case PRT_BATCH:
       if((!sameto("Y",value)) && (!sameto("N",value))){
-	fatal("Bad value (%s) for BATCH directive in %s (line %d)",
+	error_fatal("Bad value (%s) for BATCH directive in %s (line %d)",
 	      value,PROTOCOLFILE,linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_BATCH;
       else prot.flags&=~PRF_BATCH;
       break;
     case PRT_NEEDN:
       if((!sameto("Y",value)) && (!sameto("N",value))){
-	fatal("Bad value (%s) for NEEDN directive in %s (line %d)",
+	error_fatal("Bad value (%s) for NEEDN directive in %s (line %d)",
 	      value,PROTOCOLFILE,linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_NEEDN;
       else prot.flags&=~PRF_NEEDN;
       break;
     case PRT_BIN:
       if((!sameto("Y",value)) && (!sameto("N",value))){
-	fatal("Bad value (%s) for BIN directive in %s (line %d)",
+	error_fatal("Bad value (%s) for BIN directive in %s (line %d)",
 	      value,PROTOCOLFILE,linenum);
       } else if (sameto("Y",value)) prot.flags|=PRF_BINARY;
       else prot.flags&=~PRF_BINARY;
       break;
     case PRT_END:
       if(!prot.name[0]){
-	fatal("Missing NAME directive in %s (line %d)",
+	error_fatal("Missing NAME directive in %s (line %d)",
 	      PROTOCOLFILE,linenum);
       }
       if(!prot.select[0]){
-	fatal("Missing SELECT directive in %s (line %d)",
+	error_fatal("Missing SELECT directive in %s (line %d)",
 	      PROTOCOLFILE,linenum);
       }
       if(!prot.command[0]){
-	fatal("Missing SELECT directive in %s (line %d)",
+	error_fatal("Missing SELECT directive in %s (line %d)",
 	      PROTOCOLFILE,linenum);
       }
 
       numprotocols++;
       protocols=realloc(protocols,sizeof(struct protocol)*numprotocols);
       if(!protocols){
-	fatal("Unable to allocate memory for the protocol"\
+	error_fatal("Unable to allocate memory for the protocol"\
 	      "table",NULL);
       } else {
 	memcpy(&protocols[numprotocols-1],&prot,sizeof(struct protocol));
@@ -241,24 +243,24 @@ readviewers()
 {
   int           n;
   struct viewer viewer;
-  promptblk     *msg=NULL;
+  promptblock_t     *msg=NULL;
 
-  msg=opnmsg("archivers");
+  msg=msg_open("archivers");
 
   memset(&viewer,0,sizeof(viewer));
 
   for(n=0;n<MAXARCHIVERS;n++){
-    char *view=getmsg(VIEW1+n*7);
+    char *view=msg_get(VIEW1+n*7);
     if(!strlen(view))continue;
 
-    strcpy(viewer.string,getmsg(STRING1+n*7));
-    strcpy(viewer.type,getmsg(TYPE1+n*7));
-    strcpy(viewer.command,getmsg(VIEW1+n*7));
+    strcpy(viewer.string,msg_get(STRING1+n*7));
+    strcpy(viewer.type,msg_get(TYPE1+n*7));
+    strcpy(viewer.command,msg_get(VIEW1+n*7));
 
     numviewers++;
     viewers=realloc(viewers,sizeof(struct viewer)*numviewers);
     if(!viewers){
-      fatal("Unable to allocate memory for the viewer"\
+      error_fatal("Unable to allocate memory for the viewer"\
 	    "table",NULL);
     } else {
       memcpy(&viewers[numviewers-1],&viewer,sizeof(struct viewer));
@@ -266,8 +268,8 @@ readviewers()
     }
   }
 
-  clsmsg(msg);
-  rstmbk();
+  msg_close(msg);
+  msg_reset();
 }
 
 
@@ -275,7 +277,7 @@ void
 readtransferlist(char *fname, int *count, int flags)
 {
   FILE *fp;
-  struct xferitem *item, *tmp, read;
+  xfer_item_t *item, *tmp, read;
   
   if((fp=fopen(fname,"r"))==NULL)return;
   while(!feof(fp)){
@@ -286,12 +288,12 @@ readtransferlist(char *fname, int *count, int flags)
 
     (*count)++;
     totalitems++;
-    tmp=alcmem(sizeof(struct xferitem)*totalitems);
-    memcpy(tmp,xferlist,sizeof(struct xferitem)*(totalitems-1));
+    tmp=alcmem(sizeof(xfer_item_t)*totalitems);
+    memcpy(tmp,xferlist,sizeof(xfer_item_t)*(totalitems-1));
     xferlist=tmp;
     item=&(xferlist)[totalitems-1];
 
-    memcpy(item,&read,sizeof(struct xferitem));
+    memcpy(item,&read,sizeof(xfer_item_t));
 
     item->filename=strrchr(item->fullname,'/');
     if(!item->filename)item->filename=item->fullname;

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/08/13 17:10:05  alexios
  * Fixed things so that user inactivity timers are reset to handle
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -96,15 +98,15 @@ find()
   int c;
 
   move(LINES-2,0);
-  printansi(getmsg(FIND1));
+  printansi(msg_get(FIND1));
   refresh();
   strcpy(ftxt,getstg(findtext,rmargin));
-  if(isX(ftxt)||ftxt[0]==0){
+  if(inp_isX(ftxt)||ftxt[0]==0){
     showstatus();
     return;
   } else strcpy(findtext,ftxt);
   move(LINES-2,0);
-  printansi(getmsg(FIND2));
+  printansi(msg_get(FIND2));
   refresh();
 
   for(opt=0;!opt;){
@@ -191,25 +193,25 @@ replace()
   int opt,action=0,all=0;
 
   move(LINES-2,0);
-  printansi(getmsg(FREP1));
+  printansi(msg_get(FREP1));
   refresh();
   strcpy(ftxt,getstg(findtext,rmargin));
-  if(isX(ftxt)||ftxt[0]==0){
+  if(inp_isX(ftxt)||ftxt[0]==0){
     showstatus();
     return;
   } else strcpy(findtext,ftxt);
 
   move(LINES-2,0);
-  printansi(getmsg(FREP2));
+  printansi(msg_get(FREP2));
   refresh();
   strcpy(reptxt,getstg(reptxt,rmargin));
-  if(isX(reptxt)){
+  if(inp_isX(reptxt)){
     showstatus();
     return;
   }
 
   move(LINES-2,0);
-  printansi(getmsg(FREP3));
+  printansi(msg_get(FREP3));
   refresh();
 
   for(opt=0;!opt;){
@@ -273,7 +275,7 @@ replace()
     if(l){
       if(!all){
 	move(LINES-2,0);
-	printansi(getmsg(FREP4));
+	printansi(msg_get(FREP4));
 	putcursor();
 	refresh();
       }

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 22:09:33  alexios
- * Changed a few fatal() calls to fatalsys(). Minor bug fixes.
+ * Changed a few error_fatal() calls to error_fatalsys(). Minor bug fixes.
  *
  * Revision 0.4  1998/12/27 16:34:28  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -83,7 +85,7 @@ getfiletype(char *fname,int recurse)
   FILE *fp;
   char command[256], line[1024], *cp=line;
 
-  strcpy(filetype,getmsg(FTUNK));
+  strcpy(filetype,msg_get(FTUNK));
   if(!recurse)return;
 
   sprintf(command,"file %s",fname);
@@ -156,7 +158,7 @@ extraprotocols()
 	  if(strstr(filetype,viewers[i].string)==filetype){
 	    struct protocol prot;
 	    
-	    sprintf(prot.name,getmsg(VIEWNAME),viewers[i].type);
+	    sprintf(prot.name,msg_get(VIEWNAME),viewers[i].type);
 	    strcpy(prot.select,vprsel);
 	    strcpy(prot.command,viewers[i].command);
 	    prot.flags=PRF_NEEDN|PRF_VIEWER;
@@ -164,7 +166,7 @@ extraprotocols()
 	    numprotocols++;
 	    protocols=realloc(protocols,sizeof(struct protocol)*numprotocols);
 	    if(!protocols){
-	      fatal("Unable to allocate memory for the protocol"\
+	      error_fatal("Unable to allocate memory for the protocol"\
 		    "table",NULL);
 	    } else {
 	      memcpy(&protocols[numprotocols-1],&prot,sizeof(struct protocol));
@@ -177,10 +179,10 @@ extraprotocols()
       }
     }
   } else {
-    if(haskey(&thisuseracc,lnkkey)){
+    if(key_owns(&thisuseracc,lnkkey)){
       struct protocol prot;
 
-      sprintf(prot.name,getmsg(LNKNAM));
+      sprintf(prot.name,msg_get(LNKNAM));
       strcpy(prot.select,lnksel);
       strcpy(prot.command,"");
       prot.flags=PRF_UPLOAD|PRF_LINK;
@@ -188,7 +190,7 @@ extraprotocols()
       numprotocols++;
       protocols=realloc(protocols,sizeof(struct protocol)*numprotocols);
       if(!protocols){
-	fatal("Unable to allocate memory for the protocol"\
+	error_fatal("Unable to allocate memory for the protocol"\
 	      "table",NULL);
       } else {
 	memcpy(&protocols[numprotocols-1],&prot,sizeof(struct protocol));

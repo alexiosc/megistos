@@ -27,14 +27,15 @@
  **  You  should have received a copy   of the GNU  General Public License  **
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
- \*****************************************************************************/
+\*****************************************************************************/
 
 /*
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:31  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -321,7 +323,7 @@ void get_fp (void)
 void unwind (zword_t value, zword_t new_fp)
 {
   if (new_fp > fp)
-    fatal ("Bad frame for unwind");
+    error_fatal ("Bad frame for unwind");
   
   fp = new_fp;
   ret (value);

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -139,7 +141,7 @@ ctl_request(struct qwkhdr *qwkhdr, struct message *msg)
     }
 
     sprintf(dosfname,"%-8.8s.att",att.club[0]?att.club:EMAILCLUBNAME);
-    sprintf(num,"%ld",att.msgno);
+    sprintf(num,"%d",att.msgno);
     strncpy(&dosfname[strlen(dosfname)-4-strlen(num)],num,strlen(num));
     for(i=0;dosfname[i];i++){
       dosfname[i]=dosfname[i]==' '?'-':

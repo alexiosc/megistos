@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:02  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
  * Added support for the network manager menu.
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,7 +80,7 @@
 #include "email.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 
 int  entrykey;
@@ -123,74 +125,68 @@ int  defaultrate;
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("emailclubs");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("emailclubs");
+  msg_setlanguage(thisuseracc.language);
 
   defaultrate=thisuseronl.credspermin;
   strcpy(inclublock,"dummy");
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  sopkey=numopt(SOPKEY,0,129);
-  wrtkey=numopt(WRTKEY,0,129);
-  netkey=numopt(NETKEY,0,129);
-  rrrkey=numopt(RRRKEY,0,129);
-  attkey=numopt(ATTKEY,0,129);
-  dnlchg=numopt(DNLCHG,-32767,32767);
-  wrtchg=numopt(WRTCHG,-32767,32767);
-  netchg=numopt(NETCHG,-32767,32767);
-  rrrchg=numopt(RRRCHG,-32767,32767);
-  attchg=numopt(ATTCHG,-32767,32767);
-  mkaudd=ynopt(MKAUDD);
-  mkaudu=ynopt(MKAUDU);
-  emllif=numopt(EMLLIF,-1,32767);
-  maxccs=numopt(MAXCCS,0,32767);
-  msglen=numopt(MSGLEN,1,256)<<10;
-  eattupl=stgopt(EATTUPL);
-  sigbmax=numopt(SIGBMAX,16,1024);
-  siglmax=numopt(SIGLMAX,1,32);
-  sigckey=numopt(SIGCKEY,0,129);
-  sigchg=numopt(SIGCHG,-32767,32767);
-  afwkey=numopt(AFWKEY,0,129);
-  dlkey=numopt(DLKEY,0,129);
-  maxdlm=numopt(MAXDLM,2,256);
-  msskey=numopt(MSSKEY,0,129);
-  tlckey=numopt(TLCKEY,0,129);
-  bltkey=numopt(BLTKEY,0,129);
-  tlcpag=stgopt(TLCPAG);
-  bltpag=stgopt(BLTPAG);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  sopkey=msg_int(SOPKEY,0,129);
+  wrtkey=msg_int(WRTKEY,0,129);
+  netkey=msg_int(NETKEY,0,129);
+  rrrkey=msg_int(RRRKEY,0,129);
+  attkey=msg_int(ATTKEY,0,129);
+  dnlchg=msg_int(DNLCHG,-32767,32767);
+  wrtchg=msg_int(WRTCHG,-32767,32767);
+  netchg=msg_int(NETCHG,-32767,32767);
+  rrrchg=msg_int(RRRCHG,-32767,32767);
+  attchg=msg_int(ATTCHG,-32767,32767);
+  mkaudd=msg_bool(MKAUDD);
+  mkaudu=msg_bool(MKAUDU);
+  emllif=msg_int(EMLLIF,-1,32767);
+  maxccs=msg_int(MAXCCS,0,32767);
+  msglen=msg_int(MSGLEN,1,256)<<10;
+  eattupl=msg_string(EATTUPL);
+  sigbmax=msg_int(SIGBMAX,16,1024);
+  siglmax=msg_int(SIGLMAX,1,32);
+  sigckey=msg_int(SIGCKEY,0,129);
+  sigchg=msg_int(SIGCHG,-32767,32767);
+  afwkey=msg_int(AFWKEY,0,129);
+  dlkey=msg_int(DLKEY,0,129);
+  maxdlm=msg_int(MAXDLM,2,256);
+  msskey=msg_int(MSSKEY,0,129);
+  tlckey=msg_int(TLCKEY,0,129);
+  bltkey=msg_int(BLTKEY,0,129);
+  tlcpag=msg_string(TLCPAG);
+  bltpag=msg_string(BLTPAG);
 
-  clntrkey=numopt(CLNTRKEY,0,129);
-  clsopkey=numopt(CLSOPKEY,0,129);
-  tlckey=numopt(TLCKEY,0,129);
-  bltkey=numopt(BLTKEY,0,129);
-  clbwchg=numopt(CLBWCHG,-32767,32767);
-  clbuchg=numopt(CLBUCHG,-32767,32767);
-  clbdchg=numopt(CLBDCHG,-32767,32767);
-  clblif=numopt(CLBLIF,0,32767);
-  cdnlaud=ynopt(CDNLAUD);
-  cuplaud=ynopt(CUPLAUD);
-  defclub=stgopt(DEFCLUB);
+  clntrkey=msg_int(CLNTRKEY,0,129);
+  clsopkey=msg_int(CLSOPKEY,0,129);
+  tlckey=msg_int(TLCKEY,0,129);
+  bltkey=msg_int(BLTKEY,0,129);
+  clbwchg=msg_int(CLBWCHG,-32767,32767);
+  clbuchg=msg_int(CLBUCHG,-32767,32767);
+  clbdchg=msg_int(CLBDCHG,-32767,32767);
+  clblif=msg_int(CLBLIF,0,32767);
+  cdnlaud=msg_bool(CDNLAUD);
+  cuplaud=msg_bool(CUPLAUD);
+  defclub=msg_string(DEFCLUB);
   bzero(defaultclub,sizeof(defaultclub));
   strncpy(defaultclub,defclub,sizeof(defaultclub));
   if(*defclub=='/')defclub++;
-  modaxkey=numopt(MODAXKEY,0,129);
-  modchkey=numopt(MODCHKEY,0,129);
-  modhdkey=numopt(MODHDKEY,0,129);
-  drdaxkey=numopt(DRDAXKEY,0,129);
-  ddlaxkey=numopt(DDLAXKEY,0,129);
-  dwraxkey=numopt(DWRAXKEY,0,129);
-  dulaxkey=numopt(DULAXKEY,0,129);
-  addnew=ynopt(ADDNEW);
+  modaxkey=msg_int(MODAXKEY,0,129);
+  modchkey=msg_int(MODCHKEY,0,129);
+  modhdkey=msg_int(MODHDKEY,0,129);
+  drdaxkey=msg_int(DRDAXKEY,0,129);
+  ddlaxkey=msg_int(DDLAXKEY,0,129);
+  dwraxkey=msg_int(DWRAXKEY,0,129);
+  dulaxkey=msg_int(DULAXKEY,0,129);
+  addnew=msg_bool(ADDNEW);
 
   initlist();
   initecsubstvars();
-}
-
-
-void
-login()
-{
 }
 
 
@@ -217,27 +213,27 @@ selectclub()
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(SCASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -246,7 +242,7 @@ selectclub()
 
     if(!findclub(i)){
       prompt(SCERR);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -263,16 +259,16 @@ run()
   int shownmenu=0;
   int shownbanner=0;
   int access=CAX_ZERO;
-  char c;
+  char c=0;
 
-  if(!haskey(&thisuseracc,clntrkey)){
+  if(!key_owns(&thisuseracc,clntrkey)){
     prompt(CLNONTR);
     return;
   }
 
   if(!thisuseracc.lastclub[0])strcpy(thisuseracc.lastclub,defclub);
   if(!findclub(defclub)){
-    fatal("Default club %s does not exist!",defclub);
+    error_fatal("Default club %s does not exist!",defclub);
   }
 
   rmlocks();
@@ -306,7 +302,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(nxtcmd==NULL){
+      if(cnc_nxtcmd==NULL){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -325,90 +321,90 @@ run()
 	    break;
 	  }
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       shownbanner=1;
       switch (c) {
       case 'H':
 	about();
-	endcnc();
+	cnc_end();
 	break;
       case 'I':
 	information();
-	endcnc();
+	cnc_end();
 	break;
       case 'S':
 	if(selectclub())shownbanner=0;
 	thisuseronl.flags&=~OLF_MMCONCAT;
-	if(!morcnc())endcnc();
+	if(!cnc_more())cnc_end();
 	break;
       case 'L':
 	longlistclubs();
-	endcnc();
+	cnc_end();
 	break;
       case 'W':
 	clubwrite();
-	endcnc();
+	cnc_end();
 	break;
       case 'R':
 	clubread(0);
-	endcnc();
+	cnc_end();
 	break;
       case 'D':
 	clubread(1);
-	endcnc();
+	cnc_end();
 	break;
       case 'A':
 	if(access>=CAX_COOP)fileapp();
 	else prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	break;
       case 'O':
 	if(access>=CAX_CLUBOP)operations();
 	else prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	break;
 #ifdef HAVE_METABBS
       case 'N':
 	if(access>=CAX_CLUBOP)networking();
 	else prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	break;
 #endif
       case 'T':
-	if(haskey(&thisuseracc,tlckey)){
+	if(key_owns(&thisuseracc,tlckey)){
 	  sprintf(thisuseronl.telechan,"/%s",clubhdr.club);
 	  gopage(tlcpag);
 	} else prompt(TLCNAX);
-	endcnc();
+	cnc_end();
 	break;
       case 'B':
-	if(haskey(&thisuseracc,bltkey)){
+	if(key_owns(&thisuseracc,bltkey)){
 	  thisuseronl.flags|=OLF_JMP2BLT;
 	  gopage(bltpag);
 	} else prompt(BLTNAX);
-	endcnc();
+	cnc_end();
 	break;
       case 'X':
 	prompt(CLLEAVE);
 	return;
       case '?':
 	shownmenu=0;
-	endcnc();
+	cnc_end();
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    if(!morcnc())endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    if(!cnc_more())cnc_end();
   }
 }
 
@@ -417,19 +413,45 @@ void
 done()
 {
   if(uqsc)saveqsc();
-  rmlock(inclublock);
+  lock_rm(inclublock);
   rmlocks();
 }
 
 
 int
-main(int argc, char *argv[])
+handler_run(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(strstr(argv[0],"msgcnv"))return msgcnv_main(argc,argv);
   atexit(done);
   init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else run();
-  exit(0);
+  run();
+  return 0;
+}
+
+
+
+/* The Clubs module lacks a few handlers because they are implemented
+   by its sister-module, Email. */
+
+mod_info_t mod_info_clubs = {
+  "clubs",
+  "Discussion groups",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Read/write public (`club') BBS messages organised by topic.",
+  RCS_VER,
+  "1.0",
+  { 0,NULL},			/* Login handler */
+  { 0,handler_run},		/* Interactive handler */
+  { 0,NULL},			/* Install logout handler */
+  { 0,NULL},			/* Hangup handler */
+  { 0,NULL},			/* Cleanup handler */
+  { 0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  if(strstr(argv[0],"msgcnv"))return msgcnv_main(argc,argv);
+  mod_setinfo(&mod_info_clubs);
+  return mod_main(argc,argv);
 }

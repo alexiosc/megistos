@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/08/07 02:17:20  alexios
  * Fixed easy but annoying bug that caused endless loops while
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -83,15 +85,15 @@ attmenu()
 {
   char c;
 
-  endcnc();
+  cnc_end();
   for(;;){
-    lastresult=0;
-    getinput(1);
+    fmt_lastresult=0;
+    inp_get(1);
     if(!margc)return 0;
-    bgncnc();
-    c=toupper(cncchr());
-    endcnc();
-    if(margc && isX(margv[0]))return 'X';
+    cnc_begin();
+    c=toupper(cnc_chr());
+    cnc_end();
+    if(margc && inp_isX(margv[0]))return 'X';
     else if(margc && (c=='?'||sameas(margv[0],"?"))){
       return '?';
     } else if(strchr("YNAOPM",c))return toupper(c);
@@ -111,9 +113,9 @@ previewheader(struct reqidx *idx)
   goclub(sameas(idx->reqarea,EMAILCLUBNAME)?NULL:idx->reqarea);
   getmsgheader(idx->msgno,&msg);
   prompt(QWKCPHH);
-  setmbk(emailclubs_msg);
+  msg_set(emailclubs_msg);
   showheader(idx->reqarea,&msg);
-  setmbk(mail_msg);
+  msg_set(mail_msg);
   prompt(QWKCPHF);
   prompt(QWKCPHD);
 }
@@ -248,7 +250,7 @@ doatt()
       /* Remove the current request from the database */
       
       if(!rmrequest(&idx)){
-	fatal("Unable to remove request %d from the database.",
+	error_fatal("Unable to remove request %d from the database.",
 	      idx.reqnum);
       }
       break;
@@ -259,7 +261,7 @@ doatt()
     case 'N':
 
       if(!rmrequest(&idx)){
-	fatal("Unable to remove request %d from the database.",
+	error_fatal("Unable to remove request %d from the database.",
 	      idx.reqnum);
       }
       prompt(QWKCPCA);
@@ -275,7 +277,7 @@ doatt()
       idx.reqflags|=RQF_POSTPONE;
       if(idx.priority==RQP_ATT)idx.priority=RQP_POSTPONE;
       if(!updrequest(&idx)){
-	fatal("Unable to update request %d.",idx.reqnum);
+	error_fatal("Unable to update request %d.",idx.reqnum);
       }
       prompt(QWKCPPO);
     }

@@ -5,9 +5,9 @@
 
 #include "metaservices.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <rpc/pmap_clnt.h>
-#include <string.h>
+#include <stdlib.h>/* getenv, exit */
+#include <rpc/pmap_clnt.h> /* for pmap_unset */
+#include <string.h> /* strcmp */ 
 #include <sys/ioctl.h> /* ioctl, TIOCNOTTY */
 #include <sys/types.h> /* open */
 #include <sys/stat.h> /* open */
@@ -18,7 +18,7 @@
 #include <netinet/in.h>
 #include <syslog.h>
 
-#ifndef SIG_PF
+#ifdef __STDC__
 #define SIG_PF void(*)(int)
 #endif
 #include "parallelism.h"
@@ -26,15 +26,15 @@ extern int _rpcpmstart;		/* Started by a port monitor ? */
 extern int _rpcfdtype;		/* Whether Stream or Datagram ? */
 
 static
-void _msgout (char* msg)
+void _msgout(char* msg)
 {
 #ifdef RPC_SVC_FG
 	if (_rpcpmstart)
-		syslog (LOG_ERR, msg);
+		syslog(LOG_ERR, msg);
 	else
-		fprintf (stderr, "%s\n", msg);
+		(void) fprintf(stderr, "%s\n", msg);
 #else
-	syslog (LOG_ERR, msg);
+	syslog(LOG_ERR, msg);
 #endif
 }
 
@@ -51,74 +51,74 @@ metabbs_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		message_request_t distclub_request_message_1_arg;
 	} argument;
 	char *result;
-	xdrproc_t _xdr_argument, _xdr_result;
+	xdrproc_t xdr_argument, xdr_result;
 	char *(*local)(char *, struct svc_req *);
 
 	switch (rqstp->rq_proc) {
 	case NULLPROC:
-		(void) svc_sendreply (transp, (xdrproc_t) xdr_void, (char *)NULL);
+		(void) svc_sendreply(transp, (xdrproc_t) xdr_void, (char *)NULL);
 		return;
 
 	case metabbs_register:
-		_xdr_argument = (xdrproc_t) xdr_registration_package_t;
-		_xdr_result = (xdrproc_t) xdr_int;
+		xdr_argument = (xdrproc_t) xdr_registration_package_t;
+		xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) metabbs_register_1_svc;
 		break;
 
 	case metabbs_register_non_megistos:
-		_xdr_argument = (xdrproc_t) xdr_registration_package_t;
-		_xdr_result = (xdrproc_t) xdr_int;
+		xdr_argument = (xdrproc_t) xdr_registration_package_t;
+		xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) metabbs_register_non_megistos_1_svc;
 		break;
 
 	case metabbs_request_info:
-		_xdr_argument = (xdrproc_t) xdr_wrapstring;
-		_xdr_result = (xdrproc_t) xdr_info_package_p;
+		xdr_argument = (xdrproc_t) xdr_wrapstring;
+		xdr_result = (xdrproc_t) xdr_info_package_p;
 		local = (char *(*)(char *, struct svc_req *)) metabbs_request_info_1_svc;
 		break;
 
 	case distclub_request_list:
-		_xdr_argument = (xdrproc_t) xdr_club_list_request_t;
-		_xdr_result = (xdrproc_t) xdr_club_list;
+		xdr_argument = (xdrproc_t) xdr_club_list_request_t;
+		xdr_result = (xdrproc_t) xdr_club_list;
 		local = (char *(*)(char *, struct svc_req *)) distclub_request_list_1_svc;
 		break;
 
 	case distclub_request_header:
-		_xdr_argument = (xdrproc_t) xdr_club_header_request_t;
-		_xdr_result = (xdrproc_t) xdr_club_header;
+		xdr_argument = (xdrproc_t) xdr_club_header_request_t;
+		xdr_result = (xdrproc_t) xdr_club_header;
 		local = (char *(*)(char *, struct svc_req *)) distclub_request_header_1_svc;
 		break;
 
 	case distclub_request_ihave:
-		_xdr_argument = (xdrproc_t) xdr_ihave_request_t;
-		_xdr_result = (xdrproc_t) xdr_ihave_list;
+		xdr_argument = (xdrproc_t) xdr_ihave_request_t;
+		xdr_result = (xdrproc_t) xdr_ihave_list;
 		local = (char *(*)(char *, struct svc_req *)) distclub_request_ihave_1_svc;
 		break;
 
 	case distclub_request_message:
-		_xdr_argument = (xdrproc_t) xdr_message_request_t;
-		_xdr_result = (xdrproc_t) xdr_club_message;
+		xdr_argument = (xdrproc_t) xdr_message_request_t;
+		xdr_result = (xdrproc_t) xdr_club_message;
 		local = (char *(*)(char *, struct svc_req *)) distclub_request_message_1_svc;
 		break;
 
 	default:
-		svcerr_noproc (transp);
+		svcerr_noproc(transp);
 		return;
 	}
-	memset ((char *)&argument, 0, sizeof (argument));
-	if (!svc_getargs (transp, _xdr_argument, (caddr_t) &argument)) {
-		svcerr_decode (transp);
+	(void) memset((char *)&argument, 0, sizeof (argument));
+	if (!svc_getargs(transp, xdr_argument, (caddr_t) &argument)) {
+		svcerr_decode(transp);
 		return;
 	}
 	__CALL_PREAMBLE__
 	result = (*local)((char *)&argument, rqstp);
 	__CALL_POSTAMBLE__
-	if (result != NULL && !svc_sendreply(transp, _xdr_result, result)) {
-		svcerr_systemerr (transp);
+	if (result != NULL && !svc_sendreply(transp, xdr_result, result)) {
+		svcerr_systemerr(transp);
 	}
-	if (!svc_freeargs (transp, _xdr_argument, (caddr_t) &argument)) {
-		_msgout ("unable to free arguments");
-		exit (1);
+	if (!svc_freeargs(transp, xdr_argument, (caddr_t) &argument)) {
+		_msgout("unable to free arguments");
+		exit(1);
 	}
 	return;
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -72,9 +74,9 @@
 #include "mbk_emailclubs.h"
 
 
-promptblk *mail_msg;
-promptblk *emailclubs_msg;
-promptblk *mailer_msg;
+promptblock_t *mail_msg;
+promptblock_t *emailclubs_msg;
+promptblock_t *mailer_msg;
 
 char *progname;
 char *defclub;
@@ -112,60 +114,60 @@ void
 init()
 {
   int i;
-  initmodule(INITALL);
+  mod_init(INI_ALL);
 
-  emailclubs_msg=opnmsg("emailclubs");
-  setlanguage(thisuseracc.language);
+  emailclubs_msg=msg_open("emailclubs");
+  msg_setlanguage(thisuseracc.language);
 
-  sopkey=numopt(EMAILCLUBS_SOPKEY,0,129);
-  wrtkey=numopt(EMAILCLUBS_WRTKEY,0,129);
-  netkey=numopt(EMAILCLUBS_NETKEY,0,129);
-  rrrkey=numopt(EMAILCLUBS_RRRKEY,0,129);
-  wrtchg=numopt(EMAILCLUBS_WRTCHG,-32767,32767);
-  netchg=numopt(EMAILCLUBS_NETCHG,-32767,32767);
-  rrrchg=numopt(EMAILCLUBS_RRRCHG,-32767,32767);
-  defclub=stgopt(EMAILCLUBS_DEFCLUB);
-  msglen=numopt(EMAILCLUBS_MSGLEN,1,256)<<10;
+  sopkey=msg_int(EMAILCLUBS_SOPKEY,0,129);
+  wrtkey=msg_int(EMAILCLUBS_WRTKEY,0,129);
+  netkey=msg_int(EMAILCLUBS_NETKEY,0,129);
+  rrrkey=msg_int(EMAILCLUBS_RRRKEY,0,129);
+  wrtchg=msg_int(EMAILCLUBS_WRTCHG,-32767,32767);
+  netchg=msg_int(EMAILCLUBS_NETCHG,-32767,32767);
+  rrrchg=msg_int(EMAILCLUBS_RRRCHG,-32767,32767);
+  defclub=msg_string(EMAILCLUBS_DEFCLUB);
+  msglen=msg_int(EMAILCLUBS_MSGLEN,1,256)<<10;
 
-  mailer_msg=opnmsg("mailer");
-  bbsid=stgopt(MAILER_BBSID);
-  ansihi=ynopt(MAILER_ANSIHI);
-  ansibye=ynopt(MAILER_ANSIBYE);
-  hifile=stgopt(MAILER_HIFILE);
-  byefile=stgopt(MAILER_BYEFILE);
-  for(i=0;i<6;i++)ctlname[i]=stgopt(MAILER_CTLNAME1+i);
-  if((qwkuc=tokopt(MAILER_QWKUC,"LOWERCASE","UPPERCASE"))==0){
-    fatal("Option QWKUC in mailer.msg has bad value.");
+  mailer_msg=msg_open("mailer");
+  bbsid=msg_string(MAILER_BBSID);
+  ansihi=msg_bool(MAILER_ANSIHI);
+  ansibye=msg_bool(MAILER_ANSIBYE);
+  hifile=msg_string(MAILER_HIFILE);
+  byefile=msg_string(MAILER_BYEFILE);
+  for(i=0;i<6;i++)ctlname[i]=msg_string(MAILER_CTLNAME1+i);
+  if((qwkuc=msg_token(MAILER_QWKUC,"LOWERCASE","UPPERCASE"))==0){
+    error_fatal("Option QWKUC in mailer.msg has bad value.");
   }else qwkuc--;
 
-  mail_msg=opnmsg("offline.mail");
-  setlanguage(thisuseracc.language);
+  mail_msg=msg_open("offline.mail");
+  msg_setlanguage(thisuseracc.language);
 
-  if((defatt=tokopt(DEFATT,"NO","YES","ASK"))==0){
-    fatal("Option DEFATT in offline.mail.msg has bad value.");
+  if((defatt=msg_token(DEFATT,"NO","YES","ASK"))==0){
+    error_fatal("Option DEFATT in offline.mail.msg has bad value.");
   }else defatt--;
 
-  if((defreq=tokopt(DEFREQ,"NO","YES","ASK"))==0){
-    fatal("Option DEFREQ in offline.mail.msg has bad value.");
+  if((defreq=msg_token(DEFREQ,"NO","YES","ASK"))==0){
+    error_fatal("Option DEFREQ in offline.mail.msg has bad value.");
   }else defreq--;
 
-  updqsc=ynopt(UPDQSC);
-  defhdr=ynopt(DEFHDR);
-  omceml=stgopt(OMCEML);
-  allnam=stgopt(ALLNAM);
-  usepass=ynopt(USEPASS);
-  fixeta=ynopt(FIXETA);
-  etaxlt=chropt(ETAXLT);
-  prgind=ynopt(PRGIND);
+  updqsc=msg_bool(UPDQSC);
+  defhdr=msg_bool(DEFHDR);
+  omceml=msg_string(OMCEML);
+  allnam=msg_string(ALLNAM);
+  usepass=msg_bool(USEPASS);
+  fixeta=msg_bool(FIXETA);
+  etaxlt=msg_char(ETAXLT);
+  prgind=msg_bool(PRGIND);
 }
 
 
 void
 done()
 {
-  clsmsg(emailclubs_msg);
-  clsmsg(mailer_msg);
-  clsmsg(mail_msg);
+  msg_close(emailclubs_msg);
+  msg_close(mailer_msg);
+  msg_close(mail_msg);
 }
 
 
@@ -178,19 +180,48 @@ warn()
 }
 
 
+mod_info_t mod_info_offline_mail = {
+  "offline.mail",
+  "Mailer Plugin: Mail and Clubs",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Packages private and public BBS messages.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,NULL},			/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(argc<2)warn();
-  atexit(done);
-  progname=argv[0];
-  init();
-  if(!strcmp(argv[1],"-setup"))setup();
-  else if(!strcmp(argv[1],"-download"))return omdownload();
-  else if(!strcmp(argv[1],"-upload"))return omupload();
-  else if(!strcmp(argv[1],"-reqman"))return reqman();
-  else warn();
-  done();
-  return 0;
+  progname=mod_info_offline_mail.progname;
+  mod_setinfo(&mod_info_offline_mail);
+
+  if(argc!=2)return mod_main(argc,argv);
+
+  if(!strcmp(argv[1],"--setup")){
+    atexit(done);
+    init();
+    setup();
+  } else if(!strcmp(argv[1],"--download")){
+    atexit(done);
+    init();
+    return omdownload();
+  } else if(!strcmp(argv[1],"--upload")){
+    atexit(done);
+    init();
+    return omupload();
+  } else if(!strcmp(argv[1],"--reqman")){
+    atexit(done);
+    init();
+    return reqman();
+  }
+
+  /* This should only return help, info, etc */
+  return mod_main(argc,argv);
 }

@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:23  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:37:59  alexios
  * Added autoconf support. Fixed slight bugs.
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,8 +80,57 @@
 static int
 msgselect(const struct dirent *d)
 {
+  if(!strcmp(d->d_name,"lost+found"))return 0;
   return(int)(d->d_name[0]!='.');
 }
+
+
+
+static struct clubheader clubhdr;
+
+
+
+int
+loadclubhdr(char *club)
+{
+  FILE *fp;
+  char fname[256];
+  struct stat st;
+
+  if(*club=='/')club++;
+  sprintf(fname,"%s/h%s",CLUBHDRDIR,club);
+  if(stat(fname,&st)){
+    return 0;
+  }
+  
+  if((fp=fopen(fname,"r"))==NULL){
+    return 0;
+  }
+
+  if(fread(&clubhdr,sizeof(clubhdr),1,fp)!=1){
+    fclose(fp);
+    return 0;
+  }
+  fclose(fp);
+
+  return 1;
+}
+
+
+
+int
+saveclubhdr(struct clubheader *hdr)
+{
+  char fname[256];
+  FILE *fp;
+
+  sprintf(fname,"%s/h%s",CLUBHDRDIR,hdr->club);
+  if((fp=fopen(fname,"w"))==NULL)return 0;
+  fwrite(hdr,sizeof(struct clubheader),1,fp);
+  fclose(fp);
+  return 1;
+}
+
 
 
 static void
@@ -106,18 +157,18 @@ doindex(char *clubname, char *clubdir)
   /* Wait for club to become available and lock it */
 
   sprintf(lock,CLUBLOCK,clubname);
-  if(checklock(lock,s)>0){
+  if(lock_check(lock,s)>0){
     printf("Waiting for lock...\n");
-    waitlock(lock,9999);
+    lock_wait(lock,9999);
   }
-  placelock(lock,"indexing");
+  lock_place(lock,"indexing");
 
 
   /* Open the database */
 
   sprintf(fname,"\\rm -f %s/%s/[A-Z]* >&/dev/null",dir,DBDIR);
   system(fname);
-  sync();
+  /*sync();*/
   sprintf(fname,"%s/%s",dir,DBDIR);
   mkdir(fname,0777);
   d_dbfpath(fname);
@@ -148,7 +199,7 @@ doindex(char *clubname, char *clubdir)
   for(j=0;j<i;free(msgs[j]),j++){
     sprintf(fname,"%s/%s",dir,msgs[j]->d_name);
 
-    if((fp=fopen(fname,"r"))==NULL){
+    if((fp=fopen(fname,"rw"))==NULL){
       printf("Unable to open %s\n",msgs[j]->d_name);
       fclose(fp);
       continue;
@@ -158,6 +209,20 @@ doindex(char *clubname, char *clubdir)
       printf("Unable to read %s\n",msgs[j]->d_name);
       fclose(fp);
       continue;
+    }
+
+    if((email==0)&&strcmp(msg.club,clubname)){
+      strcpy(msg.club,clubname);
+      print("Message %s/%s has wrong club name, fixing.\n",
+	    clubname,msgs[j]->d_name);
+      rewind(fp);
+      if(ftell(fp)==0) fwrite(&msg,sizeof(msg),1,fp);
+    } else if(email && msg.club[0]){
+      strcpy(msg.club,"");
+      print("Message %s/%s has wrong club name, fixing.\n",
+	    clubname,msgs[j]->d_name);
+      rewind(fp);
+      if(ftell(fp)==0) fwrite(&msg,sizeof(msg),1,fp);
     }
 
     fclose(fp);
@@ -179,6 +244,24 @@ doindex(char *clubname, char *clubdir)
   }
 
 
+  /* Make sure the club header is sane. */
+
+  if(msg.club[0]){
+    loadclubhdr(msg.club);
+    /*fprintf(stderr,"---> club=%s (%s), clubhdr.msgno=%u, msg.msgno=%u, "
+	    "fix=%d\n",
+	    clubhdr.club,clubhdr.descr,clubhdr.msgno,msg.msgno,
+	    clubhdr.msgno<msg.msgno);*/
+
+    if(clubhdr.msgno<msg.msgno){
+      clubhdr.msgno=msg.msgno+1;
+      printf("Fixing club header (club msgno=%d, actual=%d).\n",
+	     clubhdr.msgno,msg.msgno);
+      saveclubhdr(&clubhdr);
+    }
+  }
+  
+
   /* Free the dirent structure block */
 
   if(msgs)free(msgs);
@@ -191,15 +274,15 @@ doindex(char *clubname, char *clubdir)
 
   /* Adjust ownership and permissions of the files */
 
-  sprintf(command,"chown -R bbs.bbs %s >&/dev/null",dir);
+  sprintf(command,"chown -R bbs.bbs %s 2>/dev/null >/dev/null",dir);
   system(command);
-  sprintf(command,"chmod -R ug+rw,o-rwx %s >&/dev/null",dir);
+  sprintf(command,"chmod -R ug+rw,o-rwx %s 2>/dev/null >/dev/null",dir);
   system(command);
 
 
   /* Remove the lock */
 
-  rmlock(lock);
+  lock_rm(lock);
 
 
   /* Show info */
@@ -220,7 +303,7 @@ main(int argc, char **argv)
   struct dirent  **clubs;
   int i,j;
   
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   doindex(EMAILCLUBNAME,EMAILDIR);
   
   i=scandir(MSGSDIR,&clubs,msgselect,alphasort);

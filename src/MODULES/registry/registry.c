@@ -29,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:59  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 2.5  1999/07/18 21:47:54  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 2.4  1998/12/27 16:07:17  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -72,7 +74,7 @@
 #include "registry.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 int entrykey;
 int syskey;
@@ -92,7 +94,7 @@ loadregistry(char *userid)
   sprintf(fname,"%s/%s",REGISTRYDIR,userid);
   if((fp=fopen(fname,"r"))==NULL)return -1;
   if(fread(&registry,sizeof(struct registry),1,fp)!=1){
-    fatalsys("Unable to read registry %s",fname);
+    error_fatalsys("Unable to read registry %s",fname);
   }
   registry.template=registry.template%3;
   fclose(fp);
@@ -109,7 +111,7 @@ saveregistry(char *userid)
   sprintf(fname,"%s/%s",REGISTRYDIR,userid);
   if((fp=fopen(fname,"w"))==NULL)return -1;
   if(fwrite(&registry,sizeof(struct registry),1,fp)!=1){
-    fatalsys("Unable to write registry %s",fname);
+    error_fatalsys("Unable to write registry %s",fname);
   }
   fclose(fp);
   return 0;
@@ -121,21 +123,21 @@ init()
 {
   int i,j;
 
-  initmodule(INITALL);
-  msg=opnmsg("registry");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("registry");
+  msg_setlanguage(thisuseracc.language);
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  syskey=numopt(SYSKEY,0,129);
-  crkey=numopt(CRKEY,0,129);
-  for(i=0;i<3;i++)for(j=0;j<30;j++)template[i][j]=numopt(T1F1+i*30+j,0,255);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  syskey=msg_int(SYSKEY,0,129);
+  crkey=msg_int(CRKEY,0,129);
+  for(i=0;i<3;i++)for(j=0;j<30;j++)template[i][j]=msg_int(T1F1+i*30+j,0,255);
 }
 
 
 void
 login()
 {
-  if(haskey(&thisuseracc,entrykey) && loadregistry(thisuseracc.userid)){
+  if(key_owns(&thisuseracc,entrykey) && loadregistry(thisuseracc.userid)){
     prompt(REGPLS);
   }
 }
@@ -149,21 +151,21 @@ directory()
   FILE *pipe;
   
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      c=cnc_chr();
       shownhelp=1;
     } else {
-      if(!shownhelp)prompt(DINTRO,NULL);
-      prompt(DLETTER,NULL);
+      if(!shownhelp)prompt(DINTRO);
+      prompt(DLETTER);
       shownhelp=1;
-      getinput(0);
-      bgncnc();
-      c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      c=cnc_chr();
     }
-    if(!margc && !reprompt)return;
-    else if (!margc && reprompt) {
-      endcnc();
+    if(!margc && !inp_reprompt())return;
+    else if (!margc && inp_reprompt()) {
+      cnc_end();
       continue;
     }
     if(margc && sameas(margv[0],"?")){
@@ -173,26 +175,26 @@ directory()
       break;
     } else {
       prompt(DIRERR,c);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
 
-  nonblocking();
+  inp_nonblock();
   thisuseronl.flags|=OLF_BUSY;
 
   prompt(DIRHDR);
 
   sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",REGISTRYDIR,c);
   if((pipe=popen(command,"r"))==NULL){
-    fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
+    error_fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
   }
   
   for(;;){
     char line[256], c;
 
     if(fscanf(pipe,"%s",line)!=1)break;
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(DIRCAN);
       break;
     }
@@ -205,7 +207,7 @@ directory()
   }
   prompt(DIRFTR);
   pclose(pipe);
-  blocking();
+  inp_block();
 }
 
 
@@ -217,21 +219,21 @@ scan()
   FILE *pipe;
   
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      c=cnc_chr();
       shownhelp=1;
     } else {
-      if(!shownhelp)prompt(SINTRO,NULL);
-      prompt(SLETTER,NULL);
+      if(!shownhelp)prompt(SINTRO);
+      prompt(SLETTER);
       shownhelp=1;
-      getinput(0);
-      bgncnc();
-      c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      c=cnc_chr();
     }
-    if(!margc && !reprompt)return;
-    else if (!margc && reprompt) {
-      endcnc();
+    if(!margc && !inp_reprompt())return;
+    else if (!margc && inp_reprompt()) {
+      cnc_end();
       continue;
     }
     if(margc && sameas(margv[0],"?")){
@@ -241,42 +243,42 @@ scan()
       break;
     } else {
       prompt(DIRERR,c);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
   
   shownhelp=0;
   for(;;){
-    lastresult=0;
-    if(!morcnc()){
-      if(!shownhelp)prompt(SCANKW,NULL);
-      prompt(GETKEYW,NULL);
+    fmt_lastresult=0;
+    if(!cnc_more()){
+      if(!shownhelp)prompt(SCANKW);
+      prompt(GETKEYW);
       shownhelp=1;
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
     }
     if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
-    } else if(isX(nxtcmd)){
+    } else if(inp_isX(cnc_nxtcmd)){
       return;
     } else if(sameas(margv[0],"?")){
       shownhelp=0;
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
 
-  phonetic(nxtcmd);
+  phonetic(cnc_nxtcmd);
 
-  nonblocking();
+  inp_nonblock();
   thisuseronl.flags|=OLF_BUSY;
   prompt(DIRHDR);
 
   sprintf(command,"\134ls %s |grep -i \"^[%c-Z]\"",REGISTRYDIR,c);
   if((pipe=popen(command,"r"))==NULL){
-    fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
+    error_fatalsys("Unable to spawn ls|grep pipe for %s",REGISTRYDIR);
   }
   
   for(;;){
@@ -284,7 +286,7 @@ scan()
     int i,pos,found;
 
     if(fscanf(pipe,"%s",line)!=1)break;
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(DIRCAN);
       break;
     }
@@ -299,7 +301,7 @@ scan()
       bzero(tmp,sizeof(tmp));
       strncpy(tmp,&registry.registry[pos],sizeof(tmp)-1);
       phonetic(tmp);
-      if(search(tmp,nxtcmd)){
+      if(search(tmp,cnc_nxtcmd)){
 	found=1;
 	break;
       }
@@ -310,7 +312,7 @@ scan()
       strncpy(tmp,registry.summary,sizeof(tmp)-1);
       phonetic(tmp);
       strcpy(summary,registry.summary);
-      found=search(tmp,nxtcmd);
+      found=search(tmp,cnc_nxtcmd);
       strcpy(registry.summary,summary);
     }
     if(found)prompt(DIRLIN,line,registry.summary);
@@ -318,7 +320,7 @@ scan()
 
   prompt(DIRFTR);
   pclose(pipe);
-  blocking();
+  inp_block();
 }
 
 
@@ -329,9 +331,9 @@ lookup()
   int  i,j,pos;
 
   for(;;){
-    if(!getuserid(userid,LKUPWHO,UIDERR,0,0,0))return;
+    if(!get_userid(userid,LKUPWHO,UIDERR,0,0,0))return;
     if(loadregistry(userid)){
-      endcnc();
+      cnc_end();
       prompt(UIDERR);
     } else break;
   }
@@ -342,7 +344,7 @@ lookup()
   }
   format[j++]=registry.summary;
   format[j]=NULL;
-  vsprintf(buf,getmsg(T1LOOKUP+registry.template),format);
+  vsprintf(buf,msg_get(T1LOOKUP+registry.template),format);
   print("%s",buf);
 }
 
@@ -351,46 +353,34 @@ void
 edit(char *userid)
 {
   int i, pos;
-  FILE *fp;
-  char fname[256], s[256], *cp;
 
   loadregistry(userid);
 
-  sprintf(fname,TMPDIR"/reg%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    return;
-  }
+  inp_buffer[0]=0;
   for(i=pos=0;i<30;pos+=template[registry.template][i++]+1){
     if(!template[registry.template][i])break;
-    fprintf(fp,"%s\n",&registry.registry[pos]);
+    strcat(inp_buffer,&registry.registry[pos]);
+    strcat(inp_buffer,"\n");
   }
-  fprintf(fp,"%s\nOK button\nCancel button\n",registry.summary);
-  fclose(fp);
+  strcat(inp_buffer,registry.summary);
+  strcat(inp_buffer,"\nOK\nCANCEL\n");
 
-  dataentry("registry",T1VISUAL+registry.template,
-	    T1LINEAR+31*registry.template,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
+  if(dialog_run("registry",T1VISUAL+registry.template,
+		T1LINEAR+31*registry.template,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
+
+  dialog_parse(inp_buffer);
+
   for(i=pos=0;i<30;pos+=template[registry.template][i++]+1){
+    char *s=margv[i];
     if(!template[registry.template][i])break;
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
     strcpy(&registry.registry[pos],s);
   }
-  fgets(s,sizeof(s),fp);
-  if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-  strcpy(registry.summary,s);
-  fgets(s,sizeof(s),fp);
-  fgets(s,sizeof(s),fp);
-  fgets(s,sizeof(s),fp);
-  if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
+
+  strcpy(registry.summary,margv[i]);
+  if(sameas(margv[i+3],"CANCEL")||sameas(margv[i+2],margv[i+3])){
     prompt(EDITCAN);
     return;
   } else prompt(EDITOK);
@@ -404,7 +394,7 @@ editother()
 {
   char userid[128];
 
-  if(!getuserid(userid,EDITWHO,EDITERR,0,0,0))return;
+  if(!get_userid(userid,EDITWHO,EDITERR,0,0,0))return;
   edit(userid);
 }
 
@@ -414,7 +404,7 @@ change()
 {
   char opt;
 
-  if(!getmenu(&opt,1,CHINFO,CHANGE,CHERR,"123",0,0)){
+  if(!get_menu(&opt,1,CHINFO,CHANGE,CHERR,"123",0,0)){
     prompt(NOCHANGE);
     return;
   } else opt-='1';
@@ -442,8 +432,8 @@ run()
   int shownmenu=0;
   char c;
 
-  if(!haskey(&thisuseracc,entrykey)){
-    prompt(NOENTRY,NULL);
+  if(!key_owns(&thisuseracc,entrykey)){
+    prompt(NOENTRY);
     return;
   }
 
@@ -451,7 +441,7 @@ run()
     thisuseronl.flags&=~OLF_BUSY;
     if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
       if(!shownmenu){
-	prompt(haskey(&thisuseracc,syskey)?REGSMNU:REGMNU,NULL);
+	prompt(key_owns(&thisuseracc,syskey)?REGSMNU:REGMNU);
 	prompt(VSHMENU);
 	shownmenu=2;
       }
@@ -459,33 +449,33 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
 	}
 	if(shownmenu==1){
-	  prompt(haskey(&thisuseracc,syskey)?SHSMENU:SHMENU,NULL);
+	  prompt(key_owns(&thisuseracc,syskey)?SHSMENU:SHMENU);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
-	prompt(ABOUT,NULL);
+	prompt(ABOUT);
 	break;
       case 'D':
 	directory();
 	break;
       case 'E':
-	if(haskey(&thisuseracc,syskey))editother();
+	if(key_owns(&thisuseracc,syskey))editother();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -496,10 +486,10 @@ run()
 	scan();
 	break;
       case 'Y':
-	if(haskey(&thisuseracc,crkey))edit(thisuseracc.userid);
+	if(key_owns(&thisuseracc,crkey))edit(thisuseracc.userid);
 	else {
 	  prompt(EDITNAX);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -507,19 +497,19 @@ run()
 	change();
 	break;
       case 'X':
-	prompt(LEAVE,NULL);
+	prompt(LEAVE);
 	return;
       case '?':
 	shownmenu=0;
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -527,18 +517,71 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
   exit(0);
 }
 
 
 int
-main(int argc, char *argv[])
+handler_run(int argc, char *argv[])
 {
-  setprogname(argv[0]);
   init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else run();
+  run();
   done();
   return 0;
+}
+
+
+int
+handler_login(int argc, char *argv[])
+{
+  init();
+  login();
+  done();
+  return 0;
+}
+
+
+int handler_userdel(int argc, char **argv)
+{
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",REGISTRYDIR,victim);
+  unlink(fname);
+
+  return 0;
+}
+
+
+mod_info_t mod_info_registry = {
+  "registry",
+  "Registry of Users",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Allows users to describe themselves to other users.",
+  RCS_VER,
+  "2.0",
+  {80,handler_login},		/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {50,handler_userdel}		/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_registry);
+  return mod_main(argc,argv);
 }

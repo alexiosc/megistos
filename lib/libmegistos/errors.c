@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 14:31:16  alexios
  * Added autoconf support. Added functions with 'sys' suffix
@@ -63,6 +64,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -102,8 +104,8 @@ void *parmlist;
   if((fp=fopen(ERRORFILE,"a"))==NULL)return;
   t=time(0);
   dt=localtime(&t);
-  strftime(datetime,sizeof(datetime),"%d/%m/%y %H:%M:%S",dt);
-  fprintf(fp,"%s %s (%s:%d): %s, ",datetime,module.progname,file,line,reason);
+  strftime(datetime,sizeof(datetime),"%d/%m/%Y %H:%M:%S",dt);
+  fprintf(fp,"%s %s (%s:%d): %s, ",datetime,__module.progname,file,line,reason);
   vfprintf(fp,format,parmlist);
   fputc('\n',fp);
   fclose(fp);
@@ -174,16 +176,9 @@ va_dcl
 
 
 void
-noerrormessages()
+error_setnotify(int state)
 {
-  errormessageflag=0;
-}
-
-
-void
-yeserrormessages()
-{
-  errormessageflag=1;
+  errormessageflag=state;
 }
 
 

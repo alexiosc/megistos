@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:51:09  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:29  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/08/13 16:56:08  alexios
  * Fixed error reporting when injoth() fails.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -73,12 +75,12 @@
 
 
 struct shmuserrec *thisshm=NULL, *othrshm=NULL;
-classrec                   *userclasses=NULL;
-int                        numuserclasses=0;
+classrec_t                 *cls_classes=NULL;
+int                        cls_count=0;
 
 
 int
-userexists(char *uid)
+usr_exists(char *uid)
 {
   DIR *dp;
   struct dirent *de;
@@ -101,20 +103,19 @@ userexists(char *uid)
 }
 
 
-classrec *
-findclass (char *s)
+classrec_t *
+cls_find (char *s)
 {
   int i;
-  for(i=0;i<numuserclasses;i++)if(sameas(userclasses[i].name,s)){
-    return (classrec *)&userclasses[i];
+  for(i=0;i<cls_count;i++)if(sameas(cls_classes[i].name,s)){
+    return (classrec_t *)&cls_classes[i];
   }
-  /*fatal("Can't find class %s!",s,NULL); */
   return NULL;
 }
 
 
 int
-loaduseraccount (char *whose, useracc *uacc)
+usr_loadaccount (char *whose, useracc_t *uacc)
 {
   char fname[256];
   int result;
@@ -122,19 +123,19 @@ loaduseraccount (char *whose, useracc *uacc)
 
   sprintf(fname,"%s/%s",USRDIR,whose);
   if((fp=fopen(fname,"r"))==NULL) return 0;
-  result=fread(uacc,sizeof(useracc),1,fp);
+  result=fread(uacc,sizeof(useracc_t),1,fp);
   fclose(fp);
   if(result!=1) return 0;
 
   if(strncmp(uacc->magic,USR_MAGIC,sizeof(uacc->magic))){
-    fatal("User account for %s is corrupted (invalid magic number)");
+    error_fatal("User account for %s is corrupted (invalid magic number)");
   }
   return 1;
 }
 
 
 int
-loaduseronlrec (char *whose, onlinerec *onlrec)
+usr_loadonlrec (char *whose, onlinerec_t *onlrec)
 {
   char       fname[256];
   int        result;
@@ -142,7 +143,7 @@ loaduseronlrec (char *whose, onlinerec *onlrec)
 
   sprintf(fname,"%s/%s",ONLINEDIR,whose);
   if((fp=fopen(fname,"r"))==NULL) return 0;
-  result=fread(onlrec,sizeof(onlinerec),1,fp);
+  result=fread(onlrec,sizeof(onlinerec_t),1,fp);
   fclose(fp);
   if(result!=1) return 0;
   return 1;
@@ -150,7 +151,7 @@ loaduseronlrec (char *whose, onlinerec *onlrec)
 
 
 int
-saveuseraccount (useracc *uacc)
+usr_saveaccount (useracc_t *uacc)
 {
   char       fname[256],fname2[256];
   int        result;
@@ -159,7 +160,7 @@ saveuseraccount (useracc *uacc)
   sprintf(fname,"%s/%s",USRDIR,uacc->userid);
   sprintf(fname2,"%s/.%05d.%s",USRDIR,(int)getpid(),uacc->userid);
   if((fp=fopen(fname2,"w"))==NULL) return 0;
-  result=fwrite(uacc,sizeof(useracc),1,fp);
+  result=fwrite(uacc,sizeof(useracc_t),1,fp);
   fclose(fp);
   if(result!=1) return 0;
   rename(fname2,fname);
@@ -168,7 +169,7 @@ saveuseraccount (useracc *uacc)
 
 
 int
-saveuseronlrec (onlinerec *usronl)
+usr_saveonlrec (onlinerec_t *usronl)
 {
   char        fname[256],fname2[256];
   int         result;
@@ -179,7 +180,7 @@ saveuseronlrec (onlinerec *usronl)
   if(!stat(fname,&st))return 1;
   sprintf(fname2,"%s/.%05d.%s",ONLINEDIR,(int)getpid(),usronl->userid);
   if((fp=fopen(fname2,"w"))==NULL) return 0;
-  result=fwrite(usronl,sizeof(onlinerec),1,fp);
+  result=fwrite(usronl,sizeof(onlinerec_t),1,fp);
   fclose(fp);
   if(result!=1) return 0;
   rename(fname2,fname);
@@ -188,11 +189,11 @@ saveuseronlrec (onlinerec *usronl)
 
 
 void
-postcredits (char *userid, int amount, int paid)
+usr_postcredits (char *userid, int amount, int paid)
 {
-  useracc user, *uacc=&user;
+  useracc_t user, *uacc=&user;
   
-  if(!uinsys(userid,0))loaduseraccount(userid,uacc);
+  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
   else uacc=&othruseracc;
   if(!uacc) return;
 
@@ -204,16 +205,16 @@ postcredits (char *userid, int amount, int paid)
     if(paid)sysvar->tcredspaid+=amount;
   }
   
-  if(!uinsys(userid,0))saveuseraccount(uacc);
+  if(!usr_insys(userid,0))usr_saveaccount(uacc);
 }
 
 
 void
-chargecredits (int amount)
+usr_chargecredits (int amount)
 {
-  classrec *ourclass=findclass(thisuseracc.curclss);
+  classrec_t *ourclass=cls_find(thisuseracc.curclss);
 
-  if(ourclass)if(ourclass->flags&CF_NOCHRGE)return;
+  if(ourclass)if(ourclass->flags&CLF_NOCHRGE)return;
   thisuseracc.credits-=amount;
   thisuseracc.totcreds-=amount;
   thisuseronl.statcreds+=amount;
@@ -221,11 +222,11 @@ chargecredits (int amount)
 
 
 void
-changeclass (char *userid, char *newclass, int permanent)
+usr_setclass (char *userid, char *newclass, int permanent)
 {
-  useracc *uacc=NULL;
+  useracc_t *uacc=NULL;
 
-  if(!uinsys(userid,0))loaduseraccount(userid,uacc);
+  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
   else uacc=&othruseracc;
   if(!uacc) return;
 
@@ -238,22 +239,22 @@ changeclass (char *userid, char *newclass, int permanent)
     uacc->classdays=0;
   }
   
-  if(!uinsys(userid,0))saveuseraccount(uacc);
+  if(!usr_insys(userid,0))usr_saveaccount(uacc);
 }
 
 
 int
-canpay(int amount)
+usr_canpay(int amount)
 {
-  classrec *ourclass=findclass(thisuseracc.curclss);
+  classrec_t *ourclass=cls_find(thisuseracc.curclss);
 
-  if(ourclass)if(ourclass->flags&CF_NOCHRGE)return 1;
+  if(ourclass)if(ourclass->flags&CLF_NOCHRGE)return 1;
   return(thisuseracc.credits>=amount);
 }
 
 
 int
-uinsystem(char *userid, int checkinvis, struct shmuserrec **buf)
+usr_insystem(char *userid, int checkinvis, struct shmuserrec **buf)
 {
   char fname [256];
   FILE *fp;
@@ -266,7 +267,7 @@ uinsystem(char *userid, int checkinvis, struct shmuserrec **buf)
     return 1;
   } */
   if(!fscanf(fp,"%d",&shmid)){
-    fatal("Unable to read file %s",fname);
+    error_fatal("Unable to read file %s",fname);
   }
   fclose(fp);
 
@@ -282,18 +283,18 @@ uinsystem(char *userid, int checkinvis, struct shmuserrec **buf)
 
 
 int
-uinsys(char *userid, int checkinvis)
+usr_insys(char *userid, int checkinvis)
 {
-  if(!userexists(userid))return 0;
-  return uinsystem(userid,checkinvis,&othrshm);
+  if(!usr_exists(userid))return 0;
+  return usr_insystem(userid,checkinvis,&othrshm);
 }
 
 
 int
-injoth(onlinerec *user,char *msg,int force)
+usr_injoth(onlinerec_t *user,char *msg,int force)
 {
   char dummy[MSGMAX+sizeof(long)];
-  struct msgbuf *buf=(struct msgbuf*)(&dummy);
+  struct injothbuf *buf=(struct injothbuf*)(&dummy);
 
   if(!force)if(user->flags&OLF_BUSY)return 0;
   
@@ -305,12 +306,12 @@ injoth(onlinerec *user,char *msg,int force)
   buf->mtext[MSGMAX-1]=0;
 
   if(strlen(msg)+1>MSGMAX){
-    interror("Message len (%d) exceeded size of injoth buf (%d).",
-	     strlen(msg), MSGMAX);
+    error_int("Message len (%d) exceeded size of injoth buf (%d).",
+	      strlen(msg), MSGMAX);
   }
 
   if(msgsnd(user->injothqueue,buf,strlen(msg)+1,IPC_NOWAIT)<0){
-    interrorsys("Failed to injoth() to %s",user->userid,i,strerror(i));
+    error_intsys("Failed to injoth() to %s",user->userid,i,strerror(i));
     return 0;
   }
   
@@ -349,7 +350,7 @@ cachechk(char *s)
 
 
 int
-uidxref(char *userid, int online)
+usr_uidxref(char *userid, int online)
 {
   char matches[1000][80];
   int  num=0;
@@ -360,11 +361,11 @@ uidxref(char *userid, int online)
   if(strlen(userid)<3 && (!online))return 0;
   if(!strlen(userid) && online)return 0;
   cache=cachechk(userid);
-  if(online)if(uinsys(userid,!hassysaxs(&thisuseracc,USY_MASTERKEY))){
+  if(online)if(usr_insys(userid,!hassysaxs(&thisuseracc,USY_MASTERKEY))){
     if(!cache)cachepush(userid);
     return 1;
   }
-  if(!online)if(userexists(userid)){
+  if(!online)if(usr_exists(userid)){
     if(!cache)cachepush(userid);
     return 1;
   }
@@ -373,13 +374,13 @@ uidxref(char *userid, int online)
   memset(matches,0,sizeof(matches));
   if(online){
     int i;
-    struct linestatus status;
+    channel_status_t status;
 
-    for(i=0;i<numchannels;i++){
-      if(getlinestatus(channels[i].ttyname,&status)<0)continue;
+    for(i=0;i<chan_count;i++){
+      if(channel_getstatus(channels[i].ttyname,&status)<0)continue;
       
       if(status.result==LSR_USER){
-	if(uinsys(status.user,!hassysaxs(&thisuseracc,USY_MASTERKEY))){
+	if(usr_insys(status.user,!hassysaxs(&thisuseracc,USY_MASTERKEY))){
 	  if(sameto(userid,status.user)&&(num<1000)){
 	    strcpy(matches[num],status.user);
 	    num++;
@@ -414,19 +415,19 @@ uidxref(char *userid, int online)
   else {
     int i,ans=0;
     
-    setmbk(sysblk);
+    msg_set(msg_sys);
     for(;;){
-      endcnc();
+      cnc_end();
       if(num){
 	prompt(UXRF1,userid);
 	for(i=0;i<num;i++)prompt(UXRF2,i+1,matches[i]);
 	prompt(UXRF3,1,num);
       } else prompt(UXRF3A);
-      getinput(0);
+      inp_get(0);
       if(!margc){
 	continue;
-      } else if(margc && isX(margv[0])){
-	rstmbk();
+      } else if(margc && inp_isX(margv[0])){
+	msg_reset();
 	return 0;
       } else if(margc && sameas(margv[0],"?")){
 	continue;
@@ -436,11 +437,11 @@ uidxref(char *userid, int online)
 	  continue;
 	} else {
 	  cachepush(strcpy(userid,matches[ans-1]));
-	  rstmbk();
+	  msg_reset();
 	  return 1;
 	}
       } else if(margc){
-	rstmbk();
+	msg_reset();
 	strcpy(userid,margv[0]);
 	retry=1;
 	goto tryagain;
@@ -449,5 +450,3 @@ uidxref(char *userid, int online)
   }
   return 0;
 }
-
-

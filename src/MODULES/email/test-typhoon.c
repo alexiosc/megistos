@@ -21,7 +21,7 @@
 extern int findmsgto(int *msgno, char *who, int targetnum, int direction);
 
 
-void fatal(char *a, char *b)
+void error_fatal(char *a, char *b)
 {
   fprintf(stderr,"%s: %s\n",a,b);
   exit(1);

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:46:41  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,41 +77,39 @@
 #include "mbk_emailclubs.h"
 
 
-promptblk *msg;
-promptblk *bulletins_msg;
-promptblk *emailclubs_msg;
+promptblock_t *msg;
+promptblock_t *bulletins_msg;
+promptblock_t *emailclubs_msg;
 
 int  sopkey;
 int  defblt;
 int  defansi;
 char *bltidfn;
 
-char *progname;
-
 void
 init()
 {
-  initmodule(INITALL);
+  mod_init(INI_ALL);
 
-  emailclubs_msg=opnmsg("emailclubs");
-  sopkey=numopt(EMAILCLUBS_SOPKEY,0,129);
-  clsmsg(emailclubs_msg);
+  emailclubs_msg=msg_open("emailclubs");
+  sopkey=msg_int(EMAILCLUBS_SOPKEY,0,129);
+  msg_close(emailclubs_msg);
 
-  bulletins_msg=opnmsg("bulletins");
+  bulletins_msg=msg_open("bulletins");
 
-  msg=opnmsg("offline.bulletins");
-  defblt=ynopt(DEFBLT);
-  defansi=ynopt(DEFANSI);
-  bltidfn=stgopt(BLTIDFN);
+  msg=msg_open("offline.bulletins");
+  defblt=msg_bool(DEFBLT);
+  defansi=msg_bool(DEFANSI);
+  bltidfn=msg_string(BLTIDFN);
 
-  setlanguage(thisuseracc.language);
+  msg_setlanguage(thisuseracc.language);
 }
 
 
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
@@ -117,23 +117,52 @@ void
 warn()
 {
   fprintf(stderr,"This is a Mailer plugin. ");
-  fprintf(stderr,"It should not be run by the user.\n");
+  fprintf(stderr,"It should not be run as an ordinary module.\n");
   exit(1);
 }
+
+
+mod_info_t mod_info_offline_bulletins = {
+  "offline.bulletins",
+  "Mailer Plugin: Bulletins",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Packages off-line requested bulletins and lists of bulletins.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,NULL},			/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+char *progname;
 
 
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(argc<2)warn();
-  atexit(done);
-  progname=argv[0];
-  init();
-  if(!strcmp(argv[1],"-setup"))setup();
-  else if(!strcmp(argv[1],"-download"))return obdownload();
-  else if(!strcmp(argv[1],"-upload"))return obupload();
-  else warn();
-  done();
-  return 0;
+  progname=mod_info_offline_bulletins.progname;
+  mod_setinfo(&mod_info_offline_bulletins);
+
+  if(argc!=2)return mod_main(argc,argv);
+
+  if(!strcmp(argv[1],"--setup")){
+    atexit(done);
+    init();
+    setup();
+  } else if(!strcmp(argv[1],"--download")){
+    atexit(done);
+    init();
+    return obdownload();
+  } else if(!strcmp(argv[1],"--upload")){
+    atexit(done);
+    init();
+    return obupload();
+  }
+
+  /* This should only return help, info, etc */
+  return mod_main(argc,argv);
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:53  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -98,21 +100,21 @@ listclubs()
   struct dirent **clubs;
   int n,i;
   
-  setmbk(clubmsg);
+  msg_set(clubmsg);
   n=scandir(CLUBHDRDIR,&clubs,hdrselect,alphasort);
   prompt(LCHDR);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
     prompt(LCTAB,clubhdr.club,clubhdr.clubop,clubhdr.descr);
   }
   free(clubs);
-  if(lastresult==PAUSE_QUIT){
-    setmbk(msg);
+  if(fmt_lastresult==PAUSE_QUIT){
+    msg_set(msg);
     return;
   }
   prompt(LCFTR);
-  setmbk(msg);
+  msg_set(msg);
 }

@@ -42,11 +42,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.6  1999/07/18 22:09:11  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.5  1998/12/27 16:33:27  alexios
  * Added autoconf support.
@@ -75,6 +76,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,12 +106,13 @@
 #define AUT_CKIECUE (AUF_INFO|AUF_EVENT)
 
 
+
 void
 init()
 {
-  initmodule(INITALL);
-  setlanguage(thisuseracc.language);
-  setverticalformat(0);
+  mod_init(INI_ALL);
+  msg_setlanguage(thisuseracc.language);
+  fmt_setverticalformat(0);
 }
 
 
@@ -125,9 +128,9 @@ cleanup()
   int dotcount=0;
   char c;
 
-  initmodule(INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES);
+  mod_init(INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES);
 
-  setauditfile(CLNUPAUDITFILE);
+  audit_setfile(CLNUPAUDITFILE);
   audit("CLEANUP",AUDIT(CKIECUB));
 
   printf("\nMegistos BBS cookie database index.\n");
@@ -187,7 +190,7 @@ cleanup()
     printf("Done!\n\n");
   }
   audit("CLEANUP",AUDIT(CKIECUE),total,numfiles);
-  resetauditfile();
+  audit_resetfile();
 }
 
 
@@ -211,7 +214,7 @@ run(int begin, int end)
   n=scandir(COOKIEDIR,&d,cookiesel,alphasort);
 
   if(n==0){
-    logerror("Didn't find any cookie files in "COOKIEDIR);
+    error_log("Didn't find any cookie files in "COOKIEDIR);
   }
 
   /* Choose a file at random. Every file has an equal chance of being
@@ -229,10 +232,10 @@ run(int begin, int end)
   }
 
   if ((qdb=fopen(dat,"r")) == NULL) {
-    logerrorsys("Unable to open %s",dat);
+    error_logsys("Unable to open %s",dat);
   }
   if ((idx=fopen(idxfn,"r")) == NULL) {
-    logerrorsys("Unable to open %s",idxfn);
+    error_logsys("Unable to open %s",idxfn);
   }
   fread(&max,sizeof(max),1,idx);
   choice=rnd(max)+1;
@@ -240,7 +243,7 @@ run(int begin, int end)
   fread(&idxptr,sizeof(long),1,idx);
   fseek(qdb,idxptr,SEEK_SET);
   
-  setmbk(sysblk);
+  msg_set(msg_sys);
   prompt(begin);
   c=getc(qdb);
   cp=buf;
@@ -268,15 +271,47 @@ run(int begin, int end)
 }
 
 
-void
-main(int argc, char *argv[])
+int handler_run(int argc, char **argv)
 {
-  setprogname(argv[0]);
-  if(argc>1 && !strcmp(argv[1],"-cleanup"))cleanup();
-  else {
-    init();
-    if(argc>1 && !strcmp(argv[1],"-logout"))run(COOKIE,CKIEEND);
-    else run(GCOOKIE,GCKIEEND);
-  }
+  init();
+  run(GCOOKIE,GCKIEEND);
+  return 0;
 }
 
+int handler_logout(int argc, char **argv)
+{
+  init();
+  run(COOKIE,CKIEEND);
+  return 0;
+}
+
+int handler_cleanup(int argc, char **argv)
+{
+  cleanup();
+  return 0;
+}
+
+
+
+mod_info_t mod_info_cookie = {
+  "cookie",
+  "Cookie",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Shows random quotes a la fortune(1) at logout and when /cookie is issued.",
+  RCS_VER,
+  "2.0",
+  {0,NULL},			/* No login handler */
+  {0,handler_run},		/* No run handler, this is a simple module */
+  {20,handler_logout},		/* Install logout handler */
+  {0,NULL},			/* No hangup handler */
+  {90,handler_cleanup},		/* Low-priority cleanup handler */
+  {0,NULL}			/* No delete user handler, no per-user info */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_cookie);
+  return mod_main(argc,argv);
+}

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -245,7 +247,7 @@ parsein(int num,char *keyword,char *array[],char *data)
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
   FILE *fin, *fout;
@@ -254,7 +256,7 @@ main(int argc, char *argv[])
   struct keyword *k;
   union action a;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if((fin=fopen(TELEACTSRCFILE,"r"))==NULL){
     fprintf(stderr,"%s: Unable to open %s\n",argv[0],TELEACTSRCFILE);
     exit(1);
@@ -482,5 +484,5 @@ main(int argc, char *argv[])
   }
   printf("\n");
 
-  exit(0);
+  return 0;
 }

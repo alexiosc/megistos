@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -96,12 +98,12 @@ downloadatt(struct message *msg)
     }
   }
 
-  if(!canpay(dnlchg)){
+  if(!usr_canpay(dnlchg)){
     prompt(DNLNCRD);
     return;
-  } else chargecredits(dnlchg);
+  } else usr_chargecredits(dnlchg);
 
-  sprintf(nameless,"%ld.att",msg->msgno);
+  sprintf(nameless,"%d.att",msg->msgno);
   noname=sameas(msg->fatt,nameless);
   sprintf(fname,"%s/%s/"MSGATTDIR"/%s",
 	  MSGSDIR,
@@ -116,7 +118,7 @@ downloadatt(struct message *msg)
   if(noname)prompt(ATTMNT1,st.st_size);
   else prompt(ATTMNT2,msg->fatt,st.st_size);
 
-  if(!getbool(&i,ATTDNL,ATTERR,ATTDEF,0))return;
+  if(!get_bool(&i,ATTDNL,ATTERR,ATTDEF,0))return;
   if(!i)return;
 
   sprintf(dnldir,TMPDIR"/dnlatt%d%lx",getpid(),time(0));
@@ -129,7 +131,7 @@ downloadatt(struct message *msg)
     return;
   }
 
-  sprintf(descr,getmsg(ATTDESC),
+  sprintf(descr,msg_get(ATTDESC),
 	  msg->club[0]?msg->club:EMAILCLUBNAME,
 	  msg->msgno);
 
@@ -141,13 +143,13 @@ downloadatt(struct message *msg)
   sprintf(audit[3],AUD_ESDNLF,
 	  thisuseracc.userid,msg->club[0]?msg->club:EMAILCLUBNAME,
 	  (int)msg->msgno);
-  setaudit(AUT_ESDNLS,audit[0],audit[1],AUT_ESDNLF,audit[2],audit[3]);
+  xfer_setaudit(AUT_ESDNLS,audit[0],audit[1],AUT_ESDNLF,audit[2],audit[3]);
 
-  addxfer(FXM_DOWNLOAD,dnlname,descr,dnlchg,-1);
+  xfer_add(FXM_DOWNLOAD,dnlname,descr,dnlchg,-1);
 
-  dofiletransfer();
+  xfer_run();
   msg->timesdnl++;
-  killxferlist();
-  endcnc();
+  xfer_kill_list();
+  cnc_end();
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -64,21 +66,21 @@ getfilenames(int pr)
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
     } else {
       prompt(pr);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     } else if(!strcmp(fn,"?")){
       listapproved();
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -126,15 +128,15 @@ op_del()
   numfiles=expandspec(spec,1);
   if(numfiles==0){
     prompt(ODELERR);
-    endcnc();
+    cnc_end();
     return;
   } else if(numfiles>0){
     prompt(ODELNUM,numfiles);
   }
 
-  endcnc();
+  cnc_end();
   if(!mode)
-    if(!getbool(&mode,ODELMOD,ODELMOD,0,0))return;
+    if(!get_bool(&mode,ODELMOD,ODELMOD,0,0))return;
 
   fr=firstfile();
   i=1;
@@ -148,9 +150,9 @@ op_del()
       if(!all){
 	prompt(ODELINF,i,numfiles);
 	fileinfo(&library,&f);
-	setinputflags(INF_HELP);
-	res=getmenu(&c,0,0,ODELMNU,0,"YNA",0,0);
-	setinputflags(INF_NORMAL);
+	inp_setflags(INF_HELP);
+	res=get_menu(&c,0,0,ODELMNU,0,"YNA",0,0);
+	inp_clearflags(INF_HELP);
 	if(res<0)continue;
 	if(res==0)goto done;
 	if(c=='A'){

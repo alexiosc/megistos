@@ -6,6 +6,22 @@
  **  PURPOSE:  Renumber the bulletins.                                      **
  **  NOTES:                                                                 **
  **                                                                         **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
 \*****************************************************************************/
 
 
@@ -13,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:53  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:19:18  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support. Fixed stupid bug that wouldn't update
@@ -36,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,14 +86,14 @@ static void resetclubs()
 
   strcpy(fname,CLUBHDRDIR);
   if((dp=opendir(fname))==NULL){
-    fatalsys("Can't open directory %s\n",fname);
+    error_fatalsys("Can't open directory %s\n",fname);
   }
 
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
     sprintf(fname,"%s/%s",CLUBHDRDIR,dir->d_name);
     if((fp=fopen(fname,"r"))==NULL){
-      fatalsys("Error while opening club header %s",fname);
+      error_fatalsys("Error while opening club header %s",fname);
       continue;
     }
 
@@ -90,7 +108,7 @@ static void resetclubs()
     }
     fclose(fp);
     if((fp=fopen(fname,"w"))==NULL){
-      fatalsys("Error while opening club header %s",fname);
+      error_fatalsys("Error while opening club header %s",fname);
       continue;
     }
     
@@ -152,8 +170,8 @@ static void updateheader(char *oldclub, int count)
 }
 
 
-void
-cleanup()
+int
+cleanup(int argc, char **argv)
 {
   FILE *fp;
   char fname[256];
@@ -182,7 +200,7 @@ cleanup()
 
   if(dayssince<1){
     printf("Cleanup not done yet.\n");
-    return;
+    return 0;
   }
 
 
@@ -196,7 +214,7 @@ cleanup()
     sprintf(fname,TMPDIR"/blt%lx",time(0));
     if((fp=fopen(fname,"w"))==NULL){
       printf("Unable to open temp file\n");
-      return;
+      return 0;
     }
 
     dbopen();
@@ -205,7 +223,7 @@ cleanup()
       printf("Empty database.\n");
       fclose(fp);
       unlink(fname);
-      return;
+      return 0;
     }
 
     num=1;
@@ -219,7 +237,7 @@ cleanup()
 	       i,strerror(i));
 	fclose(fp);
 	unlink(fname);
-	return;
+	return 0;
       }
       i++;
     }while(dblistnext());
@@ -238,7 +256,7 @@ cleanup()
 
     if((fp=fopen(fname,"r"))==NULL){
       printf("FATAL ERROR, BULLETIN INDEX LOST.\n");
-      return;
+      return 0;
     }
 
 
@@ -248,7 +266,7 @@ cleanup()
       if(fread(&blt,sizeof(blt),1,fp)!=1){
 	printf("FATAL ERROR, UNABLE TO READ FROM TEMPORARY BULLETIN INDEX\n");
 	fclose(fp);
-	return;
+	return 0;
       }
       
       blt.num=num++;
@@ -274,4 +292,6 @@ cleanup()
   }
 
   printf("Bulletin cleanup done.\n\n");
+
+  return 0;
 }

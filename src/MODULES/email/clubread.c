@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:02  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support. Slight fixes.
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -106,14 +108,14 @@ methodmenu(int d)
   int i;
 
   for(;;){
-    setinputflags(INF_HELP);
-    if(!d)i=getmenu(&opt,0,0,RCMNU,RCMNUR,"SFTLKQ",RCMNUD,'S');
-    else i=getmenu(&opt,0,0,DMNU,DMNUR,"SFTLKQ",DMNUD,'S');
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    if(!d)i=get_menu(&opt,0,0,RCMNU,RCMNUR,"SFTLKQ",RCMNUD,'S');
+    else i=get_menu(&opt,0,0,DMNU,DMNUR,"SFTLKQ",DMNUD,'S');
+    inp_clearflags(INF_HELP);
     if(!i)return 0;
     if(i==-1){
       prompt(d?DMNUH:RCMNUH);
-      endcnc();
+      cnc_end();
       continue;
     } else return opt;
   }
@@ -133,19 +135,19 @@ quickmenu(int file)
   sprintf(fname,"%s/%s",QSCDIR,thisuseracc.userid);
   if(stat(fname,&st)||st.st_size==0||(ecuser.flags&ECF_QSCCFG)==0){
     prompt(RQCFH);
-    endcnc();
+    cnc_end();
     configurequickscan(1);
     return;
   }
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,0,0,RQMNU,RCMNUR,"SFTLKC",RCMNUD,'S');
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,0,0,RQMNU,RCMNUR,"SFTLKC",RCMNUD,'S');
+    inp_clearflags(INF_HELP);
     if(!i)return;
     if(i==-1){
       prompt(RQMNUH);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -185,7 +187,7 @@ clubread(int file)
 
   if(file&&(getclubax(&thisuseracc,clubhdr.club)<CAX_DNLOAD)){
     prompt(DNLNAX);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -235,23 +237,23 @@ keywordscan()
 
   if(quickscan)startqsc();
   for(;;){
-    if(morcnc()){
-      i=nxtcmd;
-      strcpy(tmp,nxtcmd);
-      strcpy(input,nxtcmd);
-      parsin();
+    if(cnc_more()){
+      i=cnc_nxtcmd;
+      strcpy(tmp,cnc_nxtcmd);
+      strcpy(inp_buffer,cnc_nxtcmd);
+      inp_parsin();
     } else {
       prompt(RKASK);
-      getinput(0);
+      inp_get(0);
       if(!margc)continue;
     }
     i=margv[0];
     
     if(!i[0])continue;
-    else if(isX(i))return;
+    else if(inp_isX(i))return;
     else if(sameas("?",i)){
       prompt(RKHELP);
-      endcnc();
+      cnc_end();
       continue;
     } else {
       char s[256], *cp;

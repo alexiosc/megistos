@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:30  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 14:31:16  alexios
  * Added autoconf support. Made allowances for new getlinestatus().
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -71,8 +73,8 @@
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "audit.h"
 #include "config.h"
+#include "audit.h"
 #include "useracc.h"
 #include "miscfx.h"
 #include "sysstruct.h"
@@ -86,7 +88,7 @@
 #include "mbk_sysvar.h"
 
 
-char auditfile[256]=AUDITFILE;
+static char auditfile[256]=AUDITFILE;
 
 
 void
@@ -97,18 +99,18 @@ char *channel, *summary, *detailed;
   int i;
   struct shmuserrec *ushm=NULL;
   char buf[MSGBUFSIZE];
-  struct linestatus status;
+  channel_status_t status;
 
-  if(numchannels==0)return;	/* Not initialised yet */
+  if(chan_count==0)return;	/* Not initialised yet */
 
-  for(i=0;i<numchannels;i++){
-    if(!getlinestatus(channels[i].ttyname,&status)){
+  for(i=0;i<chan_count;i++){
+    if(!channel_getstatus(channels[i].ttyname,&status)){
       continue;
     }
     
     fflush(stdout);
     if(status.result==LSR_USER){
-      if(uinsystem(status.user,0,&ushm)){
+      if(usr_insystem(status.user,0,&ushm)){
 	if(!ushm){
 	  continue;
 	}
@@ -118,11 +120,11 @@ char *channel, *summary, *detailed;
 	if(hassysaxs(&ushm->acc,USY_PAGEAUDIT)&&
 	   ((flags&ushm->acc.auditfiltering)&~AUF_SEVERITY)&&
 	   ((flags&ushm->acc.auditfiltering)&AUF_SEVERITY)){
-	  setmbk(sysblk);
-	  sprintf(buf,getmsglang(AUDINJI+GETSEVERITY(flags),ushm->acc.language-1),
+	  msg_set(msg_sys);
+	  sprintf(buf,msg_getl(AUDINJI+GETSEVERITY(flags),ushm->acc.language-1),
 		  channel,summary,detailed);
-	  rstmbk();
-	  injoth(&ushm->onl,buf,0);
+	  msg_reset();
+	  usr_injoth(&ushm->onl,buf,0);
 	}
 	shmdt((char *)ushm);
       }
@@ -132,7 +134,7 @@ char *channel, *summary, *detailed;
 
 
 int
-audit(char *channel,int flags,char *summary,char *format,...)
+audit(char *channel, uint32 flags, char *summary, char *format,...)
 {
   va_list args;
 
@@ -144,8 +146,10 @@ audit(char *channel,int flags,char *summary,char *format,...)
 
   if((fp=fopen(auditfile,"a"))==NULL)return 0;
 
+  if(channel==NULL)channel=thisuseronl.channel;
+
   if(sameto("tty",channel)){
-    int c=getchannelnum(channel);
+    int c=chan_getnum(channel);
     if(c!=-1)sprintf(chanstr,"CHANNEL %02x",c);
     else sprintf(chanstr,"%-10s",channel);
   } else sprintf(chanstr,"%-10s",channel);
@@ -168,14 +172,14 @@ audit(char *channel,int flags,char *summary,char *format,...)
 
 
 void
-setauditfile(char *s)
+audit_setfile(char *s)
 {
-  strcpy(auditfile,s);
+  strcpy(auditfile,s!=NULL?s:AUDITFILE);
 }
 
 
 void
-resetauditfile()
+audit_resetfile()
 {
   strcpy(auditfile,AUDITFILE);
 }

@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1999/07/18 21:29:45  alexios
  * Major changes to allow for download rebates, etc.
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -69,8 +71,8 @@ getfilenames()
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
       if(!getlibaccess(&library,ACC_DOWNLOAD)){
 	prompt(DNLNAX);
 	return NULL;
@@ -81,17 +83,17 @@ getfilenames()
 	return NULL;
       }
       prompt(DNLASK);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     } else if(!strcmp(fn,"?")){
       prompt(DNLHLP);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -115,9 +117,9 @@ dodownload()
   if(library.flags&LBF_DNLAUD){
     sprintf(audit[0],AUD_FDNLOK,library.fullname);
     sprintf(audit[1],AUD_FDNLERR,library.fullname);
-    setaudit(AUT_FDNLOK,AUS_FDNLOK,audit[0],
-	     AUT_FDNLERR,AUS_FDNLERR,audit[1]);
-  } else setaudit(0,NULL,NULL,0,NULL,NULL);
+    xfer_setaudit(AUT_FDNLOK,AUS_FDNLOK,audit[0],
+		  AUT_FDNLERR,AUS_FDNLERR,audit[1]);
+  } else xfer_setaudit(0,NULL,NULL,0,NULL,NULL);
 
 
   /* Remove the rebate file */
@@ -147,21 +149,21 @@ dodownload()
       if(fileread(library.libnum,f->fname,1,&file)){
 	sprintf(command,"echo %d %s %d %s >>"REBATELOG,
 		rebate,file.uploader,library.libnum,f->fname,(int)getpid());
-	setcmd(command,NULL);
+	xfer_setcmd(command,NULL);
       }
     }
 		     
     /* Register the file for downloading */
-    addxfer(FXM_DOWNLOAD,fname,f->summary,library.dnlcharge,-1);
+    xfer_add(FXM_DOWNLOAD,fname,f->summary,library.dnlcharge,-1);
 
     f=nextfile();
   }
 
   /* Perform the transfer */
 
-  dofiletransfer();
-  killxferlist();
-  endcnc();
+  xfer_run();
+  xfer_kill_list();
+  cnc_end();
 }
 
 
@@ -181,14 +183,14 @@ postdownload()
     struct fileidx file;
 
     if(fscanf(fp,"%d %s %d %s %d %*s\n",&rebate,user,&libnum,fname,&res)!=5){
-      logerror("Rebate file %s had incorrect format.",fname);
+      error_log("Rebate file %s had incorrect format.",fname);
       fclose(fp);
       unlink(fname);
       return;
     }
 
     /* Post the rebate to the user */
-    if(rebate)postcredits(user,rebate,0);
+    if(rebate)usr_postcredits(user,rebate,0);
 
     /* Increase the downloads counter of the file */
     if(libreadnum(libnum,&lib)){
@@ -219,17 +221,17 @@ download(char *fnames)
     
     numfiles=expandspec(spec,0);
     
-    if(!numfiles)endcnc();
+    if(!numfiles)cnc_end();
     else break;
   } else {
     expandspec(fnames,0);
   }
 
   charge=gettotalcharge();
-  if(!canpay(charge)){
+  if(!usr_canpay(charge)){
     prompt(DNLNCR);
     return;
-  } else chargecredits(charge);
+  } else usr_chargecredits(charge);
 
   dodownload();
 

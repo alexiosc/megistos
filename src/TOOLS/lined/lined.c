@@ -29,15 +29,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:50  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  2000/01/08 12:47:37  alexios
  * Slight bug fix that caused a segmentation fault when opening
  * new files.
  *
  * Revision 0.7  1999/07/18 22:09:18  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:33:54  alexios
  * Added autoconf support. Added support for new file transfer
@@ -69,6 +70,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,9 +106,9 @@ struct line {
 } *first=NULL, *last=NULL, *inspoint=NULL;
 
 
-promptblk    *msg;
+promptblock_t    *msg;
 int          numlines=0, numbytes=0, maxsize=1<<16;
-extern char  input[MAXINPLEN];
+extern char  inp_buffer[MAXINPLEN];
 char         wraparound[1024], filename[1024];
 
 
@@ -126,12 +128,12 @@ latin(char *s)
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("lined");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("lined");
+  msg_setlanguage(thisuseracc.language);
 
-  maxlen=numopt(MAXLEN,20,255);
-  txtupld=stgopt(TXTUPLD);
+  maxlen=msg_int(MAXLEN,20,255);
+  txtupld=msg_string(TXTUPLD);
 }
 
 
@@ -219,13 +221,13 @@ edinputstring(int maxlen)
   int  cp=0, count=0;
   unsigned char c;
 
-  nonblocking();
-  reprompt=0;
+  inp_nonblock();
+  inp_clearflags(INF_REPROMPT);
 
-  strcpy(input,wraparound);
+  strcpy(inp_buffer,wraparound);
   wraparound[0]=0;
-  cp=strlen(input);
-  if(cp)write(0,input,cp);
+  cp=strlen(inp_buffer);
+  if(cp)write(0,inp_buffer,cp);
 
   if(!maxlen)maxlen=MAXINPLEN-1;
   for(;;){
@@ -233,33 +235,34 @@ edinputstring(int maxlen)
       usleep(10000);
       count=(count+1)%10;
       if(count) continue;
-      if(dontinjoth || cp) continue;
-      if(acceptinjoth()){
-	reprompt=1;
-	clrinp();
-	blocking();
+      if((inp_flags&INF_NOINJOTH) || cp) continue;
+      if(inp_acceptinjoth()){
+	inp_setflags(INF_REPROMPT);
+	inp_clear();
+	inp_block();
 	return;
       }
     }
-    resetinactivity();
+    inp_resetidle();
     switch(c){
     case 13:
     case 10:
       c='\n';
       write(0,&c,1);
       fflush(stdout);
-      input[cp]=0;
-      monitorinput(getenv("CHANNEL"));
-      if(handlegcs()){
-	clrinp();
-	reprompt=1;
+      inp_buffer[cp]=0;
+      inp_setmonitorid(getenv("CHANNEL"));
+      inp_monitor();
+      if(gcs_handle()){
+	inp_clear();
+	inp_setflags(INF_REPROMPT);
       }
-      blocking();
+      inp_block();
       return;
     case 127:
     case 8:
       if(cp){
-	write(0,del,3);
+	write(0,inp_del,3);
 	cp--;
       }
       break;
@@ -268,7 +271,7 @@ edinputstring(int maxlen)
 	char i=7;
 	write(0,&i,1);
       } else if(cp<maxlen && (c>=0x20)){
-	input[cp++]=c;
+	inp_buffer[cp++]=c;
 	write(0,&c,1);
       } else if(cp>maxlen){
 	char i=7;
@@ -276,22 +279,23 @@ edinputstring(int maxlen)
       } else if(cp==maxlen){
 	int i;
 	char j=32;
-	input[cp++]=c;
-	input[cp]=0;
-	for(i=0;cp && input[cp]!=32;cp--,i++)write(0,del,1);
-	if(input[cp]==32)strcpy(wraparound,&input[cp+1]);
-	else strcpy(wraparound,&input[cp]);
+	inp_buffer[cp++]=c;
+	inp_buffer[cp]=0;
+	for(i=0;cp && inp_buffer[cp]!=32;cp--,i++)write(0,inp_del,1);
+	if(inp_buffer[cp]==32)strcpy(wraparound,&inp_buffer[cp+1]);
+	else strcpy(wraparound,&inp_buffer[cp]);
 	for(;i;i--)write(0,&j,1);
 	j='\n';
 	write(0,&j,1);
 	fflush(stdout);
-	input[cp]=0;
-	monitorinput(getenv("CHANNEL"));
-	if(handlegcs()){
-	  clrinp();
-	  reprompt=1;
+	inp_buffer[cp]=0;
+	inp_setmonitorid(getenv("CHANNEL"));
+	inp_monitor();
+	if(gcs_handle()){
+	  inp_clear();
+	  inp_setflags(INF_REPROMPT);
 	}
-	blocking();
+	inp_block();
 	return;
       }
     }
@@ -302,16 +306,16 @@ edinputstring(int maxlen)
 char *
 edgetinput()
 {
-  afterinput=1;
-  memset(input,0,sizeof(input));
-  if(lastresult==PAUSE_QUIT) {
-    reprompt=1;
+  out_setflags(OFL_AFTERINPUT);
+  memset(inp_buffer,0,sizeof(inp_buffer));
+  if(fmt_lastresult==PAUSE_QUIT) {
+    inp_setflags(INF_REPROMPT);
   } else {
-    resetvpos(0);
+    fmt_resetvpos(0);
     edinputstring(maxlen);
   }
-  resetvpos(0);
-  nxtcmd=NULL;
+  fmt_resetvpos(0);
+  cnc_nxtcmd=NULL;
   return margv[0];
 }
 
@@ -353,7 +357,7 @@ showtext(int start, int end)
 
   prompt(TXTHDR);
   for(i=1,l=first;l;l=l->next,i++){
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(i>=start && i<=end)prompt(TXTLST,i,l->text);
     else if(i>end)break;
   }
@@ -374,7 +378,7 @@ insert()
   struct line *l;
   int i,linenum;
 
-  if(!getnumber(&linenum,INSERT,1,numlines,INVLIN,0,0))return 0;
+  if(!get_number(&linenum,INSERT,1,numlines,INVLIN,0,0))return 0;
   
   for(l=NULL,i=1;i<linenum;i++,l=(!l?first:l->next));
   inspoint=l;
@@ -395,7 +399,7 @@ retype()
   struct line *l;
   int i,linenum;
 
-  if(!getnumber(&linenum,RETYPE,1,numlines,INVLIN,0,0))return;
+  if(!get_number(&linenum,RETYPE,1,numlines,INVLIN,0,0))return;
 
   for(l=first,i=1;i<linenum;i++,l=l->next);
   prompt(TXTLST,i,l->text);
@@ -404,10 +408,10 @@ retype()
   prompt(RULER);
   numbytes-=strlen(l->text)+1;
   sizewarn();
-  getinput(min(maxlen-1,maxsize-numbytes));
+  inp_get(min(maxlen-1,maxsize-numbytes));
   free(l->text);
-  l->text=(char *)alcmem(strlen(input)+1);
-  strcpy(l->text,input);
+  l->text=(char *)alcmem(strlen(inp_buffer)+1);
+  strcpy(l->text,inp_buffer);
   numbytes+=strlen(l->text)+1;
 }
 
@@ -417,29 +421,29 @@ getrange(int *m, int *n, int min, int max, int pr, int err)
 {
   int i;
   for(;;){
-    if(morcnc()){
-      if(isX(nxtcmd))return 0;
-      rstrin();
+    if(cnc_more()){
+      if(inp_isX(cnc_nxtcmd))return 0;
+      inp_raw();
     } else {
       prompt(pr,min,max);
-      getinput(0);
+      inp_get(0);
       if(!margc)continue;
-      if(margc==1 && isX(margv[0]))return 0;
-      rstrin();
-      nxtcmd=input;
+      if(margc==1 && inp_isX(margv[0]))return 0;
+      inp_raw();
+      cnc_nxtcmd=inp_buffer;
     }
     *m=*n=0;
-    if(!strchr(nxtcmd,'-') && sscanf(nxtcmd,"%d%n",n,&i))*m=*n;
-    else if(sscanf(nxtcmd,"%d-%d%n",m,n,&i)==2);
-    else if(sscanf(nxtcmd,"-%d%n",n,&i)==1)*m=min;
-    else if(sscanf(nxtcmd,"%d-%n",m,&i)==1)*n=max;
+    if(!strchr(cnc_nxtcmd,'-') && sscanf(cnc_nxtcmd,"%d%n",n,&i))*m=*n;
+    else if(sscanf(cnc_nxtcmd,"%d-%d%n",m,n,&i)==2);
+    else if(sscanf(cnc_nxtcmd,"-%d%n",n,&i)==1)*m=min;
+    else if(sscanf(cnc_nxtcmd,"%d-%n",m,&i)==1)*n=max;
     if(((*m)<min)||((*n)<min)||((*m)>max)||((*n)>max)||((*m)>(*n))){
       prompt(err,min,max);
-      endcnc();
-      input[0]=0;
+      cnc_end();
+      inp_buffer[0]=0;
       continue;
     }
-    endcnc();
+    cnc_end();
     return 1;
   }
   return 0;
@@ -454,30 +458,30 @@ change()
   struct line *l;
 
   if(!getrange(&m,&n,1,numlines,RWCHLN,RNGERR))return;
-  if(n-m+5>=screenheight)prompt(RANGEOK,m,n);
+  if(n-m+5>=fmt_screenheight)prompt(RANGEOK,m,n);
   else showtext(m,n);
-  endcnc();
+  cnc_end();
   for(;;){
     prompt(FIND);
-    getinput(0);
-    bgncnc();
+    inp_get(0);
+    cnc_begin();
     if(!margc)continue;
-    else if(isX(margv[0]))return;
+    else if(inp_isX(margv[0]))return;
     else {
-      strncpy(find,input,sizeof(find));
+      strncpy(find,inp_buffer,sizeof(find));
       break;
     }
   }
   for(;;){
     prompt(REPLACE);
-    getinput(0);
-    bgncnc();
+    inp_get(0);
+    cnc_begin();
     if(!margc){
       replace[0]=0;
       break;
-    }else if(isX(margv[0]))return;
+    }else if(inp_isX(margv[0]))return;
     else {
-      strncpy(replace,input,sizeof(find));
+      strncpy(replace,inp_buffer,sizeof(find));
       break;
     }
   }
@@ -513,7 +517,7 @@ change()
       numbytes+=strlen(l->text)+1;
     }
   }
-  if(n-m+5>=screenheight)prompt(NCHNGD,changes);
+  if(n-m+5>=fmt_screenheight)prompt(NCHNGD,changes);
   else {
     prompt(NLNRDS);
     showtext(m,n);
@@ -527,9 +531,9 @@ delete()
   int m,n,yes=0;
 
   if(!getrange(&m,&n,1,numlines,DWDELN,RNGERR))return;
-  if(n-m+5>=screenheight)prompt(RANGEOK,m,n);
+  if(n-m+5>=fmt_screenheight)prompt(RANGEOK,m,n);
   else showtext(m,n);
-  if(!getbool(&yes,DELLIN+(n-m>0),YORN,0,0))return;
+  if(!get_bool(&yes,DELLIN+(n-m>0),YORN,0,0))return;
   if(!yes)return;
 
   deletelines(m,n);
@@ -540,7 +544,7 @@ void
 newtext()
 {
   int yes=0;
-  if(!getbool(&yes,ASKNEW,YORN,0,0))return;
+  if(!get_bool(&yes,ASKNEW,YORN,0,0))return;
   if(!yes)return;
   deletelines(1,numlines);
 }
@@ -554,8 +558,8 @@ upload()
   int  count = 0;
 
   name[0]=dir[0]=0;
-  addxfer(FXM_UPLOAD,"UPLOAD-NAMELESS",txtupld,0,-1);
-  dofiletransfer();
+  xfer_add(FXM_UPLOAD,"UPLOAD-NAMELESS",txtupld,0,-1);
+  xfer_run();
   
   sprintf(fname,XFERLIST,getpid());
 
@@ -595,7 +599,7 @@ upload()
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -610,7 +614,7 @@ save()
     int i=errno;
     prompt(SAVEERR,i,sys_errlist[i]);
     errno=i;
-    interrorsys("Unable to write to %s",filename);
+    error_intsys("Unable to write to %s",filename);
     return;
   }
 
@@ -631,7 +635,7 @@ void
 abortedit()
 {
   int yes=0;
-  if(!getbool(&yes,ABORT,YORN,0,0))return;
+  if(!get_bool(&yes,ABORT,YORN,0,0))return;
   if(yes){
     unlink(filename);
     exit(1);
@@ -643,23 +647,23 @@ void
 menu()
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
-  endcnc();
+  cnc_end();
 
   for(;;){
-    if(!nxtcmd){
+    if(!cnc_nxtcmd){
       if(!shownmenu){
 	prompt(EDTMNU);
 	shownmenu=1;
       }
       prompt(EDTMNUS);
-      getinput(0);
-      bgncnc();
+      inp_get(0);
+      cnc_begin();
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
 	
       case 'A':
@@ -705,12 +709,12 @@ menu()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -733,30 +737,30 @@ run()
     }
     sizewarn();
     edgetinput(80);
-    rstrin();
-    if(reprompt||sameas(input,"?")){
-      reprompt=0;
+    inp_raw();
+    if(inp_reprompt()||sameas(inp_buffer,"?")){
+      inp_clearflags(INF_REPROMPT);
       prompt(SIZINFO,numlines,numbytes,maxsize);
       prompt(ENTHLP);
       prompt(RULER);
-    } else if(IS_CANCEL(input)){
+    } else if(IS_CANCEL(inp_buffer)){
       cancel();
-    } else if(IS_UPLOAD(input)){
+    } else if(IS_UPLOAD(inp_buffer)){
       upload();
-    } else if(IS_SAVE(input)){
+    } else if(IS_SAVE(inp_buffer)){
       save();
-    } else if(isX(input)){
+    } else if(inp_isX(inp_buffer)){
       abortedit();
       prompt(SIZINFO,numlines,numbytes,maxsize);
       prompt(ENTHLP);
       prompt(RULER);
-    } else if(IS_OK(input) || numbytes>=maxsize){
+    } else if(IS_OK(inp_buffer) || numbytes>=maxsize){
       menu();
       prompt(SIZINFO,numlines,numbytes,maxsize);
       prompt(ENTHLP);
       prompt(RULER);
     } else {
-      insertline(inspoint,input);
+      insertline(inspoint,inp_buffer);
     }
   }
 }
@@ -765,19 +769,20 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc==3 && (maxsize=atoi(argv[2]))){
     init();
     strcpy(filename,argv[1]);
     run();
     done();
   }
+  return 0;
 }
 

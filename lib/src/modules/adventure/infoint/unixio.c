@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -354,35 +356,35 @@ int input_line (int buflen, char *buffer, int timeout, int *read_size)
      Z-Machine if the user has just used some BBS global command like
      /#. Instead of returning the like to the game which would say something to
      the effect of "I beg your pardon?" below each page, /#, etc, we simply
-     loop until actual input to the game is available. For realism, a > prompt
+     loop until actual inp_buffer to the game is available. For realism, a > prompt
      is also printed. */
   
   do{
-    reprompt=0;
-    if(timeout)setinputtimeout(timeout,0); /* Set optional timeout */
-    setwaittoclear(1);
-    getinput(buflen-1);
-    setwaittoclear(0);
-    if(reprompt)print("\e[0m>\n");
-    else if(margc==1 && isX(margv[0])){
+    inp_clearflags(INF_REPROMPT);
+    if(timeout)inp_timeout(timeout,0); /* Set optional timeout */
+    out_setflags(OFL_WAITTOCLEAR);
+    inp_get(buflen-1);
+    out_clearflags(OFL_WAITTOCLEAR);
+    if(inp_reprompt())print("\e[0m>\n");
+    else if(margc==1 && inp_isX(margv[0])){
       int yes;
-      if((getbool(&yes,XCONFRM,0,0,0)==0) || (yes==0)){
-	reprompt=1;
+      if((get_bool(&yes,XCONFRM,0,0,0)==0) || (yes==0)){
+	inp_setflags(INF_REPROMPT);
 	print("\n\e[0m>\n");
 	continue;
       }
       exit(0);
     }
-  } while(reprompt);
+  } while(inp_reprompt());
   
   
   thisuseronl.flags|=OLF_BUSY;	/* Ok, we're going busy again. */
   
-  /* Copy the input buffer to the Z-Machine's buffer and return it. */
+  /* Copy the inp_buffer buffer to the Z-Machine's buffer and return it. */
   
-  rstrin();
-  memcpy(&buffer[*read_size],input,min(strlen(input),buflen-strlen(input)));
-  *read_size+=strlen(input);
+  inp_raw();
+  memcpy(&buffer[*read_size],inp_buffer,min(strlen(inp_buffer),buflen-strlen(inp_buffer)));
+  *read_size+=strlen(inp_buffer);
   scroll_line();
   return '\r';
 }

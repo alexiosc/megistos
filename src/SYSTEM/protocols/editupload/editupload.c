@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:01:01  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  1998/12/27 16:29:48  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,14 +70,14 @@ main(int argc, char **argv)
 {
   FILE *fp;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc!=2)exit(1);
 
   if((fp=fopen(argv[1],"w"))==NULL)exit(1);
   fclose(fp);
 
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  initmodule(INITALL);
+  mod_init(INI_ALL);
   print("\033[0m");
   exit (editor(argv[1],512<<10));
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:06  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/08/13 17:10:05  alexios
  * Fixed things so that user inactivity timers are reset to handle
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -394,11 +396,11 @@ printansi(char *s)
   char parms[1024], *cp, *ep;
   int state=0, len=0, n,y,x, sx=0,sy=0;
   int fg=7, bg=0, bold=0, a=0x07;
-  char *msgbuf=s;
+  char *msg_buffer=s;
   int cursorx, cursory;
 
   attr(a);
-  while ((c=*msgbuf++)!=0){
+  while ((c=*msg_buffer++)!=0){
     if(c==13)continue;
     if (c==27 && !state) state=1;
     else if(c=='\n'){

@@ -29,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:41  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 22:07:30  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 16:30:50  alexios
  * Added autoconf support.
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -77,8 +79,8 @@
 
 union object  *object=NULL;
 int           numobjects=0;
-promptblk     *msg=NULL;
-promptblk     *templates=NULL;
+promptblock_t     *msg=NULL;
+promptblock_t     *templates=NULL;
 int           mode;
 char          *mbkname=NULL;
 int           vtnum=0;
@@ -94,7 +96,7 @@ endsession(char *event)
 
   if(mode==VISUAL){
     thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-    resetinactivity();
+    inp_resetidle();
     attrset(A_NORMAL);
     clear();
     wrefresh(stdscr);
@@ -103,7 +105,7 @@ endsession(char *event)
   }
 
   if((fp=fopen(dfname,"w"))==NULL){
-    fatalsys("Unable to write data file %s",dfname);
+    error_fatalsys("Unable to write data file %s",dfname);
   }
 
   for(i=0;i<numobjects;i++){
@@ -153,10 +155,10 @@ usage()
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc!=5){
     usage();
   } else {
@@ -166,11 +168,11 @@ main(int argc, char *argv[])
     dfname=argv[4];
   }
 
-  initmodule(INITALL);
-  msg=opnmsg("bbsdialog");
-  setlanguage(thisuseracc.language);
-  templates=opnmsg(mbkname);
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("bbsdialog");
+  msg_setlanguage(thisuseracc.language);
+  templates=msg_open(mbkname);
+  msg_setlanguage(thisuseracc.language);
 
   if(vtnum>=0 && thisuseracc.prefs&UPF_VISUAL && thisuseronl.flags&OLF_ANSION){
     mode=VISUAL;
@@ -179,4 +181,6 @@ main(int argc, char *argv[])
     mode=LINEAR;
     runlinear();
   }
+
+  return 0;
 }

@@ -30,11 +30,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.3  1998/12/27 16:31:55  alexios
  * Added autoconf support. Migrated to new locking style.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -79,31 +81,31 @@ getemsgnum(struct message *msg)
 
   /* Wait for lock to clear */
 
-  if(waitlock(NEMESSAGELOCK,5)==LKR_TIMEOUT){
+  if(lock_wait(NEMESSAGELOCK,5)==LKR_TIMEOUT){
     if(usercaller)prompt(TIMEOUT1);
-    if(waitlock(NEMESSAGELOCK,55)==LKR_TIMEOUT){
+    if(lock_wait(NEMESSAGELOCK,55)==LKR_TIMEOUT){
       if(usercaller)prompt(TIMEOUT2);
-      logerror("Timed out (60 sec) waiting for %s",NEMESSAGELOCK);
+      error_log("Timed out (60 sec) waiting for %s",NEMESSAGELOCK);
       exit(1);
     }
   }
 
   /* Lock the area */
   
-  placelock(NEMESSAGELOCK,"seeking");
+  lock_place(NEMESSAGELOCK,"seeking");
 
 
   /* Get the next message number in a paranoid but safe way */
 
   do{
     sysvar->emessages++;
-    sprintf(chkname,"%s/%010d",EMAILDIR,sysvar->emessages);
+    sprintf(chkname,"%s/"MESSAGEFILE,EMAILDIR,sysvar->emessages);
   } while (!stat(chkname,&st));
 
   
   /* Remove the lock */
   
-  rmlock(NEMESSAGELOCK);
+  lock_rm(NEMESSAGELOCK);
 
 
   /* Set the message number in the header */
@@ -132,12 +134,12 @@ getcmsgnum(struct message *msg)
     
   sprintf(fname,"%s/h%s",CLUBHDRDIR,msg->club);
   if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to open %s",fname);
+    error_logsys("Unable to open %s",fname);
     exit(1);
   }
   
   if(fread(&clubhdr,sizeof(clubhdr),1,fp)!=1){
-    logerrorsys("Unable to read %s",fname);
+    error_logsys("Unable to read %s",fname);
     fclose(fp);
     exit(1);
   }
@@ -147,11 +149,11 @@ getcmsgnum(struct message *msg)
   /* Wait for club lock to clear */
   
   sprintf(fname,CLUBLOCK,clubhdr.club);
-  if(waitlock(fname,5)==LKR_TIMEOUT){
+  if(lock_wait(fname,5)==LKR_TIMEOUT){
     if(usercaller)prompt(TIMEOUT1);
-    if(waitlock(fname,55)==LKR_TIMEOUT){
+    if(lock_wait(fname,55)==LKR_TIMEOUT){
       if(usercaller)prompt(TIMEOUT2);
-      logerror("Timed out (60 sec) waiting for %s",
+      error_log("Timed out (60 sec) waiting for %s",
 	       NEMESSAGELOCK);
       exit(1);
     }
@@ -160,14 +162,14 @@ getcmsgnum(struct message *msg)
 
   /* Place the lock */
   
-  placelock(fname,"seeking");
+  lock_place(fname,"seeking");
 
 
   /* Good old paranoid way of calculating next msg number */
   
   do{
     clubhdr.msgno++;
-    sprintf(chkname,"%s/%s/%010d",MSGSDIR,clubhdr.club,clubhdr.msgno);
+    sprintf(chkname,"%s/%s/"MESSAGEFILE,MSGSDIR,clubhdr.club,clubhdr.msgno);
   }while(!stat(chkname,&st));
 
   
@@ -184,12 +186,12 @@ getcmsgnum(struct message *msg)
   
   sprintf(fname,"%s/h%s",CLUBHDRDIR,msg->club);
   if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create %s",fname);
+    error_logsys("Unable to create %s",fname);
     exit(1);
   }
   
   if(fwrite(&clubhdr,sizeof(clubhdr),1,fp)!=1){
-    logerrorsys("Unable to write %s",fname);
+    error_logsys("Unable to write %s",fname);
     fclose(fp);
     exit(1);
   }
@@ -198,7 +200,7 @@ getcmsgnum(struct message *msg)
 
   /* Done with the club header, remove the lock */
   
-  rmlock(fname);
+  lock_rm(fname);
 
 
   /* Store the message number in the header */

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -134,8 +136,6 @@ children:
 void
 op_edit()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
   struct libidx lib;
   int changes[4];
@@ -145,63 +145,48 @@ op_edit()
   if(!adminlock(lib.libnum))return;
   bzero(changes,sizeof(changes));
 
-  sprintf(fname,TMPDIR"/files%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
+	  lib.descr,lib.passwd,lib.club,lib.dir);
+
+  if(dialog_run("files",OEDIVT,OEDILT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     adminunlock();
     return;
   }
-
-  fprintf(fp,"%s\n",lib.descr);
-  fprintf(fp,"%s\n",lib.passwd);
-  fprintf(fp,"%s\n",lib.club);
-  fprintf(fp,"%s\n",lib.dir);
-  fprintf(fp,"off\n");
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("files",OEDIVT,OEDILT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    adminunlock();
-    return;
-  }
-
-  for(i=0;i<8;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0){
-      if(strcmp(lib.descr,s))changes[i]=1;
-      strcpy(lib.descr,s);
-    } else if(i==1){
-      if(strcmp(lib.passwd,s))changes[i]=1;
-      strcpy(lib.passwd,s);
-    } else if(i==2){
-      if((!masterlibop)&&strcmp(library.club,s)){
-	prompt(OEDINOP1);
-      } else {
-	if(s[0]){
-	  if(findclub(s))strcpy(lib.club,s);
-	  else prompt(OCRECNE,s);
-	} else bzero(lib.club,sizeof(lib.club));
-	if(strcmp(library.club,lib.club))changes[i]=1;
+  
+  dialog_parse(inp_buffer);
+  
+  if(sameas(margv[7],"OK")||sameas(margv[5],margv[7])){
+    for(i=0;i<8;i++){
+      char *s=margv[i];
+      if(i==0){
+	if(strcmp(lib.descr,s))changes[i]=1;
+	strcpy(lib.descr,s);
+      } else if(i==1){
+	if(strcmp(lib.passwd,s))changes[i]=1;
+	strcpy(lib.passwd,s);
+      } else if(i==2){
+	if((!masterlibop)&&strcmp(library.club,s)){
+	  prompt(OEDINOP1);
+	} else {
+	  if(s[0]){
+	    if(findclub(s))strcpy(lib.club,s);
+	    else prompt(OCRECNE,s);
+	  } else bzero(lib.club,sizeof(lib.club));
+	  if(strcmp(library.club,lib.club))changes[i]=1;
+	}
+      } else if(i==3){
+	if((!masterlibop)&&strcmp(library.dir,lib.dir)){
+	  prompt(OEDINOP2);
+	} else {
+	  strcpy(lib.dir,zonkdir(s));
+	  if(strcmp(library.dir,lib.dir))changes[i]=1;
+	}
+      } else if(i==4){
+	if((recursive=sameas(s,"on"))!=0)prompt(OEDIREC);
       }
-    } else if(i==3){
-      if((!masterlibop)&&strcmp(library.dir,lib.dir)){
-	prompt(OEDINOP2);
-      } else {
-	strcpy(lib.dir,zonkdir(s));
-	if(strcmp(library.dir,lib.dir))changes[i]=1;
-      }
-    } else if(i==4){
-      if((recursive=sameas(s,"on"))!=0)prompt(OEDIREC);
     }
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
+  } else {
     prompt(OPCAN);
     adminunlock();
     return;

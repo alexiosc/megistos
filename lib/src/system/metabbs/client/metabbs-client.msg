@@ -4,7 +4,7 @@ USRLRM {User selection timeout (minutes, 0=disable): 3} N 0 60
 
 QRYLRM {Network timeout while requesting info (seconds, 0=disable): 7} N 0 3600
 
-HOSTS {} S 256 Hosts to contact:
+HOSTS {gate} S 256 Hosts to contact:
 
 LOCAL {Show the local system along with remote ones? YES} B
 

@@ -28,15 +28,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 22:00:00  alexios
- * Changed a few fatal() calls to fatalsys(). Numerous minor
+ * Changed a few error_fatal() calls to error_fatalsys(). Numerous minor
  * fixes.
  *
  * Revision 0.5  1998/12/27 16:21:05  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * New code to try to load backup copies of the SYSVAR file if
  * the normal one is corrupted.
  *
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -114,7 +116,7 @@ makeshm(char *userid)
   proj=(proj+1)%0xff;
   sprintf(fname,"%s/%s",ONLINEDIR,userid);
   if(stat(fname,&st)){
-    logerrorsys("Online user record %s not found.",fname);
+    error_logsys("Online user record %s not found.",fname);
     return -1;
   }
 
@@ -124,14 +126,14 @@ makeshm(char *userid)
   if((shmid=shmget(ftok(fname,proj),
 		   4096,
 		   IPC_CREAT|0660))==-1){
-    logerrorsys("Unable to allocate 4k of shared memory");
+    error_logsys("Unable to allocate 4k of shared memory");
   }
 
   lowerc(strcpy(fname,userid));
   pass=getpwnam(fname);
 
   if(shmctl(shmid,IPC_STAT,&buf)<0){
-    logerrorsys("Unable to IPC_STAT shared memory");
+    error_logsys("Unable to IPC_STAT shared memory");
   } else {
     if(pass!=NULL){
       buf.shm_perm.uid=pass->pw_uid;
@@ -142,7 +144,7 @@ makeshm(char *userid)
     }
 
     if(shmctl(shmid,IPC_SET,&buf)<0){
-      logerrorsys("Unable to IPC_SET shared memory");
+      error_logsys("Unable to IPC_SET shared memory");
     }
   }
 
@@ -153,7 +155,7 @@ makeshm(char *userid)
   chmod(fname,660);
   unlink(fname);
   if((fd=open(fname,O_WRONLY|O_CREAT|O_TRUNC))<0){
-    logerrorsys("makeshm(): Unable to write shmid to %s",fname);
+    error_logsys("makeshm(): Unable to write shmid to %s",fname);
     killshm(userid,shmid);
     asapevents();
     return -1;
@@ -192,7 +194,7 @@ killshm(char *userid,int shmid)
   i=shmctl(shmid,IPC_RMID,&buf);
 
   if(i){
-    logerror("Unable to destroy shared memory segment %d.",shmid);
+    error_log("Unable to destroy shared memory segment %d.",shmid);
   }
 
   /* Remove any remaining /usr/local/bbs/online files for this user */
@@ -218,18 +220,18 @@ monitorshm()
 
   shmid=shmget(IPC_PRIVATE,sizeof(struct monitor),IPC_CREAT|0660);
   if(shmid<0){
-    fatalsys("Unable to allocate shared memory for the monitor");
+    error_fatalsys("Unable to allocate shared memory for the monitor");
   }
 
   if(shmctl(shmid,IPC_STAT,&buf)<0){
-    logerrorsys("Unable to IPC_STAT monitor memory");
+    error_logsys("Unable to IPC_STAT monitor memory");
   } else {
 
     buf.shm_perm.uid=bbsuid;
     buf.shm_perm.gid=bbsgid;
 
     if(shmctl(shmid,IPC_SET,&buf)<0){
-      logerrorsys("Unable to IPC_SET monitor memory");
+      error_logsys("Unable to IPC_SET monitor memory");
     }
   }
 
@@ -240,7 +242,7 @@ monitorshm()
     int i=errno;
     shmctl(shmid,IPC_RMID,&buf);
     errno=i;
-    fatalsys("Unable to create %s",MONITORFILE);
+    error_fatalsys("Unable to create %s",MONITORFILE);
   }
 
   chown(MONITORFILE,bbsuid,bbsgid);
@@ -250,7 +252,7 @@ monitorshm()
      bbsd. */
 
   if(shmat(shmid,NULL,0)==(char*)-1){
-    fatalsys("Unable to attach monitor memory segment %d, errno=%d\n",
+    error_fatalsys("Unable to attach monitor memory segment %d, errno=%d\n",
 	  shmid,errno);
   }
   shmctl(shmid,IPC_RMID,&buf);
@@ -278,7 +280,7 @@ sysvarshm()
     strcat(fname,tries?"O":".O");
   }
   if(tries){
-    fatal("Yikes! No sysvar file (not even a backup)!");
+    error_fatal("Yikes! No sysvar file (not even a backup)!");
   }
 
   for(tries=0;tries<256;tries++){
@@ -297,7 +299,7 @@ sysvarshm()
   /* Did it work? */
 
   if(tries){
-    fatal("Failed to shmget() space for the sysvars (errno=%d).",errno);
+    error_fatal("Failed to shmget() space for the sysvars (errno=%d).",errno);
   }
 
   
@@ -306,14 +308,14 @@ sysvarshm()
      destruction immediately. It will be destroyed when bbsd exits. */
 
   if(shmctl(shmid,IPC_STAT,&buf)<0){
-    logerrorsys("Unable to IPC_STAT sysvar memory");
+    error_logsys("Unable to IPC_STAT sysvar memory");
   } else {
 
     buf.shm_perm.uid=bbsuid;
     buf.shm_perm.gid=bbsgid;
 
     if(shmctl(shmid,IPC_SET,&buf)<0){
-      logerrorsys("Unable to IPC_SET sysvar memory");
+      error_logsys("Unable to IPC_SET sysvar memory");
     }
   }
 
@@ -321,7 +323,7 @@ sysvarshm()
   /* Now that we have the segment, attach it. */
   
   if((sysvar=(struct sysvar *)shmat(shmid,NULL,0))<0){
-    fatalsys("Unable to attach sysvar block!");
+    error_fatalsys("Unable to attach sysvar block!");
   }
 
   /* Try to load the sysvar file. This is quite sensitive, especially
@@ -347,7 +349,7 @@ sysvarshm()
       /* Check magic number */
       memcpy(magic,sysvar->magic,sizeof(sysvar->magic));
       magic[4]=0;
-      if(strcmp(magic,SVR_MAGIC)){
+      if(strcmp(magic,SYSVAR_MAGIC)){
 
 	/* Not enough magic. Try the backups. */
 	goto try_backup;
@@ -367,25 +369,25 @@ sysvarshm()
 
   if(strcmp(SYSVARFILE,fname)){
     char dummy[256];
-    waitlock("LCK..sysvar",10);
-    if(checklock("LCK..sysvar",dummy)<=0){
-      placelock("LCK..sysvar","writing");
+    lock_wait("LCK..sysvar",10);
+    if(lock_check("LCK..sysvar",dummy)<=0){
+      lock_place("LCK..sysvar","writing");
       fcopy(fname,SYSVARFILE);
-      rmlock("LCK..sysvar");
+      lock_rm("LCK..sysvar");
     }
   }
 
 
   /* Uhm, this isn't ever going to happen, right? */
 
-  waitlock("LCK..sysvarshm",60);
-  placelock("LCK..sysvarshm","creating");
+  lock_wait("LCK..sysvarshm",60);
+  lock_place("LCK..sysvarshm","creating");
 
 
   /* Now write the SHM ID for the sysvar block */
   
   if((fp=fopen(SYSVARSHMFILE,"w"))==NULL){
-    fatalsys("Unable to write sysvar shmid to %s",SYSVARSHMFILE);
+    error_fatalsys("Unable to write sysvar shmid to %s",SYSVARSHMFILE);
     shmctl(shmid,IPC_RMID,&buf);
     return;
   }
@@ -393,9 +395,9 @@ sysvarshm()
   fclose(fp);
   chown(SYSVARSHMFILE,bbsuid,bbsgid);
   chmod(SYSVARSHMFILE,0440);
-  rmlock("LCK..sysvarshm");
+  lock_rm("LCK..sysvarshm");
 
-  /*  initmodule(INITSYSVARS);*/
+  /*  initmodule(INI_SYSVARS);*/
   shmctl(shmid,IPC_RMID,&buf);
 
   refreshsysvars();

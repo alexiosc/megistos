@@ -33,11 +33,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:26  alexios
- * Initial revision
- *
- * Revision 0.1  2000/12/08 15:12:45  alexios
- * Initial checkin.
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1998/12/27 15:17:13  alexios
  * Added autoconf support.

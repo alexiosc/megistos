@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:44:25  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:47:33  alexios
  * Added autoconf support. Migrated to the new locking functions.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -102,14 +104,14 @@ checkfile()
   struct wallmsg header;
 
   if(stat(WALLFILE,&buf)){
-    if((waitlock(WALLLOCK,5))==LKR_TIMEOUT){
-      logerror("Timed out waiting for lock %s",WALLLOCK);
+    if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
+      error_log("Timed out waiting for lock %s",WALLLOCK);
       return 0;
     }
-    placelock(WALLLOCK,"creating");
+    lock_place(WALLLOCK,"creating");
     
     if((fp=fopen(WALLFILE,"w"))==NULL){
-      fatalsys("Unable to create file %s",WALLFILE);
+      error_fatalsys("Unable to create file %s",WALLFILE);
     }
     memset(&header,0,sizeof(header));
     strcpy(header.userid,SYSOP);
@@ -118,7 +120,7 @@ checkfile()
 
     fclose(fp);
     chmod(WALLFILE,0666);
-    rmlock(WALLLOCK);
+    lock_rm(WALLLOCK);
   }
   return 1;
 }
@@ -134,49 +136,49 @@ drawmessage(char *text)
   struct wallmsg wallmsg;
 
   if(!checkfile()){
-    fatal("Unable to ensure existence of graffiti wall file.");
+    error_fatal("Unable to ensure existence of graffiti wall file.");
   }
 
-  if((waitlock(WALLLOCK,5))==LKR_TIMEOUT){
-    fatal("Timed out waiting for lock %s",WALLLOCK);
+  if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
+    error_fatal("Timed out waiting for lock %s",WALLLOCK);
   }
 
-  placelock(WALLLOCK,"checking");
+  lock_place(WALLLOCK,"checking");
   
   if((fp=fopen(WALLFILE,"r"))==NULL){
-    rmlock(WALLLOCK);
-    fatalsys("Unable to open file %s",WALLFILE);
+    lock_rm(WALLLOCK);
+    error_fatalsys("Unable to open file %s",WALLFILE);
   }
   
   if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
-    rmlock(WALLLOCK);
-    fatalsys("Unable to read file %s",WALLFILE);
+    lock_rm(WALLLOCK);
+    error_fatalsys("Unable to read file %s",WALLFILE);
   }
   
   numlines=atoi(wallmsg.message);
   strcpy(userid,wallmsg.userid);
-  if(!haskey(&thisuseracc,ovrkey)
+  if(!key_owns(&thisuseracc,ovrkey)
      && sameas(wallmsg.userid,thisuseracc.userid) && numlines>=maxmsgs){
-    rmlock(WALLLOCK);
+    lock_rm(WALLLOCK);
     return 0;
   }
   
   fclose(fp);
-  rmlock(WALLLOCK);
+  lock_rm(WALLLOCK);
   
-  placelock(WALLLOCK,"writing");
+  lock_place(WALLLOCK,"writing");
 
   if((fp=fopen(WALLFILE,"r"))==NULL){
-    rmlock(WALLLOCK);
-    fatalsys("Unable to open file %s",WALLFILE);
+    lock_rm(WALLLOCK);
+    error_fatalsys("Unable to open file %s",WALLFILE);
   }
   
   fread(&wallmsg,sizeof(wallmsg),1,fp);
 
   sprintf(fname,TMPDIR"/graffiti%05d",getpid());
   if((out=fopen(fname,"w"))==NULL){
-    rmlock(WALLLOCK);
-    fatalsys("Unable to create temporary file %s",fname);
+    lock_rm(WALLLOCK);
+    error_fatalsys("Unable to create temporary file %s",fname);
   }
   if(sameas(thisuseracc.userid,userid))numlines++;
   else numlines=1;
@@ -199,12 +201,12 @@ drawmessage(char *text)
   fclose(fp);
 
   if(fcopy(fname,WALLFILE)){
-    rmlock(WALLLOCK);
-    fatal("Unable to fcopy() %s to %s",fname,WALLFILE);
+    lock_rm(WALLLOCK);
+    error_fatal("Unable to fcopy() %s to %s",fname,WALLFILE);
     return 0;
   }
   unlink(fname);
-  rmlock(WALLLOCK);
+  lock_rm(WALLLOCK);
   return 1;
 }
 
@@ -217,7 +219,7 @@ process(char *fname)
 
   FILE *fp=fopen(fname,"r");
   if(fp==NULL){
-    fatalsys("Unable to open file %s",fname);
+    error_fatalsys("Unable to open file %s",fname);
   }
 
   prompt(ULWRH);
@@ -242,13 +244,13 @@ process(char *fname)
     return 0;
   } else if(numsuccessful==numlines){
     char tmp[1024];
-    strcpy(tmp,getpfix(WRTSNG,numsuccessful));
-    prompt(ULNWR,tmp,numsuccessful,numlines,getpfix(LINSNG,numlines));
+    strcpy(tmp,msg_getunit(WRTSNG,numsuccessful));
+    prompt(ULNWR,tmp,numsuccessful,numlines,msg_getunit(LINSNG,numlines));
     return 0;
   } else {
     char tmp[1024];
-    strcpy(tmp,getpfix(WRTSNG,numlines));
-    prompt(ULWRT,tmp,numlines,getpfix(LINSNG,numlines));
+    strcpy(tmp,msg_getunit(WRTSNG,numlines));
+    prompt(ULWRT,tmp,numlines,msg_getunit(LINSNG,numlines));
   }
   return 1;
 }
@@ -274,7 +276,7 @@ ogupload()
 
     unlink(idx.dosfname);
     if(!rmrequest(&idx)){
-      fatal("Unable to remove request %d from the database.",
+      error_fatal("Unable to remove request %d from the database.",
 	    idx.reqnum);
     }
 

@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -98,7 +100,7 @@ static void configure (zbyte_t, zbyte_t);
 void
 done()
 {
-  donemodule();
+  mod_done(INI_ALL);
   exit(0);
 }
 
@@ -126,20 +128,20 @@ settermios()
 
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 
 static void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("adventure");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("adventure");
+  msg_setlanguage(thisuseracc.language);
   screen_cols=thisuseracc.scnwidth;
   screen_rows=thisuseracc.scnheight;
   settermios();
   signal(SIGINT,done);
-  setwaittoclear(0);
+  out_clearflags(OFL_WAITTOCLEAR);
 }
 
 
@@ -154,7 +156,6 @@ init()
 
 int main (int argc, char *argv[])
 {
-  setprogname(argv[0]);
   init();
   process_arguments (argc, argv);
   configure (V1, V8);
@@ -193,7 +194,7 @@ static void configure (zbyte_t min_version, zbyte_t max_version)
 
   if (h_type < min_version || h_type > max_version ||
       (get_byte (H_CONFIG) & CONFIG_BYTE_SWAPPED))
-    fatal("Wrong game or version.");
+    error_fatal("Wrong game or version.");
   
   if (h_type < V4) {
     story_scaler = 2;

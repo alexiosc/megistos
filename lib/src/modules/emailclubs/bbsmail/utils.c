@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.7  2000/01/08 12:47:02  alexios
  * Fixed bug that got the originating BBS field wrong in the
@@ -44,7 +45,7 @@
  * Slight changes and one minor bug fixed.
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
- * Changed a few fatal() calls to fatalsys(). Added code for
+ * Changed a few error_fatal() calls to error_fatalsys(). Added code for
  * the new IHAVE database.
  *
  * Revision 1.3  1998/12/27 16:31:55  alexios
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -107,7 +109,7 @@ addihave(struct message *msg)
   d_dbfpath(IHAVEDIR);
   d_dbdpath(IHAVEDIR);
   if(d_open("ihavedb","s")!=S_OKAY){
-    logerror("Cannot open ihave database (db_status %d)\n",db_status);
+    error_log("Cannot open ihave database (db_status %d)\n",db_status);
     return;
   }
 
@@ -164,7 +166,7 @@ copyatt(int copymode, struct message *msg, int email, char *attachment)
       /* Copy by hard-link */
 
       if(link(attachment,attname)){
-	logerrorsys("Unable to make hard link %s->%s",
+	error_logsys("Unable to make hard link %s->%s",
 		 attname,attachment);
 	exit(1);
       }
@@ -173,7 +175,7 @@ copyatt(int copymode, struct message *msg, int email, char *attachment)
       /* Copy by symlink */
 
       if(symlink(attachment,attname)){
-	logerrorsys("Unable to make symlink %s->%s",attname,attachment);
+	error_logsys("Unable to make symlink %s->%s",attname,attachment);
 	exit(1);
       }
       break;
@@ -186,13 +188,13 @@ copyatt(int copymode, struct message *msg, int email, char *attachment)
 	/* Normal copy */
 
 	if((fp=fopen(attname,"w"))==NULL){
-	  logerrorsys("Unable to create %s",attname);
+	  error_logsys("Unable to create %s",attname);
 	  fclose(fp);
 	  exit(1);
 	}
 	
 	if((fp2=fopen(attachment,"r"))==NULL){
-	  logerrorsys("Unable to open %s",attachment);
+	  error_logsys("Unable to open %s",attachment);
 	  fclose(fp2);
 	  fclose(fp);
 	  exit(1);
@@ -200,7 +202,7 @@ copyatt(int copymode, struct message *msg, int email, char *attachment)
 	
 	while((count=fread(&buff,1,sizeof(buff),fp2))>0){
 	  if(fwrite(&buff,1,count,fp)!=count){
-	    logerrorsys("Unable to write %s",attname);
+	    error_logsys("Unable to write %s",attname);
 	    fclose(fp2);
 	    fclose(fp);
 	    exit(1);

@@ -32,11 +32,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:37  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.2  1998/07/24 10:18:32  alexios
  * File cache for slow devices.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -200,10 +202,10 @@ char *cachefile(struct libidx *lib, struct fileidx *file)
 
   prompt(FILECACH);
   if(!obtainliblock(lib,sldevto,"caching")){
-    fatal("Timeout waiting for slow library %s.",lib->fullname);
+    error_fatal("Timeout waiting for slow library %s.",lib->fullname);
   }
   if(!copyfile(lib,file->fname)){
-    fatal("Error while copying file to cache.",lib->fullname);
+    error_fatal("Error while copying file to cache.",lib->fullname);
   }
   rmliblock(lib);
 

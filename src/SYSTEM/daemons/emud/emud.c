@@ -45,8 +45,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:40  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.11  2000/01/06 11:44:46  alexios
  * Slight corrections to one comment. Reduced the buffer size from
@@ -66,7 +67,7 @@
  * cosmetic changes.
  *
  * Revision 1.7  1998/12/27 16:27:54  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other minor fixes.
  *
  * Revision 1.6  1998/08/14 11:59:29  alexios
@@ -104,6 +105,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -134,6 +136,8 @@
 #define WANT_SYS_SHM_H 1
 #define WANT_SYS_STAT_H 1
 #define WANT_SYS_IOCTL_H 1
+#define WANT_SYS_SOCKET_H 1
+#define WANT_NETINET_IN_H 1
 #define WANT_TIME_H 1
 #define WANT_WAIT_H 1
 #define WANT_TERMIOS_H 1
@@ -152,18 +156,20 @@
 
 char buff[BUFF_SIZE+1];
 
-int    authpid = -1;
-int    emuin = -1;
-int    fdmax = 0;
-int    pid;
-int    idlzapt=0;
-char   ptynam[32];
-char   fname[128], tty[32];
-char   relogfn[256];
-char   kbdxlation[NUMXLATIONS][256];
-char   xlation[NUMXLATIONS][256];
-struct emuqueue *emuq;
-struct stat st;
+int                 authpid = -1;
+int                 emuin = -1;
+int                 fdmax = 0;
+int                 pid;
+int                 idlzapt=0;
+int                 via_telnet=0;
+char                ptynam[32];
+char                fname[128], tty[32];
+char                relogfn[256];
+char                kbdxlation[NUMXLATIONS][256];
+char                xlation[NUMXLATIONS][256];
+struct sockaddr_in  peer;
+struct emuqueue    *emuq;
+struct stat         st;
 
 
 #define TTY_STORE	16
@@ -343,11 +349,11 @@ void
 gracefulexit()
 {
   char fname[256];
-  struct linestatus status;
+  channel_status_t status;
 
   putchar(0);
-  getlinestatus(tty,&status);
-  initmodule(INITOUTPUT|INITSYSVARS|INITTTYNUM);
+  channel_getstatus(tty,&status);
+  mod_init(INI_OUTPUT|INI_SYSVARS|INI_TTYNUM);
 
   sprintf(fname,"%s/%s",ONLINEDIR,status.user);
   unlink(fname);
@@ -360,7 +366,7 @@ gracefulexit()
   status.baud=0;
   status.result=LSR_LOGOUT;
   status.user[0]=0;
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
 
   kill(-getpid(),SIGKILL);
   exit(0);
@@ -509,14 +515,37 @@ static void
 inittimeout()
 {
   idlzapt=0;
-  initmodule(INITTTYNUM);
-  if(getchannelnum(tty)>=0 && lastchandef->flags&TTF_TELNET){
-    promptblk *msg=opnmsg("sysvar");
-    idlzapt=numopt(IDLZAPT,0,32767)*60;
-    clsmsg(msg);
+  mod_init(INI_TTYNUM);
+  if(chan_getnum(tty)>=0 && chan_last->flags&TTF_TELNET){
+    promptblock_t *msg=msg_open("sysvar");
+    idlzapt=msg_int(IDLZAPT,0,32767)*60;
+    msg_close(msg);
   }
-  donemodule();
+  mod_done(INI_TTYNUM);
 }
+
+
+/* Check if we're running on a socket (i.e. serving a telnet connection) */
+
+static void
+checktelnet()
+{
+  int len=sizeof(peer), res;
+
+  /* Try to get information on the other end. If we fail, then we'll
+     just assume this isn't a telnet connection. */
+
+  res=getpeername(0, &peer, &len);
+
+  via_telnet=(res==0);
+
+  if(via_telnet){
+    printf("CONNECTING THROUGH TELNET.\n\n\n\n");
+    sleep(5);
+  }
+
+}
+
 
 
 /* main program */
@@ -541,6 +570,7 @@ int main (int argc, char *argv[])
   makeshm(tty);
   makepipe();
   inittimeout();
+  checktelnet();
 
 
   signal (SIGPIPE, SIG_IGN);
@@ -585,7 +615,7 @@ relogon:
 		
   sprintf(fname,"%s/.emu-%s",BBSETCDIR,tty);
   if((emuin=open(fname,O_RDONLY|O_NDELAY))<0)
-    errorf ("can't open input emulation FIFO %s\n", fname);
+    errorf ("can't open inp_buffer emulation FIFO %s\n", fname);
   
   fdmax = max(fdmax, emuin);
 
@@ -597,7 +627,7 @@ relogon:
       unlink(relogfn);
       if(!kill(pid,SIGKILL)) wait(NULL);
       stty_orig();
-      setlineresult(tty,LSR_RELOGON);
+      channel_setresult(tty,LSR_RELOGON);
       goto relogon;
     }
     
@@ -672,7 +702,7 @@ relogon:
 	close(emuin);
 	sprintf(fname,"%s/.emu-%s",BBSETCDIR,tty);
 	if((emuin=open(fname,O_RDONLY|O_NDELAY))<0)
-	  errorf ("can't open input emulation FIFO %s\n", fname);
+	  errorf ("can't open inp_buffer emulation FIFO %s\n", fname);
 	fdmax = max(fdmax, emuin);
       } else {
 	if(emuq->xlation>0){

@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:22  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.9  1999/08/13 17:07:21  alexios
  * Starting in this version of signup, the program refrains from
@@ -38,10 +39,10 @@
  * things up quite a lot.
  *
  * Revision 0.8  1999/07/18 22:07:16  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 16:29:59  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other useradd fixes.
  *
  * Revision 0.6  1998/07/24 10:29:10  alexios
@@ -76,6 +77,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,10 +106,10 @@
 #include "mbk_account.h"
 
 
-promptblk *msg, *loginmsg;
-useracc   uacc;
-int       asklang=1, askansi=1, askxlt=1, xlation=1;
-char      tty[32];
+promptblock_t *msg, *loginmsg;
+useracc_t      uacc;
+int            asklang=1, askansi=1, askxlt=1, xlation=1;
+char           tty[32];
 
 char *unixuid;
 char *newclss;
@@ -137,7 +139,7 @@ init()
   void registerbbsd(), trap();
 
   strcpy(tty,getenv("CHANNEL"));
-  regpid(tty);
+  mod_regpid(tty);
   signal(SIGINT,SIG_IGN);
   signal(SIGQUIT,SIG_IGN);
   signal(SIGSTOP,SIG_IGN);
@@ -149,26 +151,26 @@ init()
   signal(SIGHUP,trap);
   signal(SIGILL,trap);
 
-  initmodule(INITINPUT|INITSYSVARS|INITCLASSES|INITERRMSGS|
-	     INITATEXIT|INITLANGS|INITOUTPUT|INITCHAT|INITTTYNUM);
-  memset(&uacc,0,sizeof(useracc));
-  setwaittoclear(1);
-  loginmsg=opnmsg("login");
-  unixuid=stgopt(UNIXUID);
+  mod_init(INI_INPUT|INI_SYSVARS|INI_CLASSES|INI_ERRMSGS|
+	     INI_ATEXIT|INI_LANGS|INI_OUTPUT|INI_CHAT|INI_TTYNUM);
+  memset(&uacc,0,sizeof(useracc_t));
+  out_setflags(OFL_WAITTOCLEAR);
+  loginmsg=msg_open("login");
+  unixuid=msg_string(UNIXUID);
 
-  msg=opnmsg("account");
-  safpsw=ynopt(ACCOUNT_SAFPSW);
-  strpss=ynopt(ACCOUNT_STRPSS);
-  minpln=numopt(ACCOUNT_MINPLN,3,15);
-  mkpswd=ynopt(ACCOUNT_MKPSWD);
-  mkpwdf=ynopt(ACCOUNT_MKPWDF);
-  clsmsg(msg);
+  msg=msg_open("account");
+  safpsw=msg_bool(ACCOUNT_SAFPSW);
+  strpss=msg_bool(ACCOUNT_STRPSS);
+  minpln=msg_int(ACCOUNT_MINPLN,3,15);
+  mkpswd=msg_bool(ACCOUNT_MKPSWD);
+  mkpwdf=msg_bool(ACCOUNT_MKPWDF);
+  msg_close(msg);
 
-  msg=opnmsg("signup");
-  setmbk(msg);
+  msg=msg_open("signup");
+  msg_set(msg);
 
   registerbbsd();
-  thisuseronl.idlezap=numopt(SUPZAP,0,32767);
+  thisuseronl.idlezap=msg_int(SUPZAP,0,32767);
 }
 
 
@@ -183,11 +185,11 @@ registerbbsd()
   
   sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create file %s",fname);
+    error_fatalsys("Unable to create file %s",fname);
   }
   memset(&buf,0,sizeof(buf));
   if(fwrite(&buf,sizeof(buf),1,fp)!=1){
-    fatalsys("Unable to write file %s",fname);
+    error_fatalsys("Unable to write file %s",fname);
   }
   fclose(fp);
 
@@ -204,15 +206,15 @@ registerbbsd()
       int shmid;
 
       if((fp=fopen(fname,"r"))==NULL){
-	fatalsys("Unable to open file %s",fname);
+	error_fatalsys("Unable to open file %s",fname);
       }
       if(!fscanf(fp,"%d",&shmid)){
-	fatalsys("Unable to read file %s",fname);
+	error_fatalsys("Unable to read file %s",fname);
       }
       fclose(fp);
 
       if((thisshm=(struct shmuserrec *)shmat(shmid,NULL,0))==NULL){
-	fatalsys("Unable to shmat() to %s.",fname);
+	error_fatalsys("Unable to shmat() to %s.",fname);
       }
       
       return;
@@ -220,7 +222,7 @@ registerbbsd()
   }
   sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
   unlink(fname);
-  fatal("Timed out waiting for bbsd registration",NULL);
+  error_fatal("Timed out waiting for bbsd registration");
 }	       
 
 
@@ -231,7 +233,7 @@ trap()
 
   sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,getenv("CHANNEL"));
   unlink(fname);
-  hangup();
+  channel_hangup();
   exit(1);
 }
 
@@ -248,29 +250,29 @@ maxuidlen()
 void
 readdefaults()
 {
-  newclss=stgopt(NEWCLSS);
-  intpauz=numopt(INTPAUZ,0,1000);
-  welpauz=numopt(WELPAUZ,0,1000);
-  sgnaud=ynopt(SGNAUD);
-  askscr=ynopt(ASKSCR);
-  askcom=ynopt(ASKCOM);
-  askadr=ynopt(ASKADR);
-  askpho=ynopt(ASKPHO);
-  asksys=ynopt(ASKSYS);
-  askage=ynopt(ASKAGE);
-  asksex=ynopt(ASKSEX);
-  prfvis=ynopt(PRFVIS);
-  mxuidl=numopt(MXUIDL,3,16);
-  alwnum=ynopt(ALWNUM);
-  alwsym=ynopt(ALWSYM);
+  newclss=msg_string(NEWCLSS);
+  intpauz=msg_int(INTPAUZ,0,1000);
+  welpauz=msg_int(WELPAUZ,0,1000);
+  sgnaud=msg_bool(SGNAUD);
+  askscr=msg_bool(ASKSCR);
+  askcom=msg_bool(ASKCOM);
+  askadr=msg_bool(ASKADR);
+  askpho=msg_bool(ASKPHO);
+  asksys=msg_bool(ASKSYS);
+  askage=msg_bool(ASKAGE);
+  asksex=msg_bool(ASKSEX);
+  prfvis=msg_bool(PRFVIS);
+  mxuidl=msg_int(MXUIDL,3,16);
+  alwnum=msg_bool(ALWNUM);
+  alwsym=msg_bool(ALWSYM);
 
-  addsubstvar("@MAXUIDLEN@",maxuidlen);
+  out_addsubstvar("@MAXUIDLEN@",maxuidlen);
 
 #if 0
   if((newgidn=atoi(newgid))==0){
     FILE *fp=fopen("/etc/group","r");
     struct group *g;
-    if(fp==NULL)fatalsys("Unable to open /etc/group!");
+    if(fp==NULL)error_fatalsys("Unable to open /etc/group!");
     while((g=fgetgrent(fp))!=0){
       if(!strcmp(g->gr_name,newgid)){
 	newgidn=g->gr_gid;
@@ -278,9 +280,9 @@ readdefaults()
       }
     }
     fclose(fp);
-    if(g==NULL)fatal("Group '%s' not found in /etc/group!",newgid);
+    if(g==NULL)error_fatal("Group '%s' not found in /etc/group!",newgid);
   }
-  if(!newgidn)fatal("Will NOT add BBS users to the root group (0).");
+  if(!newgidn)error_fatal("Will NOT add BBS users to the root group (0).");
 #endif
   
 }
@@ -292,12 +294,12 @@ evilpause(int secs)
   int i;
 
   if(!secs)return;
-  prompt(PAUSE1,secs,NULL);
+  prompt(PAUSE1,secs);
   for(i=0;i<secs;i++){
-    prompt(PAUSE2,(secs-i),NULL);
+    prompt(PAUSE2,(secs-i));
     sleep(1);
   }
-  prompt(PAUSE3,NULL);
+  prompt(PAUSE3);
 }
 
 
@@ -310,8 +312,8 @@ askxlation()
   int  i, xlation=0;
   int  def=-1;
 
-  if(getchannelnum(getenv("CHANNEL"))<0){
-    fatal("%s has not been registered in %s",
+  if(chan_getnum(getenv("CHANNEL"))<0){
+    error_fatal("%s has not been registered in %s",
 	  getenv("CHANNEL"),CHANDEFFILE);
   }
 
@@ -326,20 +328,20 @@ askxlation()
 
   /* Check if this channel has a default translation table. */
 
-  if(lastchandef->xlation)def=lastchandef->xlation;
+  if(chan_last->xlation)def=chan_last->xlation;
 
-  setmbk(loginmsg);
+  msg_set(loginmsg);
   for(;;){
     prompt(XLATEM,def);
-    getinput(1);
-    if(strlen(input)==1&&isdigit(*input))xlation=atoi(input);
-    else if(!strlen(input))xlation=def;
+    inp_get(1);
+    if(strlen(inp_buffer)==1&&isdigit(*inp_buffer))xlation=atoi(inp_buffer);
+    else if(!strlen(inp_buffer))xlation=def;
     if(!xltmap[xlation])prompt(XLATEE);
     else break;
   }
   
-  setxlationtable(xlation);
-  setpxlation(uacc,xlation);
+  out_setxlation(xlation);
+  usr_setpxlation(uacc,xlation);
 }
 
 
@@ -348,16 +350,16 @@ getlanguage()
 {
   int  i=0,choice=0,ok=0,showmenu=1;
 
-  setmbk(msg);
-  if(numlangs){
+  msg_set(msg);
+  if(msg_numlangs){
     while(!ok){
       if(showmenu){
 	showmenu=0;
-	prompt(LNGSEL1,NULL);
-	for(i=0;i<numlangs;i++)prompt(LNGSEL2,i+1,languages[i],NULL);
+	prompt(LNGSEL1);
+	for(i=0;i<msg_numlangs;i++)prompt(LNGSEL2,i+1,msg_langnames[i]);
       }
-      prompt(LNGSEL3,1,numlangs,NULL);
-      getinput(1);
+      prompt(LNGSEL3,1,msg_numlangs);
+      inp_get(1);
       if(margc&&sameas(margv[0],"?")){
 	showmenu=1;
 	continue;
@@ -366,16 +368,16 @@ getlanguage()
 	choice=1;
       } else if(margc&&isdigit(margv[0][0])){
 	choice=atoi(margv[0]);
-	if(choice<1 || choice>numlangs){
-	  prompt(LNGSLRR,1,numlangs,NULL);
+	if(choice<1 || choice>msg_numlangs){
+	  prompt(LNGSLRR,1,msg_numlangs);
 	  continue;
 	} else ok=1;
       }
     }
   } else choice=1;
   uacc.language=choice;
-  setlanguage(choice);
-  prompt(LNGSLOK,languages[choice-1],NULL);
+  msg_setlanguage(choice);
+  prompt(LNGSLOK,msg_langnames[choice-1]);
 }
 
 
@@ -384,11 +386,13 @@ getansiop()
 {
   int ansiflag;
   
-  setmbk(msg);
+  msg_set(msg);
   prompt(B4QANS);
-  while(!getbool(&ansiflag,NEWANS,ANSBERR,0,0))prompt(ANSBERR,NULL);
-  if(ansiflag)uacc.prefs|=UPF_ANSION;
-  setansiflag(ansiflag);
+  while(!get_bool(&ansiflag,NEWANS,ANSBERR,0,0))prompt(ANSBERR);
+  if(ansiflag){
+    uacc.prefs|=UPF_ANSION;
+    out_setflags(OFL_ANSIENABLE);
+  } else out_clearflags(OFL_ANSIENABLE);
 }  
 
 
@@ -398,14 +402,14 @@ getusername()
   char *cp;
 
   for(;;){
-    prompt(GUSRNAM,NULL);
-    getinput(sizeof(uacc.username)-1);
+    prompt(GUSRNAM);
+    inp_get(sizeof(uacc.username)-1);
     if(margc<2) continue;
-    rstrin();
-    if(strlen(input)<7) continue;
+    inp_raw();
+    if(strlen(inp_buffer)<7) continue;
     break;
   }
-  for(cp=input;*cp && (*cp==32);cp++);
+  for(cp=inp_buffer;*cp && (*cp==32);cp++);
   strcpy(uacc.username,cp);
 }
 
@@ -416,10 +420,10 @@ getcompany()
   char *cp;
 
   if(!askcom)return;
-  prompt(GUSRCOM,NULL);
-  getinput(sizeof(uacc.company)-1);
-  rstrin();
-  for(cp=input;*cp && (*cp==32);cp++);
+  prompt(GUSRCOM);
+  inp_get(sizeof(uacc.company)-1);
+  inp_raw();
+  for(cp=inp_buffer;*cp && (*cp==32);cp++);
   strcpy(uacc.company,cp);
 }
 
@@ -431,22 +435,22 @@ getaddress()
 
   if(!askadr)return;
   for(;;){
-    prompt(GUSRAD1,NULL);
-    getinput(sizeof(uacc.address1)-1);
+    prompt(GUSRAD1);
+    inp_get(sizeof(uacc.address1)-1);
     if(margc<2)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     if(strlen(cp)<5)continue;
     break;
   }
   strcpy(uacc.address1,cp);
 
   for(;;){
-    prompt(GUSRAD2,NULL);
-    getinput(sizeof(uacc.address2)-1);
+    prompt(GUSRAD2);
+    inp_get(sizeof(uacc.address2)-1);
     if(margc<1)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     if(strlen(cp)<5)continue;
     break;
   }
@@ -461,11 +465,11 @@ getphone()
 
   if(!askpho)return;
   for(;;){
-    prompt(GUSRPHO,NULL);
-    getinput(sizeof(uacc.address1)-1);
+    prompt(GUSRPHO);
+    inp_get(sizeof(uacc.address1)-1);
     if(margc<1)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     if(strlen(cp)<7)continue;
     break;
   }
@@ -481,11 +485,11 @@ getage()
 
   if(!askage)return;
   for(;;){
-    prompt(GUSRAGE,NULL);
-    getinput(2);
+    prompt(GUSRAGE);
+    inp_get(2);
     if(margc<1)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     i=atoi(cp);
     if(i<=5 || i>=99)continue;
     break;
@@ -501,11 +505,11 @@ getsex()
 
   if(!asksex)return;
   for(;;){
-    prompt(GUSRSEX,NULL);
-    getinput(1);
+    prompt(GUSRSEX);
+    inp_get(1);
     if(margc<1)continue;
-    rstrin();
-    switch(toupper(input[0])){
+    inp_raw();
+    switch(toupper(inp_buffer[0])){
     case 'M':
 #ifdef GREEK
     case 'A':
@@ -543,36 +547,36 @@ getscnsize()
 
   if(!askscr)return;
   for(;;){
-    prompt(GSCNWID,NULL);
-    getinput(3);
+    prompt(GSCNWID);
+    inp_get(3);
     if(!margc){
       i=80;
       break;
     }else if(margc!=1)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     i=atoi(cp);
     if(!i) continue;
     else if(i<40) {
-      prompt(SCN2NAR,NULL);
+      prompt(SCN2NAR);
       continue;
     }
     if(i>255)continue;
     break;
   }
-  prompt(SCNWDOK,NULL);
+  prompt(SCNWDOK);
   uacc.scnwidth=i;
-  setlinelen(i);
+  fmt_setlinelen(i);
 
   for(;;){
-    prompt(GSCNHGT,NULL);
-    getinput(3);
+    prompt(GSCNHGT);
+    inp_get(3);
     if(!margc){
       i=23;
       break;
     }else if(margc!=1)continue;
-    rstrin();
-    for(cp=input;*cp && (*cp==32);cp++);
+    inp_raw();
+    for(cp=inp_buffer;*cp && (*cp==32);cp++);
     i=atoi(cp);
     if(i<10) continue;
     if(i>255)continue;
@@ -589,11 +593,11 @@ getsystype()
 
   if(!asksys)return;
   for(;;){
-    prompt(GSYSTYP,NULL);
-    getinput(1);
+    prompt(GSYSTYP);
+    inp_get(1);
     if(!margc)continue;
-    rstrin();
-    i=atoi(input);
+    inp_raw();
+    i=atoi(inp_buffer);
     if(i<0 || i>7)continue;
     break;
   }
@@ -635,7 +639,7 @@ uidexists(char *s)
   FILE *fp; 
 
   if((fp=fopen("/etc/passwd","r"))==NULL){
-    fatalsys("Unable to open /etc/passwd!",NULL);
+    error_fatalsys("Unable to open /etc/passwd!");
   }
 
   while(!feof(fp)){
@@ -661,18 +665,18 @@ getid()
 {
   int i, c, l, ok, accepted;
 
-  prompt(PREUID,NULL);
+  prompt(PREUID);
   for(;;){
-    prompt(GUSERID,NULL);
-    getinput(mxuidl);
+    prompt(GUSERID);
+    inp_get(mxuidl);
     if(!margc) continue;
-    rstrin();
-    if(strlen(input)<3){
-      prompt(SMLUID,NULL);
+    inp_raw();
+    if(strlen(inp_buffer)<3){
+      prompt(SMLUID);
       continue;
     }
-    for(ok=1,c=l=i=0;input[i];i++){
-      char ch=input[i];
+    for(ok=1,c=l=i=0;inp_buffer[i];i++){
+      char ch=inp_buffer[i];
       if(isalpha(ch)){
 	l++;
 	if(islower(ch))c--;
@@ -684,30 +688,30 @@ getid()
       }
     }
     if(!ok){
-      prompt(BADUID1,input,NULL);
+      prompt(BADUID1,inp_buffer);
       continue;
     }
     if(abs(c)==l){
-      input[0]=toupper(input[0]);
-      for(i=1;i<strlen(input);i++)input[i]=tolower(input[i]);
+      inp_buffer[0]=toupper(inp_buffer[0]);
+      for(i=1;i<strlen(inp_buffer);i++)inp_buffer[i]=tolower(inp_buffer[i]);
     }
-    if(!checkbaduid(input)){
-      prompt(BADUID2,input,NULL);
+    if(!checkbaduid(inp_buffer)){
+      prompt(BADUID2,inp_buffer);
       continue;
     }
-    if(/*uidexists(input)||*/ userexists(input)){
-      prompt(BADUID3,input,NULL);
+    if(/*uidexists(inp_buffer)||*/ usr_exists(inp_buffer)){
+      prompt(BADUID3,inp_buffer);
       continue;
     }
 
     accepted=0;
     while(!accepted){
-      prompt(UIDOK,input);
-      strcpy(uacc.userid,input);
-      getinput(1);
+      prompt(UIDOK,inp_buffer);
+      strcpy(uacc.userid,inp_buffer);
+      inp_get(1);
       if(!margc) continue;
-      bgncnc();
-      switch(cncyesno()){
+      cnc_begin();
+      switch(cnc_yesno()){
       case 'Y':
 	accepted=1;
 	break;
@@ -795,56 +799,56 @@ getpassword()
 {
   char recommended [256];
 
-  prompt(PREPSW,NULL);
+  prompt(PREPSW);
   strcpy(uacc.passwd,makeapass());
   strcpy(recommended,uacc.passwd);
   for(;;){
     if(mkpswd && mkpwdf){
-      prompt(FRCPSW,recommended,NULL);
+      prompt(FRCPSW,recommended);
     } else {
-      if(mkpswd)prompt(RECPSW,recommended,NULL);
-      prompt(GPSWORD,NULL);
-      setpasswordentry(1);
-      getinput(15);
-      setpasswordentry(0);
+      if(mkpswd)prompt(RECPSW,recommended);
+      prompt(GPSWORD);
+      inp_setflags(INF_PASSWD);
+      inp_get(15);
+      inp_clearflags(INF_PASSWD);
       if(!margc)continue;
-      rstrin();
+      inp_raw();
       
       if(safpsw){
 	int i,d=0;
-	if(strlen(input)<minpln){
-	  prompt(BADPSW1,NULL);
+	if(strlen(inp_buffer)<minpln){
+	  prompt(BADPSW1);
 	  continue;
 	}
 	if(!strpss)d++;
 	else {
-	  for(i=0,d=0;input[i];i++)if(isupper(input[i])||!isalpha(input[i]))d++;
+	  for(i=0,d=0;inp_buffer[i];i++)if(isupper(inp_buffer[i])||!isalpha(inp_buffer[i]))d++;
 	}
 	if(!d){
-	  prompt(BADPSW1,NULL);
+	  prompt(BADPSW1);
 	  continue;
 	}
-	if(stupidpass(input)){
-	  prompt(BADPSW2,NULL);
+	if(stupidpass(inp_buffer)){
+	  prompt(BADPSW2);
 	  continue;
 	}
-	strcpy(uacc.passwd,input);
+	strcpy(uacc.passwd,inp_buffer);
       }
     }
-    prompt(GPSWAGN,NULL);
-    setpasswordentry(1);
-    getinput(15);
-    setpasswordentry(0);
-    rstrin();
-    if(!sameas(input,uacc.passwd)){
-      prompt(BADPSW3,NULL);
+    prompt(GPSWAGN);
+    inp_setflags(INF_PASSWD);
+    inp_get(15);
+    inp_clearflags(INF_PASSWD);
+    inp_raw();
+    if(!sameas(inp_buffer,uacc.passwd)){
+      prompt(BADPSW3);
       continue;
     }
     break;
   }
   uacc.passexp=sysvar->pswexpiry;
-  prompt(PSWEPI,uacc.userid,uacc.passwd,NULL);
-  getinput(1);
+  prompt(PSWEPI,uacc.userid,uacc.passwd);
+  inp_get(1);
 }
 
 
@@ -913,7 +917,7 @@ adduser()
     FILE *passfile;
 
     if((passfile=fopen("/etc/passwd","a"))==NULL){
-      fatalsys("Failed to open /etc/password for appending.");
+      error_fatalsys("Failed to open /etc/password for appending.");
     }
     fprintf(passfile,"%s:*:%d:%d:%s:%s/%s:%s\n",
 	    uid,uidn,newgidn,newnam,newhome,uid,newshl);
@@ -929,7 +933,7 @@ adduser()
 
     if(!stat("/etc/shadow",&st)){
       if((shadow=fopen("/etc/shadow","a"))!=NULL){
-	fatalsys("Failed to open /etc/shadow for appending.");
+	error_fatalsys("Failed to open /etc/shadow for appending.");
       }
       fprintf(shadow,"%s:*:9804:0:::::\n",uid);
       fclose(shadow);
@@ -941,7 +945,7 @@ adduser()
   um=umask(0022);
   sprintf(fname,"%s %s %d %d \"%s\" %s/%s %s >&/dev/null",
 	  USERADDBIN,uid,uidn,newgidn,newnam,newhome,uid,newshl);
-  if(system(fname))fatal("%s failed to add user.",USERADDBIN);
+  if(system(fname))error_fatal("%s failed to add user.",USERADDBIN);
   umask(um);
 #endif
 
@@ -949,18 +953,18 @@ adduser()
 
   um=umask(0022);
   sprintf(fname,"%s %s >&/dev/null",USERADDBIN,uid);
-  if(system(fname))fatal("%s failed to execute additional signup script.",USERADDBIN);
+  if(system(fname))error_fatal("%s failed to execute additional signup script.",USERADDBIN);
   umask(um);
 
   /* Add the user's record */
 
   sprintf(fname,"%s/%s",USRDIR,uacc.userid);
   if((user=fopen(fname,"w"))==NULL){
-    fatalsys("Failed to create user account %s",fname,NULL);
+    error_fatalsys("Failed to create user account %s",fname);
   }
 
   if(fwrite(&uacc,sizeof(uacc),1,user)!=1){
-    fatalsys("Failed to write user account %s",fname,NULL);
+    error_fatalsys("Failed to write user account %s",fname);
   }
 
   fclose(user);
@@ -978,7 +982,7 @@ adduser()
 void
 signemup()
 {
-  classrec *cls;
+  classrec_t *cls;
 
   memset(&uacc,0,sizeof(uacc));
   strcpy(uacc.tempclss,newclss);
@@ -992,15 +996,15 @@ signemup()
   uacc.datelast=-1;
   uacc.auditfiltering=-1;
   
-  setmbk(sysblk);
-  if((uacc.pagestate=tokopt(DFTPOP,"STORE","OK","ON","OFF"))==0){
-    fatal("Option DFTPOP in sysvar.msg has bad value",NULL);
+  msg_set(msg_sys);
+  if((uacc.pagestate=msg_token(DFTPOP,"STORE","OK","ON","OFF"))==0){
+    error_fatal("Option DFTPOP in sysvar.msg has bad value");
   }else uacc.pagestate--;
-  uacc.pagetime=numopt(DFTPTM,0,9);
-  setmbk(msg);
+  uacc.pagetime=msg_int(DFTPTM,0,9);
+  msg_set(msg);
 
-  if((cls=findclass(newclss))==NULL){
-    fatal("New user class \"%s\" does not exist!",newclss);
+  if((cls=cls_find(newclss))==NULL){
+    error_fatal("New user class \"%s\" does not exist!",newclss);
   }
 
   uacc.credits=cls->crdperday;
@@ -1010,7 +1014,7 @@ signemup()
   getlanguage();
   getansiop();
 
-  prompt(INTRO,NULL);
+  prompt(INTRO);
   evilpause(intpauz);
 
   getusername();
@@ -1026,7 +1030,7 @@ signemup()
 
   setenv("USERID",uacc.userid,1);
  
-  prompt(WELCOME,NULL);
+  prompt(WELCOME);
   evilpause(welpauz);
 
   adduser();
@@ -1036,7 +1040,7 @@ signemup()
 void
 logemin()
 {
-  donemodule();
+  mod_done(INI_ALL);
 
   {
     FILE *fp;
@@ -1051,7 +1055,7 @@ logemin()
   exit(0);
 /*  (void) execl(BBSLOGIN,"",NULL);
   (void) execl("/bin/sh","-c",BBSLOGIN,NULL);
-  fatalsys("Cannot execute %s",BBSLOGIN); */
+  error_fatalsys("Cannot execute %s",BBSLOGIN); */
 }
 
 
@@ -1067,7 +1071,7 @@ setquestions(char *s)
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc>1)setquestions(argv[1]);
   init();
   readdefaults();

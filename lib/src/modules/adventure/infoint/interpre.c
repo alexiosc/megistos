@@ -33,8 +33,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -134,7 +136,7 @@ int interpret ()
 	case 0x09: undo_save (); break;
 	case 0x0a: undo_restore (); break;
 	  
-	default: fatal ("Illegal operation");
+	default: error_fatal ("Illegal operation");
 	}
       else
 	switch ((char) opcode) {
@@ -205,7 +207,7 @@ int interpret ()
 	case 0x3e: print_window (count, operand); break;
 	case 0x3f: check_argument (operand[0]); break;
 	  
-	default: fatal ("Illegal operation");
+	default: error_fatal ("Illegal operation");
 	}
     } else {
       
@@ -258,7 +260,7 @@ int interpret ()
 	  
 	case 0x0f: conditional_jump (TRUE); break;
 	  
-	default: fatal ("Illegal operation");
+	default: error_fatal ("Illegal operation");
 	}
       }
     }

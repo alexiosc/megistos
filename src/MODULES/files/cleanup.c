@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  2000/01/06 10:37:25  alexios
  * Lots of bug fixes that caused segmentation faults during
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -997,7 +999,7 @@ cleanup()
     return 0;
   }
 
-  msg=opnmsg("files");
+  msg=msg_open("files");
   readsettings();
   topfiles=alcmem(sizeof(struct topfiles)*numtops);
   mastertopfiles=alcmem(sizeof(struct topfiles)*nummtps);

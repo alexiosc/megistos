@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/28 23:10:22  alexios
  * Fixed slight but that wouldn't show the 'no bulletins' message,
@@ -39,6 +40,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -71,12 +73,12 @@ list(int full)
     return;
   }
 
-  nonblocking();
+  inp_nonblock();
   do{
     dbget(&blt);
 
     if(read(fileno(stdin),&c,1)&&
-       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))lastresult=PAUSE_QUIT;
+       ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))fmt_lastresult=PAUSE_QUIT;
 
     if(club[0] && strcmp(blt.area,club))break;
 
@@ -91,9 +93,9 @@ list(int full)
       }
     }
 
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(LSTCAN);
-      blocking();
+      inp_block();
       return;
     }
 
@@ -105,19 +107,19 @@ list(int full)
     } else {
       prompt(BLTLST,blt.num,blt.author,blt.descr);
     }
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(LSTCAN);
-      blocking();
+      inp_block();
       return;
     }
   }while(dblistnext());
 
-  if(lastresult!=PAUSE_QUIT && first==1){
+  if(fmt_lastresult!=PAUSE_QUIT && first==1){
     if(!club[0])prompt(BLTNOBT);
     else prompt(CLBNOBT,club);
   }
   
-  blocking();
+  inp_block();
   if(i)prompt(full?LSTEND2:LSTEND);
 }
 

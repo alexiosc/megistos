@@ -39,8 +39,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:51:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:29  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 14:31:16  alexios
  * Added autoconf support. Added function to get the day of the
@@ -62,6 +63,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Added string to hold the dummy file description of a file in
@@ -65,8 +66,8 @@
 #include "dbkey.h"
 
 
-#define libop (haskey(&thisuseracc,libopkey)||islibop(&library))
-#define masterlibop (haskey(&thisuseracc,libopkey))
+#define libop (key_owns(&thisuseracc,libopkey)||islibop(&library))
+#define masterlibop (key_owns(&thisuseracc,libopkey))
 #define setflag(flags,f,on) (flags=((on)?(flags|(f)):(flags&(~(f)))))
 
 
@@ -119,7 +120,7 @@
 
 /* files.c */
 
-promptblk *msg;
+promptblock_t *msg;
 
 extern int  entrykey;
 extern int  libopkey;

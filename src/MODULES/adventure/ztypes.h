@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -476,7 +477,7 @@ void undo_save ();
 void verify ();
 #endif
 
-/* input.c */
+/* inp_buffer.c */
 
 #ifdef __STDC__
 int get_line (char *, zword_t, zword_t);
@@ -600,7 +601,7 @@ zword_t load_variable ();
 
 #ifdef __STDC__
 int codes_to_text (int, char *);
-/*void fatal (const char *);*/
+/*void error_fatal (const char *);*/
 void file_cleanup (const char *, int);
 int fit_line (const char *, int, int);
 int get_file_name (char *, char *, int);
@@ -611,7 +612,7 @@ void set_font (int);
 void sound (int, zword_t *);
 #else
 int codes_to_text ();
-void fatal ();
+void error_fatal ();
 void file_cleanup ();
 int fit_line ();
 int get_file_name ();

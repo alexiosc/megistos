@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -126,8 +128,6 @@ children:
 void
 op_options()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
   struct libidx lib;
   int changes[8];
@@ -136,42 +136,35 @@ op_options()
   memcpy(&lib,&library,sizeof(lib));
   if(!adminlock(lib.libnum))return;
 
-  sprintf(fname,TMPDIR"/files%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  inp_buffer[0]='\0';
+  for(i=0;i<9;i++){
+    char tmp[40];
+    sprintf(tmp,"%s\n",lib.flags&flags[i]?"on":"off");
+    strcat(inp_buffer,tmp);
+  }
+  strcat(inp_buffer,"off\nOK\nCancel\n");
+
+  if(dialog_run("files",OOPTVT,OOPTLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     adminunlock();
     return;
   }
 
-  for(i=0;i<9;i++)fprintf(fp,"%s\n",lib.flags&flags[i]?"on":"off");
-  fprintf(fp,"off\nOK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("files",OOPTVT,OOPTLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    adminunlock();
-    return;
-  }
-
-  for(i=0;i<13;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i<9){
-      int old=lib.flags;
-      setflag(lib.flags,flags[i],sameas(s,"on"));
-      if(lib.flags!=old)changes[i]=1;
-    } else if(i==9){
-      if((recursive=sameas(s,"on"))!=0)prompt(OOPTREC);
-      break;
+  if(sameas(margv[12],"OK")||sameas(margv[12],margv[10])){
+    for(i=0;i<13;i++){
+      char *s=margv[i];
+      if(i<9){
+	int old=lib.flags;
+	setflag(lib.flags,flags[i],sameas(s,"on"));
+	if(lib.flags!=old)changes[i]=1;
+      } else if(i==9){
+	if((recursive=sameas(s,"on"))!=0)prompt(OOPTREC);
+	break;
+      }
     }
-  }
-
-  fclose(fp);
-  unlink(fname);
-
-  if(sameas(s,"CANCEL")){
+  } else {
     prompt(OPCAN);
     adminunlock();
     return;

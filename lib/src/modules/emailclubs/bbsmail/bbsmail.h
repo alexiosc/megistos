@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1999/07/28 23:19:38  alexios
  * Moved run() to its own .c file in anticipation of a united
@@ -121,7 +122,7 @@ void addtodb(struct message *msg, int email);
 
 /* bbsmail.c */
 
-extern promptblk *msg;
+extern promptblock_t *msg;
 extern int       usercaller;
 extern char      *bbscode;
 

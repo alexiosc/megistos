@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:21:38  alexios
  * Fixed sneaky little bug in substvar code.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -232,7 +234,7 @@ initecsubstvars()
   int i=0;
   
   while(table[i].varname[0]){
-    addsubstvar(table[i].varname,table[i].varcalc);
+    out_addsubstvar(table[i].varname,table[i].varcalc);
     i++;
   }
 }

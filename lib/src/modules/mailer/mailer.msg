@@ -6,7 +6,7 @@ UPLKEY {Key required to upload packets: 2} N 0 129
 
 CHGDNL {Charge for downloading packet: 0} N -100000 100000
 
-BBSID {MEGISTOS} S 8 Short BBS-ID stamped on QWK packets
+BBSID {ACRO} S 8 Short BBS-ID stamped on QWK packets
 
 STPNCNF {Stop download if user hasn't set up preferences? NO} B
 
@@ -36,7 +36,7 @@ CTLNAME4 {QWKMAIL} S 16 QWK Control Name alias 3/5 (if necessary)
 
 CTLNAME5 {QMAIL} S 16 QWK Control Name alias 4/5 (if necessary)
 
-CTLNAME6 {MEGISTOS} S 16 QWK Control Name alias 5/5 (if necessary)
+CTLNAME6 {ACRO} S 16 QWK Control Name alias 5/5 (if necessary)
 
 
 
@@ -483,7 +483,7 @@ BADREP {[0;1;31m
 
 BADBBSID {[0;1;31m
 ’¦ §˜¡â«¦ £¤¬£á«à¤ §¦¬ ˜§¦©«œå¢˜«œ §¨¦¦¨ æ«˜¤ š ˜ «¤ ™á© £œ ¡à› ¡æ
-[33m%s[31m ¡˜  æ®  š ˜ «¤ @BBS@ (¡à› ¡æª [33m%s[31m).
+[33m%s[31m ¡˜  æ®  š ˜ «¤ Acrobase (¡à› ¡æª [33m%s[31m).
 [0;1m} T Upload: Incorrect BBS ID stamped on REP packet
 
 

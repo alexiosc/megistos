@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -64,21 +66,21 @@ getfilenames(int pr)
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
     } else {
       prompt(pr);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     } else if(!strcmp(fn,"?")){
       listapproved();
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -94,49 +96,49 @@ gettargetlibname(struct libidx *l)
   struct libidx lib;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	libtree();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OMOVTRG);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	libtree();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
     if(sameas(i,"..")){
       if(nesting(library.fullname)==0){
 	prompt(SELNPR);
-	endcnc();
+	cnc_end();
 	continue;
       } else return 2;
     } else if(sameas(i,"/")||sameas(i,"\\")){
       if(!libread(libmain,0,&lib)){
-	fatal("Unable to find main library!");
+	error_fatal("Unable to find main library!");
       } else goto enter;
     } else {
       if(!nesting(i)){
 	if(!libread(i,library.libnum,&lib)||
 	   !getlibaccess(&lib,ACC_VISIBLE)){
 	  prompt(OMOVTR2);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	} else goto enter;
       } else {
@@ -145,7 +147,7 @@ gettargetlibname(struct libidx *l)
 
 	strcpy(s,i);
 	if(!libread(libmain,0,&lib)){
-	  fatal("Unable to find main library!");
+	  error_fatal("Unable to find main library!");
 	}
 	cp=strtok(i,"/\\");
 	while(cp){
@@ -153,7 +155,7 @@ gettargetlibname(struct libidx *l)
 	  if(!libread(cp,lib.libnum,&lib)||
 	     !getlibaccess(&lib,ACC_VISIBLE)){
 	    prompt(OMOVTR2);
-	    endcnc();
+	    cnc_end();
 	    goto outerloop;
 	  }
 	  cp=strtok(NULL,"/\\");
@@ -227,12 +229,12 @@ int domove(struct fileidx *f, int mode, struct libidx *target)
 
   if(target->numfiles>target->filelimit){
     prompt(OMOVFAIL);
-    endcnc();
+    cnc_end();
     return 0;
   }
   if(target->numbytes+st.st_size>=(target->libsizelimit<<20)){
     prompt(OMOVFAIL);
-    endcnc();
+    cnc_end();
     return 0;
   }
 
@@ -293,7 +295,7 @@ op_move()
   numfiles=expandspec(spec,1);
   if(numfiles==0){
     prompt(OMOVERR);
-    endcnc();
+    cnc_end();
     return;
   } else if(numfiles>1){
     prompt(OMOVNUM,numfiles);
@@ -308,23 +310,23 @@ op_move()
     }
     
     if(target.libnum==library.libnum){
-      endcnc();
+      cnc_end();
       prompt(OMOVTR1);
       continue;
     }
 
     if(target.flags&LBF_READONLY){
       prompt(OMOVTR4);
-      endcnc();
+      cnc_end();
       continue;
     }
 
     break;
   }
 
-  endcnc();
+  cnc_end();
   if(!mode)
-    if(!getbool(&mode,OMOVMOD,OMOVMOD,0,0))return;
+    if(!get_bool(&mode,OMOVMOD,OMOVMOD,0,0))return;
 
   if(library.flags&LBF_OSDIR){
     prompt(OMOVOS);
@@ -344,9 +346,9 @@ op_move()
 	prompt(OMOVINF,i,numfiles);
 	fileinfo(&library,&f);
 
-	setinputflags(INF_HELP);
-	res=getmenu(&c,0,0,OMOVMNU,0,"YNA",0,0);
-	setinputflags(INF_NORMAL);
+	inp_setflags(INF_HELP);
+	res=get_menu(&c,0,0,OMOVMNU,0,"YNA",0,0);
+	inp_clearflags(INF_HELP);
 	if(res<0)continue;
 	if(res==0)goto done;
 	if(c=='A'){

@@ -105,8 +105,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.9  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out().
@@ -143,6 +144,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -156,6 +158,7 @@
 #include <bbsinclude.h>
 
 #include "config.h"
+#include "bbsmod.h"
 #include "useracc.h"
 #include "miscfx.h"
 #include "prompts.h"
@@ -164,6 +167,11 @@
 #include "input.h" 
 
 #include "mbk_sysvar.h"
+
+
+#define INHIBIT_FORMATTING (inhibit||IS_BOT)
+#define IS_BOT \
+(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
 
 
 #define FFL_FORMAT     0x0000000f
@@ -181,11 +189,11 @@
 #define INDENTS (FFL_NOMARGINS|FFL_SUBINDENT)
 
 
-static int inhibit=0;
-static int LINELEN=80;
-static int RMARGIN=1;
-static int LMARGIN=0;
-static int SINDLM=0;
+static int  inhibit=0;
+static int  LINELEN=80;
+static int  RMARGIN=1;
+static int  LMARGIN=0;
+static int  SINDLM=0;
 static long flags=FFL_FLUSHLEFT;
 static int  xpos=0;
 static char prevline[1024];
@@ -196,15 +204,24 @@ static int  comstate=0;
 static char lastc=32;
 static int  lastpos=0;
 static char *lastp=NULL;
+static int  screenvpos=0;
 static int  savepos=0;
 static char fmtbuf[16384];
-char *pausetxt=NULL;
+static char *pausetxt=NULL;
+int fmt_verticalformat=0;
+int fmt_screenheight=23;
+int fmt_lastresult=0;
 
 
-int verticalformat=0;
-int screenheight=23;
-int screenvpos=0;
-int lastresult=0;
+void
+fmt_setpausetext(char *s)
+{
+  if(pausetxt!=NULL){
+    free(pausetxt);
+    pausetxt=NULL;
+  }
+  if(s!=NULL)pausetxt=s;
+}
 
 
 char *
@@ -332,70 +349,72 @@ formatandoutput(char *s)
 	    break;
 	  }
 	} else if(comstate==3){
-	  switch(c){
-	  case 'L':
-	    flags=(flags&~CLEAR)|FFL_FLUSHLEFT|FFL_BEGIN;
-	    break;
-	  case 'R':
-	    flags=(flags&~CLEAR)|FFL_FLUSHRIGHT|FFL_BEGIN;
-	    break;
-	  case 'C':
-	    flags=(flags&~CLEAR)|FFL_CENTRE|FFL_BEGIN;
-	    break;
-	  case 'W':
-	    flags=(flags&~CLEAR)|FFL_WRAP|FFL_BEGIN;
-	    break;
-	  case 'J':
-	    flags=(flags&~CLEAR)|FFL_JUSTIFY|FFL_BEGIN;
-	    break;
-	  case '(':
-	    flags=(flags&~FFL_SUBINDENT)|FFL_BEGIN;
-	    break;
-	  case ')':
-	    flags|=FFL_END;
-	    break;
-	  case 'r':
-	    if(strlen(command))RMARGIN=min(LINELEN-10,atoi(command));
-	    else RMARGIN=min(LINELEN-10,LINELEN-xpos);
-	    break;
-	  case 'i':
-	    flags|=FFL_SUBINDENT;
-	    if(strlen(command))SINDLM=min(LINELEN-10,atoi(command));
-	    else SINDLM=min(LINELEN-10,xpos);
-	    break;
-	  case 'l':
-	    if(strlen(command))LMARGIN=min(LINELEN-10,atoi(command));
-	    else LMARGIN=min(LINELEN-10,xpos);
-	    SINDLM=LMARGIN;
-	    break;
-	  case 'F':
-	    if(*(cp+1)){
-	      char multiple[256]={0};
-	      char temp[1024];
-	      int  reps=atoi(command);
-	      memset(multiple,*(cp+1),(reps?reps:LINELEN-LMARGIN-RMARGIN-xpos));
-
-	      sprintf(temp,"%s%s",multiple,cp+2);
-	      strcpy(cp+1,temp);
-	    }
-	    break;
-	  case 'Z':
-	    xpos=0;
-	    break;
-	  case 'v':
-	    if(!strlen(command))inhibitvars=0;
-	    else inhibitvars=atoi(command)==0;
-	    break;
-	  case 'P':
-	    {
-	      char c;
-	      char *buf;
-	      setmbk(sysblk);
-	      buf=getmsg(W2CLR);
-	      send_out(fileno(stdout),buf,strlen(buf));
-	      rstmbk();
-	      read(0,&c,1);
-	      resetinactivity();
+	  if(!INHIBIT_FORMATTING){
+	    switch(c){
+	    case 'L':
+	      flags=(flags&~CLEAR)|FFL_FLUSHLEFT|FFL_BEGIN;
+	      break;
+	    case 'R':
+	      flags=(flags&~CLEAR)|FFL_FLUSHRIGHT|FFL_BEGIN;
+	      break;
+	    case 'C':
+	      flags=(flags&~CLEAR)|FFL_CENTRE|FFL_BEGIN;
+	      break;
+	    case 'W':
+	      flags=(flags&~CLEAR)|FFL_WRAP|FFL_BEGIN;
+	      break;
+	    case 'J':
+	      flags=(flags&~CLEAR)|FFL_JUSTIFY|FFL_BEGIN;
+	      break;
+	    case '(':
+	      flags=(flags&~FFL_SUBINDENT)|FFL_BEGIN;
+	      break;
+	    case ')':
+	      flags|=FFL_END;
+	      break;
+	    case 'r':
+	      if(strlen(command))RMARGIN=min(LINELEN-10,atoi(command));
+	      else RMARGIN=min(LINELEN-10,LINELEN-xpos);
+	      break;
+	    case 'i':
+	      flags|=FFL_SUBINDENT;
+	      if(strlen(command))SINDLM=min(LINELEN-10,atoi(command));
+	      else SINDLM=min(LINELEN-10,xpos);
+	      break;
+	    case 'l':
+	      if(strlen(command))LMARGIN=min(LINELEN-10,atoi(command));
+	      else LMARGIN=min(LINELEN-10,xpos);
+	      SINDLM=LMARGIN;
+	      break;
+	    case 'F':
+	      if(*(cp+1)){
+		char multiple[256]={0};
+		char temp[1024];
+		int  reps=atoi(command);
+		memset(multiple,*(cp+1),(reps?reps:LINELEN-LMARGIN-RMARGIN-xpos));
+		
+		sprintf(temp,"%s%s",multiple,cp+2);
+		strcpy(cp+1,temp);
+	      }
+	      break;
+	    case 'Z':
+	      xpos=0;
+	      break;
+	    case 'v':
+	      if(!strlen(command))out_clearflags(OFL_INHIBITVARS);
+	      else __out_setclear(OFL_INHIBITVARS,(atoi(command)==0));
+	      break;
+	    case 'P':
+	      {
+		char c;
+		char *buf;
+		msg_set(msg_sys);
+		buf=msg_get(W2CLR);
+		out_send(fileno(stdout),buf,strlen(buf));
+		msg_reset();
+		read(0,&c,1);
+		inp_resetidle();
+	      }
 	    }
 	  }
 	}
@@ -417,8 +436,8 @@ formatandoutput(char *s)
 	  flags&=~INDENTS;
 	  LMARGIN=SINDLM;
 	  sprintf(fmtbuf,"%s%s\n",lpadding,prevline);
-	  send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
-	  if(screenpause()==PAUSE_QUIT){
+	  out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
+	  if(fmt_screenpause()==PAUSE_QUIT){
 	    flags=FFL_FLUSHLEFT;
 	    plidx=0;
 	    prevline[plidx]=0;
@@ -445,8 +464,8 @@ formatandoutput(char *s)
 	  flags&=~INDENTS;
 	  LMARGIN=SINDLM;
 	  sprintf(fmtbuf,"%s%s\n",lpadding,prevline);
-	  send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
-	  if(screenpause()==PAUSE_QUIT){
+	  out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
+	  if(fmt_screenpause()==PAUSE_QUIT){
 	    flags=FFL_FLUSHLEFT;
 	    plidx=0;
 	    prevline[plidx]=0;
@@ -478,13 +497,13 @@ formatandoutput(char *s)
       flags&=~INDENTS;
       LMARGIN=SINDLM;
       sprintf(fmtbuf,"%s%s%s",lpadding,padding,prevline);
-      if(screenpause()==PAUSE_QUIT){
+      if(fmt_screenpause()==PAUSE_QUIT){
 	flags=FFL_FLUSHLEFT;
 	plidx=0;
 	prevline[plidx]=0;
 	return;
       }
-      send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
+      out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
       flags&=~FFL_SUBINDENT;
       if(flags&FFL_END)flags&=~(FFL_BEGIN);
       xpos=0;
@@ -498,13 +517,13 @@ formatandoutput(char *s)
       flags&=~INDENTS;
       LMARGIN=SINDLM;
       sprintf(fmtbuf,"%s%s",lpadding,prevline);
-      if(screenpause()==PAUSE_QUIT){
+      if(fmt_screenpause()==PAUSE_QUIT){
 	flags=FFL_FLUSHLEFT;
 	plidx=0;
 	prevline[plidx]=0;
 	return;
       }
-      send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
+      out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
       flags&=~FFL_SUBINDENT;
       if(flags&FFL_END)flags&=~(FFL_BEGIN);
       lastpos=0;
@@ -522,13 +541,13 @@ formatandoutput(char *s)
       flags&=~INDENTS;
       LMARGIN=SINDLM;
       sprintf(fmtbuf,"%s%s",lpadding,prevline);
-      if(screenpause()==PAUSE_QUIT){
+      if(fmt_screenpause()==PAUSE_QUIT){
 	flags=FFL_FLUSHLEFT;
 	plidx=0;
 	prevline[plidx]=0;
 	return;
       }
-      send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
+      out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
       flags&=~FFL_SUBINDENT;
       if(flags&FFL_END)flags&=~(FFL_BEGIN|FFL_END);
       lastpos=0;
@@ -548,13 +567,13 @@ formatandoutput(char *s)
     prevline[plidx]=0;
     if(flags&(FFL_WRAP|FFL_JUSTIFY) || ((flags&FFL_FORMAT)==0)){
       sprintf(fmtbuf,"%s%s",lpadding,prevline);
-/*      if(screenpause()==PAUSE_QUIT){
+/*      if(fmt_screenpause()==PAUSE_QUIT){
 	flags=FFL_FLUSHLEFT;
 	plidx=0;
 	prevline[plidx]=0;
 	return;
       } */
-      send_out(fileno(stdout),fmtbuf,strlen(fmtbuf));
+      out_send(fileno(stdout),fmtbuf,strlen(fmtbuf));
       flags&=~FFL_SUBINDENT;
       plidx=0;
       prevline[plidx]=0;
@@ -565,7 +584,7 @@ formatandoutput(char *s)
 
 
 void
-formatoutput(char *s)
+fmt_output(char *s)
 {
   if(((!strstr(s,"\033!"))&&((flags&FFL_FORMAT)==0)) || inhibit){
     char *cp, *lp=s;
@@ -577,13 +596,13 @@ formatoutput(char *s)
 	char c='\n';
 	
 	*cp=0;
-	send_out(fileno(stdout),lp,strlen(lp));
-	send_out(fileno(stdout),&c,1);
-	if(screenpause()==PAUSE_QUIT)return;
+	out_send(fileno(stdout),lp,strlen(lp));
+	out_send(fileno(stdout),&c,1);
+	if(fmt_screenpause()==PAUSE_QUIT)return;
 	*cp=c;
 	lp=cp+1;
       } else {
-	send_out(fileno(stdout),lp,strlen(lp));
+	out_send(fileno(stdout),lp,strlen(lp));
 	break;
       }
     }
@@ -595,91 +614,98 @@ formatoutput(char *s)
 
 
 void
-setlinelen(int i)
+fmt_setlinelen(int i)
 {
   LINELEN=i;
 }
 
 
 void
-setformatting(int i)
+fmt_setformatting(int i)
 {
   inhibit=(i==0);
-  lastresult=0;
+  fmt_lastresult=0;
 }
 
 
 void
-setverticalformat(int i)
+fmt_setverticalformat(int i)
 {
-  verticalformat=i;
-  lastresult=0;
+  fmt_verticalformat=i;
+  fmt_lastresult=0;
 }
 
 
 void
-setscreenheight(int i)
+fmt_setscreenheight(int i)
 {
-  screenheight=i;
-  lastresult=0;
+  fmt_screenheight=i;
+  fmt_lastresult=0;
 }
 
 
 int
-screenpause()
+fmt_screenpause()
 {
+  /* Bots don't need to pause */
+  if(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
+    return 0;
+
   screenvpos++;
-  if(screenvpos>=screenheight-2){
+  if(screenvpos>=fmt_screenheight-2){
     screenvpos=0;
-    if(!verticalformat || lastresult==PAUSE_NONSTOP) return 0;
-    else return forcedpause();
+    if(!fmt_verticalformat || fmt_lastresult==PAUSE_NONSTOP) return 0;
+    else return fmt_forcedpause();
   }
   return 0;
 }
 
 
 int
-forcedpause()
+fmt_forcedpause()
 {
   char c;
   int i,j;
 
-  blocking();
+  inp_block();
   
-  send_out(fileno(stdout),pausetxt,strlen(pausetxt));
+  if(pausetxt!=NULL)
+    out_send(fileno(stdout),pausetxt,strlen(pausetxt));
 
   read(0,&c,1);
-  resetinactivity();
+  inp_resetidle();
   switch(toupper(c)){
   case 'N':
-    lastresult=PAUSE_NONSTOP;
+    fmt_lastresult=PAUSE_NONSTOP;
     break;
   case 'Q':
-    lastresult=PAUSE_QUIT;
+    fmt_lastresult=PAUSE_QUIT;
     flags=FFL_FLUSHLEFT;
     SINDLM=0;
     xpos=0;
     break;
   case 'S':
-    screenvpos=screenheight;
+    screenvpos=fmt_screenheight;
   default:
-    lastresult=PAUSE_CONTINUE;
+    fmt_lastresult=PAUSE_CONTINUE;
   }
 
-  j=strlen(pausetxt);
-  for(i=0;i<j;i++){
-    const char s[]="\010 \010";
-    send_out(fileno(stdout),(char*)s,strlen(s));
+  if(pausetxt){
+    j=strlen(pausetxt);
+    for(i=0;i<j;i++){
+      const char s[]="\010 \010";
+      out_send(fileno(stdout),(char*)s,strlen(s));
+    }
   }
 
-  resetblocking();
-  return lastresult;
+  inp_resetblocking();
+  return fmt_lastresult;
 }
 
 
 void
-resetvpos(int i)
+fmt_resetvpos(int i)
 {
   screenvpos=i;
-  lastresult=0;
+  fmt_lastresult=0;
 }

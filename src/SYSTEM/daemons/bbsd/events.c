@@ -28,15 +28,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/07/18 22:00:00  alexios
- * Changed a few fatal() calls to fatalsys(). Other minor
+ * Changed a few error_fatal() calls to error_fatalsys(). Other minor
  * changes.
  *
  * Revision 0.9  1998/12/27 16:21:05  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other minor fixes.
  *
  * Revision 0.8  1998/07/26 21:11:32  alexios
@@ -74,6 +75,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -121,10 +123,10 @@ eventexec(char *command, char *name)
     initgroups(BBSUSERNAME,bbsgid);
     setuid(bbsuid);
     
-    /*    logerror("executing event (%s)",command); */
+    /*    error_log("executing event (%s)",command); */
     if(!chdir(BINDIR))res=system(command);
     else {
-      logerrorsys("eventexec(): unable to chdir(\"%s\") to run event",
+      error_logsys("eventexec(): unable to chdir(\"%s\") to run event",
 	       BINDIR);
       exit(0);
     }
@@ -146,7 +148,7 @@ asapevents()
 
   switch(fork()){
   case -1:
-    logerrorsys("Unable to fork() in asapevents()");
+    error_logsys("Unable to fork() in asapevents()");
     return;
   case 0:
     break;
@@ -155,7 +157,7 @@ asapevents()
   }
   
   if((dp=opendir(EVENTDIR))==NULL){
-    fatalsys("Unable to opendir %s",EVENTDIR);
+    error_fatalsys("Unable to opendir %s",EVENTDIR);
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -174,9 +176,9 @@ asapevents()
       if((event.flags&EVF_ASAP)==0)continue;
 
       if(numusers<0){
-	for(i=0,numusers=0;i<numchannels;i++){
-	  struct linestatus status;
-	  if(!getlinestatus(channels[i].ttyname,&status))continue;
+	for(i=0,numusers=0;i<chan_count;i++){
+	  channel_status_t status;
+	  if(!channel_getstatus(channels[i].ttyname,&status))continue;
 	  if(status.result==LSR_USER)numusers++;
 	}
       }
@@ -212,7 +214,7 @@ events()
 
   switch(fork()){
   case -1:
-    logerrorsys("Unable to fork() in events()");
+    error_logsys("Unable to fork() in events()");
     return;
   case 0:
     break;
@@ -225,7 +227,7 @@ events()
 #endif
 
   if((dp=opendir(EVENTDIR))==NULL){
-    fatalsys("Unable to opendir %s",EVENTDIR);
+    error_fatalsys("Unable to opendir %s",EVENTDIR);
   }
 
   while((dirent=readdir(dp))!=NULL){

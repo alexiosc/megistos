@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:06  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/08/13 17:10:05  alexios
  * Fixed things so that user inactivity timers are reset to handle
@@ -63,7 +64,7 @@
 
 
 
-#define mygetch() (resetinactivity(),getch())
+#define mygetch() (inp_resetidle(),getch())
 
 
 
@@ -93,7 +94,7 @@ extern struct line  *first;
 extern struct line  *last;
 extern struct       line *top;
 extern struct       line *current;
-extern promptblk    *msg;
+extern promptblock_t    *msg;
 extern int          numlines, numbytes, maxsize;
 extern char         filename[1024];
 extern int          cx,cy,toprow,leftcol;

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:41  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/07/24 10:29:41  alexios
  * Moved to stable status. Migrated to bbslib 0.6.
@@ -132,8 +133,8 @@ union object {
 
 extern union object  *object;
 extern int           numobjects;
-extern promptblk     *msg;
-extern promptblk     *templates;
+extern promptblock_t     *msg;
+extern promptblock_t     *templates;
 extern int           mode;
 extern char          *mbkname;
 extern int           vtnum;

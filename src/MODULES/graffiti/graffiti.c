@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:32  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.6  1999/07/18 21:42:37  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.5  1998/12/27 15:44:51  alexios
  * Added autoconf support. Migrated to new locking functions.
@@ -58,6 +59,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,7 +77,7 @@
 #include "mbk_graffiti.h"
 #include "graffiti.h"
 
-promptblk *msg;
+promptblock_t *msg;
 
 
 int entrykey;
@@ -98,17 +100,17 @@ static char *zonk(char *s)
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("graffiti");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("graffiti");
+  msg_setlanguage(thisuseracc.language);
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  maxlen=numopt(MAXLEN,1,255);
-  maxsize=numopt(MAXSIZE,1,32767);
-  maxmsgs=numopt(MAXMSGS,1,100);
-  ovrkey=numopt(OVRKEY,0,129);
-  syskey=numopt(SYSKEY,0,129);
-  wrtkey=numopt(WRTKEY,0,129);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  maxlen=msg_int(MAXLEN,1,255);
+  maxsize=msg_int(MAXSIZE,1,32767);
+  maxmsgs=msg_int(MAXMSGS,1,100);
+  ovrkey=msg_int(OVRKEY,0,129);
+  syskey=msg_int(SYSKEY,0,129);
+  wrtkey=msg_int(WRTKEY,0,129);
 
   randomize();
 }
@@ -122,14 +124,14 @@ checkfile()
   struct wallmsg header;
 
   if(stat(WALLFILE,&buf)){
-    if((waitlock(WALLLOCK,5))==LKR_TIMEOUT){
-      logerror("Timed out waiting for lock %s",WALLLOCK);
+    if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
+      error_log("Timed out waiting for lock %s",WALLLOCK);
       return 0;
     }
-    placelock(WALLLOCK,"creating");
+    lock_place(WALLLOCK,"creating");
     
     if((fp=fopen(WALLFILE,"w"))==NULL){
-      fatalsys("Unable to create file %s",WALLFILE);
+      error_fatalsys("Unable to create file %s",WALLFILE);
     }
     memset(&header,0,sizeof(header));
     strcpy(header.userid,SYSOP);
@@ -138,7 +140,7 @@ checkfile()
 
     fclose(fp);
     chmod(WALLFILE,0666);
-    rmlock(WALLLOCK);
+    lock_rm(WALLLOCK);
   }
   return 1;
 }
@@ -154,67 +156,67 @@ drawmessage()
   int            numlines=0, i;
   struct wallmsg wallmsg;
 
-  if(!haskey(&thisuseracc,wrtkey)){
+  if(!key_owns(&thisuseracc,wrtkey)){
     prompt(WRTNAX);
-    endcnc();
+    cnc_end();
     return;
   } else if(!checkfile()){
     prompt(OOPS);
     return;
   } else {
-    if((waitlock(WALLLOCK,5))==LKR_TIMEOUT){
-      logerror("Timed out waiting for lock %s",WALLLOCK);
+    if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
+      error_log("Timed out waiting for lock %s",WALLLOCK);
       return;
     }
-    placelock(WALLLOCK,"checking");
+    lock_place(WALLLOCK,"checking");
     
     if((fp=fopen(WALLFILE,"r"))==NULL){
-      rmlock(WALLLOCK);
-      fatalsys("Unable to open file %s",WALLFILE);
+      lock_rm(WALLLOCK);
+      error_fatalsys("Unable to open file %s",WALLFILE);
     }
     
     if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
-      rmlock(WALLLOCK);
-      fatalsys("Unable to read file %s",WALLFILE);
+      lock_rm(WALLLOCK);
+      error_fatalsys("Unable to read file %s",WALLFILE);
     }
 
     numlines=atoi(wallmsg.message);
     strcpy(userid,wallmsg.userid);
-    if(!haskey(&thisuseracc,ovrkey)
+    if(!key_owns(&thisuseracc,ovrkey)
        && sameas(wallmsg.userid,thisuseracc.userid) && numlines>=maxmsgs){
-      prompt(MSGDENY,NULL);
-      rmlock(WALLLOCK);
+      prompt(MSGDENY);
+      lock_rm(WALLLOCK);
       return;
     }
   }
   fclose(fp);
-  rmlock(WALLLOCK);
+  lock_rm(WALLLOCK);
   
   for(;;){
-    if(!morcnc()){
+    if(!cnc_more()){
       prompt(NEWMSG);
-      bzero(input,MAXINPLEN+1);
-      getinput(maxlen);
-      bgncnc();
+      bzero(inp_buffer,MAXINPLEN+1);
+      inp_get(maxlen);
+      cnc_begin();
     }
-    rstrin();
-    strcpy(message,cncall());
+    inp_raw();
+    strcpy(message,cnc_all());
     
-    if(reprompt){
-      endcnc();
+    if(inp_reprompt()){
+      cnc_end();
       continue;
-    } else if(!message[0] || isX(message)) return;
+    } else if(!message[0] || inp_isX(message)) return;
     else break;
   }
 
-  prompt(WALLSAV,NULL);
+  prompt(WALLSAV);
 
-  placelock(WALLLOCK,"writing");
+  lock_place(WALLLOCK,"writing");
   if((fp=fopen(WALLFILE,"r"))==NULL){
     int i=errno;
-    rmlock(WALLLOCK);
+    lock_rm(WALLLOCK);
     errno=i;
-    fatalsys("Unable to open file %s",WALLFILE);
+    error_fatalsys("Unable to open file %s",WALLFILE);
   }
   
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -222,9 +224,9 @@ drawmessage()
   sprintf(fname,TMPDIR"/graffiti%05d",getpid());
   if((out=fopen(fname,"w"))==NULL){
     int i=errno;
-    rmlock(WALLLOCK);
+    lock_rm(WALLLOCK);
     errno=i;
-    fatalsys("Unable to create temporary file %s",fname);
+    error_fatalsys("Unable to create temporary file %s",fname);
   }
   if(sameas(thisuseracc.userid,userid))numlines++;
   else numlines=1;
@@ -247,13 +249,13 @@ drawmessage()
   fclose(fp);
 
   if(fcopy(fname,WALLFILE)){
-    prompt(OOPS,NULL);
-    rmlock(WALLLOCK);
+    prompt(OOPS);
+    lock_rm(WALLLOCK);
     return;
   }
   unlink(fname);
-  rmlock(WALLLOCK);
-  prompt(WALLDON,NULL);
+  lock_rm(WALLLOCK);
+  prompt(WALLDON);
 }
 
 
@@ -265,31 +267,30 @@ readwall()
   struct stat    buf;
   
   if(stat(WALLFILE,&buf)){
-    prompt(EMPTY,NULL);
+    prompt(EMPTY);
     return;
   }
 
-  prompt(WALLHEAD,NULL);
+  prompt(WALLHEAD);
   
   if((fp=fopen(WALLFILE,"r"))==NULL){
-    fatalsys("Unable to open %s for reading.",WALLFILE);
+    error_fatalsys("Unable to open %s for reading.",WALLFILE);
   }
 
   fread(&wallmsg,sizeof(wallmsg),1,fp);
   while(!feof(fp)){
     if(!fread(&wallmsg,sizeof(wallmsg),1,fp))continue;
     if(wallmsg.userid[0]){
-      sprintf(outbuf,"%s%s\n",colors[rnd(MAXCOLOR)],zonk(wallmsg.message));
-      print(outbuf);
-      if(lastresult==PAUSE_QUIT){
+      print("%s%s\n",colors[rnd(MAXCOLOR)],zonk(wallmsg.message));
+      if(fmt_lastresult==PAUSE_QUIT){
 	fclose(fp);
-	prompt(ABORT,NULL);
+	prompt(ABORT);
 	return;
       }
     }
   }
   fclose(fp);
-  prompt(WALLEND,NULL);
+  prompt(WALLEND);
 }
 
 
@@ -302,14 +303,14 @@ listwall()
   struct stat    buf;
   
   if(stat(WALLFILE,&buf)){
-    prompt(EMPTY,NULL);
+    prompt(EMPTY);
     return;
   }
 
-  prompt(WALLHEAD,NULL);
+  prompt(WALLHEAD);
   
   if((fp=fopen(WALLFILE,"r"))==NULL){
-    fatalsys("Unable to open %s for reading.",WALLFILE);
+    error_fatalsys("Unable to open %s for reading.",WALLFILE);
   }
 
   fread(&wallmsg,sizeof(wallmsg),1,fp);
@@ -317,17 +318,16 @@ listwall()
     if(!fread(&wallmsg,sizeof(wallmsg),1,fp))continue;
     i++;
     if(wallmsg.userid[0]){
-      sprintf(outbuf,"%3d %-10s %s\n",i,wallmsg.userid,zonk(wallmsg.message));
-      print(outbuf,NULL);
-      if(lastresult==PAUSE_QUIT){
+      print("%3d %-10s %s\n",i,wallmsg.userid,zonk(wallmsg.message));
+      if(fmt_lastresult==PAUSE_QUIT){
 	fclose(fp);
-	prompt(ABORT,NULL);
+	prompt(ABORT);
 	return;
       }
     }
   }
   fclose(fp);
-  prompt(WALLEND,NULL);
+  prompt(WALLEND);
 }
 
 
@@ -340,63 +340,63 @@ cleanwall()
   int            linenum;
   
   if(stat(WALLFILE,&buf) || (buf.st_size/sizeof(wallmsg))<2){
-    prompt(WALLEMPTY,NULL);
+    prompt(WALLEMPTY);
     return;
   }
 
   if((fp=fopen(WALLFILE,"r+"))==NULL){
-    fatalsys("Unable to open %s for reading.",WALLFILE);
+    error_fatalsys("Unable to open %s for reading.",WALLFILE);
   }
 
   for(;;){
-    if(!getnumber(&linenum,DELMSG,1,buf.st_size/sizeof(wallmsg),BADNUM,0,0)){
-      rmlock(WALLLOCK);
+    if(!get_number(&linenum,DELMSG,1,buf.st_size/sizeof(wallmsg),BADNUM,0,0)){
+      lock_rm(WALLLOCK);
       fclose(fp);
       return;
     }
-    if(waitlock(WALLLOCK,5)==LKR_TIMEOUT){
-      prompt(TIMEOUT,NULL);
+    if(lock_wait(WALLLOCK,5)==LKR_TIMEOUT){
+      prompt(TIMEOUT);
       fclose(fp);
       return;
     }
-    placelock(WALLLOCK,"cleaning");
+    lock_place(WALLLOCK,"cleaning");
     fstat(fileno(fp),&buf);
     if(linenum>=buf.st_size/sizeof(wallmsg)){
-      prompt(BADNUM,NULL);
-      rmlock(WALLLOCK);
+      prompt(BADNUM);
+      lock_rm(WALLLOCK);
     } else {
       if(fseek(fp,sizeof(wallmsg)*linenum,SEEK_SET)){
 	int i=errno;
-	rmlock(WALLLOCK);
+	lock_rm(WALLLOCK);
 	errno=i;
-	fatalsys("Unable to seek %s",WALLFILE);
+	error_fatalsys("Unable to seek %s",WALLFILE);
       }
       if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
 	int i=errno;
-	rmlock(WALLLOCK);
+	lock_rm(WALLLOCK);
 	errno=i;
-	fatalsys("Unable to read %s",WALLFILE);
+	error_fatalsys("Unable to read %s",WALLFILE);
       }
       if(!wallmsg.userid[0]){
-	rmlock(WALLLOCK);
+	lock_rm(WALLLOCK);
 	prompt(BADNUM);
       } else {
 	wallmsg.userid[0]=0;
 	if(fseek(fp,sizeof(wallmsg)*linenum,SEEK_SET)){
 	  int i=errno;
-	  rmlock(WALLLOCK);
+	  lock_rm(WALLLOCK);
 	  errno=i;
-	  fatalsys("Unable to seek %s",WALLFILE);
+	  error_fatalsys("Unable to seek %s",WALLFILE);
 	}
 	if(!fwrite(&wallmsg,sizeof(wallmsg),1,fp)){
 	  int i=errno;
-	  rmlock(WALLLOCK);
+	  lock_rm(WALLLOCK);
 	  errno=i;
-	  fatalsys("Unable to write %s",WALLFILE);
+	  error_fatalsys("Unable to write %s",WALLFILE);
 	}
 	fclose(fp);
-	rmlock(WALLLOCK);
-	prompt(WALLDEL,NULL);
+	lock_rm(WALLLOCK);
+	prompt(WALLDEL);
 	return;
       }
     }
@@ -409,21 +409,21 @@ run()
 {
   int shownintro=0;
   int shownmenu=0;
-  char c;
+  char c=0;
 
-  if(!haskey(&thisuseracc,entrykey)){
-    prompt(NOENTRY,NULL);
+  if(!key_owns(&thisuseracc,entrykey)){
+    prompt(NOENTRY);
     return;
   }
 
   for(;;){
     if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
       if(!shownintro){
-	prompt(HITHERE,NULL);
+	prompt(HITHERE);
 	shownintro=1;
       }
       if(!shownmenu){
-	prompt(haskey(&thisuseracc,syskey)?SYSMENU:MENU,NULL);
+	prompt(key_owns(&thisuseracc,syskey)?SYSMENU:MENU);
 	prompt(VSHMENU);
 	shownmenu=2;
       }
@@ -431,24 +431,24 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
 	}
 	if(shownmenu==1){
-	  prompt(haskey(&thisuseracc,syskey)?SYSSHMENU:SHMENU,NULL);
+	  prompt(key_owns(&thisuseracc,syskey)?SYSSHMENU:SHMENU);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
-	prompt(ABOUT,NULL);
+	prompt(ABOUT);
 	break;
       case 'D':
 	drawmessage();
@@ -457,15 +457,15 @@ run()
 	readwall();
 	break;
       case 'L':
-	if(haskey(&thisuseracc,syskey))listwall();
+	if(key_owns(&thisuseracc,syskey))listwall();
 	else prompt(ERRSEL,c);
 	break;
       case 'C':
-	if(haskey(&thisuseracc,syskey))cleanwall();
+	if(key_owns(&thisuseracc,syskey))cleanwall();
 	else prompt(ERRSEL,c);
 	break;
       case 'X':
-	prompt(LEAVE,NULL);
+	prompt(LEAVE);
 	return;
       case '?':
 	shownmenu=0;
@@ -474,8 +474,8 @@ run()
 	prompt(ERRSEL,c);
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -483,17 +483,40 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
   exit(0);
 }
 
 
 int
-main(int argc, char **argv)
+handler_run(int argc, char **argv)
 {
-  setprogname(argv[0]);
   init();
   run();
   done();
   return 0;
+}
+
+
+mod_info_t mod_info_graffiti = {
+  "graffiti",
+  "The Graffiti Wall",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Hosts (semi-)anonymous, multi-coloured one-liners written by users.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_graffiti);
+  return mod_main(argc,argv);
 }

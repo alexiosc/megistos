@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1999/08/13 17:11:32  alexios
  * Ugly-looking changes to accommodate no-UNIX account policy.
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -73,9 +75,9 @@
 
 
 
-useracc  usr;
-char    *newclss;
-int      pswexp;
+useracc_t  usr;
+char      *newclss;
+int        pswexp;
 
 
 
@@ -190,7 +192,7 @@ convert(char *arg_usrdir, char *arg_majordir, char *arg_class,
   char        rec[16384], c, *fname=rec;
   int         reclen;
   int         num=0;
-  promptblk*  msg;
+  promptblock_t*  msg;
 
   if(arg_fast){
     if((passwd=fopen(".passwd","w"))==NULL){
@@ -205,13 +207,13 @@ convert(char *arg_usrdir, char *arg_majordir, char *arg_class,
 
   /* Read signup options */
 
-  msg=opnmsg("sysvar");
-  pswexp=numopt(PSWEXP,0,360);
-  clsmsg(msg);
+  msg=msg_open("sysvar");
+  pswexp=msg_int(PSWEXP,0,360);
+  msg_close(msg);
 
-  msg=opnmsg("signup");
-  newclss=stgopt(NEWCLSS);
-  clsmsg(msg);
+  msg=msg_open("signup");
+  newclss=msg_string(NEWCLSS);
+  msg_close(msg);
 
   /*if(arg_uid>=100)beguid=arg_uid;*/
 

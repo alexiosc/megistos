@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:09  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 17:03:41  alexios
  * Initial revision
@@ -25,6 +26,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,20 +84,20 @@ mkrow(int *row, int lang, int top)
   s[0]=0;
   for(i=0;i<6;i++){
     if(sgn(row[i]) != cur){
-      if(row[i]) strcat(s,getmsglang(row[i]>0?BDCOL1:BDCOL2,lang));
+      if(row[i]) strcat(s,msg_getl(row[i]>0?BDCOL1:BDCOL2,lang));
       cur=sgn(row[i]);
     }
     
-    if(row[i]==0)strcat(s,getmsglang(BDEMPT,lang));
-    else if(row[i]==1)strcat(s,getmsglang(BDSTN1,lang));
-    else if(row[i]==-1)strcat(s,getmsglang(BDSTN2,lang));
+    if(row[i]==0)strcat(s,msg_getl(BDEMPT,lang));
+    else if(row[i]==1)strcat(s,msg_getl(BDSTN1,lang));
+    else if(row[i]==-1)strcat(s,msg_getl(BDSTN2,lang));
     else if(row[i]>1){
       char tmp[16];
-      sprintf(tmp,getmsglang(BDSTNN,lang),row[i]-5);
+      sprintf(tmp,msg_getl(BDSTNN,lang),row[i]-5);
       strcat(s,tmp);
     } else if(row[i]<-1){
       char tmp[16];
-      sprintf(tmp,getmsglang(BDSTNN,lang),abs(row[i])-5);
+      sprintf(tmp,msg_getl(BDSTNN,lang),abs(row[i])-5);
       strcat(s,tmp);
     }
   }
@@ -108,7 +110,7 @@ bg_board (int n)  {
   int i,j;
   char b[24][256];		/* 24 rows, not columns (coincidence) */
 
-  if(!uinsys(player[n],0))exit(0);
+  if(!usr_insys(player[n],0))exit(0);
 
   for(i=0;i<6;i++){
     int row[6];
@@ -157,7 +159,7 @@ bg_board (int n)  {
     strcpy(b[18+i],mkrow(row,othruseracc.language,0));
   }
 
-  sprintf(outbuf,getmsglang(BOARD,othruseracc.language),
+  sprintf(out_buffer,msg_getl(BOARD,othruseracc.language),
 	  b[0], b[6],
 	  b[1], b[7],
 	  b[2], b[8],
@@ -172,5 +174,5 @@ bg_board (int n)  {
 	  b[19], b[13],
 	  b[18], b[12]);
 
-  injoth(&othruseronl,outbuf,0);
+  usr_injoth(&othruseronl,out_buffer,0);
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:51:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:29  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out(). Added send_out(),
@@ -49,7 +50,7 @@
  * off.
  *
  * Revision 0.7  1999/07/18 21:01:53  alexios
- * Altered fatal() calls to fatalsys() where needed. Fixed a
+ * Altered error_fatal() calls to error_fatalsys() where needed. Fixed a
  * sneaky bug in the list of substitution variables.
  *
  * Revision 0.6  1998/12/27 14:31:16  alexios
@@ -83,6 +84,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -115,12 +117,12 @@
 
 #include "mbk_sysvar.h"
 
-char outbuf [8192];
-int  ansienable=1;
-int  waittoclear=0;
-int  afterinput=1;
-int  inhibitvars=0;
-int  protectvars=1;
+char out_buffer [8192];
+uint32 out_flags=OFL_WAITTOCLEAR|OFL_ANSIENABLE;
+
+
+#define IS_BOT \
+(mod_isbot() || (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT)))
 
 
 struct substvar *substvars=NULL, *lastsubstvar=NULL;
@@ -132,33 +134,33 @@ static int translation;
 
 static int isvarchar(char c)
 {
-  if(protectvars)return c==_VARCHAR;
+  if(out_flags&OFL_PROTECTVARS)return c==_VARCHAR;
   else return c==_VARCHAR || c==_ASCIIVARCHAR;
 }
 
 
 void
-initoutput()
+out_init()
 {
-  sysblk=opnmsg("sysvar");
+  msg_sys=msg_open("sysvar");
 
-  initsubstvars();
-  setwaittoclear(1);
-  pausetxt=stgopt(PAUSE);
-  inhibitvars=0;
-  protectvars=1;
+  out_initsubstvars();
+  out_setwaittoclear(1);
+  fmt_setpausetext(msg_string(PAUSE));
+  out_clearflags(OFL_INHIBITVARS);
+  out_setflags(OFL_PROTECTVARS);
 }
 
 
 void
-doneoutput()
+out_done()
 {
   fflush(stdout);
 }
 
 
 void
-setxlationtable(int i)
+out_setxlation(int i)
 {
   FILE *fp;
   char fname[256];
@@ -172,10 +174,10 @@ setxlationtable(int i)
   sprintf(fname,"%s/.shmid-%s",EMULOGDIR,getenv("CHANNEL"));
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open %s",fname);
+    error_fatalsys("Unable to open %s",fname);
   }
   if(!fscanf(fp,"%d",&shmid)){
-    fatalsys("Unable to read %s",fname);
+    error_fatalsys("Unable to read %s",fname);
   }
   fclose(fp);
 
@@ -183,7 +185,7 @@ setxlationtable(int i)
   /* Attach to the shared memory block */
 
   if((emuq=(struct emuqueue *)shmat(shmid,NULL,0))==NULL){
-    fatalsys("Error attaching to emulation shared memory");
+    error_fatalsys("Error attaching to emulation shared memory");
   }
 
 
@@ -211,7 +213,7 @@ setxlationtable(int i)
   
   /* Set the user's online record */
 
-  if(thisshm)setoxlation(thisuseronl,i);
+  if(thisshm)usr_setoxlation(thisuseronl,i);
   translation=i;
 }
 
@@ -242,7 +244,7 @@ xlwrite(int fd, const char *s, int count)
 */
 
 
-int send_out(int fd, const char *s, int count)
+int out_send(int fd, const char *s, int count)
 {
   register int offs=0;
   int retval=count;
@@ -290,7 +292,7 @@ void *parmlist;
   while(*p1 && count<16383){
     while (*p1 && !isvarchar(*p1)){
       format[count]=*p1;
-      if(!ansienable){
+      if(!(out_flags&OFL_ANSIENABLE)){
 	if(!ansistate && *p1==27 && *(p1+1)!='!')ansistate=1;
 	else if((ansistate==1) && (*p1=='['))ansistate=2;
 	else if((ansistate==2) && (isdigit(*p1) || (*p1==';')));
@@ -309,7 +311,7 @@ void *parmlist;
       p1++;
     }
     format[count]=0;
-    if(inhibitvars)break;
+    if(out_flags&OFL_INHIBITVARS)break;
     if(!(*p1))break;
 
     if(isvarchar(*(p1+1))) {
@@ -348,7 +350,7 @@ void *parmlist;
   vsprintf(newbuf,format,parmlist);
 
   bufptr=newbuf;
-  if(waittoclear)while(*bufptr){
+  if((!IS_BOT) && (out_flags&OFL_WAITTOCLEAR))while(*bufptr){
     char *clp=strstr(bufptr,"\033[2J");
     int  len=clp-bufptr;
     
@@ -359,39 +361,39 @@ void *parmlist;
     if(len){
       char c=bufptr[len];
       bufptr[len]=0;
-      formatoutput(bufptr);
+      fmt_output(bufptr);
       bufptr[len]=c;
-      afterinput=0;
+      out_clearflags(OFL_AFTERINPUT);
     }
 
     bufptr+=len;
 
-    if(!afterinput){
+    if(!(out_flags&OFL_AFTERINPUT)){
       char c, *msgp;
       char clrscr[32]="\033[2J\033[1;1H\0";
 
       bufptr+=4;
 
-      setmbk(sysblk);
-      msgp=getmsg(W2CLR);
-      send_out(fileno(stdout),msgp,strlen(msgp));
-      rstmbk();
+      msg_set(msg_sys);
+      msgp=msg_get(W2CLR);
+      out_send(fileno(stdout),msgp,strlen(msgp));
+      msg_reset();
 
       read(0,&c,1);
-      resetinactivity();
-      if(!ansienable){
+      inp_resetidle();
+      if(!(out_flags&OFL_ANSIENABLE)){
 	c=12;
-	send_out(fileno(stdout),&c,1);
+	out_send(fileno(stdout),&c,1);
       }else{
-	send_out(fileno(stdout),clrscr,strlen(clrscr));
+	out_send(fileno(stdout),clrscr,strlen(clrscr));
       }
     } else {
       char homestg[10]="\033[1;1H\0";
-      send_out(fileno(stdout),bufptr,4);
-      send_out(fileno(stdout),homestg,strlen(homestg));
+      out_send(fileno(stdout),bufptr,4);
+      out_send(fileno(stdout),homestg,strlen(homestg));
       bufptr+=4;
     }
-    resetvpos(0);
+    fmt_resetvpos(0);
   } else {
     char homestg[20]="\033[2J\033[1;1H\0";
     
@@ -406,18 +408,18 @@ void *parmlist;
       if(len){
 	char c=bufptr[len];
 	bufptr[len]=0;
-	formatoutput(bufptr);
+	fmt_output(bufptr);
 	bufptr[len]=c;
-	afterinput=0;
+	out_clearflags(OFL_AFTERINPUT);
       }
-      send_out(fileno(stdout),bufptr,4);
-      send_out(fileno(stdout),homestg,strlen(homestg));
+      out_send(fileno(stdout),bufptr,4);
+      out_send(fileno(stdout),homestg,strlen(homestg));
       bufptr+=4+len;
     }
   }
   if(strlen(bufptr)){
-    formatoutput(bufptr);
-    afterinput=0;
+    fmt_output(bufptr);
+    out_clearflags(OFL_AFTERINPUT);
   }
 }
 
@@ -439,7 +441,7 @@ void *parmlist;
   while(*p1 && count<16383){
     while (*p1 && !isvarchar(*p1)){
       format[count]=*p1;
-      if(!ansienable){
+      if(!(out_flags&OFL_ANSIENABLE)){
 	if(!ansistate && *p1==27 && *(p1+1)!='!')ansistate=1;
 	else if((ansistate==1) && (*p1=='['))ansistate=2;
 	else if((ansistate==2) && (isdigit(*p1) || (*p1==';')));
@@ -488,7 +490,7 @@ void *parmlist;
   vsprintf(newbuf,format,parmlist);
 
   bufptr=newbuf;
-  if(waittoclear)while(*bufptr){
+  if((!IS_BOT) && (out_flags&OFL_WAITTOCLEAR))while(*bufptr){
     char *clp=strstr(bufptr,"\033[2J");
     int  len=clp-bufptr;
     
@@ -499,37 +501,37 @@ void *parmlist;
       bufptr[len]=0;
       strcat(stg,bufptr);
       bufptr[len]=c;
-      afterinput=0;
+      out_clearflags(OFL_AFTERINPUT);
     }
 
     bufptr+=len;
 
-    if(!afterinput){
+    if(!(out_flags&OFL_AFTERINPUT)){
       char c, *msgp;
       char clrscr[32]="\033[2J\033[1;1H\0";
 
       bufptr+=4;
 
-      setmbk(sysblk);
-      msgp=getmsg(W2CLR);
-      send_out(fileno(stdout),msgp,strlen(msgp));
-      rstmbk();
+      msg_set(msg_sys);
+      msgp=msg_get(W2CLR);
+      out_send(fileno(stdout),msgp,strlen(msgp));
+      msg_reset();
 
       read(0,&c,1);
-      resetinactivity();
-      if(!ansienable){
+      inp_resetidle();
+      if(!(out_flags&OFL_ANSIENABLE)){
 	c=12;
-	send_out(fileno(stdout),&c,1);
+	out_send(fileno(stdout),&c,1);
       }else{
-	send_out(fileno(stdout),clrscr,strlen(clrscr));
+	out_send(fileno(stdout),clrscr,strlen(clrscr));
       }
     } else {
       char homestg[10]="\033[1;1H\0";
-      send_out(fileno(stdout),bufptr,4);
-      send_out(fileno(stdout),homestg,strlen(homestg));
+      out_send(fileno(stdout),bufptr,4);
+      out_send(fileno(stdout),homestg,strlen(homestg));
       bufptr+=4;
     }
-    resetvpos(0);
+    fmt_resetvpos(0);
   } else {
     char homestg[10]="\033[1;1H\0";
     
@@ -544,16 +546,16 @@ void *parmlist;
 	bufptr[len]=0;
 	strcat(stg,bufptr);
 	bufptr[len]=c;
-	afterinput=0;
+	out_clearflags(OFL_AFTERINPUT);
       }
-      send_out(fileno(stdout),bufptr,4);
-      send_out(fileno(stdout),homestg,strlen(homestg));
+      out_send(fileno(stdout),bufptr,4);
+      out_send(fileno(stdout),homestg,strlen(homestg));
       bufptr+=4+len;
     }
   }
   if(strlen(bufptr)){
     strcat(stg,bufptr);
-    afterinput=0;
+    out_clearflags(OFL_AFTERINPUT);
   }
 }
 
@@ -591,9 +593,9 @@ int num;
 va_dcl
 {
   va_list args;
-  char *s=getmsg(num);
+  char *s=msg_get(num);
 
-  acceptinjoth();
+  inp_acceptinjoth();
   va_start(args);
   printexpand(s,args);
   va_end(args);
@@ -607,22 +609,22 @@ int num;
 va_dcl
 {
   va_list args;
-  char *s=getmsg(num);
+  char *s=msg_get(num);
 
-  acceptinjoth();
+  inp_acceptinjoth();
   va_start(args);
   sprintexpand(stg,s,args);
   va_end(args);
 }
 
 
-int printfile(char *fname)
+int out_printfile(char *fname)
 {
   FILE *fp;
 
   if((fp=fopen(fname,"r"))!=NULL){
-    int oldprotect=protectvars;
-    protectvars=0;
+    int oldprotect=out_flags&OFL_PROTECTVARS;
+    out_clearflags(OFL_PROTECTVARS);
 
     while(!feof(fp)){
       char line[MSGBUFSIZE];
@@ -630,16 +632,16 @@ int printfile(char *fname)
 
       line[num]=0;
       if(num)print(line);
-      if(lastresult==PAUSE_QUIT)break;
+      if(fmt_lastresult==PAUSE_QUIT)break;
     }
-    protectvars=oldprotect;
+    oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
     fclose(fp);
     return 1;
   } else return 0;
 }
 
 
-int catfile(char *fname)
+int out_catfile(char *fname)
 {
   FILE *fp;
 
@@ -647,8 +649,8 @@ int catfile(char *fname)
     while(!feof(fp)){
       char line[MSGBUFSIZE];
       if(fgets(line,1024,fp)){
-	if(screenpause()==PAUSE_QUIT) return 1;
-	send_out(fileno(stdout),line,strlen(line));
+	if(fmt_screenpause()==PAUSE_QUIT) return 1;
+	out_send(fileno(stdout),line,strlen(line));
       }
     }
     fclose(fp);
@@ -657,28 +659,29 @@ int catfile(char *fname)
 }
 
 
-int printlongfile(char *fname)
+int out_printlongfile(char *fname)
 {
   FILE *fp;
   char c;
 
-  nonblocking();
   if((fp=fopen(fname,"r"))!=NULL){
-    int oldprotect=protectvars;
+    int oldprotect=out_flags&OFL_PROTECTVARS;
 
+    inp_nonblock();
     while(!feof(fp)){
       char line[MSGBUFSIZE];
       if(read(fileno(stdin),&c,1)&&
 	 ((c==13)||(c==10)||(c==27)||(c==15)||(c==3))){
-	lastresult=PAUSE_QUIT;
+	fmt_lastresult=PAUSE_QUIT;
 	break;
       }
       if(fgets(line,1024,fp)){
-	if(screenpause()==PAUSE_QUIT) return 1;
-	send_out(fileno(stdout),line,strlen(line));
+	if(fmt_screenpause()==PAUSE_QUIT) return 1;
+	out_send(fileno(stdout),line,strlen(line));
       }
     }
-    protectvars=oldprotect;
+    inp_resetblocking();
+    oldprotect?out_setflags(OFL_PROTECTVARS):out_clearflags(OFL_PROTECTVARS);
     fclose(fp);
     return 1;
   } else return 0;
@@ -686,14 +689,20 @@ int printlongfile(char *fname)
 
 
 void
-addsubstvar(name, varcalc)
+out_addsubstvar(name, varcalc)
 char *name;
 char *(*varcalc)(void);
 {
   struct substvar *new=alcmem(sizeof(struct substvar));
   char *cp, *tp, temp[64];
 
-  for(cp=name,tp=temp;*cp;cp++,tp++)*tp=((*cp)=='@'?_VARCHAR:(*cp));
+  cp=name;
+  tp=temp;
+  if(*cp!=_ASCIIVARCHAR) *tp++=_ASCIIVARCHAR;
+  for(;*cp;cp++,tp++){
+    *tp=((*cp)==_ASCIIVARCHAR?_VARCHAR:(*cp));
+  }
+  if(*(tp-1)!=_VARCHAR)*tp++=_VARCHAR;
   *tp=0;
   new->varname=(char *)alcmem(strlen(name)+1);
   strcpy(new->varname,temp);
@@ -702,20 +711,6 @@ char *(*varcalc)(void);
   if(!substvars)substvars=new;
   if(lastsubstvar)lastsubstvar->next=new;
   lastsubstvar=new;
-}
-
-
-void
-setansiflag(int f)
-{
-  ansienable=(f!=0);
-}
-
-
-void
-setwaittoclear(int f)
-{
-  waittoclear=(f!=0);
 }
 
 
@@ -796,7 +791,7 @@ char *sv_minmoney()
 char *sv_version()
 {
   static char s[256];
-  strcpy(s,SYSTEMVERSION);
+  strcpy(s,bbs_systemversion);
   return s;
 }
 
@@ -804,14 +799,14 @@ char *sv_version()
 char *sv_shortversion()
 {
   static char s[256];
-  strcpy(s,SHORTVERSION);
+  strcpy(s,bbs_shortversion);
   return s;
 }
 
 
 char *sv_baudrate()
 {
-  char *s=baudstg(atoi(getenv("BAUD")));
+  char *s=channel_baudstg(atoi(getenv("BAUD")));
   return s?s:"";
 }
 
@@ -838,7 +833,7 @@ char *sv_date()
 char *sv_passexp()
 {
   static char conv[32];
-  sprintf(conv,"%ld",sysvar->pswexpiry);
+  sprintf(conv,"%d",sysvar->pswexpiry);
   return conv;
 }
 
@@ -897,7 +892,7 @@ char *sv_usersex()
 
 char *sv_userlang()
 {
-  return languages[(int)thisuseracc.language];
+  return msg_langnames[(int)thisuseracc.language];
 }
 
 
@@ -940,7 +935,7 @@ char *sv_userclass()
 char *sv_credstdy()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.timetdy);
+  sprintf(conv,"%d",thisuseracc.timetdy);
   return conv;
 }
 
@@ -948,7 +943,7 @@ char *sv_credstdy()
 char *sv_classdays()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.classdays);
+  sprintf(conv,"%d",thisuseracc.classdays);
   return conv;
 }
 
@@ -956,7 +951,7 @@ char *sv_classdays()
 char *sv_credits()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.credits);
+  sprintf(conv,"%d",thisuseracc.credits);
   return conv;
 }
 
@@ -964,7 +959,7 @@ char *sv_credits()
 char *sv_totcreds()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.totcreds);
+  sprintf(conv,"%d",thisuseracc.totcreds);
   return conv;
 }
 
@@ -972,7 +967,7 @@ char *sv_totcreds()
 char *sv_totpaid()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.totpaid);
+  sprintf(conv,"%d",thisuseracc.totpaid);
   return conv;
 }
 
@@ -1000,7 +995,7 @@ char *sv_online()
 char *sv_numconns()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.connections);
+  sprintf(conv,"%d",thisuseracc.connections);
   return conv;
 }
 
@@ -1008,7 +1003,7 @@ char *sv_numconns()
 char *sv_credsever()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.credsever);
+  sprintf(conv,"%d",thisuseracc.credsever);
   return conv;
 }
 
@@ -1016,7 +1011,7 @@ char *sv_credsever()
 char *sv_timever()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.timever);
+  sprintf(conv,"%d",thisuseracc.timever);
   return conv;
 }
 
@@ -1024,7 +1019,7 @@ char *sv_timever()
 char *sv_filesdnl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.filesdnl);
+  sprintf(conv,"%d",thisuseracc.filesdnl);
   return conv;
 }
 
@@ -1032,7 +1027,7 @@ char *sv_filesdnl()
 char *sv_kbsdnl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.bytesdnl>>10);
+  sprintf(conv,"%d",thisuseracc.bytesdnl>>10);
   return conv;
 }
 
@@ -1040,7 +1035,7 @@ char *sv_kbsdnl()
 char *sv_filesupl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.filesupl);
+  sprintf(conv,"%d",thisuseracc.filesupl);
   return conv;
 }
 
@@ -1048,7 +1043,7 @@ char *sv_filesupl()
 char *sv_kbsupl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.bytesupl>>10);
+  sprintf(conv,"%d",thisuseracc.bytesupl>>10);
   return conv;
 }
 
@@ -1056,7 +1051,7 @@ char *sv_kbsupl()
 char *sv_tnlnum()
 {
   static char conv[32];
-  sprintf(conv,"%d",telnetlinecount());
+  sprintf(conv,"%d",chan_telnetlinecount());
   return conv;
 }
 
@@ -1072,7 +1067,7 @@ char *sv_tnlmax()
 char *sv_upassexp()
 {
   static char conv[32];
-  sprintf(conv,"%ld",thisuseracc.passexp);
+  sprintf(conv,"%d",thisuseracc.passexp);
   return conv;
 }
 
@@ -1120,7 +1115,7 @@ char *sv_tfilesdnl()
 char *sv_tbytesupl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",sysvar->bytesupl);
+  sprintf(conv,"%d",sysvar->bytesupl);
   return conv;
 }
 
@@ -1128,7 +1123,7 @@ char *sv_tbytesupl()
 char *sv_tbytesdnl()
 {
   static char conv[32];
-  sprintf(conv,"%ld",sysvar->bytesdnl);
+  sprintf(conv,"%d",sysvar->bytesdnl);
   return conv;
 }
 
@@ -1166,7 +1161,7 @@ char *sv_tconns()
 
 
 void
-initsubstvars()
+out_initsubstvars()
 {
   struct substvar table []={
     {"@BBS@",sv_bbstitle,NULL},
@@ -1237,7 +1232,20 @@ initsubstvars()
   int i=0;
   
   while(table[i].varname[0]){
-    addsubstvar(table[i].varname,table[i].varcalc);
+    out_addsubstvar(table[i].varname,table[i].varcalc);
     i++;
+  }
+}
+
+
+void __out_setclear(int set, uint32 f)
+{
+  if(set){
+    out_flags|=f;
+  } else out_flags&=~f;
+
+  if(thisshm!=NULL && f&OFL_AFTERINPUT){
+    if(out_flags&OFL_AFTERINPUT)thisuseronl.flags|=OLF_AFTERINP;
+      else thisuseronl.flags&=~OLF_AFTERINP;
   }
 }

@@ -28,15 +28,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 22:00:00  alexios
- * Changed a few fatal() calls to fatalsys(). Added MetaBBS
+ * Changed a few error_fatal() calls to error_fatalsys(). Added MetaBBS
  * daemon support.
  *
  * Revision 0.7  1998/12/27 16:21:05  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.6  1998/07/26 21:11:32  alexios
  * No changes.
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -119,7 +121,7 @@ cmd_connect(int chan, char *tty, char *arg)
   /* Make sure there's a process running for the channel */
   
   if(gettys[chan].pid<=0){
-    logerror("processcmd(): can't connect user before spawning getty");
+    error_log("processcmd(): can't connect user before spawning getty");
     return;
   }
   
@@ -183,7 +185,7 @@ cmd_delete(int chan, char *tty, char *arg)
     
   while(!stat(fname,&st)){
     if(!kicked){
-      for(chan=0;chan<numchannels;chan++){
+      for(chan=0;chan<chan_count;chan++){
 	if(!strcmp(gettys[chan].user,arg)){
 	  cmd_hangup(chan,gettys[chan].ttyname,"");
 	}
@@ -192,7 +194,7 @@ cmd_delete(int chan, char *tty, char *arg)
     sleep(1);
     kicked++;
     if(kicked>5){
-      logerror("cmd_delete(): timed out waiting to hangup user %s.",
+      error_log("cmd_delete(): timed out waiting to hangup user %s.",
 	       arg);
       exit(0);
     }
@@ -202,8 +204,9 @@ cmd_delete(int chan, char *tty, char *arg)
   {
     char command[256];
     sprintf(command,"%s %s",USERDELBIN,arg);
+    setenv("PREFIX",BBSDIR,1);
     execl("/bin/sh","sh","-c",command,NULL);
-    logerrorsys("failed to execl() %s",command);
+    error_logsys("failed to execl() %s",command);
   }
   exit(1);
 }
@@ -220,19 +223,19 @@ cmd_chat(int chan, char *tty, char *arg)
 
   sprintf(s,"%s/register-%s",BBSETCDIR,tty);
   if((fp=fopen(s,"r"))==NULL){
-    logerrorsys("cmd_chat(): Unable to open %s",s);
+    error_logsys("cmd_chat(): Unable to open %s",s);
     /*    exit(0);*/
     return;
   }
   if(!fgets(s,sizeof(s),fp)){
-    logerrorsys("cmd_chat(): Unable to read %s",s);
+    error_logsys("cmd_chat(): Unable to read %s",s);
     fclose(fp);
     /*    exit(0); */
     return;
   }
   fclose(fp);
   if(sscanf(s,"%d",&pid)!=1){
-    logerrorsys("cmd_chat(): Unable to scan %s",s);
+    error_logsys("cmd_chat(): Unable to scan %s",s);
     /*    exit(0); */
     return;
   }
@@ -253,19 +256,19 @@ cmd_user2(int chan, char *tty, char *arg)
 
   sprintf(s,"%s/register-%s",BBSETCDIR,tty);
   if((fp=fopen(s,"r"))==NULL){
-    logerrorsys("cmd_chat(): Unable to open %s",s);
+    error_logsys("cmd_chat(): Unable to open %s",s);
     /*    exit(0); */
     return;
   }
   if(!fgets(s,sizeof(s),fp)){
-    logerrorsys("cmd_chat(): Unable to read %s",s);
+    error_logsys("cmd_chat(): Unable to read %s",s);
     fclose(fp);
     /*    exit(0); */
     return;
   }
   fclose(fp);
   if(sscanf(s,"%d",&pid)!=1){
-    logerrorsys("cmd_chat(): Unable to scan %s",s);
+    error_logsys("cmd_chat(): Unable to scan %s",s);
     /*    exit(0); */
     return;
   }
@@ -279,13 +282,13 @@ static void
 changeline(int chan, char *tty, int state,
 	   int result, int baud, char *user, int hangup)
 {
-  struct linestatus status;
+  channel_status_t status;
   bzero(&status,sizeof(status));
   status.state=state;
   status.result=result;
   status.baud=baud;
   strcpy(status.user,user);
-  setlinestatus(tty,&status);
+  channel_setstatus(tty,&status);
   if(hangup)cmd_hangup(chan,tty,"");
 }
 
@@ -294,25 +297,25 @@ void
 cmd_change(int chan, char *tty, char *arg)
 {
   int i,res,state;
-  struct linestatus status;
+  channel_status_t status;
 
   state=LST_NORMAL;
   for(i=0;i<LST_NUMSTATES;i++){
-    if(sameas(arg,line_states[i])){
+    if(sameas(arg,channel_states[i])){
       state=i;
       break;
     }
   }
   if(gettys[chan].flags&TTF_TELNET){
-    for(i=0;i<numchannels;i++){
-      res=getlinestatus(gettys[i].ttyname,&status);
+    for(i=0;i<chan_count;i++){
+      res=channel_getstatus(gettys[i].ttyname,&status);
       if((status.result==LSR_OK||res<0) && (channels[i].flags&TTF_TELNET)){
 	changeline(i,gettys[i].ttyname,state,status.result,status.baud,
 		   status.user,1);
       }
     }
   } else {
-    res=getlinestatus(gettys[chan].ttyname,&status);
+    res=channel_getstatus(gettys[chan].ttyname,&status);
     changeline(chan,gettys[chan].ttyname,state,status.result,
 	       status.baud,status.user,1);
   }
@@ -328,25 +331,25 @@ void
 cmd_nchang(int chan, char *tty, char *arg)
 {
   int i,res,state;
-  struct linestatus status;
+  channel_status_t status;
 
   state=LST_NORMAL;
   for(i=0;i<LST_NUMSTATES;i++){
-    if(sameas(arg,line_states[i])){
+    if(sameas(arg,channel_states[i])){
       state=i;
       break;
     }
   }
   if(gettys[chan].flags&TTF_TELNET){
-    for(i=0;i<numchannels;i++){
-      res=getlinestatus(gettys[i].ttyname,&status);
+    for(i=0;i<chan_count;i++){
+      res=channel_getstatus(gettys[i].ttyname,&status);
       if((status.result==LSR_OK||res<0) && (channels[i].flags&TTF_TELNET)){
 	changeline(i,gettys[i].ttyname,state,status.result,status.baud,
 		   status.user,0);
       }
     }
   } else {
-    res=getlinestatus(gettys[chan].ttyname,&status);
+    res=channel_getstatus(gettys[chan].ttyname,&status);
     changeline(chan,gettys[chan].ttyname,state,status.result,
 	       status.baud,status.user,0);
   }
@@ -416,9 +419,9 @@ processcmd(char *buf)
   for(cp=strtok(buf,"\n");cp;cp=strtok(NULL,"\n")){
     if(sscanf(cp,"%s %s %s",keyword,tty,arg)!=3)return;
 
-    chan=getchannelindex(tty);
+    chan=chan_getindex(tty);
     if(chan<0&&strcmp(tty,"-")){
-      logerror("processcmd(): %s is not a BBS channel",tty);
+      error_log("processcmd(): %s is not a BBS channel",tty);
       return;
     }
     
@@ -435,7 +438,7 @@ processcmd(char *buf)
     }
 
     if(!found){
-      logerror("processcmd(): unknown command: %s",buf);
+      error_log("processcmd(): unknown command: %s",buf);
       continue;
     }
   }
@@ -453,9 +456,9 @@ processcommands(int fd)
     n=read(fd,buf,sizeof(buf));
     
     if(n<0){
-      logerror("Error reading from pipe, errno=%d",errno);
+      error_log("Error reading from pipe, errno=%d",errno);
     } else if(n==sizeof(buf)){
-      logerror("Possible command buffer overrun.");
+      error_log("Possible command buffer overrun.");
     } else if(n>0){
       processcmd(buf);
     }

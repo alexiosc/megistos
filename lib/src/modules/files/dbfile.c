@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
  * Minor paranoia checks/bug fixes.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,7 +80,7 @@ dbfileopen()
   d_dbfpath(FILELIBDBDIR);
   d_dbdpath(FILELIBDBDIR);
   if(d_open("dbfile","s")!=S_OKAY){
-    fatal("Cannot open file index database (db_status %d).",
+    error_fatal("Cannot open file index database (db_status %d).",
 	  db_status);
   }
   d_dbget(&id_dbfile);
@@ -91,7 +93,7 @@ filecreate(struct fileidx *file)
   d_dbset(id_dbfile);
   if(d_fillnew(FILEIDX,file)==S_OKAY)return;
   else
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
 }
 
 
@@ -100,7 +102,7 @@ filedelete(struct fileidx *file)
 {
   if(fileexists(file->flibnum,file->fname,file->approved)){
     if(d_delete()!=S_OKAY){
-      fatal("Typhoon call failed with db_status=%d",db_status);
+      error_fatal("Typhoon call failed with db_status=%d",db_status);
     }
   }
 }
@@ -113,7 +115,7 @@ fileupdate(struct fileidx *file)
     filecreate(file);
   } else {
     if(d_recwrite(file)!=S_OKAY)
-      fatal("Typhoon call failed with db_status=%d",db_status);
+      error_fatal("Typhoon call failed with db_status=%d",db_status);
   }
 }
 
@@ -130,7 +132,7 @@ fileexists(int libnum, char *fname, int approved)
   d_keyfind(STATLIBFN,&key);
   if(db_status==S_OKAY) return 1;
   else if(db_status!=S_NOTFOUND) {
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
   }
   return 0;
 }
@@ -148,12 +150,12 @@ fileread(int libnum, char *fname, int approved, struct fileidx *f)
   d_keyfind(STATLIBFN,&key);
   if(db_status==S_NOTFOUND) return 0;
   else if(db_status!=S_OKAY) {
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
   
   d_recread(f);
   if(db_status!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   } else return 1;
 
   return 0;			/* Dummy */
@@ -176,10 +178,10 @@ filegetfirst(int libnum, struct fileidx *file, int approved)
   if(db_status!=S_OKAY)d_keynext(STATLIBFN);
   if(db_status==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY){
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
   if(d_recread(file)!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   }
   return (libnum==file->flibnum) && (approved==file->approved);
 }
@@ -198,10 +200,10 @@ filegetnext(int libnum, struct fileidx *file)
   d_keynext(STATLIBFN);
   if(db_status==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY){
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
   if(d_recread(file)!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   }
   return file->flibnum==libnum && s.approved==file->approved;
 }
@@ -221,10 +223,10 @@ filegetoldest(int libnum, time_t newer_than, int approved,
   if(db_status!=S_OKAY)d_keyprev(TIMELIB);
   if(db_status==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY){
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
   if(d_recread(file)!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   }
   return (libnum==file->flibnum) && (approved==file->approved);
 }
@@ -245,10 +247,10 @@ filegetnextoldest(int libnum, struct fileidx *file)
   d_keynext(TIMELIB);
   if(db_status==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY){
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
   if(d_recread(file)!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   }
   return file->flibnum==libnum && tl.approved==file->approved;
 }

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:44:48  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -55,6 +56,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -123,7 +125,7 @@ findclub(char *club)
   if(!isalpha(*club))return 0;
 
   if((dp=opendir(CLUBHDRDIR))==NULL){
-    fatalsys("Unable to open directory %s",CLUBHDRDIR);
+    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
@@ -172,16 +174,16 @@ loadclubhdr(char *club)
 
 
 int
-getdefaultax(useracc *uacc, char *club)
+getdefaultax(useracc_t *uacc, char *club)
 {
   if(!loadclubhdr(club)){/* soup */
     return CAX_ZERO;
   }
 
-  if(haskey(uacc,clubhdr.keyuplax))return CAX_UPLOAD;
-  if(haskey(uacc,clubhdr.keywriteax))return CAX_WRITE;
-  if(haskey(uacc,clubhdr.keydnlax))return CAX_DNLOAD;
-  if(haskey(uacc,clubhdr.keyreadax))return CAX_READ;
+  if(key_owns(uacc,clubhdr.keyuplax))return CAX_UPLOAD;
+  if(key_owns(uacc,clubhdr.keywriteax))return CAX_WRITE;
+  if(key_owns(uacc,clubhdr.keydnlax))return CAX_DNLOAD;
+  if(key_owns(uacc,clubhdr.keyreadax))return CAX_READ;
 
   /* Everyone always has access to the Default club. */
   return sameas(club,defaultclub)?CAX_READ:CAX_ZERO;
@@ -189,7 +191,7 @@ getdefaultax(useracc *uacc, char *club)
 
 
 int
-getclubax(useracc *uacc, char *club)
+getclubax(useracc_t *uacc, char *club)
 {
   char fname[256], clubname[256], access;
   int ax=CAX_ZERO, found=0;
@@ -203,7 +205,7 @@ getclubax(useracc *uacc, char *club)
 
   strcpy(club,tmp);
 
-  if(haskey(uacc,sopkey))return CAX_SYSOP;
+  if(key_owns(uacc,sopkey))return CAX_SYSOP;
   else if(!strcmp(uacc->userid,clubhdr.clubop))return CAX_CLUBOP;
 
   sprintf(fname,"%s/%s",CLUBAXDIR,uacc->userid);

@@ -29,11 +29,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -62,6 +63,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -132,7 +134,7 @@ ustartqsc(char *uid)
   if(stat(fname,&st))return NULL;
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open quickscan configuration %s",fname);
+    error_fatalsys("Unable to open quickscan configuration %s",fname);
   }
   
   while(!feof(fp)){
@@ -251,13 +253,13 @@ usaveqsc(char *uid)
 
   sprintf(fname,"%s/%s",QSCDIR,uid);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create quickscan configuration %s",fname);
+    error_fatalsys("Unable to create quickscan configuration %s",fname);
   }
 
   for(i=0;i<numclubs;i++){
     if(uqsc[i].flags&LRF_DELETED)continue;
     if(fwrite(&uqsc[i],sizeof(struct lastread),1,fp)!=1){
-      fatalsys("Unable to write quickscan configuration %s",fname);
+      error_fatalsys("Unable to write quickscan configuration %s",fname);
     }
   }
 
@@ -430,13 +432,13 @@ listqsc()
       i=(i+1)%linemax;
       if(i==0)print("\n");
     }
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     p=nextqsc();
   }
   if(first){
     prompt(RQLCE);
     resetqsc();
-  } else if(lastresult!=PAUSE_QUIT)prompt(RQCLF);
+  } else if(fmt_lastresult!=PAUSE_QUIT)prompt(RQCLF);
   resetqsc();
 }
 
@@ -472,7 +474,7 @@ delclub()
       return;
     } else if(((p=findqsc(club))==NULL) || ((p->flags&LRF_QUICKSCAN)==0)){
       prompt(RQCDR);
-      endcnc();
+      cnc_end();
       continue;
     } else {
       /*addqsc(club,-1,p->flags&~LRF_QUICKSCAN);*/
@@ -493,9 +495,9 @@ configurequickscan(int create)
   if(create)initialise();
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,0,0,RQCMNU,RCMNUR,"+-V",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,0,0,RQCMNU,RCMNUR,"+-V",0,0);
+    inp_clearflags(INF_HELP);
     if(!i){
       saveqsc();
       if(create){
@@ -508,7 +510,7 @@ configurequickscan(int create)
     }
     if(i==-1){
       prompt(RQCHELP);
-      endcnc();
+      cnc_end();
       continue;
     }
   
@@ -534,13 +536,13 @@ quickscanmenu(struct message *msg)
   int res;
 
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,0,QSMMNU,QWMNUR,"NPRBCS",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,0,QSMMNU,QWMNUR,"NPRBCS",0,0);
+    inp_clearflags(INF_HELP);
     if(!res)return 'X';
     else if(res<0){
       prompt(QSMNUH);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -580,7 +582,7 @@ doquickscan()
 
     /* Non-blocking mode */
 
-    nonblocking();
+    inp_nonblock();
 
 
     /* Read this club? */
@@ -592,9 +594,9 @@ doquickscan()
 
     /* Handle quit commands */
 
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(QSABORT);
-      blocking();
+      inp_block();
       return;
     }
 
@@ -685,27 +687,27 @@ qgoclub()
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(SCASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -714,7 +716,7 @@ qgoclub()
 
     if(!findclub(i)){
       prompt(SCERR);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }

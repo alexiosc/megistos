@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -147,9 +149,6 @@ children:
 void
 op_access()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
-  int i;
   struct libidx lib;
   int changes[7];
   int recursive=0;
@@ -158,92 +157,86 @@ op_access()
   memcpy(&lib,&library,sizeof(lib));
   if(!adminlock(lib.libnum))return;
 
-  sprintf(fname,TMPDIR"/files%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,
+	  "%d\n%s\n%d\n%s\n%d\n%s\n%s\n%s\n%s\n%s\n%s\n%s\noff\nOK\nCANCEL\n",
+	  lib.readkey,
+	  lib.flags&LBF_LOCKENTR?"on":"off",
+	  lib.uploadkey,
+	  lib.flags&LBF_LOCKUPL?"on":"off",
+	  lib.downloadkey,
+	  lib.flags&LBF_LOCKDNL?"on":"off",
+	  lib.passwd,
+	  lib.libops[0],
+	  lib.libops[1],
+	  lib.libops[2],
+	  lib.libops[3],
+	  lib.libops[4]);
+
+  if(dialog_run("files",OACCVT,OACCLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     adminunlock();
     return;
   }
 
-  fprintf(fp,"%d\n",lib.readkey);
-  fprintf(fp,"%s\n",lib.flags&LBF_LOCKENTR?"on":"off");
-  fprintf(fp,"%d\n",lib.uploadkey);
-  fprintf(fp,"%s\n",lib.flags&LBF_LOCKUPL?"on":"off");
-  fprintf(fp,"%d\n",lib.downloadkey);
-  fprintf(fp,"%s\n",lib.flags&LBF_LOCKDNL?"on":"off");
-  fprintf(fp,"%s\n",lib.passwd);
-  for(i=0;i<5;i++)fprintf(fp,"%s\n",lib.libops[i]);
-  fprintf(fp,"off\n");
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("files",OACCVT,OACCLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    adminunlock();
-    return;
-  }
-
-  for(i=0;i<16;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    switch(i){
-    case 0:
-      changes[i]=lib.readkey!=atoi(s);
-      lib.readkey=atoi(s);
-      break;
-    case 1:
-      {
-	int old=lib.flags;
-	setflag(lib.flags,LBF_LOCKENTR,sameas(s,"on"));
-	if(lib.flags!=old)changes[i]=1;
+  if(sameas(margv[15],"OK")||sameas(margv[13],margv[15])){
+    int i;
+    for(i=0;i<16;i++){
+      char *s=margv[i];
+      switch(i){
+      case 0:
+	changes[i]=lib.readkey!=atoi(s);
+	lib.readkey=atoi(s);
 	break;
-      }
-    case 2:
-      changes[i]=lib.uploadkey!=atoi(s);
-      lib.uploadkey=atoi(s);
-      break;
-    case 3:
-      {
-	int old=lib.flags;
-	setflag(lib.flags,LBF_LOCKUPL,sameas(s,"on"));
-	if(lib.flags!=old)changes[i]=1;
-	break;
-      }
-    case 4:
-      changes[i]=lib.downloadkey!=atoi(s);
-      lib.downloadkey=atoi(s);
-      break;
-    case 5:
-      {
-	int old=lib.flags;
-	setflag(lib.flags,LBF_LOCKDNL,sameas(s,"on"));
-	if(lib.flags!=old)changes[i]=1;
-	break;
-      }
-    case 6:
-      changes[i]=1;
-      strcpy(lib.passwd,s);
-      break;
-    case 7: case 8: case 9: case 10: case 11:
-      if(masterlibop)strcpy(lib.libops[i-7],s);
-      else {
-	if(strcmp(lib.libops[i-7],s)&&!warned){
-	  prompt(OACCNOP);
-	  warned=1;
+      case 1:
+	{
+	  int old=lib.flags;
+	  setflag(lib.flags,LBF_LOCKENTR,sameas(s,"on"));
+	  if(lib.flags!=old)changes[i]=1;
+	  break;
 	}
+      case 2:
+	changes[i]=lib.uploadkey!=atoi(s);
+	lib.uploadkey=atoi(s);
+	break;
+      case 3:
+	{
+	  int old=lib.flags;
+	  setflag(lib.flags,LBF_LOCKUPL,sameas(s,"on"));
+	  if(lib.flags!=old)changes[i]=1;
+	  break;
+	}
+      case 4:
+	changes[i]=lib.downloadkey!=atoi(s);
+	lib.downloadkey=atoi(s);
+	break;
+      case 5:
+	{
+	  int old=lib.flags;
+	  setflag(lib.flags,LBF_LOCKDNL,sameas(s,"on"));
+	  if(lib.flags!=old)changes[i]=1;
+	  break;
+	}
+      case 6:
+	changes[i]=1;
+	strcpy(lib.passwd,s);
+	break;
+      case 7: case 8: case 9: case 10: case 11:
+	if(masterlibop)strcpy(lib.libops[i-7],s);
+	else {
+	  if(strcmp(lib.libops[i-7],s)&&!warned){
+	    prompt(OACCNOP);
+	    warned=1;
+	  }
+	}
+	break;
+      case 12:
+	if((recursive=sameas(s,"on"))!=0)prompt(OACCREC);
+	break;
       }
-      break;
-    case 12:
-      if((recursive=sameas(s,"on"))!=0)prompt(OACCREC);
-      break;
     }
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
+  } else {
     prompt(OPCAN);
     adminunlock();
     return;

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:54  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:44:48  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 15:48:12  alexios
  * Added autoconf support. Fixed bug that wouldn't auto-translate
@@ -63,6 +64,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,7 +106,7 @@ static void
 readbuf()
 {
   if(!fread(qwkbuf,128,1,rep)){
-    if(!feof(rep))fatalsys("Unable to read from reply packet.");
+    if(!feof(rep))error_fatalsys("Unable to read from reply packet.");
   }
 }
 
@@ -131,7 +133,7 @@ checkbbsid()
       prompt(BADID,qwkbuf,bbsid);
       return -1;
     }
-  } else fatal("Malformed reply packet.");
+  } else error_fatal("Malformed reply packet.");
 
   return 0;
 }
@@ -193,6 +195,7 @@ setupclub()
       loadclubhdr(tmp);
     }
   } else if(conf)strcpy(msg.club,clubhdr.club);
+  setclub(msg.club);
   return 1;
 }
 
@@ -204,7 +207,7 @@ setuprecipient()
   if(!sscanf(qwkhdr.whoto,"%s",tmp)){
     prompt(REPTB,"",conf?clubhdr.club:omceml);
     prompt(REPTBNR);
-    if(!getuserid(tmp,conf?ASKSRCP:ASKERCP,UNKUSR,0,0,0)){
+    if(!get_userid(tmp,conf?ASKSRCP:ASKERCP,UNKUSR,0,0,0)){
       prompt(REPHD);
       prompt(REPTB,"",conf?clubhdr.club:omceml);
       prompt(REPTBCN);
@@ -217,12 +220,12 @@ setuprecipient()
     isctlmsg=1;
     strcpy(msg.to,ctlname[0]);
   } else if(sameas(tmp,allnam)){
-    strcpy(msg.to,ALL);
+    strcpy(msg.to,MSG_ALL);
   } else {
-    if(!userexists(tmp)){
+    if(!usr_exists(tmp)){
       prompt(REPTB,tmp,conf?clubhdr.club:omceml);
       prompt(REPTBUU);
-      if(!getuserid(tmp,conf?ASKSRCP:ASKERCP,UNKUSR,0,0,0)){
+      if(!get_userid(tmp,conf?ASKSRCP:ASKERCP,UNKUSR,0,0,0)){
 	prompt(REPHD);
 	prompt(REPTB,tmp,conf?clubhdr.club:omceml);
 	prompt(REPTBCN);
@@ -250,7 +253,7 @@ static int
 checkcreds()
 {
   charge=conf?clubhdr.postchg:wrtchg;
-  if(!canpay(charge)){
+  if(!usr_canpay(charge)){
     prompt(REPTBCR);
     return 0;
   }
@@ -265,7 +268,7 @@ checkprivclub()
     prompt(REPTBES);
     for(;;){
       char c;
-      int res=getmenu(&c,1,0,ASKEORS,ASKERR,"EPC",0,0);
+      int res=get_menu(&c,1,0,ASKEORS,ASKERR,"EPC",0,0);
       if(!res){
 	prompt(ASKERR);
 	continue;
@@ -275,20 +278,20 @@ checkprivclub()
 	bzero(msg.club,sizeof(msg.club));
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	return 1;
       case 'P':
 	qwkhdr.status=STATUS_N;
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	return 1;
       case 'C':
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	prompt(REPTBCN);
 	return 0;
@@ -302,20 +305,20 @@ checkprivclub()
 static int
 checkemailall()
 {
-  if(!conf&&!strcmp(msg.to,ALL)){
+  if(!conf&&!strcmp(msg.to,MSG_ALL)){
     prompt(REPTBAE);
     prompt(EMLALL);
-    if(!getuserid(tmp,ASKERCP,UNKUSR,0,0,0)){
+    if(!get_userid(tmp,ASKERCP,UNKUSR,0,0,0)){
       prompt(REPHD);
       prompt(REPTB,
-	     sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	     sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	     conf?clubhdr.club:omceml);
       prompt(REPTBCN);
       return 0;
     } else {
       prompt(REPHD);
       prompt(REPTB,
-	     sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	     sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	     conf?clubhdr.club:omceml);
     }
     strcpy(msg.to,tmp);
@@ -331,7 +334,7 @@ checkpublrrr()
     prompt(REPTBPR);
     for(;;){
       char c;
-      int res=getmenu(&c,1,0,ASKRORS,ASKERR,"EPC",0,0);
+      int res=get_menu(&c,1,0,ASKRORS,ASKERR,"EPC",0,0);
       if(!res){
 	prompt(ASKERR);
 	continue;
@@ -341,20 +344,20 @@ checkpublrrr()
 	bzero(msg.club,sizeof(msg.club));
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	return 1;
       case 'P':
 	msg.flags&=~MSF_RECEIPT;
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	return 1;
       case 'C':
 	prompt(REPHD);
 	prompt(REPTB,
-	       sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	       sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	       conf?clubhdr.club:omceml);
 	prompt(REPTBCN);
 	return 0;
@@ -389,7 +392,7 @@ setuphist()
       /* Set the message up as a reply, as well */
 
       if(ref==org.msgno){
-	sprintf(msg.history,"%s %s/%ld",HST_REPLY,
+	sprintf(msg.history,"%s %s/%d",HST_REPLY,
 		conf?clubhdr.club:EMAILCLUBNAME,
 		org.msgno);
 	msg.flags|=MSF_REPLY;
@@ -412,11 +415,11 @@ askdupl()
 
   prompt (REPTBAG);
 
-  while(!getbool(&yes,ASKDUPL,ASKERR,ASKDUPD,0))prompt(ASKERR);
+  while(!get_bool(&yes,ASKDUPL,ASKERR,ASKDUPD,0))prompt(ASKERR);
 
   prompt(REPHD);
   prompt(REPTB,
-	 sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	 sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	 conf?clubhdr.club:omceml);
   if(!yes)prompt(REPTBCN);
   return yes;
@@ -503,11 +506,11 @@ dobody(char *fname)
   if(body[strlen(body)-1]!='\n')strcat(body,"\n");
   
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to open %s for writing",fname);
+    error_fatalsys("Unable to open %s for writing",fname);
   }
 
   if(write(fileno(fp),body,strlen(body))!=strlen(body)){
-    fatalsys("Unable to write to %s",fname);
+    error_fatalsys("Unable to write to %s",fname);
   }
 
   fclose(fp);
@@ -519,11 +522,11 @@ doheader(char *header)
 {
   FILE *fp;
   if((fp=fopen(header,"w"))==NULL){
-    fatalsys("Unable to create message header %s",header);
+    error_fatalsys("Unable to create message header %s",header);
   }
   if(fwrite(&msg,sizeof(msg),1,fp)!=1){
     fclose(fp);
-    fatalsys("Unable to write message header %s",header);
+    error_fatalsys("Unable to write message header %s",header);
   }
   fclose(fp);
 }
@@ -576,7 +579,7 @@ processmsg()
   /* Print a table entry now that we have all necessary data */
     
   prompt(REPTB,
-	 sameas(msg.to,ALL)?getpfix(REPTBALL,1):msg.to,
+	 sameas(msg.to,MSG_ALL)?msg_getunit(REPTBALL,1):msg.to,
 	 conf?clubhdr.club:omceml);
 
 
@@ -637,9 +640,9 @@ processmsg()
 
   sprintf(command,"%s %s %s",BBSMAILBIN,headerfname,bodyfname);
   if(system(command)){
-    fatal("Command %s failed",command);
+    error_fatal("Command %s failed",command);
   }
-  chargecredits(charge);
+  usr_chargecredits(charge);
   thisuseracc.msgswritten++;
 
   unlink(bodyfname);
@@ -660,16 +663,16 @@ processmsg()
 
   /* Notify the recipient, if on-line */
 
-  if(!(thisuseronl.flags&OLF_INVISIBLE)&&uinsys(msg.to,0)){
-    if(conf)sprintf(outbuf,getmsg(SIGINJ),
+  if(!(thisuseronl.flags&OLF_INVISIBLE)&&usr_insys(msg.to,0)){
+    if(conf)sprintf(out_buffer,msg_get(SIGINJ),
 		    thisuseracc.userid,
 		    msg.subject,
 		    clubhdr.club);
-    else    sprintf(outbuf,getmsg(EMLINJ),
+    else    sprintf(out_buffer,msg_get(EMLINJ),
 		    thisuseracc.userid,
 		    msg.subject);
 
-    injoth(&othruseronl,outbuf,0);
+    usr_injoth(&othruseronl,out_buffer,0);
   }
 
   return 1;
@@ -691,7 +694,7 @@ process(char *fname)
   int nummsgs=0, numsuccessful=0;
 
   if((rep=fopen(fname,"r"))==NULL){
-    interrorsys("Unable to open reply packet %s for reading!",fname);
+    error_intsys("Unable to open reply packet %s for reading!",fname);
     return -1;
   }
 
@@ -710,7 +713,7 @@ process(char *fname)
     else nummsgs++;
   }
 
-  prompt(ENDUL,numsuccessful,nummsgs,getpfix(MSGSNG,nummsgs));
+  prompt(ENDUL,numsuccessful,nummsgs,msg_getunit(MSGSNG,nummsgs));
 
   return 0;
 }
@@ -720,7 +723,7 @@ void static
 mkxlation()
 {
   if(!loadprefs(USERQWK,&userqwk)){
-    fatal("Unable to read user mailer preferences for %s",
+    error_fatal("Unable to read user mailer preferences for %s",
 	  thisuseracc.userid);
   }
 

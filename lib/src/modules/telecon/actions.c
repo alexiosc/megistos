@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:22  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,7 +77,7 @@ static struct actionidx *actions=NULL;
 
 static int numactions=0;
 
-static promptblk *actionblk=NULL;
+static promptblock_t *actionblk=NULL;
 
 static char *inpptr;
 
@@ -86,8 +88,8 @@ initactions()
   int i, pr;
   char type;
 
-  actionblk=opnmsg("teleactions");
-  numactions=numopt(NUMVERBS,0,1<<20);  /* 1M actions SHOULD suffice */
+  actionblk=msg_open("teleactions");
+  numactions=msg_int(NUMVERBS,0,1<<20);  /* 1M actions SHOULD suffice */
   if(!numactions)return;
 
   if(actions)free(actions);
@@ -98,8 +100,8 @@ initactions()
   for(i=0;i<numactions;i++){
 /*  print("%d. ",pr);fflush(stdout); */
     actions[i].index=pr;
-    actions[i].verb=strdup(getmsg(pr));
-    type=chropt(pr+1);
+    actions[i].verb=strdup(msg_get(pr));
+    type=msg_char(pr+1);
 /*  print("%c (%s)\n",type,actions[i].verb); */
     switch(type){
     case TYPE_SIMPLE:
@@ -118,7 +120,7 @@ initactions()
       pr+=4+2*NUMLANGUAGES;
       break;
     default:
-      fatal("Action verb '%s' has invalid type '%c'.",
+      error_fatal("Action verb '%s' has invalid type '%c'.",
 	    actions[i].verb,type);
     }
   }
@@ -142,25 +144,25 @@ sendusermsg(int pr)
   
   if(fx_objopt&OBJ_SECRETLY){
     if(!fx_fmtusec){
-      setmbk(msg);
-      fx_fmtusec=strdup(getmsg(FMTUSEC));
+      msg_set(msg);
+      fx_fmtusec=strdup(msg_get(FMTUSEC));
     }
   } else {
     if(!fx_fmtuser){
-      setmbk(msg);
-      fx_fmtuser=strdup(getmsg(FMTUSER));
+      msg_set(msg);
+      fx_fmtuser=strdup(msg_get(FMTUSER));
     }
   }
 
-  setmbk(actionblk);
+  msg_set(actionblk);
   for(lang=thisuseracc.language-1;lang>=0;lang--){
-    char *s=getmsg(pr+4+lang);
+    char *s=msg_get(pr+4+lang);
     if(s&&*s){
       print(fx_objopt&OBJ_SECRETLY?fx_fmtusec:fx_fmtuser,s);
       return;
     }
   }
-  setmbk(msg);
+  msg_set(msg);
   prompt(VERBSENT);
 }
 
@@ -168,10 +170,10 @@ sendusermsg(int pr)
 char *
 fx_simple(struct chanusr *u)
 {
-  setmbk(actionblk);
+  msg_set(actionblk);
   sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(outbuf,fx_fmtsmpl,fx_tmp);
-  return outbuf;
+  sprint(out_buffer,fx_fmtsmpl,fx_tmp);
+  return out_buffer;
 }
 
 
@@ -180,14 +182,14 @@ simpleaction(int pr)
 {
   fx_pr=pr+4+ML;
   if(!fx_fmtsmpl){
-    setmbk(msg);
-    fx_fmtsmpl=strdup(getmsg(FMTSMPL));
+    msg_set(msg);
+    fx_fmtsmpl=strdup(msg_get(FMTSMPL));
   }
   if(broadcast(fx_simple)>0)sendusermsg(pr);
   else {
-    setmbk(msg);
+    msg_set(msg);
     prompt(SIU0);
-    setmbk(actionblk);
+    msg_set(actionblk);
   }
 }
 
@@ -195,10 +197,10 @@ simpleaction(int pr)
 char *
 fx_generic(struct chanusr *u)
 {
-  setmbk(actionblk);
+  msg_set(actionblk);
   sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(outbuf,fx_fmtgnrc,fx_tmp,inpptr);
-  return outbuf;
+  sprint(out_buffer,fx_fmtgnrc,fx_tmp,inpptr);
+  return out_buffer;
 }
 
 
@@ -206,20 +208,20 @@ void
 genericaction(int pr, char *verb)
 {
   if(!inpptr||inpptr[0]==0){
-    setmbk(msg);
+    msg_set(msg);
     prompt(VERBNMT,verb);
     return;
   }
   fx_pr=pr+4+ML;
   if(!fx_fmtgnrc){
-    setmbk(msg);
-    fx_fmtgnrc=strdup(getmsg(FMTGNRC));
+    msg_set(msg);
+    fx_fmtgnrc=strdup(msg_get(FMTGNRC));
   }
   if(broadcast(fx_generic)>0)sendusermsg(pr);
   else {
-    setmbk(msg);
+    msg_set(msg);
     prompt(SIU0);
-    setmbk(actionblk);
+    msg_set(actionblk);
   }
 }
 
@@ -227,10 +229,10 @@ genericaction(int pr, char *verb)
 char *
 fx_adverb(struct chanusr *u)
 {
-  setmbk(actionblk);
+  msg_set(actionblk);
   sprompt(fx_tmp,fx_pr+othruseracc.language-1);
-  sprint(outbuf,fx_fmtadvb,fx_tmp,inpptr);
-  return outbuf;
+  sprint(out_buffer,fx_fmtadvb,fx_tmp,inpptr);
+  return out_buffer;
 }
 
 
@@ -244,16 +246,16 @@ adverbaction(int pr)
 
   fx_pr=pr+4+2*ML;
   if(!fx_fmtadvb){
-    setmbk(msg);
-    fx_fmtadvb=strdup(getmsg(FMTADVB));
+    msg_set(msg);
+    fx_fmtadvb=strdup(msg_get(FMTADVB));
   }
   if(broadcast(fx_adverb)>0){
-    setmbk(msg);
+    msg_set(msg);
     prompt(VERBSENT);
   } else {
-    setmbk(msg);
+    msg_set(msg);
     prompt(SIU0);
-    setmbk(actionblk);
+    msg_set(actionblk);
   }
 }
 
@@ -261,22 +263,22 @@ adverbaction(int pr)
 char *
 fx_object(struct chanusr *u)
 {
-  setmbk(actionblk);
+  msg_set(actionblk);
   if(fx_objopt&OBJ_ALL){
     sprompt(fx_tmp,fx_pr+(4+2*ML)+othruseracc.language-1);
-    sprint(outbuf,fx_fmtall,fx_tmp);
+    sprint(out_buffer,fx_fmtall,fx_tmp);
   } else if(fx_objopt&OBJ_SECRETLY) {
     if(!sameas(u->userid,fx_target))return NULL;
     sprompt(fx_tmp,fx_pr+(4+4*ML)+othruseracc.language-1);
-    sprint(outbuf,fx_fmtscrt,fx_tmp);
+    sprint(out_buffer,fx_fmtscrt,fx_tmp);
   } else if(sameas(u->userid,fx_target)){
     sprompt(fx_tmp,fx_pr+(4+3*ML)+othruseracc.language-1);
-    sprint(outbuf,fx_fmttrgt,fx_tmp);
+    sprint(out_buffer,fx_fmttrgt,fx_tmp);
   } else {
     sprompt(fx_tmp,fx_pr+(4+ML)+othruseracc.language-1);
-    sprint(outbuf,fx_fmtothr,fx_tmp);
+    sprint(out_buffer,fx_fmtothr,fx_tmp);
   }
-  return outbuf;
+  return out_buffer;
 }
 
 
@@ -285,7 +287,7 @@ objectaction(int pr, char *verb, int typeD)
 {
   char tmp[8192];
 
-  setmbk(msg);
+  msg_set(msg);
   if(!inpptr||inpptr[0]==0){
     prompt(VERBNOBJ,verb);
     return;
@@ -315,36 +317,36 @@ objectaction(int pr, char *verb, int typeD)
       prompt(VERBUID,fx_target);
       return;
     }
-    uinsys(fx_target,0);
+    usr_insys(fx_target,0);
     fx_targetsex=othruseracc.sex;
     fx_targetcol=othruseraux.colour;
   }
 
-  setmbk(actionblk);
+  msg_set(actionblk);
   fx_pr=typeD?pr+ML:pr;
 
   if(!fx_fmtothr){
-    setmbk(msg);
-    fx_fmtothr=strdup(getmsg(FMTOTHR));
+    msg_set(msg);
+    fx_fmtothr=strdup(msg_get(FMTOTHR));
   }
   if(!fx_fmttrgt){
-    setmbk(msg);
-    fx_fmttrgt=strdup(getmsg(FMTTRGT));
+    msg_set(msg);
+    fx_fmttrgt=strdup(msg_get(FMTTRGT));
   }
   if(!fx_fmtall){
-    setmbk(msg);
-    fx_fmtall=strdup(getmsg(FMTALL));
+    msg_set(msg);
+    fx_fmtall=strdup(msg_get(FMTALL));
   }
   if(!fx_fmtscrt){
-    setmbk(msg);
-    fx_fmtscrt=strdup(getmsg(FMTSCRT));
+    msg_set(msg);
+    fx_fmtscrt=strdup(msg_get(FMTSCRT));
   }
 
   if(broadcast(fx_object)>0)sendusermsg(pr);
   else {
-    setmbk(msg);
+    msg_set(msg);
     prompt(SIU0);
-    setmbk(actionblk);
+    msg_set(actionblk);
   }
 }
 
@@ -359,9 +361,9 @@ doubleaction(int pr, char *verb)
 
 int actionax(int pr)
 {
-  if(!haskey(&thisuseracc,numopt(pr+2,0,129)))return 0;
+  if(!key_owns(&thisuseracc,msg_int(pr+2,0,129)))return 0;
   else {
-    char *access=strdup(getmsg(pr+3));
+    char *access=strdup(msg_get(pr+3));
     char userid[26];
 
     if(!access[0]){
@@ -369,7 +371,7 @@ int actionax(int pr)
       return 1;
     } else {
       sprintf(userid,"(%s)",thisuseracc.userid);
-      if(!strstr(getmsg(pr+3),userid)){
+      if(!strstr(msg_get(pr+3),userid)){
 	free(access);
 	return 0;
       }
@@ -409,7 +411,7 @@ int handleaction(char *s)
 
   if(*s=='/')return 0;
 
-  if(!haskey(&thisuseracc,actkey))return 0;
+  if(!key_owns(&thisuseracc,actkey))return 0;
   if(!thisuseraux.actions)return 0;
 
   fx_objopt=OBJ_NORMAL;
@@ -419,7 +421,7 @@ int handleaction(char *s)
   n=0;
   if(!sscanf(s,"%s %n",key,&n)) {
     free(key);
-    setmbk(msg);
+    msg_set(msg);
     return 0;
   }
   
@@ -430,19 +432,19 @@ int handleaction(char *s)
   free(key);
 
   if(!a){
-    setmbk(msg);
+    msg_set(msg);
     return 0;
   }
 
   /*  print("Action=(%s), Index=%d\n",a->verb,a->index); */
   
-  setmbk(actionblk);
+  msg_set(actionblk);
   if(!actionax(a->index)){
-    setmbk(msg);
+    msg_set(msg);
     return 0;
   }
   
-  switch(chropt(a->index+1)){
+  switch(msg_char(a->index+1)){
   case TYPE_SIMPLE:
     simpleaction(a->index);
     break;
@@ -460,7 +462,7 @@ int handleaction(char *s)
     break;
   }
 
-  setmbk(msg);
+  msg_set(msg);
   return 1;
 }
 
@@ -476,7 +478,7 @@ actionctl(char *s)
   if((i<1)||sameas(cmd,"?")||sameas(cmd,"HELP")){
     prompt(ACTHLP);
     return;
-  } else if(!haskey(&thisuseracc,actkey)){
+  } else if(!key_owns(&thisuseracc,actkey)){
     prompt(ACTNAX);
     return;
   } else if(sameas(cmd,"ON")){

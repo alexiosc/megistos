@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:05  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:07:28  alexios
  * Added autoconf support.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,21 +80,21 @@ rsys_type()
   char fname[256]={0}, *cp;
 
   for(;;){
-    if(morcnc()){
-      rstrin();
-      strcpy(fname,nxtcmd);
+    if(cnc_more()){
+      inp_raw();
+      strcpy(fname,cnc_nxtcmd);
       break;
     }else{
       prompt(RSTYPEASK,NULL);
-      getinput(0);
-      bgncnc();
-      if(!margc || reprompt) {
-	endcnc();
+      inp_get(0);
+      cnc_begin();
+      if(!margc || inp_reprompt()) {
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       else {
-	rstrin();
-	strcpy(fname,nxtcmd);
+	inp_raw();
+	strcpy(fname,cnc_nxtcmd);
 	break;
       }
     }
@@ -103,7 +105,7 @@ rsys_type()
   while(*cp && !isspace(*cp))cp++;
   *cp=0;
   
-  if(!catfile(fname))prompt(RSTYPEERR,fname);
+  if(!out_catfile(fname))prompt(RSTYPEERR,fname);
 }
 
 
@@ -114,47 +116,47 @@ cpmv(int asksrc,int asktrg,int ok, int err, char *cmd)
   char *cp;
 
   for(;;){
-    if(morcnc()){
-      rstrin();
-      strcpy(source,nxtcmd);
+    if(cnc_more()){
+      inp_raw();
+      strcpy(source,cnc_nxtcmd);
       break;
     }else{
       prompt(asksrc,NULL);
-      getinput(0);
-      bgncnc();
-      if(!margc || reprompt) {
-	endcnc();
+      inp_get(0);
+      cnc_begin();
+       if(!margc || inp_reprompt()) {
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       else {
-	rstrin();
-	strcpy(source,nxtcmd);
+	inp_raw();
+	strcpy(source,cnc_nxtcmd);
 	break;
       }
     }
   }
 
-  cncword();
+  cnc_word();
   cp=source;
   while(*cp && !isspace(*cp))cp++;
   *cp=0;
 
   for(;;){
-    if(morcnc()){
-      rstrin();
-      strcpy(target,nxtcmd);
+    if(cnc_more()){
+      inp_raw();
+      strcpy(target,cnc_nxtcmd);
       break;
     }else{
       prompt(asktrg,NULL);
-      getinput(0);
-      bgncnc();
-      if(!margc || reprompt) {
-	endcnc();
+      inp_get(0);
+      cnc_begin();
+      if(!margc || inp_reprompt()) {
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       else {
-	rstrin();
-	strcpy(target,nxtcmd);
+	inp_raw();
+	strcpy(target,cnc_nxtcmd);
 	break;
       }
     }
@@ -163,7 +165,7 @@ cpmv(int asksrc,int asktrg,int ok, int err, char *cmd)
   cp=target;
   while(*cp && !isspace(*cp))cp++;
   *cp=0;
-  endcnc();
+  cnc_end();
 
   sprintf(command,"%s %s %s",cmd,source,target);
   prompt(runcommand(command)?err:ok);
@@ -192,21 +194,21 @@ rsys_dir()
   char *cp=fname;
 
   for(;;){
-    if(morcnc()){
-      rstrin();
-      strcpy(fname,nxtcmd);
+    if(cnc_more()){
+      inp_raw();
+      strcpy(fname,cnc_nxtcmd);
       break;
     }else{
       prompt(RSDIRASK,NULL);
-      getinput(0);
-      bgncnc();
-      if(!margc || reprompt) {
-	endcnc();
+      inp_get(0);
+      cnc_begin();
+      if(!margc || inp_reprompt()) {
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       else {
-	rstrin();
-	strcpy(fname,nxtcmd);
+	inp_raw();
+	strcpy(fname,cnc_nxtcmd);
 	break;
       }
     }
@@ -230,21 +232,21 @@ rsys_del()
   char *cp=fname;
 
   for(;;){
-    if(morcnc()){
-      rstrin();
-      strcpy(fname,nxtcmd);
+    if(cnc_more()){
+      inp_raw();
+      strcpy(fname,cnc_nxtcmd);
       break;
     }else{
       prompt(RSDELASK,NULL);
-      getinput(0);
-      bgncnc();
-      if(!margc || reprompt) {
-	endcnc();
+      inp_get(0);
+      cnc_begin();
+      if(!margc || inp_reprompt()) {
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       else {
-	rstrin();
-	strcpy(fname,nxtcmd);
+	inp_raw();
+	strcpy(fname,cnc_nxtcmd);
 	break;
       }
     }
@@ -263,18 +265,18 @@ rsys_del()
 void
 rsys_sys()
 {
-  if(morcnc()){
-    rstrin();
+  if(cnc_more()){
+    inp_raw();
   }else{
     prompt(RSSYSASK,NULL);
-    getinput(0);
-    bgncnc();
+    inp_get(0);
+    cnc_begin();
   }
-  if(!nxtcmd || !*nxtcmd)return;
-  if(isX(nxtcmd))return;
+  if(!cnc_nxtcmd || !*cnc_nxtcmd)return;
+  if(inp_isX(cnc_nxtcmd))return;
   {
     char command[512]={0};
-    strcpy(command,nxtcmd);
+    strcpy(command,cnc_nxtcmd);
     runcommand(command);
   }
 }
@@ -294,26 +296,26 @@ rsys_editor()
   FILE *fp;
 
   for(;;){
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
     } else {
       prompt(RSEDITWHF);
-      getinput(0);
-      nxtcmd=input;
+      inp_get(0);
+      cnc_nxtcmd=inp_buffer;
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return;
       }
     }
 
-    strcpy(fname,cncword());
+    strcpy(fname,cnc_word());
     if((fp=fopen(fname,"r"))==NULL){
       fclose(fp);
       prompt(RSXFERERR,fname);
-      endcnc();
+      cnc_end();
       continue;
     } else {
       char tempname[256];

@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  2000/01/06 10:37:25  alexios
  * Added support for locating files and expanding wildcards
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -145,7 +147,7 @@ os_shdnlinfo(char *f, char *summary, int quiet)
   t=calcxfertime(st.st_size,1);
   c=calccharge(st.st_size,&library);
 
-  if(lastresult!=PAUSE_QUIT)
+  if(fmt_lastresult!=PAUSE_QUIT)
     if(!quiet)prompt(DNLSIL,f,st.st_size,t/60,t%60,c,summary);
   return st.st_size;
 }
@@ -216,7 +218,7 @@ idx_expandspec(char *s, int quiet)
       int t=calcxfertime(totalsize,1);
       totalcharge=calccharge(totalsize,&library);
       totalcharge+=(numfiles-1)*library.dnlcharge;
-      if(lastresult!=PAUSE_QUIT)
+      if(fmt_lastresult!=PAUSE_QUIT)
 	if(!quiet)prompt(DNLSIF,numfiles,totalsize,t/60,t%60,totalcharge);
     } else {
       if(!quiet)prompt(DNLNFM,s);
@@ -286,7 +288,7 @@ os_expandspec(char *s,int quiet)
     /* Open the library directory */
     
     if((dp=opendir(library.dir))==NULL){
-      fatalsys("Unable to open library %s (directory: %s)",
+      error_fatalsys("Unable to open library %s (directory: %s)",
 	    library.fullname,library.dir);
     }
 
@@ -319,7 +321,7 @@ os_expandspec(char *s,int quiet)
       int t=calcxfertime(totalsize,1);
       totalcharge=calccharge(totalsize,&library);
       totalcharge+=(numfiles-1)*library.dnlcharge;
-      if(lastresult!=PAUSE_QUIT)
+      if(fmt_lastresult!=PAUSE_QUIT)
 	if(!quiet)prompt(DNLSIF,numfiles,totalsize,t/60,t%60,totalcharge);
     } else {
       if(!quiet)prompt(DNLNFM,s);

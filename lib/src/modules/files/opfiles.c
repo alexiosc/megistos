@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -67,12 +69,12 @@ op_files()
   sprintf(command,"cd %s; file -L *",library.dir);
   if((pp=popen(command,"r"))==NULL){
     fclose(pp);
-    logerrorsys("Unable to popen(\"%s\",\"r\").",command);
+    error_logsys("Unable to popen(\"%s\",\"r\").",command);
     return;
   }
 
   prompt(OFILHD);
-  nonblocking();
+  inp_nonblock();
   while(!feof(pp)){
     char line[8192], *type;
     if(!fgets(line,sizeof(line),pp))break;
@@ -81,9 +83,9 @@ op_files()
     while(*type==32)type++;
     *(type-1)=0;
     prompt(OFILLN,line,type);
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
   }
-  blocking();
-  if(lastresult!=PAUSE_QUIT)prompt(OFILFT);
+  inp_block();
+  if(fmt_lastresult!=PAUSE_QUIT)prompt(OFILFT);
   pclose(pp);
 }

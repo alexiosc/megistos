@@ -28,14 +28,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:30  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 15:33:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Migrated to the new locking functions.
  *
  * Revision 0.6  1998/08/14 11:29:14  alexios
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -130,13 +132,13 @@ listclubs()
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
     prompt(LCTAB,clubhdr.club,clubhdr.clubop,clubhdr.descr);
   }
   free(clubs);
   enterdefaultclub();
-  if(lastresult==PAUSE_QUIT)return;
+  if(fmt_lastresult==PAUSE_QUIT)return;
   prompt(LCFTR);
 }
 
@@ -153,7 +155,7 @@ longlistclubs()
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
     strcpy(date,strdate(clubhdr.crdate));
     /*memcpy(&date[7],&date[9],3);*/
@@ -162,7 +164,7 @@ longlistclubs()
   }
   free(clubs);
   enterdefaultclub();
-  if(lastresult==PAUSE_QUIT)return;
+  if(fmt_lastresult==PAUSE_QUIT)return;
   prompt(LC2FTR);
 }
 
@@ -196,27 +198,27 @@ newclub()
   char lock[256], fname[256];
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(CRCASK);
-      getinput(15);
-      bgncnc();
-      i=cncword();
+      inp_get(15);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -225,12 +227,12 @@ newclub()
 
     if(strlen(i)>15){
       prompt(CRERR);
-      endcnc();
+      cnc_end();
       continue;
     }
     for(ok=1,cp=i;*cp;cp++)if(!strchr(FNAMECHARS,*cp)){
       prompt(CRERR);
-      endcnc();
+      cnc_end();
       ok=0;
       break;
     }
@@ -238,7 +240,7 @@ newclub()
 
     if(findclub(i)){
       prompt(CRCXST);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -260,10 +262,10 @@ newclub()
   new.credspermin=-1;
 
   sprintf(lock,CLUBLOCK,new.club);
-  if(waitlock(lock,10)==LKR_TIMEOUT)return;
-  placelock(lock,"creating");
+  if(lock_wait(lock,10)==LKR_TIMEOUT)return;
+  lock_place(lock,"creating");
   saveclubhdr(&new);
-  rmlock(lock);
+  lock_rm(lock);
   prompt(CRCCNF,new.club);
 
   sprintf(fname,"%s/%s",MSGSDIR,new.club);
@@ -298,27 +300,27 @@ delclub()
   
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(DCASK);
-      getinput(15);
-      bgncnc();
-      i=cncword();
+      inp_get(15);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return;
+      } else if(inp_isX(margv[0]))return;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -327,7 +329,7 @@ delclub()
 
     if(!findclub(i)){
       prompt(DCUNK);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -348,7 +350,7 @@ delclub()
 
   prompt(DCINFO);
 
-  if(!getbool(&yes,DCCONF,DCCR,0,0))return;
+  if(!get_bool(&yes,DCCONF,DCCR,0,0))return;
   if(!yes)return;
   if(!checkinclub(i)){
     prompt(DCSNUK);
@@ -367,8 +369,8 @@ delclub()
 
   loadclubhdr(i);
   sprintf(lock,CLUBLOCK,clubhdr.club);
-  waitlock(lock,60);
-  placelock(lock,"deleting");
+  lock_wait(lock,60);
+  lock_place(lock,"deleting");
   sprintf(command,"\\rm -rf %s/?%s %s/%s >&/dev/null &",
 	  CLUBHDRDIR,clubhdr.club,
 	  MSGSDIR,clubhdr.club);
@@ -380,11 +382,11 @@ delclub()
 
   if((dp=opendir(CLUBAXDIR))!=NULL){
     while((dir=readdir(dp))!=NULL){
-      useracc usracc, *uacc=&usracc;
+      useracc_t usracc, *uacc=&usracc;
       
       if(dir->d_name[0]=='.')continue;
       
-      if(!uinsys(dir->d_name,0))loaduseraccount(dir->d_name,uacc);
+      if(!usr_insys(dir->d_name,0))usr_loadaccount(dir->d_name,uacc);
       else uacc=&othruseracc;
 
       setclubax(uacc,clubhdr.club,CAX_DEFAULT);
@@ -395,7 +397,7 @@ delclub()
 
   /* Unlock and exit */
 
-  rmlock(lock);
+  lock_rm(lock);
   prompt(DCOK);
 }
 
@@ -406,229 +408,126 @@ delclub()
 void
 editclub()
 {
-  int i;
-  char fname[256],bedit[256],bok[256],bcan[256],res[256],s[256],*cp;
+  char fname[256];
   char descr[256];
   int lifetime=0;
-  FILE *fp;
 
-  sprintf(fname,TMPDIR"/ec%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    return;
+  sprintf(inp_buffer,"%s\n%d\nEdit\nOK\nCancel\n",
+	  clubhdr.descr,
+	  clubhdr.msglife);
+
+  if(dialog_run("emailclubs",ECVT,ECLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
   }
 
-  fprintf(fp,"%s\n",clubhdr.descr);
-  fprintf(fp,"%d\n",clubhdr.msglife);
-  fprintf(fp,"Edit button\nOK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("emailclubs",ECVT,ECLT,fname);
+  if (sameas(margv[5],"OK") || sameas (margv[2],margv[5])
+      || sameas(margv[3],margv[5])) {
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
 
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==2)strcpy(bedit,s);
-    else if(i==3)strcpy(bok,s);
-    else if(i==4)strcpy(bcan,s);
-    else if(i==5)strcpy(res,s);
-  }
-  if(sameas(bedit,bok))bok[0]=0;
-  if(sameas(bedit,bcan))bcan[0]=0;
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
+    /* Edit the banner? */
 
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
-    prompt(ECCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
-  }
-  if(sameas(res,bedit)){
-    if(!modifybanner()){
-      prompt(ECCAN);
-      fclose(fp);
-      unlink(fname);
-      return;
+    if(sameas(margv[2],margv[5])){
+      if(!modifybanner()){
+	prompt(ECCAN);
+	return;
+      }
     }
+
+    bzero(descr,sizeof(descr));
+    strncpy(descr,margv[0],sizeof(descr));
+    lifetime=atoi(margv[1]);
+
+    sprintf(fname,CLUBLOCK,clubhdr.club);
+    if(lock_wait(fname,10)==LKR_TIMEOUT)return;
+    lock_place(fname,"writing");
+    loadclubhdr(clubhdr.club);
+    strncpy(clubhdr.descr,descr,sizeof(clubhdr.descr)-1);
+    clubhdr.descr[sizeof(clubhdr.descr)-1]='\0';
+    clubhdr.msglife=lifetime;
+    saveclubhdr(&clubhdr);
+    lock_rm(fname);
+    prompt(ECDONE);
+  } else {
+    prompt(ECCAN);
   }
-  
-  rewind(fp);
-
-  for(i=0;i<2;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(descr,s);
-    else if(i==1)lifetime=atoi(s);
-  }
-
-  fclose(fp);
-  unlink(fname);
-
-  sprintf(fname,CLUBLOCK,clubhdr.club);
-  if(waitlock(fname,10)==LKR_TIMEOUT)return;
-  placelock(fname,"writing");
-  loadclubhdr(clubhdr.club);
-  strcpy(clubhdr.descr,descr);
-  clubhdr.msglife=lifetime;
-  saveclubhdr(&clubhdr);
-  rmlock(fname);
-  prompt(ECDONE);
 }
 
 
 void
 accesslevels()
 {
-  int i;
-  char fname[256],bok[256],bcan[256],res[256],s[256],*cp;
-  int r, d, w, u;
-  FILE *fp;
+  sprintf(inp_buffer,"%d\n%d\n%d\n%d\nOK\nCANCEL\n",
+	  clubhdr.keyreadax,
+	  clubhdr.keydnlax,
+	  clubhdr.keywriteax,
+	  clubhdr.keyuplax);
 
-  r=d=w=u=128;
-  sprintf(fname,TMPDIR"/al%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    return;
+  if(dialog_run("emailclubs",AXLVT,AXLLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
   }
 
-  fprintf(fp,"%d\n",clubhdr.keyreadax);
-  fprintf(fp,"%d\n",clubhdr.keydnlax);
-  fprintf(fp,"%d\n",clubhdr.keywriteax);
-  fprintf(fp,"%d\n",clubhdr.keyuplax);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("emailclubs",AXLVT,AXLLT,fname);
-  
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
+  if(sameas(margv[6],"OK")||sameas(margv[6],margv[4])){
+    int  r=atoi(margv[0]);
+    int  d=atoi(margv[1]);
+    int  w=atoi(margv[2]);
+    int  u=atoi(margv[3]);
+    char fname[256];
 
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==4)strcpy(bok,s);
-    else if(i==5)strcpy(bcan,s);
-    else if(i==6)strcpy(res,s);
-  }
-
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
-
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
+    sprintf(fname,CLUBLOCK,clubhdr.club);
+    if(lock_wait(fname,10)==LKR_TIMEOUT)return;
+    lock_place(fname,"writing");
+    loadclubhdr(clubhdr.club);
+    clubhdr.keyreadax=sameas(clubhdr.club,defclub)?0:r;
+    if(sameas(clubhdr.club,defclub))prompt(WRNDEFC);
+    clubhdr.keydnlax=d;
+    clubhdr.keywriteax=w;
+    clubhdr.keyuplax=u;
+    saveclubhdr(&clubhdr);
+    lock_rm(fname);
+    prompt(ECDONE);
+  } else {
     prompt(ECCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
   }
-  
-  rewind(fp);
-
-  for(i=0;i<4;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)r=atoi(s);
-    else if(i==1)d=atoi(s);
-    else if(i==2)w=atoi(s);
-    else if(i==3)u=atoi(s);
-  }
-
-  fclose(fp);
-  unlink(fname);
-
-  sprintf(fname,CLUBLOCK,clubhdr.club);
-  if(waitlock(fname,10)==LKR_TIMEOUT)return;
-  placelock(fname,"writing");
-  loadclubhdr(clubhdr.club);
-  clubhdr.keyreadax=sameas(clubhdr.club,defclub)?0:r;
-  if(sameas(clubhdr.club,defclub))prompt(WRNDEFC);
-  clubhdr.keydnlax=d;
-  clubhdr.keywriteax=w;
-  clubhdr.keyuplax=u;
-  saveclubhdr(&clubhdr);
-  rmlock(fname);
-  prompt(ECDONE);
 }
 
 
 void
 charges()
 {
-  int i;
-  char fname[256],bok[256],bcan[256],res[256],s[256],*cp;
-  int post, upl, dnl, rate;
-  FILE *fp;
+  sprintf(inp_buffer,"%d\n%d\n%d\n%d\nOK\nCANCEL\n",
+	  clubhdr.postchg,
+	  clubhdr.uploadchg,
+	  clubhdr.dnloadchg,
+	  clubhdr.credspermin);
 
-  post=upl=dnl=0;
-  rate=-1;
-
-  sprintf(fname,TMPDIR"/ch%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  if(dialog_run("emailclubs",CHVT,CHLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%d\n",clubhdr.postchg);
-  fprintf(fp,"%d\n",clubhdr.uploadchg);
-  fprintf(fp,"%d\n",clubhdr.dnloadchg);
-  fprintf(fp,"%d\n",clubhdr.credspermin);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("emailclubs",CHVT,CHLT,fname);
-  
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
+  if(sameas(margv[6],"OK")||sameas(margv[6],margv[4])){
+    char fname[256];
 
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==4)strcpy(bok,s);
-    else if(i==5)strcpy(bcan,s);
-    else if(i==6)strcpy(res,s);
-  }
-
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
-
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
+    sprintf(fname,CLUBLOCK,clubhdr.club);
+    if(lock_wait(fname,10)==LKR_TIMEOUT)return;
+    lock_place(fname,"writing");
+    loadclubhdr(clubhdr.club);
+    clubhdr.postchg=atoi(margv[0]);
+    clubhdr.uploadchg=atoi(margv[1]);
+    clubhdr.dnloadchg=atoi(margv[2]);
+    clubhdr.credspermin=atoi(margv[3]);
+    saveclubhdr(&clubhdr);
+    lock_rm(fname);
+    prompt(ECDONE);
+  } else {
     prompt(ECCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
   }
-  
-  rewind(fp);
-
-  for(i=0;i<4;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)post=atoi(s);
-    else if(i==1)upl=atoi(s);
-    else if(i==2)dnl=atoi(s);
-    else if(i==3)rate=atoi(s);
-  }
-
-  fclose(fp);
-  unlink(fname);
-
-  sprintf(fname,CLUBLOCK,clubhdr.club);
-  if(waitlock(fname,10)==LKR_TIMEOUT)return;
-  placelock(fname,"writing");
-  loadclubhdr(clubhdr.club);
-  clubhdr.postchg=post;
-  clubhdr.uploadchg=upl;
-  clubhdr.dnloadchg=dnl;
-  clubhdr.credspermin=rate;
-  saveclubhdr(&clubhdr);
-  rmlock(fname);
-  prompt(ECDONE);
 }
 
 
@@ -637,7 +536,7 @@ configureuser()
 {
   char uid[256], opt, fname[256];
   int res, cur, i;
-  useracc usracc, *uacc=&usracc;
+  useracc_t usracc, *uacc=&usracc;
   
   int axp[]={
     CAX_ZERO,CAX_READ,CAX_DNLOAD,CAX_WRITE,
@@ -655,51 +554,51 @@ configureuser()
     0};
 
   for(;;){
-    if(!getuserid(uid,CUASK,CUERR1,0,0,0))return;
+    if(!get_userid(uid,CUASK,CUERR1,0,0,0))return;
     break; /* Don't check for Sysop here */
     if(sameas(SYSOP,uid)){
       prompt(CUERR2);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
 
-  if(!uinsys(uid,0))loaduseraccount(uid,uacc);
+  if(!usr_insys(uid,0))usr_loadaccount(uid,uacc);
   else uacc=&othruseracc;
 
   cur=getclubax(uacc,clubhdr.club);
 
   for(i=0;axp[i]>=0;i++)if(axp[i]==cur){
-    prompt(CUCUR,uid,getpfix(CULVL0+i,1));
+    prompt(CUCUR,uid,msg_getunit(CULVL0+i,1));
     break;
   }
 
   if(cur==CAX_SYSOP)prompt(CUSYSW);
 
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,CUMNU,CUSMNU,CUMNUR,"D0123456",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,CUMNU,CUSMNU,CUMNUR,"D0123456",0,0);
+    inp_clearflags(INF_HELP);
     if(!res)return;
     else if(res==-1){
       prompt(CUHLP);
-      endcnc();
+      cnc_end();
       continue;
     } else if(opt=='6' && getclubax(&thisuseracc,clubhdr.club)<CAX_SYSOP){
       prompt(CUMNUR1);
-      endcnc();
+      cnc_end();
       continue;
     } else if(opt=='5' && getclubax(&thisuseracc,clubhdr.club)<CAX_CLUBOP){
       prompt(CUMNUR2);
-      endcnc();
+      cnc_end();
       continue;
     } else if(opt=='0' && sameas(clubhdr.club,defclub)){
       prompt(CUMNUR3);
-      endcnc();
+      cnc_end();
       continue;
     } else if(opt!='6' && sameas(SYSOP,uid)){
       prompt(CUERR2);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -714,33 +613,33 @@ configureuser()
 
   if(cur==CAX_CLUBOP && (!sameas(clubhdr.clubop,uid))){
     uacc=&usracc;
-    if(!uinsys(clubhdr.clubop,0))loaduseraccount(clubhdr.clubop,uacc);
+    if(!usr_insys(clubhdr.clubop,0))usr_loadaccount(clubhdr.clubop,uacc);
     else uacc=&othruseracc;
     setclubax(uacc,clubhdr.club,CAX_DEFAULT);
     prompt(CUDIS,uacc->userid);
   }
 
   uacc=&usracc;
-  if(!uinsys(uid,0))loaduseraccount(uid,uacc);
+  if(!usr_insys(uid,0))usr_loadaccount(uid,uacc);
   else uacc=&othruseracc;
 
   setclubax(uacc,clubhdr.club,cur);
 
   if(cur==CAX_CLUBOP || (cur!=CAX_CLUBOP&&sameas(clubhdr.clubop,uid))){
     sprintf(fname,CLUBLOCK,clubhdr.club);
-    if(waitlock(fname,10)==LKR_TIMEOUT)return;
-    placelock(fname,"writing");
+    if(lock_wait(fname,10)==LKR_TIMEOUT)return;
+    lock_place(fname,"writing");
     loadclubhdr(clubhdr.club);
     if(cur==CAX_CLUBOP)strcpy(clubhdr.clubop,uid);
     else if(cur!=CAX_CLUBOP&&sameas(clubhdr.clubop,uid))strcpy(clubhdr.clubop,SYSOP);
     saveclubhdr(&clubhdr);
-    rmlock(fname);
+    lock_rm(fname);
   }
 
   if(cur>=CAX_COOP){
-    if(uinsys(uid,1)){
-      sprintf(outbuf,getmsglang(CUCNOT,othruseracc.language-1),clubhdr.club);
-      injoth(&othruseronl,outbuf,0);
+    if(usr_insys(uid,1)){
+      sprintf(out_buffer,msg_getl(CUCNOT,othruseracc.language-1),clubhdr.club);
+      usr_injoth(&othruseronl,out_buffer,0);
     }
   }
 
@@ -758,7 +657,7 @@ operations()
   for(;;){
     enterdefaultclub();
     access=getclubax(&thisuseracc,clubhdr.club);
-    if(!getmenu(&opt,show,OPMNU,SHOPMNU,ERRSEL,"HNDEAMC",0,0))return;
+    if(!get_menu(&opt,show,OPMNU,SHOPMNU,ERRSEL,"HNDEAMC",0,0))return;
 
     show=0;
     switch(opt){
@@ -774,15 +673,15 @@ operations()
       else prompt(NOAXES,opt);
       continue;
     case 'A':
-      if(access==CAX_SYSOP || haskey(&thisuseracc,modaxkey))accesslevels();
+      if(access==CAX_SYSOP || key_owns(&thisuseracc,modaxkey))accesslevels();
       else prompt(NOAXES,opt);
       continue;
     case 'M':
-      if(access==CAX_SYSOP || haskey(&thisuseracc,modchkey))charges();
+      if(access==CAX_SYSOP || key_owns(&thisuseracc,modchkey))charges();
       else prompt(NOAXES,opt);
       continue;
     case 'E':
-      if(access==CAX_SYSOP || haskey(&thisuseracc,modhdkey))editclub();
+      if(access==CAX_SYSOP || key_owns(&thisuseracc,modhdkey))editclub();
       else prompt(NOAXES,opt);
       continue;
     case 'C':

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:28  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  2000/01/06 11:41:02  alexios
  * Small bug fixes.
@@ -47,6 +48,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -90,7 +92,7 @@ list_import_points()
     char *cp=systems[i]->d_name;
     sprintf(fname,MSGSDIR"/..netimport/%s",cp);
     if((fp=fopen(fname,"r"))==NULL){
-      logerrorsys("Unable to open %s",fname);
+      error_logsys("Unable to open %s",fname);
       continue;
     }
 
@@ -134,37 +136,37 @@ getaddr(char *addr, int pr)
   int error;
   char *s, *slash;
   
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if(morcnc()!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if(cnc_more()!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	list_import_points();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      s=cncword();
+      s=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
+      inp_get(0);
       if(!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	list_import_points();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      bgncnc();
-      s=cncword();
+      cnc_begin();
+      s=cnc_word();
     }
     
-    /* Check the input. */
+    /* Check the inp_buffer. */
     
     slash=strchr(s,'/');
     error=(slash==NULL);
@@ -195,27 +197,27 @@ getremclub(char *remclub, int pr)
   int error;
   char *s, *slash, *club;
   
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if(morcnc()!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      s=cncword();
+    fmt_lastresult=0;
+    if(cnc_more()!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      s=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
+      inp_get(0);
       if(!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
-      bgncnc();
-      s=cncword();
+      cnc_begin();
+      s=cnc_word();
     }
     
-    /* Check the input. */
+    /* Check the inp_buffer. */
     
     slash=strchr(s,'/');
     error=(slash==NULL);
@@ -251,9 +253,9 @@ static int
 gettime(int *t,int pr,int def,int defval)
 {
   for(;;){
-    if(!getnumber(t,pr,1,24000,0,def,defval))return 0;
-    if(morcnc()){
-      switch(tolower(cncchr())){
+    if(!get_number(t,pr,1,24000,0,def,defval))return 0;
+    if(cnc_more()){
+      switch(tolower(cnc_chr())){
       case 'm':
 	*t*=60;
 	break;
@@ -299,11 +301,11 @@ add_import_point()
   
   
   if((cp=strchr(addr,'/'))==NULL){
-    fatal("Address sanity check failed.");
+    error_fatal("Address sanity check failed.");
   } else *cp=':';
 
   sprintf(fname,MSGSDIR"/..netimport/%s",addr);
-  if((fp=fopen(fname,"w"))==NULL) fatalsys("Unable to create %s",fname);
+  if((fp=fopen(fname,"w"))==NULL) error_fatalsys("Unable to create %s",fname);
   fprintf(fp,"delta: %d\nlast-update: %ld\nlast-ihave-time: %ld\n",
 	  delta,time(0),time(0));
   fclose(fp);
@@ -325,11 +327,11 @@ del_import_point()
   }
 
   if((cp=strchr(addr,'/'))==NULL){
-    fatal("Address sanity check failed.");
+    error_fatal("Address sanity check failed.");
   } else *cp=':';
 
   sprintf(fname,MSGSDIR"/..netimport/%s",addr);
-  if(unlink(fname)<0)fatalsys("Unable to unlink() %s",fname);
+  if(unlink(fname)<0)error_fatalsys("Unable to unlink() %s",fname);
 
   *(strrchr(addr,':'))='/';
   prompt(DIPDELOK,addr);
@@ -352,7 +354,7 @@ mod_import_point()
     else break;
   }
   if((cp=strchr(addr,'/'))==NULL){
-    fatal("Address sanity check failed.");
+    error_fatal("Address sanity check failed.");
   } else *cp=':';
 
 
@@ -360,7 +362,7 @@ mod_import_point()
 
   sprintf(fname,MSGSDIR"/..netimport/%s",addr);
   *(strrchr(addr,':'))='/';
-  if((fp=fopen(fname,"r"))==NULL) fatalsys("Unable to open %s",fname);
+  if((fp=fopen(fname,"r"))==NULL) error_fatalsys("Unable to open %s",fname);
 
 
   /* Read the delta */
@@ -390,7 +392,7 @@ mod_import_point()
 
   /* Modify the file */
   sprintf(fname2,"%s~",fname);
-  if((out=fopen(fname2,"w"))==NULL) fatalsys("Unable to create %s",fname2);
+  if((out=fopen(fname2,"w"))==NULL) error_fatalsys("Unable to create %s",fname2);
   rewind(fp);
   while(!feof(fp)){
     char line[512], key[512];
@@ -408,9 +410,9 @@ mod_import_point()
 
   if(unlink(fname)<0){
     unlink(fname2);		/* Hope this works */
-    fatalsys("Unable to unlink() %s",fname);
+    error_fatalsys("Unable to unlink() %s",fname);
   }
-  if(rename(fname2,fname)<0) fatalsys("Unable to rename %s to %s",fname2,fname);
+  if(rename(fname2,fname)<0) error_fatalsys("Unable to rename %s to %s",fname2,fname);
 
   prompt(DIPMODOK,addr);
 }
@@ -421,10 +423,10 @@ define_import_point()
 {
   char opt;
   int res;
-  setinputflags(INF_HELP);
+  inp_setflags(INF_HELP);
   for(;;){
-    res=getmenu(&opt,0,0,DIPMNU,ERRSEL,"MAD",0,0);
-    setinputflags(INF_NORMAL);
+    res=get_menu(&opt,0,0,DIPMNU,ERRSEL,"MAD",0,0);
+    inp_clearflags(INF_HELP);
     if(!res)return;
     if(res<0)opt='?';
     switch(opt){
@@ -457,7 +459,7 @@ import_club()
     if(!getremclub(remclub,IMPCLUB))return;
     strcpy(addr,remclub);
     if((cp=strrchr(addr,'/'))==NULL){
-      fatal("Sanity check failed (addr=%s). Nyaaargh nyaaargh!",addr);
+      error_fatal("Sanity check failed (addr=%s). Nyaaargh nyaaargh!",addr);
     } else *cp=0;
     if(!import_point_exists(addr))prompt(IMPCLBS,addr);
     else break;
@@ -472,8 +474,8 @@ import_club()
   sprintf(fname,MSGSDIR"/..netimport/%s",addr);
   sprintf(fname2,"%s~",fname);
   *(strrchr(addr,':'))='/';
-  if((fp=fopen(fname,"r"))==NULL) fatalsys("Unable to open %s",fname);
-  if((out=fopen(fname2,"w"))==NULL) fatalsys("Unable to create %s",fname2);
+  if((fp=fopen(fname,"r"))==NULL) error_fatalsys("Unable to open %s",fname);
+  if((out=fopen(fname2,"w"))==NULL) error_fatalsys("Unable to create %s",fname2);
 
   /* Modify the file */
   while(!feof(fp)){
@@ -501,9 +503,9 @@ import_club()
 
   if(unlink(fname)<0){
     unlink(fname2);		/* Hope this works */
-    fatalsys("Unable to unlink() %s",fname);
+    error_fatalsys("Unable to unlink() %s",fname);
   }
-  if(rename(fname2,fname)<0) fatalsys("Unable to rename %s to %s",fname2,fname);
+  if(rename(fname2,fname)<0) error_fatalsys("Unable to rename %s to %s",fname2,fname);
 
   if(found!=2)prompt(IMPOK,remclub,localclub);
   else prompt(IMPDISP,remclub,localclub,oldclub);
@@ -523,7 +525,7 @@ listexports()
   for(i=0;i<n;free(clubs[i]),i++){
     cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
     prompt(EXPLSTL,clubhdr.club);
     strcpy(tmp,clubhdr.export_access_list);
@@ -553,7 +555,7 @@ listexports()
     }
   }
   free(clubs);
-  if(lastresult==PAUSE_QUIT)return;
+  if(fmt_lastresult==PAUSE_QUIT)return;
   prompt(EXPLSTF);
 }
 
@@ -566,27 +568,27 @@ getexportclub(char *club, int pr, int err)
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listexports();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listexports();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -599,7 +601,7 @@ getexportclub(char *club, int pr, int err)
     }
     if(!findclub(i)){
       prompt(err);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
     return 1;
@@ -620,31 +622,31 @@ export_club()
   if(!getexportclub(clubname,EXPASK,EXPCLBR))return;
 
   for(;;){
-    lastresult=0;
-    if(morcnc()!=0){
-      if(sameas(nxtcmd,"X")){
-	endcnc();
+    fmt_lastresult=0;
+    if(cnc_more()!=0){
+      if(sameas(cnc_nxtcmd,"X")){
+	cnc_end();
 	return;
       }
-      if(sameas(nxtcmd,"?")){
+      if(sameas(cnc_nxtcmd,"?")){
 	listexports();
-	endcnc();
+	cnc_end();
 	continue;
       }
     } else {
       prompt(EXPSPEC);
-      getinput(127);
-      bgncnc();
+      inp_get(127);
+      cnc_begin();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0])){
-	endcnc();
+      } else if(inp_isX(margv[0])){
+	cnc_end();
 	return;
       }
       if(sameas(margv[0],"?")){
 	listexports();
-	endcnc();
+	cnc_end();
 	continue;
       } else if(margc==1 && sameas(margv[0],"-")){
 	strcpy(spec,"");
@@ -654,7 +656,7 @@ export_club()
 	break;
       }
       if(margc>1 && sameas(margv[0],"-")){
-	strcpy(spec,input);
+	strcpy(spec,inp_buffer);
 	break;
       }
       if(strlen(margv[0])>1 && margv[0][0]=='-'){
@@ -666,7 +668,7 @@ export_club()
     break;
   }
 
-  endcnc();
+  cnc_end();
 
 
   /* Right, now let's pack the spec up to save space */
@@ -701,19 +703,19 @@ export_club()
       if(!loadclubhdr(cp))continue;
       strcpy(clubhdr.export_access_list,spec);
       sprintf(lock,CLUBLOCK,cp);
-      if(waitlock(lock,10)==LKR_TIMEOUT)continue;
-      placelock(lock,"updating");
+      if(lock_wait(lock,10)==LKR_TIMEOUT)continue;
+      lock_place(lock,"updating");
       saveclubhdr(&clubhdr);
-      rmlock(lock);
+      lock_rm(lock);
     }
     free(clubs);
   } else if(loadclubhdr(clubname)){
     strcpy(clubhdr.export_access_list,spec);
     sprintf(lock,CLUBLOCK,clubname);
-    if(waitlock(lock,10)==LKR_TIMEOUT)return;
-    placelock(lock,"updating");
+    if(lock_wait(lock,10)==LKR_TIMEOUT)return;
+    lock_place(lock,"updating");
     saveclubhdr(&clubhdr);
-    rmlock(lock);
+    lock_rm(lock);
   }
 }
 
@@ -734,7 +736,7 @@ club_status()
     char *cp=systems[i]->d_name;
     sprintf(fname,MSGSDIR"/..netimport/%s",cp);
     if((fp=fopen(fname,"r"))==NULL){
-      logerrorsys("Unable to open %s",fname);
+      error_logsys("Unable to open %s",fname);
       continue;
     }
 
@@ -766,7 +768,7 @@ networking()
   for(;;){
     enterdefaultclub();
     access=getclubax(&thisuseracc,clubhdr.club);
-    if(!getmenu(&opt,show,NETMNU,SHNETMNU,ERRSEL,"HDIES",0,0))return;
+    if(!get_menu(&opt,show,NETMNU,SHNETMNU,ERRSEL,"HDIES",0,0))return;
 
     show=0;
     switch(opt){

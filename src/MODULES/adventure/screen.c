@@ -33,8 +33,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
@@ -65,7 +67,7 @@
  * select_window
  *
  * Put the cursor in the text or status window. The cursor is free to move in
- * the status window, but is fixed to the input line in the text window.
+ * the status window, but is fixed to the inp_buffer line in the text window.
  *
  */
 
@@ -592,7 +594,7 @@ void set_font_attribute (zword_t new_font)
 void set_colour_attribute (zword_t foreground, zword_t background)
 {
   if (foreground < 1 || foreground > 9 || background < 1 || background > 9)
-    fatal ("Bad colour!");
+    error_fatal ("Bad colour!");
   flush_buffer (FALSE);
   set_colours (foreground, background);
 }

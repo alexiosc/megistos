@@ -3,8 +3,8 @@
  **  FILE:     input.c                                                      **
  **  AUTHORS:  Alexios                                                      **
  **  REVISION: A, June 94                                                   **
- **  PURPOSE:  Handle user input using ncurses                              **
- **  NOTES:    Initialise using initinput()                                 **
+ **  PURPOSE:  Handle user input                                            **
+ **  NOTES:                                                                 **
  **  LEGALESE:                                                              **
  **                                                                         **
  **  This program is free software; you  can redistribute it and/or modify  **
@@ -28,21 +28,22 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:49:38  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.11  2000/01/06 10:56:23  alexios
  * Changed calls to write(2) to send_out().
  *
  * Revision 0.10  1999/07/28 23:06:34  alexios
  * Added a timeout facility to getinp(), accessible using
- * setinputtimeout().
+ * inp_timeout().
  *
  * Revision 0.9  1999/07/18 21:01:53  alexios
- * Changed a couple of fatal() calls to fatalsys(). Minor
+ * Changed a couple of error_fatal() calls to error_fatalsys(). Minor
  * fixes in dealing with global commands while in password
  * entry mode. One minor change to getint() to make it behave
- * better in concatenated mode. One minor fix to getbool().
+ * better in concatenated mode. One minor fix to get_bool().
  *
  * Revision 0.8  1998/12/27 14:31:16  alexios
  * Added autoconf support. Enhanced terminal setting support to
@@ -84,6 +85,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -118,23 +120,19 @@
 #define __SYSVAR_UNAMBIGUOUS__
 #include "mbk_sysvar.h"
 
-struct termios  oldkbdtermios;
-struct termios  newkbdtermios;
-char            del[4]="\010 \010\0";
-char            input[MAXINPLEN+1];
-char            *margv[MAXINPLEN/2];
-char            *margn[MAXINPLEN/2];
-char            *nxtcmd,wordbuf[MAXINPLEN];
-int             margc;
-int             inplen;
-int             reprompt;
-int             passwordentry;
-int             dontinjoth;
-int             inputflags=0;
-int             oldblocking=1;
-int             newblocking=1;
-int             inptimeout_msecs=0;
-int             inptimeout_intr=0;
+static struct termios  oldkbdtermios;
+static struct termios  newkbdtermios;
+       char            inp_del[4]="\010 \010\0";
+       char            inp_buffer[MAXINPLEN+1];
+       char            *margv[MAXINPLEN/2];
+       char            *cnc_nxtcmd=NULL,wordbuf[MAXINPLEN];
+       int             margc;
+static int             inp_len;
+       uint32          inp_flags=0;
+static int             oldblocking=1;
+static int             newblocking=1;
+static int             inptimeout_msecs=0;
+static int             inptimeout_intr=0;
 
 static long oldflags=0;
 static volatile int cancel=0;
@@ -142,7 +140,7 @@ volatile struct monitor *monitor;
 static char montty[24];
 
 
-void setmonitorid(char *s)
+void inp_setmonitorid(char *s)
 {
   sprintf(montty," %s",s);
 }
@@ -157,20 +155,20 @@ initmonitor()
   strcpy(montty,getenv("CHANNEL"));
 
   if((fp=fopen(MONITORFILE,"r"))==NULL){
-    fatalsys("Unable to open %s",MONITORFILE);
+    error_fatalsys("Unable to open %s",MONITORFILE);
   }
 
   fscanf(fp,"%d",&shmid);
   fclose(fp);
 
   if((monitor=(struct monitor *)shmat(shmid,NULL,0))==NULL){
-    fatalsys("Unable to attach to shm block (errno=%d).",errno);
+    error_fatalsys("Unable to attach to shm block (errno=%d).",errno);
   }
 }
 
 
 void
-initinput()
+inp_init()
 {
   int i;
   tcgetattr(0, &oldkbdtermios);
@@ -180,26 +178,24 @@ initinput()
   newkbdtermios.c_cc[VTIME]=0;	/* Cook the tty (medium rare) */
   newkbdtermios.c_cc[VMIN]=1;
   tcsetattr(0, TCSANOW, &newkbdtermios);
-  reprompt=0;
-  dontinjoth=0;
-  passwordentry=0;
+  inp_flags=0;
 
   initmonitor();
 }
 
 
 void
-doneinput()
+inp_done()
 {
   tcsetattr(0, TCSANOW, &oldkbdtermios);
 }
 
 
 int
-acceptinjoth()
+inp_acceptinjoth()
 {
   char dummy[MSGMAX+sizeof(long)];
-  struct msgbuf *buf=(struct msgbuf*)(&dummy);
+  struct injothbuf *buf=(struct injothbuf*)(&dummy);
   int i=0;
 
   if(thisshm==NULL)return 0;
@@ -211,7 +207,13 @@ acceptinjoth()
     errno=0;
     if(msgrcv(thisuseronl.injothqueue,buf,MSGMAX,0,IPC_NOWAIT)<0)return i>0;
     i++;
-    print("%s",buf->mtext);
+
+    if(mod_isbot() || 
+       (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
+      print("630 %d byte injected message follows.\n",strlen(buf->mtext));
+    }
+
+    print(buf->mtext);
   }
 
   return 1;
@@ -220,12 +222,17 @@ acceptinjoth()
 
 
 void
-inputstring(int maxlen)
+inp_readstring(int maxlen)
 {
   int  cp=0, count=0, tmout;
   unsigned char c;
   struct timeval tv,tvtimeout;
   struct timezone tz;
+
+  if(mod_isbot() || 
+     (thisshm!=NULL && (thisuseronl.flags&OLF_ISBOT))){
+    print("650 %d Input expected now.\n",maxlen);
+  }
 
   cancel=0;
   if(inptimeout_msecs){
@@ -238,17 +245,18 @@ inputstring(int maxlen)
 
   tmout=inptimeout_msecs>0;
 
-  nonblocking();
-  reprompt=0;
+  inp_nonblock();
+
+  inp_flags&=~(INF_REPROMPT|INF_TIMEOUT);
 
   if(!maxlen)maxlen=MAXINPLEN-1;
   for(;;){
     while (read(0,&c,1)!=1){
       if(cancel){
-	acceptinjoth();
-	reprompt=1;
-	clrinp();
-	blocking();
+	inp_acceptinjoth();
+	inp_flags|=INF_TIMEOUT|INF_REPROMPT;
+	inp_clear();
+	inp_block();
 	return;
       }
       usleep(10000);
@@ -258,48 +266,48 @@ inputstring(int maxlen)
 	   ((tv.tv_sec==tvtimeout.tv_sec)&&(tv.tv_usec>=tvtimeout.tv_usec))){
 	  inptimeout_msecs=0;
 	  inptimeout_intr=0;
-	  clrinp();
-	  blocking();
+	  inp_clear();
+	  inp_block();
 	  return;
 	}
       }
       count=(count+1)%5;
-      if(dontinjoth || cp) continue;
-      if(acceptinjoth()){
-	reprompt=1;
-	clrinp();
-	blocking();
+      if((inp_flags&INF_NOINJOTH) || cp) continue;
+      if(inp_acceptinjoth()){
+	inp_flags|=INF_REPROMPT;
+	inp_clear();
+	inp_block();
 	return;
       }
       if(count) continue;
     }
-    resetinactivity();
+    inp_resetidle();
     switch(c){
     case 13:
     case 10:
       c='\n';
-      send_out(fileno(stdout),&c,1);
+      out_send(fileno(stdout),&c,1);
       fflush(stdout);
-      input[cp]=0;
-      monitorinput(montty);
-      blocking();
-      if(!passwordentry && handlegcs()){
-	clrinp();
-	reprompt=1;
+      inp_buffer[cp]=0;
+      inp_monitor();
+      inp_block();
+      if(((inp_flags&INF_PASSWD)==0) && gcs_handle()){
+	inp_clear();
+	inp_flags|=INF_REPROMPT;
       }
       return;
     case 127:
     case 8:
       if(cp){
-	send_out(fileno(stdout),del,3);
+	out_send(fileno(stdout),inp_del,3);
 	cp--;
       }
       break;
     default:
       if(cp<maxlen && (c>=0x20)){
-	input[cp++]=c;
-	if(passwordentry)c='*';
-	send_out(fileno(stdout),&c,1);
+	inp_buffer[cp++]=c;
+	if(inp_flags&INF_PASSWD)c='*';
+	out_send(fileno(stdout),&c,1);
       }
     }
   }
@@ -307,68 +315,60 @@ inputstring(int maxlen)
 
 
 void
-parsin()
+inp_parsin()
 {
-  char *cp=input;
+  char *cp=inp_buffer;
 
   margc=0;
-  inplen=strlen(input);
+  inp_len=strlen(inp_buffer);
 
-  cp=strtok(input," ");
+  cp=strtok(inp_buffer," \t\n\r");
   while(cp){
     margv[margc++]=cp;
-    cp=strtok(NULL," ");
+    cp=strtok(NULL," \t\n\r");
   }
-
-/*  for(;;){
-    while(*cp==32)cp++;
-    if(!*cp)break;
-    margv[margc++]=cp;
-    
-    while(*cp && (*cp!=32))cp++;
-    if(!*cp)break;
-    *(cp++)=0;
-  }*/
 }
 
 
 void
-monitorinput(char *tty)
+inp_monitor()
 {
   monitor->timestamp++;
-  strcpy((char *)monitor->channel,tty);
-  strcpy((char *)monitor->input,passwordentry?"<password>":input);
+  strcpy((char *)monitor->channel,montty);
+  strcpy((char *)monitor->input,inp_flags&INF_PASSWD?"<password>":inp_buffer);
 }
 
 
 char *
-getinput(int maxlen)
+inp_get(int maxlen)
 {
-  afterinput=1;
-  memset(input,0,sizeof(input));
-  if(lastresult==PAUSE_QUIT) {
-    reprompt=1;
+  out_setflags(OFL_AFTERINPUT);
+  memset(inp_buffer,0,sizeof(inp_buffer));
+  if(fmt_lastresult==PAUSE_QUIT) {
+    inp_flags|=INF_REPROMPT;
   } else {
-    resetvpos(0);
-    inputstring(maxlen);
+    fmt_resetvpos(0);
+    inp_readstring(maxlen);
+    inp_len=strlen(inp_buffer);
   }
-  resetvpos(0);
-  nxtcmd=NULL;
+  inp_clearflags(INF_PASSWD);
+  fmt_resetvpos(0);
+  cnc_nxtcmd=NULL;
   return margv[0];
 }
 
 
 void
-clrinp()
+inp_clear()
 {
-  input[0]=0;
-  inplen=0;
+  inp_buffer[0]=0;
+  inp_len=0;
   margc=0;
 }
 
 
 void
-rstrin()
+inp_raw()
 {
   int i;
 
@@ -377,66 +377,66 @@ rstrin()
 
 
 void
-bgncnc()
+cnc_begin()
 {
-  nxtcmd=margv[0];
-  rstrin();
+  cnc_nxtcmd=margv[0];
+  inp_raw();
 }
 
 
 int
-endcnc()
+cnc_end()
 {
-  nxtcmd=NULL;
+  cnc_nxtcmd=NULL;
   thisuseronl.input[0]=0;
-  parsin();
+  inp_parsin();
 /*  if (!margc)return 1;
-  strncpy(input,nxtcmd,strlen(nxtcmd)+1);
-  parsin(); */
+  strncpy(inp_buffer,cnc_nxtcmd,strlen(cnc_nxtcmd)+1);
+  inp_parsin(); */
   return (margc==0);
 }
 
 
 char
-cncchr()
+cnc_chr()
 {
   char c;
 
-  if(nxtcmd==NULL)return 0;
-  if((c=tolatin(toupper(*nxtcmd)))!=0)nxtcmd++;
+  if(cnc_nxtcmd==NULL)return 0;
+  if((c=tolatin(toupper(*cnc_nxtcmd)))!=0)cnc_nxtcmd++;
   return c;
 }
 
 
-int
-cncint()
+int32
+cnc_int()
 {
   int ofs, d=0;
 
-  sscanf(nxtcmd,"%d%n",&d,&ofs);
-  nxtcmd+=ofs;
+  sscanf(cnc_nxtcmd,"%d%n",&d,&ofs);
+  cnc_nxtcmd+=ofs;
   return d;
 }
 
 
-long
-cnclong()
+int64
+cnc_long()
 {
   int ofs;
   long l=0L;
 
-  sscanf(nxtcmd,"%ld%n",&l,&ofs);
-  nxtcmd+=ofs;
+  sscanf(cnc_nxtcmd,"%ld%n",&l,&ofs);
+  cnc_nxtcmd+=ofs;
   return l;
 }
 
 
 char
-cncyesno()
+cnc_yesno()
 {
   char c;
   
-  switch (c=cncchr()) {
+  switch (c=cnc_chr()) {
   case 'Y':
 #ifdef GREEK
   case -109:
@@ -457,15 +457,15 @@ cncyesno()
 
 
 char *
-cncword()
+cnc_word()
 {
   int i=0;
   char c;
 
   wordbuf[0]=0;
 
-  while((c=*nxtcmd)!=' ' && c){
-    nxtcmd++;
+  while((c=*cnc_nxtcmd)!=' ' && c){
+    cnc_nxtcmd++;
     wordbuf[i++]=c;
   }
   wordbuf[i]=0;
@@ -474,83 +474,80 @@ cncword()
 
 
 char *
-cncall()
+cnc_all()
 {
   char *s;
   
-  s=nxtcmd;
-  nxtcmd="";
-  return s;
+  s=cnc_nxtcmd;
+  if(s!=NULL){
+    cnc_nxtcmd+=strlen(cnc_nxtcmd); /* Move to the terminating null */
+    return s[0]?s:NULL;
+  }
+  return NULL;
 }
 
 
 char
-morcnc()
+cnc_more()
 {
-  if(!nxtcmd) return 0;
-  while(*nxtcmd==' ')nxtcmd++;
-  return(toupper(*nxtcmd));
+  if(!cnc_nxtcmd) return 0;
+  while(*cnc_nxtcmd==' ')cnc_nxtcmd++;
+  return(toupper(*cnc_nxtcmd));
 }
 
 
-int
-cnchex()
+uint64
+cnc_hex()
 {
   int i,retval=0,flag=0;
   static char hex[6]={'A','B','C','D','E','F'};
   
   while (1) {
-    if(isdigit(*nxtcmd))retval=(retval<<4)+(*nxtcmd-'0');
+    if(isdigit(*cnc_nxtcmd))retval=(retval<<4)+(*cnc_nxtcmd-'0');
     else {
       for(i=0;i<6;i++){
-	if (toupper(*nxtcmd)==hex[i]){
+	if (toupper(*cnc_nxtcmd)==hex[i]){
 	  retval=(retval<<4)+10+i;
 	  break;
 	}
       }
       if (i==6)return(flag?retval:-1);
     }
-    nxtcmd++;
+    cnc_nxtcmd++;
     flag=1;
   }
 }
 
 
 char *
-cncnum()
+cnc_num()
 {
   int i=0;
   static char retval[12];
-  
-  if (*nxtcmd=='-')retval[i++]=*(nxtcmd++);
-  while(isdigit(*nxtcmd)&& i<11)retval[i++]=*(nxtcmd++);
+
+  if(!cnc_more())return NULL;
+  if (*cnc_nxtcmd=='-')retval[i++]=*(cnc_nxtcmd++);
+  while(isdigit(*cnc_nxtcmd)&& i<11)retval[i++]=*(cnc_nxtcmd++);
   retval[i]='\0';
   return(retval);
 }
 
 
 void
-setpasswordentry(int n)
+inp_setflags(uint32 n)
 {
-  passwordentry=(n!=0);
+  inp_flags|=n;
 }
 
 
 void
-setinjoth(int n)
+inp_clearflags(uint32 f)
 {
-  dontinjoth=(n==0);
+  inp_flags&=~f;
 }
 
 
-void
-setinputflags(int n)
-{
-  inputflags=n;
-}
-
-
-int isX(char *s)
+int inp_isX(char *s)
 {
   int c=toupper(s[0]);
   int result;
@@ -565,47 +562,47 @@ int isX(char *s)
 
 
 int
-getnumber(num,msg,min,max,err,def,defval)
+get_number(num,msg,min,max,err,def,defval)
 int *num,msg,min,max,err,def,defval;
 {
   int i;
   char c;
 
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")&&(inputflags&INF_HELP))return -1;
-      if(sameas(nxtcmd,".")&&def){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")&&(inp_flags&INF_HELP))return -1;
+      if(sameas(cnc_nxtcmd,".")&&def){
 	*num=defval;
 	return 1;
       }
-      i=cncint();
+      i=cnc_int();
     } else {
-      if(msg)prompt(msg,min,max,NULL);
+      if(msg)prompt(msg,min,max);
       if(def){
-	sprintf(outbuf,getmsg(def),defval);
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),defval);
+	print(out_buffer);
       }
-      getinput(0);
-      if((!margc||(margc==1&&sameas(margv[0],"."))) && def && !reprompt) {
+      inp_get(0);
+      if((!margc||(margc==1&&sameas(margv[0],"."))) && def && !inp_reprompt()){
 	*num=defval;
 	return 1;
       } else if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
-      if(sameas(margv[0],"?")&&(inputflags&INF_HELP))return -1;
-      bgncnc();
-      i=cncint();
+      if(sameas(margv[0],"?")&&(inp_flags&INF_HELP))return -1;
+      cnc_begin();
+      i=cnc_int();
     }
     if(i<min || i>max){
-      endcnc();
-      if(err)prompt(err,min,max,NULL);
+      cnc_end();
+      if(err)prompt(err,min,max);
     }else{
       *num=i;
       return 1;
@@ -616,32 +613,33 @@ int *num,msg,min,max,err,def,defval;
 
 
 int
-getbool(boolean,msg,err,def,defval)
+get_bool(boolean,msg,err,def,defval)
 int *boolean,msg,err,def,defval;
 {
   int c=0;
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if(morcnc())c=cncyesno();
+    fmt_lastresult=0;
+    if(cnc_more())c=cnc_yesno();
     else {
-      if(msg)prompt(msg,NULL);
+      if(msg)prompt(msg);
       if(def){
-	sprintf(outbuf,getmsg(def),(defval?'Y':'N'));
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),(defval?'Y':'N'));
+	print(out_buffer);
       }
-      getinput(0);
+      inp_get(0);
       if(margc){
-	if(isX(margv[0])){
+	if(inp_isX(margv[0])){
 	  return 0;
 	}
-	if(sameas(margv[0],"?")&&(inputflags&INF_HELP))return -1;
-      }else if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !reprompt) {
+	if(sameas(margv[0],"?")&&(inp_flags&INF_HELP))return -1;
+      }else if((!margc||(margc==1&&sameas(margv[0],".")))&&
+	       def && !inp_reprompt()){
 	*boolean=defval;
 	return 1;
       }
-      bgncnc();
-      c=cncchr();
+      cnc_begin();
+      c=cnc_chr();
     }
     switch(c=toupper(c)){
 #ifdef GREEK
@@ -659,13 +657,13 @@ int *boolean,msg,err,def,defval;
       *boolean=0;
       return 1;
     case 0:
-      endcnc();
+      cnc_end();
       continue;
     case '?':
-      if(inputflags&INF_HELP)return -1;
+      if(inp_flags&INF_HELP)return -1;
       break;
     default:
-      endcnc();
+      cnc_end();
       if(err)prompt(err,c);
     }      
   }
@@ -674,48 +672,48 @@ int *boolean,msg,err,def,defval;
 
 
 int
-getuserid(uid,msg,err,def,defval,online)
+get_userid(uid,msg,err,def,defval,online)
 char *uid, *defval;
 int  msg,err,def,online;
 {
   char *i;
   char c;
 
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")&&(inputflags&INF_HELP))return -1;
-      if(sameas(nxtcmd,".")&&def){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")&&(inp_flags&INF_HELP))return -1;
+      if(sameas(cnc_nxtcmd,".")&&def){
 	strcpy(uid,defval);
 	return 1;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
-      if(msg)prompt(msg,NULL);
+      if(msg)prompt(msg);
       if(def){
-	sprintf(outbuf,getmsg(def),defval);
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),defval);
+	print(out_buffer);
       }
-      getinput(0);
-      bgncnc();
-      i=cncword();
-      if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !reprompt) {
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
+      if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !inp_reprompt()) {
 	strcpy(uid,defval);
 	return 1;
       } else if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
-      if(sameas(margv[0],"?")&&(inputflags&INF_HELP))return -1;
+      if(sameas(margv[0],"?")&&(inp_flags&INF_HELP))return -1;
     }
-    if(!uidxref(i,online)){
-      endcnc();
-      if(err)prompt(err,i,NULL);
+    if(!usr_uidxref(i,online)){
+      cnc_end();
+      if(err)prompt(err,i);
     }else{
       strcpy(uid,i);
       return 1;
@@ -726,43 +724,43 @@ int  msg,err,def,online;
 
 
 int
-getmenu(option,show,lmenu,smenu,err,opts,def,defval)
+get_menu(option,show,lmenu,smenu,err,opts,def,defval)
 char *option, defval, *opts;
 int  show,lmenu,smenu,err,def;
 {
   int shownmenu=!show;
   char c;
 
-  lastresult=PAUSE_CONTINUE;
+  fmt_lastresult=PAUSE_CONTINUE;
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      c=cnc_chr();
       shownmenu=1;
     } else {
       if(!shownmenu && lmenu)prompt(lmenu);
       shownmenu=1;
-      if(smenu)prompt(smenu,NULL);
+      if(smenu)prompt(smenu);
       if(def){
-	sprintf(outbuf,getmsg(def),defval);
-	print(outbuf,NULL);
+	sprintf(out_buffer,msg_get(def),defval);
+	print(out_buffer);
       }
-      getinput(0);
-      bgncnc();
-      c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      c=cnc_chr();
     }
-    if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !reprompt) {
+    if((!margc||(margc==1&&sameas(margv[0],".")))&&def && !inp_reprompt()) {
       *option=defval;
       return 1;
     } else if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       return 0;
     } else if(margc && (c=='?'||sameas(margv[0],"?"))){
-      if(inputflags&INF_HELP)return -1;
+      if(inp_flags&INF_HELP)return -1;
       shownmenu=0;
       continue;
     } else if(strchr(opts,c)){
@@ -770,7 +768,7 @@ int  show,lmenu,smenu,err,def;
       return 1;
     } else {
       if(err)prompt(err,c);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -778,14 +776,14 @@ int  show,lmenu,smenu,err,def;
 }
 
 
-void cancelinput()
+void inp_cancel()
 {
   cancel=1;
 }
 
 
 void
-nonblocking()
+inp_nonblock()
 {
   oldblocking=newblocking;
   newblocking=0;
@@ -795,7 +793,7 @@ nonblocking()
 
 
 void
-blocking()
+inp_block()
 {
   oldblocking=newblocking;
   newblocking=1;
@@ -805,38 +803,44 @@ blocking()
 
 
 void
-resetblocking()
+inp_resetblocking()
 {
-  if(oldblocking)blocking();
-  else nonblocking();
+  if(oldblocking)inp_block();
+  else inp_nonblock();
 }
 
 
 void
-settimeout(int i)
+inp_setidle(int i)
 {
   int ovr=0, usy=0, force=0;
 
-  /*  if(thisuseracc.userid[0]&&sysvar!=NULL)
-    ovr=haskey(&thisuseracc,sysvar->idlovr); */
   usy=hassysaxs(&thisuseracc,USY_MASTERKEY);
   force=(thisuseronl.flags&OLF_FORCEIDLE)!=0;
-
   if((!usy&&!ovr)||force)thisuseronl.idlezap=i;
   else thisuseronl.idlezap=0;
 }
 
 
 void
-resetinactivity()
+inp_resetidle()
 {
   if(thisshm)thisuseronl.timeoutticks=0;
 }
 
 
 void
-setinputtimeout(int msecs, int intrusive)
+inp_timeout(int msecs, int intrusive)
 {
   inptimeout_msecs=msecs;
   inptimeout_intr=intrusive;
 }
+
+
+int
+inp_reprompt()
+{
+  return inp_flags&INF_REPROMPT;
+}
+
+

@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:06  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.11  2000/01/08 12:48:03  alexios
  * Fixed slight bug that caused a segmentation fault.
@@ -42,7 +43,7 @@
  * harmless, since emud handles these timeouts.
  *
  * Revision 0.9  1999/07/18 22:10:59  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.8  1998/12/27 16:35:48  alexios
  * Added autoconf support. One slight fix.
@@ -87,6 +88,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -125,7 +127,7 @@ struct       line *first=NULL;
 struct       line *last=NULL;
 struct       line *top=NULL;
 struct       line *current=NULL;
-promptblk    *msg;
+promptblock_t    *msg;
 int          numlines=0, numbytes=0, maxsize=262144;
 char         filename[1024];
 int          cx=0,cy=0,toprow=0,leftcol=0;
@@ -176,7 +178,7 @@ latin(char *s)
 int
 getfg(int p)
 {
-  return tokopt(p,"BLACK","DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
+  return msg_token(p,"BLACK","DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
 		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
 		"CYAN","RED","MAGENTA","YELLOW","WHITE")-1;
 }
@@ -185,7 +187,7 @@ getfg(int p)
 int
 getbg(int p)
 {
-  return tokopt(p,"BLACK","BLUE","GREEN","CYAN","RED","MAGENTA","BROWN",
+  return msg_token(p,"BLACK","BLUE","GREEN","CYAN","RED","MAGENTA","BROWN",
 		"GREY")-1;
 }
 
@@ -195,51 +197,51 @@ init()
 {
   int i;
 
-  initmodule(INITALL);
-  msg=opnmsg("vised");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("vised");
+  msg_setlanguage(thisuseracc.language);
 
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
 
-  maxlen=numopt(RMARGIN,20,999);
-  vscrinc=numopt(VSCRINC,1,25);
-  hscrinc=numopt(HSCRINC,1,25);
-  pageinc=numopt(PAGEINC,0,100);
-  insert=ynopt(INSERT);
-  if((format=tokopt(FORMAT,"NONE","LEFT","RIGHT","CENTRE","JUSTIFY")-1)<0){
-    fatal("LEVEL2 option INSERT (vised.msg) has bad value.");
+  maxlen=msg_int(RMARGIN,20,999);
+  vscrinc=msg_int(VSCRINC,1,25);
+  hscrinc=msg_int(HSCRINC,1,25);
+  pageinc=msg_int(PAGEINC,0,100);
+  insert=msg_bool(INSERT);
+  if((format=msg_token(FORMAT,"NONE","LEFT","RIGHT","CENTRE","JUSTIFY")-1)<0){
+    error_fatal("LEVEL2 option INSERT (vised.msg) has bad value.");
   }
-  txtupld=stgopt(TXTUPLD);
-  stins[0]=stgopt(STOVR);
-  stins[1]=stgopt(STINS);
-  for(i=0;i<5;i++)stformat[i]=stgopt(STNONE+i);
-  qtechrs=stgopt(QTECHRS);
-  qtemaxc=numopt(QTEMAXC,1,10);
-  statust=stgopt(STATUST);
-  statusb=stgopt(STATUSB);
-  statusm=stgopt(STATUSM);
-  statuso=stgopt(STATUSO);
-  statusk=stgopt(STATUSK);
+  txtupld=msg_string(TXTUPLD);
+  stins[0]=msg_string(STOVR);
+  stins[1]=msg_string(STINS);
+  for(i=0;i<5;i++)stformat[i]=msg_string(STNONE+i);
+  qtechrs=msg_string(QTECHRS);
+  qtemaxc=msg_int(QTEMAXC,1,10);
+  statust=msg_string(STATUST);
+  statusb=msg_string(STATUSB);
+  statusm=msg_string(STATUSM);
+  statuso=msg_string(STATUSO);
+  statusk=msg_string(STATUSK);
 
   if((cfgtxt=getfg(CFGTXT))<0)
-    fatal("LEVEL2 option CFGTXT (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CFGTXT (vised.msg) has bad value.");
   if((cbgtxt=getbg(CBGTXT))<0)
-    fatal("LEVEL2 option CBGTXT (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CBGTXT (vised.msg) has bad value.");
 
   if((cfgblk=getfg(CFGBLK))<0)
-    fatal("LEVEL2 option CFGBLK (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CFGBLK (vised.msg) has bad value.");
   if((cbgblk=getbg(CBGBLK))<0)
-    fatal("LEVEL2 option CBGBLK (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CBGBLK (vised.msg) has bad value.");
 
   if((cfgfnd=getfg(CFGFND))<0)
-    fatal("LEVEL2 option CFGFND (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CFGFND (vised.msg) has bad value.");
   if((cbgfnd=getbg(CBGFND))<0)
-    fatal("LEVEL2 option CBGFND (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CBGFND (vised.msg) has bad value.");
 
   if((cfgqte=getfg(CFGQTE))<0)
-    fatal("LEVEL2 option CFGQTE (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CFGQTE (vised.msg) has bad value.");
   if((cbgqte=getbg(CBGQTE))<0)
-    fatal("LEVEL2 option CBGQTE (vised.msg) has bad value.");
+    error_fatal("LEVEL2 option CBGQTE (vised.msg) has bad value.");
 
   thisuseronl.input[0]=0;
   /*  thisuseronl.flags&=~(OLF_MMCONCAT); */
@@ -297,9 +299,9 @@ savefile()
   if((fp=fopen(filename,"w"))==NULL){
     int i=errno;
     prompt(SAVEERR,i,sys_errlist[i]);
-    noerrormessages();
+    error_setnotify(0);
     errno=i;
-    fatalsys("Unable to write to %s",filename);
+    error_fatalsys("Unable to write to %s",filename);
   }
 
   for(l=first;l;l=l->next){
@@ -335,7 +337,7 @@ help()
   }
   for(;p<=HELP4;p++){
     move(1,0);
-    printansi(getmsg(p));
+    printansi(msg_get(p));
     refresh();
     while((c=mygetch())==ERR)usleep(20000);
     if(c!=10&&c!=13&&c!=KEY_ENTER)break;
@@ -352,11 +354,11 @@ upload()
   char fname[256],command[256],*cp,name[256],dir[256];
   FILE *fp;
 
-  endcnc();
+  cnc_end();
   name[0]=dir[0]=0;
-  addxfer(FXM_UPLOAD,"UPLOAD-NAMELESS",txtupld,0,-1);
+  xfer_add(FXM_UPLOAD,"UPLOAD-NAMELESS",txtupld,0,-1);
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  dofiletransfer();
+  xfer_run();
   thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
   
   sprintf(fname,XFERLIST,getpid());
@@ -391,7 +393,7 @@ upload()
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -445,7 +447,7 @@ run()
   thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
 
   initvisual();
-  initsignals();
+  mod_init(INI_SIGNALS);
   idlok(stdscr,TRUE);
 
   loadfile(filename);
@@ -570,7 +572,7 @@ run()
 	} else if(current->text&&IS_UPLOAD(current->text)){
 	  backspace();
 	  backspace();
-	  afterinput=1;
+	  out_setflags(OFL_AFTERINPUT);
 	  prompt(CLRSCR);
 	  upload();
 	  clearok(stdscr,1);
@@ -578,7 +580,7 @@ run()
 	  centerline();
 	  showtext(0);
 	  showstatus();
-	} else if(current->text&&isX(current->text)){
+	} else if(current->text&&inp_isX(current->text)){
 	  backspace();
 	  if(doquit()){
 	    unlink(filename);
@@ -608,7 +610,7 @@ run()
 	break;
       case KEY_SUSPEND:
       case CTRL('Z'):
-	afterinput=1;
+	out_setflags(OFL_AFTERINPUT);
 	prompt(CLRSCR);
 	upload();
 	clearok(stdscr,1);
@@ -786,7 +788,7 @@ done()
 {
   ioctl(0,KDSKBMETA,oldmetaflag);
   endwin();
-  afterinput=1;
+  out_setflags(OFL_AFTERINPUT);
   prompt(CLRSCR);
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
@@ -796,7 +798,7 @@ done()
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc==3 && (maxsize=atoi(argv[2]))){
     init();
     strcpy(filename,argv[1]);

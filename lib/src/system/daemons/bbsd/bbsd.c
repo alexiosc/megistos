@@ -32,15 +32,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/07/18 22:00:00  alexios
- * Changed a few fatal() calls to fatalsys(). Added support
+ * Changed a few error_fatal() calls to error_fatalsys(). Added support
  * for the MetaBBS daemon.
  *
  * Revision 0.9  1998/12/27 16:21:05  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Daemon restarts entire system after a few hours of inactivity
  * to make sure no inadvertent zombies are left running. Not
  * strictly needed, though. This may be removed in later versions.
@@ -86,6 +87,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -123,7 +125,7 @@ static void
 getpwbbs()
 {
   struct passwd *pass=pass=getpwnam(BBSUSERNAME);
-  if(pass==NULL)fatal("User %s not found.",BBSUSERNAME);
+  if(pass==NULL)error_fatal("User %s not found.",BBSUSERNAME);
   bbsuid=pass->pw_uid;
   bbsgid=pass->pw_gid;
 }
@@ -134,13 +136,13 @@ mkpipe()
 {
   unlink(BBSDPIPEFILE);
   if(mkfifo(BBSDPIPEFILE,0220)){
-    fatalsys("Unable to mkfifo(\"%s\",0220)",BBSDPIPEFILE);
+    error_fatalsys("Unable to mkfifo(\"%s\",0220)",BBSDPIPEFILE);
   }
   if(chown(BBSDPIPEFILE,bbsuid,bbsgid)){
-    fatalsys("Unable to chown() %s",BBSDPIPEFILE);
+    error_fatalsys("Unable to chown() %s",BBSDPIPEFILE);
   }
   if(chmod(BBSDPIPEFILE,0220)){
-    fatalsys("Unable to chmod(\"%s\",0220)",BBSDPIPEFILE);
+    error_fatalsys("Unable to chmod(\"%s\",0220)",BBSDPIPEFILE);
   }
 }
 
@@ -150,7 +152,7 @@ storepid()
 {
   FILE *fp=fopen(BBSETCDIR"/bbsd.pid","w");
   if(fp==NULL){
-    fatalsys("Unable to open "BBSETCDIR"/bbsd.pid for writing.");
+    error_fatalsys("Unable to open "BBSETCDIR"/bbsd.pid for writing.");
     exit(1);
   }
   fprintf(fp,"%d",getpid());
@@ -170,7 +172,7 @@ mainloop()
   int timestarted=time(NULL);
 
   if(fd<0){
-    fatalsys("Unable to open() %s",BBSDPIPEFILE);
+    error_fatalsys("Unable to open() %s",BBSDPIPEFILE);
     exit(1);
   }
 
@@ -261,7 +263,7 @@ forkdaemon()
 }
 
 
-static promptblk *msg;
+static promptblock_t *msg;
 
 int   supzap;
 
@@ -280,7 +282,7 @@ void
 enablegettys()
 {
   int i;
-  for(i=0;i<numchannels;i++)if(gettys[i].disabled){
+  for(i=0;i<chan_count;i++)if(gettys[i].disabled){
     gettys[i].disabled=0;
     gettys[i].spawncount=0;
   }
@@ -290,26 +292,26 @@ enablegettys()
 static void init(int argc, char *argv[])
 {
   progname=argv[0];
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
 
-  msg=opnmsg("signup");
-  supzap=numopt(SUPZAP,0,32767);
-  clsmsg(msg);
+  msg=msg_open("signup");
+  supzap=msg_int(SUPZAP,0,32767);
+  msg_close(msg);
 
 #ifdef HAVE_METABBS
-  msg=opnmsg("metabbs");
-  telnet_port=numopt(TELPRT,0,65535);
-  url=stgopt(URL);
-  email=stgopt(EMAIL);
-  allow=stgopt(ALLOW);
-  deny=stgopt(DENY);
-  bbsad=stgopt(BBSAD);
+  msg=msg_open("metabbs");
+  telnet_port=msg_int(TELPRT,0,65535);
+  url=msg_string(URL);
+  email=msg_string(EMAIL);
+  allow=msg_string(ALLOW);
+  deny=msg_string(DENY);
+  bbsad=msg_string(BBSAD);
   init_non_megistos();		/* Initialise the non-Megistos system table */
-  clsmsg(msg);
+  msg_close(msg);
 #endif
 
-  msg=sysblk=opnmsg("sysvar");
-  bbscod=stgopt(BBSCOD);
+  msg=msg_sys=msg_open("sysvar");
+  bbscod=msg_string(BBSCOD);
   signal(SIGUSR1,enablegettys);
   setenv("CHANNEL","[bbsd]",1);
 }

@@ -47,8 +47,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:28  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1998/12/27 16:39:15  alexios
  * Added autoconf support.
@@ -73,6 +74,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -164,11 +166,11 @@ main(int argc, char **argv)
   int  i,j;
   FILE *fp;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   for(i=0;i<NUMXLATIONS;i++)for(j=0;j<256;j++)xlate[i][j]=kbdxlate[i][j]=j;
 
   for(i=0;i<NUMXLATIONS;i++)parse(i,0);	/* Output mapping */
-  for(i=0;i<NUMXLATIONS;i++)parse(i,1);	/* Keyboard (input) mapping */
+  for(i=0;i<NUMXLATIONS;i++)parse(i,1);	/* Keyboard (inp_buffer) mapping */
 
   if((fp=fopen(XLATIONFILE"~","w"))==NULL){
     fprintf(stderr,"Unable to open %s for writing!\n",XLATIONFILE"~");

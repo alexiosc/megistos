@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
  * Numerous changes and additions.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -79,7 +81,7 @@ traverselibtree(struct libidx *l, char *br)
 
   if(read(fileno(stdin),&c,1)&&
      ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))return 0;
-  if(lastresult==PAUSE_QUIT)return 0;
+  if(fmt_lastresult==PAUSE_QUIT)return 0;
 
   if(!getlibaccess(l,ACC_VISIBLE))return 1;
   else {
@@ -89,8 +91,8 @@ traverselibtree(struct libidx *l, char *br)
 
     branches[0]=0;
     for(i=0;br[i];i++){
-      if(br[i+1]==0&&br[i]=='1')strcat(branches,getmsg(LITRBR));
-      else strcat(branches,getmsg(LITRVR+br[i]-'1'));
+      if(br[i+1]==0&&br[i]=='1')strcat(branches,msg_get(LITRBR));
+      else strcat(branches,msg_get(LITRVR+br[i]-'1'));
       if(br[i]=='2')br[i]='3';
     }
 
@@ -118,12 +120,12 @@ libtree()
   prompt(LITRHD);
 
   if(!libread(libmain,0,&l)){
-    fatal("Main library (\"%s\") not found!",libmain);
+    error_fatal("Main library (\"%s\") not found!",libmain);
   }
 
-  nonblocking();
+  inp_nonblock();
   if(traverselibtree(&l,""))prompt(LITRFT);
-  blocking();
+  inp_block();
 }
 
 
@@ -138,13 +140,13 @@ listsublibs()
 
   /* Print the main library */
   if(!libread(libmain,0,&l)){
-    fatal("Unable to find main lib!");
+    error_fatal("Unable to find main lib!");
   } else prompt(LIBLSTL,"/",l.numfiles,l.numbytes>>10,l.descr);
   
   /* Print the parent library, if any */
   if(nesting(library.fullname)){
     if(!libreadnum(library.parent,&l)){
-      fatal("Unable to get parent lib, libnum=%d",
+      error_fatal("Unable to get parent lib, libnum=%d",
 	    library.parent);
     }
     prompt(LIBLSTP,l.numfiles,l.numbytes>>10,leafname(l.fullname));
@@ -158,13 +160,13 @@ listsublibs()
       if(getlibaccess(&l,ACC_VISIBLE))
 	prompt(LIBLSTL,leafname(l.fullname),l.numfiles,l.numbytes>>10,l.descr);
     }
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     strcpy(gt,l.keyname);
   }while(res);
 
   prompt(LIBLSTF);
 
-  return lastresult!=PAUSE_QUIT;
+  return fmt_lastresult!=PAUSE_QUIT;
 }
 
 
@@ -186,9 +188,9 @@ osfiledir()
   if(!stat(fname,&st)){
     res=1;
     prompt(FLRHDR);
-    lastresult=PAUSE_CONTINUE;
-    printlongfile(fname);
-    if(lastresult==PAUSE_QUIT)prompt(FLCAN);
+    fmt_lastresult=PAUSE_CONTINUE;
+    out_printlongfile(fname);
+    if(fmt_lastresult==PAUSE_QUIT)prompt(FLCAN);
     else prompt(FLRFTR);
   } else {
     cp=strtok(s," \n\r\t,");
@@ -197,9 +199,9 @@ osfiledir()
       sprintf(fname,"%s/%s",library.dir,cp);
       if(!stat(fname,&st)){
 	prompt(FLRHDR);
-	lastresult=PAUSE_CONTINUE;
-	printlongfile(fname);
-	if(lastresult==PAUSE_QUIT)prompt(FLCAN);
+	fmt_lastresult=PAUSE_CONTINUE;
+	out_printlongfile(fname);
+	if(fmt_lastresult==PAUSE_QUIT)prompt(FLCAN);
 	else prompt(FLRFTR);
 	res=1;
 	break;
@@ -222,7 +224,7 @@ osdirlisting()
   struct tm        *tm;
 
   if(library.flags&LBF_FILELIST)if(osfiledir())
-    return lastresult!=PAUSE_QUIT;
+    return fmt_lastresult!=PAUSE_QUIT;
 
   if((j=scandir(library.dir,&d,listsel,alphasort))==0){
     if(d)free(d);
@@ -231,7 +233,7 @@ osdirlisting()
   }
 
   prompt(FLOHDR);
-  nonblocking();
+  inp_nonblock();
   for(i=0;i<j;free(d[i]),i++){
     bzero(&st,sizeof(st));
     sprintf(fname,"%s/%s",library.dir,d[i]->d_name);
@@ -247,18 +249,18 @@ osdirlisting()
 
     if(read(fileno(stdin),&c,1)&&
        ((c==13)||(c==10)||(c==27)||(c==15)||(c==3))){
-      lastresult=PAUSE_QUIT;
+      fmt_lastresult=PAUSE_QUIT;
       break;
     }
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
   }
-  if(lastresult==PAUSE_QUIT)prompt(FLCAN);
+  if(fmt_lastresult==PAUSE_QUIT)prompt(FLCAN);
   else prompt(FLOFTR,files,bytes);
 
   free(d);
-  blocking();
+  inp_block();
 
-  return lastresult!=PAUSE_QUIT;
+  return fmt_lastresult!=PAUSE_QUIT;
 }
 
 
@@ -275,7 +277,7 @@ normallisting(int approved)
     return 1;
   }
   prompt(approved?FLHDR:FLHDRU);
-  nonblocking();
+  inp_nonblock();
 
   while(i){
     char fname[256];
@@ -283,7 +285,7 @@ normallisting(int approved)
 
     if(read(fileno(stdin),&c,1)&&
        ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))break;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
 
     if(f.approved!=approved)continue;
     if(f.flibnum!=library.libnum)break;
@@ -298,9 +300,9 @@ normallisting(int approved)
   }
   if(i)prompt(FLCAN);
   else prompt(FLFTR,numfiles,numbytes);
-  blocking();
+  inp_block();
 
-  return lastresult!=PAUSE_QUIT;
+  return fmt_lastresult!=PAUSE_QUIT;
 }
 
 
@@ -310,7 +312,7 @@ filelisting(int approved)
   if(library.flags&LBF_OSDIR){
     if(!approved){
       prompt(OLUNOS,library.fullname);
-      endcnc();
+      cnc_end();
       return 1;
     } else return osdirlisting();
   } else return normallisting(approved);

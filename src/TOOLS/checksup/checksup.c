@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:50  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1998/12/27 16:33:17  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -68,8 +70,8 @@
 #include "mbk_signup.h"
 
 
-promptblk *msg;
-useracc uacc;
+promptblock_t *msg;
+useracc_t uacc;
 
 
 int
@@ -188,7 +190,7 @@ checkphone()
 void
 check(char *userid)
 {
-  loaduseraccount(userid,&uacc);
+  usr_loadaccount(userid,&uacc);
   prompt(CKSHEADER);
   
   checkname();
@@ -199,25 +201,27 @@ check(char *userid)
 }
 
 
-void
+int
 main(int argc, char **argv)
 {
   int init;
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc!=2){
     printf("syntax: checksup userid\n\n");
     exit(1);
   }
 
-  if(!userexists(argv[1]))exit(1);
+  if(!usr_exists(argv[1]))exit(1);
 
-  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INITALL;
-  else init=INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES;
-  initmodule(init);
+  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INI_ALL;
+  else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
+  mod_init(init);
 
-  msg=opnmsg("signup");
+  msg=msg_open("signup");
 
   check(argv[1]);
-  donemodule();
+  mod_done(init);
+
+  return 0;
 }

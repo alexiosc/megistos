@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:47:33  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -72,9 +74,9 @@
 #include "mbk_graffiti.h"
 
 
-promptblk *msg;
-promptblk *graffiti_msg;
-promptblk *mailer_msg;
+promptblock_t *msg;
+promptblock_t *graffiti_msg;
+promptblock_t *mailer_msg;
 
 int  entrykey;
 int  ovrkey;
@@ -91,31 +93,31 @@ char *progname;
 void
 init()
 {
-  initmodule(INITALL);
+  mod_init(INI_ALL);
 
-  mailer_msg=opnmsg("mailer");
+  mailer_msg=msg_open("mailer");
 
-  graffiti_msg=opnmsg("graffiti");
-  entrykey=numopt(GRAFFITI_ENTRYKEY,0,129);
-  ovrkey=numopt(GRAFFITI_OVRKEY,0,129);
-  maxmsgs=numopt(GRAFFITI_MAXMSGS,1,100);
-  maxsize=numopt(GRAFFITI_MAXSIZE,1,32767);
+  graffiti_msg=msg_open("graffiti");
+  entrykey=msg_int(GRAFFITI_ENTRYKEY,0,129);
+  ovrkey=msg_int(GRAFFITI_OVRKEY,0,129);
+  maxmsgs=msg_int(GRAFFITI_MAXMSGS,1,100);
+  maxsize=msg_int(GRAFFITI_MAXSIZE,1,32767);
 
-  msg=opnmsg("offline.graffiti");
-  defwall=ynopt(DEFWALL);
-  defansi=ynopt(DEFANSI);
-  deflins=numopt(DEFLINS,0,10000);
-  wallfil=stgopt(WALLFIL);
+  msg=msg_open("offline.graffiti");
+  defwall=msg_bool(DEFWALL);
+  defansi=msg_bool(DEFANSI);
+  deflins=msg_int(DEFLINS,0,10000);
+  wallfil=msg_string(WALLFIL);
 
-  setlanguage(thisuseracc.language);
+  msg_setlanguage(thisuseracc.language);
 }
 
 
 void
 done()
 {
-  clsmsg(mailer_msg);
-  clsmsg(msg);
+  msg_close(mailer_msg);
+  msg_close(msg);
 }
 
 
@@ -128,18 +130,44 @@ warn()
 }
 
 
+mod_info_t mod_info_offline_graffiti = {
+  "offline.graffiti",
+  "Mailer Plugin: Graffiti Wall",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Packages the Graffiti Wall and handles off-line wall write requests.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,NULL},			/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(argc<2)warn();
-  atexit(done);
-  progname=argv[0];
-  init();
-  if(!strcmp(argv[1],"-setup"))setup();
-  else if(!strcmp(argv[1],"-download"))return ogdownload();
-  else if(!strcmp(argv[1],"-upload"))return ogupload();
-  else warn();
-  done();
-  return 0;
+  progname=mod_info_offline_graffiti.progname;
+  mod_setinfo(&mod_info_offline_graffiti);
+
+  if(argc!=2)return mod_main(argc,argv);
+
+  if(!strcmp(argv[1],"--setup")){
+    atexit(done);
+    init();
+    setup();
+  } else if(!strcmp(argv[1],"--download")){
+    atexit(done);
+    init();
+    return ogdownload();
+  } else if(!strcmp(argv[1],"--upload")){
+    atexit(done);
+    init();
+    return ogupload();
+  }
+
+  /* This should only return help, info, etc */
+  return mod_main(argc,argv);
 }

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 15:45:11  alexios
  * Added autoconf support.
@@ -62,6 +63,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -121,24 +123,24 @@ setupmenu()
   options[numplugins]=0;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      c=cncchr();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      c=cnc_chr();
       shownmenu=1;
     } else {
       if(!shownmenu)showsetupmenu();
       else prompt(SETUPSH);
       shownmenu=1;
-      getinput(0);
-      bgncnc();
-      if(nxtcmd)c=cncchr();
+      inp_get(0);
+      cnc_begin();
+      if(cnc_nxtcmd)c=cnc_chr();
     }
     if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       return 0;
     } else if(margc && (c=='?'||sameas(margv[0],"?"))){
       shownmenu=0;
@@ -146,7 +148,7 @@ setupmenu()
     } else if(strchr(options,c)||c=='S')return c;
     else {
       prompt(ERRSEL,c);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -168,88 +170,77 @@ defaultvals()
 void
 setupqwk()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
+  char tmp[256];
 
   if(loadprefs(USERQWK,&userqwk)!=1){
     defaultvals();
   }
 
-  sprintf(fname,TMPDIR"/mailer%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  msg_set(archivers);
+  sprintf(inp_buffer,"%s\n",msg_get(ARCHIVERS_NAME1+userqwk.compressor*7));
+  sprintf(tmp,"%s\n",msg_get(ARCHIVERS_NAME1+userqwk.decompressor*2));
+  strcat(inp_buffer,tmp);
+  msg_reset();
+  sprintf(tmp,"%s\n%s\n%s\nOK\nCANCEL\n",
+	  userqwk.flags&USQ_GREEKQWK?"on":"off",
+	  userqwk.packetname,
+	  msg_get(TR0+((userqwk.flags&OMF_TR)>>OMF_SHIFT)));
+
+  if(dialog_run("mailer",QWKVT,QWKLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  setmbk(archivers);
-  fprintf(fp,"%s\n",getmsg(ARCHIVERS_NAME1+userqwk.compressor*7));
-  fprintf(fp,"%s\n",getmsg(ARCHIVERS_NAME1+userqwk.decompressor*2));
-  rstmbk();
-  fprintf(fp,"%s\n",userqwk.flags&USQ_GREEKQWK?"on":"off");
-  fprintf(fp,"%s\n",userqwk.packetname);
-  fprintf(fp,"%s\n",getmsg(TR0+((userqwk.flags&OMF_TR)>>OMF_SHIFT)));
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("mailer",QWKVT,QWKLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  setmbk(archivers);
-  for(i=0;i<8;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0){
-      int i;
-      userqwk.compressor=-1;
-      for(i=0;i<MAXARCHIVERS;i++)if(sameas(getmsg(ARCHIVERS_NAME1+i*7),s)){
-	userqwk.compressor=i;
-	break;
-      }
-      if(userqwk.compressor<0){
-	fatal("Bad value \"%s\" for compressor.",s);
-      }
-    } else if(i==1){
-      int i;
-      userqwk.decompressor=-1;
-      for(i=0;i<MAXARCHIVERS;i++)if(sameas(getmsg(ARCHIVERS_NAME1+i*7),s)){
-	userqwk.decompressor=i;
-	break;
-      }
-      if(userqwk.decompressor<0){
-	fatal("Bad value \"%s\" for decompressor.",s);
-      }
-    } else if(i==2){
-      if(sameas("on",s))userqwk.flags|=USQ_GREEKQWK;
-      else userqwk.flags&=~USQ_GREEKQWK;
-    } else if(i==3){
-      strcpy(userqwk.packetname,stripspace(s));
-    } else if(i==4){
-      int n;
-      setmbk(mailer_msg);
-      for(n=0;n<NUMXLATIONS;n++){
-	if(sameas(s,getmsg(TR0+n))){
-	  userqwk.flags&=~OMF_TR;
-	  userqwk.flags|=n<<OMF_SHIFT;
+  if(sameas(margv[7],"OK")||sameas(margv[7],margv[5])){
+    msg_set(archivers);
+    for(i=0;i<8;i++){
+      char *s=margv[i];
+      if(i==0){
+	int i;
+	userqwk.compressor=-1;
+	for(i=0;i<MAXARCHIVERS;i++)if(sameas(msg_get(ARCHIVERS_NAME1+i*7),s)){
+	  userqwk.compressor=i;
 	  break;
+	}
+	if(userqwk.compressor<0){
+	  error_fatal("Bad value \"%s\" for compressor.",s);
+	}
+      } else if(i==1){
+	int i;
+	userqwk.decompressor=-1;
+	for(i=0;i<MAXARCHIVERS;i++)if(sameas(msg_get(ARCHIVERS_NAME1+i*7),s)){
+	  userqwk.decompressor=i;
+	  break;
+	}
+	if(userqwk.decompressor<0){
+	  error_fatal("Bad value \"%s\" for decompressor.",s);
+	}
+      } else if(i==2){
+	if(sameas("on",s))userqwk.flags|=USQ_GREEKQWK;
+	else userqwk.flags&=~USQ_GREEKQWK;
+      } else if(i==3){
+	strcpy(userqwk.packetname,stripspace(s));
+      } else if(i==4){
+	int n;
+	msg_set(mailer_msg);
+	for(n=0;n<NUMXLATIONS;n++){
+	  if(sameas(s,msg_get(TR0+n))){
+	    userqwk.flags&=~OMF_TR;
+	    userqwk.flags|=n<<OMF_SHIFT;
+	    break;
+	  }
 	}
       }
     }
-  }
-  setmbk(mailer_msg);
+    msg_set(mailer_msg);
 
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
-    prompt(SETUPAB);
-    return;
-  } else {
     saveprefs(USERQWK,sizeof(userqwk),&userqwk);
     prompt(SETUPOK);
+  } else {
+    prompt(SETUPAB);
   }
 }
 
@@ -258,9 +249,9 @@ static void
 pluginsetup(int n)
 {
   char command[256];
-  sprintf(command,"%s -setup",plugins[n].name);
-  runmodule(command);
-  endcnc();
+  sprintf(command,"%s --setup",plugins[n].name);
+  runcommand(command);
+  cnc_end();
 }
 
 

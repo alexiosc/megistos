@@ -1,4 +1,17 @@
-/*****************************************************************************\
+/** @name     ecdbase.h
+    @memo     Header file to include email and clubs database definitions.
+    @author   Alexios
+
+    @doc
+
+    This isn't an overly complicated header file. It simply includes the
+    Typhoon definitions for the database of messages, private and public alike.
+
+    Original banner, legalese and change history follow.
+
+    {\small\begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     ecdbase.h                                                    **
  **  AUTHORS:  Alexios                                                      **
@@ -21,15 +34,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:51  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.2  1997/11/06 20:03:39  alexios
  * Added GPL legalese to the top of this file.
@@ -38,7 +52,12 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
+
+\end{verbatim}
+}*/
+
+/*@{*/
 
 
 #ifndef RCS_VER 
@@ -67,3 +86,12 @@
 
 
 #endif /* ECDBASE_H */
+
+
+/*@}*/
+
+/*
+LocalWords: ecdbase Alexios doc legalese RDBMS alexios Exp bbs GPL ifndef
+LocalWords: VER endif config ecdb KEYFILE DBDDIR MSGSDIR DBDIR
+*/
+

@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys(). Added support for
+ * Changed a few error_fatal() calls to error_fatalsys(). Added support for
  * the pre/postconnect fields.
  *
  * Revision 1.1  1998/12/27 16:15:40  alexios
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -120,7 +122,7 @@ yesno(char *name, char *value, int *bool, int line)
   if(res<0){
     debug(D_DEF,"Line %d: expecting YES or NO value for %s, got \"%s\".",
 	  line,name,value);
-    fatal("Line %d: expecting YES or NO value for %s, got \"%s\".",
+    error_fatal("Line %d: expecting YES or NO value for %s, got \"%s\".",
 	  line,name,value);
   } else *bool=res;
   return res;
@@ -146,7 +148,7 @@ processpair(char *name, char *value, int line)
 
   if(keys[i].ref<0){
     debug(D_DEF,"Line %d: unknown configuration argument \"%s\".",line,name);
-    logerror("Line %d: unknown configuration argument \"%s\".",line,name);
+    error_log("Line %d: unknown configuration argument \"%s\".",line,name);
     return;
   }
 
@@ -160,21 +162,21 @@ processpair(char *name, char *value, int line)
       if(!sscanf(value,"%x",&debuglevel)){
 	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
 	      line,value);
-	logerror("Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
+	error_log("Line %d: DEBUG level \"%s\" is not a hexadecimal number.",
 		 line,value);
       }
     } else if(value[0]=='0'){
       if(!sscanf(value,"%o",&debuglevel)){
 	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not an octal number.",
 	      value);
-	logerror("Line %d: DEBUG level \"%s\" is not an octal number.",
+	error_log("Line %d: DEBUG level \"%s\" is not an octal number.",
 		 value);
       }
     } else {
       if(!sscanf(value,"%d",&debuglevel)){
 	debug(D_DEF,"Line %d: DEBUG level \"%s\" is not a decimal number.",
 	      line,value);
-	logerror("Line %d: DEBUG level \"%s\" is not a decimal number.",
+	error_log("Line %d: DEBUG level \"%s\" is not a decimal number.",
 		 line,value);
       }
     }
@@ -194,7 +196,7 @@ processpair(char *name, char *value, int line)
     if(!sscanf(value,"%d",&delay)){
       debug(D_DEF,"Line %d: value for DELAY \"%s\" is not a decimal number.",
 	    line,value);
-      logerror("Line %d: value for DELAY \"%s\" is not a decimal number.",
+      error_log("Line %d: value for DELAY \"%s\" is not a decimal number.",
 	       line,value);
     }
     break;
@@ -268,7 +270,7 @@ parsefile(char *suffix)
 
   if((fp=fopen(fname,"r"))==NULL){
     int i=errno;
-    logerror("Unable to open config file %s",fname);
+    error_log("Unable to open config file %s",fname);
     debug(D_DEF,"fopen(\"%s\",\"r\") failed, errno=%d",fname,i);
     return;
   }
@@ -288,7 +290,7 @@ parsefile(char *suffix)
     /* Get the name and value */
     if((cp=strchr(line,'='))==NULL){
       debug(D_DEF,"line %d has bad format (not NAME=VALUE)",linenum);
-      logerror("bad format (%s line %d)",fname,linenum);
+      error_log("bad format (%s line %d)",fname,linenum);
       continue;
     }
 
@@ -321,12 +323,12 @@ validate()
 {
   if(!strlen(device)){
     debug(D_DEF,"No device has been specified!");
-    fatal("No device has been specified!");
+    error_fatal("No device has been specified!");
   }
   
   if(!initial || !strlen(initial)){
-    debug(D_DEF,"No INITIAL flags have been specified!");
-    fatal("No INITIAL flags have been specified!");
+    debug(D_DEF,"No INI_IAL flags have been specified!");
+    error_fatal("No INI_IAL flags have been specified!");
   } else if (!final || !strlen(final)){
     final=strdup(initial);
   }
@@ -349,15 +351,15 @@ setdefaults(int argc, char **argv)
     case 'D':
       if(optarg[0]=='0'&&optarg[1]=='x'){
 	if(!sscanf(optarg,"%x",&debuglevel)){
-	  fatal("Debug level \"%s\" is not a hexadecimal number.",optarg);
+	  error_fatal("Debug level \"%s\" is not a hexadecimal number.",optarg);
 	}
       } else if(optarg[0]=='0'){
 	if(!sscanf(optarg,"%o",&debuglevel)){
-	  fatal("Debug level \"%s\" is not an octal number.",optarg);
+	  error_fatal("Debug level \"%s\" is not an octal number.",optarg);
 	}
       } else {
 	if(!sscanf(optarg,"%d",&debuglevel)){
-	  fatal("Debug level \"%s\" is not a decimal number.",optarg);
+	  error_fatal("Debug level \"%s\" is not a decimal number.",optarg);
 	}
       }
       setdebuglevel(debuglevel);
@@ -372,7 +374,7 @@ setdefaults(int argc, char **argv)
   if(optind<argc){
     strcpy(device,argv[optind++]);
   } else {
-    fatal("No TTY device given in command line.");
+    error_fatal("No TTY device given in command line.");
     exit(2);
   }
 }

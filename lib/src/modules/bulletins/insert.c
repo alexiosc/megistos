@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:53  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 15:27:54  alexios
  * Added autoconf support. Minor fixes.
@@ -42,6 +43,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -92,28 +94,28 @@ askfile(char *club)
   struct stat st;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"."))return -1;
-      i=cncint();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"."))return -1;
+      i=cnc_int();
     } else {
       prompt(NBMSGN);
-      getinput(0);
+      inp_get(0);
       i=atoi(margv[0]);
-      if((!margc||(margc==1&&sameas(margv[0],"."))) && !reprompt) {
+      if((!margc||(margc==1&&sameas(margv[0],"."))) && !inp_reprompt()) {
 	return -1;
       } else if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0]))return 0;
+      if(inp_isX(margv[0]))return 0;
     }
 
-    sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(long)i);
+    sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)i);
     if(stat(fname,&st)){
       prompt(NBMSGNR,club,i);
-      endcnc();
+      cnc_end();
     } else return i;
   }
   return 0;
@@ -131,21 +133,21 @@ getmsgheader(char *club, int msgno,struct message *msg)
 
   sprintf(tmp,"%d",msgno);
   sprintf(lock,MESSAGELOCK,club,tmp);
-  if((waitlock(lock,20))==LKR_TIMEOUT)return 0;
-  placelock(lock,"reading");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
+  lock_place(lock,"reading");
 
   sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno);
   if((zfp=gzopen(fname,"rb"))==NULL){
     gzclose(zfp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   } else if(gzread(zfp,msg,sizeof(struct message))<=0){
     gzclose(zfp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   }
   gzclose(zfp);
-  rmlock(lock);
+  lock_rm(lock);
   return 1;
 }
 
@@ -213,21 +215,21 @@ getmsgheader(char *club, int msgno,struct message *msg)
 
   sprintf(tmp,"%d",msgno);
   sprintf(lock,MESSAGELOCK,club,tmp);
-  if((waitlock(lock,20))==LKR_TIMEOUT)return 0;
-  placelock(lock,"reading");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
+  lock_place(lock,"reading");
 
-  sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno);
+  sprintf(fname,MSGSDIR"/%s/"MESSAGEFILE,club,(uint32)msgno);
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   } else if(fread(msg,sizeof(struct message),1,fp)!=1){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
   return 1;
 }
 
@@ -287,7 +289,7 @@ fcopymsg(char *source, char *target)
 
 
 static void
-insmsg(char *club, int msgno)
+insmsg(char *club, uint32 msgno)
 {
   struct message msg;
   struct bltidx blt;
@@ -317,7 +319,7 @@ insmsg(char *club, int msgno)
 
   /* Set the source and target files for linking/copying the bulletin */
 
-  sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno);
+  sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,msgno);
   sprintf(target,MSGSDIR"/%s/%s/%s",club,MSGBLTDIR,blt.fname);
 
 
@@ -338,7 +340,7 @@ insmsg(char *club, int msgno)
     char fatt[256];
     struct stat st1, st2;
 
-    sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,(long)msgno);
+    sprintf(source,MSGSDIR"/%s/"MESSAGEFILE,club,msgno);
     sprintf(fatt,MSGSDIR"/%s/%s/%d.att",club,MSGATTDIR,msgno);
 
     if(stat(fatt,&st1)){
@@ -353,17 +355,17 @@ insmsg(char *club, int msgno)
     prompt(NBATT,club,msgno,st1.st_size);
 
     for(;;){
-      setinputflags(INF_HELP);
-      i=getmenu(&opt,0,0,NBBODATT,NBBAR,"AB",NBBAD,
+      inp_setflags(INF_HELP);
+      i=get_menu(&opt,0,0,NBBODATT,NBBAR,"AB",NBBAD,
 		st1.st_size>=st2.st_size?'A':'B');
-      setinputflags(INF_NORMAL);
+      inp_clearflags(INF_HELP);
       if(!i){
 	prompt(BLTCAN);
 	return;
       }
       if(i==-1){
 	prompt(NBATT,club,msgno,st1.st_size);
-	endcnc();
+	cnc_end();
 	continue;
       } else break;
     }
@@ -443,10 +445,10 @@ insupl(char *club)
 
   /* Upload the file */
   
-  setaudit(0,NULL,NULL,0,NULL,NULL);
+  xfer_setaudit(0,NULL,NULL,0,NULL,NULL);
   sprintf(source,thisuseracc.userid);
-  addxfer(FXM_UPLOAD,source,"",0,0);
-  dofiletransfer();
+  xfer_add(FXM_UPLOAD,source,"",0,0);
+  xfer_run();
 
 
   /* Scan the uploaded file(s) */
@@ -491,7 +493,7 @@ insupl(char *club)
 
   /* Get the author of the bulletin */
 
-  if(!getuserid(blt.author,NBUSER,NBRRUID,NBUSERD,thisuseracc.userid,0)){
+  if(!get_userid(blt.author,NBUSER,NBRRUID,NBUSERD,thisuseracc.userid,0)){
     prompt(BLTCAN);
     goto kill;
   }
@@ -577,7 +579,7 @@ insupl(char *club)
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -598,20 +600,21 @@ insertblt()
     prompt(BLTCAN);
     return;
   } else if(msgnum==-1) {
-    endcnc();
+    cnc_end();
     insupl(insclub);
   }
   else insmsg(insclub,msgnum);
 }
 
 
-void
+int
 extins(char *msgspec)
 {
   char *cp;
   if((cp=strchr(msgspec,'/'))==NULL){
-    fatal("Syntax error running bulletins -insert %s",msgspec);
+    error_fatal("Syntax error running bulletins -insert %s",msgspec);
   }
   *cp++=0;
   insmsg(msgspec,atoi(cp));
+  return 0;
 }

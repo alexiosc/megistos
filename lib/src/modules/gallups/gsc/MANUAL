@@ -1,11 +1,7 @@
 
 
-                Gallops Script Format revision 4 - 20/09/2000
-                ---------------------------------------------
-
- Revision 4 of Gallups Script Format comes to complete the disadvantages and
-              bugs of the previous revisions of script formats.
-
+               Gallops Script Format revision 4.1 - 21/09/2000
+               -----------------------------------------------
 
                               =================
                               Table of Contents
@@ -238,6 +234,24 @@ Due to the great extend of the extensions section of revision 3, revision 4
 is introduced. Future extensions should not interfere with the directives
 above, and should be optional.
 
+3.1. Enabling special features (Revision 4.1)
+There are some flags that can be enabled or disabled inside a gallup.
+One can toggle them with the commands `enable' and `disable'.
+Syntax:
+	enable	<flag>
+	disable	<flag>
+	
+		<flag> is one of the following words:
+			- `timer'		(Rev. 4.1)
+			
+	The text in the parenthesis is the revision that flag was first
+	introduced.
+
+	`timer' enables a seconds timer that counts in how much time the
+		user completed the gallup. This flag is only available in
+		Quiz-type gallups.
+
+
 
 
 ==================
@@ -272,3 +286,6 @@ During compilation:
 gallups
 
 5.2. Timed quizzes
+
+========================
+$Id$

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -104,9 +106,9 @@ approvefile(struct libidx *l, char *fname)
     int res;
     fileinfo(l,&f);
   nohelp:
-    setinputflags(INF_HELP);
-    res=getmenu(&c,0,0,OAPPASK,OAPPERR,"YND",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&c,0,0,OAPPASK,OAPPERR,"YND",0,0);
+    inp_clearflags(INF_HELP);
     if(res<0)continue;
     else if(!res)return 0;
 
@@ -166,25 +168,25 @@ approveall()
 
   i=filegetfirst(library.libnum,&f,0);
   if(!i || f.flibnum!=library.libnum) return 1;
-  nonblocking();
+  inp_nonblock();
 
   while(i){
     if(read(fileno(stdin),&c,1)&&
        ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))break;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
 
     if(f.approved)continue;
     if(f.flibnum!=library.libnum)break;
 
-    blocking();
+    inp_block();
     approvefile(&library,f.fname);
-    nonblocking();
+    inp_nonblock();
 
     i=filegetnext(library.libnum,&f);
   }
-  blocking();
+  inp_block();
 
-  return lastresult!=PAUSE_QUIT;
+  return fmt_lastresult!=PAUSE_QUIT;
 }
 
 
@@ -195,7 +197,7 @@ traverseapprove(struct libidx *l)
 
   if(read(fileno(stdin),&c,1)&&
      ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))return 0;
-  if(lastresult==PAUSE_QUIT)return 0;
+  if(fmt_lastresult==PAUSE_QUIT)return 0;
 
   if(!islibop(&library))return 1;
   else {
@@ -214,7 +216,7 @@ traverseapprove(struct libidx *l)
       res=approveall();
       memcpy(&library,&tmp,sizeof(library));
       if(!res)return 0;
-      nonblocking();		/* approveall() restores blocking mode */
+      inp_nonblock();		/* approveall() restores blocking mode */
     }
 
     res=libgetchild(l->libnum,"",&otherchild);
@@ -235,20 +237,20 @@ getfilename()
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
     } else {
       prompt(OAPPQ);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)) return ".";
     else if(!strcmp(fn,".")) return ".";
 
     if(!fileexists(library.libnum,fn,0)){
-      endcnc();
+      cnc_end();
       prompt(OAPPR);
       continue;
     } else break;
@@ -266,9 +268,9 @@ op_approve()
   if(strcmp(fn,".")){
     approvefile(&library,fn);
   } else {
-    nonblocking();
+    inp_nonblock();
     traverseapprove(&library);
-    blocking();
+    inp_block();
   }
   if(!filesapproved)prompt(OAPPNUN);
 }

@@ -30,11 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:59:57  alexios
- * Initial revision
- *
- * Revision 0.1  2000/12/08 15:12:50  alexios
- * Initial checkin.
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/09/04 13:57:57  valis
  * first stable release, tidy up source code

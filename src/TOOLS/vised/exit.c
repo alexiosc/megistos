@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:03:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/08/13 17:10:05  alexios
  * Fixed things so that user inactivity timers are reset to handle
@@ -66,6 +67,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -91,7 +93,7 @@ doquit()
   char s[2],t[2];
 
   move(LINES-2,0);
-  printansi(getmsg(QUIT));
+  printansi(msg_get(QUIT));
   refresh();
 
   while((c=mygetch())==ERR)usleep(20000);
@@ -110,7 +112,7 @@ golined()
   char n[16];
   savefile();
   sprintf(n,"%d",maxsize);
-  afterinput=1;
+  out_setflags(OFL_AFTERINPUT);
   prompt(CLRSCR);
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
   execl(LINEDBIN,"lined",filename,n,NULL);

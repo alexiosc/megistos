@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  2000/01/06 11:42:07  alexios
  * Added variable pgstmo to denote the length of time after a
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -82,7 +84,7 @@
 #include "mbk_remsys.h"
 
 int       COMMANDS=0;
-promptblk *msg;
+promptblock_t *msg;
 char      lock[256];
 
 
@@ -153,17 +155,14 @@ runcommand(char *s)
   int res;
 
   thisuseronl.flags|=OLF_BUSY|OLF_NOTIMEOUT;
-  doneinput();
-  donesignals();
+  mod_done(INI_INPUT|INI_SIGNALS);
   system(STTYBIN" sane intr 0x03");
   res=system(s);
   system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  regpid(thisuseronl.channel);
-  initinput();
-  initsignals();
+  mod_init(INI_INPUT|INI_SIGNALS);
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  resetinactivity();
-  if(res==127 || res==-1)prompt(EXECERR,NULL);
+  inp_resetidle();
+  if(res==127 || res==-1)prompt(EXECERR);
   return res;
 }
 
@@ -171,29 +170,29 @@ runcommand(char *s)
 void
 init()
 {
-  initmodule(INITALL|INITTTYNUM);
-  msg=opnmsg("remsys");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("remsys");
+  msg_setlanguage(thisuseracc.language);
 
-  unixsh=stgopt(UNIXSH);
-  sxfdesc=stgopt(SXFDESC);
-  keychu=numopt(KEYCHU,0,129);
-  kydnam=numopt(KYDNAM,0,129);
-  kydcom=numopt(KYDCOM,0,129);
-  kydadr=numopt(KYDADR,0,129);
-  kydpho=numopt(KYDPHO,0,129);
-  kydage=numopt(KYDAGE,0,129);
-  kydsex=numopt(KYDSEX,0,129);
-  kydpss=numopt(KYDPSS,0,129);
-  hidepass=ynopt(HIDEPASS);
-  dfwarn=numopt(DFWARN,0,100);
-  dfcrit=numopt(DFCRIT,0,100);
-  pgstmo=numopt(PGSTMO,1,9999)*60;
+  unixsh=msg_string(UNIXSH);
+  sxfdesc=msg_string(SXFDESC);
+  keychu=msg_int(KEYCHU,0,129);
+  kydnam=msg_int(KYDNAM,0,129);
+  kydcom=msg_int(KYDCOM,0,129);
+  kydadr=msg_int(KYDADR,0,129);
+  kydpho=msg_int(KYDPHO,0,129);
+  kydage=msg_int(KYDAGE,0,129);
+  kydsex=msg_int(KYDSEX,0,129);
+  kydpss=msg_int(KYDPSS,0,129);
+  hidepass=msg_bool(HIDEPASS);
+  dfwarn=msg_int(DFWARN,0,100);
+  dfcrit=msg_int(DFCRIT,0,100);
+  pgstmo=msg_int(PGSTMO,1,9999)*60;
 
   for(COMMANDS=0;commands[COMMANDS].command[0];COMMANDS++);
 
   sprintf(lock,"LCK-remsys-%s",thisuseronl.channel);
-  placelock(lock,"inside");
+  lock_place(lock,"inside");
 }
 
 
@@ -201,7 +200,7 @@ void
 done()
 {
   sprintf(lock,"LCK-remsys-%s",thisuseronl.channel);
-  rmlock(lock);
+  lock_rm(lock);
 }
 
 
@@ -226,18 +225,18 @@ remsaccess()
 
 
 void
-showmenu(long *sysaxs,int altshow)
+showmenu(uint32 *sysaxs,int altshow)
 {
   int i, group=-1, a=0, sep=1;
   char opton[80]={0},optoff[80]={0};
 
   if(altshow){
-    strncpy(opton,getmsg(OPTON),sizeof(opton));
-    strncpy(optoff,getmsg(OPTOFF),sizeof(optoff));
+    strncpy(opton,msg_get(OPTON),sizeof(opton));
+    strncpy(optoff,msg_get(OPTOFF),sizeof(optoff));
   }
   
   for(i=0;i<COMMANDS;i++){
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(commands[i].group!=group && group!=-1 && !sep){
       prompt(OPTSEP);
       sep=1;
@@ -265,19 +264,20 @@ run()
       shownmenu=1;
     }
     prompt(RSSMNU,NULL);
-    getinput(0);
-    bgncnc();
-    if(!margc || reprompt)continue;
+    inp_get(0);
+    cnc_begin();
+    if(!margc || inp_reprompt())continue;
     else if(margc==1 && sameas(margv[0],"?"))shownmenu=0;
-    else if(margc==1 && isX(margv[0]))return;
+    else if(margc==1 && inp_isX(margv[0]))return;
     else {
       char *command;
       int i, found=0,execute=-1;
       
-      command=cncword();
+      command=cnc_word();
       for(i=0;i<COMMANDS;i++){
 	if(sameto(command,commands[i].command)){
-	  if(HASAXS(thisuseracc.sysaxs,commands[i].accessflag)&&commands[i].action){
+	  if(HASAXS(thisuseracc.sysaxs,commands[i].accessflag)&&
+	     commands[i].action){
 	    found++;
 	    execute=i;
 	  }
@@ -285,24 +285,47 @@ run()
       }
       if(!found){
 	prompt(ERRCOM);
-	endcnc();
+	cnc_end();
       } else if(found==1)(commands[execute].action)();
       else {
 	prompt(MORCHR,command);
-	endcnc();
+	cnc_end();
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
   }
 }
 
 
 int
-main(int argc, char **argv)
+handler_run(int argc, char **argv)
 {
-  setprogname(argv[0]);
   atexit(done);
   init();
   run();
   return 0;
+}
+
+
+mod_info_t mod_info_remsys = {
+  "remsys",
+  "Remote Operator Menu",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Allows remote administration of the system to privileged users.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_remsys);
+  return mod_main(argc,argv);
 }

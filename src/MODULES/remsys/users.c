@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:16  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1998/12/27 16:07:28  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Fixed a POST bug that wouldn't post to users not on-line.
  *
  * Revision 0.7  1998/08/11 10:19:45  alexios
@@ -67,6 +68,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -90,11 +92,11 @@ int pr,flag,ok1,ok0,err,flag1,flag2;
 char *aus1,*aud1,*aus2,*aud2;
 {
   static char userid[32];
-  useracc usracc, *uacc=&usracc;
+  useracc_t usracc, *uacc=&usracc;
 
   memset(userid,0,sizeof(userid));
-  if(!getuserid(userid,pr,UNKUID,0,NULL,0))return userid;
-  if(!uinsys(userid,0))loaduseraccount(userid,uacc);
+  if(!get_userid(userid,pr,UNKUID,0,NULL,0))return userid;
+  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
   else uacc=&othruseracc;
 
   if((uacc->flags&UFL_EXEMPT||sameas(userid,SYSOP))
@@ -106,7 +108,7 @@ char *aus1,*aud1,*aus2,*aud2;
   
   uacc->flags^=flag;
   
-  if (!uinsys(userid,0))saveuseraccount(uacc);
+  if (!usr_insys(userid,0))usr_saveaccount(uacc);
   if(uacc->flags&flag){
     prompt(ok1,userid);
     audit(getenv("CHANNEL"),flag1,aus1,aud1,thisuseracc.userid,userid);
@@ -132,7 +134,7 @@ rsys_delete()
      online anyway */
 
   if(userid[0]){
-    if(uinsys(userid,0)){
+    if(usr_insys(userid,0)){
       bbsdcommand("hangup",othruseronl.channel,"");
     }
   }
@@ -149,72 +151,72 @@ rsys_exempt()
 
 void rsys_post()
 {
-  int     getclassname();
-  char    userid[24];
-  int     amount, fop;
-  useracc usracc, *uacc=&usracc;
-  int     prompted=0;
+  int       getclassname();
+  char      userid[24];
+  int       amount, fop;
+  useracc_t usracc, *uacc=&usracc;
+  int       prompted=0;
 
-  if(!getuserid(userid,RSPOSTWHO,UNKUID,0,NULL,0))return;
-  if(!uinsys(userid,0))loaduseraccount(userid,uacc);
+  if(!get_userid(userid,RSPOSTWHO,UNKUID,0,NULL,0))return;
+  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
   else uacc=&othruseracc;
 
-  if(!getnumber(&amount,RSPOSTAMT,-1<<30,0x7fffffff,NUMERR,0,0))return;
+  if(!get_number(&amount,RSPOSTAMT,-1<<30,0x7fffffff,NUMERR,0,0))return;
   if(!amount) return;
 
   for(;;){
     int c=0;
     char *s;
-    lastresult=0;
-    if(morcnc()){
-      s=cncword();
+    fmt_lastresult=0;
+    if(cnc_more()){
+      s=cnc_word();
       c=toupper(*s);
     } else {
       prompt(RSPOSTFOP,NULL);
-      getinput(0);
-      if(margc&&isX(margv[0]))return;
+      inp_get(0);
+      if(margc&&inp_isX(margv[0]))return;
       c=toupper(margv[0][0]);
     }
     if(c=='F' || c=='P'){
       fop=toupper(c);
       break;
     } else {
-      endcnc();
+      cnc_end();
       prompt(RSPOSTERR,NULL);
     }      
   }
 
   for(;;){
     int c=0;
-    lastresult=0;
-    if(morcnc()){
-      c=cncyesno();
+    fmt_lastresult=0;
+    if(cnc_more()){
+      c=cnc_yesno();
     } else {
       char creds[MSGBUFSIZE];
       char acc  [MSGBUFSIZE];
 
-      strcpy(creds,getpfix(CRDSING,amount==1));
-      strcpy(acc,getpfix(MSCACC,uacc->sex==USX_MALE));
+      strcpy(creds,msg_getunit(CRDSING,amount==1));
+      strcpy(acc,msg_getunit(MSCACC,uacc->sex==USX_MALE));
 
       prompt(RSPOSTCNF,amount,(fop=='F')?"FREE":"PAID",creds,acc,uacc->userid);
-      getinput(0);
-      if(margc&&isX(margv[0]))return;
+      inp_get(0);
+      if(margc&&inp_isX(margv[0]))return;
       c=toupper(margv[0][0]);
     }
     if(c=='Y')break;
     else if(c=='N')return;
   }
 
-  if(!userexists(userid)){
+  if(!usr_exists(userid)){
     prompt(RSPOSTDEL,NULL);
     return;
   }
 
-  postcredits(uacc->userid,amount,fop=='P');
+  usr_postcredits(uacc->userid,amount,fop=='P');
   audit(getenv("CHANNEL"),AUDIT(CRDPOST),amount,
 	(fop=='P'?"PAID":"FREE"),uacc->userid);
   if(fop=='P'){
-    classrec *ourclass=findclass(uacc->curclss);
+    classrec_t *ourclass=cls_find(uacc->curclss);
     if(strcmp(ourclass->credpost,uacc->curclss)){
       strncpy(uacc->curclss,ourclass->credpost,sizeof(uacc->tempclss));
       strncpy(uacc->tempclss,uacc->curclss,sizeof(uacc->tempclss));
@@ -222,11 +224,12 @@ void rsys_post()
       prompted=1;
       prompt(RSPOSTOK2,uacc->curclss);
 
-      if (uinsys(userid,0)) {
-	sprintf(outbuf,getmsglang(RSPOSTNOT3,othruseracc.language-1),
-		amount,getpfixlang(CRDSING,amount==1,othruseracc.language-1),
+      if (usr_insys(userid,0)) {
+	sprintf(out_buffer,msg_getl(RSPOSTNOT3,othruseracc.language-1),
+		amount,msg_getunitl(CRDSING,amount==1,othruseracc.language-1),
 		uacc->curclss);
-	if(injoth(&othruseronl,outbuf,0))prompt(NOTIFIED,othruseronl.userid);
+	if(usr_injoth(&othruseronl,out_buffer,0))
+	  prompt(NOTIFIED,othruseronl.userid);
       }
     }
   }
@@ -234,10 +237,12 @@ void rsys_post()
   if(!prompted){
     prompt(RSPOSTOK);
     
-    if (uinsys(userid,0)) {
-      sprintf(outbuf,getmsglang(RSPOSTNOT1+(fop=='P'),othruseracc.language-1),
-	      amount,getpfixlang(CRDSING,amount==1,othruseracc.language-1));
-      if(injoth(&othruseronl,outbuf,0))prompt(NOTIFIED,othruseronl.userid);
+    if (usr_insys(userid,0)) {
+      sprintf(out_buffer,
+	      msg_getl(RSPOSTNOT1+(fop=='P'),othruseracc.language-1),
+	      amount,msg_getunitl(CRDSING,amount==1,othruseracc.language-1));
+      if(usr_injoth(&othruseronl,out_buffer,0))
+	prompt(NOTIFIED,othruseronl.userid);
     }
   }
 }
@@ -247,14 +252,14 @@ void
 rsys_hangup()
 {
   char tty[64];
-  struct linestatus status;
+  channel_status_t status;
 
   for(;;){
     if(!getchanname(tty,RSHANGUPWHO,0))return;
-    getlinestatus(tty,&status);
+    channel_getstatus(tty,&status);
     if(status.result!=LSR_USER){
       prompt(RSHANGUPERR);
-      endcnc();
+      cnc_end();
     }
     else break;
   }
@@ -273,7 +278,7 @@ rsys_suspend()
 		  RSSUSPUNDO,RSSUSPERR,
 		  AUDIT(RSSUSP),AUDIT(RSUSUSP)));
   if(userid[0]){
-    if(uinsys(userid,0))bbsdcommand("hangup",othruseronl.channel,"");
+    if(usr_insys(userid,0))bbsdcommand("hangup",othruseronl.channel,"");
   }
 }
 
@@ -282,32 +287,32 @@ void
 rsys_detail()
 {
   static char userid[32];
-  useracc usracc, *uacc=&usracc;
+  useracc_t usracc, *uacc=&usracc;
   char wh[80],age[80],sex[80];
   char s1[80],s2[80],s3[80],s4[80];
   char d1[80],d2[80];
   char sys[80],ns[80],lang[80];
 
   memset(userid,0,sizeof(userid));
-  if(!getuserid(userid,RSDETAILWHO,UNKUID,0,NULL,0))return;
-  if(!uinsys(userid,0))loaduseraccount(userid,uacc);
+  if(!get_userid(userid,RSDETAILWHO,UNKUID,0,NULL,0))return;
+  if(!usr_insys(userid,0))usr_loadaccount(userid,uacc);
   else uacc=&othruseracc;
 
-  strcpy(wh,getmsg(RSDETAILNAX));
-  strcpy(sex,uacc->sex==USX_MALE?getmsg(RSDETAILM):getmsg(RSDETAILF));
+  strcpy(wh,msg_get(RSDETAILNAX));
+  strcpy(sex,uacc->sex==USX_MALE?msg_get(RSDETAILM):msg_get(RSDETAILF));
   memset(s1,0,sizeof(s1));
-  if(uacc->flags&UFL_SUSPENDED)strcpy(s1,getmsg(RSDETAILSUSP));
+  if(uacc->flags&UFL_SUSPENDED)strcpy(s1,msg_get(RSDETAILSUSP));
   memset(s2,0,sizeof(s2));
-  if(uacc->flags&UFL_EXEMPT)strcpy(s2,getmsg(RSDETAILXMPT));
+  if(uacc->flags&UFL_EXEMPT)strcpy(s2,msg_get(RSDETAILXMPT));
   memset(s3,0,sizeof(s3));
-  if(uacc->flags&UFL_DELETED)strcpy(s3,getmsg(RSDETAILDEL));
+  if(uacc->flags&UFL_DELETED)strcpy(s3,msg_get(RSDETAILDEL));
   memset(s4,0,sizeof(s3));
   if(uacc->sysaxs[0]||uacc->sysaxs[1]||uacc->sysaxs[2])
-    strcpy(s4,getmsg(RSDETAILOP));
-  strcpy(sys,getmsg(RSDETAILS1+uacc->system-1));
+    strcpy(s4,msg_get(RSDETAILOP));
+  strcpy(sys,msg_get(RSDETAILS1+uacc->system-1));
   ns[0]=0;
-  if(uacc->prefs&UPF_NONSTOP)strcpy(ns,getmsg(RSDETAILNST));
-  strcpy(lang,getmsg(RSDETAILL1+uacc->language-1));
+  if(uacc->prefs&UPF_NONSTOP)strcpy(ns,msg_get(RSDETAILNST));
+  strcpy(lang,msg_get(RSDETAILL1+uacc->language-1));
   sprintf(age,"%d",uacc->age);
 
   strcpy(d1,strdate(uacc->datecre));
@@ -315,16 +320,16 @@ rsys_detail()
   prompt(RSDETAIL,userid,
 	 d1,s1,s2,
 	 d2,s3,s4,
-	 (haskey(&thisuseracc,kydnam)?uacc->username:wh),
-	 (haskey(&thisuseracc,kydcom)?uacc->company:wh),
-	 (haskey(&thisuseracc,kydadr)?uacc->address1:wh),
-	 (haskey(&thisuseracc,kydadr)?uacc->address2:wh),
-	 (haskey(&thisuseracc,kydpho)?uacc->phone:wh),
-	 (haskey(&thisuseracc,kydage)?age:wh),
-	 (haskey(&thisuseracc,kydsex)?sex:wh),
+	 (key_owns(&thisuseracc,kydnam)?uacc->username:wh),
+	 (key_owns(&thisuseracc,kydcom)?uacc->company:wh),
+	 (key_owns(&thisuseracc,kydadr)?uacc->address1:wh),
+	 (key_owns(&thisuseracc,kydadr)?uacc->address2:wh),
+	 (key_owns(&thisuseracc,kydpho)?uacc->phone:wh),
+	 (key_owns(&thisuseracc,kydage)?age:wh),
+	 (key_owns(&thisuseracc,kydsex)?sex:wh),
 	 sys,uacc->scnwidth,uacc->scnheight,ns,
 	 lang,uacc->curclss,
-	 ((!hidepass)&&haskey(&thisuseracc,kydpss)?uacc->passwd:wh),
+	 ((!hidepass)&&key_owns(&thisuseracc,kydpss)?uacc->passwd:wh),
 	 uacc->credits,uacc->totpaid);
 }
 
@@ -359,59 +364,46 @@ numcmp(char *op,int a,int b)
 void
 rsys_search()
 {
-  char fname[256];
+  char tmp[256];
   FILE *fp;
   char data[30][80], command[256];
-  char line[1024], *cp;
   int  i=0,check=0;
   
-  sprintf(fname,TMPDIR"/rssrch-%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    fclose(fp);
-    return;
-  }
-  fprintf(fp,"\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-  fprintf(fp,"\n%s\n",getmsg(RSSRCHS1));
-  fprintf(fp,"\n0\n");
-  fprintf(fp,"\n%s\n",getmsg(RSSRCHM));
-  fprintf(fp,"\n0\n");
-  fprintf(fp,"\n0\n\n\n");
+  sprintf(inp_buffer,"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n%s\n",msg_get(RSSRCHS1));
+  sprintf(tmp,"\n0\n\n%s\n\n0\n\n0\n\n\n",msg_get(RSSRCHM));
+  strcat(inp_buffer,tmp);
   i=today();
-  fprintf(fp,"\n%d/%d/%d\n",tdday(i),1+tdmonth(i),tdyear(i));
-  fprintf(fp,"\n%d/%d/%d\n",tdday(i),1+tdmonth(i),tdyear(i));
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  sprintf(tmp,"\n%d/%d/%d\n\n%d/%d/%d\nOK\nCANCEL\n",
+	  tdday(i),1+tdmonth(i),tdyear(i),
+	  tdday(i),1+tdmonth(i),tdyear(i));
+  strcat(inp_buffer,tmp);
 
-  dataentry("remsys",RSSRCHVT,RSSRCHLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    fclose(fp);
+  if(dialog_run("remsys",RSSRCHVT,RSSRCHLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
+
+  dialog_parse(inp_buffer);
+
   for(i=0;i<30;i++){
-    fgets(line,sizeof(line),fp);
-    if((cp=strchr(line,'\n'))!=NULL)*cp=0;
+    char *line=margv[i];
     strncpy(data[i],line,79);
     if(strcmp(" ",line) && (i%2)==0)check++;
   }
-  fgets(line,sizeof(line),fp);
-  fgets(line,sizeof(line),fp);
-  fgets(line,sizeof(line),fp);
-  fclose(fp);
-  unlink(fname);
-  if((cp=strchr(line,'\n'))!=NULL)*cp=0;
-  if(sameas(line,"CANCEL")){
+  
+  if(sameas(margv[32],margv[31])||sameas(margv[32],"CANCEL")){
     prompt(RSSRCHC);
     return;
   }
+
   if(!check)prompt(RSSRCHR);
 
-  if(sameas(getmsg(RSSRCHM),data[19]))data[19][0]=USX_MALE;
+  if(sameas(msg_get(RSSRCHM),data[19]))data[19][0]=USX_MALE;
   else data[19][0]=USX_FEMALE;
   data[19][1]=0;
 
   for(i=0;i<8;i++){
-    if(sameas(getmsg(RSSRCHS1+i),data[15])){
+    if(sameas(msg_get(RSSRCHS1+i),data[15])){
       sprintf(data[15],"%d",i+1);
       break;
     }
@@ -425,7 +417,7 @@ rsys_search()
   sprintf(command,"\\ls %s",USRDIR);
   if((fp=popen(command,"r"))==NULL)return;
 
-  nonblocking();
+  inp_nonblock();
 
   prompt(RSSRCHB);
   while(!feof(fp)){
@@ -435,16 +427,16 @@ rsys_search()
       prompt(RSSRCHC);
       break;
     }
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(RSSRCHC);
       break;
     }
     if(fscanf(fp,"%s",name)==1){
-      useracc usracc, *uacc=&usracc;
+      useracc_t usracc, *uacc=&usracc;
       int match=0;
 
-      if(!uinsys(name,0))loaduseraccount(name,uacc);
-      else memcpy(uacc,&othruseracc,sizeof(useracc));
+      if(!usr_insys(name,0))usr_loadaccount(name,uacc);
+      else memcpy(uacc,&othruseracc,sizeof(useracc_t));
 
       match=0;      
       for(i=0;i<15;i++){
@@ -529,6 +521,5 @@ rsys_search()
   }
   fclose(fp);
   print("\n");
-  blocking();
+  inp_block();
 }
-

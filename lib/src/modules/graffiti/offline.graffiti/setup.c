@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:44:25  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:47:33  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -99,46 +101,27 @@ void writeprefs(struct prefs *prefs)
 void
 setup()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
-  int i;
-
   readprefs(&prefs);
 
-  sprintf(fname,TMPDIR"/mailer%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\n%d\nOK\nCANCEL\n",
+	  prefs.flags&OGF_YES?"on":"off",
+	  prefs.flags&OGF_ANSI?"on":"off",
+	  prefs.numlines);
+
+  if(!dialog_run("offline.graffiti",OGVT,OGLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%s\n",prefs.flags&OGF_YES?"on":"off");
-  fprintf(fp,"%s\n",prefs.flags&OGF_ANSI?"on":"off");
-  fprintf(fp,"%d\n",prefs.numlines);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("offline.graffiti",OGVT,OGLT,fname);
+  if(sameas(margv[5],"OK")||sameas(margv[3],margv[5])){
+    if(sameas("on",margv[0]))prefs.flags|=OGF_YES;
+    else prefs.flags&=~OGF_YES;
+    if(sameas("on",margv[1]))prefs.flags|=OGF_ANSI;
+    else prefs.flags&=~OGF_ANSI;
+    prefs.numlines=atoi(margv[2]);
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
+    saveprefs(progname,sizeof(prefs),&prefs);
   }
-
-  for(i=0;i<6;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0){
-      if(sameas("on",s))prefs.flags|=OGF_YES;
-      else prefs.flags&=~OGF_YES;
-    } else if(i==1){
-      if(sameas("on",s))prefs.flags|=OGF_ANSI;
-      else prefs.flags&=~OGF_ANSI;
-    } else if(i==2){
-      prefs.numlines=atoi(s);
-    }
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(!sameas(s,"CANCEL"))saveprefs(progname,sizeof(prefs),&prefs);
 }

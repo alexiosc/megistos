@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 22:00:00  alexios
  * Paranoia additions to prevent premature death of bbsd.
@@ -60,6 +61,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -100,7 +102,7 @@ spawn(struct getty *g)
 
   switch(pid=fork()){
   case -1:
-    logerrorsys("Unable to fork() while spawning getty");
+    error_logsys("Unable to fork() while spawning getty");
     return;
   case 0:
     break;
@@ -121,7 +123,7 @@ spawnfresh()
 {
   int i;
 
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
     int t=time(NULL);
 
     /* We don't spawn telnet channels */
@@ -150,7 +152,7 @@ sepuku()
 {
   int i;
 
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
     if(gettys[i].pid>1){
       kill(gettys[i].pid,SIGTERM);
       kill(-gettys[i].pid,SIGTERM); /* Better yet, kill the entire pgrp */
@@ -159,7 +161,7 @@ sepuku()
 
   sleep(2);
 
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
     if(gettys[i].pid>1){
       kill(gettys[i].pid,SIGKILL);
       kill(-gettys[i].pid,SIGKILL); /* Better yet, kill the entire pgrp */
@@ -184,7 +186,7 @@ waitforchildren()
     pid=waitpid(-1,&status,WNOHANG);
 
     if(pid<0){
-      /*      logerror("waitpid() returns error (errno=%d).",errno); */
+      /*      error_log("waitpid() returns error (errno=%d).",errno); */
     } else if(pid==0)break;
 
     if(pid==bbslockd_pid){
@@ -192,7 +194,7 @@ waitforchildren()
       return;
     }
 
-    for(i=0;i<numchannels;i++){
+    for(i=0;i<chan_count;i++){
       if(gettys[i].pid==pid){
 	if(gettys[i].user[0]){
 #ifdef DEBUG
@@ -207,7 +209,7 @@ waitforchildren()
 	gettys[i].spawncount++;
 	if(gettys[i].spawncount>=MAXCOUNT){
 	  gettys[i].disabled=time(NULL);
-	  logerror("bbsgetty on %s respawning too fast; disabled for %d secs",
+	  error_log("bbsgetty on %s respawning too fast; disabled for %d secs",
 		   gettys[i].ttyname,DISABLETIME);
 	}
       }
@@ -223,7 +225,7 @@ waitforattached()
   char fname[256];
   struct stat st;
   
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
 
     if(!(gettys[i].flags&TTF_TELNET))continue;
     if(!gettys[i].pid)continue;
@@ -248,7 +250,7 @@ waitforattached()
     gettys[i].spawncount++;
     if(gettys[i].spawncount>=MAXCOUNT){
       gettys[i].disabled=time(NULL);
-      logerror("bbsgetty on %s respawning too fast; disabled for %d secs",
+      error_log("bbsgetty on %s respawning too fast; disabled for %d secs",
 	       gettys[i].ttyname,DISABLETIME);
     }
   }
@@ -272,6 +274,6 @@ void
 resetcounts()
 {
   int i;
-  for(i=0;i<numchannels;i++)gettys[i].spawncount=0;
+  for(i=0;i<chan_count;i++)gettys[i].spawncount=0;
 }
 

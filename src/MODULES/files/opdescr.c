@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -64,21 +66,21 @@ getfilenames(int pr)
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
     } else {
       prompt(pr);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     } else if(!strcmp(fn,"?")){
       listapproved();
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -98,7 +100,7 @@ op_descr()
 
   if(library.flags&LBF_OSDIR){
     prompt(ODESOS);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -106,7 +108,7 @@ op_descr()
   numfiles=expandspec(spec,1);
   if(numfiles==0){
     prompt(ODESERR);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -117,14 +119,14 @@ op_descr()
       if(!fileread(library.libnum,fr->fname,0,&f)) continue;
     
     prompt(ODESFIL,f.fname,i,numfiles,f.summary);
-    endcnc();
-    getinput(sizeof(f.summary)-1);
-    rstrin();
-    if(strlen(input)){
-      if(isX(input))break;
+    cnc_end();
+    inp_get(sizeof(f.summary)-1);
+    inp_raw();
+    if(strlen(inp_buffer)){
+      if(inp_isX(inp_buffer))break;
 
       bzero(f.summary,sizeof(f.summary));
-      strncpy(f.summary,input,sizeof(f.summary));
+      strncpy(f.summary,inp_buffer,sizeof(f.summary));
       fileupdate(&f);
     }
       
@@ -146,7 +148,7 @@ editdescr(struct fileidx *f)
   sprintf(fname,TMPDIR"/des-%05d",getpid());
 
   if((fd=open(fname,O_WRONLY|O_CREAT,0600))<0){
-    fatalsys("Unable to open() %s for writing.",fname);
+    error_fatalsys("Unable to open() %s for writing.",fname);
   }
   write(fd,f->description,strlen(f->description));
   close(fd);
@@ -156,7 +158,7 @@ editdescr(struct fileidx *f)
   stat(fname,&st);
   bzero(f->description,sizeof(f->description));
   if((fd=open(fname,O_RDONLY))<0){
-    fatalsys("Unable to open() %s for reading.",fname);
+    error_fatalsys("Unable to open() %s for reading.",fname);
   }
   read(fd,f->description,min(st.st_size,sizeof(f->description)));
   f->descrlen=strlen(f->description)+1;
@@ -178,7 +180,7 @@ op_long()
 
   if(library.flags&LBF_OSDIR){
     prompt(OLONOS);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -186,7 +188,7 @@ op_long()
   numfiles=expandspec(spec,1);
   if(numfiles==0){
     prompt(OLONERR);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -200,9 +202,9 @@ op_long()
       int yes,res;
       prompt(OLONINF,i,numfiles);
       fileinfo(&library,&f);
-      setinputflags(INF_HELP);
-      res=getbool(&yes,OLONCONT,0,OLONCND,0);
-      setinputflags(INF_NORMAL);
+      inp_setflags(INF_HELP);
+      res=get_bool(&yes,OLONCONT,0,OLONCND,0);
+      inp_clearflags(INF_HELP);
       if(res<0)continue;
       if(res==0)goto done;
       if(yes)editdescr(&f);

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:16  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 16:09:37  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -94,7 +96,7 @@ init()
   chmod(fname,0660);
   printf("Days since last cleanup: %d\n",dayssince);
   
-  sprintf(oldstatsdir,"%s/%ld",STATDIR,tdyear(today()));
+  sprintf(oldstatsdir,"%s/%d",STATDIR,(int)tdyear(today()));
   mkdir(oldstatsdir,0750);
   sprintf(everdir,"%s/EVER",STATDIR);
   mkdir(everdir,0750);
@@ -180,7 +182,7 @@ mergettystats(char *dir, char *name)
     int i;
 
     memset(&tty,0,sizeof(tty));
-    i=fscanf(in1,"%s %x %ld %ld %ld\n",tty.name,&tty.channel,
+    i=fscanf(in1,"%s %x %d %d %d\n",tty.name,&tty.channel,
 		 &tty.credits,&tty.minutes,&tty.calls);
     if(numttystats>=MAXTTYS)break;
     if(i==5){
@@ -195,7 +197,7 @@ mergettystats(char *dir, char *name)
     int i, j;
 
     memset(&tty,0,sizeof(tty));
-    i=fscanf(in2,"%s %x %ld %ld %ld\n",tty.name,&tty.channel,
+    i=fscanf(in2,"%s %x %d %d %d\n",tty.name,&tty.channel,
 	     &tty.credits,&tty.minutes,&tty.calls);
     if(i==5){
       int add=1;
@@ -219,7 +221,7 @@ mergettystats(char *dir, char *name)
 
   qsort(ttystats,numttystats,sizeof(struct ttystats),ttycmp);
   for(i=0;i<numttystats;i++){
-    fprintf(out,"%s %x %ld %ld %ld\n",ttystats[i].name,ttystats[i].channel,
+    fprintf(out,"%s %x %d %d %d\n",ttystats[i].name,ttystats[i].channel,
 	    ttystats[i].credits,ttystats[i].minutes,ttystats[i].calls);
   }
   fclose(out);
@@ -269,7 +271,7 @@ mergebaudstats(char *dir, char *name)
     int i;
 
     memset(&baud,0,sizeof(baud));
-    i=fscanf(in1,"%ld %ld %ld %ld\n",&baud.baud,
+    i=fscanf(in1,"%d %d %d %d\n",&baud.baud,
 	     &baud.credits,&baud.minutes,&baud.calls);
     if(numbaudstats>=MAXBAUDS)break;
     if(i==4){
@@ -285,7 +287,7 @@ mergebaudstats(char *dir, char *name)
     int i,j;
 
     memset(&baud,0,sizeof(baud));
-    i=fscanf(in2,"%ld %ld %ld %ld\n",&baud.baud,
+    i=fscanf(in2,"%d %d %d %d\n",&baud.baud,
 		 &baud.credits,&baud.minutes,&baud.calls);
     
     if(i==4){
@@ -308,7 +310,7 @@ mergebaudstats(char *dir, char *name)
   
   qsort(baudstats,numbaudstats,sizeof(struct baudstats),baudcmp);
   for(i=0;i<numbaudstats;i++){
-    fprintf(out,"%ld %ld %ld %ld\n",baudstats[i].baud,
+    fprintf(out,"%d %d %d %d\n",baudstats[i].baud,
 	    baudstats[i].credits,baudstats[i].minutes,baudstats[i].calls);
   }
   fclose(out);
@@ -358,7 +360,7 @@ mergeclsstats(char *dir, char *name)
     int i;
 
     memset(&cls,0,sizeof(struct clsstats));
-    i=fscanf(in1,"%s %ld %ld\n",cls.name,&cls.credits,&cls.minutes);
+    i=fscanf(in1,"%s %d %d\n",cls.name,&cls.credits,&cls.minutes);
     if(numclsstats>=MAXCLSS)break;
     if(i==3){
       memcpy(&clsstats[numclsstats],&cls,sizeof(struct clsstats));
@@ -372,7 +374,7 @@ mergeclsstats(char *dir, char *name)
     int i,j;
 
     memset(&cls,0,sizeof(struct clsstats));
-    i=fscanf(in2,"%s %ld %ld\n",cls.name,&cls.credits,&cls.minutes);
+    i=fscanf(in2,"%s %d %d\n",cls.name,&cls.credits,&cls.minutes);
 
     if(i==3){
       int add=1;
@@ -393,7 +395,7 @@ mergeclsstats(char *dir, char *name)
 
   qsort(clsstats,numclsstats,sizeof(struct clsstats),clscmp);
   for(i=0;i<numclsstats;i++){
-    fprintf(out,"%s %ld %ld\n",clsstats[i].name,
+    fprintf(out,"%s %d %d\n",clsstats[i].name,
 	    clsstats[i].credits,clsstats[i].minutes);
   }
   fclose(out);
@@ -454,7 +456,7 @@ mergemodstats(char *dir, char *name)
     strncpy(mod.name,cp,sizeof(mod.name));
     cp+=len+1;
 
-    i=sscanf(cp,"%ld %ld\n",&mod.credits,&mod.minutes);
+    i=sscanf(cp,"%d %d\n",&mod.credits,&mod.minutes);
     if(i==2){
       memcpy(&modstats[nummodstats],&mod,sizeof(struct modstats));
       nummodstats++;
@@ -477,7 +479,7 @@ mergemodstats(char *dir, char *name)
     strncpy(mod.name,cp,sizeof(mod.name));
     cp+=len+1;
     
-    i=sscanf(cp,"%ld %ld\n",&mod.credits,&mod.minutes);
+    i=sscanf(cp,"%d %d\n",&mod.credits,&mod.minutes);
     if(i==2){
       int j,add=1;
       for(j=0;j<nummodstats;j++)if(!strcmp(modstats[j].name,mod.name)){
@@ -496,7 +498,7 @@ mergemodstats(char *dir, char *name)
   
   qsort(modstats,nummodstats,sizeof(struct modstats),modcmp);
   for(i=0;i<nummodstats;i++){
-    fprintf(out,"%d %s %ld %ld\n",strlen(modstats[i].name),
+    fprintf(out,"%d %s %d %d\n",strlen(modstats[i].name),
 	    modstats[i].name,modstats[i].credits,modstats[i].minutes);
   }
   fclose(out);
@@ -523,7 +525,7 @@ getstats()
 {
   char fname[256];
 
-  setauditfile(CLNUPAUDITFILE);
+  audit_setfile(CLNUPAUDITFILE);
   audit("CLEANUP",AUDIT(STATCUB),dayssince);
 
   printf("\nCalculating daily usage statistics.\n");
@@ -564,7 +566,7 @@ getstats()
   printf("\nDone generating statistics!\n\n");
 
   audit("CLEANUP",AUDIT(STATCUE));
-  resetauditfile();
+  audit_resetfile();
 }
 
 
@@ -572,5 +574,3 @@ void
 done()
 {
 }
-
-

@@ -1,4 +1,49 @@
-/*****************************************************************************\
+/** @name    errors.h
+    @memo    Error logging functionality.
+    @author  Alexios
+
+    @doc
+
+    This header file defines means of reporting errors to various types of
+    recipients. There are basically three different levels of errors:
+    
+    \begin{description}
+
+    \item[Internal errors] These are recorded internally by appending them to
+    the error log. The fact that an error occurred is also logged into the
+    audit trail (though the exact nature of the error isn't). This type of
+    error reporting is silent, making it suitable for situations where we don't
+    want the user to know (mostly because we're sneaky offspring of female
+    canines).
+
+    \item[(Plain) errors] They are identical to internal errors, but a message
+    is sent to the user after the error is logged and audited.
+
+    \item[Fatal errors] These ones are pretty intrusive. In addition to
+    logging, auditing and notifying the user, the current process is
+    terminated.
+
+    \end{description}
+
+    There are variants of the above error logging styles to log UNIX system
+    errors. These are exactly as above, but the logging functions interpret the
+    value of the UNIX {\tt errno} variable and log its numerical value and
+    textual explanation (if your C library has this information in the header
+    files, of course).
+    
+    Since error reporting should be available to non-interactive processes too,
+    there is a mechanism to inhibit the user notification part of the reporting
+    process. Please note that, any people with enough access to receive audit
+    trail entries by automatic system paging will still get notified about
+    these silent errors, since they are audited (depending on their setup of
+    the personal audit trail filters, et cetera).
+
+    Original banner, legalese and change history follow
+
+    {\footnotesize
+    \begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     errors.h                                                     **
  **  AUTHORS:  Alexios                                                      **
@@ -21,15 +66,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:51  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:13:24  alexios
  * Added an #include directive to read in errno.h. Some systems
@@ -49,8 +95,12 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
 
+\end{verbatim}
+} */
+
+/*@{*/
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -66,57 +116,235 @@
 #include <errno.h>
 
 
-/* Log an error from program p, using printf format f and params p1..6 */
+/** Log a plain error.
 
-void _logerror(char *file, int line, char *format, ...);
-void _logerrorsys(char *file, int line, int err, char *format, ...);
+    Logs and audits an error, notifying the user. Don't worry about the unusual
+    nature of most of the arguments. They are filled in automatically by the
+    helper macro, {\tt logerror}. In fact, you {\em must not} use this function
+    directly.
 
-#define logerror(f...) _logerror(__FILE__,__LINE__,##f)
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
 
-#define logerrorsys(f...) \
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_log() */
+
+void _logerror(char *file, uint32 line, char *format, ...);
+
+
+/** Log a plain system error.
+
+    Logs and audits a system error, along with its standard UNIX
+    explanation. The user is notified. Don't worry about the unusual nature of
+    most of the arguments. They are filled in automatically by the helper
+    macro, {\tt logerror}. In fact, you {\em must not} use this function
+    directly.
+
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
+
+    @param err the value of {\tt errno}.
+
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_logsys() */
+
+void _logerrorsys(char *file, uint32 line, int32 err, char *format, ...);
+
+
+/** Proper way to log a plain error.
+
+    Logs and audits a non-fatal error. {\em This} is the function you should
+    use in order to log an error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+*/
+
+#define error_log(fmt...) _logerror(__FILE__,__LINE__,##fmt)
+
+
+/** Proper way to log a system error.
+
+    Logs and audits a non-fatal system error, along with the explanation of the
+    current value of {\tt errno}. {\em This} is the function you should use in
+    order to log a system error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+*/
+
+#define error_logsys(fmt...) \
 {\
-   int i=errno; \
-   _logerrorsys(__FILE__,__LINE__,i,##f);\
+   int32 i=errno; \
+   _logerrorsys(__FILE__,__LINE__,i,##fmt);\
 }
 
 
-/* Same as logerr, but reports internal errors (no user notification) */
 
-void _interror(char *file, int line, char *format, ...);
-void _interrorsys(char *file, int line, int err, char *format, ...);
 
-#define interror(f...) _interror(__FILE__,__LINE__,##f)
+/** Log an internal error.
 
-#define interrorsys(f...) \
+    Logs and audits an error silently (no user notification). Don't worry about
+    the unusual nature of most of the arguments. They are filled in
+    automatically by the helper macro, {\tt logerror}. In fact, you {\em must
+    not} use this function directly.
+
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
+
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_int()
+*/
+
+void _interror(char *file, uint32 line, char *format, ...);
+
+
+/** Log an internal system error.
+
+    Logs and audits a system error, along with its standard UNIX
+    explanation. The user is {\em not} notified. Don't worry about the unusual
+    nature of most of the arguments. They are filled in automatically by the
+    helper macro, {\tt logerror}. In fact, you {\em must not} use this function
+    directly.
+
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
+
+    @param err the value of {\tt errno}.
+
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_intsys()
+*/
+
+void _interrorsys(char *file, uint32 line, int32 err, char *format, ...);
+
+
+/** Proper way to log an internal error.
+
+    Logs and audits an internal error. {\em This} is the function you should
+    use in order to log such an error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+*/
+
+#define error_int(fmt...) _interror(__FILE__,__LINE__,##fmt)
+
+
+/** Proper way to log an internal system error.
+
+    Logs and audits an internal system error, along with the explanation of the
+    current value of {\tt errno}. {\em This} is the function you should use in
+    order to log a system error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+*/
+
+#define error_intsys(fmt...) \
 {\
-   int i=errno; \
-   _interrorsys(__FILE__,__LINE__,i,##f);\
+   int32 i=errno; \
+   _interrorsys(__FILE__,__LINE__,i,##fmt);\
 }
 
 
-/* Log a fatal error. Like logerr, but exits the program as well */
+/** Log a fatal error.
+
+    Logs and audits a fatal error. The user is notified and the current process
+    is terminated. Don't worry about the unusual nature of most of the
+    arguments. They are filled in automatically by the helper macro, {\tt
+    logerror}. In fact, you {\em must not} use this function directly.
+
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
+
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_fatal() */
 
 void _fatal(char *file, int line, char *format, ...);
+
+
+/** Log a fatal system error.
+
+    Logs and audits a fatal system error, along with its standard UNIX
+    explanation. The user is notified and the current process is
+    terminated. Don't worry about the unusual nature of most of the
+    arguments. They are filled in automatically by the helper macro, {\tt
+    logerror}. In fact, you {\em must not} use this function directly.
+
+    @param file the source filename where the error occurred.
+    
+    @param line the line number executing at the time of the error.
+
+    @param err the value of {\tt errno}.
+
+    @param format a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.
+
+    @see error_fatalsys() */
+
 void _fatalsys(char *file, int line, int err, char *format, ...);
 
-#define fatal(f...) _fatal(__FILE__,__LINE__,##f)
 
-#define fatalsys(f...) \
+/** Proper way to log a fatal error.
+
+    Logs and audits a fatal error. {\em This} is the function you should use in
+    order to log such an error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.  */
+
+#define error_fatal(fmt...) _fatal(__FILE__,__LINE__,##fmt)
+
+
+/** Proper way to log a fatal system error.
+
+    Logs and audits a fatal system error, along with the explanation of the
+    current value of {\tt errno}. The user is notified and the current process
+    is terminated. {\em This} is the function you should use in order to log a
+    system error.
+
+    @param fmt a {\tt printf()}-like format string, followed by any
+           necessary arguments, as required by the format specifiers.  */
+
+#define error_fatalsys(fmt...) \
 {\
-   int i=errno; \
-   _fatalsys(__FILE__,__LINE__,i,##f);\
+   int32 i=errno; \
+   _fatalsys(__FILE__,__LINE__,i,##fmt);\
 }
 
 
-/* NO error messages dumped to the tty. Useful for gettys and things */
+/** Enable or disable user notifications.
 
-void noerrormessages();
+    @param state Pass zero to disable all user notifications. Non-zero values
+    enable notifications.
+*/
 
-
-/* YES error messages. To those sitting in front of a screen for too  */
-/* long, like me: This was a joke guys. So there.                     */
-
-void yeserrormessages();
+void error_setnotify(int state);
 
 
 #endif /* ERRORS_H */
+
+
+/*@}*/
+
+/*
+LocalWords: Alexios doc tt errno legalese otnotesize alexios Exp bbs GPL
+LocalWords: ifndef VER endif logerror em param printf uint logsys int fmt
+LocalWords: logerrorsys interror intsys interrorsys fatalsys setnotify
+*/

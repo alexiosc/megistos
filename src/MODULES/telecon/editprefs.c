@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 16:10:27  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -76,8 +78,7 @@
 void
 editprefs()
 {
-  FILE *fp;
-  char fname[256], s[80], *cp;
+  char tmp[256];
   int i, nax=0, che=0, chx=0;
   struct tlcuser temptlcu;
 
@@ -86,88 +87,77 @@ editprefs()
   leavechannel();
   usermsg(ENTEDIT);
 
-  sprintf(fname,TMPDIR"/tlc%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    return;
-  }
-
-  fprintf(fp,"%s\n",temptlcu.entrystg);
-  fprintf(fp,"%s\n",temptlcu.exitstg);
-  fprintf(fp,"%s\n",temptlcu.topic);
-  if(temptlcu.flags&TLF_BEGUNINV)fprintf(fp,"%s\n",getmsg(CHANST1));
-  else if(temptlcu.flags&TLF_BEGINV)fprintf(fp,"%s\n",getmsg(CHANST2));
-  else fprintf(fp,"%s\n",getmsg(CHANST3));
-  fprintf(fp,"%s\n",getmsg(temptlcu.flags&TLF_STARTMAIN?DEFCHAN1:DEFCHAN2));
-  fprintf(fp,"%d\n",temptlcu.chatinterval);
-  fprintf(fp,"%s\n",temptlcu.actions?"on":"off");
-  fprintf(fp,"%s\n",getmsg(temptlcu.colour+COLOUR1-1));
+  sprintf(inp_buffer,"%s\n%s\n%s\n",
+	  temptlcu.entrystg,temptlcu.exitstg,temptlcu.topic);
+  if(temptlcu.flags&TLF_BEGUNINV)strcat(inp_buffer,msg_get(CHANST1));
+  else if(temptlcu.flags&TLF_BEGINV)strcat(inp_buffer,msg_get(CHANST2));
+  else strcat(inp_buffer,msg_get(CHANST3));
+  strcat(inp_buffer,"\n");
+  strcat(inp_buffer,msg_get(temptlcu.flags&TLF_STARTMAIN?DEFCHAN1:DEFCHAN2));
+  sprintf(tmp,"\n%d\n%s\n%s\nOK\nCANCEL\n",
+	  temptlcu.chatinterval,
+	  temptlcu.actions?"on":"off",
+	  msg_get(temptlcu.colour+COLOUR1-1));
+  strcat(inp_buffer,tmp);
   
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("telecon",UEDITVT,UEDITLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
+  if(dialog_run("telecon",UEDITVT,UEDITLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   } 
 
-  for(i=0;i<11;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
+  dialog_parse(inp_buffer);
 
-    if((i==0)&&strcmp(s,temptlcu.entrystg)){
-      strcpy(temptlcu.entrystg,s);
-      che=1;
-    } else if((i==1)&&strcmp(s,temptlcu.exitstg)){
-      strcpy(temptlcu.exitstg,s);
-      chx=1;
-    } else if(i==2)strcpy(temptlcu.topic,s);
-    else if(i==3){
-      int j;
-      temptlcu.flags&=~(TLF_BEGUNINV|TLF_BEGINV|TLF_BEGPANEL);
-      for(j=0;j<3;j++)if(!strcmp(getmsg(CHANST1+j),s)){
-	if(!j)temptlcu.flags|=TLF_BEGUNINV;
-	else if(j==1)temptlcu.flags|=TLF_BEGINV;
-	else temptlcu.flags|=TLF_BEGPANEL;
-	break;
-      }
-    } else if(i==4){
-      if(!strcmp(getmsg(DEFCHAN1),s))temptlcu.flags|=TLF_STARTMAIN;
-      else temptlcu.flags&=~TLF_STARTMAIN;
-    } else if(i==5){
-      temptlcu.chatinterval=thisuseraux.interval;
-      thisuseraux.interval=(temptlcu.chatinterval=atoi(s))*60;
-    } else if(i==6){
-      if(!haskey(&thisuseracc,actkey)){
-	temptlcu.actions=thisuseraux.actions=0;
-	prompt(ACTNAX);
-      } else temptlcu.actions=thisuseraux.actions=sameas(s,"on");
-    } else if(i==7){
-      int j;
-      for(j=0;j<15;j++){
-	if(!strcmp(s,getmsg(COLOUR1+j))){
-	  temptlcu.colour=j+1;
+  if(sameas(margv[10],"OK")||sameas(margv[10],margv[8])){
+    for(i=0;i<11;i++){
+      char *s=margv[i];
+      if((i==0)&&strcmp(s,temptlcu.entrystg)){
+	strcpy(temptlcu.entrystg,s);
+	che=1;
+      } else if((i==1)&&strcmp(s,temptlcu.exitstg)){
+	strcpy(temptlcu.exitstg,s);
+	chx=1;
+      } else if(i==2)strcpy(temptlcu.topic,s);
+      else if(i==3){
+	int j;
+	temptlcu.flags&=~(TLF_BEGUNINV|TLF_BEGINV|TLF_BEGPANEL);
+	for(j=0;j<3;j++)if(!strcmp(msg_get(CHANST1+j),s)){
+	  if(!j)temptlcu.flags|=TLF_BEGUNINV;
+	  else if(j==1)temptlcu.flags|=TLF_BEGINV;
+	  else temptlcu.flags|=TLF_BEGPANEL;
 	  break;
+	}
+      } else if(i==4){
+	if(!strcmp(msg_get(DEFCHAN1),s))temptlcu.flags|=TLF_STARTMAIN;
+	else temptlcu.flags&=~TLF_STARTMAIN;
+      } else if(i==5){
+	temptlcu.chatinterval=thisuseraux.interval;
+	thisuseraux.interval=(temptlcu.chatinterval=atoi(s))*60;
+      } else if(i==6){
+	if(!key_owns(&thisuseracc,actkey)){
+	  temptlcu.actions=thisuseraux.actions=0;
+	  prompt(ACTNAX);
+	} else temptlcu.actions=thisuseraux.actions=sameas(s,"on");
+      } else if(i==7){
+	int j;
+	for(j=0;j<15;j++){
+	  if(!strcmp(s,msg_get(COLOUR1+j))){
+	    temptlcu.colour=j+1;
+	    break;
+	  }
 	}
       }
     }
-  }
 
-  fclose(fp);
-  unlink(fname);
-  if(!sameas(s,"CANCEL")){
     prompt(EDITOK);
 
     if(che){
-      if(!haskey(&thisuseracc,msgkey)){
+      if(!key_owns(&thisuseracc,msgkey)){
 	nax=1;
 	prompt(MSGNAX);
-      } else if(!canpay(msgchg)){
+      } else if(!usr_canpay(msgchg)){
 	prompt(MSGNCRE);
       } else {
-	chargecredits(msgchg);
+	usr_chargecredits(msgchg);
 	prompt(MSGCHE);
       }
 
@@ -176,12 +166,12 @@ editprefs()
     }
 
     if(chx){
-      if(!haskey(&thisuseracc,msgkey)){
+      if(!key_owns(&thisuseracc,msgkey)){
 	if(!nax)prompt(MSGNAX);
-      } else if(!canpay(msgchg)){
+      } else if(!usr_canpay(msgchg)){
 	prompt(MSGNCRX);
       } else {
-	chargecredits(msgchg);
+	usr_chargecredits(msgchg);
 	prompt(MSGCHX);
       }
       
@@ -191,7 +181,7 @@ editprefs()
     
     savetlcuser(thisuseracc.userid,&temptlcu);
     if((i=loadtlcuser(thisuseracc.userid,&tlcu))==0){
-      fatal("Unable to re-read tlcuser %s",thisuseracc.userid);
+      error_fatal("Unable to re-read tlcuser %s",thisuseracc.userid);
     }
 
     thisuseraux.interval=temptlcu.chatinterval*60;

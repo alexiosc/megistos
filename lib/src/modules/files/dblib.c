@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
  * Added libdelete(). Fixed bug in libgetchild().
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -74,7 +76,7 @@ dblibopen()
   d_dbfpath(FILELIBDBDIR);
   d_dbdpath(FILELIBDBDIR);
   if(d_open("dblib","s")!=S_OKAY){
-    fatal("Cannot open file library database (db_status %d).",
+    error_fatal("Cannot open file library database (db_status %d).",
 	  db_status);
   }
   d_dbget(&id_dblib);
@@ -87,7 +89,7 @@ libgetfirst(struct libidx *lib)
   d_dbset(id_dblib);
   if(d_keyfrst(LIBNUM)==S_NOTFOUND)return 0;
   else if(db_status!=S_OKAY || d_recread(lib)!=S_OKAY){
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
   }
   return 1;
 }
@@ -100,16 +102,16 @@ libgetnext(struct libidx *lib)
 
   if(d_keyfind(LIBNUM,&(lib->libnum))==S_NOTFOUND)return 0;
   if(db_status!=S_OKAY){
-    fatal("Typhoon call 1 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 1 failed with db_status=%d",db_status);
   }
 
   if(d_keynext(LIBNUM)==S_NOTFOUND)return 0;
   if(db_status!=S_OKAY){
-    fatal("Typhoon call 2 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 2 failed with db_status=%d",db_status);
   }
 
   if(d_recread(lib)!=S_OKAY){
-    fatal("Typhoon call 3 failed with db_status=%d",db_status);
+    error_fatal("Typhoon call 3 failed with db_status=%d",db_status);
   }
   return 1;
 }
@@ -133,7 +135,7 @@ libexists(char *s,int parent)
     }
     return 1;
   } else if(db_status==S_NOTFOUND)return 0;
-  fatal("Typhoon call failed with db_status=%d",db_status);
+  error_fatal("Typhoon call failed with db_status=%d",db_status);
   return -1;			/* Gets rid of warning */
 }
 
@@ -143,7 +145,7 @@ libdelete(int libnum)
 {
   if(libexistsnum(libnum)){
     if(d_delete()!=S_OKAY){
-      fatal("Typhoon call failed with db_status=%d",db_status);
+      error_fatal("Typhoon call failed with db_status=%d",db_status);
     }
     return 1;
   }
@@ -158,7 +160,7 @@ libexistsnum(int num)
   d_keyfind(LIBNUM,&num);
   if(db_status==S_OKAY)return 1;
   else if(db_status==S_NOTFOUND)return 0;
-  fatal("Typhoon call failed with db_status=%d",db_status);
+  error_fatal("Typhoon call failed with db_status=%d",db_status);
   return -1;			/* Gets rid of warning */
 }
 
@@ -170,7 +172,7 @@ libread(char *s, int parent, struct libidx *library)
   if(!libexists(s,parent))return 0;
   d_recread(library);
   if(db_status==S_OKAY)return 1;
-  fatal("Typhoon call failed with db_status=%d",db_status);
+  error_fatal("Typhoon call failed with db_status=%d",db_status);
   return -1;			/* Gets rid of warning */
 }
 
@@ -182,7 +184,7 @@ libreadnum(int num, struct libidx *library)
   if(!libexistsnum(num))return 0;
   d_recread(library);
   if(db_status==S_OKAY)return 1;
-  fatal("Typhoon call failed with db_status=%d",db_status);
+  error_fatal("Typhoon call failed with db_status=%d",db_status);
   return -1;			/* Gets rid of warning */
 }
 
@@ -193,7 +195,7 @@ libcreate(struct libidx *lib)
   d_dbset(id_dblib);
   if(d_fillnew(LIBIDX,lib)==S_OKAY)return;
   else
-    fatal("Typhoon call failed with db_status=%d",db_status);
+    error_fatal("Typhoon call failed with db_status=%d",db_status);
 }
 
 
@@ -205,7 +207,7 @@ libmaxnum()
   if(d_keylast(LIBNUM)==S_OKAY){
     d_keyread(&retval);
     if(db_status!=S_OKAY){
-      fatal("Unable to read maximum LIBNUM key (db_status=%d)",
+      error_fatal("Unable to read maximum LIBNUM key (db_status=%d)",
 	    db_status);
     }
   }
@@ -252,15 +254,15 @@ libinstfile(struct libidx *lib, struct fileidx *f, int bytes, int add)
   char lock[256];
 
   sprintf(lock,LIBUPDLOCK,lib->libnum);
-  if(waitlock(lock,10)>0){
-    fatal("Timeout waiting for library \"%s\" update lock.",
+  if(lock_wait(lock,10)>0){
+    error_fatal("Timeout waiting for library \"%s\" update lock.",
 	  lib->keyname);
   }
 
-  placelock(lock,"libinstfile");
+  lock_place(lock,"libinstfile");
 
   if(!libreadnum(lib->libnum,lib)){
-    fatal("Library %s disappeared despite lock!",lib->keyname);
+    error_fatal("Library %s disappeared despite lock!",lib->keyname);
   }
 
   if(f->approved){
@@ -296,8 +298,8 @@ libinstfile(struct libidx *lib, struct fileidx *f, int bytes, int add)
   /* Now write the library and release the lock */
 
   if(!libupdate(lib)){
-    fatal("Library %s disappeared despite lock!",lib->keyname);
+    error_fatal("Library %s disappeared despite lock!",lib->keyname);
   }
 
-  rmlock(lock);
+  lock_rm(lock);
 }

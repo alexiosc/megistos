@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  2000/01/06 11:42:07  alexios
  * Added variable pgstmo to denote the length of time after a
@@ -74,7 +75,7 @@ struct rsysopt {
 };
 
 extern int            COMMANDS;
-extern promptblk      *msg;
+extern promptblock_t      *msg;
 extern struct rsysopt commands[];
 
 

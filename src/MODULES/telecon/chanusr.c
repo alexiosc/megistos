@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:22  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:10:27  alexios
  * Added autoconf support. Other slight fixes.
@@ -60,6 +61,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -86,9 +88,9 @@ makechanusr(char *userid, int access)
 
   usr.flags=access;
 
-  uinsys(userid,0);
+  usr_insys(userid,0);
   if(strcmp(userid,othruseracc.userid)){
-    fatal("Unable to read account for user %s",userid);
+    error_fatal("Unable to read account for user %s",userid);
   }
 
   usr.sex=othruseracc.sex;
@@ -115,18 +117,18 @@ readchanusr(char *channel, char *userid)
   }
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open existing channel user file %s",fname);
+    error_fatalsys("Unable to open existing channel user file %s",fname);
   }
 
   if(fread(&retval,sizeof(struct chanusr),1,fp)!=1){
-    fatalsys("Unable to write to channel user file %s",fname);
+    error_fatalsys("Unable to write to channel user file %s",fname);
   }
 
   fclose(fp);
   
   /* Delete leftover channel files for users who aren't on-line now */
 
-  if(!uinsys(userid,0)){
+  if(!usr_insys(userid,0)){
     unlink(fname);
     return NULL;
   }
@@ -153,11 +155,11 @@ writechanusr(char *channel, struct chanusr *wusr)
   sprintf(fname,"%s/%s/%s%s",TELEDIR,mkchfn(channel),wusr->userid,
 	  wusr->flags&CUF_PRESENT?"+":"-");
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to open channel user file %s",fname);
+    error_fatalsys("Unable to open channel user file %s",fname);
   }
 
   if(fwrite(wusr,sizeof(struct chanusr),1,fp)!=1){
-    fatalsys("Unable to write to channel user file %s",fname);
+    error_fatalsys("Unable to write to channel user file %s",fname);
   }
 
   fclose(fp);

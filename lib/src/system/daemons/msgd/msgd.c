@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 22:04:23  alexios
  * Removed periodic reindexing of message base -- not needed.
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -131,22 +133,22 @@ mainloop()
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(getuid()){
     fprintf(stderr, "%s: getuid: not super-user\n", argv[0]);
     exit(1);
   }
 
   {
-    promptblk *msg;
-    noerrormessages();
-    msg=opnmsg("emailclubs");
-    tmreidx=numopt(TMREIDX,5,32767)*60;
-    tmnetml=numopt(TMNETML,5,32767)*60;
-    clsmsg(msg);
+    promptblock_t *msg;
+    error_setnotify(0);
+    msg=msg_open("emailclubs");
+    tmreidx=msg_int(TMREIDX,5,32767)*60;
+    tmnetml=msg_int(TMNETML,5,32767)*60;
+    msg_close(msg);
   }
 
   switch(fork()){
@@ -159,12 +161,14 @@ main(int argc, char *argv[])
     exit(0);
   }
 
-  initmodule(INITSYSVARS);
+  mod_init(INI_SYSVARS);
 
   storepid();
   ioctl(0,TIOCNOTTY,NULL);
 
   mainloop();
+
+  return 0;
 }
 
 

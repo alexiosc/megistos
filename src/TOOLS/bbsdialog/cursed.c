@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/08/13 17:09:11  alexios
  * Added call to resetinactivity() to handle slightly borken (sic)
@@ -38,7 +39,7 @@
  * handles these.
  *
  * Revision 0.7  1999/07/18 22:07:30  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:30:50  alexios
  * Added autoconf support. Added tentative support for
@@ -52,13 +53,13 @@
  * Added GPL legalese to the top of this file.
  *
  * Revision 0.3  1997/11/05 10:49:19  alexios
- * Reverted to using getmsg() instead of xlgetmsg() since emud()
+ * Reverted to using msg_get() instead of xlgetmsg() since emud()
  * takes care of translations for everything passing through it
  * (even shell sessions).
  *
  * Revision 0.2  1997/09/12 13:35:04  alexios
  * Added a call to the fieldhelp() function. Fixed calls to
- * getmsg() that would return untranslated prompt blocks. Now
+ * msg_get() that would return untranslated prompt blocks. Now
  * all prompts are properly translated for the right terminal
  * type.
  *
@@ -71,6 +72,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -126,11 +128,11 @@ completeclass(char *s)
 {
   int i;
   
-  for(i=0;i<numuserclasses;i++)if(sameto(s,userclasses[i].name)){
-    strcpy(s,userclasses[i].name);
+  for(i=0;i<cls_count;i++)if(sameto(s,cls_classes[i].name)){
+    strcpy(s,cls_classes[i].name);
     return;
   }
-  strcpy(s,userclasses[0].name);
+  strcpy(s,cls_classes[0].name);
 }
 
 
@@ -531,7 +533,7 @@ mainloop()
 
   for(;;){
     drawfield(curfield);
-    resetinactivity();
+    inp_resetidle();
     switch(c=getch()){
     case 9:
     case 14:
@@ -606,13 +608,13 @@ parsetemplate()
   char parms[1024], *cp, *ep, dataline[257];
   int state=0, len=0, n,y,x, sx=0,sy=0;
   int fg=7, bg=0, bold=0, quote=0, i;
-  char *msgbuf=getmsg(vtnum);
+  char *msg_buffer=msg_get(vtnum);
 
   if((data=fopen(dfname,"r"))==NULL){
-    fatalsys("Unable to open data file %s",dfname);
+    error_fatalsys("Unable to open data file %s",dfname);
   }
 
-  while ((c=*msgbuf++)!=0){
+  while ((c=*msg_buffer++)!=0){
     if(c==13)continue;
     if (c==27 && !state) state=1;
     else if (c=='[' && state==1){
@@ -761,7 +763,7 @@ parsetemplate()
 	    numobjects++;
 	    if((obj.s.data=alcmem(obj.s.max+1))==NULL || 
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    dataline[0]=0;
 	    fgets(dataline,sizeof(dataline),data);
@@ -786,7 +788,7 @@ parsetemplate()
 	    numobjects++;
 	    if((obj.n.data=alcmem(obj.n.shown+1))==NULL || 
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    dataline[0]=0;
 	    fgets(dataline,sizeof(dataline),data);
@@ -806,7 +808,7 @@ parsetemplate()
 	    cp=&parms[i];
 	    if((obj.l.options=alcmem(strlen(cp)+1))==NULL || 
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    memset(obj.l.options,0,strlen(cp)+1);
 	    strncpy(obj.l.options,cp,strlen(cp));
@@ -836,7 +838,7 @@ parsetemplate()
 	  obj.t.off=parms[2];
 	  cp=&parms[i];
 	  if((object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	    fatal("Unable to allocate dialog object buffers");
+	    error_fatal("Unable to allocate dialog object buffers");
 	  }
 	  dataline[0]=0;
 	  fgets(dataline,sizeof(dataline),data);
@@ -854,7 +856,7 @@ parsetemplate()
 	    cp=&parms[i];
 	    if((obj.b.label=alcmem(strlen(cp)+1))==NULL ||
 	       (object=realloc(object,sizeof(union object)*numobjects))==NULL){
-	      fatal("Unable to allocate dialog object buffers");
+	      error_fatal("Unable to allocate dialog object buffers");
 	    }
 	    if((ep=strchr(cp,'"'))!=NULL)*ep=0;
 	    strncpy(obj.b.label,cp,strlen(cp)+1);

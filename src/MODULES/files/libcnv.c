@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:40:03  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -154,11 +156,11 @@ parseopts(int argc, char **argv)
 int
 cnvmain(int argc, char **argv)
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   parseopts(argc, argv);
   print_endian_warning();
   
-  msg=opnmsg("files");
+  msg=msg_open("files");
   readsettings();
 
   dblibopen();

@@ -30,11 +30,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:38  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1999/07/18 22:03:05  alexios
- * Changed a few fatal() calls to fatalsys(). Minor fixes.
+ * Changed a few error_fatal() calls to error_fatalsys(). Minor fixes.
  *
  * Revision 1.0  1998/12/27 16:25:21  alexios
  * Initial revision
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -72,7 +74,7 @@ static void
 getpwbbs()
 {
   struct passwd *pass=getpwnam(BBSUSERNAME);
-  if(pass==NULL)fatal("User %s not found.",BBSUSERNAME);
+  if(pass==NULL)error_fatal("User %s not found.",BBSUSERNAME);
   bbsuid=pass->pw_uid;
   bbsgid=pass->pw_gid;
 }
@@ -88,7 +90,7 @@ mksocket()
 
   /* Create the socket */
   if((locksocket=socket(AF_UNIX,SOCK_STREAM,0))<0){
-    fatalsys("Unable to create bbslockd socket");
+    error_fatalsys("Unable to create bbslockd socket");
   }
 
   /* Name the socket */
@@ -99,7 +101,7 @@ mksocket()
 
   /* Bind the socket to the name */
   if(bind(locksocket,(struct sockaddr*)&name,len)<0){
-    fatalsys("Failed to bind bbslockd socket to %s",BBSLOCKD_SOCKET);
+    error_fatalsys("Failed to bind bbslockd socket to %s",BBSLOCKD_SOCKET);
   }
 
   /* Set ownership and permissions of the socket */
@@ -113,7 +115,7 @@ storepid()
 {
   FILE *fp=fopen(BBSETCDIR"/bbslockd.pid","w");
   if(fp==NULL){
-    fatalsys("Unable to open "BBSETCDIR"/bbslockd.pid for writing.");
+    error_fatalsys("Unable to open "BBSETCDIR"/bbslockd.pid for writing.");
   }
   fprintf(fp,"%d",getpid());
   fclose(fp);
@@ -129,11 +131,11 @@ mainloop()
 
   for(;;){
     if(listen(locksocket,5)<0){
-      fatalsys("Unable to listen to socket %s",BBSLOCKD_SOCKET);
+      error_fatalsys("Unable to listen to socket %s",BBSLOCKD_SOCKET);
     }
 
     if((ns=accept(locksocket,(struct sockaddr*)&name,&len))<0){
-      fatalsys("accept() failed for socket %s",BBSLOCKD_SOCKET);
+      error_fatalsys("accept() failed for socket %s",BBSLOCKD_SOCKET);
     }
 
     handlerequest(ns);
@@ -174,11 +176,11 @@ forkdaemon()
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
   progname=argv[0];
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   setenv("CHANNEL","[bbslockd]",1);
   signal(SIGPIPE,SIG_IGN);
 
@@ -188,4 +190,6 @@ main(int argc, char *argv[])
   mksocket();			/* Make BBSD's FIFO and set its permissions */
   storepid();			/* Store the daemon's PID */
   mainloop();			/* Finally, run the daemon's main loop */
+
+  return 0;
 }

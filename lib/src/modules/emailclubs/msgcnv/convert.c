@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:04  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:21:38  alexios
  * Updated code to read the move BBSCOD(E) variable.
@@ -48,6 +49,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -316,7 +318,7 @@ addihave(struct message *msg)
 	  IHAVEDIR,tdyear(i),tdmonth(i)+1,tdday(i));
   
   if((fp=fopen(fname,"a"))==NULL)return;
-  fprintf(fp,"%s/%s/%s %s/%ld\n",
+  fprintf(fp,"%s/%s/%s %s/%d\n",
 	  msg->origbbs,msg->origclub,msg->msgid,
 	  msg->club,msg->msgno);
   fclose(fp);
@@ -400,7 +402,7 @@ addmsg(FILE *fp,char *club,int msgno,int fpos,int flen)
 
   strcpy(msg.origbbs,bbscode);
   strcpy(msg.origclub,msg.club);
-  sprintf(msg.msgid,"%ld.%02d%02d%02d%02d%02d%02d",
+  sprintf(msg.msgid,"%d.%02d%02d%02d%02d%02d%02d",
 	  msg.msgno,
 	  tdday(msg.crdate),tdmonth(msg.crdate)+1,tdyear(msg.crdate)%100,
 	  tdhour(msg.crtime),tdmin(msg.crtime),tdsec(msg.crtime));
@@ -414,7 +416,7 @@ addmsg(FILE *fp,char *club,int msgno,int fpos,int flen)
 
   msg.msgno=msgno;
   strcpy(msg.history,"Converted from MajorBBS");
-  sprintf(msg.fatt,FILEATTACHMENT,(long)msgno);
+  sprintf(msg.fatt,FILEATTACHMENT,msgno);
   msg.replies=((unsigned char)rec[126]|((unsigned char)rec[127]<<8));
   if(!strcmp(club,"Email")){
     srand(time(NULL));
@@ -473,22 +475,22 @@ convert(char *arg_majordir)
   char            rec[64<<10], c, *fname=rec;
   int             reclen;
   int             num=0, areas=0, headerless=0, msgno=0, fpos;
-  promptblk *msg;
+  promptblock_t *msg;
 
   ids=alcmem(sizeof(struct clubidx)*256);
 
   strcpy(dir,arg_majordir);
   
-  msg=opnmsg("sysvar");
-  bbscode=stgopt(SYSVAR_BBSCOD);
-  clsmsg(msg);
+  msg=msg_open("sysvar");
+  bbscode=msg_string(SYSVAR_BBSCOD);
+  msg_close(msg);
 
-  msg=opnmsg("emailclubs");
-  clbwchg=numopt(CLBWCHG,-32767,32767);
-  clbuchg=numopt(CLBUCHG,-32767,32767);
-  clbdchg=numopt(CLBDCHG,-32767,32767);
-  clblif=numopt(CLBLIF,0,32767);
-  clsmsg(msg);
+  msg=msg_open("emailclubs");
+  clbwchg=msg_int(CLBWCHG,-32767,32767);
+  clbuchg=msg_int(CLBUCHG,-32767,32767);
+  clbdchg=msg_int(CLBDCHG,-32767,32767);
+  clblif=msg_int(CLBLIF,0,32767);
+  msg_close(msg);
 
   /* Start conversion */
 

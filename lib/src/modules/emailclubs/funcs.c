@@ -28,17 +28,18 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:23  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/28 23:11:36  alexios
  * Added a history entry for networked messages.
  *
  * Revision 0.5  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Migrated to the new locking functions.
  *
  * Revision 0.3  1998/07/24 10:17:37  alexios
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -106,35 +108,35 @@ getrdmsgno(int *num,int msg,int help,int err,int def)
   int i;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(help&&sameas(nxtcmd,"?")){
-	endcnc();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(help&&sameas(cnc_nxtcmd,"?")){
+	cnc_end();
 	if(help)prompt(help);
 	continue;
       }
-      if(sameas(nxtcmd,".")){
+      if(sameas(cnc_nxtcmd,".")){
 	*num=def;
 	return 1;
       }
-      strcpy(w,cncword());
+      strcpy(w,cnc_word());
     } else {
       prompt(msg,def);
-      getinput(0);
+      inp_get(0);
       strcpy(w,margv[0]);
-      if((!margc||(margc==1&&sameas(margv[0],"."))) && !reprompt) {
+      if((!margc||(margc==1&&sameas(margv[0],"."))) && !inp_reprompt()) {
 	*num=def;
 	return 1;
       } else if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
-	endcnc();
+	cnc_end();
 	if(help)prompt(help);
 	continue;
       }
@@ -153,7 +155,7 @@ getrdmsgno(int *num,int msg,int help,int err,int def)
     }
     else{
       prompt(err);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -167,21 +169,21 @@ int *boolean,msg,err,charge;
 {
   int c=0;
   for(;;){
-    lastresult=0;
-    if(morcnc())c=cncyesno();
+    fmt_lastresult=0;
+    if(cnc_more())c=cnc_yesno();
     else {
-      prompt(msg,charge,getpfix(CRDSING,charge));
-      getinput(0);
+      prompt(msg,charge,msg_getunit(CRDSING,charge));
+      inp_get(0);
       if(margc){
-	if(isX(margv[0])){
+	if(inp_isX(margv[0])){
 	  return 0;
 	}
-      }else if((!margc||(margc==1&&sameas(margv[0],"."))) && !reprompt) {
+      }else if((!margc||(margc==1&&sameas(margv[0],"."))) && !inp_reprompt()) {
 	*boolean=0;
 	return 1;
       }
-      bgncnc();
-      c=cncyesno();
+      cnc_begin();
+      c=cnc_yesno();
     }
     switch(c=toupper(c)){
 #ifdef GREEK
@@ -201,7 +203,7 @@ int *boolean,msg,err,charge;
     case '?':
       break;
     default:
-      endcnc();
+      cnc_end();
       if(err)prompt(err,c);
     }      
   }
@@ -213,7 +215,7 @@ int
 confirmcancel()
 {
   int i;
-  if(!getbool(&i,WECCAN,WERRSEL,WECCND,0))return 0;
+  if(!get_bool(&i,WECCAN,WERRSEL,WECCND,0))return 0;
   else return i;
 }
 
@@ -234,7 +236,7 @@ xlatehist(char *s)
 	if(keyword[strlen(keyword)-1]==':'){
 	  cp+=n;
 	  if(sscanf(cp,"%s%n",value,&n)==1){
-	    sprintf(temp,getmsg(histentries[i].index),value);
+	    sprintf(temp,msg_get(histentries[i].index),value);
 	    if(buffer[0]){
 	      strcat(buffer,", ");
 	    }
@@ -244,7 +246,7 @@ xlatehist(char *s)
 	  if(buffer[0]){
 	    strcat(buffer,", ");
 	  }
-	  strcat(buffer,getmsg(histentries[i].index));
+	  strcat(buffer,msg_get(histentries[i].index));
 	}
 	found=1;
 	break;
@@ -267,37 +269,37 @@ showheader(char *sig,struct message *msg)
   char s5[256]={0}, s6[256]={0}, s7[256]={0}, m4u[256]={0};
 
   strcpy(s1,xlatehist(msg->history));
-  sprintf(s2,"%s/%ld  ",sig,msg->msgno);
+  sprintf(s2,"%s/%d  ",sig,msg->msgno);
   if(strlen(s1)+strlen(s2)>thisuseracc.scnwidth-1){
     s1[78-strlen(s2)]='*';
     s1[79-strlen(s2)]=0;
   }
 
-  strcpy(s3,getmsg(MHDAY0+getdow(msg->crdate)));
-  strcpy(s4,getmsg(MHJAN+tdmonth(msg->crdate)));
+  strcpy(s3,msg_get(MHDAY0+getdow(msg->crdate)));
+  strcpy(s4,msg_get(MHJAN+tdmonth(msg->crdate)));
   sprintf(s2,"%s, %d %s %d, %s",
 	  s3, tdday(msg->crdate), s4, tdyear(msg->crdate),
 	  strtime(msg->crtime,1));
 
 #ifdef CLUBS
-  strcpy(m4u,getmsg(MHFORU));
+  strcpy(m4u,msg_get(MHFORU));
 #endif
 
   if(msg->period){
-    sprintf(s3,getmsg(MHPERIOD),msg->period,getpfix(DAYSNG,msg->period));
+    sprintf(s3,msg_get(MHPERIOD),msg->period,msg_getunit(DAYSNG,msg->period));
   } else {
-    strcpy(s3,msg->flags&MSF_EXEMPT?getmsg(MHXMPT):"");
+    strcpy(s3,msg->flags&MSF_EXEMPT?msg_get(MHXMPT):"");
   }
-  strcpy(s4,msg->flags&MSF_RECEIPT?getmsg(MHRRR):"");
+  strcpy(s4,msg->flags&MSF_RECEIPT?msg_get(MHRRR):"");
 
   if(msg->timesread){
-    strcpy(s6,getmsg(MHTMRD));
-    sprintf(s5,s6,msg->timesread,getpfix(TIMSNG,msg->timesread));
+    strcpy(s6,msg_get(MHTMRD));
+    sprintf(s5,s6,msg->timesread,msg_getunit(TIMSNG,msg->timesread));
   }else strcpy(s5,"");
   
   if(msg->replies){
-    strcpy(s7,getmsg(MHNREP));
-    sprintf(s6,s7,msg->replies,getpfix(REPSNG,msg->replies));
+    strcpy(s7,msg_get(MHNREP));
+    sprintf(s6,s7,msg->replies,msg_getunit(REPSNG,msg->replies));
   }else strcpy(s6,"");
 
   prompt(MSGHDR1,
@@ -305,13 +307,13 @@ showheader(char *sig,struct message *msg)
 	 s2,s3,
 	 msg->from,s4,
 	 (msg->club[0]&&(sameas(thisuseracc.userid,msg->to)))?m4u:"",
-	 sameas(msg->to,ALL)?getpfix(MHALL,1):msg->to,s5,
+	 sameas(msg->to,MSG_ALL)?msg_getunit(MHALL,1):msg->to,s5,
 	 msg->subject,s6);
 
   if(msg->flags&MSF_FILEATT){
     if(msg->timesdnl){
-      strcpy(s1,getmsg(MHNDNL));
-      sprintf(s2,s1,msg->timesdnl,getpfix(TIMSNG,msg->timesdnl));
+      strcpy(s1,msg_get(MHNDNL));
+      sprintf(s2,s1,msg->timesdnl,msg_getunit(TIMSNG,msg->timesdnl));
     } else strcpy(s2,"");
     prompt(MSGHDR2,msg->fatt,s2);
   }
@@ -330,20 +332,20 @@ writeecuser(char *uid, struct emailuser *user)
   sprintf(fname,"%s/%s",MSGUSRDIR,uid);
   sprintf(lock,ECUSERLOCK,uid);
 
-  if((waitlock(lock,20))==LKR_TIMEOUT)return 0;
-  placelock(lock,"writing");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
+  lock_place(lock,"writing");
   
   if((fp=fopen(fname,"w"))==NULL){
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   }
   if(fwrite(user,sizeof(struct emailuser),1,fp)!=1){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
 
   return 1;
 }
@@ -358,11 +360,11 @@ readecuser(char *uid, struct emailuser *user)
   sprintf(fname,"%s/%s",MSGUSRDIR,uid);
   sprintf(lock,ECUSERLOCK,uid);
 
-  if((waitlock(lock,20))==LKR_TIMEOUT)return 0;
-  placelock(lock,"reading");
+  if((lock_wait(lock,20))==LKR_TIMEOUT)return 0;
+  lock_place(lock,"reading");
   
   if((fp=fopen(fname,"r"))==NULL){
-    rmlock(lock);
+    lock_rm(lock);
     memset(user,0,sizeof(struct emailuser));
     strcpy(user->forwardto,thisuseracc.userid);
     user->prefs=ECP_QUOTEYES|ECP_LOGINASK;
@@ -370,11 +372,11 @@ readecuser(char *uid, struct emailuser *user)
   }
   if(fread(user,sizeof(struct emailuser),1,fp)!=1){
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     return 0;
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
 
   return 1;
 }
@@ -437,16 +439,16 @@ checklocks(struct message *msg)
 {
   int  i;
   char lock[256],dummy[64];
-  struct linestatus status;
+  channel_status_t status;
 
-  for(i=0;i<numchannels;i++){
-    if(getlinestatus(channels[i].ttyname,&status)){
+  for(i=0;i<chan_count;i++){
+    if(channel_getstatus(channels[i].ttyname,&status)){
       if((status.result==LSR_USER)&&(!sameas(status.user,thisuseracc.userid))){
-	sprintf(dummy,"%ld",msg->msgno);
+	sprintf(dummy,"%d",msg->msgno);
 	sprintf(lock,MSGREADLOCK,channels[i].ttyname,
 		msg->club[0]?msg->club:EMAILCLUBNAME,
 		dummy);
-	if(checklock(lock,dummy)>0)return 0;
+	if(lock_check(lock,dummy)>0)return 0;
       }
     }
   }
@@ -458,7 +460,7 @@ int
 askmsgno()
 {
   int newmsgno;
-  if(!getnumber(&newmsgno,RDGONUM,0,LASTMSG,0,0,0))return -1;
+  if(!get_number(&newmsgno,RDGONUM,0,LASTMSG,0,0,0))return -1;
   if(!newmsgno)newmsgno=1;
   return newmsgno;
 }
@@ -480,10 +482,10 @@ decompressmsg(struct message *msg)
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
 
   if((zfp=gzopen(fname1,"rb"))==NULL){
-    fatalsys("Unable to gzopen() %s",fname1);
+    error_fatalsys("Unable to gzopen() %s",fname1);
   }
   if((fp=fopen(fname2,"w"))==NULL){
-    fatalsys("Unable to fopen() %s",fname2);
+    error_fatalsys("Unable to fopen() %s",fname2);
   }
 
   for(;;){
@@ -491,14 +493,14 @@ decompressmsg(struct message *msg)
     int bytes=gzread(zfp,buf,sizeof(buf));
     if(bytes<=0)break;
     if(fwrite(buf,sizeof(buf),1,fp)!=1){
-      fatalsys("I/O error while writing.",fname2);
+      error_fatalsys("I/O error while writing.",fname2);
     }
   }
 
   gzclose(zfp);
   fclose(fp);
   if(rename(fname2,fname1)){
-    fatalsys("Unable to move decompressmsged message.");
+    error_fatalsys("Unable to move decompressmsged message.");
   }
 #endif
 }
@@ -521,10 +523,10 @@ compressmsg(struct message *msg)
 	  msg->club[0]?msg->club:EMAILDIRNAME,(long)msg->msgno);
 
   if((fp=fopen(fname1,"r"))==NULL){
-    fatalsys("Unable to fopen() %s",fname2);
+    error_fatalsys("Unable to fopen() %s",fname2);
   }
   if((zfp=gzopen(fname2,"wb"))==NULL){
-    fatalsys("Unable to gzopen() %s",fname1);
+    error_fatalsys("Unable to gzopen() %s",fname1);
   }
 
   for(;;){
@@ -532,14 +534,14 @@ compressmsg(struct message *msg)
     int bytes=fread(buf,1,sizeof(buf),fp);
     if(bytes<=0)break;
     if(gzwrite(zfp,buf,sizeof(buf))<=0){
-      fatalsys("I/O error while writing.",fname1);
+      error_fatalsys("I/O error while writing.",fname1);
     }
   }
 
   gzclose(zfp);
   fclose(fp);
   if(rename(fname2,fname1)){
-    fatalsys("Unable to move compressed message.");
+    error_fatalsys("Unable to move compressed message.");
   }
 #endif
 }

@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:59  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys(). Fixed weird
+ * Changed a few error_fatal() calls to error_fatalsys(). Fixed weird
  * argument declaration in ncsalphasort.
  *
  * Revision 0.6  1998/12/27 15:33:03  alexios
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -130,7 +132,7 @@ findclub(char *club)
   if(!isalpha(*club))return 0;
 
   if((dp=opendir(CLUBHDRDIR))==NULL){
-    fatalsys("Unable to open directory %s",CLUBHDRDIR);
+    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
@@ -156,16 +158,16 @@ getclubid()
   int id=0;
   
   if((dp=opendir(CLUBHDRDIR))==NULL){
-    fatalsys("Unable to open directory %s",CLUBHDRDIR);
+    error_fatalsys("Unable to open directory %s",CLUBHDRDIR);
   }
   while((dir=readdir(dp))!=NULL){
     if(dir->d_name[0]!='h')continue;
     sprintf(fname,"%s/%s",CLUBHDRDIR,dir->d_name);
     if((fp=fopen(fname,"r"))==NULL){
-      fatalsys("Unable to open club header %s",fname);
+      error_fatalsys("Unable to open club header %s",fname);
     }
     if(fread(&hdr,sizeof(hdr),1,fp)!=1){
-      fatalsys("Unable to open club header %s",fname);
+      error_fatalsys("Unable to open club header %s",fname);
     }
     fclose(fp);
     id=max(id,hdr.clubid);
@@ -223,16 +225,16 @@ saveclubhdr(struct clubheader *hdr)
 
 
 int
-getdefaultax(useracc *uacc, char *club)
+getdefaultax(useracc_t *uacc, char *club)
 {
   if(!loadclubhdr(club)){/* soup */
     return CAX_ZERO;
   }
 
-  if(haskey(uacc,clubhdr.keyuplax))return CAX_UPLOAD;
-  if(haskey(uacc,clubhdr.keywriteax))return CAX_WRITE;
-  if(haskey(uacc,clubhdr.keydnlax))return CAX_DNLOAD;
-  if(haskey(uacc,clubhdr.keyreadax))return CAX_READ;
+  if(key_owns(uacc,clubhdr.keyuplax))return CAX_UPLOAD;
+  if(key_owns(uacc,clubhdr.keywriteax))return CAX_WRITE;
+  if(key_owns(uacc,clubhdr.keydnlax))return CAX_DNLOAD;
+  if(key_owns(uacc,clubhdr.keyreadax))return CAX_READ;
 
   /* Everyone always has access to the Default club. */
   return sameas(club,defaultclub)?CAX_READ:CAX_ZERO;
@@ -240,7 +242,7 @@ getdefaultax(useracc *uacc, char *club)
 
 
 int
-getclubax(useracc *uacc, char *club)
+getclubax(useracc_t *uacc, char *club)
 {
   char fname[256], clubname[256], access;
   int ax=CAX_ZERO, found=0;
@@ -254,7 +256,7 @@ getclubax(useracc *uacc, char *club)
 
   strcpy(club,tmp);
 
-  if(haskey(uacc,sopkey))return CAX_SYSOP;
+  if(key_owns(uacc,sopkey))return CAX_SYSOP;
   else if(!strcmp(uacc->userid,clubhdr.clubop))return CAX_CLUBOP;
 
   sprintf(fname,"%s/%s",CLUBAXDIR,uacc->userid);
@@ -304,7 +306,7 @@ getclubax(useracc *uacc, char *club)
 
 
 void
-setclubax(useracc *uacc, char *club, int ax)
+setclubax(useracc_t *uacc, char *club, int ax)
 {
   char fname1[256], fname2[256], clubname[256], access=0, command[768];
   FILE *fp1, *fp2;
@@ -315,7 +317,7 @@ setclubax(useracc *uacc, char *club, int ax)
 
   fp1=fopen(fname1,"r");
   if((fp2=fopen(fname2,"w"))==NULL){
-    fatalsys("Unable to create temp file %s",fname2);
+    error_fatalsys("Unable to create temp file %s",fname2);
   }
 
   if(fp1)while(!feof(fp1)){

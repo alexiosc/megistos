@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:38  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  2000/01/06 11:44:10  alexios
  * Corrected name of rpc.metabbs PID lock file.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -77,7 +79,7 @@ static void
 getpwbbs()
 {
   struct passwd *pass=pass=getpwnam(BBSUSERNAME);
-  if(pass==NULL)fatal("User %s not found.",BBSUSERNAME);
+  if(pass==NULL)error_fatal("User %s not found.",BBSUSERNAME);
   bbsuid=pass->pw_uid;
   bbsgid=pass->pw_gid;
 }
@@ -88,7 +90,7 @@ storepid()
 {
   FILE *fp=fopen(BBSETCDIR"/bbsinit.pid","w");
   if(fp==NULL){
-    fatalsys("Unable to open "BBSETCDIR"/bbsinit.pid for writing.");
+    error_fatalsys("Unable to open "BBSETCDIR"/bbsinit.pid for writing.");
   }
   fprintf(fp,"%d",(int)getpid());
   fclose(fp);
@@ -189,11 +191,11 @@ mainloop()
 
 	switch(pid=fork()){
 	case -1:
-	  logerrorsys("Unable to fork() while spawning daemon %s",daemons[i].name);
+	  error_logsys("Unable to fork() while spawning daemon %s",daemons[i].name);
 	  break;
 	case 0:
 	  execl(daemons[i].binary,daemons[i].binary,NULL);
-	  fatalsys("Unable to spawn daemon %s (%s)",
+	  error_fatalsys("Unable to spawn daemon %s (%s)",
 		   daemons[i].name,daemons[i].binary);
 	  break;
 	default:
@@ -253,7 +255,7 @@ int
 main(int argc, char *argv[])
 {
   progname=argv[0];
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   setenv("CHANNEL","[bbsinit]",1);
 
   /* Some of these are merely wishful thinking, of course. */

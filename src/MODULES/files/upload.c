@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys(). Completed the
+ * Changed a few error_fatal() calls to error_fatalsys(). Completed the
  * upload() code.
  *
  * Revision 0.4  1998/12/27 15:40:03  alexios
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -147,7 +149,7 @@ static char*
 filetype(char *fname)
 {
   if(stat(fname,&st)){
-    fatalsys("Sanity check failed, unable to stat %s",fname);
+    error_fatalsys("Sanity check failed, unable to stat %s",fname);
   }
   return ftype=getfiletype(fname);
 }
@@ -169,7 +171,7 @@ filehdr(char *fname, struct fileidx *f, char *keywords)
 	 strdate(makedate(dt->tm_mday,dt->tm_mon+1,1900+dt->tm_year)),
 	 strtime(maketime(dt->tm_hour,dt->tm_min,dt->tm_sec),1),
 	 f->uploader,
-	 f->downloaded,getpfix(TIMESNG,f->downloaded),
+	 f->downloaded,msg_getunit(TIMESNG,f->downloaded),
 	 st.st_size);
 
   if(f->approved)prompt(FILEHDR2,f->approved_by);
@@ -186,17 +188,17 @@ fileheader(char *name, int multiple, char *source, int filenum, int numfiles)
   if(multiple){
     char tmp[256], *np;
     int rem=numfiles-filenum;
-    if(!rem)strcpy(tmp,getmsg(REMZER));
-    else sprintf(tmp,getmsg(rem==1?REMSNG:REMPLR),rem);
+    if(!rem)strcpy(tmp,msg_get(REMZER));
+    else sprintf(tmp,msg_get(rem==1?REMSNG:REMPLR),rem);
     np=strrchr(name,'/');
     if(np)np++;
     else np=name;
     prompt(UPLINFM,filenum,tmp,np,st.st_size,
-	   getpfix(BYTESNG,st.st_size==1),ftype);
+	   msg_getunit(BYTESNG,st.st_size==1),ftype);
   } else {
     prompt(UPLINF1,
 	   source,
-	   st.st_size,getpfix(BYTESNG,st.st_size==1),
+	   st.st_size,msg_getunit(BYTESNG,st.st_size==1),
 	   ftype);
   }
 }
@@ -206,7 +208,7 @@ static int
 confirmcan()
 {
   int yes;
-  if(!getbool(&yes,UPLACN,UPLACR,0,0))return 0;
+  if(!get_bool(&yes,UPLACN,UPLACR,0,0))return 0;
   if(yes)return 1;
   return 0;
 }
@@ -215,20 +217,20 @@ confirmcan()
 static int
 getdescr(char *descr)
 {
-  endcnc();
+  cnc_end();
   for(;;){
     prompt(UPLSHDS);
-    getinput(43);
-    if(!strlen(input)&&!accmtsd){
-      endcnc();
+    inp_get(43);
+    if(!strlen(inp_buffer)&&!accmtsd){
+      cnc_end();
       prompt(UPLSDMT);
       continue;
-    } else if(isX(input)){
+    } else if(inp_isX(inp_buffer)){
       if(confirmcan())return 0;
     } else break;
   }
-  rstrin();
-  strcpy(descr,input);
+  inp_raw();
+  strcpy(descr,inp_buffer);
   return 1;
 }
 
@@ -243,7 +245,7 @@ editdescr(char *descr)
   sprintf(fname,TMPDIR"/des-%05d",getpid());
   for(;;){
     if((fd=open(fname,O_WRONLY|O_CREAT,0600))<0){
-      fatalsys("Unable to open() %s for writing.",fname);
+      error_fatalsys("Unable to open() %s for writing.",fname);
     }
     write(fd,descr,strlen(descr));
     close(fd);
@@ -262,7 +264,7 @@ editdescr(char *descr)
   descr=alcmem(st.st_size+1);
   bzero(descr,st.st_size+1);
   if((fd=open(fname,O_RDONLY))<0){
-    fatalsys("Unable to open() %s for reading.",fname);
+    error_fatalsys("Unable to open() %s for reading.",fname);
   }
   read(fd,descr,st.st_size);
   close(fd);
@@ -271,7 +273,7 @@ editdescr(char *descr)
 }
 
 
-static promptblk *archivers=NULL;
+static promptblock_t *archivers=NULL;
 
 
 static char*
@@ -284,12 +286,12 @@ getlongdescr(char *fname,char *filetype)
 
   prompt(UPLDIZW);
 
-  if(!archivers)archivers=opnmsg("archivers");
+  if(!archivers)archivers=msg_open("archivers");
 
   for(n=0;n<MAXARCHIVERS;n++){
-    setmbk(archivers);
-    if(strlen(getmsg(ARCHIVERS_UNCOMPRESS1+n*7))&&
-       strstr(filetype,getmsg(ARCHIVERS_STRING1+n*7))){
+    msg_set(archivers);
+    if(strlen(msg_get(ARCHIVERS_UNCOMPRESS1+n*7))&&
+       strstr(filetype,msg_get(ARCHIVERS_STRING1+n*7))){
       char dir[256], fmt[256], command[512], *cp;
 
       sprintf(dir,TMPDIR"/diz-%05d",getpid());
@@ -297,9 +299,9 @@ getlongdescr(char *fname,char *filetype)
 
       sprintf(fmt,"cd %s;%s >&/dev/null;cd -",
 	      dir,
-	      getmsg(ARCHIVERS_UNCOMPRESS1+n*7));
+	      msg_get(ARCHIVERS_UNCOMPRESS1+n*7));
       sprintf(command,fmt,fname,filedes);
-      setmbk(msg);
+      msg_set(msg);
 
       system(command);
 
@@ -317,7 +319,7 @@ getlongdescr(char *fname,char *filetype)
 	  found=1;
 	  
 	  if((fp=fopen(command,"r"))==NULL){
-	    fatalsys("Sanity check failed: unable to open %s",command);
+	    error_fatalsys("Sanity check failed: unable to open %s",command);
 	  }
 
 	  while(!feof(fp)){
@@ -336,7 +338,7 @@ getlongdescr(char *fname,char *filetype)
 	  free(des);
 	  prompt(UPLDIZF,cp,longdescr);
 
-	  if(!getbool(&yes,UPLDIZA,UPLDIZR,0,0)){
+	  if(!get_bool(&yes,UPLDIZA,UPLDIZR,0,0)){
 	    if(confirmcan())return NULL;
 	  }
 	  if(!yes)longdescr=editdescr(longdescr);
@@ -348,12 +350,12 @@ getlongdescr(char *fname,char *filetype)
 
       sprintf(command,"\\rm -rf %s",dir);
       system(command);
-      setmbk(msg);
+      msg_set(msg);
       if(found)return longdescr;
     }
   }
 
-  setmbk(msg);
+  msg_set(msg);
   if(!found){
     prompt(UPLLDES,deslen);
     longdescr=strdup("");
@@ -374,25 +376,25 @@ getkeywords()
 
   for(;numkeywords<=maxkeyw;){
     prompt(UPLKEY,numkeywords+1);
-    getinput(23);
-    lowerc(input);
-    if(!strlen(input)){
-      endcnc();
+    inp_get(23);
+    lowerc(inp_buffer);
+    if(!strlen(inp_buffer)){
+      cnc_end();
       prompt(UPLKEYC);
       continue;
-    } else if(isX(input)){
+    } else if(inp_isX(inp_buffer)){
       if(confirmcan())return NULL;
-      endcnc();
+      cnc_end();
       prompt(UPLKEYC);
       continue;
-    } else if(sameas(input,"?")){
-      endcnc();
+    } else if(sameas(inp_buffer,"?")){
+      cnc_end();
       prompt(UPLKEYH,keywords);
       continue;
-    } else if(sameas(input,".")){
+    } else if(sameas(inp_buffer,".")){
       break;
-    } else if(strspn(input,KEYWORDCHARS)!=strlen(input)||strlen(input)>23){
-      endcnc();
+    } else if(strspn(inp_buffer,KEYWORDCHARS)!=strlen(inp_buffer)||strlen(inp_buffer)>23){
+      cnc_end();
       prompt(UPLKEYR);
       continue;
     } else {
@@ -401,15 +403,15 @@ getkeywords()
 
       strcpy(tmp,keywords);
       for(cp=strtok(tmp," ");cp;cp=strtok(NULL," ")){
-	if(!strcmp(cp,input)){
-	  endcnc();
+	if(!strcmp(cp,inp_buffer)){
+	  cnc_end();
 	  prompt(UPLKEYD);
 	  dupl=1;
 	  break;
 	}
       }
       if(!dupl){
-	sprintf(tmp," %s ",input);
+	sprintf(tmp," %s ",inp_buffer);
 	strcat(keywords,numkeywords?&tmp[1]:tmp);
 	numkeywords++;
       }
@@ -454,14 +456,14 @@ edit:
   case LIM_OK:
     break;    
   default:
-    fatal("Sanity check for filewithinlimits() failed!");
+    error_fatal("Sanity check for filewithinlimits() failed!");
   }
 
 
   /* Check if the user can pay the charges for the file */
 
-  if(canpay(library.uplcharge)){
-    chargecredits(library.uplcharge);
+  if(usr_canpay(library.uplcharge)){
+    usr_chargecredits(library.uplcharge);
   } else {
     prompt(UPLNCR);
     return 0;			/* Cancel all files if user can't afford uploads */
@@ -479,10 +481,10 @@ edit:
       else np=name;
     }
     if(!checkfname(np)){
-      endcnc();
+      cnc_end();
       prompt(UPLASK);
-      getinput(MAXFILENAMELEN);
-      strcpy(source,input);
+      inp_get(MAXFILENAMELEN);
+      strcpy(source,inp_buffer);
     } else break;
     if(multiple){		/* Yuk */
       if((np=strrchr(name,'/'))!=NULL)np++;
@@ -532,7 +534,7 @@ edit:
 
   filehdr(name,f,keywords);
   for(;;){
-    if(!getmenu(&opt,1,0,LASTCON,0,"YNE",LASTCND,'Y')){
+    if(!get_menu(&opt,1,0,LASTCON,0,"YNE",LASTCND,'Y')){
       if(confirmcan())return 0;
     } else break;
   }
@@ -601,24 +603,24 @@ uploadfile(int multiple, char *source)
   if(library.flags&LBF_UPLAUD){
     char tmp[256];
     sprintf(tmp,AUD_FUPLERR,library.fullname);
-    setaudit(0,NULL,NULL,AUT_FUPLERR,AUS_FUPLERR,tmp);
-  } else setaudit(0,NULL,NULL,0,NULL,NULL);
+    xfer_setaudit(0,NULL,NULL,AUT_FUPLERR,AUS_FUPLERR,tmp);
+  } else xfer_setaudit(0,NULL,NULL,0,NULL,NULL);
 
 
   /* Prepare for the upload */
 
   if(multiple)strcpy(source,"*");
-  addxfer(FXM_UPLOAD,source,"",0,0);
+  xfer_add(FXM_UPLOAD,source,"",0,0);
 
 
   /* Force use of multi-file protocols */
 
-  if(multiple)addxfer(FXM_UPLOAD,source,"",0,0);
+  if(multiple)xfer_add(FXM_UPLOAD,source,"",0,0);
 
 
   /* Do the file transfer */
 
-  dofiletransfer();
+  xfer_run();
 
 
   /* Scan the uploaded file(s) */
@@ -667,7 +669,7 @@ uploadfile(int multiple, char *source)
     sprintf(command,"rm -f %s >&/dev/null",name);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
   return res;
 }
 
@@ -675,28 +677,28 @@ uploadfile(int multiple, char *source)
 static char *
 getuploadfname(int *multiple)
 {
-  char *fn=input;
+  char *fn=inp_buffer;
   
   *multiple=0;
   for(;;){
-    if(morcnc())fn=cncword();
+    if(cnc_more())fn=cnc_word();
     else {
       prompt(UPLASK);
-      getinput(MAXFILENAMELEN);
-      fn=input;
+      inp_get(MAXFILENAMELEN);
+      fn=inp_buffer;
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
 
     if(!strlen(fn)){
-      endcnc();
+      cnc_end();
       continue;
     }
 
     if(strchr(fn,'*')){
       *multiple=1;
       break;
-    } else if(!checkfname(fn))endcnc();
+    } else if(!checkfname(fn))cnc_end();
     else break;
   }
 
@@ -715,10 +717,10 @@ sizewarn()
   long int nb=(library.libsizelimit<<20)-library.numbytes-library.bytesunapp;
   long int bpf=min(nb,library.filesizelimit<<10);
   
-  strcpy(files,getpfix(FILESNG,nf));
-  strcpy(bytes1,getpfix(BYTESNG,nb));
+  strcpy(files,msg_getunit(FILESNG,nf));
+  strcpy(bytes1,msg_getunit(BYTESNG,nb));
 
-  prompt(SIZEWARN,nf,files,nb,bytes1,bpf,getpfix(BYTESNG,bpf));
+  prompt(SIZEWARN,nf,files,nb,bytes1,bpf,msg_getunit(BYTESNG,bpf));
 }
 
 
@@ -732,7 +734,7 @@ upload()
 
   if(library.flags&LBF_READONLY){
     prompt(LIBRO);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -740,7 +742,7 @@ upload()
 
   if(!getlibaccess(&library,ACC_UPLOAD)){
     prompt(UPLNAX);
-    endcnc();
+    cnc_end();
     return;
   }
 
@@ -757,9 +759,9 @@ upload()
 
   /* Make sure the user can afford at least one file BEFORE upload */
 
-  if(!canpay(library.uplcharge)){
+  if(!usr_canpay(library.uplcharge)){
     prompt(UPLWNCR);
-    endcnc();
+    cnc_end();
     return;
   }
 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:30:50  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -76,7 +78,7 @@ showhelp(WINDOW *win)
   char parms[80], *cp, *ep;
   int state=0, len=0, n,y,x, sx=0,sy=0;
   int fg=7, bg=0, bold=0;
-  char *bufp=getmsg(VHELP);
+  char *bufp=msg_get(VHELP);
 
   while (*bufp){
     c=*bufp++;
@@ -220,9 +222,9 @@ visualhelp()
 /*  touchwin(helpwin); */
 /*  wclear(helpwin); */
 
-  setmbk(msg);
+  msg_set(msg);
   showhelp(helpwin);
-  rstmbk();
+  msg_reset();
 
   wrefresh(helpwin);
   getch();
@@ -239,15 +241,15 @@ visualhelp()
 void
 fieldhelp(int field)
 {
-  afterinput=1;
+  out_setflags(OFL_AFTERINPUT);
   print("\033[2J");
-  setmbk(msg);
+  msg_set(msg);
   prompt(FHHDR);
   if(object[field].b.type==OBJ_BUTTON)prompt(FHBUTN);
   else {
-    setmbk(templates);
+    msg_set(templates);
     prompt(ltnum+1+field);
-    setmbk(msg);
+    msg_set(msg);
   }
   prompt(FHFTR);
   getch();

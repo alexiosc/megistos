@@ -9,11 +9,6 @@
 #include <rpc/rpc.h>
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 struct registration_package_t {
 	char codename[9];
 	char bbstitle[52];
@@ -41,8 +36,24 @@ struct registration_package_t {
 	int flags;
 };
 typedef struct registration_package_t registration_package_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_registration_package_t(XDR *, registration_package_t*);
+#elif __STDC__ 
+extern  bool_t xdr_registration_package_t(XDR *, registration_package_t*);
+#else /* Old Style C */ 
+bool_t xdr_registration_package_t();
+#endif /* Old Style C */ 
+
 
 typedef struct info_package_t *info_package_p;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_info_package_p(XDR *, info_package_p*);
+#elif __STDC__ 
+extern  bool_t xdr_info_package_p(XDR *, info_package_p*);
+#else /* Old Style C */ 
+bool_t xdr_info_package_p();
+#endif /* Old Style C */ 
+
 
 struct info_package_t {
 	char codename[9];
@@ -65,14 +76,38 @@ struct info_package_t {
 	info_package_p next;
 };
 typedef struct info_package_t info_package_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_info_package_t(XDR *, info_package_t*);
+#elif __STDC__ 
+extern  bool_t xdr_info_package_t(XDR *, info_package_t*);
+#else /* Old Style C */ 
+bool_t xdr_info_package_t();
+#endif /* Old Style C */ 
+
 
 typedef struct club_list_item_t *club_list_item_p;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_list_item_p(XDR *, club_list_item_p*);
+#elif __STDC__ 
+extern  bool_t xdr_club_list_item_p(XDR *, club_list_item_p*);
+#else /* Old Style C */ 
+bool_t xdr_club_list_item_p();
+#endif /* Old Style C */ 
+
 
 struct club_list_request_t {
 	char codename[9];
 	char targetname[9];
 };
 typedef struct club_list_request_t club_list_request_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_list_request_t(XDR *, club_list_request_t*);
+#elif __STDC__ 
+extern  bool_t xdr_club_list_request_t(XDR *, club_list_request_t*);
+#else /* Old Style C */ 
+bool_t xdr_club_list_request_t();
+#endif /* Old Style C */ 
+
 
 struct club_list_item_t {
 	char club[16];
@@ -80,6 +115,14 @@ struct club_list_item_t {
 	club_list_item_p next;
 };
 typedef struct club_list_item_t club_list_item_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_list_item_t(XDR *, club_list_item_t*);
+#elif __STDC__ 
+extern  bool_t xdr_club_list_item_t(XDR *, club_list_item_t*);
+#else /* Old Style C */ 
+bool_t xdr_club_list_item_t();
+#endif /* Old Style C */ 
+
 #define CLR_OK              0    /* Request ok */
 #define CLR_UNKNOWN        -1    /* Target BBS is unknown */
 #define CLR_NOTMEGISTOS    -2    /* Not running Megistos */
@@ -97,6 +140,14 @@ struct club_list {
 	} club_list_u;
 };
 typedef struct club_list club_list;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_list(XDR *, club_list*);
+#elif __STDC__ 
+extern  bool_t xdr_club_list(XDR *, club_list*);
+#else /* Old Style C */ 
+bool_t xdr_club_list();
+#endif /* Old Style C */ 
+
 
 struct club_header_request_t {
 	char codename[9];
@@ -104,6 +155,14 @@ struct club_header_request_t {
 	char club[16];
 };
 typedef struct club_header_request_t club_header_request_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_header_request_t(XDR *, club_header_request_t*);
+#elif __STDC__ 
+extern  bool_t xdr_club_header_request_t(XDR *, club_header_request_t*);
+#else /* Old Style C */ 
+bool_t xdr_club_header_request_t();
+#endif /* Old Style C */ 
+
 
 struct club_header_t {
 	char club[16];
@@ -120,6 +179,14 @@ struct club_header_t {
 	char *banner;
 };
 typedef struct club_header_t club_header_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_header_t(XDR *, club_header_t*);
+#elif __STDC__ 
+extern  bool_t xdr_club_header_t(XDR *, club_header_t*);
+#else /* Old Style C */ 
+bool_t xdr_club_header_t();
+#endif /* Old Style C */ 
+
 
 struct club_header {
 	int result_code;
@@ -128,6 +195,14 @@ struct club_header {
 	} club_header_u;
 };
 typedef struct club_header club_header;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_header(XDR *, club_header*);
+#elif __STDC__ 
+extern  bool_t xdr_club_header(XDR *, club_header*);
+#else /* Old Style C */ 
+bool_t xdr_club_header();
+#endif /* Old Style C */ 
+
 
 struct ihave_request_t {
 	char codename[9];
@@ -136,8 +211,24 @@ struct ihave_request_t {
 	u_int since_time;
 };
 typedef struct ihave_request_t ihave_request_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_ihave_request_t(XDR *, ihave_request_t*);
+#elif __STDC__ 
+extern  bool_t xdr_ihave_request_t(XDR *, ihave_request_t*);
+#else /* Old Style C */ 
+bool_t xdr_ihave_request_t();
+#endif /* Old Style C */ 
+
 
 typedef struct ihave_entry_t *ihave_list_p;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_ihave_list_p(XDR *, ihave_list_p*);
+#elif __STDC__ 
+extern  bool_t xdr_ihave_list_p(XDR *, ihave_list_p*);
+#else /* Old Style C */ 
+bool_t xdr_ihave_list_p();
+#endif /* Old Style C */ 
+
 
 struct ihave_entry_t {
 	char *codename;
@@ -148,6 +239,14 @@ struct ihave_entry_t {
 	ihave_list_p next;
 };
 typedef struct ihave_entry_t ihave_entry_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_ihave_entry_t(XDR *, ihave_entry_t*);
+#elif __STDC__ 
+extern  bool_t xdr_ihave_entry_t(XDR *, ihave_entry_t*);
+#else /* Old Style C */ 
+bool_t xdr_ihave_entry_t();
+#endif /* Old Style C */ 
+
 
 struct ihave_list {
 	int result_code;
@@ -156,6 +255,14 @@ struct ihave_list {
 	} ihave_list_u;
 };
 typedef struct ihave_list ihave_list;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_ihave_list(XDR *, ihave_list*);
+#elif __STDC__ 
+extern  bool_t xdr_ihave_list(XDR *, ihave_list*);
+#else /* Old Style C */ 
+bool_t xdr_ihave_list();
+#endif /* Old Style C */ 
+
 
 struct message_request_t {
 	char codename[9];
@@ -165,12 +272,28 @@ struct message_request_t {
 	char compression;
 };
 typedef struct message_request_t message_request_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_message_request_t(XDR *, message_request_t*);
+#elif __STDC__ 
+extern  bool_t xdr_message_request_t(XDR *, message_request_t*);
+#else /* Old Style C */ 
+bool_t xdr_message_request_t();
+#endif /* Old Style C */ 
+
 
 struct compr_t {
 	int orig_msg_len;
 	int orig_att_len;
 };
 typedef struct compr_t compr_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_compr_t(XDR *, compr_t*);
+#elif __STDC__ 
+extern  bool_t xdr_compr_t(XDR *, compr_t*);
+#else /* Old Style C */ 
+bool_t xdr_compr_t();
+#endif /* Old Style C */ 
+
 
 struct compr {
 	char compression;
@@ -179,6 +302,22 @@ struct compr {
 	} compr_u;
 };
 typedef struct compr compr;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_compr(XDR *, compr*);
+#elif __STDC__ 
+extern  bool_t xdr_compr(XDR *, compr*);
+#else /* Old Style C */ 
+bool_t xdr_compr();
+#endif /* Old Style C */ 
+
+
+#ifdef __cplusplus 
+extern "C" bool_t xdr_compr(XDR *, compr*);
+#elif __STDC__ 
+extern  bool_t xdr_compr(XDR *, compr*);
+#else /* Old Style C */ 
+bool_t xdr_compr();
+#endif /* Old Style C */ 
 
 
 struct club_message_t {
@@ -200,6 +339,14 @@ struct club_message_t {
 	} attachment;
 };
 typedef struct club_message_t club_message_t;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_message_t(XDR *, club_message_t*);
+#elif __STDC__ 
+extern  bool_t xdr_club_message_t(XDR *, club_message_t*);
+#else /* Old Style C */ 
+bool_t xdr_club_message_t();
+#endif /* Old Style C */ 
+
 
 struct club_message {
 	int result_code;
@@ -208,109 +355,86 @@ struct club_message {
 	} club_message_u;
 };
 typedef struct club_message club_message;
+#ifdef __cplusplus 
+extern "C" bool_t xdr_club_message(XDR *, club_message*);
+#elif __STDC__ 
+extern  bool_t xdr_club_message(XDR *, club_message*);
+#else /* Old Style C */ 
+bool_t xdr_club_message();
+#endif /* Old Style C */ 
 
-#define METABBS_PROG 0x204d4447
-#define METABBS_VERS 1
 
-#if defined(__STDC__) || defined(__cplusplus)
-#define metabbs_register 1
-extern  int * metabbs_register_1(registration_package_t *, CLIENT *);
-extern  int * metabbs_register_1_svc(registration_package_t *, struct svc_req *);
-#define metabbs_register_non_megistos 2
-extern  int * metabbs_register_non_megistos_1(registration_package_t *, CLIENT *);
-extern  int * metabbs_register_non_megistos_1_svc(registration_package_t *, struct svc_req *);
-#define metabbs_request_info 10003
-extern  info_package_p * metabbs_request_info_1(char **, CLIENT *);
-extern  info_package_p * metabbs_request_info_1_svc(char **, struct svc_req *);
-#define distclub_request_list 1000100
-extern  struct club_list * distclub_request_list_1(club_list_request_t *, CLIENT *);
-extern  struct club_list * distclub_request_list_1_svc(club_list_request_t *, struct svc_req *);
-#define distclub_request_header 1000101
-extern  struct club_header * distclub_request_header_1(club_header_request_t *, CLIENT *);
-extern  struct club_header * distclub_request_header_1_svc(club_header_request_t *, struct svc_req *);
-#define distclub_request_ihave 1000102
-extern  struct ihave_list * distclub_request_ihave_1(ihave_request_t *, CLIENT *);
-extern  struct ihave_list * distclub_request_ihave_1_svc(ihave_request_t *, struct svc_req *);
-#define distclub_request_message 1000103
-extern  struct club_message * distclub_request_message_1(message_request_t *, CLIENT *);
-extern  struct club_message * distclub_request_message_1_svc(message_request_t *, struct svc_req *);
-extern int metabbs_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
-
-#else /* K&R C */
-#define metabbs_register 1
-extern  int * metabbs_register_1();
-extern  int * metabbs_register_1_svc();
-#define metabbs_register_non_megistos 2
-extern  int * metabbs_register_non_megistos_1();
-extern  int * metabbs_register_non_megistos_1_svc();
-#define metabbs_request_info 10003
-extern  info_package_p * metabbs_request_info_1();
-extern  info_package_p * metabbs_request_info_1_svc();
-#define distclub_request_list 1000100
-extern  struct club_list * distclub_request_list_1();
-extern  struct club_list * distclub_request_list_1_svc();
-#define distclub_request_header 1000101
-extern  struct club_header * distclub_request_header_1();
-extern  struct club_header * distclub_request_header_1_svc();
-#define distclub_request_ihave 1000102
-extern  struct ihave_list * distclub_request_ihave_1();
-extern  struct ihave_list * distclub_request_ihave_1_svc();
-#define distclub_request_message 1000103
-extern  struct club_message * distclub_request_message_1();
-extern  struct club_message * distclub_request_message_1_svc();
-extern int metabbs_prog_1_freeresult ();
-#endif /* K&R C */
-
-/* the xdr functions */
-
-#if defined(__STDC__) || defined(__cplusplus)
-extern  bool_t xdr_registration_package_t (XDR *, registration_package_t*);
-extern  bool_t xdr_info_package_p (XDR *, info_package_p*);
-extern  bool_t xdr_info_package_t (XDR *, info_package_t*);
-extern  bool_t xdr_club_list_item_p (XDR *, club_list_item_p*);
-extern  bool_t xdr_club_list_request_t (XDR *, club_list_request_t*);
-extern  bool_t xdr_club_list_item_t (XDR *, club_list_item_t*);
-extern  bool_t xdr_club_list (XDR *, club_list*);
-extern  bool_t xdr_club_header_request_t (XDR *, club_header_request_t*);
-extern  bool_t xdr_club_header_t (XDR *, club_header_t*);
-extern  bool_t xdr_club_header (XDR *, club_header*);
-extern  bool_t xdr_ihave_request_t (XDR *, ihave_request_t*);
-extern  bool_t xdr_ihave_list_p (XDR *, ihave_list_p*);
-extern  bool_t xdr_ihave_entry_t (XDR *, ihave_entry_t*);
-extern  bool_t xdr_ihave_list (XDR *, ihave_list*);
-extern  bool_t xdr_message_request_t (XDR *, message_request_t*);
-extern  bool_t xdr_compr_t (XDR *, compr_t*);
-extern  bool_t xdr_compr (XDR *, compr*);
-extern  bool_t xdr_compr (XDR *, compr*);
-extern  bool_t xdr_club_message_t (XDR *, club_message_t*);
-extern  bool_t xdr_club_message (XDR *, club_message*);
-
-#else /* K&R C */
-extern bool_t xdr_registration_package_t ();
-extern bool_t xdr_info_package_p ();
-extern bool_t xdr_info_package_t ();
-extern bool_t xdr_club_list_item_p ();
-extern bool_t xdr_club_list_request_t ();
-extern bool_t xdr_club_list_item_t ();
-extern bool_t xdr_club_list ();
-extern bool_t xdr_club_header_request_t ();
-extern bool_t xdr_club_header_t ();
-extern bool_t xdr_club_header ();
-extern bool_t xdr_ihave_request_t ();
-extern bool_t xdr_ihave_list_p ();
-extern bool_t xdr_ihave_entry_t ();
-extern bool_t xdr_ihave_list ();
-extern bool_t xdr_message_request_t ();
-extern bool_t xdr_compr_t ();
-extern bool_t xdr_compr ();
-extern bool_t xdr_compr ();
-extern bool_t xdr_club_message_t ();
-extern bool_t xdr_club_message ();
-
-#endif /* K&R C */
+#define METABBS_PROG ((u_long)0x204d4447)
+#define METABBS_VERS ((u_long)1)
 
 #ifdef __cplusplus
-}
-#endif
+#define metabbs_register ((u_long)1)
+extern "C" int * metabbs_register_1(registration_package_t *, CLIENT *);
+extern "C" int * metabbs_register_1_svc(registration_package_t *, struct svc_req *);
+#define metabbs_register_non_megistos ((u_long)2)
+extern "C" int * metabbs_register_non_megistos_1(registration_package_t *, CLIENT *);
+extern "C" int * metabbs_register_non_megistos_1_svc(registration_package_t *, struct svc_req *);
+#define metabbs_request_info ((u_long)10003)
+extern "C" info_package_p * metabbs_request_info_1(char **, CLIENT *);
+extern "C" info_package_p * metabbs_request_info_1_svc(char **, struct svc_req *);
+#define distclub_request_list ((u_long)1000100)
+extern "C" struct club_list * distclub_request_list_1(club_list_request_t *, CLIENT *);
+extern "C" struct club_list * distclub_request_list_1_svc(club_list_request_t *, struct svc_req *);
+#define distclub_request_header ((u_long)1000101)
+extern "C" struct club_header * distclub_request_header_1(club_header_request_t *, CLIENT *);
+extern "C" struct club_header * distclub_request_header_1_svc(club_header_request_t *, struct svc_req *);
+#define distclub_request_ihave ((u_long)1000102)
+extern "C" struct ihave_list * distclub_request_ihave_1(ihave_request_t *, CLIENT *);
+extern "C" struct ihave_list * distclub_request_ihave_1_svc(ihave_request_t *, struct svc_req *);
+#define distclub_request_message ((u_long)1000103)
+extern "C" struct club_message * distclub_request_message_1(message_request_t *, CLIENT *);
+extern "C" struct club_message * distclub_request_message_1_svc(message_request_t *, struct svc_req *);
+
+#elif __STDC__
+#define metabbs_register ((u_long)1)
+extern  int * metabbs_register_1(registration_package_t *, CLIENT *);
+extern  int * metabbs_register_1_svc(registration_package_t *, struct svc_req *);
+#define metabbs_register_non_megistos ((u_long)2)
+extern  int * metabbs_register_non_megistos_1(registration_package_t *, CLIENT *);
+extern  int * metabbs_register_non_megistos_1_svc(registration_package_t *, struct svc_req *);
+#define metabbs_request_info ((u_long)10003)
+extern  info_package_p * metabbs_request_info_1(char **, CLIENT *);
+extern  info_package_p * metabbs_request_info_1_svc(char **, struct svc_req *);
+#define distclub_request_list ((u_long)1000100)
+extern  struct club_list * distclub_request_list_1(club_list_request_t *, CLIENT *);
+extern  struct club_list * distclub_request_list_1_svc(club_list_request_t *, struct svc_req *);
+#define distclub_request_header ((u_long)1000101)
+extern  struct club_header * distclub_request_header_1(club_header_request_t *, CLIENT *);
+extern  struct club_header * distclub_request_header_1_svc(club_header_request_t *, struct svc_req *);
+#define distclub_request_ihave ((u_long)1000102)
+extern  struct ihave_list * distclub_request_ihave_1(ihave_request_t *, CLIENT *);
+extern  struct ihave_list * distclub_request_ihave_1_svc(ihave_request_t *, struct svc_req *);
+#define distclub_request_message ((u_long)1000103)
+extern  struct club_message * distclub_request_message_1(message_request_t *, CLIENT *);
+extern  struct club_message * distclub_request_message_1_svc(message_request_t *, struct svc_req *);
+
+#else /* Old Style C */ 
+#define metabbs_register ((u_long)1)
+extern  int * metabbs_register_1();
+extern  int * metabbs_register_1_svc();
+#define metabbs_register_non_megistos ((u_long)2)
+extern  int * metabbs_register_non_megistos_1();
+extern  int * metabbs_register_non_megistos_1_svc();
+#define metabbs_request_info ((u_long)10003)
+extern  info_package_p * metabbs_request_info_1();
+extern  info_package_p * metabbs_request_info_1_svc();
+#define distclub_request_list ((u_long)1000100)
+extern  struct club_list * distclub_request_list_1();
+extern  struct club_list * distclub_request_list_1_svc();
+#define distclub_request_header ((u_long)1000101)
+extern  struct club_header * distclub_request_header_1();
+extern  struct club_header * distclub_request_header_1_svc();
+#define distclub_request_ihave ((u_long)1000102)
+extern  struct ihave_list * distclub_request_ihave_1();
+extern  struct ihave_list * distclub_request_ihave_1_svc();
+#define distclub_request_message ((u_long)1000103)
+extern  struct club_message * distclub_request_message_1();
+extern  struct club_message * distclub_request_message_1_svc();
+#endif /* Old Style C */ 
 
 #endif /* !_METASERVICES_H_RPCGEN */

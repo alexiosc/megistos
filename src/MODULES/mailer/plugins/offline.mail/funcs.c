@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -87,27 +89,27 @@ getclub(char *club, int pr, int err, int all, int email)
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -123,7 +125,7 @@ getclub(char *club, int pr, int err, int all, int email)
     }
     if(!findclub(i)){
       prompt(err);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
     return 1;
@@ -140,23 +142,23 @@ listclubs()
   struct dirent **clubs;
   int n,i;
 
-  setmbk(emailclubs_msg);
+  msg_set(emailclubs_msg);
   n=scandir(CLUBHDRDIR,&clubs,hdrselect,alphasort);
   prompt(EMAILCLUBS_LCHDR);
   for(i=0;i<n;free(clubs[i]),i++){
     char *cp=&clubs[i]->d_name[1];
     if(!loadclubhdr(cp))continue;
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
     prompt(EMAILCLUBS_LCTAB,clubhdr.club,clubhdr.clubop,clubhdr.descr);
   }
   free(clubs);
-  if(lastresult==PAUSE_QUIT){
-    setmbk(mail_msg);
+  if(fmt_lastresult==PAUSE_QUIT){
+    msg_set(mail_msg);
     return;
   }
   prompt(EMAILCLUBS_LCFTR);
-  setmbk(mail_msg);
+  msg_set(mail_msg);
 }
 
 
@@ -207,8 +209,8 @@ void
 startind()
 {
   if(!prgind)return;
-  oldverticalformat=verticalformat;
-  setverticalformat(0);
+  oldverticalformat=fmt_verticalformat;
+  fmt_setverticalformat(0);
   prompt(OMDLIND0);
   ind=0;
 }
@@ -227,7 +229,7 @@ void
 endind()
 {
   if(!prgind)return;
-  setverticalformat(oldverticalformat);
+  fmt_setverticalformat(oldverticalformat);
   prompt(OMDLINDE);
 }
 
@@ -238,10 +240,10 @@ static char inclublock[256];
 void
 goclub(char *club)
 {
-  rmlock(inclublock);
+  lock_rm(inclublock);
   if(club){
     sprintf(inclublock,INCLUBLOCK,thisuseronl.channel,club);
-    placelock(inclublock,"reading");
+    lock_place(inclublock,"reading");
   }
   setclub(club);
 }
@@ -250,9 +252,9 @@ goclub(char *club)
 void
 abort()
 {
-  blocking();
+  inp_block();
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  setmbk(mailer_msg);
+  msg_set(mailer_msg);
   prompt(MAILER_ABORT);
   exit(2);
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:35  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/08/14 11:31:09  alexios
  * Added unix2dos() function to translate files to the DOS
@@ -58,9 +59,12 @@
 #endif
 
 
+#define VERSION "0.9"
+
+
 /* mailer.c */
 
-extern promptblk *archivers, *mailer_msg;
+extern promptblock_t *archivers, *mailer_msg;
 
 extern char *bbsid;
 extern char *ctlname[6];

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:47  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 15:48:12  alexios
  * Added autoconf support.
@@ -68,9 +69,9 @@
 
 /* offline.mail.c */
 
-extern promptblk *mail_msg;
-extern promptblk *mailer_msg;
-extern promptblk *emailclubs_msg;
+extern promptblock_t *mail_msg;
+extern promptblock_t *mailer_msg;
+extern promptblock_t *emailclubs_msg;
 
 extern char *progname;
 
@@ -108,9 +109,9 @@ extern int  prgind;
 #define NUMOLDMSGS 128
 
 struct prefs {
-  int            flags;
-  unsigned long  oldcrc[NUMOLDMSGS];
-  int            oldlen[NUMOLDMSGS];
+  uint32 flags;
+  uint32 oldcrc[NUMOLDMSGS];
+  uint32 oldlen[NUMOLDMSGS];
 };
 
 
@@ -213,9 +214,9 @@ int findclub(char *club);
 
 int loadclubhdr(char *club);
 
-int getdefaultax(useracc *uacc, char *club);
+int getdefaultax(useracc_t *uacc, char *club);
 
-int getclubax(useracc *uacc, char *club);
+int getclubax(useracc_t *uacc, char *club);
 
 
 /* download.c */

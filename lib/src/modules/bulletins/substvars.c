@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:55  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:19:18  alexios
  * Fixed sneaky little substitution variable bug.
@@ -34,6 +35,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -69,7 +71,7 @@ initbltsubstvars()
   int i=0;
   
   while(table[i].varname[0]){
-    addsubstvar(table[i].varname,table[i].varcalc);
+    out_addsubstvar(table[i].varname,table[i].varcalc);
     i++;
   }
 }

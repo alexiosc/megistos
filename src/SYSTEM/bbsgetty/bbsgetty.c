@@ -26,11 +26,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:16  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.1  1999/07/18 21:54:26  alexios
- * Changed a few fatal() calls to fatalsys(). Added config
+ * Changed a few error_fatal() calls to error_fatalsys(). Added config
  * field that executes some command immediately after connection
  * (postconnect). Minor fixes.
  *
@@ -43,6 +44,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -77,10 +79,10 @@ startemud()
   unlink(fname);
 
   if(mkfifo(fname,0660)){
-    fatalsys("Unable to create emulation FIFO %s",fname);
+    error_fatalsys("Unable to create emulation FIFO %s",fname);
   }
   if(chown(fname,bbsuid,bbsgid)){
-    fatalsys("Unable to chown(\"%s\",%d,%d)",fname,bbsuid,bbsgid);
+    error_fatalsys("Unable to chown(\"%s\",%d,%d)",fname,bbsuid,bbsgid);
   }
 
   debug(D_RUN,"Turning into emud. Bye!");
@@ -90,13 +92,13 @@ startemud()
   /* If we get to this point, something's gone wrong */
   debug(D_RUN,"Aieee, something's gone very wrong. Couldn't spawn emud.");
   errno=i;
-  fatalsys("Unable to spawn emu daemon for %s.",device);
+  error_fatalsys("Unable to spawn emu daemon for %s.",device);
 }
 
 
 int main(int argc, char **argv)
 {
-  setprogname("bbsgetty");	/* this facilitates Megistos error logging */
+  mod_setprogname("bbsgetty");	/* this facilitates Megistos error logging */
   init(argc,argv);		/* initialise bbsgetty */
   waituucplocks();		/* wait for pending UUCP locks on this tty */
   initline();			/* initialise the channel */

@@ -1,6 +1,6 @@
 /*****************************************************************************\
  **                                                                         **
- **  FILE:     input.c                                                      **
+ **  FILE:     inp_buffer.c                                                      **
  **  AUTHORS:  Mark Howell (howell_ma@movies.enet.dec.com)                  **
  **            Alexios (porting to Megistos, adding some bells & whistles)  **
  **  PURPOSE:  Run Infocom games in a nice BBS environment.                 **
@@ -34,8 +34,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 16:59:43  alexios
  * Initial revision
@@ -46,10 +47,11 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 /*
- * input.c
+ * inp_buffer.c
  *
  * Input routines
  *
@@ -116,7 +118,7 @@ void read_character (int argc, zword_t *argv)
       arg_list[0] = argv[2];
       arg_list[1] = argv[1];
       
-      /* Read a character with a timeout. If the input timed out then
+      /* Read a character with a timeout. If the inp_buffer timed out then
 	 call the timeout action routine. If the return status from the
 	 timeout routine was 0 then try to read a character again */
       
@@ -124,7 +126,7 @@ void read_character (int argc, zword_t *argv)
 	c = input_character ((int) argv[1]);
       } while (c == -1 && call (2, arg_list, ASYNC) == 0);
       
-      /* Fail call if input timed out */
+      /* Fail call if inp_buffer timed out */
       
       if (c == -1)
 	c = 0;
@@ -142,7 +144,7 @@ void read_character (int argc, zword_t *argv)
 /*
  * read_line
  *
- * Read a line of input with optional timeout.
+ * Read a line of inp_buffer with optional timeout.
  *
  *    argv[0] = character buffer address
  *    argv[1] = token buffer address
@@ -220,7 +222,7 @@ void read_line (int argc, zword_t *argv)
 /*
  * get_line
  *
- * Read a line of input and lower case it.
+ * Read a line of inp_buffer and lower case it.
  *
  */
 
@@ -250,7 +252,7 @@ int get_line (char *cbuf, zword_t timeout, zword_t action_routine)
     buffer = &cbuf[1];
   }
   
-  /* Try to read input from command file */
+  /* Try to read inp_buffer from command file */
   
   c = playback_line (buflen, buffer, &read_size);
   
@@ -261,7 +263,7 @@ int get_line (char *cbuf, zword_t timeout, zword_t action_routine)
     arg_list[0] = action_routine;
     arg_list[1] = timeout;
     
-    /* Read a line with a timeout. If the input timed out then
+    /* Read a line with a timeout. If the inp_buffer timed out then
        call the timeout action routine. If the return status from the
        timeout routine was 0 then try to read the line again */
     
@@ -270,7 +272,7 @@ int get_line (char *cbuf, zword_t timeout, zword_t action_routine)
       status = 0;
     } while (c == -1 && (status = call (2, arg_list, ASYNC)) == 0);
     
-    /* Throw away any input if timeout returns success */
+    /* Throw away any inp_buffer if timeout returns success */
     
     if (status)
       read_size = 0;
@@ -293,7 +295,7 @@ int get_line (char *cbuf, zword_t timeout, zword_t action_routine)
 /*
  * tokenise_line
  *
- * Convert a typed input line into tokens. The token buffer needs some
+ * Convert a typed inp_buffer line into tokens. The token buffer needs some
  * additional explanation. The first byte is the maximum number of tokens
  * allowed. The second byte is set to the actual number of token read. Each
  * token is composed of 3 fields. The first (word) field contains the word

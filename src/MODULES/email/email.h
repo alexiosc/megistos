@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:09  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
  * Redeclared ncsalphasort() to have the right type of args.
@@ -65,7 +66,7 @@
 #include <bbsinclude.h>
 #include "ecdbase.h"
 
-extern promptblk *msg;
+extern promptblock_t *msg;
 
 
 /* email stuff */
@@ -346,13 +347,18 @@ int loadclubhdr(char *club);
 
 int saveclubhdr(struct clubheader *hdr);
 
-int getdefaultax(useracc *uacc, char *club);
+int getdefaultax(useracc_t *uacc, char *club);
 
-int getclubax(useracc *uacc, char *club);
+int getclubax(useracc_t *uacc, char *club);
 
-void setclubax(useracc *uacc, char *club, int ax);
+void setclubax(useracc_t *uacc, char *club, int ax);
 
 
 /* substvars.c */
 
 void initecsubstvars();
+
+
+/* mailcleanup.c */
+
+int handler_cleanup(int argc, char **argv);

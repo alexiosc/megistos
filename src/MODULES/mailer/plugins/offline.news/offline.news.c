@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:54  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 15:53:37  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,8 +77,8 @@
 #include "mbk_news.h"
 
 
-promptblk *msg;
-promptblk *news_msg;
+promptblock_t *msg;
+promptblock_t *news_msg;
 
 
 int  onkey;
@@ -91,23 +93,23 @@ char *progname;
 void
 init()
 {
-  initmodule(INITALL);
+  mod_init(INI_ALL);
 
-  news_msg=opnmsg("news");
-  sopkey=numopt(NEWS_SOPKEY,0,129);
+  news_msg=msg_open("news");
+  sopkey=msg_int(NEWS_SOPKEY,0,129);
 
-  msg=opnmsg("offline.news");
-  onkey=numopt(ONKEY,0,129);
-  defnews=ynopt(DEFNEWS);
-  newsfile=stgopt(NEWSFILE);
-  setlanguage(thisuseracc.language);
+  msg=msg_open("offline.news");
+  onkey=msg_int(ONKEY,0,129);
+  defnews=msg_bool(DEFNEWS);
+  newsfile=msg_string(NEWSFILE);
+  msg_setlanguage(thisuseracc.language);
 }
 
 
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
@@ -120,17 +122,40 @@ warn()
 }
 
 
+mod_info_t mod_info_offline_news = {
+  "offline.news",
+  "Mailer Plugin: News Bulletins",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Packages logon news bulletins.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,NULL},			/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(argc<2)warn();
-  atexit(done);
-  progname=argv[0];
-  init();
-  if(!strcmp(argv[1],"-setup"))setup();
-  else if(!strcmp(argv[1],"-download"))return ondownload();
-  else warn();
-  done();
-  return 0;
+  progname=mod_info_offline_news.progname;
+  mod_setinfo(&mod_info_offline_news);
+
+  if(argc!=2)return mod_main(argc,argv);
+
+  if(!strcmp(argv[1],"--setup")){
+    atexit(done);
+    init();
+    setup();
+  } else if(!strcmp(argv[1],"--download")){
+    atexit(done);
+    init();
+    return ondownload();
+  }
+
+  /* This should only return help, info, etc */
+  return mod_main(argc,argv);
 }

@@ -28,17 +28,18 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:45:11  alexios
  * Added autoconf support.
  *
  * Revision 0.4  1998/08/14 11:31:09  alexios
- * Removed newlines from fatal() calls (ouch).
+ * Removed newlines from error_fatal() calls (ouch).
  *
  * Revision 0.3  1998/07/24 10:19:54  alexios
  * Migrated to bbslib 0.6.
@@ -55,6 +56,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -89,21 +91,21 @@ loadprefs(char *plugin, void *buffer)
   if(stat(fname,&st))return -1;
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open %s for reading",fname);
+    error_fatalsys("Unable to open %s for reading",fname);
   }
 
   while(ftell(fp)<st.st_size){
     if(!fread(&tag,sizeof(tag),1,fp)){
-      fatalsys("Unable to read tag from %s",fname);
+      error_fatalsys("Unable to read tag from %s",fname);
     }
     if(!strcmp(plugin,tag.plugin)){
       if(!fread(buffer,tag.len,1,fp)){
-	fatalsys("Unable to read from %s",fname);
+	error_fatalsys("Unable to read from %s",fname);
       }
       return 1;
     }
     if(fseek(fp,tag.len,SEEK_CUR)){
-      fatalsys("Unable to seek while reading from %s",fname);
+      error_fatalsys("Unable to seek while reading from %s",fname);
     }
   }
   fclose(fp);
@@ -124,32 +126,32 @@ saveprefs(char *plugin, int len, void *buffer)
 
   if(!stat(fname,&st)){
     if((fp=fopen(fname,"r+"))==NULL){
-      fatalsys("Unable to open %s for writing",fname);
+      error_fatalsys("Unable to open %s for writing",fname);
     }
   } else {
     if((fp=fopen(fname,"w+"))==NULL){
-      fatalsys("Unable to create %s",fname);
+      error_fatalsys("Unable to create %s",fname);
     }
     st.st_size=0;
   }
 
   while(ftell(fp)<st.st_size){
     if(!fread(&tag,sizeof(tag),1,fp)){
-      fatalsys("Unable to read tag from %s",fname);
+      error_fatalsys("Unable to read tag from %s",fname);
     }
     if(!strcmp(plugin,tag.plugin)){
       if(tag.len!=len){
-	fatalsys("Block length mismatch, %d!=%d.",len,tag.len);
+	error_fatalsys("Block length mismatch, %d!=%d.",len,tag.len);
       }
       errno=0;
       if(!fwrite(buffer,tag.len,1,fp)){
-	fatalsys("Unable to write to %s",fname);
+	error_fatalsys("Unable to write to %s",fname);
       }
       fclose(fp);
       return;
     }
     if(fseek(fp,tag.len,SEEK_CUR)){
-      fatalsys("Unable to seek while reading from %s",fname);
+      error_fatalsys("Unable to seek while reading from %s",fname);
     }
   }
 
@@ -157,10 +159,10 @@ saveprefs(char *plugin, int len, void *buffer)
   strcpy(tag.plugin,plugin);
   tag.len=len;
   if(!fwrite(&tag,sizeof(tag),1,fp)){
-    fatalsys("Unable to write tag to %s",fname);
+    error_fatalsys("Unable to write tag to %s",fname);
   }
   if(!fwrite(buffer,tag.len,1,fp)){
-    fatalsys("Unable to write to %s",fname);
+    error_fatalsys("Unable to write to %s",fname);
   }
   fclose(fp);
 }

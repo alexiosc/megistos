@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:47  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/28 23:10:22  alexios
  * Added a command to download a bulletin.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -69,7 +71,7 @@
 #include "bulletins.h"
 
 
-promptblk *msg, *clubmsg;
+promptblock_t *msg, *clubmsg;
 
 int   entrykey;
 int   sopkey;
@@ -88,27 +90,27 @@ char *dnldesc;
 void
 init()
 {
-  initmodule(INITALL);
-  clubmsg=opnmsg("emailclubs");
-  msg=opnmsg("bulletins");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  clubmsg=msg_open("emailclubs");
+  msg=msg_open("bulletins");
+  msg_setlanguage(thisuseracc.language);
 
   initbltsubstvars();
 
-  entrykey=numopt(ENTRYKEY,0,129);
-  sopkey=numopt(SOPKEY,0,129);
-  if((flaxes=tokopt(FLAXES,"CO-OPS","CLUBOP","PRIVILEGED")-1)<0){
-    fatal("LEVEL2 option FLAXES (bulletins.msg) has bad value.");
+  entrykey=msg_int(ENTRYKEY,0,129);
+  sopkey=msg_int(SOPKEY,0,129);
+  if((flaxes=msg_token(FLAXES,"CO-OPS","CLUBOP","PRIVILEGED")-1)<0){
+    error_fatal("LEVEL2 option FLAXES (bulletins.msg) has bad value.");
   }
-  audins=ynopt(AUDINS);
-  auddel=ynopt(AUDDEL);
-  audedt=ynopt(AUDEDT);
-  audrd=ynopt(AUDRD);
-  askdef=ynopt(ASKDEF);
-  ainsdef=ynopt(AINSDEF);
-  indsel=ynopt(INDSEL);
-  indspd=numopt(INDSPD,1,500);
-  dnldesc=stgopt(DNLDESC);
+  audins=msg_bool(AUDINS);
+  auddel=msg_bool(AUDDEL);
+  audedt=msg_bool(AUDEDT);
+  audrd=msg_bool(AUDRD);
+  askdef=msg_bool(ASKDEF);
+  ainsdef=msg_bool(AINSDEF);
+  indsel=msg_bool(INDSEL);
+  indspd=msg_int(INDSPD,1,500);
+  dnldesc=msg_string(DNLDESC);
 
   dbopen();
 }
@@ -125,14 +127,14 @@ void
 run()
 {
   int shownmenu=0, ax;
-  char c;
+  char c=0;
 
   if(thisuseronl.flags&OLF_JMP2BLT){
     strcpy(club,thisuseracc.lastclub);
     thisuseronl.flags&=~OLF_JMP2BLT;
   }
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOAXES);
     return;
   }
@@ -149,7 +151,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -158,13 +160,13 @@ run()
 	  if(club[0])prompt(CURSIG,club);
 	  prompt(ax?SSHMENU:SHMENU);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'H':
 	about();
@@ -172,13 +174,13 @@ run()
       case 'S':
 	selectclub();
 	thisuseronl.flags&=~OLF_MMCONCAT;
-	if(!morcnc())endcnc();
+	if(!cnc_more())cnc_end();
 	break;
       case 'I':
 	if(getaccess(club)>=flaxes)insertblt();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -186,7 +188,7 @@ run()
 	if(getaccess(club)>=flaxes)bltdel();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -194,7 +196,7 @@ run()
 	if(getaccess(club)>=flaxes)bltedt();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -202,7 +204,7 @@ run()
 	if(getaccess(club)>=flaxes)autoins();
 	else {
 	  prompt(ERRSEL,c);
-	  endcnc();
+	  cnc_end();
 	  continue;
 	}
 	break;
@@ -229,12 +231,12 @@ run()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
 
   }
 }
@@ -243,7 +245,7 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
   dbclose();
 }
 
@@ -252,18 +254,41 @@ int bltcnv_main(int argc, char *argv[]);
 
 
 int
-main(int argc, char *argv[])
+handler_run(int argc, char *argv[])
 {
-  setprogname(argv[0]);
-  if(strstr(argv[0],"bltcnv"))return bltcnv_main(argc,argv);
-  if(argc>1 && !strcmp(argv[1],"-cleanup")){
-    cleanup();
-    exit(0);
-  }
   atexit(done);
   init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else if(argc==3 && !strcmp(argv[1],"-insert"))extins(argv[2]);
-  else run();
+  run();
   return 0;
+}
+
+
+
+mod_info_t mod_info_bulletins = {
+  "bulletins",
+  "Bulletin reader",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Permanent archive of interesting club articles et al",
+  RCS_VER,
+  "1.0",
+  {50,login},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {50,cleanup},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  if(strstr(argv[0],"bltcnv"))return bltcnv_main(argc,argv);
+  if(argc==3 && !strcmp(argv[1],"--insert")){
+    init();
+    return extins(argv[2]);
+  }
+
+  mod_setinfo(&mod_info_bulletins);
+  return mod_main(argc,argv);
 }

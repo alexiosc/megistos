@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:53  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -31,6 +32,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -55,7 +57,7 @@ dbopen()
   d_dbfpath(BLTDBDIR);
   d_dbdpath(BLTDBDIR);
   if(d_open("bltidx","s")!=S_OKAY){
-    fatal("Unable to open Bulletin database (db_status %d)",
+    error_fatal("Unable to open Bulletin database (db_status %d)",
 	  db_status);
   }
 }
@@ -78,7 +80,7 @@ dbgetfirst()
     if(db_status==S_OKAY)return res;
   } else if(db_status==S_NOTFOUND)return 0;
 
-  fatal("Freak error (db_status=%d), argh argh.",db_status);
+  error_fatal("Freak error (db_status=%d), argh argh.",db_status);
   return -1; /* just to get rid of the warning */
 }
 
@@ -93,7 +95,7 @@ dbgetlast()
     if(db_status==S_OKAY)return res;
   } else if(db_status==S_NOTFOUND)return 0;
 
-  fatal("Freak error (db_status=%d), argh argh.",db_status);
+  error_fatal("Freak error (db_status=%d), argh argh.",db_status);
   return -1; /* just to get rid of the warning */
 }
 
@@ -103,7 +105,7 @@ dbins(struct bltidx *blt)
 {
   d_fillnew(BLTIDX,blt);
   /*if(db_status==S_OKAY)return;*/
-  /*fatal("Unable to insert new bulletin (db_status=%d).",db_status);*/
+  /*error_fatal("Unable to insert new bulletin (db_status=%d).",db_status);*/
   return db_status==S_OKAY;
 }
 
@@ -125,7 +127,7 @@ dbget(struct bltidx *blt)
 {
   d_recread(blt);
   if(db_status!=S_OKAY){
-    fatal("Unable to get current record (db_status=%d).",db_status);
+    error_fatal("Unable to get current record (db_status=%d).",db_status);
   }
 }
 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1999/07/18 21:29:45  alexios
  * Major changes.
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -70,30 +72,30 @@ getdellibname(char *s)
   char *i,c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(OLDLASK);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return 0;
       }
       if(sameas(margv[0],"?")){
 	listsublibs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -155,12 +157,12 @@ op_delete()
   struct libidx lib,tmp;
 
   for(;;){
-    endcnc();
+    cnc_end();
     if(!getdellibname(s))return;
 
     if(!libread(s,library.libnum,&lib)){
       prompt(OLDLNEX,s);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -176,7 +178,7 @@ op_delete()
 
   if(libgetchild(lib.libnum,"",&tmp)){
     prompt(OLDLSUB);
-    endcnc();
+    cnc_end();
     return;
   }
 

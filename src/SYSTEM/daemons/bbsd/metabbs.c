@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:59:36  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -79,35 +81,35 @@ void init_non_megistos()
     
     /* Validate this entry first */
 
-    if(!strlen(getmsg(base+SYS1COD)))continue;
-    if(!strlen(getmsg(base+SYS1HST)))continue;
+    if(!strlen(msg_get(base+SYS1COD)))continue;
+    if(!strlen(msg_get(base+SYS1HST)))continue;
     
     
     /* Right, it seems to be valid. Obviously the MetaBBS server has the last
        word, but we'll keep this one. */
 
-    strcpy(non_megistos[i].codename,stgopt(base+SYS1COD));
-    strcpy(non_megistos[i].bbstitle,stgopt(base+SYS1TTL));
-    strcpy(non_megistos[i].company,stgopt(base+SYS1CMP));
-    strcpy(non_megistos[i].address1,stgopt(base+SYS1AD1));
-    strcpy(non_megistos[i].address2,stgopt(base+SYS1AD2));
-    strcpy(non_megistos[i].city,stgopt(base+SYS1CTY));
-    strcpy(non_megistos[i].voicephone,stgopt(base+SYS1VPH));
-    strcpy(non_megistos[i].dataphone,stgopt(base+SYS1DPH));
+    strcpy(non_megistos[i].codename,msg_string(base+SYS1COD));
+    strcpy(non_megistos[i].bbstitle,msg_string(base+SYS1TTL));
+    strcpy(non_megistos[i].company,msg_string(base+SYS1CMP));
+    strcpy(non_megistos[i].address1,msg_string(base+SYS1AD1));
+    strcpy(non_megistos[i].address2,msg_string(base+SYS1AD2));
+    strcpy(non_megistos[i].city,msg_string(base+SYS1CTY));
+    strcpy(non_megistos[i].voicephone,msg_string(base+SYS1VPH));
+    strcpy(non_megistos[i].dataphone,msg_string(base+SYS1DPH));
 
     non_megistos[i].users_online=-1;
     non_megistos[i].lines_free=-1;
     non_megistos[i].lines_max=-1;
 
-    non_megistos[i].hostname=stgopt(base+SYS1HST);
-    non_megistos[i].port=numopt(base+SYS1PRT,0,65535);
-    non_megistos[i].url=stgopt(base+SYS1URL);
-    non_megistos[i].email=stgopt(base+SYS1EML);
-    non_megistos[i].bbs_ad=stgopt(base+SYS1ADV);
-    non_megistos[i].access_allow=stgopt(base+SYS1ALW);
-    non_megistos[i].access_deny=stgopt(base+SYS1DNY);
+    non_megistos[i].hostname=msg_string(base+SYS1HST);
+    non_megistos[i].port=msg_int(base+SYS1PRT,0,65535);
+    non_megistos[i].url=msg_string(base+SYS1URL);
+    non_megistos[i].email=msg_string(base+SYS1EML);
+    non_megistos[i].bbs_ad=msg_string(base+SYS1ADV);
+    non_megistos[i].access_allow=msg_string(base+SYS1ALW);
+    non_megistos[i].access_deny=msg_string(base+SYS1DNY);
 
-    non_megistos[i].flags=!ynopt(base+SYS1HUP);
+    non_megistos[i].flags=!msg_bool(base+SYS1HUP);
     non_megistos[i].bbs_uid=-1;
     non_megistos[i].bbs_gid=-1;
     non_megistos[i].bbsd_pid=(int)getpid();

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 22:09:33  alexios
  * Added a flag to signify file transfer success.
@@ -96,7 +97,7 @@ struct protocol {
 #define PRF_BINARY 0x0020
 
 
-extern promptblk *msg;
+extern promptblock_t *msg;
 
 
 extern int  peffic;
@@ -112,7 +113,7 @@ extern int             numprotocols;
 extern struct viewer   *viewers;
 extern int             numviewers;
 extern char            *xferlistname;
-extern struct xferitem *xferlist;
+extern xfer_item_t     *xferlist;
 extern int             totalitems;
 extern int             numitems;
 extern char            *taglistname;

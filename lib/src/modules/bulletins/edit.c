@@ -13,11 +13,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:53  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:19:18  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:27:54  alexios
  * Added autoconf support.
@@ -38,6 +39,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -60,8 +62,6 @@ void
 bltedt()
 {
   struct bltidx blt;
-  FILE *fp;
-  char fname[256], s[80], *cp;
   int i;
   char lock[256];
 
@@ -74,64 +74,45 @@ bltedt()
   }
 
   sprintf(lock,"%s-%s-%s-%s",BLTREADLOCK,thisuseracc.userid,blt.area,blt.fname);
-  placelock(lock,"editing");
+  lock_place(lock,"editing");
 
-  sprintf(fname,TMPDIR"/blt%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    rmlock(lock);
-    return;
+  sprintf(inp_buffer,"%s\n%s\nOK\nCancel\n",blt.author,blt.descr);
+
+  if(dialog_run("bulletins",EBLTVT,EBLTLT,inp_buffer,MAXINPLEN)!=0){
+    error_fatal("Unable to run data entry subsystem");
   }
 
-  fprintf(fp,"%s\n",blt.author);
-  fprintf(fp,"%s\n",blt.descr);
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("bulletins",EBLTVT,EBLTLT,fname);
+  if (sameas(margv[2],"OK") || sameas (margv[2],margv[4])) {
+    for(i=0;i<5;i++){
+      char *s=margv[i];
+      if(i==0)strcpy(blt.author,s);
+      else if(i==1)strcpy(blt.descr,s);
+    }
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    rmlock(lock);
-    return;
-  }
-
-  for(i=0;i<5;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(blt.author,s);
-    else if(i==1)strcpy(blt.descr,s);
-  }
-
-  fclose(fp);
-  unlink(fname);
-  if(sameas(s,"CANCEL")){
-    prompt(ABORT);
-    rmlock(lock);
-    return;
-  } else {
-    if(!uidxref(blt.author,0)){
-      if(margc&&isX(margv[0])){
+    if(!usr_uidxref(blt.author,0)){
+      if(margc&&inp_isX(margv[0])){
 	prompt(ABORT);
-	rmlock(lock);
+	lock_rm(lock);
 	return;
       }
-      endcnc();
+      cnc_end();
       prompt(EDTAUTHR,blt.author);
-      if(!getuserid(blt.author,EDTAUTH,EDTAUTHR,0,NULL,0)){
+      if(!get_userid(blt.author,EDTAUTH,EDTAUTHR,0,NULL,0)){
 	prompt(ABORT);
-	rmlock(lock);
+	lock_rm(lock);
 	return;
       }
     }
 
     if(!dbupdate(&blt)){
       prompt(EDITERR);
-      rmlock(lock);
+      lock_rm(lock);
       return;
     }
 
-    rmlock(lock);
+    lock_rm(lock);
     prompt(EDITOK);
     bltinfo(&blt);
 
@@ -139,5 +120,8 @@ bltedt()
 
     if(audedt)audit(thisuseronl.channel,AUDIT(BLTEDT),
 		    thisuseracc.userid,blt.fname,blt.area);
+  } else {
+    prompt(ABORT);
+    lock_rm(lock);
   }
 }

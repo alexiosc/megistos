@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:49  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:44:48  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 15:48:12  alexios
  * Added autoconf support. Minor fixes.
@@ -59,6 +60,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -134,7 +136,7 @@ ustartqsc(char *uid)
   if(stat(fname,&st))return NULL;
 
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open quickscan configuration %s",fname);
+    error_fatalsys("Unable to open quickscan configuration %s",fname);
   }
   
   while(!feof(fp)){
@@ -254,11 +256,11 @@ usaveqsc(char *uid)
 
   sprintf(fname,"%s/%s",QSCDIR,uid);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create quickscan configuration %s",fname);
+    error_fatalsys("Unable to create quickscan configuration %s",fname);
   }
 
   if(fwrite(uqsc,sizeof(struct lastread),numclubs,fp)!=numclubs){
-    fatalsys("Unable to write quickscan configuration %s",fname);
+    error_fatalsys("Unable to write quickscan configuration %s",fname);
   }
 
   fclose(fp);
@@ -370,7 +372,7 @@ resetall(int n)
   int i,j;
 
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 
@@ -396,7 +398,7 @@ resetall(int n)
   saveqsc();
 
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 }
@@ -440,13 +442,13 @@ listqsc()
   while(p){
     if((p->flags&LRF_INQWK)&&(getclubax(&thisuseracc,p->club)>CAX_ZERO)){
       prompt(OMCL,p->club,
-	     getpfix(OMCLYES,(p->flags&LRF_QUICKSCAN)!=0),
+	     msg_getunit(OMCLYES,(p->flags&LRF_QUICKSCAN)!=0),
 	     p->qwklast);
     }
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
     p=nextqsc();
   }
-  if(lastresult!=PAUSE_QUIT)prompt(OMCLF);
+  if(fmt_lastresult!=PAUSE_QUIT)prompt(OMCLF);
   resetqsc();
 }
 
@@ -482,7 +484,7 @@ delclub()
       return;
     } else if(((p=findqsc(club))==NULL) || ((p->flags&LRF_INQWK)==0)){
       prompt(OMCDR);
-      endcnc();
+      cnc_end();
       continue;
     } else {
       delqsc(club);
@@ -510,16 +512,16 @@ resetclub()
       break;
     } else if(((p=findqsc(club))==NULL) || ((p->flags&LRF_INQWK)==0)){
       prompt(OMCRR);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
 
   if(!all&&!email&&!loadclubhdr(club)){
-    fatal("Unable to load club %s.",club);
+    error_fatal("Unable to load club %s.",club);
   }
 
-  if(!getnumber(&n,OMCRN,
+  if(!get_number(&n,OMCRN,
 		email?-sysvar->emessages:(all?-99999:-clubhdr.msgno),
 		email?sysvar->emessages:(all?99999:clubhdr.msgno),
 		OMCRNR,0,0)){
@@ -529,7 +531,7 @@ resetclub()
   if(all)resetall(n);
   else if(email){
     if(!readecuser(thisuseracc.userid,&emlu)){
-      fatal("Unable to read E-mail preference file for %s",
+      error_fatal("Unable to read E-mail preference file for %s",
 	    thisuseracc.userid);
     }
 
@@ -537,7 +539,7 @@ resetclub()
     emlu.lastemailqwk=n;
 
     if(!writeecuser(thisuseracc.userid,&emlu)){
-      fatal("Unable to write E-mail preference file for %s",
+      error_fatal("Unable to write E-mail preference file for %s",
 	    thisuseracc.userid);
     }
   } else {
@@ -553,7 +555,7 @@ fromqsc()
   struct lastread *p;
   int yes;
 
-  if(!getbool(&yes,OMCFC,OMCFCR,0,0)){
+  if(!get_bool(&yes,OMCFC,OMCFCR,0,0)){
     prompt(OMCFCAN);
     return;
   }
@@ -563,12 +565,12 @@ fromqsc()
   }
 
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   emlu.lastemailqwk=emlu.lastemailread;
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 
@@ -590,12 +592,12 @@ updateqsc()
   struct lastread *p;
   if(!updqsc)return;
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   emlu.lastemailread=emlu.lastemailqwk;
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   
@@ -613,7 +615,7 @@ toqsc()
   struct lastread *p;
   int yes;
 
-  if(!getbool(&yes,OMCTC,OMCTCR,0,0)){
+  if(!get_bool(&yes,OMCTC,OMCTCR,0,0)){
     prompt(OMCTCAN);
     return;
   }
@@ -623,12 +625,12 @@ toqsc()
   }
 
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   emlu.lastemailread=emlu.lastemailqwk;
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   
@@ -653,21 +655,21 @@ configurequickscan(int create)
   startqsc();
   if(create==2){
     prompt(OMCHLP);
-    endcnc();
+    cnc_end();
     initialise();
   } else if(create){
     prompt(OMCHLP2);
-    endcnc();
+    cnc_end();
     all(ADD);
     all(ADD);
     emlu.lastemailqwk=sysvar->emessages;
   }
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,!shown,OMCMNU,OMCMNUS,OMERR,"+-VRFT",0,0);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,!shown,OMCMNU,OMCMNUS,OMERR,"+-VRFT",0,0);
     shown=1;
-    setinputflags(INF_NORMAL);
+    inp_clearflags(INF_HELP);
     if(!i){
       saveqsc();
       return;
@@ -675,7 +677,7 @@ configurequickscan(int create)
     if(i==-1){
       prompt(OMCHLP);
       shown=0;
-      endcnc();
+      cnc_end();
       continue;
     }
   
@@ -712,7 +714,7 @@ setqsc()
   struct prefs prefs;
 
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 
@@ -726,7 +728,7 @@ setqsc()
   prefs.flags|=OMF_QSCOK;
   writeprefs(&prefs);
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 }

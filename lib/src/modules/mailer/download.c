@@ -23,17 +23,16 @@
  **                                                                         **
 \*****************************************************************************/
 
-#define VERSION "0.1"
-
 /*
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:35  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.10  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys(). Made QWK packets
+ * Changed a few error_fatal() calls to error_fatalsys(). Made QWK packets
  * transient wrt file transfers.
  *
  * Revision 0.9  1998/12/27 15:45:11  alexios
@@ -73,6 +72,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -100,9 +100,9 @@ plugindnl(int n)
 {
   char command[256];
   int res;
-  sprintf(command,"%s -download",plugins[n].name);
-  res=runmodule(command);
-  endcnc();
+  sprintf(command,"%s --download",plugins[n].name);
+  res=runcommand(command);
+  cnc_end();
   if(res)return res==512?2:1;
   return 0;
 }
@@ -122,7 +122,7 @@ mkfiles(char *dir)
   }
   fprintf(fp,"DOOR = MegistosMail\r\n");
   fprintf(fp,"VERSION = %s\r\n",VERSION);
-  fprintf(fp,"SYSTEM = %s\r\n",SYSTEMVERSION);
+  fprintf(fp,"SYSTEM = %s\r\n",bbs_systemversion);
   fprintf(fp,"CONTROLNAME = %s\r\n",ctlname[0]);
   fprintf(fp,"MIXEDCASE = YES\r\n");
   if(userqwk.flags&USQ_GREEKQWK)fprintf(fp,"GREEKQWK\r\n");
@@ -163,13 +163,12 @@ compress(char *packetname,char *dir)
 
   /* Now compress the packet */
 
-  setmbk(archivers);
-  sprintf(tmp,"%s >&/dev/null",getmsg(ARCHIVERS_COMPRESS1+userqwk.compressor*7));
+  msg_set(archivers);
+  sprintf(tmp,"%s >&/dev/null",msg_get(ARCHIVERS_COMPRESS1+userqwk.compressor*7));
   sprintf(command,tmp,packetname,"*");
-  strcpy(tmp,getmsg(ARCHIVERS_NAME1+userqwk.compressor*7));
-  rstmbk();
+  strcpy(tmp,msg_get(ARCHIVERS_NAME1+userqwk.compressor*7));
+  msg_reset();
   prompt(PACKING,tmp);
-  rstmbk(archivers);
   if(system(command)){
     prompt(PACKERR);
     return 0;
@@ -203,26 +202,26 @@ static int offer(char *fname,char *dir)
 
   /* Set the description */
 
-  sprintf(descr,getmsg(QWKDESC));
+  sprintf(descr,msg_get(QWKDESC));
 
 
   /* Set the audit messages */
 
   strcpy(audit[0],AUS_QWKDNL);
   sprintf(audit[1],AUD_QWKDNL,thisuseracc.userid,(int)st.st_size);
-  setaudit(AUT_QWKDNL,audit[0],audit[1],0,NULL,NULL);
+  xfer_setaudit(AUT_QWKDNL,audit[0],audit[1],0,NULL,NULL);
 
 
   /* Register the file for downloading */
 
-  addxfer(FXM_TRANSIENT,fname,descr,chgdnl,-1);
+  xfer_add(FXM_TRANSIENT,fname,descr,chgdnl,-1);
 
 
   /* Perform the transfer */
 
-  dofiletransfer();
-  killxferlist();
-  endcnc();
+  xfer_run();
+  xfer_kill_list();
+  cnc_end();
   return 1;
 }
 
@@ -233,7 +232,7 @@ download()
   int i, fail;
   char dir[256], command[256];
 
-  if(!canpay(chgdnl)){
+  if(!usr_canpay(chgdnl)){
     prompt(DNLNCRD);
     return;
   }
@@ -256,7 +255,7 @@ download()
   sprintf(command,"\\rm -rf %s",dir);
   system(command);
   if(mkdir(dir,0770)){
-    fatalsys("Unable to make directory %s",dir);
+    error_fatalsys("Unable to make directory %s",dir);
   }
   chdir(dir);
   
@@ -292,7 +291,7 @@ download()
 
     /* Charge the user */
 
-    chargecredits(chgdnl);
+    usr_chargecredits(chgdnl);
 
     /* Offer it for download */
 
@@ -307,6 +306,6 @@ download()
 kill:
   chdir("/");
   if(system(command)){
-    fatal("Unable to rm -rf directory %s",dir);
+    error_fatal("Unable to rm -rf directory %s",dir);
   }
 }

@@ -30,8 +30,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1998/12/27 16:31:55  alexios
  * Added autoconf support. Migrated to new locking scheme.
@@ -48,6 +49,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -69,7 +71,7 @@ void
 resolverecipient(char *s, char *by)
 {
   char original[256], fname[256], lock[256];
-  int  n=0, maxn=numopt(MAXBNCE,1,100);
+  int  n=0, maxn=msg_int(MAXBNCE,1,100);
   struct emailuser user;
   FILE *fp;
 
@@ -82,20 +84,20 @@ resolverecipient(char *s, char *by)
     sprintf(fname,"%s/%s",MSGUSRDIR,s);
     sprintf(lock,ECUSERLOCK,s);
 
-    if((waitlock(lock,20))==LKR_TIMEOUT)return;
-    placelock(lock,"reading");
+    if((lock_wait(lock,20))==LKR_TIMEOUT)return;
+    lock_place(lock,"reading");
     
     if((fp=fopen(fname,"r"))==NULL){
-      rmlock(lock);
+      lock_rm(lock);
       return;
     }
     if(fread(&user,sizeof(struct emailuser),1,fp)!=1){
       fclose(fp);
-      rmlock(lock);
+      lock_rm(lock);
       return;
     }
     fclose(fp);
-    rmlock(lock);
+    lock_rm(lock);
     if(!user.forwardto[0])return;
     if(!strcmp(s,user.forwardto))return;
     strcpy(by,s);

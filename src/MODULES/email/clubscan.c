@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:04  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/08/13 17:00:25  alexios
  * Fixed scan-for-keyword bug that caused fatal errors due to
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -136,7 +138,7 @@ scanupdatemsg(struct message *msg,int read)
 
   if(keyscan)return;		/* Don't update quickscans if searching */
   if((l=findqsc(clubhdr.club))==NULL){
-    fatal("Unable to find quickscan entry for club %s",
+    error_fatal("Unable to find quickscan entry for club %s",
 	  clubhdr.club);
   }
 
@@ -216,7 +218,7 @@ scan4files(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
   int first=1;
   struct ecidx idx;
 
-  nonblocking();
+  inp_nonblock();
   *msgno=-1;
   for(;;){
     int j=locatemsg(msgno,sequencebroken,targetnum,dir,mode);
@@ -226,7 +228,7 @@ scan4files(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
     if(j==BSE_NFOUND||(*msgno)<0){
       if(!first)if(!keyscan)endind();
       *msgno=-1;
-      blocking();
+      inp_block();
       return j;
     } else if(first){
       startind();
@@ -242,24 +244,24 @@ scan4files(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
 
     if((read(fileno(stdin),&c,1)&&
 	((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-       ||(lastresult==PAUSE_QUIT)){
+       ||(fmt_lastresult==PAUSE_QUIT)){
       if(!first)if(!keyscan)endind();
       prompt(FSCCAN);
-      blocking();
+      inp_block();
       *msgno=-1;
       return BSE_CAN;
     }
 
     if(found){
       if(!first)if(!keyscan)endind();
-      blocking();
+      inp_block();
       return j;
     }
       
     if(dir==BSD_GT)targetnum=*msgno+1;
     else targetnum=*msgno-1;
   }
-  blocking();
+  inp_block();
   return (dir==BSD_GT)?BSE_END:BSE_BEGIN;
 }
 
@@ -280,7 +282,7 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
     struct message msg;
     int first=1;
 
-    nonblocking();
+    inp_nonblock();
 
     for(;;){
       int j, found=0;
@@ -292,7 +294,7 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
       if(j==BSE_NFOUND||(*msgno)<0){
 	if(!first)endind();
 	*msgno=-1;
-	blocking();
+	inp_block();
 	return j;
       } else if(first){
 	startind();
@@ -324,10 +326,10 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
 	    }
 	    if((read(fileno(stdin),&c,1)&&
 		((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-	       ||(lastresult==PAUSE_QUIT)){
+	       ||(fmt_lastresult==PAUSE_QUIT)){
 	      if(!first)endind();
 	      prompt(RKCAN);
-	      blocking();
+	      inp_block();
 	      *msgno=-1;
 	      return BSE_CAN;
 	    }
@@ -339,7 +341,7 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
       if(found){
 	if(!first)endind();
 	prompt(RKFOUND,keywords[lastkey]);
-	blocking();
+	inp_block();
 	return j;
       }
 
@@ -348,10 +350,10 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
       
       if((read(fileno(stdin),&c,1)&&
 	  ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))
-	 ||(lastresult==PAUSE_QUIT)){
+	 ||(fmt_lastresult==PAUSE_QUIT)){
 	if(!first)endind();
 	prompt(RKCAN);
-	blocking();
+	inp_block();
 	*msgno=-1;
 	return BSE_CAN;
       }
@@ -359,7 +361,7 @@ scan4msg(int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
     if(!first)endind();
     *msgno=-1;
   }
-  blocking();
+  inp_block();
   return BSE_NFOUND;
 }
 
@@ -384,13 +386,13 @@ clubreadmenu(struct message *msg, char defopt)
 
  again:
   for(;;){
-    setinputflags(INF_HELP);
-    res=getmenu(&opt,1,0,menu,RDMNUR,options,RSDEF,defopt);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&opt,1,0,menu,RDMNUR,options,RSDEF,defopt);
+    inp_clearflags(INF_HELP);
     if(!res)return 'X';
     else if(res<0){
       prompt(menu+1);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -429,7 +431,7 @@ clubreadmenu(struct message *msg, char defopt)
   case 'Q':
     tmp[0]=quickscanmenu(msg);
     tmp[1]=0;
-    if(isX(tmp))goto again;
+    if(inp_isX(tmp))goto again;
     else return tmp[0];
 
   case 'S':
@@ -456,25 +458,25 @@ clubheadermenu(struct message *msg, char defopt)
   char opt;
 
   for(;;){
-    setinputflags(INF_HELP);
+    inp_setflags(INF_HELP);
     if((msg->flags&(MSF_FILEATT|MSF_APPROVD))==(MSF_FILEATT|MSF_APPROVD)){
-      res=getmenu(&opt,1,0,RSSCNMD,RSSCNR,"NP#RXTDQ",RSDEF,defopt);
+      res=get_menu(&opt,1,0,RSSCNMD,RSSCNR,"NP#RXTDQ",RSDEF,defopt);
     } else {
-      res=getmenu(&opt,1,0,RSSCNM,RSSCNR,"NP#RTXQ",RSDEF,defopt);
+      res=get_menu(&opt,1,0,RSSCNM,RSSCNR,"NP#RTXQ",RSDEF,defopt);
     }
     
-    setinputflags(INF_NORMAL);
+    inp_clearflags(INF_HELP);
     
     if(!res)return 'X';
     else if(res==-1){
       if((msg->flags&(MSF_FILEATT|MSF_APPROVD))==(MSF_FILEATT|MSF_APPROVD)){
 	prompt(RSSCNMH);
       } else prompt(RSSCNMHD);
-      endcnc();
+      cnc_end();
       continue;
     } else if(opt=='Q' && !quickscan){
       prompt(QSNOJMP);
-      endcnc();
+      cnc_end();
       continue;
     }
     break;
@@ -510,7 +512,7 @@ startscanning(int startmsg, int bdir)
 
   if(startmsg<0) startmsg=oldmsgno=1;
 
-  endcnc();
+  cnc_end();
   for(i=startmsg;;){
     int msgno;
     int j;
@@ -582,10 +584,10 @@ startscanning(int startmsg, int bdir)
     if(msgno!=oldmsgno){
       dontshow=0;
 
-      if(lock[0])rmlock(lock);
+      if(lock[0])lock_rm(lock);
       sprintf(tmp,"%d",msgno);
       sprintf(lock,MSGREADLOCK,thisuseronl.channel,EMAILCLUBNAME,tmp);
-      placelock(lock,"reading");
+      lock_place(lock,"reading");
     }
 
 
@@ -731,7 +733,7 @@ startscanning(int startmsg, int bdir)
 	    optdecided=0;
 	    opt='Q';
 	  } else return opt;
-	} else if(!isX(tmp)){
+	} else if(!inp_isX(tmp)){
 	  optdecided=0;
 	} else if (toupper(opt)=='C'){
 	  
@@ -789,7 +791,7 @@ startscanning(int startmsg, int bdir)
 
       case 'X':
       default:
-	endcnc();
+	cnc_end();
 	return 'X';
       }
     }
@@ -839,7 +841,7 @@ scanmessages()
       if(j==BSE_CAN)return;
       if(msgno<0||j!=BSE_FOUND){
 	prompt(RSBNMSG);
-	endcnc();
+	cnc_end();
 	return;
       }
     }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.2  1997/11/06 20:06:55  alexios
  * Added GPL legalese to the top of this file.
@@ -53,9 +54,9 @@
 
 /* offline.news.c */
 
-extern promptblk *msg;
-extern promptblk *mailer_msg;
-extern promptblk *graffiti_msg;
+extern promptblock_t *msg;
+extern promptblock_t *mailer_msg;
+extern promptblock_t *graffiti_msg;
 
 extern int  entrykey;
 extern int  ovrkey;

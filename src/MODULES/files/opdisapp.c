@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -99,9 +101,9 @@ disapprovefile(struct libidx *l, char *fname)
     int res;
     fileinfo(l,&f);
   nohelp:
-    setinputflags(INF_HELP);
-    res=getmenu(&c,0,0,ODISASK,ODISERR,"YND",0,0);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    res=get_menu(&c,0,0,ODISASK,ODISERR,"YND",0,0);
+    inp_clearflags(INF_HELP);
     if(res<0)continue;
     else if(!res)return 0;
 
@@ -160,19 +162,19 @@ getfilename()
   static char fn[256];
 
   for(;;){
-    if(morcnc()){
-      strcpy(fn,cncword());
+    if(cnc_more()){
+      strcpy(fn,cnc_word());
     } else {
       prompt(ODISQ);
-      getinput(sizeof(fn)-1);
-      strcpy(fn,input);
+      inp_get(sizeof(fn)-1);
+      strcpy(fn,inp_buffer);
     }
 
-    if(isX(fn))return NULL;
+    if(inp_isX(fn))return NULL;
     else if(!strlen(fn)) continue;
 
     if(!fileexists(library.libnum,fn,1)){
-      endcnc();
+      cnc_end();
       prompt(ODISR);
       continue;
     } else break;

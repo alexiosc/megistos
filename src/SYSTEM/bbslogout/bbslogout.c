@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:31  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1998/12/27 16:20:53  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.5  1998/07/24 10:25:42  alexios
  * Migrated to bbslib 0.6.
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,46 +77,48 @@
 #include "mbk_login.h"
 
 
-promptblk *msg;
+promptblock_t *msg;
 
 
 
 void resetlinestatus()
 {
-  struct linestatus status;
-  getlinestatus(thisuseronl.channel,&status);
+  channel_status_t status;
+  channel_getstatus(thisuseronl.channel,&status);
   status.result=LSR_LOGOUT;
   status.baud=atoi(getenv("BAUD"));
   status.user[0]=0;
-  setlinestatus(thisuseronl.channel,&status);
+  channel_setstatus(thisuseronl.channel,&status);
 }
 
 
-void
+int
 main(int argc, char *argv[])
 {
   char fname[256];
   int hup=!strcmp(argv[0],"bbshangup");
 
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
 
-  initmodule(INITALL);
-  msg=opnmsg("login");
-  setlanguage(thisuseracc.language);
+  mod_init(INI_ALL);
+  msg=msg_open("login");
+  msg_setlanguage(thisuseracc.language);
 
   if(!hup){
-    setverticalformat(0);
+    fmt_setverticalformat(0);
     prompt(SEEYA);
     thisuseronl.flags|=OLF_LOGGEDOUT;
   }
 
   thisuseracc.datelast=today();
 
-  donemodule();
-  disconnect(thisuseronl.emupty);
+  mod_done(INI_ALL);
+  channel_disconnect(thisuseronl.emupty);
 
   sprintf(fname,"%s/%s",ONLINEDIR,thisuseracc.userid);
   unlink(fname);
 
   resetlinestatus();
+
+  return 0;
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:51:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:29  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1998/12/27 14:31:03  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 #include <bbsinclude.h>
@@ -50,23 +52,24 @@
 
 
 int
-hassysaxs(useracc *user,int index)
+hassysaxs(useracc_t *user,int index)
 {
   if(index<0 || index>(sizeof(user->sysaxs)*32))return 0;
   return(user->sysaxs[index/32] & (1<<(index%32)))!=0;
 }
 
 
-void
-makekey(long *userflags, long *classflags, long *combo)
+bbskey_t *
+key_make(bbskey_t *userkeys, bbskey_t *classkeys, bbskey_t *combokeys)
 {
   int i;
-  for(i=0;i<KEYLENGTH;i++)combo[i]=userflags[i]|classflags[i];
+  for(i=0;i<KEYLENGTH;i++)combokeys[i]=userkeys[i]|classkeys[i];
+  return combokeys;
 }
 
 
 int
-keyhasflag(long *keys,int key)
+key_exists(bbskey_t *keys,int key)
 {
   if(!key) return 1;
   if(key<0 || key>(32*KEYLENGTH)) return 0;
@@ -75,20 +78,20 @@ keyhasflag(long *keys,int key)
 }
 
 
-int haskey(useracc *user,int key)
+int key_owns(useracc_t *user,int key)
 {
-  long combo[KEYLENGTH];
-  classrec *class=findclass(user->curclss);
+  bbskey_t combo[KEYLENGTH];
+  classrec_t *class=cls_find(user->curclss);
 
   if(!key)return 1;
   if(key==(32*KEYLENGTH+1))return(sameas(user->userid,SYSOP));
   if (hassysaxs(user,USY_MASTERKEY))return 1;
-  makekey(user->keys,class->keys,combo);
-  return(keyhasflag(combo,key));
+  key_make(user->keys,class->keys,combo);
+  return(key_exists(combo,key));
 }
 
 
-void setkeyflag(long *keys, int key, int set)
+void key_set(bbskey_t *keys, int key, int set)
 {
   if(key<1 || key>(32*KEYLENGTH))return;
   key--;

@@ -31,8 +31,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:50:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 14:31:16  alexios
  * Added autoconf support. Major changes, since lock.c now
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -85,7 +87,7 @@ lockdcmd(char *cmd,const char *name,char *info)
   /* Create the socket */
 
   if((s=socket(AF_UNIX,SOCK_STREAM,0))<0){
-    fatalsys("Unable to create bbslockd socket.");
+    error_fatalsys("Unable to create bbslockd socket.");
   }
 
 
@@ -114,7 +116,8 @@ lockdcmd(char *cmd,const char *name,char *info)
 
 
   /* Oh well, we failed to connect. */
-  if(res<0)fatalsys("Unable to connect to bbslockd socket %s",BBSLOCKD_SOCKET);
+  if(res<0)
+    error_fatalsys("Unable to connect to bbslockd socket %s",BBSLOCKD_SOCKET);
 
 
   
@@ -131,7 +134,7 @@ lockdcmd(char *cmd,const char *name,char *info)
   /* Transmit the command string */
 
   if(send(s,buf,strlen(buf),0)<0){
-    fatalsys("Unable to send() to bbslockd.");
+    error_fatalsys("Unable to send() to bbslockd.");
   }
 
 
@@ -139,12 +142,12 @@ lockdcmd(char *cmd,const char *name,char *info)
   
   bzero(buf,sizeof(buf));
   if(recv(s,buf,sizeof(buf),0)<0){
-    fatalsys("Unable to recv() from bbslockd.");
+    error_fatalsys("Unable to recv() from bbslockd.");
   }
 
 
   if(sscanf(buf,"%d%n",&res,&n)!=1){
-    fatal("bbslockd issued syntantically incorrect response \"%s\"!",buf);
+    error_fatal("bbslockd issued syntantically incorrect response \"%s\"!",buf);
   }
   if(res>1 && info!=NULL)strcpy(info,&buf[n]);
 
@@ -156,34 +159,34 @@ lockdcmd(char *cmd,const char *name,char *info)
 
 
 int
-placelock(const char *name, const char *info)
+lock_place(const char *name, const char *info)
 {
   return lockdcmd(LKC_PLACE,name,(char*)info);
 }
 
 
 int
-checklock(const char *name, char *info)
+lock_check(const char *name, char *info)
 {
   return lockdcmd(LKC_CHECK,name,info);
 }
 
 
 int
-rmlock(const char *name)
+lock_rm(const char *name)
 {
   return lockdcmd(LKC_REMOVE,name,NULL);
 }
 
 
 int
-waitlock(const char *name,int delay)
+lock_wait(const char *name,int delay)
 {
   int naps=delay*5;
   int i, result;
 
   for(i=0;i<naps;i++){
-    if((result=checklock(name,NULL))<1) return result;
+    if((result=lock_check(name,NULL))<1) return result;
     usleep(200000);
   }
   return LKR_TIMEOUT;

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:44:48  alexios
  * Minor fixes wrt to auto-translation of fields in the QWK
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -94,7 +96,7 @@ doemail()
   char c;
   
   if(!readecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to read E-mail preference file for %s",
+    error_fatal("Unable to read E-mail preference file for %s",
 	  thisuseracc.userid);
   }
   
@@ -103,17 +105,17 @@ doemail()
 
   res=findmsgto(&t,thisuseracc.userid,emlu.lastemailqwk+1,BSD_GT);
 
-  nonblocking();
+  inp_nonblock();
   thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
 
   if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-  if(lastresult==PAUSE_QUIT)abort();
+  if(fmt_lastresult==PAUSE_QUIT)abort();
 
   while(res==BSE_FOUND){
     struct message msg;
 
     if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-    if(lastresult==PAUSE_QUIT)abort();
+    if(fmt_lastresult==PAUSE_QUIT)abort();
 
     if(!first){
       if((res=npmsgto(&t,thisuseracc.userid,t+1,BSD_GT))!=BSE_FOUND)break;
@@ -132,7 +134,7 @@ doemail()
     n4++;
     emlu.lastemailqwk=msg.msgno;
   }
-  blocking();
+  inp_block();
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
   if(shown)endind();
 
@@ -162,16 +164,16 @@ doclub(struct lastread *p)
   res=findmsgnum(&t,p->qwklast+1,BSD_GT);
 
   thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
-  nonblocking();
+  inp_nonblock();
 
   if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-  if(lastresult==PAUSE_QUIT)abort();
+  if(fmt_lastresult==PAUSE_QUIT)abort();
 
   while(res==BSE_FOUND){
     struct message msg;
     
     if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-    if(lastresult==PAUSE_QUIT)abort();
+    if(fmt_lastresult==PAUSE_QUIT)abort();
 
     if(!first){
       if((res=npmsgnum(&t,t+1,BSD_GT))!=BSE_FOUND)continue;
@@ -192,7 +194,7 @@ doclub(struct lastread *p)
     }
     p->qwklast=t;
   }
-  blocking();
+  inp_block();
 
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
   if(shown)endind();
@@ -210,7 +212,7 @@ controldat()
   char tmp[256];
 
   if(!fp){
-    logerrorsys("Unable to create control.dat");
+    error_logsys("Unable to create control.dat");
     return 1;
   }
 
@@ -226,7 +228,7 @@ controldat()
   xlate_out(tmp);
   fprintf(fp,"%s\r\n",tmp);
   
-  strcpy(tmp,getmsg(ADMNAM));
+  strcpy(tmp,msg_get(ADMNAM));
   xlate_out(tmp);
   fprintf(fp,"%s\r\n",tmp);
 
@@ -300,7 +302,7 @@ omdownload()
   p=startqsc();
   while(p){
     if((res=doclub(p))!=0)return res;
-    if(lastresult==PAUSE_QUIT)return 1;
+    if(fmt_lastresult==PAUSE_QUIT)return 1;
     p=nextqsc();
   }
 
@@ -311,9 +313,9 @@ omdownload()
   {
     int i=getnumatt();
     
-    prompt(MSGSTOT,nummsgs,getpfix(MSGSNG,nummsgs));
-    if(num4u)prompt(MSGS4U,num4u,getpfix(MSGSNG,num4u));
-    if(i)prompt(MSGSAT,i,getpfix(MSGSNG,i));
+    prompt(MSGSTOT,nummsgs,msg_getunit(MSGSNG,nummsgs));
+    if(num4u)prompt(MSGS4U,num4u,msg_getunit(MSGSNG,num4u));
+    if(i)prompt(MSGSAT,i,msg_getunit(MSGSNG,i));
   }
 
   doatt();
@@ -323,7 +325,7 @@ omdownload()
   /* Everything's ok, update the structures */
 
   if(!writeecuser(thisuseracc.userid,&emlu)){
-    fatal("Unable to write E-mail preference file for %s",
+    error_fatal("Unable to write E-mail preference file for %s",
 	  thisuseracc.userid);
   }
 

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:19  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 16:09:37  alexios
  * Added autoconf support.
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -75,7 +77,7 @@
 int        dayssince = 1;
 char       oldstatsdir[256];
 char       everdir[256];
-promptblk  *msg;
+promptblock_t  *msg;
 
 char *statfiles[]={"baudstats","clsstats","daystats","modstats","ttystats"};
 
@@ -90,14 +92,14 @@ drawgraph(int type1, int type2, int type3, int type4)
   struct stat st;
   struct tm *tm;
 
-  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INITALL;
-  else init=INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES;
-  initmodule(init);
+  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INI_ALL;
+  else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
+  mod_init(init);
 
-  msg=opnmsg("stats");
-  grwid0=numopt(GRWID,40,256);
-  bc=chropt(BARCHR);
-  hbc=chropt(HLFCHR);
+  msg=msg_open("stats");
+  grwid0=msg_int(GRWID,40,256);
+  bc=msg_char(BARCHR);
+  hbc=msg_char(HLFCHR);
 
   strcpy(fname,STATDIR);
   strcat(fname,"/");
@@ -123,11 +125,11 @@ drawgraph(int type1, int type2, int type3, int type4)
     return;
   }
 
-  strcpy(s,getmsg(type3+BAUD));
+  strcpy(s,msg_get(type3+BAUD));
   strcat(s,": ");
-  strcat(s,getmsg(AVGCRD+type1*3+type2));
+  strcat(s,msg_get(AVGCRD+type1*3+type2));
   strcat(s," ");
-  strcat(s,getmsg(type4+TODAY));
+  strcat(s,msg_get(type4+TODAY));
   prompt(HEADER,s);
   prompt(TOP);
 
@@ -147,7 +149,7 @@ drawgraph(int type1, int type2, int type3, int type4)
       case BAUDSTATS:
 	if(fscanf(fp,"%d %d %d %d\n",&i,&field[0],&field[1],&field[2])==4){
 	  if(pass){
-	    sprintf(label,"%6s",baudstg(i));
+	    sprintf(label,"%6s",channel_baudstg(i));
 	    grwid-=6;
 	  }
 	}
@@ -270,9 +272,9 @@ demographics()
 
   memset(&ages,0,sizeof(ages));
 
-  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INITALL;
-  else init=INITTTYNUM|INITOUTPUT|INITSYSVARS|INITERRMSGS|INITCLASSES;
-  initmodule(init);
+  if(getenv("USERID")&&strcmp("",getenv("USERID")))init=INI_ALL;
+  else init=INI_TTYNUM|INI_OUTPUT|INI_SYSVARS|INI_ERRMSGS|INI_CLASSES;
+  mod_init(init);
 
   stat(DEMOSTATFILE,&st);
   tm=localtime(&st.st_mtime);
@@ -300,7 +302,7 @@ demographics()
   fclose(fp);
   for(i=0;i<5;i++)ages[5][8]+=ages[i][8];
 
-  msg=opnmsg("stats");
+  msg=msg_open("stats");
   prompt(AGESTATS,
 	 strdate(makedate(tm->tm_mday,tm->tm_mon,1900+tm->tm_year)),
 	 strtime(maketime(tm->tm_hour,tm->tm_min,tm->tm_sec),1),
@@ -345,10 +347,10 @@ syntax()
 }
 
 
-void
+int
 main(int argc, char **argv)
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc==2 && !strcmp(argv[1],"-cleanup")){
     init();
     getstats();

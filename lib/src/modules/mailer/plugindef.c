@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:36  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:42:47  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:45:11  alexios
  * Added autoconf support.
@@ -55,6 +56,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -87,7 +89,7 @@ parseplugindef()
   bzero(&p,sizeof(p));
 
   if((fp=fopen(PLUGINDEFFILE,"r"))==NULL){
-    fatalsys("Unable to open %s for reading.",PLUGINDEFFILE);
+    error_fatalsys("Unable to open %s for reading.",PLUGINDEFFILE);
   }
 
   while(!feof(fp)){
@@ -110,7 +112,7 @@ parseplugindef()
       p.name[NAMELEN-1]=0;
     } else if(sameas(keyword,"descr")){
       if(d>=NUMLANGUAGES){
-	fatal("Too many 'descr' keywords in %s line %d",
+	error_fatal("Too many 'descr' keywords in %s line %d",
 	      PLUGINDEFFILE,lines);
       }
       strncpy(p.descr[d],cp,DESCRLEN);
@@ -132,7 +134,7 @@ parseplugindef()
 	  p.flags|=PLF_REQMAN;
 	  break;
 	default:
-	  fatal("Bad flag %c in %s line %d",
+	  error_fatal("Bad flag %c in %s line %d",
 		*cp,PLUGINDEFFILE,lines);
 	}
       }
@@ -141,7 +143,7 @@ parseplugindef()
       struct plugin *pp=alcmem(sizeof(struct plugin)*++numplugins);
 
       if(numplugins>=MAXPLUGINS){
-	fatal("Exceeded maximum of %d plugins.",MAXPLUGINS);
+	error_fatal("Exceeded maximum of %d plugins.",MAXPLUGINS);
       }
 
       if(numplugins>1){
@@ -153,7 +155,7 @@ parseplugindef()
       memcpy(&plugins[numplugins-1],&p,sizeof(struct plugin));
       bzero(&p,sizeof(p));
       d=0;
-    } else fatal("Unrecognised keyword %s in %s line %d.",
+    } else error_fatal("Unrecognised keyword %s in %s line %d.",
 		 keyword,PLUGINDEFFILE,lines);
   }
 

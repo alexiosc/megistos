@@ -35,15 +35,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:45  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.6  2000/01/06 11:36:53  alexios
  * Added AUF_EVENT to the audit trail entry for a BBS shutdown.
  * Made main() return a value.
  *
  * Revision 1.5  1998/12/27 14:44:14  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 1.4  1998/07/24 10:07:34  alexios
  * Upgraded to version 0.6 of library.
@@ -67,6 +68,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -96,12 +98,12 @@ void
 warn(int n)
 {
   int i,t,h=0,m=0,warntype=SHTDW3;
-  struct linestatus status;
+  channel_status_t status;
 
-  sysblk=opnmsg("sysvar");
-  initsubstvars();
-  initmodule(INITSYSVARS|INITTTYNUM);
-  setmbk(sysblk);
+  msg_sys=msg_open("sysvar");
+  out_initsubstvars();
+  mod_init(INI_SYSVARS|INI_TTYNUM);
+  msg_set(msg_sys);
 
   t=now();
   if(n>=60){
@@ -110,18 +112,18 @@ warn(int n)
     warntype=SHTDW1;
   } else if(n>=5)warntype=SHTDW2;
 
-  for(i=0;i<numchannels;i++){
-    getlinestatus(channels[i].ttyname,&status);
+  for(i=0;i<chan_count;i++){
+    channel_getstatus(channels[i].ttyname,&status);
     if((status.result!=LSR_USER) || (status.user[0]=='[') ||
-       (!uinsys(status.user,0)))continue;
+       (!usr_insys(status.user,0)))continue;
 
     if(warntype==SHTDW1){
-      sprintf(msgbuf,getmsglang(warntype,othruseracc.language-1),h,m);
+      sprintf(msg_buffer,msg_getl(warntype,othruseracc.language-1),h,m);
     } else {
-      sprintf(msgbuf,getmsglang(warntype,othruseracc.language-1),n,
-	      getpfixlang(MINSING,n,othruseracc.language-1));
+      sprintf(msg_buffer,msg_getl(warntype,othruseracc.language-1),n,
+	      msg_getunitl(MINSING,n,othruseracc.language-1));
     }
-    if(uinsys(status.user,0))injoth(&othruseronl,msgbuf,0);
+    if(usr_insys(status.user,0))usr_injoth(&othruseronl,msg_buffer,0);
   }
 }
 
@@ -129,17 +131,17 @@ warn(int n)
 void
 bbsshutdown()
 {
-  struct linestatus status;
+  channel_status_t status;
   int  i;
   
-  sysblk=opnmsg("sysvar");
-  initsubstvars();
-  initmodule(INITSYSVARS|INITTTYNUM);
-  setmbk(sysblk);
+  msg_sys=msg_open("sysvar");
+  out_initsubstvars();
+  mod_init(INI_SYSVARS|INI_TTYNUM);
+  msg_set(msg_sys);
 
-  for(i=0;i<numchannels;i++){
+  for(i=0;i<chan_count;i++){
     if(channels[i].flags&TTF_CONSOLE)continue;
-    if(!getlinestatus(channels[i].ttyname,&status))continue;
+    if(!channel_getstatus(channels[i].ttyname,&status))continue;
     if(status.result==LSR_USER){
       bbsdcommand("hangup",channels[i].ttyname,"");
       usleep(250000);
@@ -155,7 +157,7 @@ bbsshutdown()
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   if(argc==3 && !strcmp(argv[1],"-warn"))warn(atoi(argv[2]));
   else if(argc!=1){
     fprintf(stderr,"bbsshutdown: this is a Megistos BBS event.\n");

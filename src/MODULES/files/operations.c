@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:00  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  2000/01/06 10:37:25  alexios
  * Added command entries for ADDTREE and DELTREE.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -126,18 +128,18 @@ operations()
       shownmenu=1;
     }
     prompt(OPRSHORT);
-    getinput(0);
+    inp_get(0);
 
-    bgncnc();
+    cnc_begin();
 
-    if(!margc || reprompt)continue;
+    if(!margc || inp_reprompt())continue;
     else if(margc==1 && sameas(margv[0],"?"))shownmenu=0;
-    else if(margc==1 && isX(margv[0]))return;
+    else if(margc==1 && inp_isX(margv[0]))return;
     else {
       char *command;
       int i, found=0,execute=-1;
       
-      command=cncword();
+      command=cnc_word();
       for(i=0;i<numops;i++){
 	if(sameto(command,ops[i].command)){
 	  if((ops[i].restricted==0)||masterlibop){
@@ -148,13 +150,13 @@ operations()
       }
       if(!found){
 	prompt(OPRERR);
-	endcnc();
+	cnc_end();
       } else if(found==1)(ops[execute].action)();
       else {
 	prompt(OPRRED,command);
-	endcnc();
+	cnc_end();
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
   }
 }

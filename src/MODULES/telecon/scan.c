@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:34  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 16:10:27  alexios
  * Added autoconf support. Minor bug fixes.
@@ -61,6 +62,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -139,13 +141,13 @@ begscan(char *channel, int mode)
 
   sprintf(fname,"%s/%s/.header",TELEDIR,mkchfn(channel));
   if((fp=fopen(fname,"r"))==NULL){
-    fatalsys("Unable to open channel header %s (chan=%s)",fname,channel);
+    error_fatalsys("Unable to open channel header %s (chan=%s)",fname,channel);
   }
   if(fread(&c,sizeof(c),1,fp)!=1){
     int i=errno;
     fclose(fp);
     errno=i;
-    fatalsys("Unable to read channel file %s",fname);
+    error_fatalsys("Unable to read channel file %s",fname);
   }
   fclose(fp);
 
@@ -173,7 +175,7 @@ getscan()
   }
 
   if(fread(&u,sizeof(u),1,fp)!=1){
-    fatalsys("Unable to read channel user %s",fname);
+    error_fatalsys("Unable to read channel user %s",fname);
   }
 
   fclose(fp);
@@ -184,7 +186,7 @@ getscan()
     char userid[64];
     strcpy(userid,users[scanpos]->d_name);
     userid[strlen(userid)-1]=0;
-    if(!uinsys(userid,0)){
+    if(!usr_insys(userid,0)){
       unlink(fname);
       return getscan();
     }

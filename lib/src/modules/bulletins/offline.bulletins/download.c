@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:39  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:43:59  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:46:41  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -145,21 +147,21 @@ process(char *area, char *name)
     return 0;
   } else dbget(&idx);
 
-  oldansi=ansienable;
-  setansiflag(0);
+  oldansi=out_flags&OFL_ANSIENABLE;
+  out_setansiflag(0);
   {
     char buf[8192];
     sprompt(buf,OBDLCR);
     fputs(buf,out);
   }
-  setansiflag(oldansi);
+  out_setansiflag(oldansi);
   
   sprintf(fname,MSGSDIR"/%s/%s/%s",idx.area,MSGBLTDIR,idx.fname);
   sprintf(lock,"%s-%s-%s-%s",
 	  BLTREADLOCK,thisuseracc.userid,idx.area,idx.fname);
-  placelock(lock,"reading");
+  lock_place(lock,"reading");
   appendfile(fname,out);
-  rmlock(lock);
+  lock_rm(lock);
   unix2dos(outname,outname);
   prompt(OBDLOK,area,name,outname);
 
@@ -187,16 +189,16 @@ mkindex()
   } else prompt(OBDLMK);
 
   if((out=fopen(bltidfn,"w"))==NULL){
-    fatalsys("Unable to create bulletin index %s",bltidfn);
+    error_fatalsys("Unable to create bulletin index %s",bltidfn);
   }
 
-  oldansi=ansienable;
-  setansiflag(prefs.flags&OBF_ANSI);
+  oldansi=out_flags&OFL_ANSIENABLE;
+  out_setansiflag(prefs.flags&OBF_ANSI);
 
   sprompt(buf,OBDLPR,strtime(now(),1),strdate(today()));
   fputs(buf,out);
 
-  setmbk(bulletins_msg);
+  msg_set(bulletins_msg);
 
   do{
     dbget(&blt);
@@ -229,13 +231,13 @@ mkindex()
     fputs(buf,out);
   }
 
-  rstmbk();
+  msg_reset();
   sprompt(buf,OBDLFT);
   fputs(buf,out);
 
   fclose(out);
   unix2dos(bltidfn,bltidfn);
-  setansiflag(oldansi);
+  out_setansiflag(oldansi);
   return 0;
 }
 
@@ -248,7 +250,7 @@ obdownload()
   int bltdb;
 
   if(!loadprefs(USERQWK,&userqwk)){
-    fatal("Unable to read user mailer preferences for %s",
+    error_fatal("Unable to read user mailer preferences for %s",
 	  thisuseracc.userid);
   }
 
@@ -276,7 +278,7 @@ obdownload()
 
     unlink(idx.dosfname);
     if(!rmrequest(&idx)){
-      fatal("Unable to remove request %d from the database.",
+      error_fatal("Unable to remove request %d from the database.",
 	    idx.reqnum);
     }
 

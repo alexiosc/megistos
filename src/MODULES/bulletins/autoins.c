@@ -13,8 +13,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:47  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:19:18  alexios
  * One minor change to a scandir() call to ensure a cleaner
@@ -39,6 +40,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -117,7 +119,7 @@ autoins()
     sprintf(fname,"%s/%s",dir,files[j]->d_name);
     if(stat(fname,&st))continue;
 
-    prompt(FNDFILE,files[j]->d_name,st.st_size,getpfix(BYTESNG,st.st_size));
+    prompt(FNDFILE,files[j]->d_name,st.st_size,msg_getunit(BYTESNG,st.st_size));
 
     strncpy(fname,files[j]->d_name,strlen(files[j]->d_name)-4);
     fname[strlen(files[j]->d_name)-4]=0;
@@ -149,7 +151,7 @@ autoins()
 
       bltinfo(&blt);
 
-      if(!getbool(&yes,ASKINS,ASKERR,DEFLTC,ainsdef?'Y':'N')){
+      if(!get_bool(&yes,ASKINS,ASKERR,DEFLTC,ainsdef?'Y':'N')){
 	prompt(ABORT);
 	abort=1;
 	continue;

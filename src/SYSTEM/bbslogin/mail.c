@@ -31,8 +31,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:31  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1998/12/27 16:19:44  alexios
  * Added autoconf support.
@@ -63,6 +64,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -88,7 +90,7 @@
 #include "mbk_login.h"
 
 
-promptblk *signup;
+promptblock_t *signup;
 
 int  supu2s;
 char *supauth;
@@ -112,32 +114,32 @@ sendu2s()
   char command[256];
   struct message msg;
 
-  setmbk(sysblk);
+  msg_set(msg_sys);
 
-  kgdnam=numopt(KGDNAM,0,129);
-  kgdcom=numopt(KGDCOM,0,129);
-  kgdadr=numopt(KGDADR,0,129);
-  kgdpho=numopt(KGDPHO,0,129);
-  kgdage=numopt(KGDAGE,0,129);
-  kgdsex=numopt(KGDSEX,0,129);
-  kgdpss=numopt(KGDPSS,0,129);
-  kgdpass=ynopt(KGDPASS);
+  kgdnam=msg_int(KGDNAM,0,129);
+  kgdcom=msg_int(KGDCOM,0,129);
+  kgdadr=msg_int(KGDADR,0,129);
+  kgdpho=msg_int(KGDPHO,0,129);
+  kgdage=msg_int(KGDAGE,0,129);
+  kgdsex=msg_int(KGDSEX,0,129);
+  kgdpss=msg_int(KGDPSS,0,129);
+  kgdpass=msg_bool(KGDPASS);
 
-  strcpy(wh,getmsg(GDETNAX));
-  strcpy(sex,thisuseracc.sex==USX_MALE?getmsg(GDETM):getmsg(GDETF));
+  strcpy(wh,msg_get(GDETNAX));
+  strcpy(sex,thisuseracc.sex==USX_MALE?msg_get(GDETM):msg_get(GDETF));
   memset(s1,0,sizeof(s1));
-  if(thisuseracc.flags&UFL_SUSPENDED)strcpy(s1,getmsg(GDETSUSP));
+  if(thisuseracc.flags&UFL_SUSPENDED)strcpy(s1,msg_get(GDETSUSP));
   memset(s2,0,sizeof(s2));
-  if(thisuseracc.flags&UFL_EXEMPT)strcpy(s2,getmsg(GDETXMPT));
+  if(thisuseracc.flags&UFL_EXEMPT)strcpy(s2,msg_get(GDETXMPT));
   memset(s3,0,sizeof(s3));
-  if(thisuseracc.flags&UFL_DELETED)strcpy(s3,getmsg(GDETDEL));
+  if(thisuseracc.flags&UFL_DELETED)strcpy(s3,msg_get(GDETDEL));
   memset(s4,0,sizeof(s3));
   if(thisuseracc.sysaxs[0]||thisuseracc.sysaxs[1]||thisuseracc.sysaxs[2])
-    strcpy(s4,getmsg(GDETOP));
-  strcpy(sys,getmsg(GDETS1+thisuseracc.system-1));
+    strcpy(s4,msg_get(GDETOP));
+  strcpy(sys,msg_get(GDETS1+thisuseracc.system-1));
   ns[0]=0;
-  if(thisuseracc.prefs&UPF_NONSTOP)strcpy(ns,getmsg(GDETNST));
-  strcpy(lang,getmsg(GDETL1+thisuseracc.language-1));
+  if(thisuseracc.prefs&UPF_NONSTOP)strcpy(ns,msg_get(GDETNST));
+  strcpy(lang,msg_get(GDETL1+thisuseracc.language-1));
   sprintf(age,"%d",thisuseracc.age);
 
   strcpy(d1,strdate(thisuseracc.datecre));
@@ -157,14 +159,14 @@ sendu2s()
 	 ((!kgdpass)?thisuseracc.passwd:wh),
 	 thisuseracc.credits,thisuseracc.totpaid);
 
-  setmbk(signup);
+  msg_set(signup);
 
   sprintf(body,"/tmp/u2s%dB",getpid());
   if((fp=fopen(body,"w"))==NULL)return;
   fputs(buffer,fp);
   fclose(fp);
 
-  supauth=getmsg(SUPAUTH);
+  supauth=msg_get(SUPAUTH);
   if(supauth && *supauth){
     sprintf(command,"%s %s %s",supauth,thisuseracc.userid,body);
     system(command);
@@ -173,7 +175,7 @@ sendu2s()
   memset(&msg,0,sizeof(msg));
   strcpy(msg.from,thisuseracc.userid);
   strcpy(msg.to,SYSOP);
-  sprintf(msg.subject,getmsg(U2STPC),thisuseracc.userid);
+  sprintf(msg.subject,msg_get(U2STPC),thisuseracc.userid);
   msg.flags=MSF_CANTMOD|MSF_SIGNUP;
 
   sprintf(header,"/tmp/u2s%dH",getpid());
@@ -199,19 +201,19 @@ sends2u()
 
   sprintf(body,"/tmp/s2u%dB",getpid());
   if((fp=fopen(body,"w"))==NULL)return;
-  fputs(getmsg(S2UTXT),fp);
+  fputs(msg_get(S2UTXT),fp);
   fclose(fp);
 
   memset(&msg,0,sizeof(msg));
   strcpy(msg.to,thisuseracc.userid);
   strcpy(msg.from,SYSOP);
-  sprintf(msg.subject,getmsg(S2UTPC),thisuseracc.userid);
-  if(ynopt(E2URRR))msg.flags=MSF_RECEIPT;
+  sprintf(msg.subject,msg_get(S2UTPC),thisuseracc.userid);
+  if(msg_bool(E2URRR))msg.flags=MSF_RECEIPT;
 
-  e2uatt=stgopt(E2UATT);
+  e2uatt=msg_string(E2UATT);
   if(e2uatt && *e2uatt){
     msg.flags|=(MSF_FILEATT|MSF_APPROVD);
-    strcpy(msg.fatt,getmsg(E2UNAM));
+    strcpy(msg.fatt,msg_get(E2UNAM));
   }
 
   sprintf(header,"/tmp/s2u%dH",getpid());
@@ -233,13 +235,13 @@ sends2u()
 void
 sendmail()
 {
-  signup=opnmsg("signup");
-  setmbk(signup);
-  supu2s=ynopt(SUPU2S);
-  supauth=stgopt(SUPAUTH);
-  sups2u=ynopt(SUPS2U);
-  e2uatt=stgopt(E2UATT);
-  e2urrr=ynopt(E2URRR);
+  signup=msg_open("signup");
+  msg_set(signup);
+  supu2s=msg_bool(SUPU2S);
+  supauth=msg_string(SUPAUTH);
+  sups2u=msg_bool(SUPS2U);
+  e2uatt=msg_string(E2UATT);
+  e2urrr=msg_bool(E2URRR);
 
   if(supu2s)sendu2s();
   if(sups2u)sends2u();

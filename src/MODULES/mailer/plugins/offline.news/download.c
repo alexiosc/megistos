@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:54  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:46:06  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.5  1998/12/27 15:53:37  alexios
  * Added autoconf support.
@@ -56,6 +57,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -83,7 +85,7 @@
 #include "mbk_news.h"
 
 
-#define sop haskey(&thisuseracc,sopkey)
+#define sop key_owns(&thisuseracc,sopkey)
 
 
 static int
@@ -130,7 +132,7 @@ ondownload()
   int numblt=0,i,shownheader=0;
 
   if(!loadprefs(USERQWK,&userqwk)){
-    fatal("Unable to read user mailer preferences for %s",
+    error_fatal("Unable to read user mailer preferences for %s",
 	  thisuseracc.userid);
   }
 
@@ -141,14 +143,14 @@ ondownload()
 
   if(!(prefs.flags&ONF_YES))return 0;
 
-  if(!haskey(&thisuseracc,onkey)){
+  if(!key_owns(&thisuseracc,onkey)){
     prompt(ONDHDR);
     prompt(ONDNAX);
     return 0;
   }
 
   if((dp=opendir(NEWSDIR))==NULL){
-    fatalsys("Unable to opendir %s",NEWSDIR);
+    error_fatalsys("Unable to opendir %s",NEWSDIR);
   }
 
   while((dirent=readdir(dp))!=NULL){
@@ -163,8 +165,8 @@ ondownload()
     fclose(fp);
 
     if(!blt.enabled)continue;
-    if(!haskey(&thisuseracc,sopkey)){
-      if(!haskey(&thisuseracc,blt.key))continue;
+    if(!key_owns(&thisuseracc,sopkey)){
+      if(!key_owns(&thisuseracc,blt.key))continue;
       if(blt.class[0] && !sameas(thisuseracc.curclss,blt.class))continue;
     }
     
@@ -187,10 +189,10 @@ ondownload()
     return 0;
   }
 
-  setmbk(news_msg);
+  msg_set(news_msg);
 
   if((out=fopen(newsfile,"w"))==NULL){
-    fatalsys("Unable to create news file %s",newsfile);
+    error_fatalsys("Unable to create news file %s",newsfile);
   }
 
   for(i=0;i<numblt;i++){
@@ -211,30 +213,30 @@ ondownload()
       if(thisuseracc.datelast<=showlist[i].date){
 	if(!shownheader){
 	  shownheader=1;
-	  fprintf(out,getmsg(NEWS_RDNEWS));
+	  fprintf(out,msg_get(NEWS_RDNEWS));
 	}
-	fprintf(out,getmsg(NEWS_HEADER),hdr,getpfix(NEWS_NEWBLT,1));
+	fprintf(out,msg_get(NEWS_HEADER),hdr,msg_getunit(NEWS_NEWBLT,1));
       } else {
 	if(!shownheader){
 	  shownheader=1;
-	  fprintf(out,getmsg(NEWS_RDNEWS));
+	  fprintf(out,msg_get(NEWS_RDNEWS));
 	}
-	fprintf(out,getmsg(NEWS_HEADER),hdr,"");
+	fprintf(out,msg_get(NEWS_HEADER),hdr,"");
       }
     } else if(thisuseracc.datelast<=showlist[i].date)
-      fprintf(out,getmsg(NEWS_NEWBLT));
+      fprintf(out,msg_get(NEWS_NEWBLT));
     
     sprintf(fname,NEWSFNAME,showlist[i].num);
     fprintf(out,"\n");
     appendfile(fname,out);
-    fprintf(out,getmsg(NEWS_BLTDIV));
+    fprintf(out,msg_get(NEWS_BLTDIV));
   }
   free(showlist);
   
   fclose(out);
   unix2dos(newsfile,newsfile);
 
-  rstmbk();
+  msg_reset();
   prompt(ONDOK);
 
   return 0;

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:14  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 17:03:41  alexios
  * Initial revision
@@ -40,11 +41,12 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
 #define debug(fmt...) \
-{ uinsys(player[0],0); sprintf(outbuf,##fmt); injoth(&othruseronl,outbuf,0); }
+{ usr_insys(player[0],0); sprintf(outbuf,##fmt); usr_injoth(&othruseronl,outbuf,0); }
 
 
 #define __TELEPLUGIN__
@@ -87,8 +89,8 @@ static void
 controllingpart()
 {
   if(thisuseronl.flags&OLF_MMCONCAT){
-    strcpy(input,thisuseronl.input);
-    bgncnc();
+    strcpy(inp_buffer,thisuseronl.input);
+    cnc_begin();
   }
 
   if(margc==1){
@@ -103,7 +105,7 @@ controllingpart()
       if(!tlcuidxref(userid,0)){
 	prompt(UNKUID,userid);
 	exit(1);
-      } else if(!uinsys(userid,1)||!(othruseronl.flags&OLF_INTELECON)){
+      } else if(!usr_insys(userid,1)||!(othruseronl.flags&OLF_INTELECON)){
 	prompt(UNKUID,userid);
 	exit(1);
       } else if(!strcmp(userid,thisuseracc.userid)){
@@ -115,16 +117,16 @@ controllingpart()
 
 	/* Ok, the oponent is fine. */
 
-	prompt(OKUID,getpfix(SEXM,othruseracc.sex==USX_MALE),othruseracc.userid);
+	prompt(OKUID,msg_getunit(SEXM,othruseracc.sex==USX_MALE),othruseracc.userid);
 
 
 	/* Notify the other user. */
 
-	strcpy(fmt,getmsglang(BGREQ,othruseracc.language));
+	strcpy(fmt,msg_getl(BGREQ,othruseracc.language));
 	sprintf(buf,fmt,
-		getpfixlang(SEXM,thisuseracc.sex==USX_MALE,othruseracc.language),
+		msg_getunitl(SEXM,thisuseracc.sex==USX_MALE,othruseracc.language),
 		thisuseracc.userid,thisuseracc.userid);
-	injoth(&othruseronl,buf,0);
+	usr_injoth(&othruseronl,buf,0);
 
 
 	/* Store the two user names */
@@ -151,7 +153,7 @@ controllingpart()
 static char *
 fx_announce(struct chanusr *u)
 {
-  sprintf(fx_prompt,getmsglang(ANNOUNCE,othruseracc.language),
+  sprintf(fx_prompt,msg_getl(ANNOUNCE,othruseracc.language),
 	  player[0],player[1]);
   return fx_prompt;
 }
@@ -175,7 +177,7 @@ wait_for_acceptance()
 
     if(t0<time(NULL))break;
 
-    n=msgrcv(qid,(struct msgbuf*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
+    n=msgrcv(qid,(struct msg_buffer*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
 
     /* Got a message? */
 
@@ -184,40 +186,40 @@ wait_for_acceptance()
       /* Is the challenger issuing commands? Foo! */
 
       if(sameas(p.userid,player[0])){
-	if(!uinsys(player[0],0))exit(0);
+	if(!usr_insys(player[0],0))exit(0);
 	if(sameas(p.text,"?") || sameas(p.text,"help")){
-	  sprintf(outbuf,getmsglang(HELP1,othruseracc.language));
+	  sprintf(out_buffer,msg_getl(HELP1,othruseracc.language));
 	} else {
-	  sprintf(outbuf,getmsglang(ACCPAT,othruseracc.language),
-		  getpfixlang(SEXML,sex[1]==USX_MALE,othruseracc.language),
+	  sprintf(out_buffer,msg_getl(ACCPAT,othruseracc.language),
+		  msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language),
 		  player[1]);
 	}
-	injoth(&othruseronl,outbuf,0);
+	usr_injoth(&othruseronl,out_buffer,0);
       }
 
 
       /* Has the challengee accepted the challenge? */
 
       else if(sameas(p.userid,player[1])){
-	if(!uinsys(player[1],0))exit(0);
+	if(!usr_insys(player[1],0))exit(0);
 	if(sameas(p.text,"?") || sameas(p.text,"help")){
-	  sprintf(outbuf,getmsglang(HELP1,othruseracc.language));
+	  sprintf(out_buffer,msg_getl(HELP1,othruseracc.language));
 	} else if(sameas(p.text,player[0])){
 	  print("challengee accepted challenge.\n");
 	  return;
 	} else {
-	  sprintf(outbuf,getmsglang(REQPAT,othruseracc.language),player[0]);
+	  sprintf(out_buffer,msg_getl(REQPAT,othruseracc.language),player[0]);
 	}
-	injoth(&othruseronl,outbuf,0);
+	usr_injoth(&othruseronl,out_buffer,0);
       }
 
 
       /* How about a third party? */
 
       else {
-	uinsys(p.userid,0);
-	sprintf(outbuf,getmsglang(BGALR,othruseracc.language));
-	injoth(&othruseronl,outbuf,0);
+	usr_insys(p.userid,0);
+	sprintf(out_buffer,msg_getl(BGALR,othruseracc.language));
+	usr_injoth(&othruseronl,out_buffer,0);
       }
     }
     usleep(50000);
@@ -226,15 +228,15 @@ wait_for_acceptance()
 
   /* Timed out. Notify both parties. */
 
-  if(uinsys(player[0],0)){
-    sprintf(outbuf,getmsglang(ACCTMOUT,othruseracc.language),
-	    getpfixlang(SEXML,sex[1]==USX_MALE,othruseracc.language),
+  if(usr_insys(player[0],0)){
+    sprintf(out_buffer,msg_getl(ACCTMOUT,othruseracc.language),
+	    msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language),
 	    player[1]);
-    injoth(&othruseronl,outbuf,0);
+    usr_injoth(&othruseronl,out_buffer,0);
   }
-  if(uinsys(player[1],0)){
-    sprintf(outbuf,getmsglang(REQTMOUT,othruseracc.language));
-    injoth(&othruseronl,outbuf,0);
+  if(usr_insys(player[1],0)){
+    sprintf(out_buffer,msg_getl(REQTMOUT,othruseracc.language));
+    usr_injoth(&othruseronl,out_buffer,0);
   }
 
   exit(0);
@@ -264,7 +266,7 @@ run()
   exit(0);
 
   for(a=0;a<10;){
-    n=msgrcv(qid,(struct msgbuf*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
+    n=msgrcv(qid,(struct msg_buffer*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
     print("n=%d, p.userid=(%s), p.text=(%s)\n",n,p.userid,p.text);
     if(n>0){
       a++;
@@ -279,17 +281,17 @@ run()
 static void
 init_bg()
 {
-  initmodule(INITALL);
-  msg=opnmsg("telecon.bg");
-  setlanguage(thisuseracc.language);
-  waitacc=numopt(WAITACC,2,60)*60;
+  mod_init(INI_ALL);
+  msg=msg_open("telecon.bg");
+  msg_setlanguage(thisuseracc.language);
+  waitacc=msg_int(WAITACC,2,60)*60;
 }
 
 
 int
 main(int argc, char *argv[])
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   initplugin(argc,argv);
   init_bg();
   controllingpart();

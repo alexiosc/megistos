@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Used new timedate function getdow() to fix stupid day-of-week
  * errors once and for all.
  *
@@ -51,6 +52,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -81,11 +83,11 @@ sendreceipt(struct message *msg)
   sprintf(fname,TMPDIR"/rrrB%d%lx",getpid(),time(0));
   if((fp=fopen(fname,"w"))==NULL)return;
 
-  strcpy(s1,getmsg(MHDAY0+getdow(msg->crdate)));
-  strcpy(s2,getmsg(MHJAN+tdmonth(msg->crdate)));
+  strcpy(s1,msg_get(MHDAY0+getdow(msg->crdate)));
+  strcpy(s2,msg_get(MHJAN+tdmonth(msg->crdate)));
   
-  fprintf(fp,getmsg(RRRBODY),
-	  getpfix(SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
+  fprintf(fp,msg_get(RRRBODY),
+	  msg_getunit(SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
 	  EMAILCLUBNAME,msg->msgno,
 	  s1, tdday(msg->crdate), s2, tdyear(msg->crdate),
 	  strtime(msg->crtime,1));
@@ -95,8 +97,8 @@ sendreceipt(struct message *msg)
   memset(&rrr,0,sizeof(rrr));
   strcpy(rrr.from,thisuseracc.userid);
   strcpy(rrr.to,msg->from);
-  sprintf(rrr.subject,getmsg(RRRSUBJ),EMAILCLUBNAME,msg->msgno);
-  sprintf(rrr.history,HST_RECEIPT" %s/%ld",EMAILCLUBNAME,msg->msgno);
+  sprintf(rrr.subject,msg_get(RRRSUBJ),EMAILCLUBNAME,msg->msgno);
+  sprintf(rrr.history,HST_RECEIPT" %s/%d",EMAILCLUBNAME,msg->msgno);
   rrr.flags=MSF_CANTMOD;
 
   sprintf(hdrname,TMPDIR"/rrrH%d%lx",getpid(),time(0));
@@ -114,10 +116,10 @@ sendreceipt(struct message *msg)
 
   prompt(RRRGEN);
   
-  if(uinsys(msg->from,1)){
-    sprintf(outbuf,getmsglang(RRRINJ,othruseracc.language-1),
+  if(usr_insys(msg->from,1)){
+    sprintf(out_buffer,msg_getl(RRRINJ,othruseracc.language-1),
 	    thisuseracc.userid);
-    if(injoth(&othruseronl,outbuf,0))prompt(RRRNOT,othruseronl.userid);
+    if(usr_injoth(&othruseronl,out_buffer,0))prompt(RRRNOT,othruseronl.userid);
   }
   
   msg->flags&=~MSF_RECEIPT;

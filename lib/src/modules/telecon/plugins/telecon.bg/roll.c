@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:14  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/13 17:03:41  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -76,10 +78,10 @@ fx_firstroll(struct chanusr *u)
 
   if(sameas(u->userid,player[0])||sameas(u->userid,player[1]))return NULL;
 
-  strcpy(s1,getpfixlang(SEXM,sex[0]==USX_MALE,othruseracc.language));
-  strcpy(s2,getpfixlang(SEXML,sex[1]==USX_MALE,othruseracc.language));
+  strcpy(s1,msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language));
+  strcpy(s2,msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language));
 
-  sprintf(fx_prompt,getmsglang(ROL13RD,othruseracc.language),
+  sprintf(fx_prompt,msg_getl(ROL13RD,othruseracc.language),
 	  s1,player[0],fx_d1,
 	  s2,player[1],fx_d2,
 	  s1,player[0]);
@@ -129,22 +131,22 @@ bg_firstroll()
 
   /* Notify winner */
 
-  if(!uinsys(player[0],0))exit(0);
-  sprintf(outbuf,getmsglang(ROLL1WIN,othruseracc.language),
-	  getpfixlang(SEXM,sex[1]==USX_MALE,othruseracc.language),
+  if(!usr_insys(player[0],0))exit(0);
+  sprintf(out_buffer,msg_getl(ROLL1WIN,othruseracc.language),
+	  msg_getunitl(SEXM,sex[1]==USX_MALE,othruseracc.language),
 	  player[1],
 	  d2,d1);
-  injoth(&othruseronl,outbuf,0);
+  usr_injoth(&othruseronl,out_buffer,0);
 	  
 
   /* Notify loser */
 
-  if(!uinsys(player[1],0))exit(0);
-  sprintf(outbuf,getmsglang(ROLL1LOS,othruseracc.language),
-	  getpfixlang(SEXM,sex[0]==USX_MALE,othruseracc.language),
+  if(!usr_insys(player[1],0))exit(0);
+  sprintf(out_buffer,msg_getl(ROLL1LOS,othruseracc.language),
+	  msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language),
 	  player[0],
 	  d1,d2);
-  injoth(&othruseronl,outbuf,0);
+  usr_injoth(&othruseronl,out_buffer,0);
 	  
 
   /* Notify everyone else */

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:05  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  2000/01/06 10:37:25  alexios
  * Fixed silly but strange bug where the creation date would be
@@ -53,6 +54,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -401,13 +403,13 @@ initlibsubstvars()
   int i=0;
   
   while(table[i].varname[0]){
-    addsubstvar(table[i].varname,table[i].varcalc);
+    out_addsubstvar(table[i].varname,table[i].varcalc);
     i++;
   }
 
-  oplhdr=stgopt(OPLHDR);
-  oplcomma=stgopt(OPLCOMMA);
-  opllast=stgopt(OPLLAST);
-  oplftr=stgopt(OPLFTR);
-  oplnone=stgopt(OPLNONE);
+  oplhdr=msg_string(OPLHDR);
+  oplcomma=msg_string(OPLCOMMA);
+  opllast=msg_string(OPLLAST);
+  oplftr=msg_string(OPLFTR);
+  oplnone=msg_string(OPLNONE);
 }

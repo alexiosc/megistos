@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:07  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.7  1999/07/18 21:48:04  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.6  1998/12/27 16:07:28  alexios
  * Added autoconf support.
@@ -65,6 +66,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -102,29 +104,29 @@ download()
   char c,spec[256];
 
   for(;;){
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
     } else {
       prompt(RSXFERWHD);
-      getinput(0);
-      nxtcmd=input;
+      inp_get(0);
+      cnc_nxtcmd=inp_buffer;
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return;
       }
     }
-    killxferlist();
-    strcpy(spec,cncword());
-    if(addwild(FXM_DOWNLOAD,spec,sxfdesc,0,-1)){
-      dofiletransfer();
-      killxferlist();
+    xfer_kill_list();
+    strcpy(spec,cnc_word());
+    if(xfer_addwild(FXM_DOWNLOAD,spec,sxfdesc,0,-1)){
+      xfer_run();
+      xfer_kill_list();
       break;
     }else{
-      prompt(RSXFERERR,nxtcmd);
-      endcnc();
+      prompt(RSXFERERR,cnc_nxtcmd);
+      cnc_end();
       continue;
     }
   }
@@ -138,8 +140,8 @@ upload()
   FILE *fp;
   int  count = -1;
 
-  addxfer(FXM_UPLOAD,"NAMELESS",sxfdesc,0,0);
-  dofiletransfer();
+  xfer_add(FXM_UPLOAD,"NAMELESS",sxfdesc,0,0);
+  xfer_run();
   
   sprintf(fname,XFERLIST,getpid());
 
@@ -162,21 +164,21 @@ upload()
     struct stat st;
 
     prompt(RSXFERWHU,count);
-    getinput(0);
-    nxtcmd=input;
+    inp_get(0);
+    cnc_nxtcmd=inp_buffer;
     if (!margc) {
-      endcnc();
+      cnc_end();
       continue;
     }
-    if(isX(margv[0])){
+    if(inp_isX(margv[0])){
       goto kill;
     }
-    if(stat(input,&st))prompt(RSXFERERR,input);
-    else if(!(st.st_mode&S_IFDIR))prompt(RSXFERER2,input);
+    if(stat(inp_buffer,&st))prompt(RSXFERERR,inp_buffer);
+    else if(!(st.st_mode&S_IFDIR))prompt(RSXFERER2,inp_buffer);
     else break;
   }
 
-  sprintf(command,"mv %s/* %s",fname,input);
+  sprintf(command,"mv %s/* %s",fname,inp_buffer);
   system(command);
 
  kill:
@@ -184,7 +186,7 @@ upload()
     sprintf(command,"rm -rf %s",fname);
     system(command);
   }
-  killxferlist();
+  xfer_kill_list();
 }
 
 
@@ -193,7 +195,7 @@ rsys_transfer()
 {
   char opt;
 
-  if(!getmenu(&opt,1,RSXFERDIR,RSXFERSHRT,RSXFERRSEL,"UD",0,0))return;
+  if(!get_menu(&opt,1,RSXFERDIR,RSXFERSHRT,RSXFERRSEL,"UD",0,0))return;
 
   if (opt=='D') download(); else upload();
 }
@@ -203,9 +205,9 @@ void
 rsys_invis()
 {
   thisuseronl.flags^=OLF_INVISIBLE;
-  setmbk(sysblk);
+  msg_set(msg_sys);
   prompt((thisuseronl.flags&OLF_INVISIBLE)?INVON:INVOFF);
-  rstmbk();
+  msg_reset();
 }
 
 
@@ -219,47 +221,47 @@ rsys_gdet()
 void
 rsys_sysop()
 {
-  void    showmenu();
-  char    userid[24];
-  char    *word;
-  int     shownmenu=1;
-  useracc uacc;
+  void      showmenu();
+  char      userid[24];
+  char      *word;
+  int       shownmenu=1;
+  useracc_t uacc;
   
   if(!sameas(thisuseracc.userid,SYSOP)){
     prompt(RSSYSOPNSY,NULL);
     return;
   }
-  if(!getuserid(userid,RSSYSOPWHO,UNKUID,0,NULL,0))return;
+  if(!get_userid(userid,RSSYSOPWHO,UNKUID,0,NULL,0))return;
   if(sameas(userid,SYSOP)){
     prompt(RSSYSOPSOP,NULL);
     return;
   }
 
-  if(!uinsys(userid,0))loaduseraccount(userid,&uacc);
+  if(!usr_insys(userid,0))usr_loadaccount(userid,&uacc);
   else memcpy(uacc.sysaxs,othruseracc.sysaxs,sizeof(uacc.sysaxs));
   
-  endcnc();
+  cnc_end();
   for(;;){
     if(!shownmenu){
       prompt(RSSYSOPHDR,userid);
       showmenu(uacc.sysaxs,1);
       shownmenu=1;
     }
-    if(morcnc()){
-      word=cncword();
+    if(cnc_more()){
+      word=cnc_word();
     } else {
       prompt(RSSYSOPMNU,NULL);
-      getinput(0);
-      word=input;
+      inp_get(0);
+      word=inp_buffer;
     }
 
-    if(!margc || reprompt){
-      endcnc();
+    if(!margc || inp_reprompt()){
+      cnc_end();
       continue;
-    } else if (isX(word)) {
+    } else if (inp_isX(word)) {
       break;
     } else if (sameas(word,"?")) {
-      endcnc();
+      cnc_end();
       shownmenu=0;
     } else if (sameas(word,"on")) {
       int i;
@@ -282,7 +284,7 @@ rsys_sysop()
 	prompt(ERRCOM);
       } else if(matches>1){
 	prompt(MORCHR,word);
-	endcnc();
+	cnc_end();
       } else {
 	int j=commands[found].accessflag;
 	uacc.sysaxs[j/32]^=(1<<(j%32));
@@ -291,18 +293,18 @@ rsys_sysop()
     }
   }
 
-  if(!userexists(userid)){
+  if(!usr_exists(userid)){
     prompt(RSSYSOPDEL,NULL);
     return;
-  } else if (!uinsys(userid,0)) {
-    useracc temp;
+  } else if (!usr_insys(userid,0)) {
+    useracc_t temp;
 
-    loaduseraccount(userid,&temp);
+    usr_loadaccount(userid,&temp);
     memcpy(temp.sysaxs,uacc.sysaxs,sizeof(temp.sysaxs));
-    saveuseraccount(&temp);
+    usr_saveaccount(&temp);
   } else {
     memcpy(othruseracc.sysaxs,uacc.sysaxs,sizeof(othruseracc.sysaxs));
-    if(injoth(&othruseronl,getmsglang(RSSYSOPNOT,othruseracc.language-1),0))
+    if(usr_injoth(&othruseronl,msg_getl(RSSYSOPNOT,othruseracc.language-1),0))
       prompt(NOTIFIED,othruseracc.userid);
   }
   prompt(RSSYSOPUPD,NULL);
@@ -316,13 +318,13 @@ showlog(char *fname,int p1,int p2,int p3,int err)
   char command[256];
   FILE *fp;
 
-  if(!getmenu(&opt,1,p1,0,err,"BE",0,0))return;
+  if(!get_menu(&opt,1,p1,0,err,"BE",0,0))return;
   if(opt=='B')sprintf(command,"cat %s",fname);
   else sprintf(command,"tac %s",fname);
 
   if((fp=popen(command,"r"))==NULL)return;
 
-  nonblocking();
+  inp_nonblock();
 
   prompt(p2);
   while(!feof(fp)){
@@ -333,7 +335,7 @@ showlog(char *fname,int p1,int p2,int p3,int err)
       prompt(p3);
       break;
     }
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(p3);
       break;
     }
@@ -351,7 +353,7 @@ showlog(char *fname,int p1,int p2,int p3,int err)
     s2=&line[68];
     prompt(RSAUDITI+sev,s1,s2);
   }
-  blocking();
+  inp_block();
   fclose(fp);
   return;
 }
@@ -378,22 +380,22 @@ rsys_logon()
   int  channel;
   struct stat st;
 
-  if(!morcnc())prompt(RSLOGONH);
+  if(!cnc_more())prompt(RSLOGONH);
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return;
-      i=cncword();
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return;
+      i=cnc_word();
     } else {
       prompt(RSLOGONP);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if (!margc) {
-	endcnc();
+	cnc_end();
 	continue;
       }
-      if(isX(margv[0])){
+      if(inp_isX(margv[0])){
 	return;
       }
     }
@@ -405,27 +407,27 @@ rsys_logon()
       
       prompt(RSLOGONL1);
       if(!stat(LOGINMSGFILE,&st))prompt(RSLOGONL2A,st.st_size);
-      for(i=0;i<numchannels;i++){
+      for(i=0;i<chan_count;i++){
 	sprintf(fname,TTYINFOFILE,channels[i].ttyname);
 	if(!stat(fname,&st))prompt(RSLOGONL2B,channels[i].channel,st.st_size);
       }
       prompt(RSLOGONL3);
-      endcnc();
+      cnc_end();
       continue;
     } else if(strstr(i,"tty")==i){
-      if(getchannelnum(i)!=-1){
+      if(chan_getnum(i)!=-1){
 	strcpy(dev,i);
 	break;
       } else {
 	prompt(GCHANBDV,NULL);
-	endcnc();
+	cnc_end();
 	continue;
       }
     } else if(sscanf(i,"%x",&channel)==1){
-      char *name=getchannelname(channel);
+      char *name=chan_getname(channel);
       if(!name){
 	prompt(GCHANBCH,NULL);
-	endcnc();
+	cnc_end();
 	continue;
       } else {
 	strcpy(dev,name);
@@ -433,7 +435,7 @@ rsys_logon()
       }
     } else {
       prompt(GCHANHUH,i);
-      endcnc();
+      cnc_end();
       continue;
     }
   }
@@ -443,7 +445,7 @@ rsys_logon()
 
   if(!stat(fname,&st)){
     char opt;
-    if(!getmenu(&opt,1,0,RSLOGOND,RSLOGONDR,"ED",0,'E'))return;
+    if(!get_menu(&opt,1,0,RSLOGOND,RSLOGONDR,"ED",0,'E'))return;
     if(opt=='D'){
       unlink(fname);
       prompt(RSLOGONDD);
@@ -467,15 +469,7 @@ rsys_logon()
 void
 rsys_pageaudit()
 {
-  char fname[256], s[256], *cp;
-  FILE *fp;
   int  filtering=thisuseracc.auditfiltering, i;
-
-  sprintf(fname,TMPDIR"/rsys%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
-    return;
-  }
 
   i=GETSEVERITY(thisuseracc.auditfiltering);
 
@@ -484,35 +478,32 @@ rsys_pageaudit()
   else if(filtering&AUF_EMERGENCY)i=SEVE;
   else i=SEVO;
 
-  fprintf(fp,"%s\n",getmsg(i));
-  fprintf(fp,"%s\n",(filtering&AUF_ACCOUNTING)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_EVENT)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_OPERATION)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_SECURITY)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_TRANSFER)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_USERLOG)?"on":"off");
-  fprintf(fp,"%s\n",(filtering&AUF_OTHER)?"on":"off");
-  fprintf(fp,"OK button\nCancel button\n");
-  fclose(fp);
+  sprintf(inp_buffer,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\nOK\nCANCEL\n",
+	  msg_get(i),
+	  (filtering&AUF_ACCOUNTING)?"on":"off",
+	  (filtering&AUF_EVENT)?"on":"off",
+	  (filtering&AUF_OPERATION)?"on":"off",
+	  (filtering&AUF_SECURITY)?"on":"off",
+	  (filtering&AUF_TRANSFER)?"on":"off",
+	  (filtering&AUF_USERLOG)?"on":"off",
+	  (filtering&AUF_OTHER)?"on":"off");
 
-  dataentry("remsys",RSAPGVT,RSAPGLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
+  if(dialog_run("remsys",RSAPGVT,RSAPGLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem.");
   }
+  
+  dialog_parse(inp_buffer);
 
   filtering=-1;
   for(i=0;i<11;i++){
-    if(!fgets(s,sizeof(s),fp))break;
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
+    char *s=margv[i];
     if(i==0){
       filtering&=~AUF_SEVERITY;
-      if(!strcmp(s,getmsg(SEVE)))
+      if(!strcmp(s,msg_get(SEVE)))
 	filtering|=AUF_EMERGENCY;
-      else if(!strcmp(s,getmsg(SEVC)))
+      else if(!strcmp(s,msg_get(SEVC)))
 	filtering|=AUF_EMERGENCY|AUF_CAUTION;
-      else if(!strcmp(s,getmsg(SEVI)))
+      else if(!strcmp(s,msg_get(SEVI)))
 	filtering|=AUF_SEVERITY;
     } else if(i==1 && sameas(s,"OFF"))filtering&=~AUF_ACCOUNTING;
     else if(i==2 && sameas(s,"OFF"))filtering&=~AUF_EVENT;
@@ -522,10 +513,8 @@ rsys_pageaudit()
     else if(i==6 && sameas(s,"OFF"))filtering&=~AUF_USERLOG;
     else if(i==7 && sameas(s,"OFF"))filtering&=~AUF_OTHER;
   }
-  fclose(fp);
-  unlink(fname);
 
-  if(sameas(s,"CANCEL")){
+  if(sameas(margv[10],"CANCEL")||sameas(margv[9],margv[10])){
     prompt(RSAPGCAN);
     return;
   }
@@ -549,12 +538,12 @@ filter_audit(char *keyword, int filtering, int reverse)
 
   if(!reverse){
     if((fp=fopen(AUDITFILE,"r"))==NULL){
-      logerrorsys("Unable to open Audit Trail!");
+      error_logsys("Unable to open Audit Trail!");
       return;
     }
   } else {
     if((fp=popen("tac 2>/dev/null "AUDITFILE,"r"))==NULL){
-      logerrorsys("Unable to popen() Audit Trail with tac!");
+      error_logsys("Unable to popen() Audit Trail with tac!");
       return;
     }
   }
@@ -562,7 +551,7 @@ filter_audit(char *keyword, int filtering, int reverse)
 
   /* Start searching */
 
-  nonblocking();
+  inp_nonblock();
 
   while(!feof(fp)){
     char line[1024],*cp,s1[80],*s2,c;
@@ -572,7 +561,7 @@ filter_audit(char *keyword, int filtering, int reverse)
       prompt(AUDSCAN);
       goto done;
     }
-    if(lastresult==PAUSE_QUIT){
+    if(fmt_lastresult==PAUSE_QUIT){
       prompt(AUDSCAN);
       goto done;
     }
@@ -607,7 +596,7 @@ filter_audit(char *keyword, int filtering, int reverse)
   prompt(found?AUDSEND:AUDNF);
 
 done:
-  nonblocking();
+  inp_nonblock();
   if(!reverse)fclose(fp);
   else pclose(fp);
 }
@@ -616,31 +605,21 @@ done:
 void
 rsys_filtaud()
 {
-  char fname[256], s[256], *cp;
-  FILE *fp;
   int  filtering=-1, reverse=1, i;
   char keyword[256];
 
-  sprintf(fname,TMPDIR"/rsys%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  strcpy(inp_buffer,
+	 "\non\non\non\non\non\non\non\non\non\non\non\nOK\nCANCEL\n");
+
+  if(dialog_run("remsys",RSFLTVT,RSFLTLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  for(i=0;i<11;i++)fprintf(fp,"\non");
-  fprintf(fp,"\nOK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("remsys",RSFLTVT,RSFLTLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
+  dialog_parse(inp_buffer);
 
   for(i=0;i<15;i++){
-    if(!fgets(s,sizeof(s),fp))break;
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
+    char *s=margv[i];
     if(i==0)strcpy(keyword,s);
     else if(i==1 && sameas(s,"OFF"))filtering&=~AUF_INFO;
     else if(i==2 && sameas(s,"OFF"))filtering&=~AUF_CAUTION;
@@ -654,10 +633,7 @@ rsys_filtaud()
     else if(i==10 && sameas(s,"OFF"))filtering&=~AUF_OTHER;
     else if(i==11 && sameas(s,"OFF"))reverse=0;
   }
-  fclose(fp);
-  unlink(fname);
-
-  if(sameas(s,"CANCEL"))return;
+  if(sameas(margv[14],"CANCEL")||sameas(margv[13],margv[14]))return;
   filter_audit(keyword,filtering,reverse);
 }
 

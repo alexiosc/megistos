@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:21  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.3  2000/09/30 09:20:12  bbs
  * using gallup_loaded to determine if a gallup is loaded
@@ -197,6 +198,45 @@ int _loadgallup(char *filename, char *fn, struct gallup *gallp)
   return 1;
 }
 
+long
+today()
+{
+  struct tm *dt;
+  time_t t;
+
+  t=time(0);
+  dt=localtime(&t);
+  return((dt->tm_mday)&0x1f)|((dt->tm_mon)<<8)|(((dt->tm_year-70)&0xff)<<16);
+}
+
+
+long
+now()
+{
+  struct tm *dt;
+  time_t t;
+
+  t=time(0);
+  dt=localtime(&t);
+  return maketime(dt->tm_hour,dt->tm_min,dt->tm_sec);
+}
+
+
+#ifndef __GSC__
+
+/* this is an alternate entry point to _savegallup() */
+int savegallup(void)
+{
+  char filename[128];
+
+	sprintf(filename, "%s/%s/%s", GALLUPSDIR, gfnam(ginfo), GDATAFILE);
+	
+  return _savegallup(filename);
+}
+
+#endif
+
+
 
 int _savegallup(char *filename)
 {
@@ -275,19 +315,6 @@ int _savegallup(char *filename)
   return 1;
 }
 
-#ifndef __GSC__
-
-/* this is an alternate entry point to _savegallup() */
-int savegallup(void)
-{
-  char filename[128];
-
-	sprintf(filename, "%s/%s/%s", GALLUPSDIR, gfnam(ginfo), GDATAFILE);
-	
-  return _savegallup(filename);
-}
-
-#endif
 
 /* free a gallup questions/answers list */
 void freegallup(void)

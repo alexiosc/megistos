@@ -27,8 +27,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:28  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.2  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -42,6 +43,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -131,12 +133,12 @@ parseopts(int argc, char **argv)
 int
 msgcnv_main(int argc, char **argv)
 {
-  setprogname(argv[0]);
+  mod_setprogname(argv[0]);
   parseopts(argc, argv);
   print_endian_warning();
 
   fprintf(stderr,"WARNING WARNING WARNING!!!\n");
-  fprintf(stderr,"I'm expecting you to have a COMPLETE EMPTY "\
+  fprintf(stderr,"I'm expecting you to have a COMPLETELY EMPTY "\
 	  "Megistos message base.\n");
   fprintf(stderr,"Last chance to quit and clean it up: press ctrl-c.\n\n");
   {

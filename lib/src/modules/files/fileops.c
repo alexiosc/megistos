@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:44  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1999/07/18 21:29:45  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.3  1998/12/27 15:40:03  alexios
  * Added autoconf support. Migrated to the new locking functions.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -80,18 +82,18 @@ saveslowdevs()
   int i;
 
   if(fp==NULL){
-    fatalsys("Unable to open "SLOWDEVFILE" for writing.");
+    error_fatalsys("Unable to open "SLOWDEVFILE" for writing.");
   }
   
   for(i=0;i<16;i++){
     if(fwrite(&numdevs[i],sizeof(int),1,fp)!=1){
-      fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to "SLOWDEVFILE);
     }
 
     if(numdevs[i]==0)continue;
 
     if(fwrite(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to "SLOWDEVFILE);
     }
   }
 
@@ -122,12 +124,12 @@ loadslowdevs()
   int i;
 
   if(fp==NULL){
-    fatalsys("Unable to open "SLOWDEVFILE" for reading.");
+    error_fatalsys("Unable to open "SLOWDEVFILE" for reading.");
   }
 
   for(i=0;i<16;i++){
     if(fread(&numdevs[i],sizeof(int),1,fp)!=1){
-      fatalsys("Unable to read from "SLOWDEVFILE);
+      error_fatalsys("Unable to read from "SLOWDEVFILE);
     }
 
     if(numdevs[i]==0){
@@ -137,7 +139,7 @@ loadslowdevs()
 
     slowdevs[i]=alcmem(numdevs[i]*sizeof(int));
     if(fread(slowdevs[i],sizeof(int),numdevs[i],fp)!=numdevs[i]){
-      fatalsys("Unable to write to "SLOWDEVFILE);
+      error_fatalsys("Unable to write to "SLOWDEVFILE);
     }
 
   }
@@ -174,7 +176,7 @@ initslowdevs()
 
   sprintf(fname,"%s/files.mbk",MBKDIR);
   if(stat(fname,&st1)){
-    fatalsys("Sanity check failed: unable to stat %s",fname);
+    error_fatalsys("Sanity check failed: unable to stat %s",fname);
   }
 
   if(stat(SLOWDEVFILE,&st2))st2.st_mtime=0;
@@ -195,12 +197,12 @@ initslowdevs()
     FILE *pp;
     int  devs[512], ndevs=0;
 
-    if(!strlen(getmsg(SLOWDEV0+i)))continue;
+    if(!strlen(msg_get(SLOWDEV0+i)))continue;
 
     sprintf(command,"echo %s|tr \" \" \"\\012\" 2>/dev/null 2>/dev/null",
-	    getmsg(SLOWDEV0+i));
+	    msg_get(SLOWDEV0+i));
     if((pp=popen(command,"r"))==NULL){
-      fatalsys("Unable to pipe-in wildcard expansion!");
+      error_fatalsys("Unable to pipe-in wildcard expansion!");
     }
 
     memset(devs,-1,sizeof(devs));
@@ -214,12 +216,12 @@ initslowdevs()
 
       if(!stat(line,&st)){
 	if(!S_ISBLK(st.st_mode)){
-	  fatal("\"%s\" in group SLOWDEV%c is not a block device",
+	  error_fatal("\"%s\" in group SLOWDEV%c is not a block device",
 		line,i+(i<10?'0':('A'-10)));
 	}
 
 	if(ndevs>=(sizeof(devs)/sizeof(int))){
-	  fatal("Too many devices (>=512) in group SLOWDEV%c",
+	  error_fatal("Too many devices (>=512) in group SLOWDEV%c",
 		i+(i<10?'0':('A'-10)));
 	}
 	devs[ndevs++]=st.st_rdev;
@@ -263,7 +265,7 @@ checkliblock(struct libidx *lib)
   else {  
     char fname[256], dummy[256];
     sprintf(fname,SLOWDEVLOCK,group);
-    return checklock(fname,dummy);
+    return lock_check(fname,dummy);
   }
   return 0;			/* Never happens */
 }
@@ -279,14 +281,14 @@ obtainliblock(struct libidx *lib, int timeout, char *reason)
 
   sprintf(fname,SLOWDEVLOCK,group);
 
-  if(checklock(fname,dummy)>0){
+  if(lock_check(fname,dummy)>0){
     prompt(LIBWLCK);
-    if(waitlock(fname,timeout)==LKR_TIMEOUT){
+    if(lock_wait(fname,timeout)==LKR_TIMEOUT){
       prompt(LIBFLCK);
       return 0;
     }
   }
-  placelock(fname,reason);
+  lock_place(fname,reason);
   return 1;
 }
 
@@ -299,7 +301,7 @@ rmliblock(struct libidx *lib)
 
   if(group<0)return;
   sprintf(fname,SLOWDEVLOCK,group);
-  rmlock(fname);
+  lock_rm(fname);
 }
 
 

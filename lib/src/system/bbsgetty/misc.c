@@ -26,8 +26,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.2  1999/07/18 21:54:26  alexios
  * Added execute_as_mortal() to drop super user privileges,
@@ -45,6 +46,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -66,12 +68,12 @@
 
 void readlinestatus()
 {
-  struct linestatus status;
+  channel_status_t status;
   debug(D_RUN,"Reading status file for device %s",device);
-  getlinestatus(device,&status);
+  channel_getstatus(device,&status);
   linestate=status.state;
   debug(D_RUN,"Line status: state=%s, result=%s, bps=%d, user=%s",
-	line_states[status.state],line_results[status.result],
+	channel_states[status.state],channel_results[status.result],
 	status.baud,status.user);
 }
 
@@ -81,13 +83,13 @@ void readlinestatus()
 
 void writelinestatus(int result)
 {
-  struct linestatus status;
+  channel_status_t status;
   debug(D_RUN,"Writing status for device \"%s\"",device);
-  getlinestatus(device,&status);
+  channel_getstatus(device,&status);
   status.result=result;
   status.baud=reportedlinespeed;
   status.user[0]=0;
-  setlinestatus(device,&status);
+  channel_setstatus(device,&status);
 }
 
 
@@ -126,10 +128,10 @@ execute_as_mortal(char *command)
       execl("/bin/sh","sh","-c",command,NULL);
       system(command);
     }
-    fatal("Unable to become "BBSUSERNAME" to run \"%s\".",command);
+    error_fatal("Unable to become "BBSUSERNAME" to run \"%s\".",command);
     exit(1);
   case -1:
-    fatal("Unable to fork() child process to run \"%s\"!",command);
+    error_fatal("Unable to fork() child process to run \"%s\"!",command);
     exit(1);
   default:
     wait(&pid); /* No magic, I'm just reusing the pid variable here */

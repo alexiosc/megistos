@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:56:03  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/07/18 21:27:24  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -65,7 +67,7 @@ traverseunapp(struct libidx *l)
 
   if(read(fileno(stdin),&c,1)&&
      ((c==13)||(c==10)||(c==27)||(c==15)||(c==3)))return 0;
-  if(lastresult==PAUSE_QUIT)return 0;
+  if(fmt_lastresult==PAUSE_QUIT)return 0;
 
   if(!islibop(&library))return 1;
   else {
@@ -83,7 +85,7 @@ traverseunapp(struct libidx *l)
       res=filelisting(0);	/* Show the library's unapproved files */
       memcpy(&library,&tmp,sizeof(library));
       if(!res)return 0;
-      nonblocking();		/* filelisting() restores blocking mode */
+      inp_nonblock();		/* filelisting() restores blocking mode */
     }
 
     res=libgetchild(l->libnum,"",&otherchild);
@@ -101,7 +103,7 @@ traverseunapp(struct libidx *l)
 void
 op_listunapp()
 {
-  nonblocking();
+  inp_nonblock();
   traverseunapp(&library);
-  blocking();
+  inp_block();
 }

@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:27  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.0  1999/08/10 00:46:33  alexios
  * Initial revision
@@ -40,6 +41,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -57,7 +59,7 @@
 #include "bbs.h"
 #include "mbk_adventure.h"
 
-promptblk *msg;
+promptblock_t *msg;
 
 int  entrykey;
 int  topkey;
@@ -101,7 +103,7 @@ gatherlist()
   numgames=0;
 
   if((fp=fopen(GAMEINDEXFILE,"r"))==NULL){
-    fatalsys("Unable to open "GAMEINDEXFILE" for reading.");
+    error_fatalsys("Unable to open "GAMEINDEXFILE" for reading.");
   }
 
   linenum=0;
@@ -115,7 +117,7 @@ gatherlist()
       int n;
       char d[8192],f[1024];
       if(sscanf(&line[1],"%s %n",fname,&n)!=1){
-	fatal("line %d in"GAMEINDEXFILE" starts with : but has bad format!",
+	error_fatal("line %d in"GAMEINDEXFILE" starts with : but has bad format!",
 	      linenum);
       }
       strcpy(d,stripspace(&line[n]));
@@ -174,15 +176,15 @@ gatherlist()
 void
 init()
 {
-  initmodule(INITALL);
+  mod_init(INI_ALL);
   gatherlist();
 
-  msg=opnmsg("adventure");
-  entrykey=numopt(ENTRYKEY,0,129);
-  topkey=numopt(TOPKEY,0,129);
-  playkey=numopt(PLAYKEY,0,129);
-  setlanguage(thisuseracc.language);
-  savedgame=stgopt(SAVEDGAME);
+  msg=msg_open("adventure");
+  entrykey=msg_int(ENTRYKEY,0,129);
+  topkey=msg_int(TOPKEY,0,129);
+  playkey=msg_int(PLAYKEY,0,129);
+  msg_setlanguage(thisuseracc.language);
+  savedgame=msg_string(SAVEDGAME);
 }
 
 
@@ -206,10 +208,10 @@ download_saved_games()
   char spec[256];
 
   sprintf(spec,TMPDIR"/adv-%s/*",thisuseracc.userid);
-  if(addwild(FXM_TRANSIENT,spec,savedgame,0,-1)){
+  if(xfer_addwild(FXM_TRANSIENT,spec,savedgame,0,-1)){
     prompt(DLNOW);
-    dofiletransfer();
-    killxferlist();
+    xfer_run();
+    xfer_kill_list();
   }
 }
 
@@ -231,12 +233,12 @@ play(char *gamename)
   mkdir(tmpdir,0750);
 
   if((dp=opendir(tmpdir))==NULL)
-    fatalsys("Unable to open directory %s",tmpdir);
+    error_fatalsys("Unable to open directory %s",tmpdir);
   
   while((buf=readdir(dp))!=NULL){
     sprintf(fname,"%s/%s",tmpdir,buf->d_name);
     if((strcmp(buf->d_name,".")==0) || (strcmp(buf->d_name,"..")==0))continue;
-    if(unlink(fname)<0) fatalsys("Unable to unlink(\"%s\")",fname);
+    if(unlink(fname)<0) error_fatalsys("Unable to unlink(\"%s\")",fname);
   }
   closedir(dp);
 
@@ -246,7 +248,7 @@ play(char *gamename)
   sprintf(fname,GAMEDIR"/%s",gamename);
   sprintf(s,"%s/%s",tmpdir,gamename);
   if(fcopy(fname,s)){
-    fatal("Unable to fcopy() %s -> %s",fname,s);
+    error_fatal("Unable to fcopy() %s -> %s",fname,s);
   }
 
 
@@ -257,7 +259,7 @@ play(char *gamename)
     char command[512];
     sprintf(command,"gunzip %s",s);
     if((i=system(command))!=0){
-      fatal("Unable to system(\"%s\") (exit code %d)",command,i);
+      error_fatal("Unable to system(\"%s\") (exit code %d)",command,i);
     }
     *cp=0;			/* Remove the ".gz" suffix */
   }
@@ -266,20 +268,20 @@ play(char *gamename)
   /* Finally, run the game */
 
   prompt(PLAYWARN);
-  setwaittoclear(0);
+  out_clearflags(OFL_WAITTOCLEAR);
   print("\e[2J");
-  doneinput();
+  mod_done(INI_INPUT);
   t0=time(NULL);
 
   switch(fork()){
   case 0:
     chdir(tmpdir);
     execl(BINDIR"/infoint","infoint",s);
-    fatalsys("Unable to execl()"); /* Whoops, this doesn't look good. */
+    error_fatalsys("Unable to execl()"); /* Whoops, this doesn't look good. */
     break;
 
   case -1:
-    fatalsys("Unable to fork()"); /* This never returns... */
+    error_fatalsys("Unable to fork()"); /* This never returns... */
     break;			  /* ...but even paranoids have enemies. */
     
   default:
@@ -292,17 +294,16 @@ play(char *gamename)
 
   t1=time(NULL);
   unlink(s);
-  regpid(thisuseronl.channel);
-  initinput();
-  initsignals();
-  resetinactivity();
+  mod_regpid(thisuseronl.channel);
+  mod_init(INI_INPUT|INI_SIGNALS);
+  inp_resetidle();
   thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT|OLF_INHIBITGO|
 		       OLF_INSYSCHAT|OLF_MMCONCAT);
-  endcnc();
-  input[0]=0;
-  afterinput=1;
+  cnc_end();
+  inp_buffer[0]=0;
+  out_setflags(OFL_AFTERINPUT);
   print("\e[2J");
-  setwaittoclear(1);
+  out_setflags(OFL_WAITTOCLEAR);
 
   download_saved_games();
 
@@ -318,9 +319,9 @@ listgames()
   prompt(LISTHDR);
   for(i=0;i<numgames;i++){
     prompt(LISTGAM,i+1,games[i].title);
-    if(lastresult==PAUSE_QUIT)break;
+    if(fmt_lastresult==PAUSE_QUIT)break;
   }
-  if(lastresult!=PAUSE_QUIT)prompt(LISTFTR);
+  if(fmt_lastresult!=PAUSE_QUIT)prompt(LISTFTR);
 }
 
 
@@ -334,8 +335,8 @@ updatetop(int s, int n)
   /* Lock this operation first */
 
   sprintf(lock,"LCK..adventtop");
-  if(waitlock(lock,2)==LKR_TIMEOUT)return;
-  placelock(lock,"writing");
+  if(lock_wait(lock,2)==LKR_TIMEOUT)return;
+  lock_place(lock,"writing");
 
 
   /* Copy over the rest of the file, change the one entry we're interested in. */
@@ -344,8 +345,8 @@ updatetop(int s, int n)
   
   sprintf(fname,"%s~",TOPFILE);
   if((out=fopen(fname,"w"))==NULL){
-    rmlock(lock);
-    fatalsys("Unable to create %s",fname);
+    lock_rm(lock);
+    error_fatalsys("Unable to create %s",fname);
   }
 
   if(fp!=NULL) while(!feof(fp)){
@@ -369,11 +370,11 @@ updatetop(int s, int n)
   fclose(out);
 
   if(rename(fname,TOPFILE)){
-    rmlock(lock);
-    fatalsys("Unable to rename %s to "TOPFILE,fname);
+    lock_rm(lock);
+    error_fatalsys("Unable to rename %s to "TOPFILE,fname);
   }
 
-  rmlock(lock);
+  lock_rm(lock);
 }
 
 
@@ -383,11 +384,11 @@ choose_and_run()
   int n,i,t;
 
   for(;;){
-    setinputflags(INF_HELP);
-    i=getnumber(&n,CHOOSE,0,numgames,CHOOSERR,0,0);
+    inp_setflags(INF_HELP);
+    i=get_number(&n,CHOOSE,0,numgames,CHOOSERR,0,0);
+    inp_clearflags(INF_HELP);
     if(i==0)return;
     else if(i<0)listgames();
-    setinputflags(INF_NORMAL);
     if(i>0)break;
   }
 
@@ -423,16 +424,16 @@ top10()
   /* Lock this operation first */
 
   sprintf(lock,"LCK..adventtop");
-  if(waitlock(lock,5)==LKR_TIMEOUT)
-    fatal("Whoa, timeout expired while waiting for lock %s",lock);
-  placelock(lock,"reading");
+  if(lock_wait(lock,5)==LKR_TIMEOUT)
+    error_fatal("Whoa, timeout expired while waiting for lock %s",lock);
+  lock_place(lock,"reading");
 
 
   /* Read the accounting file, gather what information we need. */
 
   if((fp=fopen(TOPFILE,"r"))==NULL){
     prompt(NOTOP);
-    rmlock(lock);
+    lock_rm(lock);
     return;
   }
   
@@ -456,7 +457,7 @@ top10()
     }
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
 
   
   /* Print the top N */
@@ -475,7 +476,7 @@ top10()
 	       top[i].games,
 	       games[j].title);
       }
-      if(lastresult==PAUSE_QUIT)return;
+      if(fmt_lastresult==PAUSE_QUIT)return;
     }
   }
   
@@ -490,7 +491,7 @@ run()
   int shownmenu=0;
   char c;
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOENTRY);
     return;
   }
@@ -506,7 +507,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -514,13 +515,13 @@ run()
 	if(shownmenu==1){
 	  prompt(SHMENU,numgames);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'A':
 	about();
@@ -543,12 +544,12 @@ run()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
 
   }
 }
@@ -557,18 +558,41 @@ run()
 void
 done()
 {
-  clsmsg(msg);
+  msg_close(msg);
 }
 
 
+
 int
-main(int argc, char *argv[])
+handler_run(int argc, char **argv)
 {
-  setprogname(argv[0]);
-  setprogname("adventure");
   atexit(done);
   init();
   run();
   done();
   return 0;
+}
+
+
+mod_info_t mod_info_adventure = {
+  "adventure",
+  "Adventure game",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "BBS-oriented interpreter for Infocom adventure games.",
+  RCS_VER,
+  "1.0",
+  {0,NULL},			/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {0,NULL}			/* Delete user handler */
+};
+
+
+int
+main(int argc, char *argv[])
+{
+  mod_setinfo(&mod_info_adventure);
+  return mod_main(argc,argv);
 }

@@ -30,11 +30,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:02:48  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:34  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1999/07/18 22:07:59  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.3  1998/12/27 16:31:55  alexios
  * Added autoconf support.
@@ -54,6 +55,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -78,22 +80,22 @@ handlenetmail(struct message *msg, char *srcname)
   char command[256],buffer[8192];
   FILE *fp;
   struct stat st;
-  useracc uacc;
+  useracc_t uacc;
   char fatt[256];
 
   st.st_size=0;
   stat(srcname,&st);
 
-  if(!msg->fatt[0])sprintf(fatt,"%ld.att",msg->msgno);
+  if(!msg->fatt[0])sprintf(fatt,FILEATTACHMENT,msg->msgno);
   else strcpy(fatt,msg->fatt);
   
-  loaduseraccount(msg->from,&uacc);
+  usr_loadaccount(msg->from,&uacc);
   latinize(uacc.username);
 
   if((msg->flags&MSF_FILEATT)==0){
     sprintf(command,"cat - %s |%s %s",
 	    srcname,
-	    getmsg(SENDMAIL),
+	    msg_get(SENDMAIL),
 	    msg->to);
   }else{
     char tmp[256];
@@ -103,11 +105,11 @@ handlenetmail(struct message *msg, char *srcname)
     sprintf(command,"cat - %s /tmp/mailatt%05d|%s %s",
 	    srcname,
 	    getpid(),
-	    getmsg(SENDMAIL),
+	    msg_get(SENDMAIL),
 	    msg->to);
   }
   if((fp=popen(command,"w"))==NULL){
-    logerrorsys("Unable to spawn %s pipe",getmsg(SENDMAIL));
+    error_logsys("Unable to spawn %s pipe",msg_get(SENDMAIL));
     exit(1);
   }
   sprompt(buffer,NMSGHDR,uacc.username,msg->from,msg->subject,

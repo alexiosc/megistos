@@ -28,11 +28,12 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:55:26  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1999/07/18 21:21:38  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.4  1998/12/27 15:33:03  alexios
  * Added autoconf support.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -85,7 +87,7 @@ modifybody(struct message *msg)
 
   sprintf(fname,"%s/%s/"MESSAGEFILE,MSGSDIR,
 	  msg->club[0]?msg->club:EMAILDIRNAME,
-	  (long)msg->msgno);
+	  msg->msgno);
 
   if((fp=fopen(fname,"r"))==NULL){
     fclose(fp);
@@ -195,16 +197,15 @@ modifymail()
 {
   int msgno;
   int i,j,ok=0;
-  char fname[256],bedit[256],bok[256],bcan[256],res[256],s[256],*cp;
+  char fname[256];
   struct stat st;
-  FILE *fp;
   struct message msg;
 
-  if(!morcnc())prompt(MMINFO);
+  if(!cnc_more())prompt(MMINFO);
   
   setclub(NULL);
   do{
-    if(!getnumber(&msgno,MMASK,1,sysvar->emessages,MMERR3,0,0))return;
+    if(!get_number(&msgno,MMASK,1,sysvar->emessages,MMERR3,0,0))return;
 
     j=findmsgfrom(&i,thisuseracc.userid,msgno,BSD_GT);
     if((j!=BSE_FOUND)||(msgno!=i))ok=0;
@@ -213,7 +214,7 @@ modifymail()
     /* Be paranoid about it, check if the mail itself exists, too. */
 
     if(ok){
-      sprintf(fname,EMAILDIR"/"MESSAGEFILE,(long)msgno);
+      sprintf(fname,EMAILDIR"/"MESSAGEFILE,msgno);
       ok=(stat(fname,&st)==0);
     }
 
@@ -232,94 +233,75 @@ modifymail()
     return;
   }
 
-  sprintf(fname,TMPDIR"/mm%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\n%s\nEDIT\nOK\nCANCEL\n",
+	  msg.subject,
+	  msg.flags&MSF_FILEATT?msg.fatt:"",
+	  msg.flags&MSF_RECEIPT?"on":"off");
+
+  if(dialog_run("emailclubs",MMVT,MMLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%s\n",msg.subject);
-  fprintf(fp,"%s\n",msg.flags&MSF_FILEATT?msg.fatt:"");
-  fprintf(fp,"%s\n",msg.flags&MSF_RECEIPT?"on":"off");
-  fprintf(fp,"Edit button\nOK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("emailclubs",MMVT,MMLT,fname);
+  if(sameas(margv[6],"OK")||
+     sameas(margv[6],margv[3])||
+     sameas(margv[6],margv[4])){
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  for(i=0;i<7;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==3)strcpy(bedit,s);
-    else if(i==4)strcpy(bok,s);
-    else if(i==5)strcpy(bcan,s);
-    else if(i==6)strcpy(res,s);
-  }
-  if(sameas(bedit,bok))bok[0]=0;
-  if(sameas(bedit,bcan))bcan[0]=0;
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
-
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
-    prompt(MMCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
-  }
-  if(sameas(res,bedit)){
-    if(!modifybody(&msg)){
-      prompt(MMCAN);
-      fclose(fp);
-      unlink(fname);
-      return;
+    /* Editing message? */
+    if(sameas(margv[6],margv[4])){
+      if(!modifybody(&msg)){
+	prompt(MMCAN);
+	return;
+      }
     }
-  }
-  
-  rewind(fp);
 
-  getmsgheader(msgno,&msg);
 
-  for(i=0;i<3;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(msg.subject,s);
-    else if(i==1){
-      if(s[0]){
-	if(!(msg.flags&MSF_FILEATT)){
-	  if(strcmp(msg.subject,s))prompt(MMWARN1);
-	} else {
-	  int warn=0;
-	  for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
-	    warn=1;
-	    s[i]='_';
-	  }
-	  if(warn)prompt(MMWARN2,s);
+    /* Update the message */
+
+    getmsgheader(msgno,&msg);
+
+    bzero(msg.subject,sizeof(msg.subject));
+    strncpy(msg.subject,margv[0],sizeof(msg.subject)-1);
+
+    if(strlen(margv[1])){
+      if(!(msg.flags&MSF_FILEATT)){
+	if(strcmp(msg.subject,margv[1]))prompt(MMWARN1);
+      } else {
+	int warn=0;
+	char *s=margv[1];
+	for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
+	  warn=1;
+	  s[i]='_';
 	}
-      } else sprintf(msg.fatt,"%ld.att",msg.msgno);
-    }else if(i==2){
+	if(warn)prompt(MMWARN2,margv[1]);
+      }
+    } else sprintf(msg.fatt,"%d.att",msg.msgno);
+
+    {
+      char *s=margv[2];
       int current=(msg.flags&MSF_RECEIPT)!=0;
       int rrr=sameas(s,"ON");
-
+      
       if(rrr!=current){
 	if(rrr){
-	  if(!haskey(&thisuseracc,rrrkey))prompt(MMWARN3);
-	  else if(!canpay(rrrchg))prompt(MMWARN4);
+	  if(!key_owns(&thisuseracc,rrrkey))prompt(MMWARN3);
+	  else if(!usr_canpay(rrrchg))prompt(MMWARN4);
 	  else {
 	    msg.flags|=MSF_RECEIPT;
-	    chargecredits(rrrchg);
-	    prompt(MMINFO1,rrrchg,getpfix(CRDSING,rrrchg));
+	    usr_chargecredits(rrrchg);
+	    prompt(MMINFO1,rrrchg,msg_getunit(CRDSING,rrrchg));
 	  }
 	}
       }
     }
-  }
 
-  fclose(fp);
-  unlink(fname);
-  writemsgheader(&msg);
+    writemsgheader(&msg);
+
+  } else {
+    prompt(MMCAN);
+  }
 }
 
 
@@ -327,8 +309,6 @@ void
 modifyclubmsg(struct message *orig)
 {
   int i;
-  char fname[256],bedit[256],bok[256],bcan[256],res[256],s[256],*cp;
-  FILE *fp;
   struct message msg;
 
   getmsgheader(orig->msgno,&msg);
@@ -338,87 +318,60 @@ modifyclubmsg(struct message *orig)
     return;
   }
 
-  sprintf(fname,TMPDIR"/mm%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\nEDIT\nOK\nCANCEL",
+	  msg.subject,
+	  msg.flags&MSF_FILEATT?msg.fatt:"");
+
+  if(dialog_run("emailclubs",MCMVT,MCMLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
   }
 
-  fprintf(fp,"%s\n",msg.subject);
-  fprintf(fp,"%s\n",msg.flags&MSF_FILEATT?msg.fatt:"");
-  fprintf(fp,"Edit button\nOK button\nCancel button\n");
-  fclose(fp);
+  dialog_parse(inp_buffer);
 
-  dataentry("emailclubs",MCMVT,MCMLT,fname);
+  if(sameas(margv[5],"OK")||
+     sameas(margv[5],margv[2])||
+     sameas(margv[5],margv[3])){
 
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
+    /* Edit the message's body? */
 
-  for(i=0;i<6;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==2)strcpy(bedit,s);
-    else if(i==3)strcpy(bok,s);
-    else if(i==4)strcpy(bcan,s);
-    else if(i==5)strcpy(res,s);
-  }
-  if(sameas(bedit,bok))bok[0]=0;
-  if(sameas(bedit,bcan))bcan[0]=0;
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
-
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
-    prompt(MMCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
-  }
-  if(sameas(res,bedit)){
-    if(!modifybody(&msg)){
-      prompt(MMCAN);
-      fclose(fp);
-      unlink(fname);
-      return;
+    if(sameas(margv[5],margv[2])){
+      if(!modifybody(&msg)){
+	prompt(MMCAN);
+	return;
+      }
     }
-  }
-  
-  rewind(fp);
 
-  getmsgheader(orig->msgno,&msg);
+    /* OK, make the changes */
 
-  for(i=0;i<2;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(msg.subject,s);
-    else if(i==1){
-      if(s[0]){
-	if(!(msg.flags&MSF_FILEATT)){
-	  if(strcmp(msg.subject,s))prompt(MMWARN1);
-	} else {
-	  int warn=0;
-	  for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
-	    warn=1;
-	    s[i]='_';
-	  }
-	  if(warn)prompt(MMWARN2,s);
+    getmsgheader(orig->msgno,&msg);
+    
+    bzero(msg.subject,sizeof(msg.subject));
+    strncpy(msg.subject,margv[0],sizeof(msg.subject)-1);
+    if(strlen(margv[1])){
+      if(!(msg.flags&MSF_FILEATT)){
+	if(strcmp(msg.subject,margv[1]))prompt(MMWARN1);
+      } else {
+	int warn=0;
+	char *s=margv[0];
+	for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
+	  warn=1;
+	  s[i]='_';
 	}
-      } else sprintf(msg.fatt,"%ld.att",msg.msgno);
-    }
-  }
+	if(warn)prompt(MMWARN2,s);
+      }
+    } else sprintf(msg.fatt,"%d.att",msg.msgno);
 
-  fclose(fp);
-  unlink(fname);
-  writemsgheader(&msg);
+    writemsgheader(&msg);
+  } else {
+    prompt(MMCAN);
+  }
 }
 
 
 void
 clubopmodify(struct message *orig)
 {
-  int i;
-  char fname[256],bedit[256],bok[256],bcan[256],res[256],s[256],*cp;
-  FILE *fp;
   struct message msg;
 
   memcpy(&msg,orig,sizeof(msg));
@@ -429,103 +382,89 @@ clubopmodify(struct message *orig)
     return;
   }
 
-  sprintf(fname,TMPDIR"/mm%05d",getpid());
-  if((fp=fopen(fname,"w"))==NULL){
-    logerrorsys("Unable to create data entry file %s",fname);
+  sprintf(inp_buffer,"%s\n%s\n%s\n%s\n%d\nEDIT\nOK\nCANCEL\n",
+	  msg.subject,
+	  msg.flags&MSF_FILEATT?msg.fatt:"",
+	  msg.flags&MSF_APPROVD?"on":"off",
+	  msg.flags&MSF_EXEMPT?"on":"off",
+	  msg.period);
+
+  if(dialog_run("emailclubs",COPMVT,COPMLT,inp_buffer,MAXINPLEN)!=0){
+    error_log("Unable to run data entry subsystem");
     return;
-  }
-
-  fprintf(fp,"%s\n",msg.subject);
-  fprintf(fp,"%s\n",msg.flags&MSF_FILEATT?msg.fatt:"");
-  fprintf(fp,"%s\n",msg.flags&MSF_APPROVD?"on":"off");
-  fprintf(fp,"%s\n",msg.flags&MSF_EXEMPT?"on":"off");
-  fprintf(fp,"%d\n",msg.period);
-  fprintf(fp,"Edit button\nOK button\nCancel button\n");
-  fclose(fp);
-
-  dataentry("emailclubs",COPMVT,COPMLT,fname);
-
-  if((fp=fopen(fname,"r"))==NULL){
-    logerrorsys("Unable to read data entry file %s",fname);
-    return;
-  }
-
-  for(i=0;i<9;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==5)strcpy(bedit,s);
-    else if(i==6)strcpy(bok,s);
-    else if(i==7)strcpy(bcan,s);
-    else if(i==8)strcpy(res,s);
-  }
-  if(sameas(bedit,bok))bok[0]=0;
-  if(sameas(bedit,bcan))bcan[0]=0;
-  if(sameas(bok,bcan))bok[0]=bcan[0]=0;
-
-  if(sameas(res,"CANCEL")||sameas(res,bcan)){
-    prompt(MMCAN);
-    fclose(fp);
-    unlink(fname);
-    return;
-  }
-  if(sameas(res,bedit)){
-    if(!modifybody(&msg)){
-      prompt(MMCAN);
-      fclose(fp);
-      unlink(fname);
-      return;
-    }
   }
   
-  rewind(fp);
+  dialog_parse(inp_buffer);
 
-  getmsgheader(orig->msgno,&msg);
+  if(sameas(margv[8],"OK")||
+     sameas(margv[8],margv[6])||
+     sameas(margv[8],margv[5])){
 
-  for(i=0;i<5;i++){
-    fgets(s,sizeof(s),fp);
-    if((cp=strchr(s,'\n'))!=NULL)*cp=0;
-    if(i==0)strcpy(msg.subject,s);
-    else if(i==1){
-      if(s[0]){
-	if(!(msg.flags&MSF_FILEATT)){
-	  if(strcmp(msg.subject,s))prompt(MMWARN1);
-	} else {
-	  int warn=0;
-	  for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
-	    warn=1;
-	    s[i]='_';
-	  }
-	  if(warn)prompt(MMWARN2,s);
+    /* Edit the message? */
+
+//    if(sameas(margv[5],margv[6])){	// patch by Valis
+
+    if(sameas(margv[8], margv[5])){
+      if(!modifybody(&msg)){
+	prompt(MMCAN);
+      }
+    }
+
+    /* Make the changes to the message header */
+
+    getmsgheader(orig->msgno,&msg);
+
+    bzero(msg.subject,sizeof(msg.subject));
+    strncpy(msg.subject,margv[0],sizeof(msg.subject)-1);
+
+    if(strlen(margv[1])){
+      if(!(msg.flags&MSF_FILEATT)){
+	if(strcmp(msg.subject,margv[1]))prompt(MMWARN1);
+      } else {
+	int warn=0,i;
+	char *s=margv[1];
+	for(i=0;s[i];i++)if(!strchr(FNAMECHARS,s[i])){
+	  warn=1;
+	  s[i]='_';
 	}
-      } else sprintf(msg.fatt,"%ld.att",msg.msgno);
-    } else if(i==2){
+	if(warn)prompt(MMWARN2,s);
+      }
+    } else sprintf(msg.fatt,"%d.att",msg.msgno);
+
+    {
       int i=(msg.flags&MSF_APPROVD)!=0;
-      int j=sameas(s,"on");
+      int j=sameas(margv[2],"on");
       if((msg.flags&MSF_FILEATT)&&(i!=j)){
 	msg.flags^=MSF_APPROVD;
 	prompt(msg.flags&MSF_APPROVD?COPOK1:COPOK2);
       } else if(i!=j)prompt(COPMW1);
-    } else if(i==3){
+    }
+    
+    {
       int j=(msg.flags&MSF_EXEMPT)!=0;
-      int k=sameas(s,"on");
+      int k=sameas(margv[3],"on");
       if(j!=k){
 	msg.flags^=MSF_EXEMPT;
 	prompt(msg.flags&MSF_EXEMPT?COPOK3:COPOK4);
       }
-    } else if(i==4){
+    }
+    
+    {
       int j;
       int k=msg.period;
-      if(sscanf(s,"%d",&j)){
+      if(sscanf(margv[4],"%d",&j)){
 	if(j!=k){
 	  msg.period=j;
-	  if(msg.period)prompt(COPOK5,msg.period,getpfix(DAYSNG,msg.period));
+	  if(msg.period)prompt(COPOK5,
+			       msg.period,
+			       msg_getunit(DAYSNG,msg.period));
 	  else prompt(COPOK6);
 	}
       }
     }
-  }
 
-  fclose(fp);
-  unlink(fname);
-  writemsgheader(&msg);
+    writemsgheader(&msg);
+  } else {
+    prompt(MMCAN);
+  }
 }

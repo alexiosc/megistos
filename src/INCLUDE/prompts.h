@@ -1,4 +1,33 @@
-/*****************************************************************************\
+/** @name    prompts.h
+    @memo    Prompt block management
+    @author  Alexios
+
+    @doc
+
+    Prompt (or message) blocks are effectively configuration files. In their
+    source form, they contain hierarchies of options or messages that are
+    output to the user. In their compiled form, they are reduced to key-value
+    pairs. This header file allows you to read these key-value pairs and act on
+    them.
+
+    Keys aren't really keys, they're integer indices into the file. However,
+    the prompt block indexer is nice enough to make a header file with
+    definitions for each of those numeric indices. The symbolic names it
+    chooses are the same as the symbolic names of the options themselves.
+
+    The low-level, compiled prompt block format is bound to change soon, so I
+    won't go into much detail just yet.
+
+    By the way, the name `prompt block' originates from the Major BBS. Even on
+    Major, it was somewhat inaccurate, as prompt blocks didn't just contain
+    prompts.
+
+    Original banner, legalese and change history follow.
+
+    {\footnotesize
+    \begin{verbatim}
+
+ *****************************************************************************
  **                                                                         **
  **  FILE:     prompts.h                                                    **
  **  AUTHORS:  Alexios                                                      **
@@ -22,15 +51,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+ *****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:48:56  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:28  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.5  1998/12/27 15:19:19  alexios
  * Added the message block magic number.
@@ -51,14 +81,17 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
+
+\end{verbatim}
+} */
+
+/*@{*/
 
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
 #endif
-
-
 
 
 #ifndef PROMPTS_H
@@ -69,60 +102,339 @@
 
 #define MBK_MAGIC "MMBK"
 
-typedef struct {
-     char fname[64];
-     FILE *handle;
-     long indexsize;     
-     long *index;
-     int  language;
-     int  langoffs[NUMLANGUAGES];
-} promptblk;
+/** A prompt block descriptor.
+
+    This is the structure used to hold state et cetera for an open prompt
+    block. The data type is instantiated by {\tt msg_open()}. This data type
+    should be considered opaque.
+
+    @deprecated Please use {\tt promptblock_t}, the {\tt typedef} instead of
+    this structure. */
+
+struct promptblock {
+     char fname[64];		  /** Filename of the prompt block  */
+     FILE *handle;		  /** Open prompt block file */
+     long indexsize;		  /** Size of prompt index */
+     long *index;		  /** Pointer to index array */
+     int  language;		  /** Currently active language */
+     int  langoffs[NUMLANGUAGES]; /** Indices to where languages start */
+};
 
 
-extern char       *msgbuf;
-extern promptblk  *curblk, *lastblk, *sysblk;
-extern long       lastprompt;
-extern char       postfix[80];
-extern int        language;
-extern int        numlangs;
-extern char       languages[NUMLANGUAGES][64];
+/** Proper way to define a prompt block.
+
+    This is the acceptable way to refer to a prompt block descriptor. */
+
+typedef struct promptblock promptblock_t;
 
 
-promptblk *opnmsg(char *name);
+extern char           *msg_buffer;  /** Used internally to format prompts */
+extern promptblock_t  *msg_cur;     /** The currently active block */
+extern promptblock_t  *msg_last;    /** The `other' block */
+extern promptblock_t  *msg_sys;     /** The system block  */
 
-void setmbk(promptblk *blk);
 
-void rstmbk();
+/** Names of all the languages supported */
 
-char *getmsglang(int num, int language);
+extern char msg_langnames[NUMLANGUAGES][64];
 
-#define getmsg(num) getmsglang(num,curblk->language)
 
-char *getpfixlang(int num,int value,int language);
+/** The number of defined languages. */
 
-#define getpfix(num,value) getpfixlang(num,value,curblk->language)
+extern int msg_numlangs;
 
-void clsmsg(promptblk *blk);
 
-int sameas(char *s1, char *s2);
+/** Initialise prompt subsystem.
+    
+    Load language descriptions, number of available languages, et cetera. */
 
-char *lastwd(char *s);
+void msg_init();
 
-long lngopt(int num,long floor,long ceiling);
 
-unsigned hexopt(int num,unsigned floor,unsigned ceiling);
+/** Open a prompt block.
 
-int numopt(int num, int floor, int ceiling);
+    Opens a prompt block file, validates its magic number, reads its index and
+    creates a descriptor for it. The descriptor is automatically allocated by
+    the function, just like {\tt fopen()} allocates a new {\tt FILE}.
 
-int ynopt(int num);
+    The current block ({\tt msg_cur}) becomes the last block ({\tt
+    msg_last}). The newly opened block becomes the current block. If the
+    function is called from a user-servicing module, the user's language is
+    also selected for subsequent prompting.
 
-char chropt(int num);
+    @param name The {\em basename} of the prompt block file, without its {\tt
+    .mbk} suffix. By convention, prompt blocks are named the same as the
+    directory of their modules (and, in most cases, the main module source
+    file). This isn't binding, though.
 
-char *stgopt(int msgnum);
+    @return A pointer to a freshly allocated prompt block descriptor. This
+    function always returns on success. Failure causes the process to halt with
+    a fatal error. */
 
-int tokopt(int msgnum,char *toklst, ...);
+promptblock_t *msg_open(char *name);
 
-void setlanguage (int l);
+
+/** Set the current prompt block.
+
+    Sets the current prompt block. All subsequent accesses will refer to this
+    block, which must be a descriptor returned by {\tt msg_open()}. As a side
+    effect, the current block ({\tt msg_cur}) becomes the last block ({\tt
+    msg_last}). The specified block becomes the current block.
+
+    This function is used to switch between prompt blocks. Usually, each module
+    has its own, single block. However, there are times when you need to access
+    briefly another block and this is where this function comes in. The system
+    block, {\tt msg_sys} is one such example.
+
+    @param blk A prompt block descriptor returned by a previous call to {\tt
+    msg_open()}.
+
+    @see msg_open(), msg_reset(). */
+
+void msg_set(promptblock_t *blk);
+
+
+/** Return to the last prompt block used.
+
+    This function simply swaps the current and last prompt block descriptors
+    ({\tt msg_cur} and {\tt msg_last}). This is a quick way to revert to the
+    previous message. System functions that access prompts in the system block
+    use this function to revert immediately to the one the user assumes is
+    active, without needing to have access to its descriptor. */
+
+void msg_reset();
+
+
+/** Access a prompt by index and language.
+
+    This is the generic prompt access function. It's used by most other
+    prompt access functions.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param language The language you want to access.
+
+    @return A null terminated string pointer to the prompt. */
+
+#define msg_getl(num,lang) msg_getl_bot((num),lang,1)
+
+
+char *msg_getl_bot(int num, int language, int checkbot);
+
+
+/** Access a prompt by index.
+
+    This is a macro that calls {\tt msg_getl()} that retrieves a prompt by
+    index, using the currently active language. 
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @return A null terminated string pointer to the prompt. */
+
+#define msg_get(num)  msg_getl_bot((num),(msg_cur->language),1)
+
+
+/** Get the name of a unit.
+
+    This function is similar to {\tt msg_getl()}, with a catch: it retrieves
+    either of two messages, based on the value of a variable. The function is
+    used to format a unit's singular or plural form based on a value. For
+    instance, you wouldn't want to say `1 Kbytes', and `1 Kbyte(s)' is an ugly
+    way to avoid the problem. This function solves the problem.
+
+    The way to do it is to define two little prompt blocks. The first holds the
+    word `Kbyte', the second the word `Kbytes'. Your module uses this function
+    to access the needed form of the unit and includes it in a message given to
+    the user. Needless to say, this function can be used for anything that
+    needs dual, value-selected prompting. User sexes are just one example.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param value The value mentioned above. If {\tt value} is anything but one,
+    {\tt num} will be increased by one.
+
+    @param language The language of the retrieved unit name. 
+
+    @return A null terminated string pointer to the prompt. */
+
+char *msg_getunitl(int num,int value,int language);
+
+
+/** Get the name of a unit in the current language.
+
+    This is a macro that calls {\tt msg_getunitl()}. It retrieves a unit name,
+    but uses the currently active language to save you a lot of typing.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param value The value mentioned above. If {\tt value} is anything but one,
+    {\tt num} will be increased by one.
+
+    @return A null terminated string pointer to the prompt. */
+
+#define msg_getunit(num,value) msg_getunitl((num),(value),msg_cur->language)
+
+
+/** Close a prompt block
+
+    Closes the specified prompt block, deallocates its descriptor. Any
+    subsequent calls to prompt retrieval function will have unpredictable
+    results, unless you open a new block, set another one as the current, or
+    use {\tt msg_last()}.
+
+    @param blk The prompt block descriptor to close.  */
+
+void msg_close(promptblock_t *blk);
+
+
+/** Parse a {\tt long int} in a prompt.
+
+    Retrieves the requested prompt and parses a long integer contained
+    therein. This function is used to extract configuration options from
+    prompts. The number is checked to ensure it's within a user-defined range
+    of values. If not, a fatal error is issued.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param floor The minimum acceptable value.
+
+    @param ceiling The maximum acceptable value. 
+
+    @return The parsed value. */
+
+long msg_long(int num,long floor,long ceiling);
+
+
+/** Parse a base-16 {\tt unsigned int} in a prompt.
+
+    Retrieves the requested prompt and parses a hexadecimal unsigned integer
+    contained therein. This function is used to extract configuration options
+    from prompts. The number is checked to ensure it's within a user-defined
+    range of values. If not, a fatal error is issued.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param floor The minimum acceptable value.
+
+    @param ceiling The maximum acceptable value. 
+
+    @return The parsed value. */
+
+unsigned msg_hex(int num,unsigned floor,unsigned ceiling);
+
+
+/** Parse an {\tt int} in a prompt.
+
+    Retrieves the requested prompt and parses an integer contained
+    therein. This function is used to extract configuration options from
+    prompts. The number is checked to ensure it's within a user-defined range
+    of values. If not, a fatal error is issued.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param floor The minimum acceptable value.
+
+    @param ceiling The maximum acceptable value. 
+
+    @return The parsed value. */
+
+int msg_int(int num, int floor, int ceiling);
+
+
+/** Parse an yes/no configuration prompt.
+
+    Retrieves the requested prompt and parses a yes/no boolean value contained
+    therein. This function is used to extract configuration options from
+    prompts.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @return The parsed value: non-zero if `yes', zero if `no'. */
+
+int msg_bool(int num);
+
+
+/** Parse a single-character configuration prompt.
+
+    Retrieves the requested prompt and parses a single character value
+    contained therein. This function is used to extract configuration options
+    from prompts.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @return The parsed value: a single character. */
+
+char msg_char(int num);
+
+
+/** Copy a configuration prompt to a string.
+
+    Retrieves the requested prompt, allocates a new string to hold its value,
+    and returns the newly allocated string.  This function is used to extract
+    configuration options from prompts.
+
+    There is no need for you to allocate space for this string or to copy it
+    over, this is done for you. You {\em will} need to free it once you're done
+    with it, though, to avoid memory leaks.
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @return The parsed value: a single character. */
+
+char *msg_string(int msgnum);
+
+
+/** Extract a token from a configuration prompt.
+
+    Retrieves and parses the requested prompt, trying to match it against a
+    user-supplied list of tokens. This function is used to extract
+    multiple-choice configuration options from prompt.
+
+    The list of tokens is represented by one or more string arguments to the
+    function. As this is perhaps the most complex of the parsing functions,
+    here is an example that includes error recovery:
+    
+    \begin{verbatim}
+    int value=tokopt(COLOUR,"DARKBLUE","DARKGREEN","DARKCYAN","DARKRED",
+		"DARKMAGENTA","BROWN","GREY","DARKGREY","BLUE","GREEN",
+		"CYAN","RED","MAGENTA","YELLOW","WHITE");
+    if(value<1) error_fatal("Option COLOUR has unacceptable value.");
+    \end{verbatim}
+
+    @param num The prompt index. You will want to use the symbolic name here.
+
+    @param toklst An arbitrary number of one or more string pointers. The last
+    one {\em must be} {\tt NULL}.
+
+    @return Zero if the token didn't match any in the file. A value {\tt i}
+    greater than zero denoting a match against the {\tt i}-th token supplied as
+    an argument. */
+
+int msg_token(int msgnum,char *toklst, ...);
+
+
+/** Set the active language.
+
+    Specifies the language of all subsequently retrieved prompts. Only the
+    current language in the current and system blocks is changed ({\tt
+    msg_cur}, {\tt msg_sys}). The last block ({\tt msg_last}) is not touched at
+    all.
+
+    @param l The new language to set.  */
+
+void msg_setlanguage(int l);
 
 
 #endif /* PROMPTS_H */
+
+/*@}*/
+
+
+/*
+LocalWords: Alexios doc BBS legalese otnotesize alexios Exp bbs GPL emud
+LocalWords: xlgetmsg xlgetmsglang getmsglang getmsg xlation ifndef VER MBK
+LocalWords: endif MMBK tt msg promptblock struct fname indexsize int fopen
+LocalWords: langoffs NUMLANGUAGES promptblkock param em basename mbk blk
+LocalWords: rstmbk num getl getmsgl Kbytes Kbyte getunitl getpfix
+LocalWords: getpfixlang clsmsg bool msgnum tokopt COLOUR DARKBLUE DARKCYAN
+LocalWords: DARKGREEN DARKRED DARKMAGENTA DARKGREY CYAN toklst setlanguage */

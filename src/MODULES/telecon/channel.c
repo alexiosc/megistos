@@ -28,14 +28,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:22  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.8  1999/07/18 21:48:36  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 0.7  1998/12/27 16:10:27  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  * Other slight fixes.
  *
  * Revision 0.6  1998/08/14 11:51:24  alexios
@@ -64,6 +65,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -90,10 +92,10 @@ struct chanusr chanusr;
 int /* DONE */
 getaccess(char *chan)
 {
-  if(userexists(chan)){
+  if(usr_exists(chan)){
     static struct tlcuser usr;
     if(!loadtlcuser(chan,&usr)){
-      fatal("Can't load user record for %s",chan);
+      error_fatal("Can't load user record for %s",chan);
     }
     if(usr.flags&TLF_BEGUNINV)return CHF_PRIVATE;
     else if(usr.flags&TLF_BEGPANEL)return CHF_READONLY;
@@ -123,16 +125,16 @@ enterchannel(char *channel)
   sprintf(fname,"%s/%s",TELEDIR,mkchfn(channel));
 
   sprintf(lock,CHANLOCK,mkchfn(channel));
-  waitlock(lock,10);
-  placelock(lock,"entering");
+  lock_wait(lock,10);
+  lock_place(lock,"entering");
 
   mkdir(fname,0770);
 
   if(stat(fname,&st)){
     int i=errno;
-    rmlock(lock);
+    lock_rm(lock);
     errno=i;
-    fatalsys("Unable to open/create channel directory %s",fname);
+    error_fatalsys("Unable to open/create channel directory %s",fname);
   }
 
   sprintf(header,"%s/.header",fname);
@@ -161,7 +163,7 @@ enterchannel(char *channel)
     strcpy(curchannel,channel);
     thisuseraux.access=usr.flags;
 
-    rmlock(lock);
+    lock_rm(lock);
   } else {
     int ax;
 
@@ -170,14 +172,14 @@ enterchannel(char *channel)
     if(ax&CUF_MODERATOR){
       struct chanhdr *h=readchanhdr(channel);
       if(h==NULL){
-	fatal("Unable to read channel header for channel %s",channel);
+	error_fatal("Unable to read channel header for channel %s",channel);
       }
       memcpy(&chanhdr,h,sizeof(chanhdr));
       moderate(channel,thisuseracc.userid,chanhdr.moderator);
       writechanhdr(channel,&chanhdr);
     }
 
-    rmlock(lock);
+    lock_rm(lock);
 
     ax|=(thisuseronl.flags&OLF_TLCUNLIST?CUF_UNLISTED:0)|CUF_PRESENT;
     thisuseraux.access=ax;
@@ -208,13 +210,13 @@ killpersonalchannel()
 
   if((hdr=begscan(thisuseracc.userid,TSM_PRESENT))==NULL)return;
   while((usr=getscan())!=NULL){
-    if(uinsys(usr->userid,0)){
-      sprintf(outbuf,getmsglang(DISCDROP,othruseracc.language-1),
-	      getpfixlang(SEXM1,thisuseracc.sex==USX_MALE,
+    if(usr_insys(usr->userid,0)){
+      sprintf(out_buffer,msg_getl(DISCDROP,othruseracc.language-1),
+	      msg_getunitl(SEXM1,thisuseracc.sex==USX_MALE,
 			  othruseracc.language-1),
 	      thisuseracc.userid);
 
-      injoth(&othruseronl,outbuf,0);
+      usr_injoth(&othruseronl,out_buffer,0);
 
       sendmain(othruseronl.userid);
     }
@@ -243,8 +245,8 @@ leavechannels()
     sprintf(fname,"%s/%s",TELEDIR,channels[j]->d_name);
 
     sprintf(lock,CHANLOCK,channels[j]->d_name);
-    waitlock(lock,10);
-    placelock(lock,"logout");
+    lock_wait(lock,10);
+    lock_place(lock,"logout");
     
     sprintf(rmname,"%s/%s+",fname,thisuseracc.userid);
     unlink(rmname);
@@ -258,7 +260,7 @@ leavechannels()
     rmdir(fname);
 
 
-    rmlock(lock);
+    lock_rm(lock);
     for(;k;k--)free(tmp[k-1]);
     free(tmp);
   }
@@ -276,26 +278,26 @@ readchanhdr(char *channel)
   FILE *fp;
 
   sprintf(lock,CHANLOCK,mkchfn(channel));
-  waitlock(lock,10);
-  placelock(lock,"reading");
+  lock_wait(lock,10);
+  lock_place(lock,"reading");
 
   sprintf(fname,"%s/%s/.header",TELEDIR,mkchfn(channel));
 
   if((fp=fopen(fname,"r"))==NULL){
-    rmlock(lock);
+    lock_rm(lock);
     fclose(fp);
     return NULL;
   }
 
   if(fread(&c,sizeof(c),1,fp)!=1){
     int i=errno;
-    rmlock(lock);
+    lock_rm(lock);
     fclose(fp);
     errno=i;
-    fatalsys("Unable to read channel file %s",fname);
+    error_fatalsys("Unable to read channel file %s",fname);
   }
 
-  rmlock(lock);
+  lock_rm(lock);
 
   return &c;
 }
@@ -309,8 +311,8 @@ writechanhdr(char *channel, struct chanhdr *c)
   struct stat st;
 
   sprintf(lock,CHANLOCK,mkchfn(channel));
-  waitlock(lock,10);
-  placelock(lock,"writing");
+  lock_wait(lock,10);
+  lock_place(lock,"writing");
 
   /* Make the directory */
 
@@ -318,9 +320,9 @@ writechanhdr(char *channel, struct chanhdr *c)
   mkdir(fname,0770);
   if(stat(fname,&st)){
     int i=errno;
-    rmlock(lock);
+    lock_rm(lock);
     errno=i;
-    fatalsys("Unable to open/create channel directory %s",fname);
+    error_fatalsys("Unable to open/create channel directory %s",fname);
   }
 
   /* Make the header file */
@@ -328,20 +330,20 @@ writechanhdr(char *channel, struct chanhdr *c)
   strcat(fname,"/.header");
   if((fp=fopen(fname,"w"))==NULL){
     int i=errno;
-    rmlock(lock);
+    lock_rm(lock);
     fclose(fp);
     errno=i;
-    fatalsys("Unable to open channel header %s",fname);
+    error_fatalsys("Unable to open channel header %s",fname);
   }
   if(fwrite(c,sizeof(struct chanhdr),1,fp)!=1){
     int i=errno;
-    rmlock(lock);
+    lock_rm(lock);
     fclose(fp);
     errno=i;
-    fatal("Unable to write channel header %s",fname);
+    error_fatal("Unable to write channel header %s",fname);
   }
   fclose(fp);
-  rmlock(lock);
+  lock_rm(lock);
 }
 
 
@@ -373,7 +375,7 @@ setchanax(int ax)
   makechannel(thisuseracc.userid,thisuseracc.userid); /* just in case */
 
   if((c=readchanhdr(thisuseracc.userid))==NULL){
-    fatal("Unable to read channel %s",thisuseracc.userid);
+    error_fatal("Unable to read channel %s",thisuseracc.userid);
   }
   
   c->flags&=~CHF_ACCESS;
@@ -401,14 +403,14 @@ chanscan()
     
     if(hdr){
       while((usr=getscan())!=NULL){
-	if(usr->flags&CUF_UNLISTED && !haskey(&thisuseracc,sopkey))continue;
+	if(usr->flags&CUF_UNLISTED && !key_owns(&thisuseracc,sopkey))continue;
 
 	if(!(usr->flags&CUF_PRESENT)){
-	  uinsys(usr->userid,0);
+	  usr_insys(usr->userid,0);
 
 	  if(usr->flags&CUF_CHATTING){
 	    prompt(SCANTAB1A,usr->userid);
-	    uinsys(othruseraux.chatparty,0);
+	    usr_insys(othruseraux.chatparty,0);
 	    prompt(othruseracc.sex==USX_MALE?SCANCHTM:SCANCHTF,
 		   othruseracc.userid);
 	    prompt(SCANTABE);
@@ -427,15 +429,15 @@ chanscan()
 		   usr->userid);
 
 	    if(usr->flags&CUF_ACCESS){
-	      prompt(pr,getpfix(usr->flags&CUF_READONLY?SCANRM:SCANIM,
+	      prompt(pr,msg_getunit(usr->flags&CUF_READONLY?SCANRM:SCANIM,
 				thisuseracc.sex==USX_MALE));
 	    } else {
-	      prompt(pr,getpfix(SCANUM,thisuseracc.sex==USX_MALE));
+	      prompt(pr,msg_getunit(SCANUM,thisuseracc.sex==USX_MALE));
 	    }
 
 	    if(pr==SCANAX2){
 	      prompt(SCANINVY);
-	    } else if(uinsys(channels[j]->d_name,0)){
+	    } else if(usr_insys(channels[j]->d_name,0)){
 	      prompt(othruseracc.sex==USX_MALE?SCANINVM:SCANINVF,
 		     othruseracc.userid);
 	    } else if(channels[j]->d_name[0]=='/'){
@@ -453,7 +455,7 @@ chanscan()
 	prompt(strcmp(channels[j]->d_name,thisuseronl.telechan)?
 	     SCANOTHCH:SCANTHSCH);
 
-	if(uinsys(channels[j]->d_name,0)){
+	if(usr_insys(channels[j]->d_name,0)){
 	  prompt(othruseracc.sex==USX_MALE?SCANPRVM:SCANPRVF,
 		 othruseracc.userid);
 	} else if(channels[j]->d_name[0]=='/'){

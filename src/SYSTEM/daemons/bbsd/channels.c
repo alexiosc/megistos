@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:33  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 16:21:05  alexios
  * Added autoconf support.
@@ -49,6 +50,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -80,11 +82,11 @@ void
 readchannels()
 {
   int i;
-  initmodule(INITTTYNUM);
+  mod_init(INI_TTYNUM);
   if(gettys)free(gettys);
-  gettys=malloc(sizeof(struct getty)*numchannels);
-  bzero(gettys,sizeof(struct getty)*numchannels);
-  for(i=0;i<numchannels;i++){
+  gettys=malloc(sizeof(struct getty)*chan_count);
+  bzero(gettys,sizeof(struct getty)*chan_count);
+  for(i=0;i<chan_count;i++){
     gettys[i].channel=channels[i].channel;
     strcpy(gettys[i].ttyname,channels[i].ttyname);
     bzero(gettys[i].user,sizeof(gettys[i].user));

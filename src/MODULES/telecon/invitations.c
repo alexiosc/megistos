@@ -28,8 +28,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:58:24  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.3  1998/12/27 16:10:27  alexios
  * Added autoconf support. One slight bug fix.
@@ -46,6 +47,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -83,7 +85,7 @@ invite(char *s)
     return;
   }
 
-  if(!uidxref(userid,1)){
+  if(!usr_uidxref(userid,1)){
     prompt(IUNKUSR,userid);
     return;
   }
@@ -93,31 +95,31 @@ invite(char *s)
     return;
   }
 
-  uinsys(userid,0);
+  usr_insys(userid,0);
 
   setusrax(thisuseracc.userid,userid,0,CUF_EXPLICIT|CUF_ACCESS,0);
 
   {
     char article[2048];
 
-    strcpy(article,getpfix(IRECHE,thisuseracc.sex==USX_MALE));
+    strcpy(article,msg_getunit(IRECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(outbuf,getmsglang(IRECIP,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(IRECIP,othruseracc.language-1),
 	    article,thisuseracc.userid,
-	    getpfix(IRECHIS,thisuseracc.sex==USX_MALE));
+	    msg_getunit(IRECHIS,thisuseracc.sex==USX_MALE));
 
-    if(!injoth(&othruseronl,outbuf,0)){
+    if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
     
     if(othruseronl.flags&OLF_INTELECON){
-      sprintf(outbuf,getmsglang(IJOIN,othruseracc.language-1),
+      sprintf(out_buffer,msg_getl(IJOIN,othruseracc.language-1),
 	      thisuseracc.userid);
-      injoth(&othruseronl,outbuf,0);
+      usr_injoth(&othruseronl,out_buffer,0);
     }
   }
   
-  prompt(ISENDR,getpfix(ISNDM,othruseracc.sex==USX_MALE),userid);
+  prompt(ISENDR,msg_getunit(ISNDM,othruseracc.sex==USX_MALE),userid);
 
   if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
 }
@@ -130,13 +132,13 @@ static char *
 fx_kickout(struct chanusr *u)
 {
   char tmp[8192];
-  strcpy(outbuf,getmsglang(TDELIM,othruseracc.language-1));
+  strcpy(out_buffer,msg_getl(TDELIM,othruseracc.language-1));
 
-  sprintf(tmp,getmsglang(UOTHER,othruseracc.language-1),
-	  getpfixlang(SEXM1,fx_sex==USX_MALE,othruseracc.language-1),
+  sprintf(tmp,msg_getl(UOTHER,othruseracc.language-1),
+	  msg_getunitl(SEXM1,fx_sex==USX_MALE,othruseracc.language-1),
 	  fx_id);
-  strcat(outbuf,tmp);
-  return outbuf;
+  strcat(out_buffer,tmp);
+  return out_buffer;
 }
 
 
@@ -159,7 +161,7 @@ uninvite(char *s)
     return;
   }
 
-  if(!uidxref(userid,1)){
+  if(!usr_uidxref(userid,1)){
     prompt(UUNKUSR,userid);
     return;
   }
@@ -169,18 +171,18 @@ uninvite(char *s)
     return;
   }
 
-  uinsys(userid,0);
+  usr_insys(userid,0);
 
   {
     char article[2048];
 
-    strcpy(article,getpfix(URECHE,thisuseracc.sex==USX_MALE));
+    strcpy(article,msg_getunit(URECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(outbuf,getmsglang(URECIP,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(URECIP,othruseracc.language-1),
 	    article,thisuseracc.userid,
-	    getpfix(URECHIS,thisuseracc.sex==USX_MALE));
+	    msg_getunit(URECHIS,thisuseracc.sex==USX_MALE));
 
-    if(!injoth(&othruseronl,outbuf,0)){
+    if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
     
@@ -199,7 +201,7 @@ uninvite(char *s)
     }
   }
   
-  prompt(USENDR,getpfix(USNDM,othruseracc.sex==USX_MALE),userid);
+  prompt(USENDR,msg_getunit(USNDM,othruseracc.sex==USX_MALE),userid);
 }
 
 
@@ -223,7 +225,7 @@ invitero(char *s)
     return;
   }
 
-  if(!uidxref(userid,1)){
+  if(!usr_uidxref(userid,1)){
     prompt(RUNKUSR,userid);
     return;
   }
@@ -233,31 +235,31 @@ invitero(char *s)
     return;
   }
 
-  uinsys(userid,0);
+  usr_insys(userid,0);
 
   setusrax(thisuseracc.userid,userid,0,CUF_EXPLICIT|CUF_ACCESS|CUF_READONLY,0);
 
   {
     char article[2048];
 
-    strcpy(article,getpfix(RRECHE,thisuseracc.sex==USX_MALE));
+    strcpy(article,msg_getunit(RRECHE,thisuseracc.sex==USX_MALE));
 
-    sprintf(outbuf,getmsglang(RRECIP,othruseracc.language-1),
+    sprintf(out_buffer,msg_getl(RRECIP,othruseracc.language-1),
 	    article,thisuseracc.userid,
-	    getpfix(RRECHIS,thisuseracc.sex==USX_MALE));
+	    msg_getunit(RRECHIS,thisuseracc.sex==USX_MALE));
 
-    if(!injoth(&othruseronl,outbuf,0)){
+    if(!usr_injoth(&othruseronl,out_buffer,0)){
       prompt(UNNOT,othruseronl.userid);
     }
     
     if(othruseronl.flags&OLF_INTELECON){
-      sprintf(outbuf,getmsglang(RJOIN,othruseracc.language-1),
+      sprintf(out_buffer,msg_getl(RJOIN,othruseracc.language-1),
 	      thisuseracc.userid);
-      injoth(&othruseronl,outbuf,0);
+      usr_injoth(&othruseronl,out_buffer,0);
     }
   }
   
-  prompt(RSENDR,getpfix(RSNDM,othruseracc.sex==USX_MALE),userid);
+  prompt(RSENDR,msg_getunit(RSNDM,othruseracc.sex==USX_MALE),userid);
 
   if(!sameas(thisuseronl.telechan,thisuseracc.userid))prompt(INVWRN);
 }

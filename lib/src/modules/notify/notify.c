@@ -28,14 +28,15 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:57:57  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:32  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 1.4  1999/07/18 21:47:34  alexios
- * Changed a few fatal() calls to fatalsys().
+ * Changed a few error_fatal() calls to error_fatalsys().
  *
  * Revision 1.3  1998/12/27 16:06:58  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 1.2  1998/07/24 10:23:07  alexios
  * Migrated to bbslib 0.6.
@@ -52,6 +53,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -67,7 +69,11 @@
 #include "bbs.h"
 #include "mbk_notify.h"
 
-promptblk *msg;
+
+#define NOTIFYDIR BBSDATADIR"/notify"
+
+
+promptblock_t *msg;
 
 int entrykey;
 int invkey;
@@ -95,13 +101,13 @@ listcmp(const void *a, const void *b)
 void
 init()
 {
-  initmodule(INITALL);
-  msg=opnmsg("notify");
-  setlanguage(thisuseracc.language);
-  entrykey=numopt(ENTRYKEY,0,129);
-  invkey=numopt(SOPKEY,0,129);
-  sopkey=numopt(INVKEY,0,129);
-  numusr=numopt(NUMUSR,1,1000);
+  mod_init(INI_ALL);
+  msg=msg_open("notify");
+  msg_setlanguage(thisuseracc.language);
+  entrykey=msg_int(ENTRYKEY,0,129);
+  invkey=msg_int(SOPKEY,0,129);
+  sopkey=msg_int(INVKEY,0,129);
+  numusr=msg_int(NUMUSR,1,1000);
 }
 
 
@@ -135,14 +141,14 @@ loadlist(char *userid)
   sprintf(fname,"%s/%s",NOTIFYDIR,userid);
   if((fp=fopen(fname,"r"))==NULL){
     if(errno!=ENOENT){
-      fatalsys("Unable to open %s (errno=%d)",fname);
+      error_fatalsys("Unable to open %s (errno=%d)",fname);
     } else return;
   }
   while(!feof(fp)){
     char line[256], *cp;
     if(!fgets(line,sizeof(line),fp))break;
     cp=strtok(line,"\n\r");
-    if(!userexists(cp))continue;
+    if(!usr_exists(cp))continue;
     strcpy(list[numusers++].userid,cp);
   }
   fclose(fp);
@@ -160,7 +166,7 @@ savelist()
 
   sprintf(fname,"%s/%s",NOTIFYDIR,thisuseracc.userid);
   if((fp=fopen(fname,"w"))==NULL){
-    fatalsys("Unable to create %s",fname);
+    error_fatalsys("Unable to create %s",fname);
   }
   for(i=0;i<numusers;i++)fprintf(fp,"%s\n",list[i].userid);
   fclose(fp);
@@ -174,29 +180,30 @@ notifyothers()
   char fname[256];
   struct stat st;
   struct listitem key;
-  struct linestatus status;
+  channel_status_t status;
 
   strcpy(key.userid,thisuseracc.userid);
 
-  for(i=0;i<numchannels;i++){
-    if(getlinestatus(channels[i].ttyname,&status)){
+  for(i=0;i<chan_count;i++){
+    if(channel_getstatus(channels[i].ttyname,&status)){
       if(status.result==LSR_USER){
 	sprintf(fname,NOTIFYDIR"/%s",status.user);
 	if(stat(fname,&st))continue;
 
 	/* Check for Notify invisibility */
 
-	uinsys(status.user,0);
-	if(haskey(&thisuseracc,invkey)&&!haskey(&othruseracc,invkey))continue;
+	usr_insys(status.user,0);
+	if(key_owns(&thisuseracc,invkey)&&
+	   (!key_owns(&othruseracc,invkey)))continue;
 
 	/* Now load the other user's notify list and check it */
 
 	loadlist(status.user);
 	if(bsearch(&key,list,numusers,sizeof(struct listitem),listcmp)!=NULL){
-	  sprompt(outbuf,INJMSG,
-		  getpfix(SEXM,thisuseracc.sex==USX_MALE),
+	  sprompt(out_buffer,INJMSG,
+		  msg_getunit(SEXM,thisuseracc.sex==USX_MALE),
 		  thisuseracc.userid);
-	  injoth(&othruseronl,outbuf,0);
+	  usr_injoth(&othruseronl,out_buffer,0);
 	}
       }
     }
@@ -215,8 +222,8 @@ notifyme()
   online=alcmem(numusers*sizeof(int));
   bzero(online,numusers*sizeof(int));
   for(i=j=0;i<numusers;i++){
-    if(!uinsys(list[i].userid,1))continue;
-    if(haskey(&othruseracc,invkey)&&!haskey(&thisuseracc,invkey))continue;
+    if(!usr_insys(list[i].userid,1))continue;
+    if(key_owns(&othruseracc,invkey)&&!key_owns(&thisuseracc,invkey))continue;
     online[i]=1+(othruseracc.sex==USX_FEMALE);
     j++;
   }
@@ -226,30 +233,22 @@ notifyme()
     if(!online[i])continue;
     k++;
     if(k==1){
-      if(j==1)sprompt(outbuf,LOGIN1,getpfix(CONM,online[i]));
-      else sprompt(outbuf,LOGIN1,getpfix(CONP,online[i]));
+      if(j==1)sprompt(out_buffer,LOGIN1,msg_getunit(CONM,online[i]));
+      else sprompt(out_buffer,LOGIN1,msg_getunit(CONP,1));
     }
     if(k>1 && k<j){
       sprompt(tmp,LOGIN3);
-      strcat(outbuf,tmp);
+      strcat(out_buffer,tmp);
     } else if(k>1 && k==j){
       sprompt(tmp,LOGIN4);
-      strcat(outbuf,tmp);
+      strcat(out_buffer,tmp);
     }
-    sprompt(tmp,LOGIN2,getpfix(SEXM,online[i]),list[i].userid);
-    strcat(outbuf,tmp);
+    sprompt(tmp,LOGIN2,msg_getunit(SEXM,online[i]),list[i].userid);
+    strcat(out_buffer,tmp);
   }
   sprompt(tmp,LOGIN5);
-  strcat(outbuf,tmp);
-  print(outbuf);
-}
-
-
-void
-login()
-{
-  notifyothers();
-  notifyme();
+  strcat(out_buffer,tmp);
+  print(out_buffer);
 }
 
 
@@ -260,24 +259,24 @@ add()
   else if(numusers>numusr)prompt(ADDLM2,numusers,numusr);
   else {
     struct listitem key;
-    useracc acc;
+    useracc_t acc;
     for(;;){
-      if(!getuserid(key.userid,ADDASK,ADDERR,0,0,0))return;
+      if(!get_userid(key.userid,ADDASK,ADDERR,0,0,0))return;
       if(sameas(key.userid,thisuseracc.userid)){
 	prompt(ADDHUH);
-	endcnc();
+	cnc_end();
 	continue;
       }
       if(bsearch(&key,list,numusers,sizeof(struct listitem),listcmp)!=NULL){
 	prompt(ADDEXS,key.userid);
-	endcnc();
+	cnc_end();
 	continue;
       } else break;
     }
     strcpy(list[numusers].userid,key.userid);
     numusers++;
-    loaduseraccount(key.userid,&acc);
-    prompt(ADDOK,getpfix(SEXM,acc.sex==USX_MALE),acc.userid);
+    usr_loadaccount(key.userid,&acc);
+    prompt(ADDOK,msg_getunit(SEXM,acc.sex==USX_MALE),acc.userid);
     qsort(list,numusers,sizeof(struct listitem),listcmp);
   }
 }
@@ -294,10 +293,10 @@ delete()
   }
 
   for(;;){
-    if(!getuserid(key.userid,DELASK,DELERR,0,0,0))return;
+    if(!get_userid(key.userid,DELASK,DELERR,0,0,0))return;
     if((p=bsearch(&key,list,numusers,sizeof(struct listitem),listcmp))==NULL){
       prompt(DELERR,key.userid);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -329,9 +328,9 @@ void
 run()
 {
   int shownmenu=0;
-  char c;
+  char c=0;
 
-  if(!haskey(&thisuseracc,entrykey)){
+  if(!key_owns(&thisuseracc,entrykey)){
     prompt(NOENTRY);
     return;
   }
@@ -349,7 +348,7 @@ run()
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
       thisuseronl.input[0]=0;
     } else {
-      if(!nxtcmd){
+      if(!cnc_nxtcmd){
 	if(thisuseronl.flags&OLF_MMCONCAT){
 	  thisuseronl.flags&=~OLF_MMCONCAT;
 	  return;
@@ -357,13 +356,13 @@ run()
 	if(shownmenu==1){
 	  prompt(SHMENU);
 	} else shownmenu=1;
-	getinput(0);
-	bgncnc();
+	inp_get(0);
+	cnc_begin();
       }
     }
 
-    if((c=morcnc())!=0){
-      cncchr();
+    if((c=cnc_more())!=0){
+      cnc_chr();
       switch (c) {
       case 'H':
 	prompt(HELP,numusr);
@@ -386,12 +385,12 @@ run()
 	break;
       default:
 	prompt(ERRSEL,c);
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
-    if(lastresult==PAUSE_QUIT)resetvpos(0);
-    endcnc();
+    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
+    cnc_end();
   }
 }
 
@@ -400,18 +399,72 @@ void
 done()
 {
   if(own)savelist();
-  clsmsg(msg);
+  msg_close(msg);
 }
+
+
+int
+handler_run(int argc, char *argv[])
+{
+  atexit(done);
+  init();
+  run();
+  done();
+  return 0;
+}
+
+
+int handler_userdel(int argc, char **argv)
+{
+  char *victim=argv[2], fname[1024];
+
+  if(strcmp(argv[1],"--userdel")||argc!=3){
+    fprintf(stderr,"User deletion handler: syntax error\n");
+    return 1;
+  }
+
+  if(!usr_exists(victim)){
+    fprintf(stderr,"User deletion handler: user %s does not exist\n",victim);
+    return 1;
+  }
+
+  sprintf(fname,"%s/%s",NOTIFYDIR,victim);
+  unlink(fname);
+
+  return 0;
+}
+
+
+int
+handler_login(int argc, char **argv)
+{
+  init();
+  notifyothers();
+  notifyme();
+  done();
+  return 0;
+}
+
+
+mod_info_t mod_info_notify = {
+  "notify",
+  "User login notification",
+  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+  "Notifies users when their friends log in (or are already logged in).",
+  RCS_VER,
+  "1.0",
+  {95,handler_login},		/* Login handler */
+  {0,handler_run},		/* Interactive handler */
+  {0,NULL},			/* Install logout handler */
+  {0,NULL},			/* Hangup handler */
+  {0,NULL},			/* Cleanup handler */
+  {50,handler_userdel}		/* Delete user handler */
+};
 
 
 int
 main(int argc, char *argv[])
 {
-  setprogname("notify");
-  atexit(done);
-  init();
-  if(argc>1 && !strcmp(argv[1],"-login"))login();
-  else run();
-  done();
-  return 0;
+  mod_setinfo(&mod_info_notify);
+  return mod_main(argc,argv);
 }

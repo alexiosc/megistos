@@ -28,15 +28,16 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 14:54:58  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:31  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.6  1999/07/18 21:21:38  alexios
  * Just a slight addition (made "-" and "*" work same as "ALL"
  * in getclubname().
  *
  * Revision 0.5  1998/12/27 15:33:03  alexios
- * Added autoconf support. Added support for new getlinestatus().
+ * Added autoconf support. Added support for new channel_getstatus().
  *
  * Revision 0.4  1998/07/24 10:17:37  alexios
  * Migrated to bbslib 0.6.
@@ -57,6 +58,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -106,9 +108,9 @@ enterdefaultclub()
   if(clubhdr.credspermin==-1)thisuseronl.credspermin=defaultrate;
   else thisuseronl.credspermin=clubhdr.credspermin;
   
-  rmlock(inclublock);
+  lock_rm(inclublock);
   sprintf(inclublock,INCLUBLOCK,thisuseronl.channel,clubhdr.club);
-  placelock(inclublock,"reading");
+  lock_place(inclublock,"reading");
 
   setclub(clubhdr.club);
 }
@@ -123,9 +125,9 @@ enterclub(char *club)
   if(clubhdr.credspermin==-1)thisuseronl.credspermin=defaultrate;
   else thisuseronl.credspermin=clubhdr.credspermin;
   
-  rmlock(inclublock);
+  lock_rm(inclublock);
   sprintf(inclublock,INCLUBLOCK,thisuseronl.channel,clubhdr.club);
-  placelock(inclublock,"reading");
+  lock_place(inclublock,"reading");
 
   setclub(clubhdr.club);
 }
@@ -137,11 +139,11 @@ showbanner()
   char fname[256];
   struct stat st;
   
-  if(morcnc())return;
+  if(cnc_more())return;
   sprintf(fname,"%s/b%s",CLUBHDRDIR,clubhdr.club);
   if(stat(fname,&st))return;
   prompt(BANNERH);
-  printfile(fname);
+  out_printfile(fname);
   prompt(BANNERF);
 }
 
@@ -151,11 +153,11 @@ checkinclub(char *club)
 {
   int  i;
   char lock[256];
-  struct linestatus status;
+  channel_status_t status;
   struct stat st;
 
-  for(i=0;i<numchannels;i++){
-    if(getlinestatus(channels[i].ttyname,&status)){
+  for(i=0;i<chan_count;i++){
+    if(channel_getstatus(channels[i].ttyname,&status)){
       if(status.result==LSR_USER){
 	sprintf(lock,LOCKDIR"/"INCLUBLOCK,channels[i].ttyname,club);
 	if(!stat(lock,&st))return 0;
@@ -173,27 +175,27 @@ getclub(char *club, int pr, int err, int all)
   char c;
 
   for(;;){
-    lastresult=0;
-    if((c=morcnc())!=0){
-      if(sameas(nxtcmd,"X"))return 0;
-      if(sameas(nxtcmd,"?")){
+    fmt_lastresult=0;
+    if((c=cnc_more())!=0){
+      if(sameas(cnc_nxtcmd,"X"))return 0;
+      if(sameas(cnc_nxtcmd,"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
-      i=cncword();
+      i=cnc_word();
     } else {
       prompt(pr);
-      getinput(0);
-      bgncnc();
-      i=cncword();
+      inp_get(0);
+      cnc_begin();
+      i=cnc_word();
       if(!margc){
-	endcnc();
+	cnc_end();
 	continue;
-      } else if(isX(margv[0]))return 0;
+      } else if(inp_isX(margv[0]))return 0;
       if(sameas(margv[0],"?")){
 	listclubs();
-	endcnc();
+	cnc_end();
 	continue;
       }
     }
@@ -206,7 +208,7 @@ getclub(char *club, int pr, int err, int all)
     }
     if(!findclub(i)){
       prompt(err);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
     return 1;
@@ -225,13 +227,13 @@ thread(struct message *msg, char defopt)
 
  retry:
   for(;;){
-    setinputflags(INF_HELP);
-    i=getmenu(&opt,0,0,THRMNU,RCMNUR,"FBPR",RCMNUD,defopt);
-    setinputflags(INF_NORMAL);
+    inp_setflags(INF_HELP);
+    i=get_menu(&opt,0,0,THRMNU,RCMNUR,"FBPR",RCMNUD,defopt);
+    inp_clearflags(INF_HELP);
     if(!i)return 0;
     if(i==-1){
       prompt(THRMNUH);
-      endcnc();
+      cnc_end();
       continue;
     } else break;
   }
@@ -240,7 +242,7 @@ thread(struct message *msg, char defopt)
   case 'R':
     if(!threadmessage){
       prompt(THRNRET);
-      endcnc();
+      cnc_end();
       goto retry;
     }
     prompt(THRRET,threadclub,threadmessage); /* jump back to club */
@@ -251,7 +253,7 @@ thread(struct message *msg, char defopt)
   case 'F':
     j=findmsgsubj(&msgno,msg->subject,msg->msgno,BSD_GT);
     if(j!=BSE_FOUND){
-      fatal("Unable to find current message!");
+      error_fatal("Unable to find current message!");
     }
     msgno=-1;
     j=npmsgsubj(&msgno,msg->subject,msg->msgno+1,BSD_GT);
@@ -268,7 +270,7 @@ thread(struct message *msg, char defopt)
   case 'B':
     j=findmsgsubj(&msgno,msg->subject,msg->msgno,BSD_LT);
     if(j!=BSE_FOUND){
-      fatal("Unable to find current message!");
+      error_fatal("Unable to find current message!");
     }
     msgno=-1;
     j=npmsgsubj(&msgno,msg->subject,msg->msgno-1,BSD_LT);
@@ -314,7 +316,7 @@ thread(struct message *msg, char defopt)
 	sprintf(fname,"%s/%s/"MESSAGEFILE,
 		MSGSDIR,
 		msg->club[0]?msg->club:EMAILDIR EMAILDIRNAME,
-		(long)msgno);
+		msgno);
 	ok=(stat(fname,&st)==0);
       }
 

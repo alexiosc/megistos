@@ -29,8 +29,9 @@
  * $Id$
  *
  * $Log$
- * Revision 1.1  2001/04/16 15:00:42  alexios
- * Initial revision
+ * Revision 1.2  2001/04/16 21:56:33  alexios
+ * Completed 0.99.2 API, dragged all source code to that level (not as easy as
+ * it sounds).
  *
  * Revision 0.4  1998/12/27 16:28:24  alexios
  * Added autoconf support.
@@ -50,6 +51,7 @@
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
+const char *__RCS=RCS_VER;
 #endif
 
 
@@ -276,7 +278,7 @@ getnetmail()
     if(!(strcmp(dir->d_name,".")&&strcmp(dir->d_name,"..")))continue;
 
     strcpy(userid,dir->d_name);
-    if(!userexists(userid))continue;
+    if(!usr_exists(userid))continue;
 
     sprintf(fname,"%s/%s",NETMAILDIR,dir->d_name);
     if(stat(fname,&st))continue;
