@@ -1,3 +1,4 @@
 .deps
-Makefile.in
 Makefile
+Makefile.in
+mbk_telecon.h
