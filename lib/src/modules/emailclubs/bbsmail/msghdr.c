@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -74,12 +77,12 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
-#include <megistos/mbk_emailclubs.h>
+#include "bbsmail.h"
+#include <mbk/mbk_emailclubs.h>
 
 
 void
-readmsghdr (char *fname, struct message *msg)
+readmsghdr (char *fname, message_t *msg)
 {
 	FILE   *fp;
 
@@ -88,7 +91,7 @@ readmsghdr (char *fname, struct message *msg)
 				fname, errno);
 	}
 
-	if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+	if (fread (msg, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		error_fatalsys ("Unable to read mail header file %s", fname);
 		exit (1);
@@ -99,7 +102,7 @@ readmsghdr (char *fname, struct message *msg)
 
 
 void
-writemsghdr (char *fname, struct message *msg)
+writemsghdr (char *fname, message_t *msg)
 {
 	FILE   *fp;
 
@@ -121,7 +124,7 @@ writemsghdr (char *fname, struct message *msg)
 		fclose (fp);
 		exit (1);
 	}
-	if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+	if (fwrite (msg, sizeof (message_t), 1, fp) != 1) {
 		error_logsys ("Unable to write %s", fname);
 		exit (1);
 	}
@@ -131,7 +134,7 @@ writemsghdr (char *fname, struct message *msg)
 
 
 void
-preparemsghdr (struct message *msg, int email)
+preparemsghdr (message_t *msg, int email)
 {
 	/* Don't touch the date of network messages */
 
@@ -161,7 +164,7 @@ preparemsghdr (struct message *msg, int email)
 
 
 void
-writemessage (char *srcname, struct message *msg, int email)
+writemessage (char *srcname, message_t *msg, int email)
 {
 	char    msgname[256], lock[256], buff[8192];
 	FILE   *fp, *fp2;
@@ -207,7 +210,7 @@ writemessage (char *srcname, struct message *msg, int email)
 		exit (1);
 	}
 
-	if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+	if (fwrite (msg, sizeof (message_t), 1, fp) != 1) {
 		error_logsys ("Unable to write %s", msgname);
 		lock_rm (lock);
 		exit (1);

@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -80,10 +83,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
-#include <megistos/ihavedb.h>
-#include <megistos/typhoon.h>
-#include <megistos/mbk_emailclubs.h>
+#include "bbsmail.h"
+#include "../ihavedb.h"
+#include <libtyphoon/typhoon.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 void
@@ -103,7 +106,7 @@ bbsencrypt (char *buf, int size, int key)
 
 
 void
-addihave (struct message *msg)
+addihave (message_t *msg)
 {
 	struct ihaverec ihave;
 
@@ -148,7 +151,7 @@ addihave (struct message *msg)
 
 
 void
-copyatt (int copymode, struct message *msg, int email, char *attachment)
+copyatt (int copymode, message_t *msg, int email, char *attachment)
 {
 	if (copymode && msg->flags & MSF_FILEATT) {
 		char    attname[256];

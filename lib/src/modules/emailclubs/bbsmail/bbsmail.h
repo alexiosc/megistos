@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,11 +59,6 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-
 #define WANT_STDLIB_H 1
 #define WANT_STDIO_H 1
 #define WANT_CTYPE_H 1
@@ -68,58 +66,58 @@ static const char rcsinfo[] =
 #define WANT_UNISTD_H 1
 #define WANT_FCNTL_H 1
 #define WANT_SYS_STAT_H 1
-#include <bbsinclude.h>
-
+#include <megistos/bbsinclude.h>
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
+
+#include <mbk/mbk_emailclubs.h>
 
 
 /* netmail.c */
 
-void    handlenetmail (struct message *msg, char *srcname);
+void    handlenetmail (message_t *msg, char *srcname);
 
-void    checknetmail (struct message *msg, char *srcname);
+void    checknetmail (message_t *msg, char *srcname);
 
 
 /* resolve.c */
 
 void    resolverecipient (char *s, char *by);
 
-void    checkautofw (struct message *msg);
+void    checkautofw (message_t *msg);
 
 
 /* utils.c */
 
 void    bbsencrypt (char *buf, int size, int key);
 
-void    addihave (struct message *msg);
+void    addihave (message_t *msg);
 
-void    copyatt (int copymode, struct message *msg, int email,
+void    copyatt (int copymode, message_t *msg, int email,
 		 char *attachment);
 
 
 
 /* msghdr.c */
 
-void    readmsghdr (char *fname, struct message *msg);
+void    readmsghdr (char *fname, message_t *msg);
 
-void    writemsghdr (char *fname, struct message *msg);
+void    writemsghdr (char *fname, message_t *msg);
 
-void    preparemsghdr (struct message *msg, int email);
+void    preparemsghdr (message_t *msg, int email);
 
-void    writemessage (char *body, struct message *msg, int email);
+void    writemessage (char *body, message_t *msg, int email);
 
 
 /* msgnum.c */
 
-void    getemsgnum (struct message *msg);
+void    getemsgnum (message_t *msg);
 
-void    getcmsgnum (struct message *msg);
+void    getcmsgnum (message_t *msg);
 
 
 /* database.c */
 
-void    addtodb (struct message *msg, int email);
+void    addtodb (message_t *msg, int email);
 
 
 /* bbsmail.c */

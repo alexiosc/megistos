@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -69,12 +72,12 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
-#include <megistos/mbk_emailclubs.h>
+#include "bbsmail.h"
+#include <mbk/mbk_emailclubs.h>
 
 
 void
-getemsgnum (struct message *msg)
+getemsgnum (message_t *msg)
 {
 	char    chkname[256];
 	struct stat st;
@@ -129,7 +132,7 @@ getemsgnum (struct message *msg)
 
 
 void
-getcmsgnum (struct message *msg)
+getcmsgnum (message_t *msg)
 {
 	struct clubheader clubhdr;
 	FILE   *fp;

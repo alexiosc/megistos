@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,16 +69,16 @@ static const char rcsinfo[] =
 #define WANT_STRING_H 1
 #define WANT_UNISTD_H 1
 #define WANT_SYS_STAT_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
-#include <megistos/mbk_emailclubs.h>
+#include "bbsmail.h"
+#include <mbk/mbk_emailclubs.h>
 
 
 
 void
-handlenetmail (struct message *msg, char *srcname)
+handlenetmail (message_t *msg, char *srcname)
 {
 	char    command[256], buffer[8192];
 	FILE   *fp;
@@ -92,7 +95,9 @@ handlenetmail (struct message *msg, char *srcname)
 		strcpy (fatt, msg->fatt);
 
 	usr_loadaccount (msg->from, &uacc);
+#ifdef GREEK
 	latinize (uacc.username);
+#endif /* GREEK */
 
 	if ((msg->flags & MSF_FILEATT) == 0) {
 		sprintf (command, "cat - %s |%s %s",
@@ -123,7 +128,7 @@ handlenetmail (struct message *msg, char *srcname)
 
 
 void
-checknetmail (struct message *msg, char *srcname)
+checknetmail (message_t *msg, char *srcname)
 {
 
 #ifdef DEBUG

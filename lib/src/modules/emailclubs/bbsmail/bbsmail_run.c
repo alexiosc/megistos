@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:38  alexios
+ * Adjusted #includes; changed all instances of struct message to message_t.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,18 +59,18 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
+#include "bbsmail.h"
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
-#include <megistos/mbk_sysvar.h>
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_sysvar.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 void
 bbsmail_run (char *fname, char *srcname, int copymode, char *attachment)
 {
 	int     email = 1;
-	struct message msg, msg0;
+	message_t msg, msg0;
 
 
 #ifdef DEBUG
@@ -127,7 +130,7 @@ bbsmail_run (char *fname, char *srcname, int copymode, char *attachment)
 	/* Write the message header and body */
 
 	writemessage (srcname, &msg, email);
-	memcpy (&msg0, &msg, sizeof (struct message));
+	memcpy (&msg0, &msg, sizeof (message_t));
 
 
 	/* Add club messages to the IHAVE list */
