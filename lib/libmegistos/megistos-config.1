@@ -16,6 +16,10 @@
 .\" $Id$
 .\"
 .\" $Log$
+.\" Revision 1.2  2003/12/20 18:19:48  alexios
+.\" Updated the man page to reflect the status quo in the latest version
+.\" of megistos-config.
+.\"
 .\" Revision 1.1  2003/09/30 12:02:21  alexios
 .\" Initial revision.
 .\"
@@ -37,56 +41,102 @@
 megistos-config \- obtain information about the installed version of Megistos BBS.
 .SH SYNOPSIS
 .B megistos-config
-.RI [--prefix[=DIR]]
-.RI [--exec-prefix[=DIR]]
-.RI [--cflags]
-.RI [--ldflags]
-.RI [--data-dir]
-.RI [--lib-dir]
-.RI [--version]
+.RI [OPTIONS]
 .PP
 \fBmegistos-config\fP is a script that is used to obtain information about
 the Megistos BBS installation on this system. Its main use is in
 compiling and linking additional software for the BBS, mainly modules.
+.PP
+It can also be put to other uses, such as preparing GNU Automake
+makefiles for parts of the project, automatically beautifying source
+code, et cetera.
 .SH OPTIONS
 .l
-\fBmegistos-config\fP accepts the following options (most of which can be combined to produce more than one item of information on separate lines):
+If executed without any arguments, \fBmegistos-config\fP prints out
+help on its syntax, as well as the current build setup.
+.PP
+\fBmegistos-config\fP accepts the following options. Most of these
+options can be combined to produce more than one item of information
+on separate lines. However, the output order does not reflect the
+order in which arguments are encountered on the command line, so it is
+best not to issue multiple requests unless you are certain of the
+meaning of each output line.
 .TP
-.BR --prefix[=\fIDIR\fP]
-Issues the installation prefix of the system. If \fIDIR\fP is
-specified, the prefix (and exec-prefix) used to calculate other
-directories within \fBmegistos-config\fP is set accordingly. In this
-case, this option must appear before others on the command line.
+.BR --build-dir
+Issues the directory in which the system was built (the absolute, top
+build directory).
 .TP
-.BR --exec-prefix[=\fIDIR\fP]
-Issues the exec-prefix of the system. If \fIDIR\fP is specified, the
-exec-prefix used to calculate other directories within
-\fBmegistos-config\fP is set accordingly. In this case, this option must
-appear before others on the commandline (but after
-\fB--prefix=\fP\fIDIR\fP, if that is present too).
-.TP
-.B --cflags
+.BR --cflags
 Issues command-line arguments that need to be passed to the compiler to
 produce Megistos object code.
 .TP
-.B --ldflags
+.BR --data-dir
+Issues the data directory. This is where shared, system-wide,
+(possibly) network-accessible, architecture-independent data are stored.
+.TP
+.BR --exec-prefix
+Issues the exec-prefix of the system.
+.TP
+.BR --include-dir
+Issues the Megistos include directory where the library headers can be
+found.
+.TP
+.BR --instance-dir
+Issues the directory where Megistos BBS instances (individual bulletin
+boards) may be found. Each BBS gets its own subdirectory under this
+directory, named after the `BBS code' of the system.
+.TP
+.BR --ldflags
 Issues command-line arguments that need to be passed to the linker to
 link executable Megistos software.
 .TP
-.B --data-dir-dir
-Issues the Megistos data directory.
-.TP
-.B --lib-dir
+.BR --lib-dir
 Issues the global Megistos library directory.
+.TP
+.BR --prefix
+Issues the installation prefix of the system.
+.TP
+.BR --source-dir
+Issues the absolute root directory where the source distribution is
+installed. If you have a binary-only installation, this points to the
+location the source was built on the develoer's machine and is thus
+not very useful.
 .TP
 .BR --version
 Issues the currently installed version of Megistos BBS.
+.TP
+.BR --virgin-dir
+Issues the directory where the `virgin' (skeleton) BBS instance
+exists. This is outside the instance directory and is used to create
+new BBS instances. It may be read-only.
+.TP
+.BR --virgin-src
+Issues the subdirectory of the build or source directory where the
+source of the `virgin' (skeleton) BBS instance can be found.
+.SH COMMANDS
+.l
+These commands perform actions or print out more advanced
+information.
+.TP
+.BR --am=\fITEMPLATE\fP
+Prints to standard output a \fIMakefile.am\fP for this directory using
+the directory name as the program name and all sources found. Uses the
+template specified (as found in directory \fItemplates\fP under the
+root directory of the source tree). If \fB--am\fP or an unacceptable
+template name is specified, the acceptable template names are printed
+out.
+.TP
+.BR --oh
+Overhauls the source code in this directory by running \fIindent(1)\fP
+(if available) and fixing various small coding issues. Backups of the
+files are made before modifying them (\fI*-oh\fP).
+.PP
 .SH AUTHOR
 Written by Alexios Chouchoulas.
 .SH "REPORTING BUGS"
-Report bugs to Alexios Chouchoulas <alexios@dai.ed.ac.uk>.
+Report bugs to Alexios Chouchoulas <alexios@vennea.demon.co.uk>.
 .SH COPYRIGHT
-Copyright \(co 1999-2002 Alexios Chouchoulas <alexios@dai.ed.ac.uk>.
+Copyright \(co 1999-2004 Alexios Chouchoulas <alexios@vennea.demon.co.uk>.
 .br
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
