@@ -32,6 +32,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 08:59:40  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,8 +71,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 
 
 #define mkcachename(s,l,u,f) \

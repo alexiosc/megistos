@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 08:59:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -60,8 +63,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 
 
 #define DELTA 10

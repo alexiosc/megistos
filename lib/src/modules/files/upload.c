@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 08:59:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -71,10 +74,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 #define __ARCHIVERS_UNAMBIGUOUS__
-#include <megistos/mbk_archivers.h>
+#include <mbk/mbk_archivers.h>
 
 
 #define LIM_CANCEL_ALL     -1

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 08:59:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:12  alexios
  * Ran through megistos-config --oh.
  *
@@ -58,13 +61,9 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-#include <megistos/dblib.h>
-#include <megistos/dbfile.h>
-#include <megistos/dbkey.h>
+#include "dblib.h"
+#include "dbfile.h"
+#include "dbkey.h"
 
 
 #define libop (key_owns(&thisuseracc,libopkey)||islibop(&library))

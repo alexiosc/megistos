@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 08:59:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,9 +69,9 @@ static const char rcsinfo[] =
 #define WANT_STRING_H 1
 #include <bbsinclude.h>
 
-#include <megistos/typhoon.h>
+#include <libtyphoon/typhoon.h>
 #include <megistos/bbs.h>
-#include <megistos/files.h>
+#include "files.h"
 
 
 static int id_dbfile;
