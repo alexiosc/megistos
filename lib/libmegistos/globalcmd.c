@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/19 13:24:30  alexios
+ * Updated include directives.
+ *
  * Revision 1.6  2003/09/30 15:10:18  alexios
  * Changed Dynamic Library hadnling to use libtool's libltdl abstraction
  * layer. This remains untested to date.
@@ -114,10 +117,11 @@ static const char rcsinfo[] =
 #define WANT_SYS_STAT_H 1
 #define WANT_SYS_SHM_H 1
 #define WANT_TIME_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "config.h"
-#include "bbs.h"
+#include <megistos/config.h>
+#include <megistos/bbs.h>
+
 #include "mbk_sysvar.h"
 
 static gcs_t *gcservers = NULL;

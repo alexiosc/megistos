@@ -44,6 +44,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.4  2003/09/27 20:31:57  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -101,7 +104,7 @@
 #define _VARCHAR      0x7f
 
 
-#include "useracc.h"
+#include <megistos/useracc.h>
 
 
 extern char   out_buffer[8192];	/** Temporary output buffer */

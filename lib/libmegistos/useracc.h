@@ -42,6 +42,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.4  2003/09/27 20:32:38  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -119,7 +122,7 @@
 #define CHAR unsigned char
 #endif
 
-#include "config.h"
+#include <megistos/config.h>
 
 
 /** @defgroup useracc User Account Handling

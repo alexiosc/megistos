@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -72,15 +75,15 @@ static const char rcsinfo[] =
 #define WANT_STRINGS_H 1
 #define WANT_CTYPE_H 1
 #define WANT_UNISTD_H 1
-#include <bbsinclude.h>
-#include "config.h"
-#include "errors.h"
-#include "useracc.h"
-#include "miscfx.h"
-#include "prompts.h"
-#include "bbsmod.h"
-#include "output.h"
-#include "bots.h"
+#include <megistos/bbsinclude.h>
+#include <megistos/config.h>
+#include <megistos/errors.h>
+#include <megistos/useracc.h>
+#include <megistos/miscfx.h>
+#include <megistos/prompts.h>
+#include <megistos/bbsmod.h>
+#include <megistos/output.h>
+#include <megistos/bots.h>
 
 
 #define msg_get_nobot(num) msg_getl_bot((num),(msg_cur->language),0)

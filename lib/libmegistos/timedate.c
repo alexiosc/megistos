@@ -39,6 +39,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -77,8 +80,8 @@ static const char rcsinfo[] =
 #define WANT_CTYPE_H 1
 #define WANT_STRING_H 1
 #define WANT_TIME_H 1
-#include <bbsinclude.h>
-#include "timedate.h"
+#include <megistos/bbsinclude.h>
+#include <megistos/timedate.h>
 
 
 static int daymon[] =

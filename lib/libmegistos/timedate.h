@@ -60,6 +60,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.4  2003/09/27 20:32:21  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -117,7 +120,7 @@
    time.h (or whatever WANT_TIME_H includes). */
 
 #define WANT_TIME_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 
 /* Y2K compliant isleap(). Forced redefinition in case this system

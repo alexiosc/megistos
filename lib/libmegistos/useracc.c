@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -71,9 +74,10 @@ static const char rcsinfo[] =
 #define WANT_SYS_IPC_H 1
 #define WANT_SYS_SHM_H 1
 #define WANT_SYS_MSG_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
+
 #include "mbk_sysvar.h"
 
 

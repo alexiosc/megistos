@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/19 13:24:01  alexios
+ * Updated include directives.
+ *
  * Revision 1.6  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -83,12 +86,12 @@ static const char rcsinfo[] =
 #define WANT_CTYPE_H 1
 #define WANT_TIME_H 1
 #define WANT_VARARGS_H 1
-#include <bbsinclude.h>
-#include "config.h"
-#include "output.h"
-#include "audit.h"
-#include "bbsmod.h"
-#include "errorprompts.h"
+#include <megistos/bbsinclude.h>
+#include <megistos/config.h>
+#include <megistos/output.h>
+#include <megistos/audit.h>
+#include <megistos/bbsmod.h>
+#include <megistos/errorprompts.h>
 
 #define FATAL 1
 

@@ -36,6 +36,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/19 13:25:19  alexios
+ * Updated include directives.
+ *
  * Revision 1.4  2003/09/27 20:31:46  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -118,7 +121,7 @@
 @{*/
 
 
-#include "config.h"
+#include <megistos/config.h>
 
 #define PAGENAMELEN   16
 #define PAGEDESCRLEN  44

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -104,23 +107,23 @@ static const char rcsinfo[] =
 #define WANT_ERRNO_H 1
 #define WANT_VARARGS_H 1
 #define WANT_SYS_SHM_H 1
-#include <bbsinclude.h>
-#include "config.h"
-#include "prompts.h"
-#include "sysstruct.h"
-#include "bbsmod.h"
-#include "useracc.h"
-#include "miscfx.h"
-#include "timedate.h"
-#include "format.h"
-#include "input.h"
-#include "errors.h"
-#include "ttynum.h"
-#include "output.h"
-#include "channels.h"
-#include "systemversion.h"
-#include "bots.h"
-#include "useracc.h"
+#include <megistos/bbsinclude.h>
+#include <megistos/config.h>
+#include <megistos/prompts.h>
+#include <megistos/sysstruct.h>
+#include <megistos/bbsmod.h>
+#include <megistos/useracc.h>
+#include <megistos/miscfx.h>
+#include <megistos/timedate.h>
+#include <megistos/format.h>
+#include <megistos/input.h>
+#include <megistos/errors.h>
+#include <megistos/ttynum.h>
+#include <megistos/output.h>
+#include <megistos/channels.h>
+#include <megistos/systemversion.h>
+#include <megistos/bots.h>
+#include <megistos/useracc.h>
 
 #include "mbk_sysvar.h"
 

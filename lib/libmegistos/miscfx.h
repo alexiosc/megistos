@@ -41,6 +41,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/19 13:25:19  alexios
+ * Updated include directives.
+ *
  * Revision 1.4  2003/09/27 20:31:51  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -94,7 +97,7 @@
 
 #define WANT_TIME_H 1
 #define WANT_UNISTD_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 
 

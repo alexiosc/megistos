@@ -1,6 +1,6 @@
 #define I_AM_VERSION_C
-#include "version.h"
-#include "systemversion.h"
+#include <megistos/version.h>
+#include <megistos/systemversion.h>
 
 char    bbs_shortversion[] = SHORTVERSION;
 char    bbs_systemversion[] = SYSTEMVERSION;

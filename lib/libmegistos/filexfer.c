@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:24:05  alexios
+ * Updated include directives.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -76,14 +79,14 @@ static const char rcsinfo[] =
 #define WANT_UNISTD_H 1
 #define WANT_STRING_H 1
 #define WANT_STAT_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "config.h"
-#include "useracc.h"
-#include "filexfer.h"
-#include "input.h"
-#include "miscfx.h"
-#include "audit.h"
+#include <megistos/config.h>
+#include <megistos/useracc.h>
+#include <megistos/filexfer.h>
+#include <megistos/input.h>
+#include <megistos/miscfx.h>
+#include <megistos/audit.h>
 
 
 static int fok = (AUF_TRANSFER | AUF_INFO);
