@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.11  2003/12/27 12:44:03  alexios
+# Moved the shared object versioning info to configure.in, using the
+# SOVERSION Autoconf variable instead.
+#
 # Revision 1.10  2003/12/20 18:20:22  alexios
 # Added the mbk_*h files to the cleaned file list. Minor dependency fixes.
 #
@@ -91,7 +95,7 @@ pkginclude_HEADERS = $(HDR)
 noinst_HEADERS = mbk_sysvar.h mbk_metabbs.h mbk_signup.h
 CLEANFILES     = mbk_sysvar.h mbk_metabbs.h mbk_signup.h
 
-libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info 3:5:1
+libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info @SOVERSION@
 libmegistos_la_CFLAGS = @CFLAGS@ -Wall
 
 
