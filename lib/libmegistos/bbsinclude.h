@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/09/28 22:27:16  alexios
+ * Added NLS stuff.
+ *
  * Revision 1.6  2003/08/15 18:40:22  alexios
  * Reinstated a minor fix that got overwitten by CVS, and fixed another
  * stupid mistake.
@@ -535,3 +538,12 @@
 #    endif
 #  endif
 #endif
+
+#if ENABLE_NLS
+#  include <gettext.h>
+#  define _(Text) gettext (Text)
+#else
+#  define textdomain(Domain)
+#  define _(Text) Text
+#endif
+#define N_(Text) Text
