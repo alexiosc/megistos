@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/27 20:33:53  alexios
+ * One minor fix in the declaration of mod_done().
+ *
  * Revision 1.4  2003/08/15 18:08:45  alexios
  * Rationalised RCS/CVS ident(1) strings.
  *
@@ -497,7 +500,7 @@ mod_init(uint32 f)
 
 
 void
-mod_done(long services)
+mod_done(uint32 services)
 {
   long i=initialised&services;
   if(i&INI_INPUT)inp_done();
