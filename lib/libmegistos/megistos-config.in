@@ -26,6 +26,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  2003/12/27 12:48:48  alexios
+# Fixed bug where program names with non-identifier characters retained
+# those characters in the Makefile (e.g. offline.mail generated
+# offline.mail_SOURCES, not offline_mail_SOURCES).
+#
 # Revision 1.5  2003/12/22 16:24:03  alexios
 # Fixed broken templatedir variable; added sed script to update #include
 # directives.
@@ -283,7 +288,7 @@ fi
 
 if test "$echo_makefile" = "yes"; then
 
-    progname=`basename $PWD`
+    progname=`basename $PWD | sed 's/[^A-Za-z0-9]/_/g'`
 
     cat <<EOF
 # -*- Makefile -*-
