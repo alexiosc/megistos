@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:38:06  alexios
+ * Adjusted #includes. Switched to using struct msgbuf for IPC.
+ *
  * Revision 1.4  2003/12/24 20:12:08  alexios
  * Ran through megistos-config --oh.
  *
@@ -88,8 +91,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/plugins.h>
+#include <telecon.h>
+#include <teleconplugins.h>
 
 
 /*
@@ -323,7 +326,8 @@ plugin (struct plugin *p, char *command)
 
 	if (command != NULL && strlen (command)) {
 		debug ("sending %d bytes.\n", SIZE (command));
-		msgsnd (thisuseraux.pluginq, (struct msg_buffer *) &msg,
+		msgsnd (thisuseraux.pluginq,
+			(struct msgbuf *) &msg,
 			SIZE (command), 0);
 	}
 
