@@ -15,8 +15,11 @@ src/system/bbsgetty: DERIVED from the Linux version of getty that came
 with Slackware Linux in 1994; has since been rewritten almost from
 scratch.
 
-src/system/protocols/lrzsz: REPACKAGED from the Slackware lrzsz
-distribution. This is GPLed software.
+src/system/protocols/rzsz: originally a REPACKAGED lrzsz distribution,
+dropped because of licensing restrictions and replaced by the lrzsz
+distribution, which is GPLed software. Since Megistos 1.0.2, lrzsz is
+no longer included in Megistos. A 'Recommends' dependency on the
+package is declared instead.
 
 
 
@@ -27,6 +30,9 @@ CVS information and emacs stuff follows
 $Id$
 
 $Log$
+Revision 1.2  2003/12/24 18:35:22  alexios
+Updated rzsz discussion.
+
 Revision 1.1  2003/12/22 17:18:11  alexios
 Initial revision.
 
