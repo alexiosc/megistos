@@ -123,3 +123,83 @@ RUSXITL {[0;5;1m
 [0;1;31m
 ([[33mY[31m~]es=¤˜å / [[33mN[31m~]o=æ® )[1;37m: } T Main menu exit:  confirm logoff
 
+
+LANG {}
+
+DEFDESCR {Main menu} S 40 Default menuman description
+
+
+XITDESCR {Logging out} S 40 Logout menuman description
+
+
+MENPRO {} T Menu prologue
+
+MENEPI {[0;1;32m
+Page: [37m@PAGE@[0;1m} T Menu epilogue
+
+SHMBEG {[0;1;32m
+Page: [37m@PAGE@
+!WPlease enter your choice (} T Short menu starting prompt
+
+SHMOPT {[33m%c[37m,} T Short menu option 
+
+SHMLOP {[33m%c[37m,} T Short menu last option 
+
+SHMEND { or [33m?[37m for the menu): [0m!)} T Short menu ending prompt
+
+
+SHMPRM {
+!W[0;1mPlease enter your choice ([33m?[37m for the menu): [0m!)} T Short menu prompt
+
+
+ERRSEL {
+[0;31;1mSorry, "%c" isn't a valid choice here.
+[0;1m} T Incorrect selection
+
+
+NOAXES1 {
+[0;31;1mSorry, page "%s" doesn't exist.
+[0;1m} T You don't have access to that page
+
+
+NOAXES2 {
+[0;31;1mSorry, you don't have access to option "%c".
+[0;1m} T You don't have access to that menu option
+
+
+CANTXEC {
+!J[0;31;1mSorry, page @PAGE@ could not be loaded.
+Please notify the System Operator of the circumstances
+leading up to this.!)
+[0;1m} T Unable to spawn module/program
+
+
+ When a user makes the "exit" selection from the Main Menu
+ (option XITSEL), we confirm his request with this message.
+ If he types 'Y' in response to THIS message, he is logged
+ off.  If he types anything else, he is returned to the
+ short main menu (letters only).
+
+ This text applies to non-live users, who are not offered
+ the option of R for "re-logon".
+
+RUSXITN {[0;1m
+!WDo you really want to disconnect? ([[33mY[31m~]es / [[33mN[31m~]o):!)[0m } T Main menu exit:  confirm logoff
+
+ When a user makes the "exit" selection from the Main Menu
+ (option XITSEL), we confirm his request with this message.
+ If he types 'Y' in response to THIS message, he is logged
+ off.  If he types anything else, he is returned to the
+ short main menu (letters only).
+
+ This text applies to live users, who are offered the
+ option to "re-logon" by entering an 'R' at this prompt.
+
+RUSXITL {[0;1m
+!WDo you really want to disconnect? ([[33mY[31m~]es / [[33mN[31m~]o /
+[[33mR[31m~]elogon as another user):!)[0m } T Main menu exit: confirm logoff (with relogon)
+
+
+
+
+LANGEND {}

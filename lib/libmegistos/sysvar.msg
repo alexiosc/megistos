@@ -831,7 +831,10 @@ AUDITI {[0;1m
 
 LANG {}
 
+
 W2CLR {Press any key to continue.} T Press any key to clear screen
+
+PAUSE {(N)onstop, (Q)uit, (C)ontinue, (S)tep? } T Nonstop, Quit, Continue, or Step?
 
 NOCREDS {[0;35;1m***
 
@@ -956,6 +959,36 @@ Please finish up and exit the system.!)
 [0;1m} T BBS Shutdown, warning type 3
 
 
+LNCHGW1 {[0;1;36m[K***
+
+!JSorry for the interruption. At [37m%02d:%02d[36m, @BBS@ will need
+the line you're currently using. The line will be disconnected at that time.
+Feel free to use another line. We apologise for the inconvenience.!)
+
+[0;1m} T BBS Line change, warning type 1
+
+
+LNCHGW2 {[0;1;36m[K***
+
+!JIn [37m%d[36m minute%s, @BBS@ will need to use the line you're on.
+Please try to have finished by that time. Feel free to connect to
+another line. We apologise for the inconvenience.!)
+
+[0;1m} T BBS Line change, warning type 2
+
+
+LNCHGW3 {[0;1;31m[K***
+
+[5mÛÛ[0;1;31m  ATTENTION: !J!13i@BBS@ needs your line
+and will terminate your connection in [37m%d[31m minute%s.
+Please wrap up and disconnect, or connect to another line. We apologise for
+the inconvenience.!)
+!0l
+[0;1m} T BBS Line change, warning type 3
+
+
+
+
 DTCJAN {January} S 20 Month names: January
 DTCFEB {February} S 20 Month names: February
 DTCMAR {March} S 20 Month names: March
@@ -989,10 +1022,10 @@ WHOLINE2 { %02x       %-10s      %6s  %c%c  %s
 } T Global 'who' user line
 
 
-WHOLON {(‘ç¤›œ©ž)} T Global 'who' logon
+WHOLON {(Logging in)} T Global 'who' logon
 
 
-WHOSUP {(„šš¨˜­ã)} T Global 'who' signup
+WHOSUP {(Signing up)} T Global 'who' signup
 
 
 WHONIX {(Unix)} T Global 'who' unix connection
@@ -1110,6 +1143,12 @@ PAGL2M {
 } T Page: rebuffing a page of someone too often
 
 
+URINVS {
+[0;1;31m!JYou're invisible! You can't talk to mere mortals,
+you'll scare them off!!)[0;1m
+} T Page: can't page a user when invisible
+
+
 PAGMSG1 {[0;1;32m***
 %s%s paged you from %s, while you were busy.[0;1m
 } T Page: you have been paged, no message
@@ -1154,6 +1193,10 @@ message has been stored and will be transmitted as soon as possible.[0;1m!)
 } T Page: "pagee" can't be paged right now, page stored
 
 
+NOMM {} T Masculine definite article for PAGNPST
+NOMF {} T Feminine definite article for PAGNPST
+
+
 PALLNC {
 [0;1;31mYou are alone in the system![0;1m
 } T Page: page all rebuff, didn't page any users
@@ -1172,28 +1215,10 @@ CHATEND {
 
 
 
-REGHELP {[0;1;32m
-!JEnter [33m/r User_ID[32m to see a user's registry.
-For example, the command [33m/r sysop[32m displays Sysop's registry.!)
-[0;1m} T Registry help
-
-
-REGERR {[0;1;31m
-There is no record of that user.
-[0;1m} T Registry error, unknown user
-
-
-  €¬«æ œå¤˜  «¦ £ã¤¬£˜ §¦¬ Ÿ˜ §˜å¨¤œ  ¦ ®¨ã©«žª §¨ ¤
-  ˜§æ ¡áŸœ global cookie.
-                                        (€¢â¥žª)
-
 GCOOKIE {
 [33;1mÄÄ[37m  Have a cookie![33m  !FÄ
 [0m} T Cookie header text
 
-
-  €¬«æ œå¤˜  «¦ £ã¤¬£˜ §¦¬ Ÿ˜ §˜å¨¤œ  ¦ ®¨ã©«žª £œ«á
-  ˜§æ «¦ global cookie.                    (€¢â¥žª)
 
 GCKIEEND {!L!1r[1;33m!FÄ[0m
 } T Cookie footer text
@@ -1246,6 +1271,81 @@ Unable to find this user-ID. Please type in at least three letters.
 [0;1m} T User cross-reference, user ID does not exist
 
 
+
+
+GDETUR {[0;1;31m
+Ahem... There's no such user as "%s".
+[0;1m} T /L: user not found
+
+
+GDETNAX {<Suppressed>} T /L: field contents withheld
+
+GDETSUSP {[31mþSUSPENDEDþ} T /L: 'suspended' string
+
+GDETXMPT {[32mþEXEMPTþ} T /L: 'exempt' string
+
+GDETDEL {[31mþDELETEDþ} T /L: 'deleted' string
+
+GDETOP {[32mþOPERATORþ} T /L: 'operator' string
+
+GDETM {Male} T /L: 'male' string
+GDETF {Female} T /L: 'female' string
+
+GDETS1 {IBM PC compatible} T /L: system #1
+GDETS2 {Apple Macintosh} T /L: system #2
+GDETS3 {Apple II/II+/IIe, ¡¢§} T /L: system #3
+GDETS4 {Amiga} T /L: system #4
+GDETS5 {Atari} T /L: system #5
+GDETS6 {Archimedes} T /L: system #6
+GDETS7 {Amstrad CPC 464/664/6128} T /L: system #7
+GDETS8 {Unknown} T /L: system #8
+GDETS9 {} T /L: system #9
+
+GDETNST {(non-stop)} T /L: 'non-stop' string
+
+GDETL1 {Ellhnika} T /L: language #1
+GDETL2 {English} T /L: language #2
+GDETL3 {} T /L: language #3
+GDETL4 {} T /L: language #4
+GDETL5 {} T /L: language #5
+GDETL6 {} T /L: language #6
+GDETL7 {} T /L: language #7
+GDETL8 {} T /L: language #8
+GDETL9 {} T /L: language #9
+GDETL0 {} T /L: language #10
+
+
+GDET {[0;1m
+[0;36mÛÛ  [1mAccount details for %s  [46m[K[0;1m
+
+[32mCreation date . . . .  [37m%-9s  %s %s
+[32mLast connection  . . . [37m%-9s  %s %s
+
+[32mName  . . . . . . . .  [37m%s
+[32mCompany  . . . . . . . [37m%s
+[32mAddress (1/2) . . . .  [37m%s
+[32mAddress (2/2)  . . . . [37m%s
+[32mTelephone . . . . . .  [37m%s
+[32mAge  . . . . . . . . . [37m%s
+[32mSex . . . . . . . . .  [37m%s
+[32mComputer type  . . . . [37m%s
+[32mScreen size . . . . .  [37m%d x %d %s
+[32mLanguage . . . . . . . [37m%s
+[32mClass . . . . . . . .  [37m%s
+[32mPassword . . . . . . . [37m%s
+[32mCredits . . . . . . .  [37m%d (%d PAID)
+
+[46m[K[0;1m
+} T /L: template
+
+
+
+
+
+
+REMSERR {[0;1;31m
+!JYou're *ALREADY* in the Sysop menu!!)
+[0;1m} T Global Remote Sysop menu: you're already there
 
 
 CANTGO {[0;31;1m
@@ -1327,7 +1427,7 @@ as follows:!)
 [33m/audit c  . . . . .  [33mCautionary[37m and [31mEMERGENCY[37m.
 [33m/audit caution . . . [37mThe same.
 [33m/audit i  . . . . .  [37mAll entries ([32mInformational[37m, 
-[33m/audit info  . . . . [37m  [33mCautionary[37m ¡˜  [31mEMERGENCY[37m.
+[33m/audit info  . . . . [37m  [33mCautionary[37m and [31mEMERGENCY[37m.
 
 !JFor more features, please give the AUDITPAGE command from the Remote
 Operator menu.!).
@@ -1335,26 +1435,25 @@ Operator menu.!).
 
 
 AUDITOFF {[0;1m
-!J‚ ˜ «¦ ¬§æ¢¦ §¦ ˜¬«ãª «žª ©ç¤›œ©žª ƒ„Œ Ÿ˜ ¢˜£™á¤œ«œ
-« ª ¡˜«˜®à¨ã©œ ª «¦¬ audit trail.!)
+!JAudit trail entries will NOT be sent to you for the rest of this session.!)
 [0;1m} T /AUDIT is off
 
 
 AUDITE {[0;1m
-!J‚ ˜ «¦ ¬§æ¢¦ §¦ ˜¬«ãª «žª ©ç¤›œ©žª Ÿ˜ ¢˜£™á¤œ«œ £æ¤¦ « ª œ§œåš¦¬©œª
-¡˜«˜®à¨ã©œ ª «¦¬ audit trail.!)
+!JOnly emergency audit trail entries will be sent to you for the rest of
+this session.!)
 [0;1m} T /AUDIT is set to emergencies only
 
 
 AUDITC {[0;1m
-!J‚ ˜ «¦ ¬§æ¢¦ §¦ ˜¬«ãª «žª ©ç¤›œ©žª Ÿ˜ ¢˜£™á¤œ«œ « ª ©ž£˜¤« ¡âª ¡˜ 
-œ§œåš¦¬©œª ¡˜«˜®à¨ã©œ ª «¦¬ ¡˜«˜®à¨ã©œ ª «¦¬ audit trail.!)
+!JOnly emergency and cautionary audit trail entries will be sent to you for
+the rest of this session.!)
 [0;1m} T /AUDIT is set to emergencies only
 
 
 AUDITI {[0;1m
-!J‚ ˜ «¦ ¬§æ¢¦ §¦ ˜¬«ãª «žª ©ç¤›œ©žª Ÿ˜ ¢˜£™á¤œ«œ æ¢œª « ª ¡˜«˜®à¨ã©œ ª
-«¦¬ audit trail.!)
+!JAll audit trail entries will be sent to you for the remainder of this
+session.!)
 [0;1m} T /AUDIT is set to all entries
 
 
