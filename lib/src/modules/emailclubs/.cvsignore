@@ -5,3 +5,7 @@ Makefile.in
 clubs
 email
 mbk_emailclubs.h
+ecdb.h
+ihavedb.h
+.ddl
+.dbd
