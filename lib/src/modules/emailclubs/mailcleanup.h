@@ -33,6 +33,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -50,11 +54,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
 
 
 #define DAYSSINCEFILE "..LAST.CLEANUP"

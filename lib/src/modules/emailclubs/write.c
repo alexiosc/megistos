@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:27  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -89,8 +93,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 
 
 char    clubdir[256];
@@ -99,7 +103,7 @@ char    clubdir[256];
 void
 emailwrite ()
 {
-	struct message msg, checkmsg;
+	message_t msg, checkmsg;
 	struct stat st;
 	char    body[256], header[256], command[1024];
 	FILE   *fp;

@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -72,8 +76,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
@@ -83,10 +87,10 @@ static const char rcsinfo[] =
 
 
 int
-quotemessage (struct message *msg, char *quotefn)
+quotemessage (message_t *msg, char *quotefn)
 {
 	struct emailuser ecuser;
-	struct message dummy;
+	message_t dummy;
 	int     yes, col1 = 1;
 	FILE   *quote;
 	gzFile *zfp;
@@ -114,7 +118,7 @@ quotemessage (struct message *msg, char *quotefn)
 		return 1;
 	}
 
-	if (gzread (zfp, &dummy, sizeof (struct message)) <= 0) {
+	if (gzread (zfp, &dummy, sizeof (message_t)) <= 0) {
 		gzclose (zfp);
 		fclose (quote);
 		return 1;
@@ -164,10 +168,10 @@ quotemessage (struct message *msg, char *quotefn)
 
 
 int
-quotemessage (struct message *msg, char *quotefn)
+quotemessage (message_t *msg, char *quotefn)
 {
 	struct emailuser ecuser;
-	struct message dummy;
+	message_t dummy;
 	int     yes, col1 = 1;
 	FILE   *fp, *quote;
 	char    fname[256];
@@ -194,7 +198,7 @@ quotemessage (struct message *msg, char *quotefn)
 		return 1;
 	}
 
-	if (fread (&dummy, sizeof (struct message), 1, fp) != 1) {
+	if (fread (&dummy, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		fclose (quote);
 		return 1;
@@ -244,9 +248,9 @@ quotemessage (struct message *msg, char *quotefn)
 
 
 void
-reply (struct message *org, int forceemail)
+reply (message_t *org, int forceemail)
 {
-	struct message msg, checkmsg;
+	message_t msg, checkmsg;
 	struct stat st;
 	char    body[256], header[256], command[1024];
 	FILE   *fp;

@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.5  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,10 +70,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/typhoon.h>
-#include <megistos/email.h>
-#include <megistos/ecdbase.h>
+#include "mbk_emailclubs.h"
+#include <libtyphoon/typhoon.h>
+#include "email.h"
+#include "ecdbase.h"
 
 
 static char dbclubname[256] = EMAILCLUBNAME;
@@ -80,7 +84,7 @@ static int clubdbid = -1;
 
 
 int
-getmsgheader (int msgno, struct message *msg)
+getmsgheader (int msgno, message_t *msg)
 {
 	char    lock[256], fname[256], tmp[256];
 	FILE   *fp;
@@ -95,7 +99,7 @@ getmsgheader (int msgno, struct message *msg)
 	if ((fp = fopen (fname, "r")) == NULL) {
 		lock_rm (lock);
 		return BSE_OPEN;
-	} else if (fread (msg, sizeof (struct message), 1, fp) != 1) {
+	} else if (fread (msg, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		lock_rm (lock);
 		return BSE_READ;
@@ -107,7 +111,7 @@ getmsgheader (int msgno, struct message *msg)
 
 
 int
-writemsgheader (struct message *msg)
+writemsgheader (message_t *msg)
 {
 	char    lock[256], fname[256], tmp[256];
 	FILE   *fp;
@@ -122,7 +126,7 @@ writemsgheader (struct message *msg)
 	if ((fp = fopen (fname, "r+")) == NULL) {
 		lock_rm (lock);
 		return BSE_OPEN;
-	} else if (fwrite (msg, sizeof (struct message), 1, fp) != 1) {
+	} else if (fwrite (msg, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		lock_rm (lock);
 		return BSE_WRITE;
@@ -134,7 +138,7 @@ writemsgheader (struct message *msg)
 
 
 void
-dbrm (struct message *msg)
+dbrm (message_t *msg)
 {
 	setclub (msg->club);
 	if (d_keyfind (NUM, &(msg->msgno)) == S_OKAY)

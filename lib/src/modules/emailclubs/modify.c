@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,14 +72,14 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 
 
 static int
-modifybody (struct message *msg)
+modifybody (message_t *msg)
 {
-	struct message dummy;
+	message_t dummy;
 	FILE   *fp, *fp2;
 	char    fname[1024], modfn[256];
 	struct stat st;
@@ -106,7 +110,7 @@ modifybody (struct message *msg)
 		return 0;
 	}
 
-	if (fread (&dummy, sizeof (struct message), 1, fp) != 1) {
+	if (fread (&dummy, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		fclose (fp2);
 #ifdef USE_LIBC
@@ -162,7 +166,7 @@ modifybody (struct message *msg)
 		unlink (modfn);
 		return 0;
 	}
-	fseek (fp, sizeof (struct message), SEEK_SET);
+	fseek (fp, sizeof (message_t), SEEK_SET);
 	if ((fp2 = fopen (modfn, "r")) == NULL) {
 		fclose (fp);
 		fclose (fp2);
@@ -203,7 +207,7 @@ modifymail ()
 	int     i, j, ok = 0;
 	char    fname[256];
 	struct stat st;
-	struct message msg;
+	message_t msg;
 
 	if (!cnc_more ())
 		prompt (MMINFO);
@@ -326,10 +330,10 @@ modifymail ()
 
 
 void
-modifyclubmsg (struct message *orig)
+modifyclubmsg (message_t *orig)
 {
 	int     i;
-	struct message msg;
+	message_t msg;
 
 	getmsgheader (orig->msgno, &msg);
 
@@ -394,9 +398,9 @@ modifyclubmsg (struct message *orig)
 
 
 void
-clubopmodify (struct message *orig)
+clubopmodify (message_t *orig)
 {
-	struct message msg;
+	message_t msg;
 
 	memcpy (&msg, orig, sizeof (msg));
 	getmsgheader (orig->msgno, &msg);

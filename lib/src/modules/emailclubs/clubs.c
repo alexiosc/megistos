@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -73,11 +77,11 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
+#include "mbk_emailclubs.h"
 
 #define __CLUBS_C
-#include <megistos/clubs.h>
-#include <megistos/email.h>
+#include "clubs.h"
+#include "email.h"
 
 
 promptblock_t *msg;
@@ -480,8 +484,12 @@ mod_info_t mod_info_clubs = {
 int
 main (int argc, char *argv[])
 {
+
+#if 0
 	if (strstr (argv[0], "msgcnv"))
 		return msgcnv_main (argc, argv);
+#endif
+
 	mod_setinfo (&mod_info_clubs);
 	return mod_main (argc, argv);
 }

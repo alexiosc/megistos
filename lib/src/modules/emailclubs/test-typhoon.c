@@ -2,8 +2,8 @@
 #define WANT_STDLIB_H 1
 #include <bbsinclude.h>
 
-#include <megistos/typhoon.h>
-#include <megistos/ecdbase.h>
+#include <libtyphoon/typhoon.h>
+#include "ecdbase.h"
 
 
 #define BSE_FOUND   1

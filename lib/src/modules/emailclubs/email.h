@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,15 +61,9 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-
-
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
-#include <megistos/ecdbase.h>
+#include "ecdbase.h"
 
 extern promptblock_t *msg;
 
@@ -158,7 +156,7 @@ char   *getattname (char *subject, int num);
 
 #define LASTMSG (1<<29)
 
-int     readmsg (struct message *msg);
+int     readmsg (message_t *msg);
 
 void    emailread ();
 
@@ -168,13 +166,13 @@ int     startreading (int mode, int startmsg);
 
 /* receipt.c */
 
-void    sendreceipt (struct message *msg);
+void    sendreceipt (message_t *msg);
 
 
 
 /* download.c */
 
-void    downloadatt (struct message *msg);
+void    downloadatt (message_t *msg);
 
 
 /* funcs.c */
@@ -186,7 +184,7 @@ int     askyesno (int *boolean, int msg, int err, int charge);
 
 int     confirmcancel ();
 
-void    showheader (char *sig, struct message *msg);
+void    showheader (char *sig, message_t *msg);
 
 int     writeecuser (char *uid, struct emailuser *user);
 
@@ -198,13 +196,13 @@ char   *addhistory (char *h, char *s, int len);
 
 void    bbscrypt (char *buf, int size, int key);
 
-int     checklocks (struct message *msg);
+int     checklocks (message_t *msg);
 
 int     askmsgno ();
 
-void    decompressmsg (struct message *msg);
+void    decompressmsg (message_t *msg);
 
-void    compressmsg (struct message *msg);
+void    compressmsg (message_t *msg);
 
 
 
@@ -229,14 +227,14 @@ void    compressmsg (struct message *msg);
    #define BSD_GE    (BSD_GT|BSD_EQ) */
 
 
-struct message header;
+message_t header;
 
 
-int     getmsgheader (int msgno, struct message *msg);
+int     getmsgheader (int msgno, message_t *msg);
 
-int     writemsgheader (struct message *msg);
+int     writemsgheader (message_t *msg);
 
-void    dbrm (struct message *msg);
+void    dbrm (message_t *msg);
 
 int     dbgetindex (struct ecidx *idx);
 
@@ -285,35 +283,35 @@ void    preferences ();
 
 /* misc.c */
 
-void    stopautofw (struct message *msg);
+void    stopautofw (message_t *msg);
 
-void    erasemsg (int forward, struct message *msg);
+void    erasemsg (int forward, message_t *msg);
 
-void    copymsg (struct message *msg);
+void    copymsg (message_t *msg);
 
-void    forwardmsg (struct message *msg);
+void    forwardmsg (message_t *msg);
 
-int     backtrack (struct message *msg);
+int     backtrack (message_t *msg);
 
-void    deleteuser (struct message *msg);
+void    deleteuser (message_t *msg);
 
 void    rmlocks ();
 
 
 /* reply.c */
 
-void    reply (struct message *msg, int forceemail);
+void    reply (message_t *msg, int forceemail);
 
-int     quotemessage (struct message *msg, char *fname);
+int     quotemessage (message_t *msg, char *fname);
 
 
 /* modify.c */
 
 void    modifymail ();
 
-void    modifyclubmsg (struct message *msg);
+void    modifyclubmsg (message_t *msg);
 
-void    clubopmodify (struct message *msg);
+void    clubopmodify (message_t *msg);
 
 
 /* distlist.c */

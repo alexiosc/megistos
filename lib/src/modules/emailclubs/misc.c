@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -79,15 +83,15 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
 
 
 void
-stopautofw (struct message *msg)
+stopautofw (message_t *msg)
 {
 	struct emailuser user;
 	char    userid[256], *cp;
@@ -135,7 +139,7 @@ stopautofw (struct message *msg)
 
 
 void
-erasemsg (int forward, struct message *msg)
+erasemsg (int forward, message_t *msg)
 {
 	char    fname[512], clubdir[256];
 
@@ -203,7 +207,7 @@ erasemsg (int forward, struct message *msg)
 	if (msg->replyto && msg->flags & MSF_REPLY) {
 		FILE   *fp;
 
-		struct message replied;
+		message_t replied;
 		char    lock[256], s[64], *cp, club[256], t[256], *clp;
 		int     ok;
 
@@ -259,11 +263,11 @@ erasemsg (int forward, struct message *msg)
 
 
 void
-copymsg (struct message *msg)
+copymsg (message_t *msg)
 {
 	FILE   *fp1, *fp2, *fp3;
 	int     net = 0;
-	struct message checkmsg;
+	message_t checkmsg;
 	char    temp[256], source[256], fatt[256], lock[256], clubdir[256];
 	char    clubname[256];
 	char    header[256], body[256], command[256], original[256],
@@ -396,10 +400,10 @@ copymsg (struct message *msg)
 		return;
 	}
 
-	fwrite (msg, sizeof (struct message), 1, fp3);
+	fwrite (msg, sizeof (message_t), 1, fp3);
 	fclose (fp3);
 
-	fseek (fp1, sizeof (struct message), SEEK_SET);
+	fseek (fp1, sizeof (message_t), SEEK_SET);
 	do {
 		if ((bytes = fread (temp, 1, sizeof (temp), fp1)) != 0) {
 			if (msg->cryptkey)
@@ -481,11 +485,11 @@ copymsg (struct message *msg)
 
 
 void
-forwardmsg (struct message *msg)
+forwardmsg (message_t *msg)
 {
 	FILE   *fp1, *fp2, *fp3;
 	int     net = 0;
-	struct message checkmsg, orig;
+	message_t checkmsg, orig;
 	char    temp[256], source[256], fatt[256], lock[256], clubdir[256];
 	char    clubname[256];
 	char    header[256], body[256], command[256], original[256],
@@ -618,10 +622,10 @@ forwardmsg (struct message *msg)
 		return;
 	}
 
-	fwrite (msg, sizeof (struct message), 1, fp3);
+	fwrite (msg, sizeof (message_t), 1, fp3);
 	fclose (fp3);
 
-	fseek (fp1, sizeof (struct message), SEEK_SET);
+	fseek (fp1, sizeof (message_t), SEEK_SET);
 	do {
 		if ((bytes = fread (temp, 1, sizeof (temp), fp1)) != 0) {
 			if (msg->cryptkey)
@@ -704,7 +708,7 @@ forwardmsg (struct message *msg)
 
 
 int
-backtrack (struct message *msg)
+backtrack (message_t *msg)
 {
 	char    replyto[256], *cp;
 	int     msgno = 0, ok = 0, i, j;
@@ -746,7 +750,7 @@ backtrack (struct message *msg)
 
 
 void
-deleteuser (struct message *msg)
+deleteuser (message_t *msg)
 {
 	useracc_t usracc, *uacc = &usracc;
 

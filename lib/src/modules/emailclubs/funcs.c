@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -72,8 +76,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
@@ -145,7 +149,11 @@ getrdmsgno (int *num, int msg, int help, int err, int def)
 				continue;
 			}
 		}
+
+#ifdef GREEK
 		latinize (w);
+#endif /* GREEK */
+
 		if (sameas (w, "F")) {
 			*num = -1;
 			return 1;
@@ -283,7 +291,7 @@ xlatehist (char *s)
 
 
 void
-showheader (char *sig, struct message *msg)
+showheader (char *sig, message_t *msg)
 {
 	char    s1[256] = { 0 }, s2[256] = {
 	0}, s3[256] = {
@@ -474,7 +482,7 @@ bbscrypt (char *buf, int size, int key)
 
 
 int
-checklocks (struct message *msg)
+checklocks (message_t *msg)
 {
 	int     i;
 	char    lock[256], dummy[64];
@@ -512,7 +520,7 @@ askmsgno ()
 
 
 void
-decompressmsg (struct message *msg)
+decompressmsg (message_t *msg)
 {
 #ifdef USE_LIBZ
 
@@ -555,7 +563,7 @@ decompressmsg (struct message *msg)
 
 
 void
-compressmsg (struct message *msg)
+compressmsg (message_t *msg)
 {
 #ifdef USE_LIBZ
 

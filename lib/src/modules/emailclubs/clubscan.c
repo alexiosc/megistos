@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -73,10 +77,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/clubs.h>
-#include <megistos/email.h>
-#include <megistos/typhoon.h>
+#include "mbk_emailclubs.h"
+#include "clubs.h"
+#include "email.h"
+#include <libtyphoon/typhoon.h>
 
 
 static int indworking = 0;
@@ -127,9 +131,9 @@ keycmp (char *s)
 
 
 void
-scanupdatemsg (struct message *msg, int read)
+scanupdatemsg (message_t *msg, int read)
 {
-	struct message m;
+	message_t m;
 	struct lastread *l;
 
 	getmsgheader (msg->msgno, &m);
@@ -314,7 +318,7 @@ scan4msg (int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
 			return scan4files (msgno, sequencebroken, targetnum,
 					   dir, mode);
 	} else {
-		struct message msg;
+		message_t msg;
 		int     first = 1;
 
 		inp_nonblock ();
@@ -428,7 +432,7 @@ scan4msg (int *msgno, int *sequencebroken, int targetnum, int dir, int mode)
 
 
 char
-clubreadmenu (struct message *msg, char defopt)
+clubreadmenu (message_t *msg, char defopt)
 {
 	char    opt, options[32], tmp[2];
 	int     menu, msgno, res;
@@ -519,7 +523,7 @@ clubreadmenu (struct message *msg, char defopt)
 
 
 char
-clubheadermenu (struct message *msg, char defopt)
+clubheadermenu (message_t *msg, char defopt)
 {
 	int     res;
 	char    opt;
@@ -592,7 +596,7 @@ startscanning (int startmsg, int bdir)
 	for (i = startmsg;;) {
 		int     msgno;
 		int     j;
-		struct message msg;
+		message_t msg;
 
 
 		/* Find the message */

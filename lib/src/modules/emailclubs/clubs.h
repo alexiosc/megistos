@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -55,12 +59,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
-
 
 
 #define KEYSCAN  "\000\055\055\055\055\055\055\055"  /* 0-7              */ \
@@ -136,20 +134,20 @@ void    fileapp ();
 
 /* clubscan.c */
 
-void    scanupdatemsg (struct message *msg, int read);
+void    scanupdatemsg (message_t *msg, int read);
 
 int     scan4msg (int *msgno, int *sequencebroken, int targetnum, int dir,
 		  int mode);
 
 /*int scan4files(int *msgno, int *sequencebroken, int targetnum, int dir, int mode);*/
 
-char    clubreadmenu (struct message *msg, char defopt);
+char    clubreadmenu (message_t *msg, char defopt);
 
-char    clubheadermenu (struct message *msg, char defopt);
+char    clubheadermenu (message_t *msg, char defopt);
 
 int     startscanning (int startmsg, int bdir);
 
-void    scanupdatemsg (struct message *msg, int read);
+void    scanupdatemsg (message_t *msg, int read);
 
 
 
@@ -202,7 +200,7 @@ void    usaveqsc (char *uid);
 
 void    saveqsc ();
 
-int     quickscanmenu (struct message *msg);
+int     quickscanmenu (message_t *msg);
 
 void    configurequickscan (int create);
 
@@ -253,12 +251,12 @@ int     checkinclub (char *club);
 
 int     getclub (char *club, int pr, int err, int all);
 
-int     thread (struct message *msg, char defopt);
+int     thread (message_t *msg, char defopt);
 
 
 /* clubop.c */
 
-char    clubopmenu (struct message *msg);
+char    clubopmenu (message_t *msg);
 
 
 /* msgcnv.c */

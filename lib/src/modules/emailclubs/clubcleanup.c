@@ -30,6 +30,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:29  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -76,9 +80,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/email.h>
-#include <megistos/mailcleanup.h>
-#include <megistos/mbk_emailclubs.h>
+#include "email.h"
+#include "mailcleanup.h"
+#include "mbk_emailclubs.h"
 
 
 struct top *toppop, *topmsgs, *topfiles, *topblts;
@@ -144,7 +148,7 @@ ltoa (long l)
 
 
 int
-cleanup_checklocks (struct message *msg)
+cleanup_checklocks (message_t *msg)
 {
 	int     i;
 	channel_status_t status;
@@ -168,7 +172,7 @@ cleanup_checklocks (struct message *msg)
 
 
 int
-cleanup_erasemsg (struct message *msg)
+cleanup_erasemsg (message_t *msg)
 {
 	char    fname[512], clubdir[256];
 	int     timeout = 0, ok = 0;
@@ -217,7 +221,7 @@ cleanup_erasemsg (struct message *msg)
 
 	if (msg->replyto && msg->flags & MSF_REPLY) {
 		FILE   *fp;
-		struct message replied;
+		message_t replied;
 		char    lock[256], s[64], *cp, club[256], t[256], *clp;
 		int     ok;
 
@@ -263,10 +267,10 @@ cleanup_erasemsg (struct message *msg)
 
 
 void
-fwperiodic (struct message *msg)
+fwperiodic (message_t *msg)
 {
 	FILE   *fp1, *fp2, *fp3;
-	struct message checkmsg, orig;
+	message_t checkmsg, orig;
 	char    temp[256], source[256], fatt[256], lock[256], clubdir[256];
 	char    clubname[256];
 	char    header[256], body[256], command[256], original[256],
@@ -322,10 +326,10 @@ fwperiodic (struct message *msg)
 		error_fatalsys ("Unable to create %s.", header);
 	}
 
-	fwrite (msg, sizeof (struct message), 1, fp3);
+	fwrite (msg, sizeof (message_t), 1, fp3);
 	fclose (fp3);
 
-	fseek (fp1, sizeof (struct message), SEEK_SET);
+	fseek (fp1, sizeof (message_t), SEEK_SET);
 	do {
 		if ((bytes = fread (temp, 1, sizeof (temp), fp1)) != 0) {
 			if (msg->cryptkey)
@@ -395,7 +399,7 @@ clubcleanup ()
 	DIR    *dp;
 	struct dirent *dir, **msgs;
 	struct clubheader club;
-	struct message msg;
+	message_t msg;
 	FILE   *fp;
 	int     ctoday = cofdate (today ());
 	int     msgdel = 0, msgdelb = 0, msglive = 0, msgper = 0, msgfile =

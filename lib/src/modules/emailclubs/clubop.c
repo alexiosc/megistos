@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:29  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,13 +72,13 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/clubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "clubs.h"
+#include "email.h"
 
 
 void
-tagmsg (struct message *msg)
+tagmsg (message_t *msg)
 {
 	getmsgheader (msg->msgno, msg);
 	msg->flags ^= MSF_EXEMPT;
@@ -84,7 +88,7 @@ tagmsg (struct message *msg)
 
 
 void
-periodic (struct message *msg)
+periodic (message_t *msg)
 {
 	int     i;
 
@@ -112,7 +116,7 @@ periodic (struct message *msg)
 
 
 void
-approve (struct message *msg)
+approve (message_t *msg)
 {
 	getmsgheader (msg->msgno, msg);
 	msg->flags ^= MSF_APPROVD;
@@ -130,13 +134,13 @@ approve (struct message *msg)
 
 
 void
-insatt (struct message *msg)
+insatt (message_t *msg)
 {
 	char    opt;
 	int     res, truncpos;
 	FILE   *fpi, *fpo;
 	char    fnamei[256], fnameo[256];
-	struct message m;
+	message_t m;
 	char    buf[1024];
 	int     read, written;
 
@@ -180,7 +184,7 @@ insatt (struct message *msg)
 			prompt (COPIAR);
 			return;
 		}
-		fseek (fpo, sizeof (struct message), SEEK_SET);
+		fseek (fpo, sizeof (message_t), SEEK_SET);
 	}
 
 	do {
@@ -212,7 +216,7 @@ insatt (struct message *msg)
 
 
 void
-insblt (struct message *msg)
+insblt (message_t *msg)
 {
 	char    command[256];
 
@@ -227,7 +231,7 @@ insblt (struct message *msg)
 
 
 char
-clubopmenu (struct message *msg)
+clubopmenu (message_t *msg)
 {
 	int     menu = msg->flags & MSF_FILEATT ? COPMNUF : COPMNU;
 	int     help = msg->flags & MSF_FILEATT ? COPMNUFH : COPMNUH;

@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -74,9 +78,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
-#include <megistos/clubs.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
+#include "clubs.h"
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
@@ -86,9 +90,9 @@ static const char rcsinfo[] =
 
 
 int
-readmsg (struct message *msg)
+readmsg (message_t *msg)
 {
-	struct message dummy;
+	message_t dummy;
 	char    fname[256];
 	gzFile *zfp;
 
@@ -98,7 +102,7 @@ readmsg (struct message *msg)
 		gzclose (zfp);
 		prompt (RDIOERR);
 		return -1;
-	} else if (gzread (zfp, &dummy, sizeof (struct message)) <= 0) {
+	} else if (gzread (zfp, &dummy, sizeof (message_t)) <= 0) {
 		gzclose (zfp);
 		prompt (RDIOERR);
 		return -1;
@@ -146,9 +150,9 @@ readmsg (struct message *msg)
 
 
 int
-readmsg (struct message *msg)
+readmsg (message_t *msg)
 {
-	struct message dummy;
+	message_t dummy;
 	char    fname[256];
 	FILE   *fp;
 
@@ -158,7 +162,7 @@ readmsg (struct message *msg)
 		fclose (fp);
 		prompt (RDIOERR);
 		return -1;
-	} else if (fread (&dummy, sizeof (struct message), 1, fp) != 1) {
+	} else if (fread (&dummy, sizeof (message_t), 1, fp) != 1) {
 		fclose (fp);
 		prompt (RDIOERR);
 		return -1;
@@ -206,10 +210,10 @@ readmsg (struct message *msg)
 
 
 static void
-readupdatemsg (int readopt, struct message *msg)
+readupdatemsg (int readopt, message_t *msg)
 {
 	struct emailuser ecuser;
-	struct message m;
+	message_t m;
 
 	getmsgheader (msg->msgno, &m);
 	m.timesread++;
@@ -228,7 +232,7 @@ readupdatemsg (int readopt, struct message *msg)
 
 
 static char
-readmenu (struct message *msg, char defopt)
+readmenu (message_t *msg, char defopt)
 {
 	char    opt, options[32];
 	int     menu = RDRMNU1, msgno, res;
@@ -430,7 +434,7 @@ startreading (int mode, int startmsg)
 	for (i = startmsg;;) {
 		int     msgno;
 		int     j;
-		struct message msg;
+		message_t msg;
 
 
 		/* Find the message */

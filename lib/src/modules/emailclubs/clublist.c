@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:29  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,16 +70,16 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/clubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "clubs.h"
+#include "email.h"
 
 
 static void
 msglist (int msg, int method, int files)
 {
 	int     j, msgno = msg;
-	struct message m;
+	message_t m;
 	int     f = 1, c;
 
 	j = findmsgnum (&msgno, msg, BSD_GT);
@@ -160,7 +164,7 @@ static void
 qmsglist (int method, int files)
 {
 	int     j, msgno = 0, msg = 0;
-	struct message m;
+	message_t m;
 	int     first = 1, count = 0, newmsg = 0, f = 1;
 	int     c;
 

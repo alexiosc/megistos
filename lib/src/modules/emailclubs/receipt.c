@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/25 13:33:28  alexios
+ * Fixed #includes. Changed instances of struct message to
+ * message_t. Other minor changes.
+ *
  * Revision 1.4  2003/12/24 20:12:13  alexios
  * Ran through megistos-config --oh.
  *
@@ -67,14 +71,14 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_emailclubs.h>
-#include <megistos/email.h>
+#include "mbk_emailclubs.h"
+#include "email.h"
 
 
 void
-sendreceipt (struct message *msg)
+sendreceipt (message_t *msg)
 {
-	struct message rrr;
+	message_t rrr;
 	char    hdrname[256], fname[256], s1[256], s2[256];
 	char    command[256];
 	FILE   *fp;
