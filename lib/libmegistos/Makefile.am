@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.9  2003/12/20 10:18:56  alexios
+# Added more MSG files needed to build the base system.
+#
 # Revision 1.8  2003/12/19 13:22:17  alexios
 # Numerous changes to incorporate new scripts and the inclusion of
 # msgidx and mksysvar into this directory (they are both needed to
@@ -33,6 +36,7 @@
 # Initial revision.
 #
 
+MSGIDX = VIRGINDIR=`/bin/sh ./megistos-config --virgin-src` ./msgidx
 pkgdatadir = @PKGDATADIR@
 pkglibdir = @PKGLIBDIR@
 pkgincludedir = @PKGINCLUDEDIR@
@@ -81,7 +85,7 @@ libmegistos_la_SOURCES =						    \
 
 pkginclude_HEADERS = $(HDR)
 
-noinst_HEADERS = mbk_sysvar.h
+noinst_HEADERS = mbk_sysvar.h mbk_metabbs.h mbk_signup.h
 
 libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info 3:5:1
 libmegistos_la_CFLAGS = @CFLAGS@ -Wall
@@ -109,7 +113,10 @@ pkglib_PROGRAMS = msgidx mksysvar
 mksysvar_LDADD = -lmegistos
 
 
-# Compile sysvar.msg
+# Compile base msgs
 
 sysvar.mbk mbk_sysvar.h:	megistos-config msgidx sysvar.msg
-				VIRGINDIR=`/bin/sh ./megistos-config --virgin-src` ./msgidx sysvar.msg
+				$(MSGIDX) sysvar.msg
+
+mbk_%.h:			%.msg msgidx
+				$(MSGIDX) $<
