@@ -53,8 +53,11 @@ parse_params (int argc, char *argv[])
 	}
 
 	if (!strcmp (userid, "")) {
-		printf ("\nUSAGE : fixemail [-q] [-d] [-m value] userid\n
-\t-q : quiet\n\t-d : debug info\n\t-f : force update\n\t-m : new message value\n\n");
+		printf ("\nUSAGE : fixemail [-q] [-d] [-m value] userid\n"
+			"\t-q : quiet\n"
+			"\t-d : debug info\n"
+			"\t-f : force update\n"
+			"\t-m : new message value\n\n");
 		exit (0);
 	}
 
