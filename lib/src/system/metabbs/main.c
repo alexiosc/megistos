@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:22:30  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -43,10 +46,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #include <stdio.h>
@@ -74,75 +75,76 @@ const char *__RCS=RCS_VER;
 
 
 
-char     *progname;
-SVCXPRT  *server;
+char   *progname;
+SVCXPRT *server;
 
 
 
-void metabbs_prog_1(struct svc_req *rqstp, register SVCXPRT *transp);
+void    metabbs_prog_1 (struct svc_req *rqstp, register SVCXPRT * transp);
 
 
 
 static void
-checkuid()
+checkuid ()
 {
-  if (getuid()){
-    fprintf(stderr, "%s: getuid: not super-user\n", progname);
-    exit(1);
-  }
+	if (getuid ()) {
+		fprintf (stderr, "%s: getuid: not super-user\n", progname);
+		exit (1);
+	}
 }
 
 
 static void
-forkdaemon()
+forkdaemon ()
 {
-  switch(fork()){
-  case -1:
-    fprintf(stderr,"%s: fork(): unable to fork daemon\n",progname);
-    exit(1);
-  case 0:
-    ioctl(0,TIOCNOTTY,NULL);
-    setsid();
+	switch (fork ()) {
+	case -1:
+		fprintf (stderr, "%s: fork(): unable to fork daemon\n",
+			 progname);
+		exit (1);
+	case 0:
+		ioctl (0, TIOCNOTTY, NULL);
+		setsid ();
 #if 0
-    close(0);
-    close(1);
-    close(2);
+		close (0);
+		close (1);
+		close (2);
 #endif
-    break;
-  default:
-    exit(0);
-  }
+		break;
+	default:
+		exit (0);
+	}
 }
 
 
 static void
-dispatch(struct svc_req *rqstp, register SVCXPRT *transp)
+dispatch (struct svc_req *rqstp, register SVCXPRT * transp)
 {
-  server=transp;		/* Keep this so that services have access to it. */
-  metabbs_prog_1(rqstp,transp);
+	server = transp;	/* Keep this so that services have access to it. */
+	metabbs_prog_1 (rqstp, transp);
 }
 
 
 void
-handle_child_exit(int sig)
+handle_child_exit (int sig)
 {
-  int status;
-  int pid;
+	int     status;
+	int     pid;
 
 #ifdef DEBUG
-  fprintf(stderr,"A child changed status. Waiting for it...\n");
+	fprintf (stderr, "A child changed status. Waiting for it...\n");
 #endif
 
-  while((pid=waitpid(-1,&status,WNOHANG))>0){
-    
+	while ((pid = waitpid (-1, &status, WNOHANG)) > 0) {
+
 #ifdef DEBUG
-    fprintf(stderr,
-	    "Child wifexited=%d pid=%d status=%d.\n",
-	    WIFEXITED(status),pid,WEXITSTATUS(status));
+		fprintf (stderr,
+			 "Child wifexited=%d pid=%d status=%d.\n",
+			 WIFEXITED (status), pid, WEXITSTATUS (status));
 #endif
-  }
+	}
 
-  signal(SIGCHLD,handle_child_exit);
+	signal (SIGCHLD, handle_child_exit);
 }
 
 
@@ -150,46 +152,44 @@ handle_child_exit(int sig)
 
 
 static void
-rpc_svc_run()
+rpc_svc_run ()
 {
-  register SVCXPRT *transp;
-  
-  pmap_unset (METABBS_PROG, METABBS_VERS);
-  
-  transp = server = svctcp_create(RPC_ANYSOCK, 0, 0);
+	register SVCXPRT *transp;
 
-  if (transp == NULL) {
-    fprintf (stderr, "cannot create tcp service.");
-    exit(1);
-  }
-  if (!svc_register(transp, METABBS_PROG, METABBS_VERS, dispatch, IPPROTO_TCP)) {
-    fprintf (stderr, "unable to register (METABBS_PROG, METABBS_VERS, tcp).");
-    exit(1);
-  }
-  
-  signal(SIGCHLD,handle_child_exit);
-  svc_run ();
-  fprintf (stderr, "svc_run returned");
-  exit (1);
+	pmap_unset (METABBS_PROG, METABBS_VERS);
+
+	transp = server = svctcp_create (RPC_ANYSOCK, 0, 0);
+
+	if (transp == NULL) {
+		fprintf (stderr, "cannot create tcp service.");
+		exit (1);
+	}
+	if (!svc_register
+	    (transp, METABBS_PROG, METABBS_VERS, dispatch, IPPROTO_TCP)) {
+		fprintf (stderr,
+			 "unable to register (METABBS_PROG, METABBS_VERS, tcp).");
+		exit (1);
+	}
+
+	signal (SIGCHLD, handle_child_exit);
+	svc_run ();
+	fprintf (stderr, "svc_run returned");
+	exit (1);
 }
 
 
 static void
-storepid()
+storepid ()
 {
-#error "mkfname() not defined here, but function obsoleted anyway"
-#if 0
-  FILE *fp=fopen(mkfname(BBSETCDIR"/rpc.metabbs.pid"),"w");
-#endif
-  if(fp!=NULL){
-    fprintf(fp,"%d",getpid());
-    fclose(fp);
-#error "mkfname() not defined here, but function obsoleted anyway"
-#if 0
-    chmod(mkfname(BBSETCDIR"/rpc.metabbs.pid"),0600);
-    chown(mkfname(BBSETCDIR"/rpc.metabbs.pid"),0,0);
-#endif
-  }
+	FILE   *fp = fopen (mkfname (BBSETCDIR "/rpc.metabbs.pid"), "w");
+
+	if (fp != NULL) {
+		fprintf (fp, "%d", getpid ());
+		fclose (fp);
+
+		chmod (mkfname (BBSETCDIR "/rpc.metabbs.pid"), 0600);
+		chown (mkfname (BBSETCDIR "/rpc.metabbs.pid"), 0, 0);
+	}
 }
 
 
@@ -197,12 +197,15 @@ storepid()
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  my_hostname();		/* Get our hostname and cache it for later */
-  checkuid();			/* Make sure the superuser is running us */
-  forkdaemon();			/* Fork() the daemon */
-  storepid();			/* Store the PID of this daemon */
-  rpc_svc_run();		/* Execute the RPC service routine */
-  return 0;			/* We never reach this point */
+	my_hostname ();		/* Get our hostname and cache it for later */
+	checkuid ();		/* Make sure the superuser is running us */
+	forkdaemon ();		/* Fork() the daemon */
+	storepid ();		/* Store the PID of this daemon */
+	rpc_svc_run ();		/* Execute the RPC service routine */
+	return 0;		/* We never reach this point */
 }
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 08:22:30  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -37,12 +40,6 @@
  *
  *
  */
-
-
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
-
 
 
 #ifndef __METABBS_H
@@ -57,32 +54,37 @@
 
 /* main.c */
 
-extern SVCXPRT                         * server;
+extern SVCXPRT *server;
 
 
 
 /* register.c */
 
-extern struct registration_package_t   * registered_systems;
-extern struct registration_package_t   * this_system;
-extern int                               num_systems;
+extern struct registration_package_t *registered_systems;
+extern struct registration_package_t *this_system;
+extern int num_systems;
 
 
-extern int     find_system(char *codename);
-extern char  * my_hostname(void);
-extern int     make_space();
+extern int find_system (char *codename);
+extern char *my_hostname (void);
+extern int make_space ();
 
 
 /* request_info.c */
 
-int match_acl(char *acl, struct sockaddr_in *client, char *codename);
+int     match_acl (char *acl, struct sockaddr_in *client, char *codename);
 
 
 /* distclub.c */
 
-char *apply_prefix(char *fname);
-int   getclubaccess(struct sockaddr_in *caller, char *codename);
-int   loadclubhdr(char *club);
+
+char   *apply_prefix (char *fname);
+int     getclubaccess (struct sockaddr_in *caller, char *codename);
+int     loadclubhdr (char *club);
+char   *mkfname (char *fmt, ...);
 
 
-#endif /* __METABBS_H */
+#endif				/* __METABBS_H */
+
+
+/* End of File */
