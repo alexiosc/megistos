@@ -1,0 +1,54 @@
+                       TRANSLATION MATRIX FOR PROMPTS
+
+Key:	Y=Full support, N/blank=no support, 0-9 or P=partial support
+
+			LANGUAGES
+PROMPT BLOCK		EN	EL
+-------------------------------------------------------------------------------
+account			Y	Y
+adventure		Y	Y
+archivers		Y	Y	
+bbsdialog		Y	Y
+bbsdialog.sample
+bjack			Y	Y
+bulletins		Y	Y	
+classed			Y	Y
+emailclubs		Y	Y
+eventman
+files
+gallups
+graffiti		Y	Y
+gstat
+lined			Y	Y
+login			Y	Y
+mailer
+menuman
+metabbs
+metabbs-client
+news			5	Y
+notify
+offline.bulletins
+offline.graffiti
+offline.mail
+offline.news
+registry		Y	Y
+remsys
+signup
+stats			Y	Y
+sysvar
+teleactions
+telecon
+telecon.bg
+updown			Y	Y
+vised			Y	Y
+-------------------------------------------------------------------------------
+
+CVS/RCS History:
+
+$Id$
+
+$Log$
+Revision 1.1  2001/04/18 11:05:19  alexios
+Added message block translation matrix, updated to reflect newest
+translations.
+
