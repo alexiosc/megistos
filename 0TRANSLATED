@@ -22,11 +22,11 @@ gstat
 lined			Y	Y
 login			Y	Y
 mailer
-menuman
+menuman			Y	Y
 metabbs
 metabbs-client
-news			5	Y
-notify
+news			Y	Y
+notify			Y	Y
 offline.bulletins
 offline.graffiti
 offline.mail
@@ -35,7 +35,7 @@ registry		Y	Y
 remsys
 signup
 stats			Y	Y
-sysvar
+sysvar			Y	Y
 teleactions
 telecon
 telecon.bg
@@ -48,6 +48,9 @@ CVS/RCS History:
 $Id$
 
 $Log$
+Revision 1.2  2001/04/18 18:44:29  alexios
+Updated matrix to reflect latest translation status.
+
 Revision 1.1  2001/04/18 11:05:19  alexios
 Added message block translation matrix, updated to reflect newest
 translations.
