@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 06:38:04  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -97,12 +100,12 @@ static const char rcsinfo[] = "$Id$";
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_signup.h>
-#include <megistos/mbk_login.h>
-#include <megistos/mbk_sysvar.h>
+#include <mbk/mbk_signup.h>
+#include <mbk/mbk_login.h>
+#include <mbk/mbk_sysvar.h>
 
 #define __ACCOUNT_UNAMBIGUOUS__
-#include <megistos/mbk_account.h>
+#include <mbk/mbk_account.h>
 
 
 promptblock_t *msg, *loginmsg;

@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 06:38:04  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -39,10 +42,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -53,89 +53,97 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  FILE *fp;
-  int res;
-  struct message msg;
-  char command[1024], header[256], body[256];
+	FILE   *fp;
+	int     res;
+	struct message msg;
+	char    command[1024], header[256], body[256];
 
-  if(argc!=2){
-    fprintf(stderr,"%s: syntax: %s filename\n",argv[0],argv[0]);
-    exit(1);
-  }
+	if (argc != 2) {
+		fprintf (stderr, "%s: syntax: %s filename\n", argv[0],
+			 argv[0]);
+		exit (1);
+	}
 
-  if(!getenv("USERID")){
-    fprintf(stderr,"%s: must be running in BBS user context!\n",argv[0]);
-    exit(2);
-  }
+	if (!getenv ("USERID")) {
+		fprintf (stderr, "%s: must be running in BBS user context!\n",
+			 argv[0]);
+		exit (2);
+	}
 
-  memset(&msg,0,sizeof(msg));
-  strcpy(msg.from,getenv("USERID"));
-  strcpy(msg.to,msg.from);
-  strcpy(msg.subject,argv[1]);
-  strcpy(msg.fatt,msg.subject);
-  msg.flags|=MSF_FILEATT|MSF_APPROVD;
+	memset (&msg, 0, sizeof (msg));
+	strcpy (msg.from, getenv ("USERID"));
+	strcpy (msg.to, msg.from);
+	strcpy (msg.subject, argv[1]);
+	strcpy (msg.fatt, msg.subject);
+	msg.flags |= MSF_FILEATT | MSF_APPROVD;
 
-  /* Write an empty body */
+	/* Write an empty body */
 
-  sprintf(body,"/tmp/attb-%d",getpid());
-  if((fp=fopen(body,"w"))==NULL){
-    fprintf(stderr,"%s: Unable to create %s\n",argv[0],body);
-    exit(3);
-  }
-  fclose(fp);
-
-
-  /* Write the header */
-
-  sprintf(header,"/tmp/atth-%d",getpid());
-  if((fp=fopen(header,"w"))==NULL){
-    fprintf(stderr,"%s: Unable to create %s\n",argv[0],header);
-    exit(4);
-  }
-  if(fwrite(&msg,sizeof(msg),1,fp)!=1){
-    fprintf(stderr,"%s: Unable to write %s\n",argv[0],header);
-    exit(4);
-  }
-  fclose(fp);
+	sprintf (body, "/tmp/attb-%d", getpid ());
+	if ((fp = fopen (body, "w")) == NULL) {
+		fprintf (stderr, "%s: Unable to create %s\n", argv[0], body);
+		exit (3);
+	}
+	fclose (fp);
 
 
-  /* Send the message */
+	/* Write the header */
 
-  sprintf(command,"%s %s %s -c %s",mkfname(BBSMAILBIN),header,body,msg.fatt);
-  res=system(command);
-
-
-  /* Re-read the header to get the message number */
-
-  sprintf(header,"/tmp/atth-%d",getpid());
-  if((fp=fopen(header,"r"))==NULL){
-    fprintf(stderr,"%s: Unable to create %s\n",argv[0],header);
-    exit(4);
-  }
-  if(fread(&msg,sizeof(msg),1,fp)!=1){
-    fprintf(stderr,"%s: Unable to read from %s\n",argv[0],header);
-    exit(4);
-  }
-  fclose(fp);
+	sprintf (header, "/tmp/atth-%d", getpid ());
+	if ((fp = fopen (header, "w")) == NULL) {
+		fprintf (stderr, "%s: Unable to create %s\n", argv[0], header);
+		exit (4);
+	}
+	if (fwrite (&msg, sizeof (msg), 1, fp) != 1) {
+		fprintf (stderr, "%s: Unable to write %s\n", argv[0], header);
+		exit (4);
+	}
+	fclose (fp);
 
 
-  /* Notify the user (primitive for the time being) */
+	/* Send the message */
 
-  fprintf(stderr,"%s -> Email/%d: OK!\n",msg.fatt,msg.msgno);
-
-
-  /* Clean up */
-  unlink(header);
-  unlink(body);
-  if(!res)unlink(msg.fatt);
+	sprintf (command, "%s %s %s -c %s", mkfname (BBSMAILBIN), header, body,
+		 msg.fatt);
+	res = system (command);
 
 
-  /* And exit nicely */
-  return res;
+	/* Re-read the header to get the message number */
+
+	sprintf (header, "/tmp/atth-%d", getpid ());
+	if ((fp = fopen (header, "r")) == NULL) {
+		fprintf (stderr, "%s: Unable to create %s\n", argv[0], header);
+		exit (4);
+	}
+	if (fread (&msg, sizeof (msg), 1, fp) != 1) {
+		fprintf (stderr, "%s: Unable to read from %s\n", argv[0],
+			 header);
+		exit (4);
+	}
+	fclose (fp);
+
+
+	/* Notify the user (primitive for the time being) */
+
+	fprintf (stderr, "%s -> Email/%d: OK!\n", msg.fatt, msg.msgno);
+
+
+	/* Clean up */
+	unlink (header);
+	unlink (body);
+	if (!res)
+		unlink (msg.fatt);
+
+
+	/* And exit nicely */
+	return res;
 }
+
+
+/* End of File */

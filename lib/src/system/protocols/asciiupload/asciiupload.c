@@ -31,6 +31,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 06:38:04  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -66,52 +66,61 @@ const char *__RCS=RCS_VER;
 
 
 #ifdef GREEK
-char s1[5],s2[5],s3[5],s4[5],s5[5],s6[5],s7[5],s8[5];
+char    s1[5], s2[5], s3[5], s4[5], s5[5], s6[5], s7[5], s8[5];
 #endif
 
 
 int
-chkterm(char *line)
+chkterm (char *line)
 {
-  char *cp;
-  char s[8192];
+	char   *cp;
+	char    s[8192];
 
-  strcpy(s,line);
-  if((cp=strchr(s,10))!=NULL)*cp=0;
-  if((cp=strchr(s,13))!=NULL)*cp=0;
-  return !(strcasecmp(s,"OK") && strcasecmp(s,"/S") && strcasecmp(s,".S")
-	   && strcasecmp(s,"OK") && strcasecmp(s,"X")
+	strcpy (s, line);
+	if ((cp = strchr (s, 10)) != NULL)
+		*cp = 0;
+	if ((cp = strchr (s, 13)) != NULL)
+		*cp = 0;
+	return !(strcasecmp (s, "OK") && strcasecmp (s, "/S") &&
+		 strcasecmp (s, ".S")
+		 && strcasecmp (s, "OK") && strcasecmp (s, "X")
 #ifdef GREEK
-	   && strcmp(s,s1) && strcmp(s,s2) && strcmp(s,s3) && strcmp(s,s4)
-	   && strcmp(s,s5) && strcmp(s,s6) && strcmp(s,s7) && strcmp(s,s8)
+		 && strcmp (s, s1) && strcmp (s, s2) && strcmp (s, s3) &&
+		 strcmp (s, s4)
+		 && strcmp (s, s5) && strcmp (s, s6) && strcmp (s, s7) &&
+		 strcmp (s, s8)
 #endif
-	   );
+	    );
 }
 
 
 int
-main()
+main ()
 {
 
 #ifdef GREEK
-  sprintf(s1,"%c%c",-90,-95);     /* OK in capital greek letters */
-  sprintf(s2,"%c%c",-114,-119);   /* OK in lower case greek letters */
-  sprintf(s3,"%c",-107);          /* X in capital greek letters */
-  sprintf(s4,"%c",-82);           /* X in lower case greek letters */
-  sprintf(s5,"/%c",-111);         /* /S in capital greek letters */
-  sprintf(s6,"/%c",-87);          /* /s in lower case greek letters */
-  sprintf(s7,".%c",-111);         /* .S in capital greek letters */
-  sprintf(s8,".%c",-87);          /* .s in lower case greek letters */
+	sprintf (s1, "%c%c", -90, -95);	/* OK in capital greek letters */
+	sprintf (s2, "%c%c", -114, -119);	/* OK in lower case greek letters */
+	sprintf (s3, "%c", -107);	/* X in capital greek letters */
+	sprintf (s4, "%c", -82);	/* X in lower case greek letters */
+	sprintf (s5, "/%c", -111);	/* /S in capital greek letters */
+	sprintf (s6, "/%c", -87);	/* /s in lower case greek letters */
+	sprintf (s7, ".%c", -111);	/* .S in capital greek letters */
+	sprintf (s8, ".%c", -87);	/* .s in lower case greek letters */
 #endif
 
-  while(!feof(stdin)){
-    char line[8192];
-    
-    if(fgets(line,sizeof(line),stdin)){
-      if(chkterm(line))break;
-      fputs(line,stdout);
-    }
-  }
-  return 0;
+	while (!feof (stdin)) {
+		char    line[8192];
+
+		if (fgets (line, sizeof (line), stdin)) {
+			if (chkterm (line))
+				break;
+			fputs (line, stdout);
+		}
+	}
+	return 0;
 }
 
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 06:38:04  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -52,24 +52,29 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  int i;
+	int     i;
 
-  mod_setprogname(argv[0]);
-  if(argc<2)exit(1);
+	mod_setprogname (argv[0]);
+	if (argc < 2)
+		exit (1);
 
-  mod_init(INI_ALL);
+	mod_init (INI_ALL);
 
-  fmt_lastresult=PAUSE_CONTINUE;
-  for(i=1;i<argc;i++){
-    if(fmt_lastresult!=PAUSE_QUIT)out_printfile(argv[i]);
-    unlink(argv[i]);
-  }
+	fmt_lastresult = PAUSE_CONTINUE;
+	for (i = 1; i < argc; i++) {
+		if (fmt_lastresult != PAUSE_QUIT)
+			out_printfile (argv[i]);
+		unlink (argv[i]);
+	}
 
-  exit(0);
+	exit (0);
 }
+
+
+/* End of File */

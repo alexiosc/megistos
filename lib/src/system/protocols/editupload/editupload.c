@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/23 06:38:04  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -61,22 +61,27 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  FILE *fp;
+	FILE   *fp;
 
-  mod_setprogname(argv[0]);
-  if(argc!=2)exit(1);
+	mod_setprogname (argv[0]);
+	if (argc != 2)
+		exit (1);
 
-  if((fp=fopen(argv[1],"w"))==NULL)exit(1);
-  fclose(fp);
+	if ((fp = fopen (argv[1], "w")) == NULL)
+		exit (1);
+	fclose (fp);
 
-  system(STTYBIN" -echo start undef stop undef intr undef susp undef");
-  mod_init(INI_ALL);
-  print("\033[0m");
-  exit (editor(argv[1],512<<10));
+	system (STTYBIN " -echo start undef stop undef intr undef susp undef");
+	mod_init (INI_ALL);
+	print ("\033[0m");
+	exit (editor (argv[1], 512 << 10));
 }
+
+
+/* End of File */
