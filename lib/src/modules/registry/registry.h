@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:52:00  alexios
+ * Removed rcsinfo.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -46,11 +49,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
 
 
 
