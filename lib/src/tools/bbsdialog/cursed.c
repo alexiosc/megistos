@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:31:52  alexios
+ * Fixed #includes; fixed a slight (possible) arithmetic bug.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -86,8 +89,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsdialog.h>
-#include <megistos/mbk_bbsdialog.h>
+#include "bbsdialog.h"
+#include "mbk_bbsdialog.h"
 
 #ifndef KEY_DC
 #  ifdef SLANG_VERSION
@@ -583,7 +586,7 @@ mainloop ()
 #endif
 		case KEY_UP:
 			defocus (curfield);
-			curfield = curfield--;
+			curfield--;
 			if (curfield < 0)
 				curfield += numobjects;
 			focus (curfield);
@@ -620,7 +623,7 @@ mainloop ()
 			    (object[curfield].s.type == OBJ_BUTTON ||
 			     object[curfield].s.type == OBJ_TOGGLE)) {
 				defocus (curfield);
-				curfield = curfield--;
+				curfield--;
 				if (curfield < 0)
 					curfield += numobjects;
 				focus (curfield);
