@@ -565,6 +565,11 @@ PAGNPST {[0;1;31m!Z!J%s %s ›œ¤ £§¦¨œå ¤˜ œ¤¦®¢žŸœå ˜¬«ã «ž ©« š£ã.
 } T Page: "pagee" can't be paged right now, page stored
 
 
+PAGSTOK {[0;1;32m***
+%s %s £æ¢ ª â¢˜™œ «ž¤ ¡¢ã©ž ©˜ª.
+} T Page: your previously stored page was delivered.
+
+
 NOMM {Ž} T Masculine definite article for PAGNPST
 NOMF {†} T Feminine definite article for PAGNPST
 
@@ -1191,6 +1196,11 @@ later.[0;1m!)
 PAGNPST {[0;1;31m!Z!J%s%s is not available for paging right now. Your
 message has been stored and will be transmitted as soon as possible.[0;1m!)
 } T Page: "pagee" can't be paged right now, page stored
+
+
+PAGSTOK {[0;1;32m***
+%s%s has just received your previously stored page.
+} T Page: your previously stored page was delivered.
 
 
 NOMM {} T Masculine definite article for PAGNPST
