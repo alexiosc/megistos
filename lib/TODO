@@ -20,3 +20,12 @@ To do list for Megistos BBS rationalisation and modernisation.
 
 * Use XML for message blocks and other configuration files.
 
+
+* emud: use getpt(3) or similar.
+
+* emud: use iconv(3) or similar for character translation. Add an
+  extra lynx-like layer for irreversible translations.
+
+
+* msgd: move to a subdirectory of the emailclubs module (it needs much
+  of the emailclubs infrastructure in place before it can be built).
