@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.8  2003/09/30 15:11:34  alexios
+# Various changes to account for updated directory structure and new code.
+#
 # Revision 1.7  2003/09/29 21:37:32  alexios
 # Renamed src/ directory to lib/ to accommodate more source code in this
 # tree.
@@ -29,16 +32,19 @@
 #
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(lib/audit.c)
+AC_INIT(libmegistos/audit.c)
 
-dnl Magic to obtain the version from debian/changelog, where it should
-dnl reside.
+dnl Magic to obtain the package name and version from
+dnl debian/changelog, where it should reside.
 
+package=`head -1 debian/changelog | sed -e 's/^ \+//g' -e 's/ \+.*$//'`
 ver=`grep urgency= debian/changelog |head -1|sed -e 's/^.*(\(.*\)).*$/\1/'`
 
 dnl Every other copy of the package version number gets its value from
 dnl here (BUT NOT the files in debian/)
-AM_INIT_AUTOMAKE(libmegistos, $ver)
+
+AM_INIT_AUTOMAKE($package, $ver)
+
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(bbsconfig.h)
 
@@ -48,14 +54,21 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+dnl AC_PROG_RANLIB
 
 dnl Check for doxygen
 AC_PATH_PROG([DOXYGEN],[doxygen])
 AM_CONDITIONAL(HAVE_DOXYGEN,test .$DOXYGEN != .)
 
-dnl Use libtool to make a shared library.
+dnl Use libtool to make a shared library (with ltdl support)
+AC_LIBLTDL_CONVENIENCE
+AC_SUBST(LTDLINCL)
+AC_SUBST(LIBLTDL)
+AC_LIBLTDL_INSTALLABLE
 AC_PROG_LIBTOOL
+AC_CONFIG_SUBDIRS(libltdl)
+CFLAGS="$CFLAGS $LIBLINCL"
+LDFLAGS="$LDFLAGS $LIBLTDL"
 
 dnl Check for i18n
 AM_GNU_GETTEXT
@@ -110,6 +123,7 @@ AC_CHECK_HEADERS(\
 	sys/un.h \
 	sys/varargs.h \
 	sys/vt.h \
+	sys/wait.h \
 	syslog.h \
 	telnet.h \
 	termcap.h \
@@ -133,13 +147,17 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 # Checks for library functions.
+
+AC_FUNC_CHOWN
 AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_FORK
 AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_SETPGRP
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
+
 AC_HEADER_STDC
 AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
@@ -173,9 +191,10 @@ AC_CHECK_FUNCS(
 	uname \
 	usleep \
 	vhangup \
+	setenv \
 )
 
-if [[ x$datadir = xNONE ]];
+if test x$datadir != xNONE ;
 then
 	p=$datadir
 else
@@ -204,4 +223,43 @@ AC_SUBST(PKGINCLUDEDIR)
 
 CFLAGS="$CFLAGS -Wall"
 
-AC_OUTPUT([Makefile lib/Makefile lib/megistos-config intl/Makefile po/Makefile.in m4/Makefile doc/Makefile])
+dnl This is the main library directory. Its name is user-defined for
+dnl flexibility (and because it kept changing for a while).
+
+LIBMEGISTOS=libmegistos
+AC_SUBST(LIBMEGISTOS)
+
+AC_OUTPUT([
+	Makefile
+	libmegistos/Makefile
+	libmegistos/megistos-config
+	intl/Makefile
+	po/Makefile.in
+	m4/Makefile
+	doc/Makefile
+	src/Makefile
+	src/system/Makefile
+	src/system/bbsinit/Makefile])
+
+
+dnl Print out the configuration.
+
+cat <<EOF
+
+Summary of settings
+
+Compiler (CC):           $CC
+Compiler flags (CFLAGS): $CFLAGS
+Linker (LD):             $LD
+Linker flags (LDFLAGS):  $LDFLAGS
+
+Installation prefix:     $prefix
+Execution prefix:        $exec_prefix
+Data directory:          $PKGDATADIR
+Library directory:       $PKGLIBDIR
+
+You can now run:
+
+\$ make
+
+EOF
