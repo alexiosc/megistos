@@ -1,3 +1,11 @@
+megistos (1.0.12) unstable; urgency=low
+
+  * Changed email addresses and URLs.
+  * Rebuilt CVS repository after near-catastrophic disk crash, stepped all
+    versions as a result.
+
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Mon, 13 Sep 2004 20:48:23 +0100
+
 megistos (1.0.11) unstable; urgency=medium
 
   * Added four missing transfer protocols: cat-and-remove,
