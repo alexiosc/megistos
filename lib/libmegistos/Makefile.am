@@ -3,6 +3,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.8  2003/12/19 13:22:17  alexios
+# Numerous changes to incorporate new scripts and the inclusion of
+# msgidx and mksysvar into this directory (they are both needed to
+# bootstrap the library build).
+#
 # Revision 1.7  2003/09/30 15:07:50  alexios
 # Added megistos-config and its manpage to the distribution.
 #
@@ -32,7 +37,9 @@ pkgdatadir = @PKGDATADIR@
 pkglibdir = @PKGLIBDIR@
 pkgincludedir = @PKGINCLUDEDIR@
 
-DEFS = @DEFS@
+# The Megistos library
+
+DEFS = @DEFS@ -DLOCALEDIR=\"@LOCALEDIR@\"
 
 lib_LTLIBRARIES = libmegistos.la
 
@@ -79,14 +86,30 @@ noinst_HEADERS = mbk_sysvar.h
 libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info 3:5:1
 libmegistos_la_CFLAGS = @CFLAGS@ -Wall
 
-bin_SCRIPTS = megistos-config
 
-man_MANS=megistos-config.1
+# Scripts
+
+bin_SCRIPTS = megistos-config
+man_MANS = megistos-config.1
+
+
+# Versioning
 
 DISTCLEANFILES = version.mk
 
-EXTRA_DIST = mkversion.sh
+EXTRA_DIST = mkversion.sh sysvar.msg
 
-version.mk \
-version.h:	version.mk $(libmegistos_la_SOURCES) ../configure.in
-		./mkversion.sh $(VERSION)
+version.h version.mk:	$(filter-out $(libmegistos_la_SOURCES),version.h) ../configure-stamp megistos-config mkversion.sh
+			./mkversion.sh $(VERSION)
+			touch version.c
+
+# Build bootstrap programs 
+
+pkglib_PROGRAMS = msgidx mksysvar
+mksysvar_LDADD = -lmegistos
+
+
+# Compile sysvar.msg
+
+sysvar.mbk mbk_sysvar.h:	megistos-config msgidx sysvar.msg
+				VIRGINDIR=`/bin/sh ./megistos-config --virgin-src` ./msgidx sysvar.msg
