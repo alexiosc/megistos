@@ -1,0 +1,151 @@
+#                                               -*- Autoconf -*-
+
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/08/15 18:06:56  alexios
+# Initial revision.
+#
+
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/audit.c)
+dnl Every other copy of the package version number gets its value from here
+AM_INIT_AUTOMAKE(libmegistos, 1.0.1)
+dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
+AM_CONFIG_HEADER(bbsconfig.h)
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+dnl Use libtool to make a shared library.
+AC_PROG_LIBTOOL
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(\
+	arpa/telnet.h \
+	errno.h \
+	dlfcn.h \
+	fcntl.h \
+	getopt.h \
+	grp.h \
+	limits.h \
+	malloc.h \
+	memory.h \
+	netinet/in.h \
+	paths.h \
+	pwd.h \
+	rx.h \
+	regex.h \
+	rpc/rpc.h \
+	rpc.h \
+	setjmp.h \
+	sgtty.h \
+	signal.h \
+	stdarg.h \
+	stdint.h \
+	string.h \
+	strings.h \
+	sys/errno.h \
+	sys/file.h \
+	sys/filio.h \
+	sys/int_types.h \
+	sys/ioctl.h \
+	sys/ipc.h \
+	sys/msg.h \
+	sys/param.h \
+	sys/resource.h \
+	sys/sem.h \
+	sys/shm.h \
+	sys/signal.h \
+	sys/socket.h \
+	sys/stat.h \
+	sys/stream.h \
+	sys/time.h \
+	sys/tty.h \
+	sys/types.h \
+	sys/un.h \
+	sys/varargs.h \
+	sys/vt.h \
+	syslog.h \
+	telnet.h \
+	termcap.h \
+	termio.h \
+	unistd.h \
+	utime.h \
+	utmp.h \
+	varargs.h \
+	zlib.h \
+	zlib/zlib.h \
+)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_HEADER_TIME
+AC_STRUCT_ST_RDEV
+AC_STRUCT_TM
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_UID_T
+
+# Checks for library functions.
+AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_MEMCMP
+AC_FUNC_SELECT_ARGTYPES
+AC_FUNC_SETPGRP
+AC_FUNC_STRFTIME
+AC_FUNC_UTIME_NULL
+AC_FUNC_VPRINTF
+AC_HEADER_STDC
+AC_PROG_GCC_TRADITIONAL
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(
+	atexit \
+	bzero \
+	chown \
+	getcwd \
+	gethostname \
+	getpt \
+	gettimeofday \
+	malloc \
+	memcpy \
+	memset \
+	mkdir \
+	mkfifo \
+	mktime \
+	putenv \
+	realloc \
+	rmdir \
+	select \
+	socket \
+	stat \
+	strchr \
+	strcspn \
+	strdup \
+	strerror \
+	strrchr \
+	strspn \
+	strstr \
+	uname \
+	usleep \
+	vhangup \
+)
+
+if [[ x$prefix = xNONE ]];
+then
+	p=$ac_default_prefix
+else
+	p=$prefix
+fi
+BASEDIR=$p/lib/megistos
+AC_DEFINE_UNQUOTED(BASEDIR,"$BASEDIR",[The default base directory of the system's data files.])
+
+AC_OUTPUT(Makefile src/Makefile)

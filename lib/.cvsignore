@@ -1,0 +1,6 @@
+Makefile.in
+aclocal.m4
+bbsconfig.h.in
+config.h.in
+configure
+stamp-h.in
