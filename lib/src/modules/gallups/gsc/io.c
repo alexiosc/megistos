@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/31 06:59:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,9 +51,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /* Gallops input/output functions */
 
@@ -64,291 +66,333 @@
 #include <bbsinclude.h>
 
 
-#include "bbs.h"
-#include "mbk_gallups.h"
-#include "gallups.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_gallups.h>
+#include <megistos/gallups.h>
 
-int gallup_loaded=0;
+int     gallup_loaded = 0;
 
 int
-outputcharp(char *charp, FILE *filep) {
+outputcharp (char *charp, FILE * filep)
+{
 
-  unsigned int i = strlen(charp) + 1;
-  if (fwrite(&i,sizeof(unsigned int),1,filep)!=1) { prompt(OOPS); return 0; }
-  if (fwrite(charp,sizeof(char),i,filep)!=i) { prompt(OOPS); return 0; }
-  return 1;
+	unsigned int i = strlen (charp) + 1;
+	if (fwrite (&i, sizeof (unsigned int), 1, filep) != 1) {
+		prompt (OOPS);
+		return 0;
+	}
+	if (fwrite (charp, sizeof (char), i, filep) != i) {
+		prompt (OOPS);
+		return 0;
+	}
+	return 1;
 
 }
 
 int
-inputcharp (char **charp, FILE *filep) {
+inputcharp (char **charp, FILE * filep)
+{
 
-  unsigned int i;
-  
-  if (fread(&i,sizeof(unsigned int),1,filep)!=1) { prompt(OOPS); return 0; }	
-  *charp = (char *) alcmem (sizeof(char) * i);
-  if (fread(*charp,sizeof(char),i,filep)!=i) { prompt(OOPS); return 0; }
-  return 1;
+	unsigned int i;
+
+	if (fread (&i, sizeof (unsigned int), 1, filep) != 1) {
+		prompt (OOPS);
+		return 0;
+	}
+	*charp = (char *) alcmem (sizeof (char) * i);
+	if (fread (*charp, sizeof (char), i, filep) != i) {
+		prompt (OOPS);
+		return 0;
+	}
+	return 1;
 
 }
 
 #ifndef __GSC__
 
-int loadgallup(char *fn, struct gallup *gallp)
+int
+loadgallup (char *fn, struct gallup *gallp)
 {
-  char filename[128];
+	char    filename[128];
 
-	sprintf(filename, "%s/%s/%s", GALLUPSDIR, fn, GDATAFILE);
+	sprintf (filename, "%s/%s/%s", GALLUPSDIR, fn, GDATAFILE);
 
-  return _loadgallup(filename, fn, gallp);
+	return _loadgallup (filename, fn, gallp);
 }
 
 #endif
 
 
-int _loadgallup(char *filename, char *fn, struct gallup *gallp)
+int
+_loadgallup (char *filename, char *fn, struct gallup *gallp)
 {
-  FILE *fp;
-  unsigned int i;
-  struct question *q;
-  struct answer *a;
-  
+	FILE   *fp;
+	unsigned int i;
+	struct question *q;
+	struct answer *a;
+
 	ginfo = gallp;
-	
 
-	if(gallup_loaded)freegallup();
-	
-	strcpy(gfnam(ginfo), fn);
 
-	fp = fopen(filename, "r");
-	if(fp == NULL) {
-		prompt(OOPS);
+	if (gallup_loaded)
+		freegallup ();
+
+	strcpy (gfnam (ginfo), fn);
+
+	fp = fopen (filename, "r");
+	if (fp == NULL) {
+		prompt (OOPS);
 		return 0;
 	}
 
 
-	if(fread(ginfo, sizeof(struct gallup), 1, fp)!=1) { prompt(OOPS); return 0; }
-
-	if(memcmp(ginfo->magic, GAL_MAGIC, 4)) { prompt(OOPSMAGIC); return 0; }
-
-	questions = (struct question *)alcmem(sizeof(struct question) * gnumq(ginfo));
-
-	nullupgallup();
-
-	if(gflgs(ginfo) & GF_QUIZ) {
-		answers = (struct answer *)alcmem(sizeof(struct answer) * gnumq(ginfo));
+	if (fread (ginfo, sizeof (struct gallup), 1, fp) != 1) {
+		prompt (OOPS);
+		return 0;
 	}
-	
-	
-	for(i=0;i<gnumq(ginfo);i++) {
+
+	if (memcmp (ginfo->magic, GAL_MAGIC, 4)) {
+		prompt (OOPSMAGIC);
+		return 0;
+	}
+
+	questions =
+	    (struct question *) alcmem (sizeof (struct question) *
+					gnumq (ginfo));
+
+	nullupgallup ();
+
+	if (gflgs (ginfo) & GF_QUIZ) {
+		answers =
+		    (struct answer *) alcmem (sizeof (struct answer) *
+					      gnumq (ginfo));
+	}
+
+
+	for (i = 0; i < gnumq (ginfo); i++) {
 		q = &questions[i];
 
-		fread(&qtyp(q), sizeof(unsigned char), 1, fp);
-		fread(&qflg(q), sizeof(unsigned int), 1, fp);
-		
-		if(gflgs(ginfo) & GF_QUIZ) {
-			fread(&qcrd0(q), sizeof(int), 1, fp);
-			fread(&qcrd1(q), sizeof(int), 1, fp);
-		}
-			
-		inputcharp(&qprm(q), fp);
-		
-		switch(qtyp(q)) {
-			case GQ_NUMBER:
-				fread(&qnummn(q), sizeof(int), 1, fp);
-				fread(&qnummx(q), sizeof(int), 1, fp);
-				break;
-			case GQ_FREETEXT:
-				fread(&qtxtln(q), sizeof(int), 1, fp);
-				break;
-			case GQ_SELECT:
-				inputcharp(&qseldt(q), fp);
-				break;
-				
-			case GQ_COMBO:
-				inputcharp(&qcomdt(q), fp);
-				inputcharp(&qcompr(q), fp);
-				inputcharp(&qcomch(q), fp);
-				break;
+		fread (&qtyp (q), sizeof (unsigned char), 1, fp);
+		fread (&qflg (q), sizeof (unsigned int), 1, fp);
+
+		if (gflgs (ginfo) & GF_QUIZ) {
+			fread (&qcrd0 (q), sizeof (int), 1, fp);
+			fread (&qcrd1 (q), sizeof (int), 1, fp);
 		}
 
-		if(gflgs(ginfo) & GF_QUIZ) {
-			a = qans(q) = malloc(sizeof(struct answer));
-			switch(qtyp(q)) {
-				case GQ_NUMBER:
-					fread(&anumdt(a), sizeof(int), 1, fp);
-					break;
-				case GQ_FREETEXT:
-					inputcharp(&atxtdt(a), fp);
-					break;
-				case GQ_SELECT:
-					fread(&aseldt(a), sizeof(int), 1, fp);
-					break;
+		inputcharp (&qprm (q), fp);
+
+		switch (qtyp (q)) {
+		case GQ_NUMBER:
+			fread (&qnummn (q), sizeof (int), 1, fp);
+			fread (&qnummx (q), sizeof (int), 1, fp);
+			break;
+		case GQ_FREETEXT:
+			fread (&qtxtln (q), sizeof (int), 1, fp);
+			break;
+		case GQ_SELECT:
+			inputcharp (&qseldt (q), fp);
+			break;
+
+		case GQ_COMBO:
+			inputcharp (&qcomdt (q), fp);
+			inputcharp (&qcompr (q), fp);
+			inputcharp (&qcomch (q), fp);
+			break;
+		}
+
+		if (gflgs (ginfo) & GF_QUIZ) {
+			a = qans (q) = malloc (sizeof (struct answer));
+			switch (qtyp (q)) {
+			case GQ_NUMBER:
+				fread (&anumdt (a), sizeof (int), 1, fp);
+				break;
+			case GQ_FREETEXT:
+				inputcharp (&atxtdt (a), fp);
+				break;
+			case GQ_SELECT:
+				fread (&aseldt (a), sizeof (int), 1, fp);
+				break;
 			}
 		}
 	}
-	
-	fclose(fp);
 
-	gallup_loaded=1;
+	fclose (fp);
 
-	setupgallup();
-	
-  return 1;
+	gallup_loaded = 1;
+
+	setupgallup ();
+
+	return 1;
 }
 
 long
-today()
+today ()
 {
-  struct tm *dt;
-  time_t t;
+	struct tm *dt;
+	time_t  t;
 
-  t=time(0);
-  dt=localtime(&t);
-  return((dt->tm_mday)&0x1f)|((dt->tm_mon)<<8)|(((dt->tm_year-70)&0xff)<<16);
+	t = time (0);
+	dt = localtime (&t);
+	return ((dt->tm_mday) & 0x1f) | ((dt->
+					  tm_mon) << 8) | (((dt->tm_year -
+							     70) & 0xff) <<
+							   16);
 }
 
 
 long
-now()
+now ()
 {
-  struct tm *dt;
-  time_t t;
+	struct tm *dt;
+	time_t  t;
 
-  t=time(0);
-  dt=localtime(&t);
-  return maketime(dt->tm_hour,dt->tm_min,dt->tm_sec);
+	t = time (0);
+	dt = localtime (&t);
+	return maketime (dt->tm_hour, dt->tm_min, dt->tm_sec);
 }
 
 
 #ifndef __GSC__
 
 /* this is an alternate entry point to _savegallup() */
-int savegallup(void)
+int
+savegallup (void)
 {
-  char filename[128];
+	char    filename[128];
 
-	sprintf(filename, "%s/%s/%s", GALLUPSDIR, gfnam(ginfo), GDATAFILE);
-	
-  return _savegallup(filename);
+	sprintf (filename, "%s/%s/%s", GALLUPSDIR, gfnam (ginfo), GDATAFILE);
+
+	return _savegallup (filename);
 }
 
 #endif
 
 
 
-int _savegallup(char *filename)
+int
+_savegallup (char *filename)
 {
-  FILE *fp;
-  unsigned int i;
-  struct question *q;
-  struct answer *a;
-  
+	FILE   *fp;
+	unsigned int i;
+	struct question *q;
+	struct answer *a;
+
 
 #ifndef __GSC__
-	if(!gallup_loaded) {
-		prompt(NOGALSEL);
+	if (!gallup_loaded) {
+		prompt (NOGALSEL);
 		return 0;
 	}
 #endif
 
-	fp = fopen(filename, "w");
-	if(!fp) {
-		prompt(OOPS);
+	fp = fopen (filename, "w");
+	if (!fp) {
+		prompt (OOPS);
 		return 0;
 	}
 
-	memcpy(ginfo->magic, GAL_MAGIC, 4);
-	memset(ginfo->dummy, 0, sizeof(ginfo->dummy));	// clear dummy field for future use
-	
-	if(fwrite(ginfo, sizeof(struct gallup), 1, fp)!=1) { prompt(OOPS); return 0; }
-	
-	for(i=0;i<gnumq(ginfo);i++) {
+	memcpy (ginfo->magic, GAL_MAGIC, 4);
+	memset (ginfo->dummy, 0, sizeof (ginfo->dummy));	// clear dummy field for future use
+
+	if (fwrite (ginfo, sizeof (struct gallup), 1, fp) != 1) {
+		prompt (OOPS);
+		return 0;
+	}
+
+	for (i = 0; i < gnumq (ginfo); i++) {
 
 		q = &questions[i];
-		fwrite(&qtyp(q), sizeof(unsigned char), 1, fp);
-		fwrite(&qflg(q), sizeof(unsigned int), 1, fp);
+		fwrite (&qtyp (q), sizeof (unsigned char), 1, fp);
+		fwrite (&qflg (q), sizeof (unsigned int), 1, fp);
 
-		if(gflgs(ginfo) & GF_QUIZ) {
-			fwrite(&qcrd0(q), sizeof(int), 1, fp);
-			fwrite(&qcrd1(q), sizeof(int), 1, fp);
+		if (gflgs (ginfo) & GF_QUIZ) {
+			fwrite (&qcrd0 (q), sizeof (int), 1, fp);
+			fwrite (&qcrd1 (q), sizeof (int), 1, fp);
 		}
-		
-		outputcharp(qprm(q), fp);
-				
-		switch(qtyp(q)) {
+
+		outputcharp (qprm (q), fp);
+
+		switch (qtyp (q)) {
+		case GQ_NUMBER:
+			fwrite (&qnummn (q), sizeof (int), 1, fp);
+			fwrite (&qnummx (q), sizeof (int), 1, fp);
+			break;
+		case GQ_FREETEXT:
+			fwrite (&qtxtln (q), sizeof (int), 1, fp);
+			break;
+		case GQ_SELECT:
+			outputcharp (qseldt (q), fp);
+			break;
+		case GQ_COMBO:
+			outputcharp (qcomdt (q), fp);
+			outputcharp (qcompr (q), fp);
+			outputcharp (qcomch (q), fp);
+			break;
+		}
+
+		if (gflgs (ginfo) & GF_QUIZ) {
+			a = qans (q);
+			switch (qtyp (q)) {
 			case GQ_NUMBER:
-				fwrite(&qnummn(q), sizeof(int), 1, fp);
-				fwrite(&qnummx(q), sizeof(int), 1, fp);
+				fwrite (&anumdt (a), sizeof (int), 1, fp);
 				break;
 			case GQ_FREETEXT:
-				fwrite(&qtxtln(q), sizeof(int), 1, fp);
+				outputcharp (atxtdt (a), fp);
 				break;
 			case GQ_SELECT:
-				outputcharp(qseldt(q), fp);
+				fwrite (&aseldt (a), sizeof (int), 1, fp);
 				break;
-			case GQ_COMBO:
-				outputcharp(qcomdt(q), fp);
-				outputcharp(qcompr(q), fp);
-				outputcharp(qcomch(q), fp);
-				break;
-		}
-		
-		if(gflgs(ginfo) & GF_QUIZ) {
-			a = qans(q);
-			switch(qtyp(q)) {
-				case GQ_NUMBER:
-					fwrite(&anumdt(a), sizeof(int), 1, fp);
-					break;
-				case GQ_FREETEXT:
-					outputcharp(atxtdt(a), fp);
-					break;
-				case GQ_SELECT:
-					fwrite(&aseldt(a), sizeof(int), 1, fp);
-					break;
 			}
 		}
 	}
 
-	fclose(fp);
-  return 1;
+	fclose (fp);
+	return 1;
 }
 
 
 /* free a gallup questions/answers list */
-void freegallup(void)
+void
+freegallup (void)
 {
-  unsigned int i;
-  struct question *q;
-  struct answer *a;
-  
-	if(gallup_loaded) {
-		for(i=0;i<gnumq(ginfo);i++) {
+	unsigned int i;
+	struct question *q;
+	struct answer *a;
+
+	if (gallup_loaded) {
+		for (i = 0; i < gnumq (ginfo); i++) {
 			q = &questions[i];
 
-			if(qprm(q))free(qprm(q));
-			switch(qtyp(q)) {
-				case GQ_SELECT:
-					if(qseldt(q))free(qseldt(q));
-					break;
-				case GQ_COMBO:
-					if(qcomdt(q))free(qcomdt(q));
-					if(qcompr(q))free(qcompr(q));
-					if(qcomch(q))free(qcomch(q));
-					break;
+			if (qprm (q))
+				free (qprm (q));
+			switch (qtyp (q)) {
+			case GQ_SELECT:
+				if (qseldt (q))
+					free (qseldt (q));
+				break;
+			case GQ_COMBO:
+				if (qcomdt (q))
+					free (qcomdt (q));
+				if (qcompr (q))
+					free (qcompr (q));
+				if (qcomch (q))
+					free (qcomch (q));
+				break;
 			}
 
-			if(gflgs(ginfo) & GF_QUIZ) {
-				a = qans(q);
-				switch(qtyp(q)) {
-					case GQ_FREETEXT:
-						if(atxtdt(a))free(atxtdt(a));
-						break;
+			if (gflgs (ginfo) & GF_QUIZ) {
+				a = qans (q);
+				switch (qtyp (q)) {
+				case GQ_FREETEXT:
+					if (atxtdt (a))
+						free (atxtdt (a));
+					break;
 				}
 			}
 		}
-	
-		free(questions);
+
+		free (questions);
 	}
 
 	questions = NULL;
@@ -356,45 +400,53 @@ void freegallup(void)
 
 	gallup_loaded = 0;
 
-	strcpy(gdesc(ginfo), "");
-	strcpy(gfnam(ginfo), "");
+	strcpy (gdesc (ginfo), "");
+	strcpy (gfnam (ginfo), "");
 }
 
 
 /* new version */
-void nullupgallup(void)
+void
+nullupgallup (void)
 {
-  unsigned int i;
+	unsigned int i;
 
-	for(i=0;i<gnumq(ginfo);i++) {
-		qprm(&questions[i]) = NULL;
+	for (i = 0; i < gnumq (ginfo); i++) {
+		qprm (&questions[i]) = NULL;
 	}
 }
 
-		
+
 
 
 /* parses string STR, places a \0 at each \n and allocates idx to point at 
    the beginning of each substring */
-void splitstring(char *str, char ***idx, int *cnt)
+void
+splitstring (char *str, char ***idx, int *cnt)
 {
-  int i=0;
-  char *ct1, *ct2;
+	int     i = 0;
+	char   *ct1, *ct2;
 
 	ct1 = str;
-	while(ct1) {
-		ct1 = strchr(ct1, '\n');
-		if(ct1)i++; else break;
+	while (ct1) {
+		ct1 = strchr (ct1, '\n');
+		if (ct1)
+			i++;
+		else
+			break;
 		ct1++;
 	}
 
 	*cnt = i;
-	
-	*idx = malloc(sizeof(char *) * i);
-	ct1 = ct2 = str; i=0;
-	while(ct1) {
-		while(*ct2 && *ct2 != '\n')ct2++;
-		if(!(*ct2))break;
+
+	*idx = malloc (sizeof (char *) * i);
+	ct1 = ct2 = str;
+	i = 0;
+	while (ct1) {
+		while (*ct2 && *ct2 != '\n')
+			ct2++;
+		if (!(*ct2))
+			break;
 
 		(*idx)[i++] = ct1;
 		*ct2 = '\0';
@@ -403,21 +455,28 @@ void splitstring(char *str, char ***idx, int *cnt)
 	}
 }
 
-void setupgallup(void)
+void
+setupgallup (void)
 {
-  int i;
-  struct question *q;
+	int     i;
+	struct question *q;
 
-	for(i=0;i<gnumq(ginfo);i++) {
+	for (i = 0; i < gnumq (ginfo); i++) {
 		q = &questions[i];
-		switch(qtyp(q)) {
-			case GQ_SELECT:
-				splitstring(qseldt(q), &qseldataidx(q), &qseldatacnt(q));
-				break;
-			case GQ_COMBO:
-				splitstring(qcomdt(q), &qcomdataidx(q), &qcomdatacnt(q));
-				splitstring(qcompr(q), &qcompromidx(q), &qcompromcnt(q));
-				break;
+		switch (qtyp (q)) {
+		case GQ_SELECT:
+			splitstring (qseldt (q), &qseldataidx (q),
+				     &qseldatacnt (q));
+			break;
+		case GQ_COMBO:
+			splitstring (qcomdt (q), &qcomdataidx (q),
+				     &qcomdatacnt (q));
+			splitstring (qcompr (q), &qcompromidx (q),
+				     &qcompromcnt (q));
+			break;
 		}
 	}
 }
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/31 06:59:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -40,9 +43,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 #ifndef __GSC_H
 #define __GSC_H
@@ -56,13 +58,13 @@
 #  else
 #    define debug	if(0)printf
 #  endif
-#else	/* !__BORLANDC__ */
+#else				/* !__BORLANDC__ */
 #  ifdef DEBUG
 #    define debug(f...)	if(gscflags&VERBOSE)printf(##f)
 #  else
 #    define debug(f...)
 #  endif
-#endif	/* !__BORLANDC__ */
+#endif				/* !__BORLANDC__ */
 
 #define SYNTAX		0x01
 #define INFO		0x02
@@ -74,7 +76,10 @@ extern struct gallup gallupsinfo;
 extern char filename[128];
 extern char outname[128];
 
-extern void analyze(char *);
+extern void analyze (char *);
 
 #endif
 
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/31 06:59:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -39,15 +42,14 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #include <stdio.h>
 #include <string.h>
 
-#include "gsc.h"
+#include <megistos/gsc.h>
 
 #if defined(__BORLANDC__)
 #  include "glps-bcc.h"
@@ -56,43 +58,61 @@
 #endif
 
 
-char tabchar[10];
-char *gettab(int n) {memset(tabchar, 0, 10); memset(tabchar, '\t', n); return tabchar; };
+char    tabchar[10];
+char   *
+gettab (int n)
+{
+	memset (tabchar, 0, 10);
+	memset (tabchar, '\t', n);
+	return tabchar;
+};
 
-int tab=0;
+int     tab = 0;
 
 #define show	printf("%s", gettab(tab));printf
 
 
-void analyze(char *filename)
+void
+analyze (char *filename)
 {
-  FILE *fp;
-  char *s, s1[256];
-  int i;
-  struct question *q;
-  struct answer *a;
+	FILE   *fp;
+	char   *s, s1[256];
+	int     i;
+	struct question *q;
+	struct answer *a;
 
 	ginfo = &gallupsinfo;
 
-	show("Loading gallup data file %s\n", filename);
-	_loadgallup(filename, filename, &gallupsinfo);
-	show("%i questions\n", gnumq(ginfo));
+	show ("Loading gallup data file %s\n", filename);
+	_loadgallup (filename, filename, &gallupsinfo);
+	show ("%i questions\n", gnumq (ginfo));
 
-	for(i=0;i<gnumq(ginfo);i++) {
+	for (i = 0; i < gnumq (ginfo); i++) {
 		q = &questions[i];
-		
-		show("Question %i\n", i+1);
-		
+
+		show ("Question %i\n", i + 1);
+
 		tab++;
-		switch(qtyp(q)) {
-			case GQ_NUMBER: strcpy(s1, "number"); break;
-			case GQ_FREETEXT: strcpy(s1, "text"); break;
-			case GQ_SELECT: strcpy(s1, "select"); break;
-			case GQ_COMBO: strcpy(s1, "combo"); break;
+		switch (qtyp (q)) {
+		case GQ_NUMBER:
+			strcpy (s1, "number");
+			break;
+		case GQ_FREETEXT:
+			strcpy (s1, "text");
+			break;
+		case GQ_SELECT:
+			strcpy (s1, "select");
+			break;
+		case GQ_COMBO:
+			strcpy (s1, "combo");
+			break;
 		}
-		
-		show("type = %s\n", s1);
+
+		show ("type = %s\n", s1);
 		tab--;
 	}
 }
 
+
+
+/* End of File */

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/31 06:59:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,9 +44,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 #ifndef __GALLUPS_H
 #define __GALLUPS_H
@@ -65,10 +67,10 @@
 
 struct answer {
 	union {
-		char *anstext;
-		int ansnumber;
-		int ansselect;
-		char *anscombo;
+		char   *anstext;
+		int     ansnumber;
+		int     ansselect;
+		char   *anscombo;
 	} u;
 };
 
@@ -80,36 +82,36 @@ struct answer {
 struct question {
 	unsigned char qtype;
 	unsigned int qflags;
-	int credits[2];
+	int     credits[2];
 
-	char *prompt;
+	char   *prompt;
 
 	union {
 		struct {
-			int textlen;
+			int     textlen;
 		} u_text;
 
 		struct {
-			int numbermin;
-			int numbermax;
+			int     numbermin;
+			int     numbermax;
 		} u_number;
 
 		struct {
-			char *selectdata;
-			int datacount;
-			char **dataidx;
+			char   *selectdata;
+			int     datacount;
+			char  **dataidx;
 		} u_select;
 
 		struct {
-			char *combodata;
-			int datacount;
-			char **dataidx;
+			char   *combodata;
+			int     datacount;
+			char  **dataidx;
 
-			char *comboprompt;
-			int promptcount;
-			char **promptidx;
+			char   *comboprompt;
+			int     promptcount;
+			char  **promptidx;
 
-			char *combochar;
+			char   *combochar;
 		} u_combo;
 	} u;
 
@@ -145,18 +147,18 @@ struct question {
 #define GRESFILE	"RESQ-"
 #define GSUBFILE	"SUBMIT"
 
-#define GF_VIEWRESALL	0x0000001		// all users can view the results
-#define GF_MULTISUBMIT	0x0000002		// a user can take the gallup more than once
-#define GF_LOGUSERID	0x0000004		// we are logging the user ids
-#define GF_POLL		0x1000000		// the gallup is a poll
-#define GF_QUIZ		0x2000000		// the gallup is a quiz
+#define GF_VIEWRESALL	0x0000001	// all users can view the results
+#define GF_MULTISUBMIT	0x0000002	// a user can take the gallup more than once
+#define GF_LOGUSERID	0x0000004	// we are logging the user ids
+#define GF_POLL		0x1000000	// the gallup is a poll
+#define GF_QUIZ		0x2000000	// the gallup is a quiz
 
 /* extras */
-#define GF_TIMED	0x0000010		// the quiz is timed
+#define GF_TIMED	0x0000010	// the quiz is timed
 
 /* these are to be implemented */
-#define GF_EXTRA	0x0000020		// extra checking to finish the quiz is done
-#define GF_GONEXT	0x0000040		// if GF_EXTRA also set, then when a user hangups
+#define GF_EXTRA	0x0000020	// extra checking to finish the quiz is done
+#define GF_GONEXT	0x0000040	// if GF_EXTRA also set, then when a user hangups
 						// while filling a quiz, next time he will be prompted
 						// with the *next* question in line. Otherwise, he will
 						// be prompted with the same last question
@@ -167,14 +169,14 @@ struct question {
 
 
 struct gallup {
-	char magic[4];
+	char    magic[4];
 	unsigned int flags;
 	unsigned int numquestions;
-	char filename[GI_MAXFNLEN];
-	char description[GI_MAXDESCLEN];
-	int credits[3];
-	char creator[24];
-	char dummy[512 - 188];
+	char    filename[GI_MAXFNLEN];
+	char    description[GI_MAXDESCLEN];
+	int     credits[3];
+	char    creator[24];
+	char    dummy[512 - 188];
 };
 extern struct gallup *ginfo;
 
@@ -196,32 +198,32 @@ extern struct question *questions;
 extern struct answer *answers;
 
 
-void init();
-int outputcharp(char *charp, FILE *filep);
-int inputcharp (char **charp, FILE *filep);
-void freegallup(void);
-void nullupgallup(void);
-int _savegallup(char *filename);
-int savegallup(void);
-void setupgallup(void);
-void splitstring(char *, char ***, int *);
-int _loadgallup(char *filename, char *fn, struct gallup *gallupinfo);
-int loadgallup(char *fn, struct gallup *gallupinfo);
-char *listandselectpoll (void);
-void selectpoll(void);
+void    init ();
+int     outputcharp (char *charp, FILE * filep);
+int     inputcharp (char **charp, FILE * filep);
+void    freegallup (void);
+void    nullupgallup (void);
+int     _savegallup (char *filename);
+int     savegallup (void);
+void    setupgallup (void);
+void    splitstring (char *, char ***, int *);
+int     _loadgallup (char *filename, char *fn, struct gallup *gallupinfo);
+int     loadgallup (char *fn, struct gallup *gallupinfo);
+char   *listandselectpoll (void);
+void    selectpoll (void);
 
 #ifndef __GSC__
-void addtosubmitted(useracc_t *u);
-int submitted(useracc_t *u);
+void    addtosubmitted (useracc_t * u);
+int     submitted (useracc_t * u);
 #endif
 
-void saveans();
-void takepoll();
-void viewresults();
-void newgallup(void);
-void erasegallup(void);
+void    saveans ();
+void    takepoll ();
+void    viewresults ();
+void    newgallup (void);
+void    erasegallup (void);
 
-int scriptcompiler(char *script);
+int     scriptcompiler (char *script);
 
 #if defined(__GSC__)
 extern int gscflags;
@@ -230,3 +232,6 @@ extern int gscflags;
 
 #endif
 
+
+
+/* End of File */

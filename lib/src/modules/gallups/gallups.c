@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/31 06:59:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -1564,7 +1567,6 @@ gallup_statistics (void)
 			xfer_run ();
 			xfer_kill_list ();
 		}
-
 //              out_printfile(out);
 
 		unlink (out);
@@ -1783,6 +1785,9 @@ main (int argc, char *argv[])
 	mod_setinfo (&mod_info_gallups);
 	return mod_main (argc, argv);
 }
+
+
+/* End of File */
 
 
 /* End of File */
