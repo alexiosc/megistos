@@ -1,6 +1,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  2003/12/24 18:39:40  alexios
+# Added mkb subdirectory.
+#
 # Revision 1.5  2003/09/30 15:14:30  alexios
 # Updated SUBDIRS for new directory structure.
 #
@@ -24,7 +27,7 @@ else !HAVE_DOXYGEN
 DOCDIR = 
 endif !HAVE_DOXYGEN
 
-SUBDIRS = po intl m4 $(DOCDIR) libltdl libmegistos src
+SUBDIRS = po intl m4 $(DOCDIR) libltdl libmegistos mbk src
 
 ACLOCAL_AMFLAGS = -I m4
 
