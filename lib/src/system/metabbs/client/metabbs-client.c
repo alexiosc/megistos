@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/22 22:14:05  alexios
+ * Brought over to the new source tree.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -62,11 +65,11 @@ static const char rcsinfo[] = "$Id$";
 #include <rpc/rpc.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_sysvar.h>
-#include <megistos/mbk_metabbs-client.h>
+#include <mbk/mbk_sysvar.h>
+#include <mbk/mbk_metabbs-client.h>
 #define __METABBS_UNAMBIGUOUS__ 1
-#include <megistos/mbk_metabbs.h>
-#include <megistos/metaservices.h>
+#include <mbk/mbk_metabbs.h>
+#include "../daemons/rpc.metabbs/metaservices.h"
 
 
 extern int errno;
