@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2001/05/26 20:26:00  alexios
+ * Corrected bug that caused time estimations to be negative with SSH-type
+ * connections.
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -134,7 +138,7 @@ getfilesize()
 
   xfertime=(int)
     (rint(((double)filesize) /
-	   ((((double)(thisuseronl.baudrate?thisuseronl.baudrate:38400)/10.0)*
+	   ((((double)(thisuseronl.baudrate>0?thisuseronl.baudrate:38400)/10.0)*
 	    (((double)peffic/100.0))) * 60.0)));
 }
 
