@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.7  2003/09/30 15:07:50  alexios
+# Added megistos-config and its manpage to the distribution.
+#
 # Revision 1.6  2003/09/29 21:38:01  alexios
 # Renamed src/ directory to lib/ to accommodate more source code in this
 # tree.
@@ -78,7 +81,11 @@ libmegistos_la_CFLAGS = @CFLAGS@ -Wall
 
 bin_SCRIPTS = megistos-config
 
+man_MANS=megistos-config.1
+
 DISTCLEANFILES = version.mk
+
+EXTRA_DIST = mkversion.sh
 
 version.mk \
 version.h:	version.mk $(libmegistos_la_SOURCES) ../configure.in
