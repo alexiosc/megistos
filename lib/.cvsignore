@@ -1,5 +1,8 @@
 Makefile
 Makefile.in
+a.2
+a.3
+a.4
 aclocal.m4
 autom4te.cache
 bbsconfig.h
