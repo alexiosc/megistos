@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  2003/09/30 15:08:43  alexios
+ * Modified to handle libtool's libltdl and to display a deprecation
+ * notice whenever the Linux-native header dlfcn.h is requested.
+ *
  * Revision 1.7  2003/09/28 22:27:16  alexios
  * Added NLS stuff.
  *
@@ -101,8 +105,10 @@
 /* The dynamic loader library stuff */
 
 #ifdef WANT_DLFCN_H
-#  ifdef HAVE_DLFCN_H
-#    include <dlfcn.h>
+#  error "Do not use dlfcn, use libtool ltdl instead."
+#else
+#  ifdef WANT_LTDL_H
+#    include <ltdl.h>
 #  endif
 #endif
 
