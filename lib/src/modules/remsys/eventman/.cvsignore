@@ -1,5 +1,5 @@
 .deps
 .libs
-Makefile
 Makefile.in
-fixemail
+eventman
+mbk_eventman.h
