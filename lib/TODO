@@ -1,0 +1,22 @@
+-*- text -*-
+
+$Id$
+
+
+
+To do list for Megistos BBS rationalisation and modernisation.
+
+
+* Debianise library (done)
+
+* Make prefixes soft.
+
+* Use GNU build tools.
+
+* Use I18N for built-in messages.
+
+* Use unicode (or a superset thereof) for the internal representation
+  of strings.
+
+* Use XML for message blocks and other configuration files.
+
