@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 19:44:11  alexios
+ * Curses fixes.
+ *
  * Revision 1.4  2003/12/23 23:20:22  alexios
  * Ran through megistos-config --oh.
  *
@@ -74,8 +77,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/vised.h>
-#include <megistos/mbk_vised.h>
+#include "vised.h"
+#include "mbk_vised.h"
 
 
 struct line *
@@ -608,7 +611,7 @@ printansi (char *s)
 }
 
 
-void
+attr_t
 attr (int cga_attr)
 {
 	int     fg = cga_attr & 0x07;
@@ -626,6 +629,8 @@ attr (int cga_attr)
 			attron (A_BLINK);
 		attron (COLOR_PAIR ((bg * 8 + fg)));
 	}
+
+	return getattrs (stdscr);
 }
 
 
@@ -644,7 +649,8 @@ cleartoeol ()
 void
 maskblock (int x1, int y1, int x2, int y2, unsigned char a)
 {
-	int     x, y;
+	int     y;
+	attr_t  ca;
 
 	if (x1 < 0 && x2 < 0)
 		return;
@@ -659,13 +665,20 @@ maskblock (int x1, int y1, int x2, int y2, unsigned char a)
 	x2 = min (COLS - 1, max (0, x2));
 	y2 = min (LINES - 1, max (0, y2));
 
-	attr (a);
+	ca = attr (a);
 	for (y = y1; y <= y2; y++) {
+#if 0
 		for (x = x1; x <= x2; x++) {
 			mvaddch (y, x,
 				 (unsigned char) (stdscr->_line[y].
 						  text[x] & 0xff));
 		}
+#endif
+
+		mvchgat (y, x1, x2 - x1 + 1,
+			 ca & A_ATTRIBUTES,
+			 PAIR_NUMBER (ca),
+			 NULL);
 	}
 }
 
