@@ -1,0 +1,9 @@
+# $Id$
+# 
+# $Log$
+# Revision 1.1  2003/09/28 12:59:00  alexios
+# Initial revision.
+#
+#
+src/bbsmod.c
+src/errorprompts.h
