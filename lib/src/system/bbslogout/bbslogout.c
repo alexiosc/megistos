@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 08:18:08  alexios
+ * Corrected minor #include discrepancies.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -73,7 +76,7 @@ static const char rcsinfo[] = "$Id$";
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_login.h>
+#include <mbk/mbk_login.h>
 
 
 promptblock_t *msg;

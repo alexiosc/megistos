@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 08:18:09  alexios
+ * Corrected minor #include discrepancies.
+ *
  * Revision 1.4  2003/12/22 17:23:37  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -53,7 +56,7 @@ static const char rcsinfo[] = "$Id$";
 #define WANT_UNISTD_H 1
 #include <megistos/bbsinclude.h>
 #include <megistos/bbs.h>
-#include <megistos/bbsgetty.h>
+#include "bbsgetty.h"
 
 
 #define EXPECT 0
