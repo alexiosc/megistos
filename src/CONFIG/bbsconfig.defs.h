@@ -341,7 +341,7 @@
 #define HAVE_LIBTERMCAP 1
 
 /* Define if you have the typhoon library (-ltyphoon).  */
-/* #undef HAVE_LIBTYPHOON */
+#define HAVE_LIBTYPHOON 1
 
 /* Define if you have the z library (-lz).  */
 #define HAVE_ZLIB 1
