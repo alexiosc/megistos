@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 13:00:23  alexios
+ * The preprocessor symbols have moved to Makefile.am.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -96,7 +99,7 @@
 
 
 /* define if we use bbs prompt subsystem */
-#define BBSPROMPTS
+/*#define BBSPROMPTS*/
 
 
 /**********************************************************************************/
@@ -104,7 +107,7 @@
 /* Do not define more than one at the same time                                   */
 /**********************************************************************************/
 /* these will be defined in Makefile */
-//#define MEGISTOS_BBS
+/*#define MEGISTOS_BBS*/
 
 
 /* define LOG directory */
