@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 08:18:35  alexios
+ * Fixed stdargs issue.
+ *
  * Revision 1.4  2003/12/22 17:23:37  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -82,14 +85,11 @@ setdebuglevel (int i)
    are filled in by the debug() macro. */
 
 void
-_debug (level, file, line, format, va_alist)
-int     level, line;
-char   *format, *file;
-va_dcl
+_debug (int level, char *file, int line, char *format, ...)
 {
 	va_list args;
 
-	va_start (args);
+	va_start (args, format);
 	if (level & debuglevel) {
 		void    initdebug ();
 
