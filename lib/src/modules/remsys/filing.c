@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 21:53:06  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -69,9 +72,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/remsys.h>
 
-#include <megistos/mbk_remsys.h>
+#include "remsys.h"
+#include "mbk_remsys.h"
 
 
 void
