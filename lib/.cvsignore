@@ -1,6 +1,14 @@
+Makefile
 Makefile.in
 aclocal.m4
+bbsconfig.h
 bbsconfig.h.in
+config.cache
 config.h.in
+config.log
+config.status
 configure
+configure-stamp
+libtool
+stamp-h
 stamp-h.in
