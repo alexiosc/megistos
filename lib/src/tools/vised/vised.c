@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 19:44:23  alexios
+ * Minor fixes.
+ *
  * Revision 1.4  2003/12/23 23:20:22  alexios
  * Ran through megistos-config --oh.
  *
@@ -110,8 +113,8 @@ static const char rcsinfo[] =
 
 #include <sys/kd.h>
 #include <megistos/bbs.h>
-#include <megistos/vised.h>
-#include <megistos/mbk_vised.h>
+#include "vised.h"
+#include "mbk_vised.h"
 
 
 #ifndef GREEK
@@ -166,6 +169,7 @@ char   *statuso;
 char   *statusk;
 
 
+#ifdef GREEK
 static char *
 latin (char *s)
 {
@@ -174,6 +178,7 @@ latin (char *s)
 	strcpy (buf, s);
 	return latinize (buf);
 }
+#endif /* GREEK */
 
 
 int
@@ -320,7 +325,7 @@ savefile ()
 	if ((fp = fopen (filename, "w")) == NULL) {
 		int     i = errno;
 
-		prompt (SAVEERR, i, sys_errlist[i]);
+		prompt (SAVEERR, i, strerror (i));
 		error_setnotify (0);
 		errno = i;
 		error_fatalsys ("Unable to write to %s", filename);
