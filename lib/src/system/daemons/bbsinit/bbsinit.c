@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/30 14:58:59  alexios
+ * Brought over to new build structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,9 +50,9 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
+#ifndef RCS_VER
+#  define RCS_VER "$Id$"
+const char *__RCS = RCS_VER;
 #endif
 
 
@@ -60,6 +63,7 @@ const char *__RCS=RCS_VER;
 #define WANT_PWD_H 1
 #define WANT_SYS_WAIT_H 1
 #define WANT_SYS_TYPES_H 1
+#define WANT_SYS_WAIT_H 1
 #define WANT_IOCTL_H 1
 #define WANT_UNISTD_H 1
 #define WANT_FCNTL_H 1
@@ -69,224 +73,245 @@ const char *__RCS=RCS_VER;
 #include "bbs.h"
 
 
-int bbsuid, bbsgid;
-char *progname;
+int     bbsuid, bbsgid;
+char   *progname;
 
 
 
 static void
-getpwbbs()
+getpwbbs ()
 {
-  struct passwd *pass=pass=getpwnam(BBSUSERNAME);
-  if(pass==NULL)error_fatal("User %s not found.",BBSUSERNAME);
-  bbsuid=pass->pw_uid;
-  bbsgid=pass->pw_gid;
+	struct passwd *pass = pass = getpwnam (BBSUSERNAME);
+
+	if (pass == NULL)
+		error_fatal ("User %s not found.", BBSUSERNAME);
+	bbsuid = pass->pw_uid;
+	bbsgid = pass->pw_gid;
 }
 
 
 static void
-storepid()
+storepid ()
 {
-  FILE *fp=fopen(mkfname(BBSETCDIR"/bbsinit.pid"),"w");
-  if(fp==NULL){
-    error_fatalsys("Unable to open %s/bbsinit.pid for writing.",mkfname(""));
-  }
-  fprintf(fp,"%d",(int)getpid());
-  fclose(fp);
-  chmod(mkfname(BBSETCDIR"/bbsinit.pid"),0600);
-  chown(mkfname(BBSETCDIR"/bbsinit.pid"),0,0);
+	FILE   *fp = fopen (mkfname (BBSETCDIR "/bbsinit.pid"), "w");
+
+	if (fp == NULL) {
+		error_fatalsys ("Unable to open %s/bbsinit.pid for writing.",
+				mkfname (""));
+	}
+	fprintf (fp, "%d", (int) getpid ());
+	fclose (fp);
+	chmod (mkfname (BBSETCDIR "/bbsinit.pid"), 0600);
+	chown (mkfname (BBSETCDIR "/bbsinit.pid"), 0, 0);
 }
 
 
 struct daemon {
-  char *name;
-  char *binary;
-  char *pidfile;
-  int   ismaster;
-  int   pid;
+	char   *name;
+	char   *binary;
+	char   *pidfile;
+	int     ismaster;
+	int     pid;
 };
 
 
-#define _(x,y,z) {x,BINDIR"/"x,BBSETCDIR"/"x".pid",y,z}
+#define d(x,y,z) {x,BINDIR"/"x,BBSETCDIR"/"x".pid",y,z}
 
 struct daemon daemons[] = {
-  {"rpc.metabbs", BINDIR"/rpc.metabbs", BBSETCDIR"/rpc.metabbs.pid",  0, 0},
-  {"bbslockd",    BINDIR"/bbslockd",    BBSETCDIR"/bbslockd.pid",     0, 0},
-  {"bbsd",        BINDIR"/bbsd",        BBSETCDIR"/bbsd.pid",         1, 0},
-  {"statd",       BINDIR"/statd",       BBSETCDIR"/statd.pid",        0, 0},
-  {"msgd",        BINDIR"/msgd",        BBSETCDIR"/msgd.pid",         0, 0},
-  {"",            "",                   "", 0, 0}
+	{"rpc.metabbs", BINDIR "/rpc.metabbs", BBSETCDIR "/rpc.metabbs.pid", 0,
+	 0},
+	{"bbslockd", BINDIR "/bbslockd", BBSETCDIR "/bbslockd.pid", 0, 0},
+	{"bbsd", BINDIR "/bbsd", BBSETCDIR "/bbsd.pid", 1, 0},
+	{"statd", BINDIR "/statd", BBSETCDIR "/statd.pid", 0, 0},
+	{"msgd", BINDIR "/msgd", BBSETCDIR "/msgd.pid", 0, 0},
+	{"", "", "", 0, 0}
 };
 
 
 void
-murder_spree()
+murder_spree ()
 {
-  int i;
-  for(i=0;daemons[i].name[0];i++){
-    if(daemons[i].pid>1){
-      register int pid=daemons[i].pid;
-      kill(pid,SIGTERM);
-      kill(-pid,SIGTERM);
-    }
-  }
-  sleep(3);
-  for(i=0;daemons[i].name[0];i++){
-    if(daemons[i].pid>1){
-      register int pid=daemons[i].pid;
-      kill(pid,SIGKILL);
-      kill(-pid,SIGKILL);
-    }
-  }
-}
+	int     i;
 
+	for (i = 0; daemons[i].name[0]; i++) {
+		if (daemons[i].pid > 1) {
+			register int pid = daemons[i].pid;
 
-static void
-mainloop()
-{
-  int i, pid, status;
-
-  for(;;){
-#ifdef DEBUG_
-    fprintf(stderr,"bbsinit: in main loop...\n");
-#endif
-
-
-    /* Check if any daemons have died */
-
-    for(i=0;daemons[i].name[0];i++){
-      int fd;
-      char spid[80];
-      
-      if((fd=open(mkfname(daemons[i].pidfile),O_RDONLY))<0)continue;
-      bzero(spid,sizeof(spid));
-      read(fd,spid,sizeof(spid)-1);
-      close(fd);
-      
-      if((pid=atoi(spid))>1){
-	if(!kill(pid,0))continue;
-	
-#ifdef DEBUG_
-	fprintf(stderr,"bbsinit: daemon %s (pid %d) died.\n",
-		daemons[i].name,pid);
-#endif
-	daemons[i].pid=0;
-	if(daemons[i].ismaster)murder_spree();
-	
-      }
-    }
-
-
-    /* (Re)spawn any dead daemons */
-
-    for(i=0;daemons[i].name[0];i++){
-
-      /* Is the daemon dead? */
-
-      if(daemons[i].pid==0){
-	int pid;
-
-#ifdef DEBUG_
-	fprintf(stderr,"bbsinit: spawning %s.\n",daemons[i].name);
-#endif
-
-	switch(pid=fork()){
-	case -1:
-	  error_logsys("Unable to fork() while spawning daemon %s",daemons[i].name);
-	  break;
-	case 0:
-	  execl(mkfname(daemons[i].binary),daemons[i].binary,NULL);
-	  error_fatalsys("Unable to spawn daemon %s (%s)",
-		   daemons[i].name,mkfname(daemons[i].binary));
-	  break;
-	default:
-	  daemons[i].pid=pid;
+			kill (pid, SIGTERM);
+			kill (-pid, SIGTERM);
+		}
 	}
-	
-	sleep(1);
-	waitpid(pid,&status,0);
-      }
-    }
+	sleep (3);
+	for (i = 0; daemons[i].name[0]; i++) {
+		if (daemons[i].pid > 1) {
+			register int pid = daemons[i].pid;
 
-
-    /* Sleep for a bit. */
-
-    sleep(5);
-  }
+			kill (pid, SIGKILL);
+			kill (-pid, SIGKILL);
+		}
+	}
 }
 
 
 static void
-checkuid()
+mainloop ()
 {
-  if (getuid()){
-    fprintf(stderr, "%s: getuid: not super-user\n", progname);
-    exit(1);
-  }
+	int     i, pid, status;
+
+	for (;;) {
+#ifdef DEBUG_
+		fprintf (stderr, "bbsinit: in main loop...\n");
+#endif
+
+
+		/* Check if any daemons have died */
+
+		for (i = 0; daemons[i].name[0]; i++) {
+			int     fd;
+			char    spid[80];
+
+			if ((fd =
+			     open (mkfname (daemons[i].pidfile),
+				   O_RDONLY)) < 0)
+				continue;
+			bzero (spid, sizeof (spid));
+			read (fd, spid, sizeof (spid) - 1);
+			close (fd);
+
+			if ((pid = atoi (spid)) > 1) {
+				if (!kill (pid, 0))
+					continue;
+
+#ifdef DEBUG_
+				fprintf (stderr,
+					 "bbsinit: daemon %s (pid %d) died.\n",
+					 daemons[i].name, pid);
+#endif
+				daemons[i].pid = 0;
+				if (daemons[i].ismaster)
+					murder_spree ();
+
+			}
+		}
+
+
+		/* (Re)spawn any dead daemons */
+
+		for (i = 0; daemons[i].name[0]; i++) {
+
+			/* Is the daemon dead? */
+
+			if (daemons[i].pid == 0) {
+				int     pid;
+
+#ifdef DEBUG_
+				fprintf (stderr, "bbsinit: spawning %s.\n",
+					 daemons[i].name);
+#endif
+
+				switch (pid = fork ()) {
+				case -1:
+					error_logsys
+					    ("Unable to fork() while spawning daemon %s",
+					     daemons[i].name);
+					break;
+				case 0:
+					execl (mkfname (daemons[i].binary),
+					       daemons[i].binary, NULL);
+					error_fatalsys
+					    ("Unable to spawn daemon %s (%s)",
+					     daemons[i].name,
+					     mkfname (daemons[i].binary));
+					break;
+				default:
+					daemons[i].pid = pid;
+				}
+
+				sleep (1);
+				waitpid (pid, &status, 0);
+			}
+		}
+
+
+		/* Sleep for a bit. */
+
+		sleep (5);
+	}
 }
 
 
 static void
-forkdaemon()
+checkuid ()
 {
-  switch(fork()){
-  case -1:
-    fprintf(stderr,"%s: fork: unable to fork daemon\n",progname);
-    exit(1);
-  case 0:
-    ioctl(0,TIOCNOTTY,NULL);
-    setsid();
+	if (getuid ()) {
+		fprintf (stderr, "%s: getuid: not super-user\n", progname);
+		exit (1);
+	}
+}
+
+
+static void
+forkdaemon ()
+{
+	switch (fork ()) {
+	case -1:
+		fprintf (stderr, "%s: fork: unable to fork daemon\n",
+			 progname);
+		exit (1);
+	case 0:
+		ioctl (0, TIOCNOTTY, NULL);
+		setsid ();
 #if 0
 
-    /* These are ifdeffed out because of an insiduous daemonic bug
-       involving file descriptors. */
+		/* These are ifdeffed out because of an insiduous daemonic bug
+		   involving file descriptors. */
 
-    close(0);
-    close(1);
-    close(2);
+		close (0);
+		close (1);
+		close (2);
 #endif
-    break;
-  default:
-    exit(0);
-  }
+		break;
+	default:
+		exit (0);
+	}
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  progname=argv[0];
-  mod_setprogname(argv[0]);
-  setenv("CHANNEL","[bbsinit]",1);
+	progname = argv[0];
+	mod_setprogname (argv[0]);
+	setenv ("CHANNEL", "[bbsinit]", 1);
 
-  /* Some of these are merely wishful thinking, of course. */
+	/* Some of these are merely wishful thinking, of course. */
 
 
-  signal(SIGHUP,SIG_IGN);
-  signal(SIGINT,SIG_IGN);
-  signal(SIGQUIT,SIG_IGN);
-  signal(SIGILL,SIG_IGN);
-  signal(SIGTRAP,SIG_IGN);
-  signal(SIGIOT,SIG_IGN);
-  signal(SIGBUS,SIG_IGN);
-  signal(SIGFPE,SIG_IGN);
-  signal(SIGKILL,SIG_IGN);	/* Yeah, right */
-  signal(SIGUSR1,SIG_IGN);
-  signal(SIGSEGV,SIG_IGN);
-  signal(SIGUSR2,SIG_IGN);
-  signal(SIGUSR2,SIG_IGN);
-  signal(SIGPIPE,SIG_IGN);
-  signal(SIGALRM,SIG_IGN);
-  signal(SIGTERM,SIG_IGN);
-  /*  signal(SIGCHLD,SIG_IGN); */
-  signal(SIGCONT,SIG_IGN);
-  signal(SIGSTOP,SIG_IGN);
+	signal (SIGHUP, SIG_IGN);
+	signal (SIGINT, SIG_IGN);
+	signal (SIGQUIT, SIG_IGN);
+	signal (SIGILL, SIG_IGN);
+	signal (SIGTRAP, SIG_IGN);
+	signal (SIGIOT, SIG_IGN);
+	signal (SIGBUS, SIG_IGN);
+	signal (SIGFPE, SIG_IGN);
+	signal (SIGKILL, SIG_IGN);	/* Yeah, right */
+	signal (SIGUSR1, SIG_IGN);
+	signal (SIGSEGV, SIG_IGN);
+	signal (SIGUSR2, SIG_IGN);
+	signal (SIGUSR2, SIG_IGN);
+	signal (SIGPIPE, SIG_IGN);
+	signal (SIGALRM, SIG_IGN);
+	signal (SIGTERM, SIG_IGN);
+	/*  signal(SIGCHLD,SIG_IGN); */
+	signal (SIGCONT, SIG_IGN);
+	signal (SIGSTOP, SIG_IGN);
 
-  checkuid();			/* Make sure the superuser is running us */
-  forkdaemon();			/* Fork() the daemon */
-  getpwbbs();			/* Get the /etc/passwd entry user 'bbs' */
-  storepid();			/* Store the daemon's PID */
-  mainloop();			/* Finally, run the daemon's main loop */
+	checkuid ();		/* Make sure the superuser is running us */
+	forkdaemon ();		/* Fork() the daemon */
+	getpwbbs ();		/* Get the /etc/passwd entry user 'bbs' */
+	storepid ();		/* Store the daemon's PID */
+	mainloop ();		/* Finally, run the daemon's main loop */
 
-  return 0;
+	return 0;
 }
