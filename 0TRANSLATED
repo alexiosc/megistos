@@ -36,8 +36,8 @@ remsys			Y	Y
 signup			Y	Y
 stats			Y	Y
 sysvar			Y	Y
-teleactions
-telecon
+teleactions		Y	Y
+telecon			0	Y
 telecon.bg
 updown			Y	Y
 vised			Y	Y
@@ -48,6 +48,9 @@ CVS/RCS History:
 $Id$
 
 $Log$
+Revision 1.9  2001/05/20 15:58:33  alexios
+Updated to reflect new status (translated teleconference action verbs).
+
 Revision 1.8  2001/05/20 13:57:14  alexios
 Updated translation status (completed remsys.msg translation).
 
