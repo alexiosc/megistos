@@ -30,6 +30,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/03 05:45:23  alexios
+ * One minor aesthetic/clarity fix.
+ *
+ * Revision 1.6  2004/02/29 17:40:34  alexios
+ * Minor fixes to account for the new directory names.
+ *
  * Revision 1.5  2003/12/23 07:20:28  alexios
  * Fixed last #include issues.
  *
@@ -313,6 +323,7 @@ mmangopage (char *pagename)
 		prompt (NOAXES1, pagename);
 		return 0;
 	}
+	
 	if ((thisuseronl.flags & OLF_MMGCDGO) == 0)
 		strncpy (thisuseronl.prevpage, thisuseronl.curpage, 15);
 	strncpy (thisuseronl.curpage, pagename, 15);
@@ -324,9 +335,8 @@ mmangopage (char *pagename)
 		}
 		if (curpage.m.type == PAGETYPE_MENU) {
 			int     i;
-
-			for (i = 0; curpage.m.opts[i].opt && i < MENUOPTNUM;
-			     i++) {
+			
+			for (i = 0; curpage.m.opts[i].opt && i < MENUOPTNUM; i++) {
 				if (!checkpperm (curpage.m.opts[i].name)) {
 					curpage.m.opts[i].opt *= -1;
 				}
@@ -473,8 +483,9 @@ handleexit ()
 	if (sameas (curpage.m.name, toppag) || curpage.m.prev[0] == 0
 	    || sameas (curpage.m.prev, extpag)) {
 		return checkexit ();
-	} else
+	} else {
 		mmangopage (curpage.m.prev);
+	}
 	return 0;
 }
 
@@ -582,7 +593,7 @@ handleexecpage ()
 		thisuseronl.flags |= OLF_MMCONCAT;
 
 	mod_done (INI_ALL);
-	strcpy (fname, mkfname (BINDIR "/%s", curpage.e.fname));
+	strcpy (fname, mkfname (MODULEDIR "/%s", curpage.e.fname));
 	execlp (fname, fname, "--run", NULL);
 	prompt (CANTXEC, curpage.e.name);
 	exit (0);

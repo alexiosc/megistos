@@ -28,6 +28,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.8  2004/02/29 17:15:42  alexios
+ * Removed a potential buffer overflow. Added a four-level spin buffers
+ * for mkfname() to account for its being used multiple times within the
+ * same print() invocation, etc.
+ *
  * Revision 1.7  2003/12/24 18:35:08  alexios
  * Fixed #includes.
  *
@@ -146,8 +155,15 @@ char   *
 mkfname (char *fmt, ...)
 {
 	va_list args;
-	char    tmp[2048];
-	static char buf[2048];
+	char    tmp [1024], * buf = NULL;
+	static char * bufs [4] = { NULL, NULL, NULL, NULL };
+	static int spin;
+	
+	/* Spin the buffers */
+
+	spin = (spin + 1) % 4;
+	if (bufs [spin] == NULL) bufs [spin] = (char *) alcmem (1024);
+	buf = bufs [spin];
 
 	/* Find out our prefix */
 
@@ -164,7 +180,7 @@ mkfname (char *fmt, ...)
 
 	/* Prepend the prefix to the format. Chop double slashes */
 
-	strcpy (tmp, bbsprefix);
+	strncpy (tmp, bbsprefix, sizeof (tmp));
 	if (tmp[strlen (tmp) - 1] == '/')
 		tmp[strlen (tmp) - 1] = 0;
 	strcat (tmp, "/");

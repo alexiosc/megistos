@@ -106,6 +106,20 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.3  2004/02/29 17:18:14  alexios
+ * Numerous changes to the dual mode behaviour (development/instance) of
+ * msgidx. The in-instance check is now performed on BBSPREFIX, not
+ * BBSCODE. When running within a BBS instance, header files are no
+ * longer created.
+ *
+ * Revision 1.2  2004/02/22 18:53:45  alexios
+ * Fixed four instances of MSGSDIR (the club/email directory) appearing
+ * instead of the MBKDIR, where the .mbk files should really be stored.
+ *
  * Revision 1.1  2003/12/19 13:11:14  alexios
  * *** empty log message ***
  *
@@ -160,7 +174,7 @@ static enum {
 	mode_undecided = 0,
 	mode_source,
 	mode_instance
-} mode;
+} op_mode;
 
 static char *_hdir, *_mdir;
 
@@ -188,15 +202,15 @@ help ()
 	err ("\nMSGIDX\n\n");
 	err ("Syntax: msgidx message-block-file ...\n\n");
 	
-	if (mode == mode_source) {
+	if (op_mode == mode_source) {
 		err ("Running within a source tree.\n\n");
 		err ("  Target .h directory:   %s\n", HEADERDIR);
 		err ("  Target .mbk directory: %s\n", BLOCKDIR);
-	} else if (mode == mode_instance) {
+	} else if (op_mode == mode_instance) {
 		err ("Running within a BBS instance.\n\n");
-		err ("  BBS instancename (BBSCODE):  %s\n", getenv ("BBSCODE"));
-		err ("  Target .h directory:         %s\n", HEADERDIR);
-		err ("  Target .mbk directory:       %s\n", BLOCKDIR);
+		err ("  BBS prefix (BBSPREFIX):  %s\n", getenv ("BBSPREFIX"));
+		err ("  Target .h directory:     %s\n", HEADERDIR);
+		err ("  Target .mbk directory:   %s\n", BLOCKDIR);
 	}
 
 	exit (-1);
@@ -283,20 +297,28 @@ parse (char *filename)
 
 	/* Create C header file */
 
-	sprintf (hdrname, "%s/mbk_%s.h", HEADERDIR, rawname);
-	sprintf (hdrtname, "%s/mbk_%s.h1~", HEADERDIR, rawname);
+	if (op_mode == mode_instance) {
+		sprintf (hdrname, "/dev/null");
+		sprintf (hdrtname, "/dev/null");
+	} else {
+		sprintf (hdrname, "%s/mbk_%s.h", HEADERDIR, rawname);
+		sprintf (hdrtname, "%s/mbk_%s.h1~", HEADERDIR, rawname);
+	}
 	if ((header1 = fopen (hdrtname, "w")) == NULL) {
 		errp ("msgidx: Unable to open %s", hdrtname);
 		perror ("");
 		exit (-1);
 	}
-	sprintf (hdrtname, "%s/mbk_%s.h2~", HEADERDIR, rawname);
+
+	if (op_mode != mode_instance)
+		sprintf (hdrtname, "%s/mbk_%s.h2~", HEADERDIR, rawname);
+
 	if ((header2 = fopen (hdrtname, "w")) == NULL) {
 		errp ("msgidx: Unable to open %s", hdrtname);
 		perror ("");
 		exit (-1);
 	}
-
+	
 	fprintf (header1, headermessage, symbol);
 	fprintf (header2, elsemessage);
 
@@ -473,7 +495,7 @@ parse (char *filename)
 						    sizeof (indexsize) + sizeof (langoffs);
 					}
 					rewind (dict);
-					langoffs[++curlang] = ++indexsize - curlang;
+					langoffs [++curlang] = ++indexsize - curlang;
 
 #ifdef DEBUG
 					PRINT
@@ -587,10 +609,10 @@ parse (char *filename)
 
 	/* Concatenate the two halves of the header file */
 
-	{
+	if (op_mode != mode_instance) {
 		char    command[256];
 		char    fname1[2048], fname2[2048];
-
+		
 		sprintf (hdrtname, "%s/mbk_%s.h~", HEADERDIR, rawname);
 		sprintf (fname1, "%s/mbk_%s.h1~", HEADERDIR, rawname);
 		sprintf (fname2, "%s/mbk_%s.h2~", HEADERDIR, rawname);
@@ -599,7 +621,6 @@ parse (char *filename)
 		unlink (fname1);
 		unlink (fname2);
 	}
-
 
 	fclose (output);
 	fclose (inp_buffer);
@@ -623,7 +644,7 @@ parse (char *filename)
 
 		/* And move the header file to the right place IF it's new */
 
-		{
+		if (op_mode != mode_instance) {
 			struct stat st;
 			char    fname[256];
 
@@ -636,8 +657,8 @@ parse (char *filename)
 			} else
 				printf ("\n");
 			unlink (fname);
-		}
-		unlink (hdrtname);
+			unlink (hdrtname);
+		} else printf ("\n");
 	}
 }
 
@@ -650,11 +671,11 @@ main (int argc, char **argv)
 
 	/* Detect mode of operation */
 
-	mode = mode_undecided;
+	op_mode = mode_undecided;
 	if ((s = getenv ("VIRGINDIR")) != NULL) {
 		struct stat st;
 		if (stat (s, &st) == 0 && S_ISDIR (st.st_mode)) {
-			mode = mode_source;
+			op_mode = mode_source;
 			
 			_hdir = ".";
 
@@ -662,9 +683,9 @@ main (int argc, char **argv)
 			 * and terminating NUL. */
 
 			_mdir = (char *) malloc (strlen (s) + 1 +
-						 strlen (MSGSDIR) + 1);
+						 strlen (MBKDIR) + 1);
 			if (_mdir == NULL) perror ("malloc()");
-			sprintf (_mdir, "%s/"MSGSDIR, s);
+			sprintf (_mdir, "%s/"MBKDIR, s);
 			if (stat (_mdir, &st) || (!S_ISDIR (st.st_mode))) {
 				perror (_mdir);
 				exit (1);
@@ -674,19 +695,20 @@ main (int argc, char **argv)
 			exit (1);
 		}
 	}
-	
-	if ((s = getenv ("BBSCODE")) != NULL) {
-		mode = mode_instance;
+
+	if ((s = getenv ("BBSPREFIX")) != NULL) {
+		op_mode = mode_instance;
 
 		_hdir = MBKINCLUDEDIR;
-		_mdir = (char *) malloc (strlen (__INSTANCEDIR) + 1 +
+		_mdir = (char *) malloc (/*strlen (__INSTANCEDIR) + 1 +*/
 					 strlen (s) + 1 +
-					 strlen (MSGSDIR) + 1);
+					 strlen (MBKDIR) + 1);
 		if (_mdir == NULL) perror ("malloc()");
-		sprintf (_mdir, __INSTANCEDIR"/%s/"MSGSDIR, s);
+		/*sprintf (_mdir, __INSTANCEDIR"/%s/"MBKDIR, s);*/
+		sprintf (_mdir, "%s/%s", s, MBKDIR);
 	}
 
-	if (mode == mode_undecided) {
+	if (op_mode == mode_undecided) {
 		err ("Unable to detect if I'm being called in a source tree ");
 		err ("or a BBS configuration directory. Bailing out.\n\n");
 		exit (1);

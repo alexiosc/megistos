@@ -1,6 +1,13 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:54  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.3  2004/02/29 17:46:52  alexios
+# Moved netclub to the emailclubs module.
+#
 # Revision 1.2  2003/12/25 18:19:41  alexios
 # Netclub now compiles conditionally (on HAVE_METABBS).
 #
@@ -8,17 +15,9 @@
 # Initial revision.
 #
 
-if HAVE_METABBS
-METABBS = netclub
-else !HAVE_METABBS
-METABBS =
-endif !HAVE_METABBS
-
 SUBDIRS = \
 	bbsdialog \
-	bbsmail \
 	checksup \
 	lined \
-	$(METABBS) \
 	updown \
 	vised

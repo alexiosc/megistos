@@ -3,6 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.5  2004/07/15 14:45:15  alexios
+# Changed instances of CFLAGS to AM_CFLAGS and LDFLAGS to AM_LDFLAGS so
+# as not to override user settings.
+#
+# Revision 1.4  2004/02/23 17:01:10  alexios
+# Set installation directory properly.
+#
 # Revision 1.3  2003/12/29 07:48:37  alexios
 # Added the typhoon template, which is necessary to link against
 # clubhdr, in turn necessary to build teleconference modules.
@@ -18,9 +29,10 @@
 include $(top_srcdir)/templates/base
 include $(top_srcdir)/templates/clubhdr
 
-pkglib_PROGRAMS = $(PROGNAMES)
+teleconplugindir = $(pkglibdir)/telecon
+teleconplugin_PROGRAMS = $(PROGNAMES)
 TELECONDIR = $(top_srcdir)/src/modules/telecon
-CFLAGS += -I$(TELECONDIR)
+AM_CFLAGS += -I$(TELECONDIR)
 MISCDEFS = -D__TELEPLUGIN__
 LDFLAGS_EXTRA += -L$(top_builddir)/src/modules/telecon
 LDADD += -lmegistos_teleconplugin

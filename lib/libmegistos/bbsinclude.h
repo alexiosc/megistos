@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.10  2003/12/24 18:38:00  alexios
  * Fixed #includes; fixed conditional inclusion of curses and friends.
  *

@@ -3,6 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.4  2004/07/15 14:45:15  alexios
+# Changed instances of CFLAGS to AM_CFLAGS and LDFLAGS to AM_LDFLAGS so
+# as not to override user settings.
+#
+# Revision 1.3  2004/02/23 17:01:10  alexios
+# Set installation directory properly.
+#
 # Revision 1.2  2003/12/27 13:17:35  alexios
 # Various changes to accommodate the growing pains of the template
 # infrastructure.
@@ -13,9 +24,10 @@
 
 include $(top_srcdir)/templates/base
 
-pkglib_PROGRAMS = $(PROGNAMES)
+mailerplugindir = $(pkglibdir)/mailer
+mailerplugin_PROGRAMS = $(PROGNAMES)
 MAILERDIR = $(top_srcdir)/src/modules/mailer
-CFLAGS += -I$(MAILERDIR)
+AM_CFLAGS += -I$(MAILERDIR)
 MISCDEFS = -D__MAILERPLUGIN__
 LDFLAGS_EXTRA += -L$(MAILERDIR)
 LDADD += -lmegistos_mailerplugin

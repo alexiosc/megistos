@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/17 12:39:34  alexios
+ * Worked around segmentation fault when re-initialising output subsystem
+ * after a file transfer.
+ *
  * Revision 1.5  2003/12/24 18:38:43  alexios
  * Fixed #includes.
  *
@@ -205,18 +213,24 @@ upload (char *prot)
 		}
 
 		thisuseronl.flags |= OLF_BUSY;
-
+		
 		/* Turn off translation if the protocol is binary */
 		if (protocols[f].flags & PRF_BINARY)
 			out_setxlation (XLATION_OFF);
-		msg_close (msg_sys);
+		/* Commented out to work around a segmentation fault issue.
+		   msg_close (msg_sys);
+		   msg_sys = NULL;
+		*/
 		mod_done (INI_OUTPUT | INI_INPUT | INI_SIGNALS);
-
+		
 		system (STTYBIN " sane intr 0x03");
 		result = system (command);
 		system (STTYBIN
 			" -echo start undef stop undef intr undef susp undef");
 		mod_init (INI_OUTPUT | INI_INPUT | INI_SIGNALS);
+		/* Commented out to work around a segmentation fault issue.
+		   msg_sys = msg_open ("sysvar");
+		*/
 		msg_set (msg);
 
 		/* Turn translation back on if necessary */

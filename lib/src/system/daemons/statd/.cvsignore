@@ -3,3 +3,4 @@
 Makefile
 Makefile.in
 statd
+statd.c-oh

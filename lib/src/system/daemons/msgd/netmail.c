@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 16:32:58  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,12 +55,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
-
-
+static const char rcsinfo[] = "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -71,229 +73,248 @@ const char *__RCS=RCS_VER;
 #include "msgd.h"
 
 
-char *
-addhistory(char *h, char *s, int len)
+char   *
+addhistory (char *h, char *s, int len)
 {
-  char temp[1024];
+	char    temp[1024];
 
-  sprintf(temp,"%s %s",s,h);
-  strncpy(h,temp,len);
-  return h;
+	sprintf (temp, "%s %s", s, h);
+	strncpy (h, temp, len);
+	return h;
 }
 
 
 
 void
-postmessage(char *userid, char *body)
+postmessage (char *userid, char *body)
 {
-  FILE   *fp;
-  struct message msg;
-  int    gotaddress=0, bodylen=0, x;
-  char   command[256], fname[256], attdir[256]={0};
-  
-  if((fp=fopen(body,"r+"))==NULL){
-    return;
-  }
-  
-  memset(&msg,0,sizeof(msg));
+	FILE   *fp;
+	message_t msg;
+	int     gotaddress = 0, bodylen = 0, x;
+	char    command[256], fname[256], attdir[256] = { 0 };
 
-  strcpy(msg.to,userid);
-  addhistory(msg.history,HST_NETMAIL,sizeof(msg.history));
-  
-  for(;;){
-    char line[1024], *cp, field[256], value[256];
-    int pos;
-
-    if(!fgets(line,sizeof(line),fp))break;
-    if((cp=strchr(line,10))!=NULL)*cp=0;
-    if(!line[0])break;
-
-    if(sscanf(line,"%s %n%s",field,&pos,value)==2){
-      if(!strcmp("From:",field) && !gotaddress){
-	get_address_from(line,value);
-	strncpy(msg.from,value,sizeof(msg.from));
-      } else if(!strcmp("Reply-To:",field)){
-	get_address_from(line,value);
-	strncpy(msg.from,value,sizeof(msg.from));
-	gotaddress=1;
-      } else if(!strcmp("Subject:",field)){
-	strncpy(msg.subject,&line[pos],sizeof(msg.subject));
-      } else if(!strcmp("X-MsgHdr-FileAttached:",field)){
-	if(value[0]&&strcmp("No",value)){
-	  strncpy(msg.fatt,value,sizeof(msg.fatt));
-	  msg.flags|=MSF_FILEATT|MSF_APPROVD;
+	if ((fp = fopen (body, "r+")) == NULL) {
+		return;
 	}
-      } else if(!strcmp("X-MsgHdr-RRR:",field)){
-	if(sameas("yes",field))msg.flags|=MSF_RECEIPT;
-      } else if(!strcmp("X-MsgLen:",field)){
-	sscanf(value,"%d",&bodylen);
-      }
-    }
-  }
 
-  if(msg.flags&MSF_FILEATT){
-    sprintf(attdir,"%sATT",body);
-    sprintf(command,
-	    "(mkdir %s; cd %s; dd if=%s skip=%ld bs=1c|uudecode) 2>/dev/null",
-	    attdir,attdir,body,ftell(fp)+bodylen-1);
-    x=system(command);
+	memset (&msg, 0, sizeof (msg));
 
-#ifdef DEBUG
-  printf("    system(\"%s\"), exit=%d\n",command,x);
-#endif
+	strcpy (msg.to, userid);
+	addhistory (msg.history, HST_NETMAIL, sizeof (msg.history));
 
-    ftruncate(fileno(fp),ftell(fp)+bodylen);
-    fseek(fp,bodylen,SEEK_CUR);
-  }
-  fclose(fp);
+	for (;;) {
+		char    line[1024], *cp, field[256], value[256];
+		int     pos;
 
-  
-#ifdef DEBUG
-  printf("    msg.from:    (%s)\n",msg.from);
-  printf("    msg.to:      (%s)\n",msg.to);
-  printf("    msg.subject: (%s)\n",msg.subject);
-  printf("    msg.history: (%s)\n",msg.history);
-  printf("    msg.fatt:    (%s)\n",msg.fatt);
-  printf("    msg.flags:   (%08lx)\n",msg.flags);
-#endif
+		if (!fgets (line, sizeof (line), fp))
+			break;
+		if ((cp = strchr (line, 10)) != NULL)
+			*cp = 0;
+		if (!line[0])
+			break;
 
-  
-  sprintf(fname,"%sH",body);
+		if (sscanf (line, "%s %n%s", field, &pos, value) == 2) {
+			if (!strcmp ("From:", field) && !gotaddress) {
+				get_address_from (line, value);
+				strncpy (msg.from, value, sizeof (msg.from));
+			} else if (!strcmp ("Reply-To:", field)) {
+				get_address_from (line, value);
+				strncpy (msg.from, value, sizeof (msg.from));
+				gotaddress = 1;
+			} else if (!strcmp ("Subject:", field)) {
+				strncpy (msg.subject, &line[pos],
+					 sizeof (msg.subject));
+			} else if (!strcmp ("X-MsgHdr-FileAttached:", field)) {
+				if (value[0] && strcmp ("No", value)) {
+					strncpy (msg.fatt, value,
+						 sizeof (msg.fatt));
+					msg.flags |= MSF_FILEATT | MSF_APPROVD;
+				}
+			} else if (!strcmp ("X-MsgHdr-RRR:", field)) {
+				if (sameas ("yes", field))
+					msg.flags |= MSF_RECEIPT;
+			} else if (!strcmp ("X-MsgLen:", field)) {
+				sscanf (value, "%d", &bodylen);
+			}
+		}
+	}
 
-  if((fp=fopen(fname,"w"))==NULL){
-    return;
-  }
-  fwrite(&msg,1,sizeof(msg),fp);
-  fclose(fp);
-
-  if(!attdir[0]){
-    sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),fname,body);
-  } else {
-    sprintf(command,"%s %s %s -c %s/*",mkfname(BBSMAILBIN),fname,body,attdir);
-  }
-
-  sysvar->incnetmsgs++;
-  
-  x=system(command);
+	if (msg.flags & MSF_FILEATT) {
+		sprintf (attdir, "%sATT", body);
+		sprintf (command,
+			 "(mkdir %s; cd %s; dd if=%s skip=%ld bs=1c|uudecode) 2>/dev/null",
+			 attdir, attdir, body, ftell (fp) + bodylen - 1);
+		x = system (command);
 
 #ifdef DEBUG
-  printf("    system(\"%s\"), exit=%d\n",command,x);
+		printf ("    system(\"%s\"), exit=%d\n", command, x);
 #endif
 
-  if(attdir[0]){
-    sprintf(command,"\\rm -rf %s",attdir);
-    x=system(command);
+		ftruncate (fileno (fp), ftell (fp) + bodylen);
+		fseek (fp, bodylen, SEEK_CUR);
+	}
+	fclose (fp);
+
 
 #ifdef DEBUG
-    printf("    system(\"%s\"), exit=%d\n",command,x);
+	printf ("    msg.from:    (%s)\n", msg.from);
+	printf ("    msg.to:      (%s)\n", msg.to);
+	printf ("    msg.subject: (%s)\n", msg.subject);
+	printf ("    msg.history: (%s)\n", msg.history);
+	printf ("    msg.fatt:    (%s)\n", msg.fatt);
+	printf ("    msg.flags:   (%08lx)\n", msg.flags);
 #endif
-  }
 
-  unlink(fname);
-  unlink(body);
+
+	sprintf (fname, "%sH", body);
+
+	if ((fp = fopen (fname, "w")) == NULL) {
+		return;
+	}
+	fwrite (&msg, 1, sizeof (msg), fp);
+	fclose (fp);
+
+	if (!attdir[0]) {
+		sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), fname,
+			 body);
+	} else {
+		sprintf (command, "%s %s %s -c %s/*", mkfname (BBSMAILBIN),
+			 fname, body, attdir);
+	}
+
+	sysvar->incnetmsgs++;
+
+	x = system (command);
+
+#ifdef DEBUG
+	printf ("    system(\"%s\"), exit=%d\n", command, x);
+#endif
+
+	if (attdir[0]) {
+		sprintf (command, "\\rm -rf %s", attdir);
+		x = system (command);
+
+#ifdef DEBUG
+		printf ("    system(\"%s\"), exit=%d\n", command, x);
+#endif
+	}
+
+	unlink (fname);
+	unlink (body);
 }
 
 
 void
-grabmail(char *fname, char *userid)
+grabmail (char *fname, char *userid)
 {
-  char           command[256], tempname[256];
-  struct stat    st;
-  int            msgnum=0,x;
+	char    command[256], tempname[256];
+	struct stat st;
+	int     msgnum = 0, x;
 
-  sprintf(tempname,TMPDIR"/%d%s%08lx",getpid(),userid,time(0));
-  sprintf(command,"mv %s %s",fname,tempname);
-
-#ifdef DEBUG
-    printf("  grabmail: system(\"%s\")\n",command);
-#endif
-
-  if((x=system(command))!=0){
-    
-#ifdef DEBUG
-    printf("  grabmail: system(\"%s\") failed, exit=%d\n",command,x);
-#endif
-
-    return;
-  }
-
-  while(!stat(tempname,&st)){
-    char bodyname[256];
-
-    msgnum++;
-    sprintf(bodyname,TMPDIR"/%d%s%d",getpid(),userid,msgnum);
-    sprintf(command,"echo -e 's 1 %s\\nd 1\\nq'|mail -f %s >&/dev/null",
-	    bodyname,tempname);
+	sprintf (tempname, TMPDIR "/%d%s%08lx", getpid (), userid, time (0));
+	sprintf (command, "mv %s %s", fname, tempname);
 
 #ifdef DEBUG
-      printf("  grabmail: system(\"%s\").\n",command);
+	printf ("  grabmail: system(\"%s\")\n", command);
 #endif
 
-    if((x=system(command))!=0){
+	if ((x = system (command)) != 0) {
 
 #ifdef DEBUG
-      printf("  grabmail: system(\"%s\") failed, exit=%d.\n",command,x);
+		printf ("  grabmail: system(\"%s\") failed, exit=%d\n",
+			command, x);
 #endif
-      
-      break;
-    }
 
-    postmessage(userid,bodyname);
-  }
+		return;
+	}
 
-  for(;msgnum;msgnum--){
-    char victim[256];
-    sprintf(victim,TMPDIR"/%d%s%d",getpid(),userid,msgnum);
-    unlink(victim);
-  }
-  
+	while (!stat (tempname, &st)) {
+		char    bodyname[256];
+
+		msgnum++;
+		sprintf (bodyname, TMPDIR "/%d%s%d", getpid (), userid,
+			 msgnum);
+		sprintf (command,
+			 "echo -e 's 1 %s\\nd 1\\nq'|mail -f %s >&/dev/null",
+			 bodyname, tempname);
+
 #ifdef DEBUG
-    printf("  grabmail: done with file %s, unlinking.\n",tempname);
+		printf ("  grabmail: system(\"%s\").\n", command);
 #endif
-  unlink(tempname);
+
+		if ((x = system (command)) != 0) {
+
+#ifdef DEBUG
+			printf
+			    ("  grabmail: system(\"%s\") failed, exit=%d.\n",
+			     command, x);
+#endif
+
+			break;
+		}
+
+		postmessage (userid, bodyname);
+	}
+
+	for (; msgnum; msgnum--) {
+		char    victim[256];
+
+		sprintf (victim, TMPDIR "/%d%s%d", getpid (), userid, msgnum);
+		unlink (victim);
+	}
+
+#ifdef DEBUG
+	printf ("  grabmail: done with file %s, unlinking.\n", tempname);
+#endif
+	unlink (tempname);
 }
 
 
 void
-getnetmail()
+getnetmail ()
 {
-  DIR           *dp;
-  struct dirent *dir;
-  struct stat   st;
-  char          userid[24], fname[256];
+	DIR    *dp;
+	struct dirent *dir;
+	struct stat st;
+	char    userid[24], fname[256];
 
 #ifdef DEBUG
-  printf("getnetmail(): Parsing net mail.\n");
+	printf ("getnetmail(): Parsing net mail.\n");
 #endif
 
-  if((dp=opendir(NETMAILDIR))==NULL){
+	if ((dp = opendir (NETMAILDIR)) == NULL) {
 #ifdef DEBUG
-    printf("getnetmail(): opendir(NETMAIL,\"r\"): failed, errno=%d.\n",errno);
+		printf
+		    ("getnetmail(): opendir(NETMAIL,\"r\"): failed, errno=%d.\n",
+		     errno);
 #endif
-    return;
-  }
+		return;
+	}
 
-  while((dir=readdir(dp))!=NULL){
-    if(!(strcmp(dir->d_name,".")&&strcmp(dir->d_name,"..")))continue;
+	while ((dir = readdir (dp)) != NULL) {
+		if (!(strcmp (dir->d_name, ".") && strcmp (dir->d_name, "..")))
+			continue;
 
-    strcpy(userid,dir->d_name);
-    if(!usr_exists(userid))continue;
+		strcpy (userid, dir->d_name);
+		if (!usr_exists (userid))
+			continue;
 
-    sprintf(fname,"%s/%s",NETMAILDIR,dir->d_name);
-    if(stat(fname,&st))continue;
-    if(!st.st_size)continue;
+		sprintf (fname, "%s/%s", NETMAILDIR, dir->d_name);
+		if (stat (fname, &st))
+			continue;
+		if (!st.st_size)
+			continue;
 
 #ifdef DEBUG
-    printf("getnetmail(): dir->d_name=%s ",dir->d_name);
-    printf("belongs to: %s\n",userid);
+		printf ("getnetmail(): dir->d_name=%s ", dir->d_name);
+		printf ("belongs to: %s\n", userid);
 #endif
 
-    grabmail(fname,userid);
-  }
-  closedir(dp);
+		grabmail (fname, userid);
+	}
+	closedir (dp);
 
 #ifdef DEBUG
-    printf("getnetmail(): done.\n");
+	printf ("getnetmail(): done.\n");
 #endif
 }
-

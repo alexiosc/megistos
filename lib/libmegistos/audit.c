@@ -28,6 +28,18 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.10  2004/02/29 17:02:20  alexios
+ * Fixed audit trail's permissions.
+ *
+ * Revision 1.9  2004/02/22 18:49:37  alexios
+ * Added code to chown(2) and chmod(2) the audit trails if we are the
+ * superuser and they have just been generated. This is a sanity check to
+ * avoid messing up the permissions on the audit files.
+ *
  * Revision 1.8  2003/12/24 18:35:08  alexios
  * Fixed #includes.
  *
@@ -168,6 +180,11 @@ audit (char *channel, uint32 flags, char *summary, char *format, ...)
 
 	if ((fp = fopen (auditfile, "a")) == NULL)
 		return 0;
+
+	if ((getuid () == 0) && (bbs_uid > 0) && (bbs_gid > 0)) {
+		chown (auditfile, bbs_uid, bbs_gid);
+		chmod (auditfile, 0664);
+	}
 
 	if (channel == NULL)
 		channel = thisuseronl.channel;

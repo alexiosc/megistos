@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:49  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.3  2004/02/29 12:23:25  alexios
+# Split into two subprojects; the module proper and the Infocom
+# interpreter.
+#
 # Revision 1.2  2003/12/24 20:30:57  alexios
 # Fixed the makefile (adventure was really two binaries).
 #
@@ -14,30 +22,13 @@
 # adventure is an actual Megistos module, infoint also uses the very
 # same infrastructure (minus the module declaration).
 
-PROGNAMES = adventure infoint
+SUBDIRS = infoint
+
+PROGNAMES = adventure
 
 BUILT_SOURCES = mbk_adventure.h
 
 adventure_SOURCES = adventure.c
-
-infoint_SOURCES = \
-	control.c \
-	extern.c \
-	fileio.c \
-	input.c \
-	interpre.c \
-	math.c \
-	memory.c \
-	object.c \
-	operand.c \
-	osdepend.c \
-	property.c \
-	screen.c \
-	text.c \
-	unixio.c \
-	variable.c \
-	zip.c \
-	ztypes.h
 
 include $(top_srcdir)/templates/module
 

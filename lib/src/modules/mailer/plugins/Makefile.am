@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:52  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
 # Revision 1.2  2003/12/27 12:56:12  alexios
 # All of the current mailer plugins were moved below the modules
 # implementing their functionality. With the advent of the mailer plugin

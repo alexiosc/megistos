@@ -28,6 +28,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:59:45  alexios
+ * Minor permission/file location issues fixed to account for the new infrastructure.
+ *
  * Revision 1.5  2003/12/27 12:29:38  alexios
  * Adjusted #includes.
  *
@@ -153,8 +160,9 @@ run ()
 	thisuseraux.actions = tlcu.actions;
 
 	if (thisuseronl.telechan[0]) {
-		int     ax =
-		    getusrax (thisuseronl.telechan, thisuseracc.userid);
+		int     ax;
+
+		ax = getusrax (thisuseronl.telechan, thisuseracc.userid);
 		if ((ax & CUF_ACCESS) == 0) {
 			prompt (ENTRBCH, thisuseronl.telechan);
 			strcpy (thisuseronl.telechan, MAINCHAN);

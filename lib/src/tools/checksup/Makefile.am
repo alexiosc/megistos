@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:54  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.3  2004/02/29 12:46:15  alexios
+# Switched to the 'module-like' template to avoid confusion with actual
+# modules.
+#
 # Revision 1.2  2003/12/23 23:21:20  alexios
 # Minor simplifications.
 #
@@ -12,6 +20,6 @@
 
 PROGNAMES = checksup
 
-include $(top_srcdir)/templates/module
+include $(top_srcdir)/templates/module-like
 
 # End of file

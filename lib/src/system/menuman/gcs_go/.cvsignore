@@ -3,4 +3,5 @@
 Makefile
 Makefile.in
 gcs_go.lo
+libgcs10_go.la
 libgcs_go.la

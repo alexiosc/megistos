@@ -28,6 +28,31 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.13  2004/05/22 19:24:30  alexios
+ * One slight code beautification modification.
+ *
+ * Revision 1.12  2004/02/29 17:08:00  alexios
+ * Fixed shmget() error condition checking. Extra error logging for when
+ * a user account can't be saved. Refrain from changing the umask, as
+ * it's set by the rc scripts now. Fixed bug that got the bbs_gid wrong
+ * and clobbered the bbs_uid when reading from the environment. Fixed
+ * file ownership issues on the .emu-* files. Moved the register-* files
+ * to the run/ directory. More chown(2) fixes. Rewrote the --install
+ * module handler to help in the new infrastructure. It no longer prints
+ * out the installation script; now it prints out the module's desired
+ * priorities for all implemented handlers. The rc script takes care of
+ * the rest. --uninstall has now been removed for the same reasons.
+ *
+ * Revision 1.11  2004/02/22 18:51:05  alexios
+ * We now collect bbs_uid and bbs_gid from the environment and fall over
+ * if we can't, as it's an indication of a broken setup (or something
+ * sinister afoot). Initialised the variables to a reasonable value of
+ * -1.
+ *
  * Revision 1.10  2003/12/24 18:35:08  alexios
  * Fixed #includes.
  *
@@ -132,8 +157,8 @@ struct sysvar *sysvar = NULL;
 static promptblock_t *chatmsg;
 static long initialised = 0;
 mod_info_t __module = { "", "", "", "", "" };
-uid_t   bbs_uid;
-gid_t   bbs_gid;
+uid_t   bbs_uid = -1;
+gid_t   bbs_gid = -1;
 int     mod_bot = 0;
 
 
@@ -439,8 +464,8 @@ loaduser ()
 	}
 	fclose (fp);
 
-	if ((thisshm = (struct shmuserrec *) shmat (shmid, NULL, 0)) == NULL) {
-		error_fatalsys ("Unable to shmat() to %s.", fname);
+	if ((thisshm = (struct shmuserrec *) shmat (shmid, NULL, 0)) == -1) {
+		error_fatalsys ("Unable to shmat(%x) to %s.", shmid, fname);
 	}
 
 	thisuseronl.flags &=
@@ -465,7 +490,7 @@ saveuser ()
 	initialised &= ~INI_USER;
 	if (!strcmp (userid, thisuseracc.userid)) {
 		if (!usr_saveaccount (&thisuseracc)) {
-			error_log ("Unable to save account for %s", userid);
+			error_logsys ("Unable to save account for %s", userid);
 		}
 	} else {
 		error_log ("User ID name mismatch \"%s\"!=\"%s\", "
@@ -474,8 +499,8 @@ saveuser ()
 
 	if (!strcmp (userid, thisuseronl.userid)) {
 		if (!usr_saveonlrec (&thisuseronl)) {
-			error_log ("Unable to save online info for %s",
-				   userid);
+			error_logsys ("Unable to save online info for %s",
+				      userid);
 		}
 	} else {
 		error_log ("UserID mismatch \"%s\"!=\"%s\", "
@@ -500,7 +525,7 @@ getprevinput ()
 void
 mod_init (uint32 f)
 {
-	struct passwd *pass;
+	char *s;
 
 #ifdef HAVE_SETLOCALE
 	/* Set locale via LC_ALL.  */
@@ -513,9 +538,10 @@ mod_init (uint32 f)
 	textdomain (PACKAGE);
 #endif
 
-	umask (0007);
+	/* umask (0007); Obsoleted: now set by RC scripts */
 	mod_regpid (getenv ("CHANNEL"));
 	initialised |= f;
+
 	if (f & INI_SYSVARS)
 		loadsysvars ();
 	if (f & INI_OUTPUT) {
@@ -532,6 +558,7 @@ mod_init (uint32 f)
 				out_setflags (OFL_ISBOT);
 		}
 	}
+
 	error_setnotify (f & INI_ERRMSGS);
 	if (f & INI_INPUT) {
 		inp_init ();
@@ -541,31 +568,33 @@ mod_init (uint32 f)
 		}
 	}
 
-	if (f & INI_SIGNALS)
-		initsignals ();
-	if (f & INI_CLASSES)
-		loadclasses ();
-	if (f & INI_LANGS)
-		msg_init ();
-	if (f & INI_GLOBCMD)
-		gcs_init ();
-	if (f & INI_TTYNUM)
-		chan_init ();
-	if (f & INI_ATEXIT)
-		atexit (mod_end);
-	if ((f & INI_USER) && (f & INI_INPUT))
-		getprevinput ();
-	if (f & INI_CHAT)
-		signal (SIGCHAT, syschat);
-	else
-		signal (SIGCHAT, SIG_IGN);
+	if (f & INI_SIGNALS) initsignals ();
+	if (f & INI_CLASSES) loadclasses ();
+	if (f & INI_LANGS) msg_init ();
+	if (f & INI_GLOBCMD) gcs_init ();
+	if (f & INI_TTYNUM) chan_init ();
+	if (f & INI_ATEXIT) atexit (mod_end);
+	if ((f & INI_USER) && (f & INI_INPUT)) getprevinput ();
+	if (f & INI_CHAT) signal (SIGCHAT, syschat);
+	else signal (SIGCHAT, SIG_IGN);
 
+#if 0
 	pass = getpwnam (BBSUSERNAME);
 	if (pass == NULL) {
 		error_fatal ("User " BBSUSERNAME " is not in /etc/passwd!");
 	}
+
 	bbs_uid = pass->pw_uid;
 	bbs_gid = pass->pw_gid;
+#endif
+
+	if ((s = getenv ("BBSUID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbs_uid = atoi (s);
+
+	if ((s = getenv ("BBSGID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbs_gid = atoi (s);
 }
 
 
@@ -652,9 +681,7 @@ syschat ()
 		fprintf (fp, "\n");
 		fclose (fp);
 		if (!getuid () || !getgid ()) {
-			sprintf (command, "chown bbs.bbs %s >&/dev/null",
-				 fname);
-			system (command);
+			chown (fname, bbs_uid, bbs_gid);
 		}
 	}
 }
@@ -669,16 +696,14 @@ mod_regpid (char *tty)
 
 	if (tty == NULL || !tty[0] || !strcmp (tty, "(null)"))
 		return;
-	sprintf (fname, "%s/register-%s", mkfname (BBSETCDIR), tty);
+	sprintf (fname, "%s/register-%s", mkfname (BBSRUNDIR), tty);
 	if ((fp = fopen (fname, "w")) == NULL) {
 		error_fatalsys ("Can't open %s for writing.", fname);
 	}
 	fprintf (fp, "%d", (int) getpid ());
 	fclose (fp);
-	if (!getuid () || !getgid ()) {
-		sprintf (command, "chown bbs.bbs %s >&/dev/null", fname);
-		system (command);
-	}
+	if (!getuid () || !getgid ()) chown (fname, bbs_uid, bbs_gid);
+	chmod (fname, 0660);
 }
 
 
@@ -732,9 +757,11 @@ mod_syntax ()
 
 	fprintf (stderr, MODULE_HANDLER, "help", _("You're reading it"));
 	fprintf (stderr, MODULE_HANDLER, "install",
-		 _("Issues installation script"));
+		 _("Issues installation symlink information"));
+#if 0
 	fprintf (stderr, MODULE_HANDLER, "uninstall",
 		 _("Issues uninstall script"));
+#endif
 	fprintf (stderr, MODULE_HANDLER, "info",
 		 _("Module version and information"));
 	fprintf (stderr, "\n");
@@ -744,25 +771,27 @@ mod_syntax ()
 
 #define MOD_INSTALL_HANDLER(x) \
 if(__module.x.handler){ \
-  printf("mkdir -p -m 0750 %s/%s;\n",mkfname(BBSMODULEDIR),#x); \
-  printf("ln -sf %s/%s ",mkfname(BINDIR),__module.progname);\
-  printf("%s/%s/%02d_%s;\n",\
-         mkfname(BBSMODULEDIR),#x,__module.x.priority,__module.progname); \
+/*  printf("mkdir -p -m 0750 %s/%s;\n",mkfname(BBSMODULEDIR),#x); \ */ \
+/*  printf("ln -sf %s/%s ",mkfname(MODULEDIR),__module.progname);\ */ \
+  printf("create: %s/%02d_%s\n",\
+         /*mkfname(BBSMODULEDIR),*/ #x,__module.x.priority,__module.progname); \
 }
 
 
+#if 0
 static void
 mod_uninstall ()
 {
-	printf ("rm -f %s/*/*_%s;\n", mkfname (BBSMODULEDIR),
+	printf ("execute: rm -f %s/*/*_%s;\n", mkfname (BBSMODULEDIR),
 		__module.progname);
 }
+#endif
 
 
 static void
 mod_install ()
 {
-	mod_uninstall ();
+	/*mod_uninstall ();*/
 	MOD_INSTALL_HANDLER (login);
 	MOD_INSTALL_HANDLER (run);
 	MOD_INSTALL_HANDLER (logout);
@@ -826,8 +855,10 @@ mod_main (int argc, char **argv)
 			return mod_info (), 0;
 		if (strcmp (argv[1], "--install") == 0)
 			return mod_install (), 0;
+#if 0
 		if (strcmp (argv[1], "--uninstall") == 0)
 			return mod_uninstall (), 0;
+#endif
 
 		if ((strcmp (argv[1], "--login") == 0) &&
 		    (__module.login.handler != NULL))

@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -59,10 +67,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -81,207 +87,258 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
 #include "bbsd.h"
 
 
-int numusers=0;
+int     numusers = 0;
 
 #ifdef HAVE_METABBS
-int oldnumusers=0;
-int lines_free=0;
-int oldlines_free=0;
+int     oldnumusers = 0;
+int     lines_free = 0;
+int     oldlines_free = 0;
 #endif
 
 
 static void
-suptimeouts(char *tty)
+suptimeouts (char *tty)
 {
-  struct shmuserrec *ushm=NULL;
-  int shmid;
-  char supid[256];
-  FILE *fp;
+	struct shmuserrec *ushm = NULL;
+	int     shmid;
+	char    supid[256];
+	FILE   *fp;
 
-  sprintf(supid,"%s/.shmid-[SIGNUP-%s]",mkfname(ONLINEDIR),tty);
+	sprintf (supid, "%s/.shmid-[SIGNUP-%s]", mkfname (ONLINEDIR), tty);
 
-  if((fp=fopen(supid,"r"))==NULL) return;
-  if(!fscanf(fp,"%d",&shmid)) {
-    error_logsys("Unable to read file %s",supid);
-    return;
-  }
-  fclose(fp);
+	if ((fp = fopen (supid, "r")) == NULL)
+		return;
+	if (!fscanf (fp, "%d", &shmid)) {
+		error_logsys ("Unable to read file %s", supid);
+		return;
+	}
+	fclose (fp);
 
-  if((ushm=(struct shmuserrec *)shmat(shmid,NULL,0))==NULL)return;
+	if ((ushm = (struct shmuserrec *) shmat (shmid, NULL, 0)) == NULL)
+		return;
 
-  if(ushm->onl.idlezap){
-    ushm->onl.timeoutticks++;
+	if (ushm->onl.idlezap) {
+		ushm->onl.timeoutticks++;
 
 #ifdef DEBUG
-    fprintf(stderr,"%s: ticks=%d, limit=%d\n",
-	    tty,
-	    ushm->onl.timeoutticks,
-	    ushm->onl.idlezap*JIFFIESPERMIN);
+		fprintf (stderr, "%s: ticks=%d, limit=%d\n",
+			 tty,
+			 ushm->onl.timeoutticks,
+			 ushm->onl.idlezap * JIFFIESPERMIN);
 #endif
 
-    if((ushm->onl.timeoutticks)>=(ushm->onl.idlezap*JIFFIESPERMIN)){
-      char fname[256];
-      sprintf(fname,DEVDIR"/%s",tty);
-      if((fp=fopen(fname,"w"))!=NULL){
-	write(fileno(fp),msg_getl(IDLEBYE,ushm->acc.language-1),
-	      strlen(msg_buffer));
-	fclose(fp);
-      }
+		if ((ushm->onl.timeoutticks) >=
+		    (ushm->onl.idlezap * JIFFIESPERMIN)) {
+			char    fname[256];
+
+			sprintf (fname, DEVDIR "/%s", tty);
+			if ((fp = fopen (fname, "w")) != NULL) {
+				write (fileno (fp),
+				       msg_getl (IDLEBYE,
+						 ushm->acc.language - 1),
+				       strlen (msg_buffer));
+				fclose (fp);
+			}
 #ifdef DEBUG
-      fprintf(stderr,"disconnecting %s\n",tty);
+			fprintf (stderr, "disconnecting %s\n", tty);
 #endif
 
-      channel_disconnect(tty);
+			channel_disconnect (tty);
 
-      sprintf(supid,"%s/.shmid-[SIGNUP-%s]",mkfname(ONLINEDIR),tty);
-      unlink(supid);
-    }
-  }
+			sprintf (supid, "%s/.shmid-[SIGNUP-%s]",
+				 mkfname (ONLINEDIR), tty);
+			unlink (supid);
+		}
+	}
 
-  shmdt((char *)ushm);
+	shmdt ((char *) ushm);
 }
 
 
 void
-charge()
+charge ()
 {
-  int i;
+	int     i;
 
-  refreshclasses();
-  refreshsysvars();
-
-#ifdef HAVE_METABBS
-  oldnumusers=numusers; /* Calculate difference in numusers for registration */
-#endif
-
-  numusers=0;
-  for(i=0;i<chan_count;i++){
-    struct shmuserrec *ushm=NULL;
-    channel_status_t status;
-
-    if(!channel_getstatus(channels[i].ttyname,&status))continue;
-
-    if(status.result!=LSR_USER)continue;
-
-    numusers++;			/* This is a line with a user on it */
-
-    if(!strcmp(status.user,"[SIGNUP]")){
-      suptimeouts(channels[i].ttyname);
-      continue;
-    }
-
-    if(!strcmp(status.user,"[UNIX]"))continue;
-      
-    if(!usr_insystem(status.user,0,&ushm))continue;
-    if(!ushm->onl.userid[0])continue;
-
-    /* User related charges and time counts */
-    
-    ushm->onl.tick=(ushm->onl.tick+1)%JIFFIESPERMIN;
-    ushm->onl.fraccharge+=(ushm->onl.credspermin)/JIFFIESPERMIN;
-
-    if(!ushm->onl.tick){
-      long charge=((long)ushm->onl.fraccharge)/100L;
-      classrec_t *class=cls_find(ushm->acc.curclss);
-
-      sysvar->timever++;
-      ushm->onl.onlinetime++;
-      ushm->acc.timetdy++;
-      ushm->acc.timever++;
-
-      /* Credit charges */
-
-      if(charge){
-	if(class && class->flags&CLF_NOCHRGE){
-	  ushm->onl.fraccharge=0;
-	} else {
-	  ushm->acc.credits-=charge;
-	  ushm->acc.credsever+=charge;
-	  ushm->onl.statcreds+=charge;
-	  ushm->onl.fraccharge%=100;
-	  if(ushm->acc.credits<=0){
-	    ushm->acc.credits=0;
-	    ushm->onl.lastpage=EXIT_CREDS;
-	    byebye(ushm,NOCRDBYE);
-	    if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
-	  } else if((float)((float)ushm->acc.credits -
-			    (float)((float)ushm->onl.credspermin/100.0))<=0.0){
-	    sprompt_other(ushm,out_buffer,NOCREDS);
-	    usr_injoth(&(ushm->onl),out_buffer,0);
-	  }
-	}
-      }
-
-      /* Time limit per call */
-
-      if(class && class->limpercall>=0){
-	if(ushm->onl.onlinetime>=class->limpercall){
-	  ushm->onl.lastpage=EXIT_TIME;
-	  byebye(ushm,NOCTIMBYE);
-	  if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
-	} else if(ushm->onl.onlinetime+1>=class->limpercall){
-	  sprompt_other(ushm,out_buffer,NOCTIM);
-	  usr_injoth(&(ushm->onl),out_buffer,0);
-	}
-      }
-      
-      /* Daily time limit */
-
-      if(class && class->limperday>=0){
-	if(ushm->acc.timetdy>=class->limperday){
-	  ushm->onl.lastpage=EXIT_TIME;
-	  byebye(ushm,NODTIMBYE);
-	  if(class)usr_setclass(ushm->acc.userid,class->nocreds,0);
-	} else if(ushm->acc.timetdy+1>=class->limperday){
-	  sprompt_other(ushm,out_buffer,NODTIM);
-	  usr_injoth(&(ushm->onl),out_buffer,0);
-	}
-      }
-    }
-
-    /* Inactivity Timeout */
-
-    if(ushm->onl.idlezap){
-      if(!(ushm->onl.flags&(OLF_NOTIMEOUT|OLF_BUSY|OLF_ZAPBYPASS))
-	 /*|| (ushm->onl.flags&OLF_FORCEIDLE)*/){
-	if((++ushm->onl.timeoutticks)>=(ushm->onl.idlezap*JIFFIESPERMIN)){
-	  /*audit(ushm->onl.channel,AUDIT(DISCON),
-		ushm->onl.userid,
-		baudstg(ushm->onl.baudrate));*/
-	  ushm->onl.lastpage=EXIT_TIMEOUT;
-	  byebye(ushm,IDLEBYE);
-	} else if(ushm->onl.timeoutticks==((ushm->onl.idlezap-1)*JIFFIESPERMIN)){
-	  sprompt_other(ushm,msg_buffer,IDLEWRN,
-			ushm->onl.timeoutticks/JIFFIESPERMIN);
-	  usr_injoth(&(ushm->onl),msg_buffer,0);
-	}
-      }
-    }
-
-    shmdt((char *)ushm);
-  }
+	refreshclasses ();
+	refreshsysvars ();
 
 #ifdef HAVE_METABBS
-  
-  oldlines_free=lines_free;
-  lines_free=max(0,sysvar->tnlmax-chan_telnetlinecount());
-  
-  
-  /* Re-register with the MetaBBS service so that line/user counters
-     are up to date. */
-  
-  if((numusers!=oldnumusers) || (lines_free!=oldlines_free))
-    last_registration_time=0;
-
-#ifdef DEBUG
-  fprintf(stderr,"numusers=%d oldnumusers=%d lines_free=%d\n",
-	  numusers,oldnumusers,lines_free);
+	oldnumusers = numusers;	/* Calculate difference in numusers for registration */
 #endif
+
+	numusers = 0;
+	for (i = 0; i < chan_count; i++) {
+		struct shmuserrec *ushm = NULL;
+		channel_status_t status;
+
+		if (!channel_getstatus (channels[i].ttyname, &status))
+			continue;
+
+		if (status.result != LSR_USER)
+			continue;
+
+		numusers++;	/* This is a line with a user on it */
+
+		if (!strcmp (status.user, "[SIGNUP]")) {
+			suptimeouts (channels[i].ttyname);
+			continue;
+		}
+
+		if (!strcmp (status.user, "[UNIX]"))
+			continue;
+
+		if (!usr_insystem (status.user, 0, &ushm))
+			continue;
+		if (!ushm->onl.userid[0])
+			continue;
+
+		/* User related charges and time counts */
+
+		ushm->onl.tick = (ushm->onl.tick + 1) % JIFFIESPERMIN;
+		ushm->onl.fraccharge +=
+		    (ushm->onl.credspermin) / JIFFIESPERMIN;
+
+		if (!ushm->onl.tick) {
+			long    charge = ((long) ushm->onl.fraccharge) / 100L;
+			classrec_t *class = cls_find (ushm->acc.curclss);
+
+			sysvar->timever++;
+			ushm->onl.onlinetime++;
+			ushm->acc.timetdy++;
+			ushm->acc.timever++;
+
+			/* Credit charges */
+
+			if (charge) {
+				if (class && class->flags & CLF_NOCHRGE) {
+					ushm->onl.fraccharge = 0;
+				} else {
+					ushm->acc.credits -= charge;
+					ushm->acc.credsever += charge;
+					ushm->onl.statcreds += charge;
+					ushm->onl.fraccharge %= 100;
+					if (ushm->acc.credits <= 0) {
+						ushm->acc.credits = 0;
+						ushm->onl.lastpage =
+						    EXIT_CREDS;
+						byebye (ushm, NOCRDBYE);
+						if (class)
+							usr_setclass (ushm->
+								      acc.
+								      userid,
+								      class->
+								      nocreds,
+								      0);
+					} else if ((float)
+						   ((float) ushm->acc.credits -
+						    (float) ((float) ushm->onl.
+							     credspermin /
+							     100.0)) <= 0.0) {
+						sprompt_other (ushm,
+							       out_buffer,
+							       NOCREDS);
+						usr_injoth (&(ushm->onl),
+							    out_buffer, 0);
+					}
+				}
+			}
+
+			/* Time limit per call */
+
+			if (class && class->limpercall >= 0) {
+				if (ushm->onl.onlinetime >= class->limpercall) {
+					ushm->onl.lastpage = EXIT_TIME;
+					byebye (ushm, NOCTIMBYE);
+					if (class)
+						usr_setclass (ushm->acc.userid,
+							      class->nocreds,
+							      0);
+				} else if (ushm->onl.onlinetime + 1 >=
+					   class->limpercall) {
+					sprompt_other (ushm, out_buffer,
+						       NOCTIM);
+					usr_injoth (&(ushm->onl), out_buffer,
+						    0);
+				}
+			}
+
+			/* Daily time limit */
+
+			if (class && class->limperday >= 0) {
+				if (ushm->acc.timetdy >= class->limperday) {
+					ushm->onl.lastpage = EXIT_TIME;
+					byebye (ushm, NODTIMBYE);
+					if (class)
+						usr_setclass (ushm->acc.userid,
+							      class->nocreds,
+							      0);
+				} else if (ushm->acc.timetdy + 1 >=
+					   class->limperday) {
+					sprompt_other (ushm, out_buffer,
+						       NODTIM);
+					usr_injoth (&(ushm->onl), out_buffer,
+						    0);
+				}
+			}
+		}
+
+		/* Inactivity Timeout */
+
+		if (ushm->onl.idlezap) {
+			if (!
+			    (ushm->onl.
+			     flags & (OLF_NOTIMEOUT | OLF_BUSY |
+				      OLF_ZAPBYPASS))
+/*|| (ushm->onl.flags&OLF_FORCEIDLE) */
+			    ) {
+				if ((++ushm->onl.timeoutticks) >=
+				    (ushm->onl.idlezap * JIFFIESPERMIN)) {
+					/*audit(ushm->onl.channel,AUDIT(DISCON),
+					   ushm->onl.userid,
+					   baudstg(ushm->onl.baudrate)); */
+					ushm->onl.lastpage = EXIT_TIMEOUT;
+					byebye (ushm, IDLEBYE);
+				} else if (ushm->onl.timeoutticks ==
+					   ((ushm->onl.idlezap -
+					     1) * JIFFIESPERMIN)) {
+					sprompt_other (ushm, msg_buffer,
+						       IDLEWRN,
+						       ushm->onl.timeoutticks /
+						       JIFFIESPERMIN);
+					usr_injoth (&(ushm->onl), msg_buffer,
+						    0);
+				}
+			}
+		}
+
+		shmdt ((char *) ushm);
+	}
+
+#ifdef HAVE_METABBS
+
+	oldlines_free = lines_free;
+	lines_free = max (0, sysvar->tnlmax - chan_telnetlinecount ());
+
+
+	/* Re-register with the MetaBBS service so that line/user counters
+	   are up to date. */
+
+	if ((numusers != oldnumusers) || (lines_free != oldlines_free))
+		last_registration_time = 0;
+
+#  ifdef DEBUG
+	fprintf (stderr, "numusers=%d oldnumusers=%d lines_free=%d\n",
+		 numusers, oldnumusers, lines_free);
+#  endif
 
 #endif
 }
+
+
+/* End of File */

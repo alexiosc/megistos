@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 18:08:31  alexios
+ * Include file changes.
+ *
  * Revision 1.5  2003/12/25 13:33:28  alexios
  * Fixed #includes. Changed instances of struct message to
  * message_t. Other minor changes.
@@ -70,8 +77,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
+#include <libtyphoon/typhoon.h>
 #include "mbk_emailclubs.h"
-#include "typhoon.h"
 #include "email.h"
 #include "ecdbase.h"
 

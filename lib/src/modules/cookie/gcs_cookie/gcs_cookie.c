@@ -26,6 +26,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 17:48:32  alexios
+ * Updated /cookie to account for the new path to the cookie module.
+ *
  * Revision 1.4  2003/12/24 20:12:14  alexios
  * Ran through megistos-config --oh.
  *
@@ -54,7 +61,7 @@ __INIT_GCS__ ()
 	if (margc == 1 && sameas (margv[0], "/cookie") && sysvar->glockie) {
 		char    command[256];
 
-		sprintf (command, "%s/cookie --run", mkfname (BINDIR));
+		sprintf (command, "%s/cookie --run", mkfname (MODULEDIR));
 		system (command);
 		return 1;
 	} else

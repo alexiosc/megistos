@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.3  2004/07/15 14:45:15  alexios
+# Changed instances of CFLAGS to AM_CFLAGS and LDFLAGS to AM_LDFLAGS so
+# as not to override user settings.
+#
 # Revision 1.2  2003/12/27 13:17:35  alexios
 # Various changes to accommodate the growing pains of the template
 # infrastructure.
@@ -13,7 +21,7 @@
 
 ECDIR = $(top_builddir)/src/modules/emailclubs
 LDFLAGS_EXTRA += -L$(ECDIR)
-CFLAGS += -I$(ECDIR)
+AM_CFLAGS += -I$(ECDIR)
 LDADD += -lmegistos_clubhdr
 
 # End of file.

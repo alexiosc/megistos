@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.9  2004/02/29 17:14:33  alexios
+ * Removed the (previously hardwired and absolute) path to the GCS
+ * modules, replaced with a parametric value.
+ *
  * Revision 1.8  2003/12/24 18:35:08  alexios
  * Fixed #includes.
  *
@@ -147,7 +155,8 @@ gcs_add (gcs_t gcs)
 int
 soselect (const struct dirent *a)
 {
-	return strncmp (a->d_name, "gcs_", 4) == 0;
+	/*fprintf(stderr, "*** (%s), %d\n", a->d_name, strncmp(a->d_name, "libgcs", 6));*/
+	return strncmp (a->d_name, "libgcs", 6) == 0;
 }
 
 
@@ -157,9 +166,8 @@ gcs_init ()
 	struct dirent **d;
 	int     i;
 
-	gcsnum = scandir ("/usr/local/bbs/lib/gcs", &d, soselect, alphasort);
-	if (gcsnum == 0)
-		return;
+	gcsnum = scandir (mkfname (GCSDIR), &d, soselect, alphasort);
+	if (gcsnum == 0) return;
 
 	if (lt_dlinit ()) {
 		error_fatal (

@@ -3,6 +3,13 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:29  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.4  2004/02/29 16:42:05  alexios
+# Fixed the source directory.
+#
 # Revision 1.3  2003/09/30 15:24:17  alexios
 # Hacked dependencies to exclude version.h, which is regenerated every
 # build. This caused the API documentation to rebuild every time the
@@ -23,5 +30,5 @@ DISTCLEANFILES = warnings.log
 
 noinst_DATA = doc-stamp
 
-doc-stamp:	Doxyfile $(shell ls ../lib/*.[ch] | fgrep -v version.h)
+doc-stamp:	Doxyfile $(shell ls ../libmegistos/*.[ch] | fgrep -v version.h)
 		$(DOXYGEN) Doxyfile && touch doc-stamp

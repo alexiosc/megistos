@@ -30,6 +30,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:43:07  alexios
+ * Added setsid() and close() calls to make this a better daemon.
+ *
+ * Revision 1.4  2004/02/29 16:32:58  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -55,11 +65,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
-
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -74,100 +80,109 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 
 #include "bbs.h"
-#include "mbk_emailclubs.h"
+#include <mbk/mbk_emailclubs.h>
 #include "msgd.h"
 
 
-int  tmreidx=60*24;
-int  tmnetml=15;
+int     tmreidx = 60 * 24;
+int     tmnetml = 15;
 
-int h,m,s;
+int     h, m, s;
 
 
 void
-storepid()
+storepid ()
 {
-  FILE *fp;
-  char fname[256];
-  
-  sprintf(fname,"%s/msgd.pid",mkfname(BBSETCDIR));
-  if((fp=fopen(fname,"w"))==NULL)return;
-  fprintf(fp,"%d",getpid());
-  fclose(fp);
-  chmod(fname,0600);
-  chown(fname,0,0);
+	FILE   *fp;
+	char    fname[256];
+
+	sprintf (fname, "%s/msgd.pid", mkfname (BBSRUNDIR));
+	if ((fp = fopen (fname, "w")) == NULL)
+		return;
+	fprintf (fp, "%d", getpid ());
+	fclose (fp);
+	chmod (fname, 0600);
+	chown (fname, 0, 0);
 }
 
 
 int
-gcd(int a, int b)
+gcd (int a, int b)
 {
-  while(a&&b){
-    if(a>b)a=a%b;
-    else b=b%a;
-  }
-  return a?a:b;
+	while (a && b) {
+		if (a > b)
+			a = a % b;
+		else
+			b = b % a;
+	}
+	return a ? a : b;
 }
 
 
 void
-mainloop()
+mainloop ()
 {
-  int sleeptime=gcd(tmreidx,tmnetml);
-  int reindex=tmreidx/sleeptime;
-  int netmail=tmnetml/sleeptime;
-  int tick=0;
+	int     sleeptime = gcd (tmreidx, tmnetml);
+	int     reindex = tmreidx / sleeptime;
+	int     netmail = tmnetml / sleeptime;
+	int     tick = 0;
 
 #ifdef DEBUG
-  printf("msgd mainloop...\n");
-  printf("sleeptime=GCD(%d,%d)=%d\n",tmreidx,tmnetml,sleeptime);
+	printf ("msgd mainloop...\n");
+	printf ("sleeptime=GCD(%d,%d)=%d\n", tmreidx, tmnetml, sleeptime);
 #endif
 
-  for(;;){
-    if((tick%netmail)==0)getnetmail();
-    if((tick%reindex)==0)/*doreindex()*/;
-    sleep(sleeptime);
-    tick++;
-  }
+	for (;;) {
+		if ((tick % netmail) == 0)
+			getnetmail ();
+		if ((tick % reindex) == 0)	/*doreindex() */
+			;
+		sleep (sleeptime);
+		tick++;
+	}
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  if(getuid()){
-    fprintf(stderr, "%s: getuid: not super-user\n", argv[0]);
-    exit(1);
-  }
+	mod_setprogname (argv[0]);
+	if (getuid ()) {
+		fprintf (stderr, "%s: getuid: not super-user\n", argv[0]);
+		exit (1);
+	}
 
-  {
-    promptblock_t *msg;
-    error_setnotify(0);
-    msg=msg_open("emailclubs");
-    tmreidx=msg_int(TMREIDX,5,32767)*60;
-    tmnetml=msg_int(TMNETML,5,32767)*60;
-    msg_close(msg);
-  }
+	{
+		promptblock_t *msg;
 
-  switch(fork()){
-  case -1:
-    fprintf(stderr,"%s: fork: unable to fork daemon\n",argv[0]);
-    exit(1);
-  case 0:
-    break;
-  default:
-    exit(0);
-  }
+		error_setnotify (0);
+		msg = msg_open ("emailclubs");
+		tmreidx = msg_int (TMREIDX, 5, 32767) * 60;
+		tmnetml = msg_int (TMNETML, 5, 32767) * 60;
+		msg_close (msg);
+	}
 
-  mod_init(INI_SYSVARS);
+	switch (fork ()) {
+	case -1:
+		fprintf (stderr, "%s: fork: unable to fork daemon\n", argv[0]);
+		exit (1);
+	case 0:
+		ioctl (0, TIOCNOTTY, NULL);
+		setsid ();
+		close (0);
+		close (1);
+		close (2);
+		break;
+	default:
+		exit (0);
+	}
 
-  storepid();
-  ioctl(0,TIOCNOTTY,NULL);
+	mod_init (INI_SYSVARS);
 
-  mainloop();
+	storepid ();
+	ioctl (0, TIOCNOTTY, NULL);
 
-  return 0;
+	mainloop ();
+
+	return 0;
 }
-
-

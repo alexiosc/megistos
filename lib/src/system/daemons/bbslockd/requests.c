@@ -29,6 +29,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 18:02:54  alexios
+ * Ran through megistos-config --oh. Minor permission/file location
+ * issues fixed to account for the new infrastructure.
+ *
  * Revision 1.4  2003/12/29 07:46:08  alexios
  * Adjusted #includes.
  *
@@ -45,8 +53,8 @@
  */
 
 
-const static char rcsinfo [] =
-"$Id$";
+const static char rcsinfo[] =
+    "$Id$";
 
 
 #define __BBSLOCKD__ 1
@@ -65,197 +73,224 @@ static int bbslockd_socket;
 
 
 static int
-sendresult(int res)
+sendresult (int res)
 {
-  char buf[512];
-  sprintf(buf,"%d",res);
-  if(send(bbslockd_socket,buf,strlen(buf),0)<0){
-    error_intsys("Unable to write to bbslockd socket.");
-  }
-  return res;
+	char    buf[512];
+
+	sprintf (buf, "%d", res);
+	if (send (bbslockd_socket, buf, strlen (buf), 0) < 0) {
+		error_intsys ("Unable to write to bbslockd socket.");
+	}
+	return res;
 }
 
 
 static int
-sendfullresult(int res,char *info)
+sendfullresult (int res, char *info)
 {
-  char buf[512];
-  sprintf(buf,"%d %s",res,(info!=NULL)?info:"");
-  if(send(bbslockd_socket,buf,strlen(buf),0)<0){
-    error_intsys("Unable to send to bbslockd socket.");
-  }
-  return res;
+	char    buf[512];
+
+	sprintf (buf, "%d %s", res, (info != NULL) ? info : "");
+	if (send (bbslockd_socket, buf, strlen (buf), 0) < 0) {
+		error_intsys ("Unable to send to bbslockd socket.");
+	}
+	return res;
 }
 
 
 static int
-lockd_checklock(char *name,int caller_pid)
+lockd_checklock (char *name, int caller_pid)
 {
-  int          fd;
-  char         fname[256];
-  char         buf[512];
-  struct stat  st;
-  int          pid;
-  char        *infostr;
+	int     fd;
+	char    fname[256];
+	char    buf[512];
+	struct stat st;
+	int     pid;
+	char   *infostr;
 
-  /* If the lock file isn't there, return immediately */
+	/* If the lock file isn't there, return immediately */
 
-  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
-  if(stat(fname,&st)) return sendresult(LKR_OK);
+	strcpy (fname, mkfname ("%s/%s", LOCKDIR, name));
+	if (stat (fname, &st))
+		return sendresult (LKR_OK);
 
-  if((fd=open(fname,O_RDONLY))<0){
-    error_intsys("Unable top open lock file %s",fname);
-    return sendresult(LKR_ERROR);
-  }
+	if ((fd = open (fname, O_RDONLY)) < 0) {
+		error_intsys ("Unable top open lock file %s", fname);
+		return sendresult (LKR_ERROR);
+	}
 
-  bzero(buf,sizeof(buf));
-  read(fd,buf,sizeof(buf)-1);
-  close(fd);
-
-
-  /* If we fail to parse the lock file's contents, assume it's
-     fake. We declare it stale so it can be deleted. */
-
-  if((infostr=strchr(buf,' '))!=NULL)*infostr++=0;
-  else return sendresult(LKR_STALE);
-  if(!sscanf(buf,"%d",&pid))return sendresult(LKR_STALE);
+	bzero (buf, sizeof (buf));
+	read (fd, buf, sizeof (buf) - 1);
+	close (fd);
 
 
-  /* Likewise, declare stale any lock made by PID <= 1 (should never happen) */
+	/* If we fail to parse the lock file's contents, assume it's
+	   fake. We declare it stale so it can be deleted. */
 
-  if(pid<=1) return sendresult(LKR_STALE);
-  if(pid==caller_pid)return sendresult(LKR_OWN);
-  if((kill(pid,0)<0)&&errno==ESRCH) return sendresult(LKR_STALE);
+	if ((infostr = strchr (buf, ' ')) != NULL)
+		*infostr++ = 0;
+	else
+		return sendresult (LKR_STALE);
+	if (!sscanf (buf, "%d", &pid))
+		return sendresult (LKR_STALE);
 
-  return sendfullresult(pid,infostr);
+
+	/* Likewise, declare stale any lock made by PID <= 1 (should never happen) */
+
+	if (pid <= 1)
+		return sendresult (LKR_STALE);
+	if (pid == caller_pid)
+		return sendresult (LKR_OWN);
+	if ((kill (pid, 0) < 0) && errno == ESRCH)
+		return sendresult (LKR_STALE);
+
+	return sendfullresult (pid, infostr);
 }
 
 
 static int
-lockd_checklock_quietly(char *name,int caller_pid)
+lockd_checklock_quietly (char *name, int caller_pid)
 {
-  int          fd;
-  char         fname[256];
-  char         buf[512];
-  struct stat  st;
-  int          pid;
-  char        *infostr;
+	int     fd;
+	char    fname[256];
+	char    buf[512];
+	struct stat st;
+	int     pid;
+	char   *infostr;
 
-  /* If the lock file isn't there, return immediately */
+	/* If the lock file isn't there, return immediately */
 
-  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
-  if(stat(fname,&st)) return LKR_OK;
+	strcpy (fname, mkfname ("%s/%s", LOCKDIR, name));
+	if (stat (fname, &st))
+		return LKR_OK;
 
-  if((fd=open(fname,O_RDONLY))<0){
-    error_intsys("Unable top open lock file %s",fname);
-    return LKR_ERROR;
-  }
+	if ((fd = open (fname, O_RDONLY)) < 0) {
+		error_intsys ("Unable top open lock file %s", fname);
+		return LKR_ERROR;
+	}
 
-  bzero(buf,sizeof(buf));
-  read(fd,buf,sizeof(buf)-1);
-  close(fd);
-
-
-  /* If we fail to parse the lock file's contents, assume it's
-     fake. We declare it stale so it can be deleted. */
-
-  if((infostr=strchr(buf,' '))!=NULL)*infostr++=0;
-  else return LKR_STALE;
-  if(!sscanf(buf,"%d",&pid))return LKR_STALE;
+	bzero (buf, sizeof (buf));
+	read (fd, buf, sizeof (buf) - 1);
+	close (fd);
 
 
-  /* Likewise, declare stale any lock made by PID <= 1 (should never happen) */
+	/* If we fail to parse the lock file's contents, assume it's
+	   fake. We declare it stale so it can be deleted. */
 
-  if(pid<=1) return LKR_STALE;
-  if(pid==caller_pid)return LKR_OWN;
-  if((kill(pid,0)<0)&&errno==ESRCH) return LKR_STALE;
+	if ((infostr = strchr (buf, ' ')) != NULL)
+		*infostr++ = 0;
+	else
+		return LKR_STALE;
+	if (!sscanf (buf, "%d", &pid))
+		return LKR_STALE;
 
-  return pid;
+
+	/* Likewise, declare stale any lock made by PID <= 1 (should never happen) */
+
+	if (pid <= 1)
+		return LKR_STALE;
+	if (pid == caller_pid)
+		return LKR_OWN;
+	if ((kill (pid, 0) < 0) && errno == ESRCH)
+		return LKR_STALE;
+
+	return pid;
 }
 
 
 static int
-lockd_placelock(char *name,char *info,int pid)
+lockd_placelock (char *name, char *info, int pid)
 {
-  char fname[512];
-  char buf[64];
-  int  res, fd;
+	char    fname[512];
+	char    buf[64];
+	int     res, fd;
 
 
-  /* Before making the lock, check if it already exists. We shouldn't
-     rely on the client doing this */
+	/* Before making the lock, check if it already exists. We shouldn't
+	   rely on the client doing this */
 
-  res=lockd_checklock_quietly(name,pid);
-  if(res!=LKR_OK && res!=LKR_OWN && res!=LKR_STALE)return sendresult(res);
+	res = lockd_checklock_quietly (name, pid);
+	if (res != LKR_OK && res != LKR_OWN && res != LKR_STALE)
+		return sendresult (res);
 
-  /* Create the lock */
+	/* Create the lock */
 
-  strcpy(fname,mkfname("%s/%s",LOCKDIR,name));
-  unlink(fname); /* Just in case */
-  if((fd=creat(fname,0660))<0){
-    error_intsys("Unable to creat() lock file %s",fname);
-    return sendresult(LKR_ERROR);
-  }
-  sprintf(buf,"%d ",pid);
-  write(fd,buf,strlen(buf));
-  if(info!=NULL && strlen(info))write(fd,info,strlen(info));
-  close(fd);
+	strcpy (fname, mkfname ("%s/%s", LOCKDIR, name));
+	unlink (fname);		/* Just in case */
+	if ((fd = creat (fname, 0660)) < 0) {
+		error_intsys ("Unable to creat() lock file %s", fname);
+		return sendresult (LKR_ERROR);
+	}
+	sprintf (buf, "%d ", pid);
+	write (fd, buf, strlen (buf));
+	if (info != NULL && strlen (info))
+		write (fd, info, strlen (info));
+	close (fd);
 
-  chown(fname,bbsuid,bbsgid);
-  chmod(fname,0640);
+	chown (fname, bbsuid, bbsgid);
+	chmod (fname, 0640);
 
-  return sendresult(LKR_OK);
+	return sendresult (LKR_OK);
 }
 
 
 static int
-lockd_rmlock(char *name)
+lockd_rmlock (char *name)
 {
-  char fname[256];
-  sprintf(fname,"%s/%s",mkfname(LOCKDIR),name);
-  return sendresult(unlink(fname)?LKR_ERROR:LKR_OK);
+	char    fname[256];
+
+	sprintf (fname, "%s/%s", mkfname (LOCKDIR), name);
+	return sendresult (unlink (fname) ? LKR_ERROR : LKR_OK);
 }
 
 
 void
 handlerequest (int fd)
 {
-  char buf[512], *cp=buf;
-  char cmd[5], lockname[256];
-  int delta, pid;
+	char    buf[512], *cp = buf;
+	char    cmd[5], lockname[256];
+	int     delta, pid;
 
-  bbslockd_socket=fd;
+	bbslockd_socket = fd;
 
-  /* Read the request string */
-  bzero(buf,sizeof(buf));
+	/* Read the request string */
+	bzero (buf, sizeof (buf));
 
-  if(recv(bbslockd_socket,buf,sizeof(buf),0)<0){
-    error_intsys("Failed to receive from socket.");
-  }
-
-
-  /* Parse the request */
-  if(sscanf(buf,"%4s %255s %d %n",cmd,lockname,&pid,&delta)!=3){
-    sendresult(LKR_SYNTAX);
-  }
+	if (recv (bbslockd_socket, buf, sizeof (buf), 0) < 0) {
+		error_intsys ("Failed to receive from socket.");
+	}
 
 
-  /* Make sure the PID is ok */
-  if(pid<2){
-    sendresult(LKR_SYNTAX);
-    return;
-  }
+	/* Parse the request */
+	if (sscanf (buf, "%4s %255s %d %n", cmd, lockname, &pid, &delta) != 3) {
+		sendresult (LKR_SYNTAX);
+	}
 
 
-  /* Chop the newline */
-  cp=&buf[delta];
-  if((cp=strchr(cp,'\n'))!=NULL)*cp=0;
-  cp=&buf[delta];
+	/* Make sure the PID is ok */
+	if (pid < 2) {
+		sendresult (LKR_SYNTAX);
+		return;
+	}
 
 
-  /* Interpret the command */
-  if(!strcmp(cmd,LKC_PLACE)) lockd_placelock(lockname,cp,pid);
-  else if(!strcmp(cmd,LKC_CHECK)) lockd_checklock(lockname,pid);
-  else if(!strcmp(cmd,LKC_REMOVE)) lockd_rmlock(lockname);
-  else sendresult(LKR_SYNTAX);
+	/* Chop the newline */
+	cp = &buf[delta];
+	if ((cp = strchr (cp, '\n')) != NULL)
+		*cp = 0;
+	cp = &buf[delta];
+
+
+	/* Interpret the command */
+	if (!strcmp (cmd, LKC_PLACE))
+		lockd_placelock (lockname, cp, pid);
+	else if (!strcmp (cmd, LKC_CHECK))
+		lockd_checklock (lockname, pid);
+	else if (!strcmp (cmd, LKC_REMOVE))
+		lockd_rmlock (lockname);
+	else
+		sendresult (LKR_SYNTAX);
 }
+
+
+/* End of File */

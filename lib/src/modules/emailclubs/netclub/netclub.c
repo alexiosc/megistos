@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:51  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 18:05:43  alexios
+ * Minor aesthetic fixes.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -81,13 +88,10 @@ syntax ()
 	printf ("syntax: netclub [options]\n\nOptions:\n\b");
 	printf ("   -c              List remote clubs.\n");
 	printf ("   -d              Verbose debugging on.\n");
-	printf
-	    ("   -f              Force sync now, regardless of desired times.\n");
+	printf ("   -f              Force sync now, regardless of desired times.\n");
 	printf ("   -g              (Go) Synchronise remote clubs.\n");
-	printf
-	    ("   -I clubname     Get info on remote club (best used with -s).\n");
-	printf
-	    ("   -l              List import points/sync times, exit immediately.\n");
+	printf ("   -I clubname     Get info on remote club (best used with -s).\n");
+	printf ("   -l              List import points/sync times, exit immediately.\n");
 	printf ("   -n              Dry run, don't write anything to disk.\n");
 	printf ("   -s host/BBS     Only operate on specified system.\n");
 	exit (1);

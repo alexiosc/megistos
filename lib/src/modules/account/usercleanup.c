@@ -28,6 +28,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:45  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/21 20:04:26  alexios
+ * Removed hardwired, system(3)-based chown operation to bbs.bbs in
+ * favour of using the chown(2) system call and the appropriate BBS
+ * instance UID and GIDs. This may fix serious permission-related bugs.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -144,10 +153,7 @@ savetop (struct top *t, char *dir, char *name)
 			fprintf (fp, "%9s  %s\n", t[i].scorestg, t[i].label);
 	}
 	fclose (fp);
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (command, "chown bbs.bbs %s >&/dev/null", fname);
-		system (command);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname, bbs_uid, bbs_gid);
 }
 
 

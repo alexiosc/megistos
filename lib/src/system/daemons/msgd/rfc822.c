@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 16:32:58  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,11 +55,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
-
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -120,24 +123,25 @@ const char *__RCS=RCS_VER;
 #define IS822_ATOMCH(c)	(!IS822_SPECIAL(c) && !IS822_SPACE(c) && !IS822_CTL(c))
 
 
-int rfc822_toklen(str)
+int
+rfc822_toklen (str)
 register char *str;
 {
-	char *str0;
-	int depth;
+	char   *str0;
+	int     depth;
 
 	str0 = str;
 
-	if (*str == '"') {			/* quoted-string */
+	if (*str == '"') {	/* quoted-string */
 		++str;
 		while (*str != '\0' && *str != '"')
-			str += charlen(str);
+			str += charlen (str);
 		if (*str != '\0')
 			++str;
-		return (str-str0);
+		return (str - str0);
 	}
 
-	if (*str == '(' ) {			/* comment */
+	if (*str == '(') {	/* comment */
 		++str;
 		depth = 0;
 		while (*str != '\0' && (*str != ')' || depth > 0)) {
@@ -151,45 +155,44 @@ register char *str;
 				--depth;
 				break;
 			default:
-				str += charlen(str);
+				str += charlen (str);
 				break;
 			}
 		}
 		if (*str != '\0')
 			++str;
-		return (str-str0);
+		return (str - str0);
 	}
 
 
-	if (*str == '[') {			/* domain-literal */
+	if (*str == '[') {	/* domain-literal */
 		++str;
 		while (*str != '\0' && *str != ']')
-			str += charlen(str);
+			str += charlen (str);
 		if (*str != '\0')
 			++str;
-		return (str-str0);
+		return (str - str0);
 	}
 
-	if (IS822_SPACE(*str)) {		/* linear-white-space */
-		while (++str, IS822_SPACE(*str))
-			;
-		return (str-str0);
+	if (IS822_SPACE (*str)) {	/* linear-white-space */
+		while (++str, IS822_SPACE (*str));
+		return (str - str0);
 	}
 
-	if (IS822_SPECIAL(*str) || IS822_CTL(*str))
-		return charlen(str);		/* specials and CTL */
+	if (IS822_SPECIAL (*str) || IS822_CTL (*str))
+		return charlen (str);	/* specials and CTL */
 
 	/*
 	 * Treat as an "atom".
 	 */
-	while (IS822_ATOMCH(*str))
+	while (IS822_ATOMCH (*str))
 		++str;
-	return (str-str0);
+	return (str - str0);
 }
 
 
 int
-len_next_part(str)
+len_next_part (str)
 register char *str;
 {
 	register char *s;
@@ -203,7 +206,7 @@ register char *str;
 		return (*++str != '\0' ? 2 : 1);
 
 	case '"':
-		for (s = str+1 ; *s != '\0' ; ++s) {
+		for (s = str + 1; *s != '\0'; ++s) {
 			if (*s == '\\') {
 				if (*++s == '\0')
 					break;
@@ -219,22 +222,22 @@ register char *str;
 
 	}
 
-	/*NOTREACHED*/
-}
+ /*NOTREACHED*/}
 
 
 static char paren_buffer[1024];
 
-char *strip_parens(src)
+char   *
+strip_parens (src)
 register char *src;
 {
 	register int len;
 	register char *dest = paren_buffer;
 
 	while (*src != '\0') {
-		len = rfc822_toklen(src);
-		if (*src != '(') {	/*)*/
-			strncpy(dest, src, len);
+		len = rfc822_toklen (src);
+		if (*src != '(') {	/*) */
+			strncpy (dest, src, len);
 			dest += len;
 		}
 		src += len;
@@ -245,8 +248,8 @@ register char *src;
 
 
 void
-get_address_from(line, buffer)
-char *line, *buffer;
+get_address_from (line, buffer)
+char   *line, *buffer;
 {
 	/** This routine extracts the address from either a 'From:' line
 	    or a 'Reply-To:' line.  The strategy is as follows:  if the
@@ -255,48 +258,47 @@ char *line, *buffer;
 	    and return that.  White space will be elided from the result.
 	**/
 
-    register char *s;
-    register int l;
+	register char *s;
+	register int l;
 
     /**  Skip start of line over prefix, e.g. "From:".  **/
-    if ((s = index(line, ':')) != NULL)
-	line = s + 1;
+	if ((s = index (line, ':')) != NULL)
+		line = s + 1;
 
-    /*
-     * If there is a '<' then copy from it to '>' into the buffer.  We
-     * used to search with an "index()", but we need to handle RFC-822
-     * conventions (e.g. "<" within a double-quote comment) correctly.
-     */
-    for (s = line ; *s != '\0' && *s != '<' ; s += len_next_part(s))
-	;
-    if (*s == '<') {
-	++s;
-	while (*s != '\0' && *s != '>') {
-	    if ((l = len_next_part(s)) == 1 && isspace(*s)) {
-		++s; /* elide embedded whitespace */
-	    } else {
-		while (--l >= 0)
-		    *buffer++ = *s++;
-	    }
+	/*
+	 * If there is a '<' then copy from it to '>' into the buffer.  We
+	 * used to search with an "index()", but we need to handle RFC-822
+	 * conventions (e.g. "<" within a double-quote comment) correctly.
+	 */
+	for (s = line; *s != '\0' && *s != '<'; s += len_next_part (s));
+	if (*s == '<') {
+		++s;
+		while (*s != '\0' && *s != '>') {
+			if ((l = len_next_part (s)) == 1 && isspace (*s)) {
+				++s;	/* elide embedded whitespace */
+			} else {
+				while (--l >= 0)
+					*buffer++ = *s++;
+			}
+		}
+		*buffer = '\0';
+		return;
 	}
-	*buffer = '\0';
-	return;
-    }
 
     /**  Otherwise, strip comments and get address with whitespace elided.  **/
-    s = strip_parens(line);
-    while (*s != '\0') {
-	l = len_next_part(s);
-	if (l == 1) {
-	  if ( !isspace(*s) )
-	    *buffer++ = *s;
-	  s++;
-	} else {
-	  while (--l >= 0)
-	    *buffer++ = *s++;
+	s = strip_parens (line);
+	while (*s != '\0') {
+		l = len_next_part (s);
+		if (l == 1) {
+			if (!isspace (*s))
+				*buffer++ = *s;
+			s++;
+		} else {
+			while (--l >= 0)
+				*buffer++ = *s++;
+		}
 	}
-    }
-    *buffer = '\0';
+	*buffer = '\0';
 
 }
 

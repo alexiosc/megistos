@@ -29,6 +29,17 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/17 12:39:05  alexios
+ * Fixed weird-looking buffer overrun error.
+ *
+ * Revision 1.6  2004/02/29 16:46:08  alexios
+ * Fixed the ls|grep command spawned to list registries, so no errors are
+ * issued when the registry directory is empty.
+ *
  * Revision 1.5  2003/12/29 07:51:56  alexios
  * Adjusted #includes.
  *
@@ -195,7 +206,7 @@ directory ()
 
 	prompt (DIRHDR);
 
-	sprintf (command, "\134ls %s |grep -i \"^[%c-Z]\"",
+	sprintf (command, "\\ls %s 2>/dev/null |grep -i \"^[%c-Z]\" 2>/dev/null",
 		 mkfname (REGISTRYDIR), c);
 	if ((pipe = popen (command, "r")) == NULL) {
 		error_fatalsys ("Unable to spawn ls|grep pipe for %s",
@@ -294,7 +305,7 @@ scan ()
 	thisuseronl.flags |= OLF_BUSY;
 	prompt (DIRHDR);
 
-	sprintf (command, "\134ls %s |grep -i \"^[%c-Z]\"",
+	sprintf (command, "\\ls %s 2>/dev/null |grep -i \"^[%c-Z]\" 2>/dev/null",
 		 mkfname (REGISTRYDIR), c);
 	if ((pipe = popen (command, "r")) == NULL) {
 		error_fatalsys ("Unable to spawn ls|grep pipe for %s",
@@ -383,28 +394,30 @@ lookup ()
 void
 edit (char *userid)
 {
-	int     i, pos;
+	int i, pos;
+	char dialogspec [32768];
 
 	loadregistry (userid);
 
-	inp_buffer[0] = 0;
+	dialogspec[0] = 0;
 	for (i = pos = 0; i < 30; pos += template[registry.template][i++] + 1) {
 		if (!template[registry.template][i])
 			break;
-		strcat (inp_buffer, &registry.registry[pos]);
-		strcat (inp_buffer, "\n");
+		strcat (dialogspec, &registry.registry[pos]);
+		strcat (dialogspec, "\n");
 	}
-	strcat (inp_buffer, registry.summary);
-	strcat (inp_buffer, "\nOK\nCANCEL\n");
+	strcat (dialogspec, registry.summary);
+	strcat (dialogspec, "\nOK\nCANCEL\n");
+	fprintf (stderr, "----- len=%d (%d)\n", strlen(dialogspec), sizeof (dialogspec));
 
 	if (dialog_run ("registry", T1VISUAL + registry.template,
-			T1LINEAR + 31 * registry.template, inp_buffer,
+			T1LINEAR + 31 * registry.template, dialogspec,
 			MAXINPLEN) != 0) {
 		error_log ("Unable to run data entry subsystem");
 		return;
 	}
 
-	dialog_parse (inp_buffer);
+	dialog_parse (dialogspec);
 
 	for (i = pos = 0; i < 30; pos += template[registry.template][i++] + 1) {
 		char   *s = margv[i];

@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:51  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.4  2003/12/31 06:59:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,7 +72,7 @@ static const char rcsinfo[] =
 #include <stdarg.h>
 #include <string.h>
 
-#include <megistos/gsc.h>
+#include "gsc.h"
 
 #if defined(__BORLANDC__)
 #  include "glps-bcc.h"

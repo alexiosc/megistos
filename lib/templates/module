@@ -3,13 +3,21 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2004/02/23 17:01:10  alexios
+# Set installation directory properly.
+#
 # Revision 1.1  2003/12/24 11:26:35  alexios
 # Initial revision.
 #
 
 include $(top_srcdir)/templates/base
 
-pkglib_PROGRAMS = $(PROGNAMES)
+moduledir = $(pkglibdir)/bin/modules
+module_PROGRAMS = $(PROGNAMES)
 
 include $(top_srcdir)/templates/msg
 

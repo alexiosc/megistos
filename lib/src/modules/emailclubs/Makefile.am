@@ -3,6 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:50  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.8  2004/07/15 14:50:34  alexios
+# Changed instances of CFLAGS to AM_CFLAGS so as not to override user
+# settings.
+#
+# Revision 1.7  2004/02/29 18:07:39  alexios
+# Added mailfixup.
+#
 # Revision 1.6  2003/12/27 13:16:53  alexios
 # Moved the netclub tool here, compiled if MetaBBS is enabled.
 #
@@ -32,7 +43,7 @@ else !HAVE_METABBS
 METABBS =
 endif !HAVE_METABBS
 
-SUBDIRS = . bbsmail $(METABBS) offline.mail
+SUBDIRS = . bbsmail $(METABBS) offline.mail mailfixup
 
 PROGNAMES = email clubs
 
@@ -94,6 +105,6 @@ include $(top_srcdir)/templates/typhoon
 
 email_LDADD = $(LDADD) libmegistos_clubhdr.la
 clubs_LDADD = $(LDADD) libmegistos_clubhdr.la
-clubs_CFLAGS = $(CFLAGS) -DCLUBS
+clubs_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DCLUBS
 
 # End of file

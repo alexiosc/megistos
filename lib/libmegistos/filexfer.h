@@ -37,6 +37,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.4  2003/09/27 20:30:34  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.

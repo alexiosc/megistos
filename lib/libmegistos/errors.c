@@ -30,6 +30,19 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.9  2004/02/29 17:12:34  alexios
+ * Reset permissions on the error log file, and not just when the user is
+ * root.
+ *
+ * Revision 1.8  2004/02/22 18:50:01  alexios
+ * Added code to chown(2) and chmod(2) the error log if we are the
+ * superuser and they have just been generated. This is a sanity check to
+ * avoid messing up the permissions on the audit files.
+ *
  * Revision 1.7  2003/12/19 13:24:01  alexios
  * Updated include directives.
  *
@@ -86,6 +99,8 @@ static const char rcsinfo[] =
 #define WANT_CTYPE_H 1
 #define WANT_TIME_H 1
 #define WANT_VARARGS_H 1
+#define WANT_SYS_TYPES_H 1
+#define WANT_SYS_STAT_H 1
 #include <megistos/bbsinclude.h>
 #include <megistos/config.h>
 #include <megistos/output.h>
@@ -112,8 +127,7 @@ void   *parmlist;
 	char    datetime[64];
 	FILE   *fp;
 
-	if ((fp = fopen (mkfname (ERRORFILE), "a")) == NULL)
-		return;
+	if ((fp = fopen (mkfname (ERRORFILE), "a")) == NULL) return;
 	t = time (0);
 	dt = localtime (&t);
 	strftime (datetime, sizeof (datetime), "%d/%m/%Y %H:%M:%S", dt);
@@ -122,6 +136,11 @@ void   *parmlist;
 	vfprintf (fp, format, parmlist);
 	fputc ('\n', fp);
 	fclose (fp);
+
+	if ((getuid () == 0) && (bbs_uid > 0) && (bbs_gid > 0)) {
+		chown (mkfname (ERRORFILE), bbs_uid, bbs_gid);
+	}
+	chmod (mkfname (ERRORFILE), 0664);
 }
 
 

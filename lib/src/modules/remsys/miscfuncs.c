@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/03 05:38:39  alexios
+ * Fixed the generation of full path names based on TTYINFOFILE, which
+ * contains a format specifier.
+ *
  * Revision 1.5  2003/12/24 21:53:06  alexios
  * Fixed #includes.
  *
@@ -452,8 +460,10 @@ rsys_logon ()
 			if (!stat (mkfname (LOGINMSGFILE), &st))
 				prompt (RSLOGONL2A, st.st_size);
 			for (i = 0; i < chan_count; i++) {
-				sprintf (fname, mkfname (TTYINFOFILE),
+			        char tmp[512];
+				sprintf (tmp, TTYINFOFILE, 
 					 channels[i].ttyname);
+				strcpy (fname, mkfname (tmp));
 				if (!stat (fname, &st))
 					prompt (RSLOGONL2B,
 						channels[i].channel,
@@ -491,8 +501,11 @@ rsys_logon ()
 
 	if (sameas (dev, "*"))
 		strcpy (fname, mkfname (LOGINMSGFILE));
-	else
-		sprintf (fname, mkfname (TTYINFOFILE), dev);
+	else {
+		char tmp [512];
+		sprintf (tmp, mkfname (TTYINFOFILE), dev);
+		strcpy (fname, mkfname (tmp));
+	}
 
 	if (!stat (fname, &st)) {
 		char    opt;

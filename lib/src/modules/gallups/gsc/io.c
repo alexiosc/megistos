@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.4  2003/12/31 06:59:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,9 +70,9 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 
-#include <megistos/bbs.h>
-#include <megistos/mbk_gallups.h>
-#include <megistos/gallups.h>
+#include "bbs.h"
+#include "mbk_gallups.h"
+#include "gallups.h"
 
 int     gallup_loaded = 0;
 

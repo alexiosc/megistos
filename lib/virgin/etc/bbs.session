@@ -1,0 +1,122 @@
+#!/bin/bash
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.5  2004/05/17 12:40:14  alexios
+# Added /var/lib/magic to the magic file path and fixed the BBS prefix
+# in the same variable declaration.
+#
+# Revision 1.4  2004/02/29 12:06:44  alexios
+# Fixed end of line notice.
+#
+# Revision 1.3  2004/02/29 12:06:31  alexios
+# Fixed CVS banner.
+#
+
+
+# Note: PREFIX is our working prefix (/usr/local/bbs by default)
+
+# Clean up temporary files
+#cleanuptmp () {
+#    # clean up any remaining temporary files
+#    a=`whoami`
+#    \rm -rf `find /tmp -group bbs -user $a -print 2>/dev/null` >&/dev/null
+#    \rm `find ${PREFIX}/data/telecon|grep -i ${a}[-+]` >&/dev/null
+#    erasing=true
+#}
+
+
+# Check for relogons and rename relog to relogon so that emud catches
+# it and respawns.
+
+checkrelogons () {
+    if test -e ${PREFIX}/etc/online/.relog-$CHANNEL; then
+	mv ${PREFIX}/etc/online/.relog{,on}-$CHANNEL
+	while true; do sleep 666666; done
+    fi
+}
+
+
+
+cd $PREFIX
+
+# This makes life easier
+alias x='exit'
+
+unset LOGOUT
+stty sane start undef stop undef intr undef susp undef erase ^?
+declare -x PATH=/bin:/usr/local/bin:/usr/bin:/bin:${PREFIX}/bin
+
+# File creation mask should be group-friendly
+umask 007
+
+# Make sure people can read our own magic file
+declare -x MAGIC=${PREFIX}/etc/magic:/etc/magic:/usr/lib/magic:/var/lib/magic
+
+# module login stuff
+for a in ${PREFIX}/etc/module.rc/login/[0-9][0-9]_*; do
+    [ -x $a ] && $a --login
+done
+
+
+# main loop
+#
+# We use exit code 126 to signify normal logout. This allows any other exit
+# code to fall back to the menu manager again, in case a fatal error has
+# occured in another module.
+
+while [ $? != 126 ]; do ${PREFIX}/bin/menuman; done
+
+# handle logouts
+if test -e ${PREFIX}/etc/online/.logout-$CHANNEL; then
+        rm -f ${PREFIX}/etc/online/.logout-$CHANNEL 2>/dev/null
+
+	# download tagged files?
+	TAG=/tmp/tag$USERID$CHANNEL
+	if [ -r $TAG -a -s $TAG ]; then
+		updown $TAG /dev/null -logout
+	fi
+	rm -f $TAG
+
+	# clean up any remaining temporary files
+	#cleanuptmp
+	erasing=true
+
+        # module logout stuff
+	for a in ${PREFIX}/etc/module.rc/logout/[0-9][0-9]_*; do
+	    [ -x $a ] && $a --logout
+	done
+        
+	# Check for relogons
+	checkrelogons
+
+        # kick'em out nicely
+        ${PREFIX}/bin/bbslogout
+else
+	# clean up any remaining temporary files
+	if [ .$erasing = . ]; then
+	    #cleanuptmp
+	    erasing=true
+	fi
+
+	# Check for relogons
+	checkrelogons
+
+        # Oops, user not exited normally... hangup their line
+        bbshangup
+fi
+
+# clean up any remaining temporary files
+if [ .$erasing = . ]; then
+    #cleanuptmp
+fi
+
+# Check for relogons
+checkrelogons
+
+# End of file.

@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.5  2003/12/24 18:34:08  alexios
  * Fixed #includes; removed obsolete function latin() that is no longer
  * needed; switched to using strerror() instead of str_errlist[].

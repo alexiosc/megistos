@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:53  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.4  2004/07/15 14:47:00  alexios
+# Changed instances of CFLAGS to AM_CFLAGS so as not to override user
+# settings.
+#
 # Revision 1.3  2003/12/29 07:54:09  alexios
 # Included the typhoon template. It's necessary to link against clubhdr.
 #
@@ -54,7 +62,7 @@ include $(top_srcdir)/templates/module
 include $(top_srcdir)/templates/typhoon
 include $(top_srcdir)/templates/clubhdr
 
-CFLAGS += -I../emailclubs
+AM_CFLAGS += -I../emailclubs
 
 telecon_LDADD = $(LDADD) libmegistos_teleconplugin.la
 

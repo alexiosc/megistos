@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +55,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -69,28 +75,33 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
 #include "bbsd.h"
 
 
-struct getty   *gettys=NULL;
+struct getty *gettys = NULL;
 
 
 void
-readchannels()
+readchannels ()
 {
-  int i;
-  mod_init(INI_TTYNUM);
-  if(gettys)free(gettys);
-  gettys=malloc(sizeof(struct getty)*chan_count);
-  bzero(gettys,sizeof(struct getty)*chan_count);
-  for(i=0;i<chan_count;i++){
-    gettys[i].channel=channels[i].channel;
-    strcpy(gettys[i].ttyname,channels[i].ttyname);
-    bzero(gettys[i].user,sizeof(gettys[i].user));
-    gettys[i].flags=channels[i].flags;
-    gettys[i].pid=gettys[i].disabled=0;
-    gettys[i].shmid=-1;
-  }
+	int     i;
+
+	mod_init (INI_TTYNUM);
+	if (gettys)
+		free (gettys);
+	gettys = malloc (sizeof (struct getty) * chan_count);
+	bzero (gettys, sizeof (struct getty) * chan_count);
+	for (i = 0; i < chan_count; i++) {
+		gettys[i].channel = channels[i].channel;
+		strcpy (gettys[i].ttyname, channels[i].ttyname);
+		bzero (gettys[i].user, sizeof (gettys[i].user));
+		gettys[i].flags = channels[i].flags;
+		gettys[i].pid = gettys[i].disabled = 0;
+		gettys[i].shmid = -1;
+	}
 }
+
+
+/* End of File */

@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/22 19:29:19  alexios
+ * Added a workaround for a TERMIOS bug that corrupts the TERMIOS on exit
+ * (mostly on exit to vised).
+ *
  * Revision 1.5  2003/12/24 19:43:34  alexios
  * Fixed #includes.
  *
@@ -120,6 +128,7 @@ golined ()
 	out_setflags (OFL_AFTERINPUT);
 	prompt (CLRSCR);
 	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	system ("stty sane");
 	execl (mkfname (LINEDBIN), "lined", filename, n, NULL);
 	clearok (stdscr, TRUE);
 	showstatus ();

@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/22 19:29:39  alexios
+ * Added a workaround for a TERMIOS bug that corrupts the TERMIOS when
+ * field help is shown.
+ *
  * Revision 1.5  2003/12/24 18:32:08  alexios
  * Fixed #includes.
  *
@@ -67,6 +75,7 @@ static const char rcsinfo[] =
 #define WANT_STRING_H 1
 #define WANT_UNISTD_H 1
 #define WANT_NCURSES_H 1
+#define WANT_TERMIOS_H 1
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
@@ -269,6 +278,11 @@ visualhelp ()
 void
 fieldhelp (int field)
 {
+	struct termios newtermios;
+
+	tcgetattr (0, &newtermios);
+	system ("stty sane");
+
 	out_setflags (OFL_AFTERINPUT);
 	print ("\033[2J");
 	msg_set (msg);
@@ -282,6 +296,9 @@ fieldhelp (int field)
 	}
 	prompt (FHFTR);
 	getch ();
+
+	tcsetattr (0, TCSANOW, &newtermios);
+
 	clearok (stdscr, 1);
 	refresh ();
 }

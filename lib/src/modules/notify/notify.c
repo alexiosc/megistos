@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 16:45:15  alexios
+ * Added one minor bug fix; one error reporting fix; and two minor code
+ * beautification changes.
+ *
  * Revision 1.5  2003/12/27 12:29:39  alexios
  * Adjusted #includes.
  *
@@ -73,7 +81,7 @@ static const char rcsinfo[] =
 #include "mbk_notify.h"
 
 
-#define NOTIFYDIR mkfname(BBSDATADIR"/notify")
+#define NOTIFYDIR BBSDATADIR"/notify"
 
 
 promptblock_t *msg;
@@ -140,24 +148,26 @@ loadlist (char *userid)
 {
 	char    fname[256];
 	FILE   *fp;
+	struct stat st;
 
 	newlist ();
 	sprintf (fname, "%s/%s", mkfname (NOTIFYDIR), userid);
+
+	if (stat (fname, &st)) return;
+
 	if ((fp = fopen (fname, "r")) == NULL) {
 		if (errno != ENOENT) {
-			error_fatalsys ("Unable to open %s (errno=%d)", fname);
+			error_fatalsys ("Unable to open %s", fname);
 		} else
 			return;
 	}
 	while (!feof (fp)) {
 		char    line[256], *cp;
 
-		if (!fgets (line, sizeof (line), fp))
-			break;
+		if (!fgets (line, sizeof (line), fp)) break;
 		cp = strtok (line, "\n\r");
-		if (!usr_exists (cp))
-			continue;
-		strcpy (list[numusers++].userid, cp);
+		if (!usr_exists (cp)) continue;
+		strcpy (list [numusers++].userid, cp);
 	}
 	fclose (fp);
 	qsort (list, numusers, sizeof (struct listitem), listcmp);

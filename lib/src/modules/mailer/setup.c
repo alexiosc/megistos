@@ -28,6 +28,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/22 19:24:50  alexios
+ * One slight code beautification modification.
+ *
+ * Revision 1.6  2004/05/03 05:37:49  alexios
+ * Fixed the execution path of mailer modules.
+ *
  * Revision 1.5  2003/12/27 12:29:39  alexios
  * Adjusted #includes.
  *
@@ -108,12 +118,9 @@ showsetupmenu ()
 		if (!(plugins[i].flags & PLF_SETUP))
 			continue;
 		strcpy (line, &pad[i % 2]);
-		strcpy (&line
-			[67 -
-			 strlen (plugins[i].descr[thisuseracc.language - 1])],
-			plugins[i].descr[thisuseracc.language - 1]);
-		line[66 -
-		     strlen (plugins[i].descr[thisuseracc.language - 1])] = 32;
+		strcpy (&line [67 - strlen (plugins [i].descr [thisuseracc.language - 1])],
+			plugins[i].descr [thisuseracc.language - 1]);
+		line [66 - strlen (plugins[i].descr [thisuseracc.language - 1])] = 32;
 		prompt (SETUPPL, sel[i], line);
 	}
 
@@ -203,6 +210,7 @@ setupqwk ()
 		 userqwk.flags & USQ_GREEKQWK ? "on" : "off",
 		 userqwk.packetname,
 		 msg_get (TR0 + ((userqwk.flags & OMF_TR) >> OMF_SHIFT)));
+	strcat (inp_buffer, tmp);
 
 	if (dialog_run ("mailer", QWKVT, QWKLT, inp_buffer, MAXINPLEN) != 0) {
 		error_log ("Unable to run data entry subsystem");
@@ -284,7 +292,8 @@ pluginsetup (int n)
 {
 	char    command[256];
 
-	sprintf (command, "%s --setup", plugins[n].name);
+	sprintf (command, "%s/mailer/%s --setup",
+		 mkfname (BBSLIBDIR), plugins[n].name);
 	runcommand (command);
 	cnc_end ();
 }

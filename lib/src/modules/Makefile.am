@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:42  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.4  2004/02/29 12:22:36  alexios
+# Changed the order of compilation so the most widely used modules are
+# first (i.e. the off-line mailer and the email/clubs twin module).
+#
 # Revision 1.3  2003/12/27 12:44:29  alexios
 # Removed two backslashes. Ho hum.
 #
@@ -15,14 +23,14 @@
 #
 
 SUBDIRS = \
+	mailer \
+	emailclubs \
 	account \
 	adventure \
 	bulletins \
 	cookie \
-	emailclubs \
 	files \
 	graffiti \
-	mailer \
 	news \
 	notify \
 	registry \
@@ -31,7 +39,6 @@ SUBDIRS = \
 	telecon
 
 # 	gallups
-#	gallups-old
 
 
 # End of file

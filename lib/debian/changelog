@@ -1,3 +1,109 @@
+megistos (1.0.11) unstable; urgency=medium
+
+  * Added four missing transfer protocols: cat-and-remove,
+    gzipview, uudecode and remove and view-and-remove.
+  * Added protocol-script template to accommodate protocols built as
+    scripts.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Tue, 24 Aug 2004 09:36:31 +0100
+
+megistos (1.0.10) unstable; urgency=low
+
+  * Closed SF bug 957531: changing club access levels for certain users
+    causes the emailclubs module to crash.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Thu, 15 Jul 2004 15:56:43 +0100
+
+megistos (1.0.9) unstable; urgency=medium
+
+  * Closed SF bug 958385: users not being deleted during cleanup. Fixed by
+    reincorporating the missingg 'bbsuserdel' script into the
+    distribution.
+  * Worked around TERMIOS issue with vised: NL/CR translations not set properly.
+  * Worked around identical TERMIOS issue with bbsdialog (field help).
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat, 22 May 2004 20:23:16 +0100
+
+megistos (1.0.8-1) unstable; urgency=high
+
+  * Coded a candidate fix for a minor bug in src/system/daemons/emud.c to
+    ensure ${instance}/etc/.emu-* files have appropriate permissions and
+    ownership.
+  * Closed SF bug 957526: remote sysop command 'emulate' not working due
+    to permissions problem in ${instance}/etc/.emu-*.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat, 22 May 2004 00:55:25 +0100
+
+megistos (1.0.8) unstable; urgency=high
+
+  * Closed SF bug 420423: verified as closed (actual bug fix was much
+    earlier). If a user issues a global /r command (view registry) for an
+    inexistent user, the system replies with &quot;November&quot;.
+  * Closed SF bug 229615: verified as closed (actual bug fix was much
+    earlier). This referred to signup not working.
+  * Closed SF bug 957524: cleanup not being done. Fixed by reinstated the
+    bbscleanup script that had previously gone (inexplicably) missing.
+  * Numerous instances of hardwired references to the UID:GID pair
+    'bbs:bbs' changed to use the instance UID:GID pair. Likely to fix
+    several insidious permission-oriented bugs.
+  * Fixed numerous instances of system calls like chown(2) and chmod(2)
+    being idiotically executed by running system(3) with appropriate
+    command strings.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 21 May 2004 21:28:13 +0100
+
+megistos (1.0.7) unstable; urgency=high
+
+  * Closed SF bug 954250: Uploads disabled. Caused by segfault in
+    src/tools/updown/upload.c (and, by symmetry, also download.c -- although no
+    report of the latter function crashing has been given and it could not be
+    reproduced).
+  * Fixed the magic file path in bbs.session.
+  * Closed SF bug 430829: buffer overrun in the registry fixed (it overflowed
+    into the Menuman data structures and messed up the user's location when
+    they were editing their registry entry).
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Mon, 17 May 2004 15:38:05 +0300
+
+megistos (1.0.6) unstable; urgency=low
+
+  * Lack of terminating NUL in src/modules/emailclubs/reply.c made it
+    impossible to save replies to club messages because the command line
+    was mangled.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Thu, 13 May 2004 18:21:56 +0300
+
+megistos (1.0.5) unstable; urgency=high
+
+  * Fixed a bug in signup that caused a segmentation fault when a password
+    was generated.
+  * Made signup not ask for a language, encoding and ANSI setting if these
+    questions have already been asked by bbslogin prior to displaying the
+    login prompt.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Wed,  5 May 2004 12:22:59 +0300
+
+megistos (1.0.4) unstable; urgency=critical
+
+  * More bug fixes in libmegistos/prompts.c, this time to do with the
+    prompt block indexes when accessing the last message in a block.
+  * Fixed CVS tree structure and tagged.
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Mon,  3 May 2004 09:07:29 +0300
+
+megistos (1.0.3) unstable; urgency=critical
+
+  * Fixed bug whereby bbsd used msg_sys without opening the block.
+  * Added safeguards in libmegistos/prompts.c against that happening again.
+  * First vestiges of UNIX98 PTY handling (pathetic for now).
+  * Prompt blocks are now loaded into memory to avoid issues with file
+    index corruption.
+  * Fixed insidious little bug in libmegistos/prompts.c that would always
+    load 8191 bytes from a prompt block regardless of the size
+    requested. D'oh!
+
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sun,  2 May 2004 14:34:07 +0300
+
 megistos (1.0.2) unstable; urgency=low
 
   * Added first draft of a megistos-config script to yield
@@ -36,8 +142,35 @@ megistos (1.0.2) unstable; urgency=low
     needed to build third party plugins.
   * Yet again, another library was made of common mailer functionality
     that is needed by most mailer plugins.
+  * Transferred the build to a faster machine, whereupon several build
+    blunders were discovered (because I had to be lazy with full builds
+    before -- Megistos takes a long time to build on a K6-233 with 128
+    megs of RAM.
+  * Reincorporated documentation.
+  * Started work on the instance framework.
+  * The virgin instance now installed in ${prefix}/lib/megistos/virgin.
+  * Started using debconf for the configuration questions.
+  * Added megistos-admin script to manage BBS instances.
+  * Numerous changes in virgin/etc/rc.bbs to account for the new directory
+    infrastructure, for enhanced portability, and the like.
+  * Moved daemon PID files from ${instancedir}/etc to ${instancedir}/run.
+  * Completely rewrote privilege separation framework.
+  * Documented reworked privilege separation in
+    doc/notes/Privilege_Separation.
+  * Much of the BBS instance directory structure has changed significantly
+    as a result of changes to the source tree, and the implementation of
+    the instance infrastructure.
+  * Numerous changes in the library and daemons to fix permissions,
+    ownerships et cetera when installing a BBS from scratch.
+  * More bug fixes than I can remember. Almost all of them had to do with
+    directories not existing in the virgin instance, and/or file
+    permissions not set up correctly.
+  * Bug fix: removed spurious fclose() in src/modules/telecon/accesses.c
+    that would cause crashes when entering club teleconference channels.
+  * Bug fix: removed mod_done() call from src/modules/telecon/plugins.c
+    that would mangle TERMIOS when a plugins was called.
 
- --
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat,  7 Feb 2004 11:05:06 +0000
 
 megistos (1.0.1) unstable; urgency=low
 

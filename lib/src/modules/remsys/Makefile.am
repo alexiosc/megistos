@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:52  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.4  2004/02/29 16:58:26  alexios
+# Moved the (rudimentary) BBS console to a subdirectory. It used some of
+# the remsys code anyway.
+#
 # Revision 1.3  2003/12/27 12:58:27  alexios
 # Moved some of the tools (namely, classed and eventman) from the old
 # ADMIN subdirectory to this one. These modules are mostly called by
@@ -15,7 +23,7 @@
 # Initial revision.
 #
 
-SUBDIRS = . gcs_remsys classed eventman
+SUBDIRS = . gcs_remsys classed eventman console
 
 PROGNAMES = remsys
 

@@ -26,6 +26,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:34  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.7  2004/02/22 18:53:03  alexios
+# Added code to yield the top-level BBS UID and GIDs used for privilege
+# separation.
+#
 # Revision 1.6  2003/12/27 12:48:48  alexios
 # Fixed bug where program names with non-identifier characters retained
 # those characters in the Makefile (e.g. offline.mail generated
@@ -71,6 +79,8 @@ srcdir=`echo @abs_top_srcdir@ | sed 's/libmegistos\/..\/*//'`
 instancedir="@INSTANCEDIR@"
 virgininstance="@VIRGININSTANCE@"
 virginsrc="$builddir/@VIRGINDIR@"
+toplevel_user="@TOPLEVEL_USER@"
+toplevel_group="@TOPLEVEL_GROUP@"
 
 templatedir="@abs_top_srcdir@/templates"
 
@@ -92,6 +102,8 @@ Options (informational):
     [--version]
     [--virgin-dir]
     [--virgin-src]
+    [--toplevel-user]
+    [--toplevel-group]
 
 Commands:
 
@@ -112,6 +124,7 @@ Include directory:      $includedir
 Instance directory:     $instancedir
 Virgin instance source: $virginsrc
 Virgin instance:        $virgininstance
+Top-level user:group:   $toplevel_user:$toplevel_group
 
 EOF
     exit $1
@@ -200,6 +213,14 @@ while test $# -gt 0; do
 	    echo_include_dir=yes
 	    ;;
 
+	--toplevel-user)
+	    echo_toplevel_user=yes
+	    ;;
+
+	--toplevel-group)
+	    echo_toplevel_group=yes
+	    ;;
+
 	--header)
 	    echo_header=yes
 	    ;;
@@ -269,6 +290,14 @@ fi
 
 if test "$echo_include_dir" = "yes"; then
     echo $includedir
+fi
+
+if test "$echo_toplevel_user" = "yes"; then
+    echo $toplevel_user
+fi
+
+if test "$echo_toplevel_group" = "yes"; then
+    echo $toplevel_group
 fi
 
 if test "$echo_header" = "yes"; then

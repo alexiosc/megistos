@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.6  2003/12/24 18:58:41  alexios
  * Fixed #includes; fixed download time calculation to use integer
  * arithmetic.

@@ -28,6 +28,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 16:32:58  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,29 +51,23 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
-
-
-
 /* #define DEBUG 1 */
 
 
-extern int  tmreidx;
-extern int  tmnetml;
+extern int tmreidx;
+extern int tmnetml;
 
 
 /* netmail.c: */
 
-void getnetmail();
+void    getnetmail ();
 
 
 /* rfc822.c: */
 
-void get_address_from(char *line, char *buffer);
+void    get_address_from (char *line, char *buffer);
 
 
 /* reindex.c */
 
-void doreindex();
+void    doreindex ();

@@ -1,0 +1,16 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+
+include $(top_srcdir)/templates/base
+
+megistosprotocoldir = $(pkglibdir)/bin/protocols
+megistosprotocol_SCRIPTS = $(PROGNAMES)
+
+# End of file.

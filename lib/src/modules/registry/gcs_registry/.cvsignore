@@ -3,4 +3,5 @@
 Makefile
 Makefile.in
 gcs_registry.lo
+libgcs10_registry.la
 libgcs_registry.la

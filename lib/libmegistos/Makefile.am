@@ -3,6 +3,19 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:34  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.13  2004/02/29 17:00:20  alexios
+# Moved the gcs_builtin code to a subdirectory, so it can compile as a
+# shared object. This allows other global command servers to override
+# its commands, if necessary.
+#
+# Revision 1.12  2004/02/22 18:54:14  alexios
+# Moved msgidx and mksysvar to the right place, under
+# ${prefix}/lib/megistos/bin.
+#
 # Revision 1.11  2003/12/27 12:44:03  alexios
 # Moved the shared object versioning info to configure.in, using the
 # SOVERSION Autoconf variable instead.
@@ -48,6 +61,8 @@ pkgdatadir = @PKGDATADIR@
 pkglibdir = @PKGLIBDIR@
 pkgincludedir = @PKGINCLUDEDIR@
 
+SUBDIRS = . gcs_builtin
+
 # The Megistos library
 
 DEFS = @DEFS@ -DLOCALEDIR=\"@LOCALEDIR@\"
@@ -86,7 +101,7 @@ HDR =						\
 
 libmegistos_la_SOURCES =						    \
 	audit.c channels.c format.c input.c output.c timedate.c		    \
-	version.c bbsmod.c errors.c gcs_builtin.c lock.c prompts.c ttynum.c \
+	version.c bbsmod.c errors.c lock.c prompts.c ttynum.c \
 	bots.c filexfer.c globalcmd.c miscfx.c security.c useracc.c	    \
 	$(HDR)
 
@@ -117,7 +132,8 @@ version.h version.mk:	$(filter-out $(libmegistos_la_SOURCES),version.h) ../confi
 
 # Build bootstrap programs 
 
-pkglib_PROGRAMS = msgidx mksysvar
+megistosbindir = $(pkglibdir)/bin
+megistosbin_PROGRAMS = msgidx mksysvar
 mksysvar_LDADD = -lmegistos
 
 

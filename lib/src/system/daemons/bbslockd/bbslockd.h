@@ -29,6 +29,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 18:02:54  alexios
+ * Ran through megistos-config --oh. Minor permission/file location
+ * issues fixed to account for the new infrastructure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,9 +52,12 @@
 */
 
 
-extern int                 locksocket;
-extern struct sockaddr_un  name;
-extern int                 bbsuid,bbsgid;
+extern int locksocket;
+extern struct sockaddr_un name;
+extern int bbsuid, bbsgid;
 
 
-void handlerequest (int fd);
+void    handlerequest (int fd);
+
+
+/* End of File */

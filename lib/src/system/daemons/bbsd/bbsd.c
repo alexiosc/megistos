@@ -32,6 +32,18 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:40:25  alexios
+ * Mini fixes to hunt down a bug where msg_sys wasn't opened or had an
+ * invalid file descriptor.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -84,10 +96,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -108,239 +118,266 @@ const char *__RCS=RCS_VER;
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
-#include "mbk_signup.h"
-#include "mbk_metabbs.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
+#include <megistos/mbk_signup.h>
+#include <megistos/mbk_metabbs.h>
 #include "bbsd.h"
 
 
-int bbsuid, bbsgid;
-char *progname;
+int     bbsuid, bbsgid;
+char   *progname;
 
 
 
 static void
-getpwbbs()
+getpwbbs ()
 {
-  struct passwd *pass=pass=getpwnam(BBSUSERNAME);
-  if(pass==NULL)error_fatal("User %s not found.",BBSUSERNAME);
-  bbsuid=pass->pw_uid;
-  bbsgid=pass->pw_gid;
+	char *s;
+
+	if ((s = getenv ("BBSUID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsuid = atoi (s);
+
+	if ((s = getenv ("BBSGID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsgid = atoi (s);
 }
 
 
 static void
-mkpipe()
+mkpipe ()
 {
-  unlink(mkfname(BBSDPIPEFILE));
-  if(mkfifo(mkfname(BBSDPIPEFILE),0220)){
-    error_fatalsys("Unable to mkfifo(\"%s\",0220)",mkfname(BBSDPIPEFILE));
-  }
-  if(chown(mkfname(BBSDPIPEFILE),bbsuid,bbsgid)){
-    error_fatalsys("Unable to chown() %s",mkfname(BBSDPIPEFILE));
-  }
-  if(chmod(mkfname(BBSDPIPEFILE),0220)){
-    error_fatalsys("Unable to chmod(\"%s\",0220)",mkfname(BBSDPIPEFILE));
-  }
+	unlink (mkfname (BBSDPIPEFILE));
+	if (mkfifo (mkfname (BBSDPIPEFILE), 0220)) {
+		error_fatalsys ("Unable to mkfifo(\"%s\",0220)",
+				mkfname (BBSDPIPEFILE));
+	}
+	if (chown (mkfname (BBSDPIPEFILE), bbsuid, bbsgid)) {
+		error_fatalsys ("Unable to chown() %s",
+				mkfname (BBSDPIPEFILE));
+	}
+	if (chmod (mkfname (BBSDPIPEFILE), 0220)) {
+		error_fatalsys ("Unable to chmod(\"%s\",0220)",
+				mkfname (BBSDPIPEFILE));
+	}
 }
 
 
 static void
-storepid()
+storepid ()
 {
-  FILE *fp=fopen(mkfname(BBSETCDIR"/bbsd.pid"),"w");
-  if(fp==NULL){
-    error_fatalsys("Unable to open %s/bbsd.pid for writing.",
-		   mkfname(BBSETCDIR));
-    exit(1);
-  }
-  fprintf(fp,"%d",getpid());
-  fclose(fp);
-  chmod(mkfname(BBSETCDIR"/bbsd.pid"),0600);
-  chown(mkfname(BBSETCDIR"/bbsd.pid"),0,0);
+	char fname [512];
+	FILE   *fp;
+
+	strncpy (fname, mkfname (BBSRUNDIR "/bbsd.pid"), sizeof (fname));
+	
+	if ((fp = fopen (fname, "w")) == NULL) {
+		error_fatalsys ("Unable to open %s for writing.", fname);
+		exit (1);
+	}
+	fprintf (fp, "%d", getpid ());
+	fclose (fp);
+	chmod (fname, 0600);
+	chown (fname, 0, 0);
 }
 
 
 static void
-mainloop()
+mainloop ()
 {
-  int killed=0;
-  int fd=open(mkfname(BBSDPIPEFILE),O_RDONLY|O_NONBLOCK);
-  int ticks=0, jiffies=0;
-  int t, sec, min, oldmin=-1;
-  int timestarted=time(NULL);
+	int     killed = 0;
+	int     fd = open (mkfname (BBSDPIPEFILE), O_RDONLY | O_NONBLOCK);
+	int     ticks = 0, jiffies = 0;
+	int     t, sec, min, oldmin = -1;
+	int     timestarted = time (NULL);
 
-  if(fd<0){
-    error_fatalsys("Unable to open() %s",mkfname(BBSDPIPEFILE));
-    exit(1);
-  }
+	if (fd < 0) {
+		error_fatalsys ("Unable to open() %s", mkfname (BBSDPIPEFILE));
+		exit (1);
+	}
 
-  for(;!killed;){
-    respawn();			/* Respawn gettys and bbslockd*/
-    processcommands(fd);	/* Process commands from the FIFO */
+	for (; !killed;) {
+		respawn ();	/* Respawn gettys and bbslockd */
+		processcommands (fd);	/* Process commands from the FIFO */
 
-    usleep(SLEEPTIME);		/* Sleep a bit */
-
-
-    /* Execute events no more than once a minute, on the minute */
-    
-    t=now();
-    sec=tdsec(t);
-    min=tdmin(t);
-    if(sec==0&&oldmin!=min){
-      events();
-      oldmin=min;
-    }
+		usleep (SLEEPTIME);	/* Sleep a bit */
 
 
-    /* The following is executed once every jiffy */
+		/* Execute events no more than once a minute, on the minute */
 
-    ticks=(ticks+1)%TICKSPERJIFFY;
-    if(ticks)continue;
+		t = now ();
+		sec = tdsec (t);
+		min = tdmin (t);
+		if (sec == 0 && oldmin != min) {
+			events ();
+			oldmin = min;
+		}
 
-    charge();			/* Charge credits and count on-line time */
+
+		/* The following is executed once every jiffy */
+
+		ticks = (ticks + 1) % TICKSPERJIFFY;
+		if (ticks)
+			continue;
+
+		charge ();	/* Charge credits and count on-line time */
 
 
-    /* We register with the Meta-BBS daemon (or send a 'heartbeat'
-       re-registration) every 5 mins, or every time our number of
-       online users changes (whichever occurs first). */
-    
+		/* We register with the Meta-BBS daemon (or send a 'heartbeat'
+		   re-registration) every 5 mins, or every time our number of
+		   online users changes (whichever occurs first). */
+
 #ifdef HAVE_METABBS
-    if((last_registration_time+(5*60))<=time(NULL))register_with_metabbs();
+		if ((last_registration_time + (5 * 60)) <= time (NULL))
+			register_with_metabbs ();
 #endif
 
 
-    /* The following is executed once every minute */
+		/* The following is executed once every minute */
 
-    jiffies=(jiffies+1)%JIFFIESPERMIN;
-    if(jiffies)continue;
-    
-    resetcounts();		/* Reset spawn counts on gettys */
+		jiffies = (jiffies + 1) % JIFFIESPERMIN;
+		if (jiffies)
+			continue;
+
+		resetcounts ();	/* Reset spawn counts on gettys */
 
 
 
 
-    /* Restart system if it is idle */
+		/* Restart system if it is idle */
 
-    if(numusers==0 && (time(0)-timestarted>sysvar->bbsrst*3600)){
-      sepuku();
-      exit(0);			/* This should never really happen */
-    }
-  }
+		if (numusers == 0 &&
+		    (time (0) - timestarted > sysvar->bbsrst * 3600)) {
+			sepuku ();
+			exit (0);	/* This should never really happen */
+		}
+	}
 }
 
 
 static void
-checkuid()
+checkuid ()
 {
-  if (getuid()){
-    fprintf(stderr, "%s: getuid: not super-user\n", progname);
-    exit(1);
-  }
+	if (getuid ()) {
+		fprintf (stderr, "%s: getuid: not super-user\n", progname);
+		exit (1);
+	}
 }
 
 
 static void
-forkdaemon()
+forkdaemon ()
 {
-  switch(fork()){
-  case -1:
-    fprintf(stderr,"%s: fork: unable to fork daemon\n",progname);
-    exit(1);
-  case 0:
-    ioctl(0,TIOCNOTTY,NULL);
-    setsid();
-    close(0);
+	switch (fork ()) {
+	case -1:
+		fprintf (stderr, "%s: fork: unable to fork daemon\n",
+			 progname);
+		exit (1);
+	case 0:
+		ioctl (0, TIOCNOTTY, NULL);
+		setsid ();
+		close (0);
 #ifndef DEBUG
-    close(1);
-    close(2);
+		close (1);
+		close (2);
 #endif
-    break;
-  default:
-    exit(0);
-  }
+		break;
+	default:
+		exit (0);
+	}
 }
 
 
 static promptblock_t *msg;
 
-int   supzap;
+int     supzap;
 
 #ifdef HAVE_METABBS
-int   telnet_port;
-char *bbscod;
-char *url;
-char *email;
-char *allow;
-char *deny;
-char *bbsad;
+int     telnet_port;
+char   *bbscod;
+char   *url;
+char   *email;
+char   *allow;
+char   *deny;
+char   *bbsad;
 #endif
 
 
 void
-enablegettys()
+enablegettys ()
 {
-  int i;
-  for(i=0;i<chan_count;i++)if(gettys[i].disabled){
-    gettys[i].disabled=0;
-    gettys[i].spawncount=0;
-  }
+	int     i;
+
+	for (i = 0; i < chan_count; i++)
+		if (gettys[i].disabled) {
+			gettys[i].disabled = 0;
+			gettys[i].spawncount = 0;
+		}
 }
 
 
-static void init(int argc, char *argv[])
+static void
+init (int argc, char *argv[])
 {
-  progname=argv[0];
-  mod_setprogname(argv[0]);
+	progname = argv[0];
+	mod_setprogname (argv[0]);
 
-  msg=msg_open("signup");
-  supzap=msg_int(SUPZAP,0,32767);
-  msg_close(msg);
+	msg = msg_open ("signup");
+	supzap = msg_int (SUPZAP, 0, 32767);
+	msg_close (msg);
+	if (msg_sys == NULL) msg_sys = msg_open ("sysvar");
 
 #ifdef HAVE_METABBS
-  msg=msg_open("metabbs");
-  telnet_port=msg_int(TELPRT,0,65535);
-  url=msg_string(URL);
-  email=msg_string(EMAIL);
-  allow=msg_string(ALLOW);
-  deny=msg_string(DENY);
-  bbsad=msg_string(BBSAD);
-  init_non_megistos();		/* Initialise the non-Megistos system table */
-  msg_close(msg);
-#endif
+	msg = msg_open ("metabbs");
+	telnet_port = msg_int (TELPRT, 0, 65535);
+	url = msg_string (URL);
+	email = msg_string (EMAIL);
+	allow = msg_string (ALLOW);
+	deny = msg_string (DENY);
+	bbsad = msg_string (BBSAD);
+	init_non_megistos ();	/* Initialise the non-Megistos system table */
+	msg_close (msg);
+#endif				/* HAVE_METABBS */
 
-  msg=msg_sys=msg_open("sysvar");
-  bbscod=msg_string(BBSCOD);
-  signal(SIGUSR1,enablegettys);
-  setenv("CHANNEL","[bbsd]",1);
+	msg = msg_open ("sysvar");
+
+#ifdef HAVE_METABBS
+	bbscod = msg_string (BBSCOD);
+#endif				/* HAVE_METABBS */
+
+	signal (SIGUSR1, enablegettys);
+	setenv ("CHANNEL", "[bbsd]", 1);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  init(argc,argv);		/* Initialise stuff */
+	init (argc, argv);	/* Initialise stuff */
 
-  checkuid();			/* Make sure the superuser is running us */
+	checkuid ();		/* Make sure the superuser is running us */
 
-  forkdaemon();			/* Fork() the daemon */
-  
-  getpwbbs();			/* Get the /etc/passwd entry user 'bbs' */
+	forkdaemon ();		/* Fork() the daemon */
 
-  cleanuponline();		/* Clean up the ONLINE directory */
+	getpwbbs ();		/* Get the /etc/passwd entry user 'bbs' */
 
-  mkpipe();			/* Make BBSD's FIFO and set its permissions */
+	cleanuponline ();	/* Clean up the ONLINE directory */
 
-  readchannels();		/* Read in the channels */
+	mkpipe ();		/* Make BBSD's FIFO and set its permissions */
 
-  storepid();			/* Store the daemon's PID */
+	readchannels ();	/* Read in the channels */
 
-  monitorshm();			/* Allocate monitor memory */
+	storepid ();		/* Store the daemon's PID */
 
-  sysvarshm();			/* Allocate sysvar memory */
+	monitorshm ();		/* Allocate monitor memory */
 
-  mainloop();			/* Finally, run the daemon's main loop */
-  
-  return 0;			/* We never get here. */
+	sysvarshm ();		/* Allocate sysvar memory */
+
+	mainloop ();		/* Finally, run the daemon's main loop */
+
+	return 0;		/* We never get here. */
 }
+
+
+/* End of File */

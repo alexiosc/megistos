@@ -29,6 +29,22 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/03 05:36:12  alexios
+ * Opens msg_sys whenever any other prompt block is opened, provided
+ * msg_sys isn't already opened (and the prompt block being opened isn't
+ * msg_sys). Fixed insidious bug in the prompt index that caused certain
+ * modules to dump core when outputting the last message in certain
+ * multilingual blocks. Added debugging code (#ifdef'ed out). Changed the
+ * code so that (depending on preprocessor symbol MSGS_ON_DISK) prompt
+ * block data lives in core, and is read from disk on startup. This makes
+ * the system more resistant to cases where the blocks change mid-run
+ * (e.g. due to an admin adjusting them). Added a couple of safeguards to
+ * msg_close().
+ *
  * Revision 1.6  2003/12/19 13:25:18  alexios
  * Updated include directives.
  *
@@ -75,6 +91,7 @@ static const char rcsinfo[] =
 #define WANT_STRINGS_H 1
 #define WANT_CTYPE_H 1
 #define WANT_UNISTD_H 1
+#define WANT_STAT_H 1
 #include <megistos/bbsinclude.h>
 #include <megistos/config.h>
 #include <megistos/errors.h>
@@ -135,11 +152,21 @@ msg_open (char *name)
 {
 	char    fname[256], magic[4];
 	long    result;
+	struct  stat st;
+
+	/* Also open the sysvar block by recursing here (just once). */
+
+	if (strcmp (name, "sysvar") && (msg_sys == NULL)) {
+		msg_sys = msg_open ("sysvar");
+	}
 
 	msg_last = msg_cur;
 	msg_cur = (promptblock_t *) alcmem (sizeof (promptblock_t));
 
 	sprintf (fname, "%s/%s.mbk", mkfname (MBKDIR), name);
+	if (stat (fname, &st)) {
+		error_fatalsys ("Unable to stat prompt file %s", fname);
+	}
 	if ((msg_cur->handle = fopen (fname, "r")) == NULL) {
 		error_fatalsys ("Unable to open prompt file %s", fname);
 	}
@@ -175,6 +202,7 @@ msg_open (char *name)
 	if (result != msg_cur->indexsize) {
 		error_fatal ("Corrupted prompt file %s (index)", fname);
 	}
+	msg_cur->index [msg_cur->indexsize - 1].offset = msg_cur->size;
 
 	msg_cur->indexsize--;
 	msg_cur->language = 0;
@@ -183,6 +211,30 @@ msg_open (char *name)
 
 	if (thisshm)
 		msg_setlanguage (thisuseracc.language);
+
+	/* Read in the messages */
+
+	msg_cur->size = st.st_size;
+	msg_cur->data = alcmem (st.st_size);
+	if (fseek (msg_cur->handle, 0, SEEK_SET)) {
+		error_fatalsys
+			("Failed to rewind() file %s", msg_cur->fname);
+	}
+	if (fread (msg_cur->data, st.st_size, 1, msg_cur->handle) != 1) {
+		error_fatalsys
+			("Failed to fread() %d bytes from file %s", st.st_size, msg_cur->fname);
+	}
+
+#if 0
+	{
+		int i;
+		fprintf(stderr,"INDEX FOR %s:\n", msg_cur->fname);
+		for (i=0; i<msg_cur->indexsize; i++) {
+			fprintf(stderr,"%3d. ofs %5d name %s\n", i, msg_cur->index[i].offset, msg_cur->index[i].id);
+		}
+		printf(stderr,"--------------------------------------------------------\n");
+	}
+#endif
 
 	return msg_cur;
 }
@@ -291,15 +343,33 @@ msg_getl_bot (int num, int language, int checkbot)
 
 	id = msg_cur->index[num - 1].id;
 	offset = msg_cur->index[num - 1].offset;
+#ifdef MSGS_ON_DISK
 	if (fseek (msg_cur->handle, offset, SEEK_SET)) {
 		error_fatalsys
 		    ("Failed to fseek() prompt %s (#%d) location %ld in %s",
 		     id, oldnum, offset, msg_cur->fname);
 	}
+#endif /* MSGS_ON_DISK */
+
 	size = msg_cur->index[num].offset - offset;
-	if (size >= MSGBUFSIZE)
-		size = MSGBUFSIZE - 1;
-	size = MSGBUFSIZE - 1;
+
+	if (size < 0) size = msg_cur->size - offset - 1;
+
+	if (offset >= msg_cur->size) {
+		error_fatal
+			("Prompt offset %d is out of limits (max %d) for prompt %s (#%d) in file %s",
+			 offset, msg_cur->size, id, num, msg_cur->fname);
+	}
+
+	if ((offset + size) >= msg_cur->size) {
+		error_fatal
+			("Prompt offset %d + size %d past end of file (size %d) for prompt %s (#%d) in file %s",
+			 offset, size, msg_cur->size, id, num, msg_cur->fname);
+	}
+
+	if (size >= MSGBUFSIZE) size = MSGBUFSIZE - 1;
+
+#ifdef MSGS_ON_DISK 
 	if (fread (msg_buffer, size, 1, msg_cur->handle) != 1) {
 #if 0
 		error_fatal
@@ -308,6 +378,13 @@ msg_getl_bot (int num, int language, int checkbot)
 		     (void *) size, msg_cur->index[num].offset, offset);
 #endif
 	}
+#else
+
+	/*fprintf(stderr,"(fname=\"%s\",ofs=%d,size=%d)\n", msg_cur->fname,offset,size);*/
+	memcpy (msg_buffer, &msg_cur->data [offset], size);
+
+#endif /* MSGS_ON_DISK */
+
 	lastprompt = num;
 
 	/* If this is a bot, format the prompt for it. */
@@ -337,6 +414,8 @@ msg_getunitl (int num, int value, int language)
 	offset = msg_cur->index[num - 1].offset;
 	if ((size = msg_cur->index[num].offset - offset) > 79)
 		return postfix;
+
+#ifdef MSGS_ON_DISK
 	if (fseek (msg_cur->handle, offset, SEEK_SET)) {
 		error_fatalsys
 		    ("Failed to fseek() prompt %s location %ld in file %s",
@@ -348,6 +427,10 @@ msg_getunitl (int num, int value, int language)
 		     msg_cur->index[num].id, num, msg_cur->fname, size,
 		     msg_cur->index[num].offset, offset, 0);
 	}
+#else
+	memcpy (postfix, &msg_cur->data [offset], size);
+#endif /* MSGS_ON_DISK */
+
 	return postfix;
 }
 
@@ -355,11 +438,11 @@ msg_getunitl (int num, int value, int language)
 void
 msg_close (promptblock_t * blk)
 {
-	if (!msg_cur)
-		return;
+	if (!msg_cur) return;
 	if (blk && blk->fname[0]) {
 		fclose (blk->handle);
-		free (blk->index);
+		if (blk->index != NULL) free (blk->index);
+		if (blk->data != NULL) free (blk->data);
 		blk->fname[0] = 0;
 		free (blk);
 		blk = NULL;

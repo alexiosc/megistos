@@ -29,6 +29,22 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/21 20:08:56  alexios
+ * Removed deprecated code stanza pertaining to a chown() operation on
+ * the user's newly created account.
+ *
+ * Revision 1.6  2004/05/05 09:21:51  alexios
+ * Signup no longer asks encoding, language and ANSI questions if they've
+ * already been asked by something else (e.g. bbslogin). Bug fix that
+ * tried to open the password generation dictionary without prepending
+ * the BBS prefix, then performed no error checking if this
+ * failed. Placed additional safeguards against this happening for other
+ * reasons. Minor beautification changes.
+ *
  * Revision 1.5  2003/12/23 06:38:04  alexios
  * Ran through megistos-config --oh.
  *
@@ -337,6 +353,18 @@ askxlation ()
 			     getenv ("CHANNEL"), mkfname (CHANDEFFILE));
 	}
 
+
+	/* Has this been asked before? */
+
+	if (!askxlt) {
+		char * env_xlation = getenv("XLATION");
+		if (env_xlation != NULL) {
+			xlation = atoi (env_xlation);
+			goto skipxlationquestion;
+		}
+	}
+
+
 	/* Check the available translation tables and make the first one the
 	   default */
 
@@ -366,6 +394,8 @@ askxlation ()
 			break;
 	}
 
+ skipxlationquestion:
+
 	out_setxlation (xlation);
 	usr_setpxlation (uacc, xlation);
 }
@@ -374,7 +404,18 @@ askxlation ()
 void
 getlanguage ()
 {
-	int     i = 0, choice = 0, ok = 0, showmenu = 1;
+	int     i = 0, choice = 0, ok = 0, showmenu = 1, quiet = 0;
+
+	/* Has this been asked before? */
+
+	if (!asklang) {
+		char * env_lang = getenv("LANG");
+		if (env_lang != NULL) {
+			choice = atoi (env_lang);
+			quiet = 1;
+			goto skiplangquestion;
+		}
+	}
 
 	msg_set (msg);
 	if (msg_numlangs) {
@@ -405,9 +446,12 @@ getlanguage ()
 		}
 	} else
 		choice = 1;
+
+ skiplangquestion:
+
 	uacc.language = choice;
 	msg_setlanguage (choice);
-	prompt (LNGSLOK, msg_langnames[choice - 1]);
+	if (!quiet) prompt (LNGSLOK, msg_langnames [choice - 1]);
 }
 
 
@@ -416,10 +460,21 @@ getansiop ()
 {
 	int     ansiflag;
 
+	/* Has this been asked before? */
+
+	if (!askansi) {
+		char * env_ansi = getenv("ANSI");
+		if (env_ansi != NULL) {
+			ansiflag = atoi (env_ansi) != 0;
+			goto skipansiquestion;
+		}
+	}
+	
 	msg_set (msg);
 	prompt (B4QANS);
-	while (!get_bool (&ansiflag, NEWANS, ANSBERR, 0, 0))
-		prompt (ANSBERR);
+	while (!get_bool (&ansiflag, NEWANS, ANSBERR, 0, 0)) prompt (ANSBERR);
+
+ skipansiquestion:
 	if (ansiflag) {
 		uacc.prefs |= UPF_ANSION;
 		out_setflags (OFL_ANSIENABLE);
@@ -808,7 +863,8 @@ makeapass ()
 	char    word[16] = { 0 };
 	int     l, i, j;
 
-	if ((words = fopen (FLETTRWORDS, "r")) != NULL) {
+	pass [0]=0;
+	if ((words = fopen (mkfname(FLETTRWORDS), "r")) != NULL) {
 		randomize ();
 		fseek (words, 0L, SEEK_END);
 		l = (int) ftell (words);
@@ -835,11 +891,9 @@ makeapass ()
 			for (i = 5; i < k; i++)
 				pass[i] = toupper (pass[i]);
 		}
-
-		return pass;
-	} else {
-		return NULL;
 	}
+
+	return pass;
 }
 
 
@@ -877,17 +931,17 @@ stupidpass (char *pass)
 void
 getpassword ()
 {
-	char    recommended[256];
+	char * recommended;
 
 	prompt (PREPSW);
-	strcpy (uacc.passwd, makeapass ());
-	strcpy (recommended, uacc.passwd);
+	if ((recommended = makeapass ()) != NULL)
+		strcpy (uacc.passwd, recommended);
+
 	for (;;) {
-		if (mkpswd && mkpwdf) {
+		if (mkpswd && mkpwdf && recommended[0]) {
 			prompt (FRCPSW, recommended);
 		} else {
-			if (mkpswd)
-				prompt (RECPSW, recommended);
+			if (mkpswd) prompt (RECPSW, recommended);
 			prompt (GPSWORD);
 			inp_setflags (INF_PASSWD);
 			inp_get (15);
@@ -895,10 +949,10 @@ getpassword ()
 			if (!margc)
 				continue;
 			inp_raw ();
-
+			
 			if (safpsw) {
 				int     i, d = 0;
-
+				
 				if (strlen (inp_buffer) < minpln) {
 					prompt (BADPSW1);
 					continue;
@@ -1065,16 +1119,6 @@ adduser ()
 	}
 
 	fclose (user);
-
-#if 0
-	if ((!getuid ()) || (!getgid ())) {
-		char    command[256];
-
-		sprintf (command, "chown bbs.bbs %s/%s >&/dev/null",
-			 mkfname (USRDIR), uacc.userid);
-		system (command);
-	}
-#endif
 }
 
 
@@ -1128,6 +1172,8 @@ signemup ()
 	getsystype ();
 	getid ();
 	getpassword ();
+	
+	sleep (1);
 
 	setenv ("USERID", uacc.userid, 1);
 
@@ -1164,18 +1210,14 @@ logemin ()
 void
 setquestions (char *s)
 {
-	if (strchr (s, 'l'))
-		asklang = 0;
-	else
-		asklang = 1;
-	if (strchr (s, 'a'))
-		askansi = 0;
-	else
-		askansi = 1;
-	if (strchr (s, 'x'))
-		askxlt = 0;
-	else
-		askxlt = 1;
+	if (strchr (s, 'l')) asklang = 0;
+	else asklang = 1;
+
+	if (strchr (s, 'a')) askansi = 0;
+	else askansi = 1;
+
+	if (strchr (s, 'x')) askxlt = 0;
+	else askxlt = 1;
 }
 
 

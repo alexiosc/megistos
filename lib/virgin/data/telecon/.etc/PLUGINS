@@ -1,6 +1,8 @@
-#!/usr/local/bbs/bin/mkplugin
-
+#!/usr/lib/megistos/bin/mkplugin
+#
 # MEGISTOS BBS TELECONFERENCE PLUG-IN CONFIGURATION FILE
+#
+# Process with mkplugin
 #
 # This file specifies plugins (teleconference sub-modules) to make
 # available to users.

@@ -26,6 +26,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:58:32  alexios
+ * Minor permission/file location issues fixed to account for the new
+ * infrastructure.
+ *
  * Revision 1.5  2003/12/23 08:18:08  alexios
  * Corrected minor #include discrepancies.
  *
@@ -125,14 +133,15 @@ cleanonline ()
 static void
 getbbsuid ()
 {
-	struct passwd *bbspass = getpwnam (BBSUSERNAME);
+	char * s;
 
-	if (bbspass == NULL) {
-		error_fatal ("Unable to get /etc/passwd entry for user %s",
-			     BBSUSERNAME);
-	}
-	bbsuid = bbspass->pw_uid;
-	bbsgid = bbspass->pw_gid;
+	if ((s = getenv ("BBSUID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsuid = atoi (s);
+
+	if ((s = getenv ("BBSGID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsgid = atoi (s);
 }
 
 
@@ -146,7 +155,7 @@ storepid ()
 	char    fname[256];
 	pid_t   pid;
 
-	strcpy (fname, mkfname (CHANDEFDIR "/.pid-%s", device));
+	strcpy (fname, mkfname (BBSRUNDIR "/pid-%s", device));
 
 	debug (D_RUN, "Writing PID file (%s).", fname);
 
@@ -233,8 +242,9 @@ init (int argc, char **argv)
 
 	/* Get the uid and gid for the bbs user */
 	getbbsuid ();
-	debug (D_INIT, "The " BBSUSERNAME " user has UID %d, GID %d.", bbsuid,
-	       bbsgid);
+	debug (D_INIT, "The BBS owner user \"%s\" has UID %d, GID %d.",
+	       getenv ("BBSOWNER") != NULL? getenv ("BBSOWNER"): "***UNSET!***",
+	       bbsuid, bbsgid);
 
 	/* Initialise some of the BBS facilities */
 	mod_init (INI_TTYNUM | INI_SYSVARS);

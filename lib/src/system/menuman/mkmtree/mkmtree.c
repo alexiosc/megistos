@@ -123,6 +123,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:41:58  alexios
+ * No significant changes to speak of.
+ *
  * Revision 1.5  2003/12/23 08:01:25  alexios
  * One minor error-reporting bugfix; fixed file header that included
  * CVS/RCS log twice; and removed use of tmpnam(3).
@@ -330,7 +337,7 @@ parse ()
 	msg = msg_open ("menuman");
 
 	addsymbol (msg_get (TOPPAG));
-	addsymbol (msg_get (EXTPAG));
+	//addsymbol (msg_get (EXTPAG));
 
 	bzero (file, sizeof (file));
 	bzero (exec, sizeof (exec));
@@ -777,7 +784,7 @@ loadindex ()
 			exit (-1);
 		}
 		numpages++;
-		pageindex =
+		pageindex = 
 		    realloc (pageindex, sizeof (struct pageidx) * numpages);
 		memset (&pageindex[numpages - 1], 0, sizeof (struct pageidx));
 		strncpy (pageindex[numpages - 1].page, page, 15);

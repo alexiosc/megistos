@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.6  2003/12/29 07:50:12  alexios
  * Renamed getline() to vised_getline() to disambiguate it from a GNU
  * extension in stdio.h.

@@ -27,6 +27,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/03 05:37:45  alexios
+ * Fixed the execution path of mailer modules.
+ *
  * Revision 1.5  2003/12/27 12:39:56  alexios
  * Adjusted #includes. One minor fix.
  *
@@ -104,7 +111,8 @@ plugindnl (int n)
 	char    command[256];
 	int     res;
 
-	sprintf (command, "%s --download", plugins[n].name);
+	sprintf (command, "%s/mailer/%s --download",
+		 mkfname (BBSLIBDIR), plugins[n].name);
 	res = runcommand (command);
 	cnc_end ();
 	if (res)

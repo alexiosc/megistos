@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 18:09:28  alexios
+ * Include file changes.
+ *
  * Revision 1.5  2003/12/27 12:29:40  alexios
  * Adjusted #includes.
  *
@@ -76,7 +83,7 @@ static const char rcsinfo[] =
 #include "mbk_bulletins.h"
 #include "bltidx.h"
 #include "bulletins.h"
-#include <typhoon.h>
+#include <libtyphoon/typhoon.h>
 
 
 static void

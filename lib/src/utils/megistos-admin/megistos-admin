@@ -1,0 +1,711 @@
+#!/bin/sh
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:54  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2004/05/03 05:46:02  alexios
+# Made it print 'OK' when finished to debug the debconf issue.
+#
+# Revision 1.1  2004/02/29 12:26:57  alexios
+# Initial revision.
+#
+#
+
+# Check for the superuser
+
+if [ x$UID != x0 ]; then
+    echo >&2 Sorry, only the superuser may execute this.
+    exit 1
+fi
+
+# Read in the configuration file, if available.
+
+[ -r /etc/megistos.conf ] && . /etc/megistos.conf
+
+# Check for megistos-config, a prerequisite
+
+if megistos-config --version >&/dev/null; then true;
+else
+    cat >&2 <<EOF
+
+megistos-config could not be executed. This is needed, and its absence
+probably indicates your Megistos installation is broken. It should be
+in one of the standard bin directories such as /usr/bin or
+/usr/local/bin.
+
+EOF
+    exit 1
+fi
+
+
+syntax ()
+{
+    cat <<EOF
+Syntax: $0 COMMAND [OPTIONS]
+
+The following commands are available:
+
+    create . . . .  Create a new BBS instance.
+    destroy . . . . Delete an existing BBS instance (completely destructive).
+    list . . . . .  Lists available BBS instances.
+    status . . . .  Shows the status (running/stopped) of all instances.
+
+    start . . . . . Start the specified instance.
+    stop . . . . .  Stop the specified instance.
+    restart . . . . Restart the specified instance.
+
+Enter $0 COMMAND -h for help on a particular command.
+EOF
+}
+
+
+check_confirmation ()
+{
+    msg=$1
+    default=$2
+    RESULT=$default
+    [ x$default = x ] && default=no
+    while true; do
+	echo -e 2>&1 "\n$msg\n"
+	read -p "Confirm? (yes/no) [$default]: " RESULT
+	case $RESULT in
+	    "")  RESULT=$default; break;;
+	    yes) break;;
+	    no)  break;;
+	    *)   echo 2>&1 "Please specify yes or no (verbatim, in full).";;
+	esac
+    done
+}
+
+
+bail ()
+{
+    echo 2>&1 "No action taken, exiting."
+    exit 1
+}
+
+
+
+export stepcounter=0
+step ()
+{
+    stepcounter=$[ $stepcounter + 1 ]
+    echo "$stepcounter. $1"
+}
+
+
+###############################################################################
+#
+# megistos-create: create a new BBS instance.
+#
+###############################################################################
+
+syntax_create ()
+{
+    target=`megistos-config --instance-dir`
+
+    cat <<EOF
+Syntax $0 $command BBSCODE [TELNET-PORT]
+
+    BBSCODE = The Unix directory name of the new BBS. Usually a short version
+              or abbreviation of the full name. Also used for communicating
+              with other systems.
+
+    TELNET-PORT = Am optional TCP port to listen to for incoming telnet
+                  connections.
+
+Creates a new BBS instance named BBSCODE. The new instance will be created in
+$target/BBSCODE.
+
+EOF
+}
+
+
+megistos_create_errortrap ()
+{
+    echo "Error occurred! Undoing changes."
+
+    (
+	deluser --quiet $bbsowner || true
+	deluser --quiet $bbsuser || true
+	delgroup --quiet $bbsgroup || true
+	[ x$target != x -a x$bbscode != x ] && rm -rf $target/$bbscode
+    ) >& /dev/null
+}
+
+
+megistos_create ()
+{
+    bbscode=$1
+    telnet_port=$2
+
+    if [ x$bbscode = x ]; then
+	syntax_create
+	exit 1
+    fi
+
+    tlu=`megistos-config --toplevel-user`
+    tlg=`megistos-config --toplevel-group`
+    bbsowner=$bbscode
+    bbsuser="$bbscode-user"
+    bbsgroup=$bbscode
+    
+    cat <<EOF 
+
+We are about to create BBS $bbscode.
+
+These are the steps we will go through:
+
+    1. Check everything.
+       Ask for confirmation before going on.
+    2. Create the group $bbscode.
+    3. Create the user $bbsowner.
+    4. Create the user $bbsuser.
+    5. Populate the BBS directory.
+    6. Set permissions.
+    7. Create the BBS configuration file.
+EOF
+
+    if [ x$telnet_port != x ]; then
+	echo "    8. Modify /etc/inetd.conf to allow telnet access."
+    fi
+
+    # Ask for confirmation
+    
+    check_confirmation "Proceed with step 1? Nothing will be changed or written yet." yes
+    [ x$RESULT == xno ] && bail
+
+    # Step 1, checks.
+
+    step "Checking..."
+
+    # Step 1A: paranoia
+
+    target=`megistos-config --instance-dir`
+    src=`megistos-config --virgin-dir`
+
+    if [ ! -e $src ]; then
+	echo 2>&1 "Virgin instance directory $src does not exist."
+	echo 2>&1 "Your Megistos installation is broken."
+	exit 1
+    else
+	echo "    Directory $src exists."
+    fi
+    if [ ! -e $target ]; then
+	echo 2>&1 "BBS instance directory $target does not exist."
+	echo 2>&1 "Your Megistos installation is broken."
+	exit 1
+    else
+	echo "    Directory $target exists."
+    fi
+
+    # Step 1B: users and groups that must exist
+
+    if ! getent passwd $tlu >/dev/null; then
+	echo 2>&1 "The top-level Megistos user \"$tlu\" does not exist."
+	echo 2>&1 "Your Megistos installation is broken."
+	exit 1
+    else
+	echo "    User $tlu exists."
+    fi
+    if ! getent group $tlg >/dev/null; then
+	echo 2>&1 "The top-level Megistos group \"$tlg\" does not exist."
+	echo 2>&1 "Your Megistos installation is broken."
+	exit 1
+    else
+	echo "    Group $tlg exists."
+    fi
+
+    # Step 1D: users and groups that must not exist
+
+    if getent passwd $bbsowner >/dev/null; then
+	echo 2>&1 "The BBS owner \"$bbsowner\" already exists."
+	echo 2>&1 "This may indicate a name clash or a partial removal of a previous BBS."
+	echo 2>&1 "It may have to be resolved by choosing a different BBSCODE."
+	exit 1
+    else
+	echo "    User $bbsowner does not exist (this is good)."
+    fi
+    if getent group $bbsgroup >/dev/null; then
+	echo 2>&1 "The BBS group \"$bbsgroup\" already exists."
+	echo 2>&1 "This may indicate a name clash or a partial removal of a previous BBS."
+	echo 2>&1 "It may have to be resolved by choosing a different BBSCODE."
+	exit 1
+    else
+	echo "    Group $bbsgroup does not exist (this is good)."
+    fi
+
+    # Step 1E: directories that must not exist
+    
+    if [ -e $target/$bbscode ]; then
+	echo 2>&1 "Instance directory $target/$bbscode exists."
+	echo 2>&1 "It is possible a BBS instance by this name once existed and has not been."
+	echo 2>&1 "deleted entirely."
+	exit 1
+    else
+	echo "    Directory $target/$bbscode does not exist (this is good)."
+    fi
+    
+    # Step 1F: check disk space
+
+    size=`du -s $src | cut -f1`
+    free=`df $target | tail -1 | awk -- '{ x=NF-2; print $x }'`
+
+    if [ $free -lt $size ]; then
+	echo 2>&1 "$target has $free Kb free. To create a new BBS, I need"
+	echo 2>&1 "$size Kb free at the very least."
+	exit 1
+    else
+	echo -e "    Directory $target has $free Kb free. That's plenty."
+    fi
+
+    # Step 1G: if a telnet port was specified, check it out.
+
+    if [ x$telnet_port != x ]; then
+
+	# Check for processes listening on the port.
+
+	if netstat -ntl4 | grep -q ":$telnet_port "; then
+	    echo 2>&1 "Something is already listening on port $telnet_port/tcp."
+	    exit 1
+	else
+	    echo -e "    Port $telnet_port/tcp is available."
+	fi
+    fi
+
+
+    # Ask for confirmation
+    
+    check_confirmation "Everything looks in order. Ready to create the BBS $bbscode."
+    [ x$RESULT == xno ] && bail
+
+    # Do the work
+
+    export bbscode
+    export src
+    export target
+    export bbsowner
+    export bbsgroup
+    trap megistos_create_errortrap ERR
+
+    set -e
+
+    # Add the BBS Group
+    step "Creating group $bbsgroup..."
+    addgroup --system --quiet $bbsgroup
+
+    # Add the BBS Owner
+    step "Creating user $bbsowner..."
+    adduser --quiet --gecos "Megistos BBS ($bbscode)" \
+	--system --no-create-home --home $target/$bbscode \
+	--ingroup $bbsgroup $bbsowner
+    adduser --quiet $bbsowner $tlg
+
+    # Add the BBS user
+    step "Creating user $bbsuser..."
+    adduser --quiet --gecos "Megistos User ($bbscode)" \
+	--disabled-password --no-create-home --home /dev/null \
+	--ingroup $bbsgroup $bbsuser
+
+    step "Populating directory $target/$bbscode..."
+    mkdir -m 0755 $target/$bbscode
+    (cd $src; tar -cf - . \
+	--exclude .remove-before-flight \
+	--exclude .cvsignore \
+	--exclude CVS \
+    ) | (cd $target/$bbscode; umask 000; tar -xf - .)
+    ln -s `megistos-config --lib-dir` $target/$bbscode/lib
+    (cd $target/$bbscode; ln -s lib/bin bin)
+
+    step "Setting permissions..."
+    chown -R $bbsowner:$bbsgroup $target/$bbscode
+    [ x$LOCKDOWN != xfalse ] && chmod -R o-rwx $target/$bbscode
+    touch $target/$bbscode/log/{errors,audit}
+    chmod -R ug+rw,o-w $target/$bbscode/online
+    chmod -R ug+rw,o-w $target/$bbscode/run
+    chmod -R ug+rw,o-w $target/$bbscode/data/usr
+
+    step "Creating BBS configuration file..."
+    BBSPREFIX=$target/$bbscode
+    BBSCODE=$bbscode
+    BBSOWNER=$bbscode
+    BBSUSER=${bbscode}-user
+    BBSGROUP=$bbscode
+    
+    BBSUID=`getent passwd $BBSOWNER | cut -d: -f3`
+    BBSGID=`getent group $BBSOWNER | cut -d: -f3`
+    BBSUUID=`getent passwd $BBSUSER | cut -d: -f3`
+    cat >$target/$bbscode/etc/paths <<EOF
+#!/bin/sh
+#
+# Automatically generated, DO NOT MODIFY
+
+BBSPREFIX=$BBSPREFIX
+BBSCODE=$BBSCODE
+BBSOWNER=$BBSOWNER
+BBSUSER=$BBSUSER
+BBSGROUP=$BBSGROUP
+BBSUID=$BBSUID
+BBSGID=$BBSGID
+BBSUUID=$BBSUUID
+
+declare -rx BBSPREFIX BBSCODE BBSOWNER BBSGROUP BBSUSER BBSUID BBSGID BBSUUID
+
+EOF
+
+    if [ x$telnet_port != x ]; then
+	step "Modifying /etc/inetd.conf to allow telnet access..."
+	update-inetd --add "$telnet_port\t\tstream\ttcp\tnowait\troot\t/usr/sbin/tcpd\t/usr/sbin/in.telnetd -L$target/$bbscode/bin/login-telnet"
+	
+	cat <<EOF
+
+I'm finished, but your job is just beginning. You need to configure
+the system by editing the files in $target/$bbscode/etc before you can
+start the BBS.
+
+EOF
+	set +e
+    fi
+}
+
+
+
+###############################################################################
+#
+# megistos-destroy: destroy an existing BBS instance.
+#
+###############################################################################
+
+syntax_destroy ()
+{
+    target=`megistos-config --instance-dir`
+
+    cat <<EOF
+Syntax $0 $command BBSCODE
+
+    BBSCODE = The Unix directory name of the BBS to destroy.
+
+
+Destroys the BBS instance named BBSCODE, removing UNIX users, files
+and directories.
+
+              WARNING: this will permanently and irrevocably destroy
+              the specified BBS, removing all traces of it from the
+              system. If you have any doubts, don't do it.
+
+
+EOF
+}
+
+
+megistos_destroy ()
+{
+    bbscode=$1
+
+    if [ x$bbscode = x ]; then
+	syntax_destroy
+	exit 1
+    fi
+
+    tlu=`megistos-config --toplevel-user`
+    tlg=`megistos-config --toplevel-group`
+    bbsowner=$bbscode
+    bbsuser="$bbscode-user"
+    bbsgroup=$bbscode
+    
+    cat <<EOF 
+
+We are about to delete BBS $bbscode.
+
+These are the steps we will go through:
+
+    1. Perform security checks.
+       Ask for confirmation before going on.
+    2. Permanently remove all files under $target/$bbscode.
+    3. Remove the user $bbsuser.
+    4. Remove the user $bbsowner.
+    5. Remove the group $bbscode.
+    6. Remove the /etc/inetd.conf entry.
+
+EOF
+
+    # Ask for confirmation
+    
+    check_confirmation "Proceed with step 1? Nothing will be changed or written yet." yes
+    [ x$RESULT == xno ] && bail
+
+    # Step 1, checks.
+
+    step "Checking..."
+
+    target=`megistos-config --instance-dir`
+    src=`megistos-config --virgin-dir`
+
+    # Step 1B: users and groups that must exist
+
+    if ! getent passwd $bbsowner >/dev/null; then
+	echo 2>&1 "The BBS owner \"$bbsowner\" doesn't exist."
+	exit 1
+    else
+	echo "    User $bbsowner exists."
+    fi
+    if ! getent group $bbsgroup >/dev/null; then
+	echo 2>&1 "The BBS group \"$bbsgroup\" doesn't already exists."
+	exit 1
+    else
+	echo "    Group $bbsgroup exists."
+    fi
+
+    # Step 1E: directories that must exist
+    
+    if [ ! -e $target/$bbscode ]; then
+	echo 2>&1 "Instance directory $target/$bbscode does not exist."
+	exit 1
+    else
+	echo "    Directory $target/$bbscode exists."
+    fi
+    
+    # Step 1F: check disk space
+
+    size=`du -s $target/$bbscode | cut -f1`
+    
+    echo
+    echo "After deleting BBS $bbscode, $size Kb of disk space will be freed."
+
+    # Ask for confirmation
+    
+    check_confirmation "This is the last chance to change your mind.
+PERMANENTLY DELETE BBS \"$bbscode\"?"
+    [ x$RESULT == xno ] && bail
+
+    # Do the work
+
+    # Delete the directory
+    step "Deleting everything under $target/$bbscode..."
+    [ x$target != x -a x$bbscode != x ] && rm -rf $target/$bbscode
+
+    # Delete the BBS user
+    step "Deleting user $bbsuser..."
+    deluser --quiet $bbsuser
+
+    # Delete the BBS owner
+    step "Deleting user $bbsowner..."
+    deluser --quiet $bbsowner || true
+
+    # Delete the BBS Group
+    if getent group $bbsgroup >/dev/null; then
+	step "Deleting group $bbsgroup..."
+	delgroup --quiet $bbsgroup
+    else
+	step "Deleting group $bbsgroup... (no need, already deleted by deluser)"
+    fi
+
+    # Delete the inetd.conf line
+    step "Removing /etc/inetd.conf entry..."
+    port=1024
+    update-inetd --remove "/usr/sbin/in.telnetd -L$target/$bbscode/bin/login-telnet$"
+
+    cat <<EOF
+
+I'm done. The BBS $bbscode has been destroyed. I hope you knew what
+
+you were doing (or had backups).
+
+EOF
+}
+
+
+
+###############################################################################
+#
+# megistos-list: list instances.
+#
+###############################################################################
+
+megistos_list ()
+{
+    ls -1 `megistos-config --instance-dir`
+}
+
+
+
+###############################################################################
+#
+# megistos-startstop: start/stop/restart an instance.
+#
+###############################################################################
+
+syntax_startstop ()
+{
+    target=`megistos-config --instance-dir`
+
+    cat <<EOF
+Syntax $0 $command BBSCODE
+
+    BBSCODE = The Unix directory name of the BBS to destroy.
+
+Starts (start), stops (stop) or restarts (restart) the specified BBS
+instance.
+
+EOF
+}
+
+
+megistos_restart ()
+{
+    bbscode=$1
+    mode=$2
+
+    if [ x$bbscode = x ]; then
+	syntax_startstop
+	exit 1
+    fi
+
+    dir=`megistos-config --instance-dir`/$bbscode
+
+    if [ ! -e $dir ]; then
+	echo >&2 "Instance \"$bbscode\" not found."
+	exit 1
+    fi
+
+    (megistos_startstop $bbscode stop)
+    (megistos_startstop $bbscode start)
+}
+
+
+megistos_startstop ()
+{
+    bbscode=$1
+    mode=$2
+
+    if [ x$bbscode = x ]; then
+	syntax_startstop
+	exit 1
+    fi
+
+    dir=`megistos-config --instance-dir`/$bbscode
+
+    if [ ! -e $dir ]; then
+	echo >&2 "Instance \"$bbscode\" not found."
+	exit 1
+    fi
+    
+    BBSPREFIX=$dir
+    BBSCODE=$bbscode
+    BBSOWNER=$bbscode
+    BBSUSER=${bbscode}-user
+    BBSGROUP=$bbscode
+
+    BBSUID=`getent passwd $BBSOWNER | cut -d: -f3`
+    BBSGID=`getent group $BBSOWNER | cut -d: -f3`
+    BBSUUID=`getent passwd $BBSUSER | cut -d: -f3`
+
+    # Sanity checks.
+
+    if [ x$BBSUID = x ]; then
+	echo >&2 "Error: the privilege separation user $BBSOWNER does not exist."
+	echo >&2 "Your installation is broken."
+	exit 1
+    fi
+    if [ x$BBSGID = x ]; then
+	echo >&2 "Error: the privilege separation group $BBSGROUP does not exist."
+	echo >&2 "Your installation is broken."
+	exit 1
+    fi
+    if [ x$BBSUSER = x ]; then
+	echo >&2 "Error: the privilege separation user $BBSUSER does not exist."
+	echo >&2 "Your installation is broken."
+	exit 1
+    fi
+
+    # Secure these variables against change and export them to the BBS.
+    
+#    declare -r  BBSPREFIX BBSCODE BBSOWNER BBSGROUP BBSUSER BBSUID BBSGID BBSUUID
+    export      BBSPREFIX BBSCODE BBSOWNER BBSGROUP BBSUSER BBSUID BBSGID BBSUUID
+
+#    set|grep BBS
+#    exit 0
+    
+    rc=$dir/etc/rc.bbs
+
+    if [ ! -x $rc ]; then
+	echo >&2 "Instance \"$bbscode\" is broken ($rc not found or not executable)."
+	exit 1
+    fi
+
+    if [ x$mode = xstart ]; then
+	$rc start;
+    else
+	if ! ls $dir/run/* >&/dev/null; then
+	    echo >&2 "Megistos instance $bbscode does not seem to be running."
+	    exit 1
+	fi
+	echo "Stopping Megistos instance $bbscode..."
+	echo "    Sending processes the KILL signal..."
+	(kill `cat $dir/run/bbsinit.pid`) >&/dev/null
+	(for a in $dir/run/*; do kill `cat $a`; done) >&/dev/null
+        sleep 3;
+	echo "    Sending processes the TERM signal..."
+	(kill -9 `cat $dir/run/bbsinit.pid`) >&/dev/null
+	(for a in $dir/run/*; do kill -9 `cat $a`; rm $a; done) >&/dev/null
+        sleep 3;
+	echo "Done.";
+    fi
+}
+
+
+###############################################################################
+#
+# The main program
+#
+###############################################################################
+
+
+# Check the syntax
+
+if [ $# == 0 ]; then
+    syntax
+    exit 1
+fi
+
+# Help requested
+
+if [ $# == 1 -a $1 == '-h' ]; then
+    syntax
+    exit 0
+fi
+
+command=$1
+shift
+
+# Command help requested?
+
+if [ $# == 1 -a x$1 == x'-h' ]; then
+    eval "syntax_$command"
+    exit 0
+fi
+
+case $command in
+
+    create)  megistos_create $*;;
+    destroy) megistos_destroy $*;;
+    list) megistos_list;;
+
+    start) megistos_startstop $1 start;;
+    stop) megistos_startstop $1 stop;;
+    restart) megistos_restart $1;;
+
+    *)
+	echo 2>&1 "Unknown command \"$command\"."
+	syntax
+	exit 1
+esac
+
+echo "OK"
+exit 0
+
+# End of file.

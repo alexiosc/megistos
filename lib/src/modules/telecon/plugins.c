@@ -28,6 +28,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:59:45  alexios
+ * Minor permission/file location issues fixed to account for the new infrastructure.
+ *
  * Revision 1.5  2003/12/27 12:38:06  alexios
  * Adjusted #includes. Switched to using struct msgbuf for IPC.
  *
@@ -232,7 +239,7 @@ makequeue (char *keyword, char *channel)
 void
 runplugin (struct plugin *p)
 {
-	char    tmp[256];
+	char    tmp [256], tmp2 [256];
 	int     pid, status;
 
 	debug ("running.\n");
@@ -247,12 +254,13 @@ runplugin (struct plugin *p)
 			thisuseronl.flags &= ~OLF_MMCONCAT;
 
 #endif
-		mod_done (INI_ALL);
+		/*mod_done (INI_ALL);*/
 
 		sprintf (tmp, "%d", thisuseraux.pluginq);
-		execlp (p->exec, p->exec, p->keyword, curchannel,
+		sprintf (tmp2, "%s/%s", mkfname(TELEPLUGINBIN), p->exec);
+		execlp (tmp2, p->exec, p->keyword, curchannel,
 			thisuseracc.userid, tmp, NULL);
-		error_fatalsys ("Unable to execlp() teleplugin!");
+		error_fatalsys ("Unable to execlp() teleplugin %s (%s)", p->exec, tmp2);
 
 	case -1:
 		error_fatalsys ("Unable to fork and run teleplugin!");

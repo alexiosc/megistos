@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 16:57:22  alexios
+ * Register-* and PID files are now in the run/ directory.
+ *
  * Revision 1.5  2003/12/24 21:53:06  alexios
  * Fixed #includes.
  *
@@ -324,7 +331,7 @@ getchkname (char *checkname, char *tty)
 	int     pid;
 
 	pid = 0;
-	sprintf (s, "%s/register-%s", mkfname (BBSETCDIR), tty);
+	sprintf (s, "%s/register-%s", mkfname (BBSRUNDIR), tty);
 	if ((fp = fopen (s, "r")) != NULL) {
 		fgets (s, sizeof (s), fp);
 		fclose (fp);
@@ -363,7 +370,7 @@ rsys_emulate ()
 			int     pid, ok = 0;
 			char    s[256];
 
-			sprintf (fname, "%s/emud-%s.pid", mkfname (BBSETCDIR),
+			sprintf (fname, "%s/emud-%s.pid", mkfname (BBSRUNDIR),
 				 tty);
 			if ((fp = fopen (fname, "r")) != NULL) {
 				if (fscanf (fp, "%d", &pid) == 1) {

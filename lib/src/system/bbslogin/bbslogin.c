@@ -30,6 +30,22 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.10  2004/05/05 09:19:37  alexios
+ * Declared the current encoding, language and ANSI setting for the
+ * benefit of the signup module.
+ *
+ * Revision 1.9  2004/05/03 05:39:54  alexios
+ * Fixed the generation of full path names based on TTYINFOFILE, which
+ * contains a format specifier.
+ *
+ * Revision 1.8  2004/02/29 17:35:46  alexios
+ * Numerous changes to reflect the new infrastructure: getting UIDs and
+ * GIDs from the environment, PID files moved to new directories, et cetera.
+ *
  * Revision 1.7  2003/12/23 08:19:56  alexios
  * Fixed MetaBBS conditional compilation issues. Removed references to
  * sys_errlist[], which is deprecated, replacing them with calls to
@@ -155,8 +171,7 @@ static const char rcsinfo[] = "$Id$";
 #define KEY          (chan_last->key)
 
 
-char    tty[32], userid[64];
-char   *unixuid;
+char    tty[256], userid[64];
 int     linestate, baud, ansiopt = 0;
 useracc_t uacc;
 onlinerec_t user;
@@ -168,6 +183,8 @@ int     xlation = 0, lang = 1;
 int     setlang = 0, setansi = 0, setxlt = 0;
 int     uid = -1, gid = -1;
 int     bbsuid = -1, bbsgid = -1;
+int     bbsuuid = -1;
+char    *bbsuser;
 int     metab4, metalg;
 
 #ifdef HAVE_METABBS
@@ -439,6 +456,7 @@ writeonline (char status)
 void
 updateutmp (char *username)
 {
+#if 0
 	struct utmp ut;
 	int     wtmp;
 
@@ -459,6 +477,8 @@ updateutmp (char *username)
 		write (wtmp, (char *) &ut, sizeof (ut));
 		close (wtmp);
 	}
+#endif
+
 }
 
 
@@ -499,7 +519,7 @@ storepid ()
 	FILE   *fp;
 	char    fname[256];
 
-	sprintf (fname, "%s/.pid-%s", mkfname (CHANDEFDIR), tty);
+	sprintf (fname, "%s/pid-%s", mkfname (BBSRUNDIR), tty);
 
 	if ((fp = fopen (fname, "w")) == NULL) {
 		error_fatalsys ("Cannot open PID file %s for writing", fname);
@@ -526,7 +546,7 @@ resetchannel ()
 void
 init ()
 {
-	struct passwd *passwd = getpwnam (BBSUSERNAME), bbspass;
+	char *s;
 	char    baudrate[64], fname[256];
 	FILE   *fp;
 
@@ -562,25 +582,29 @@ init ()
 	}
 #endif
 
+	if ((s = getenv ("BBSUID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsuid = atoi (s);
 
-	if (passwd == NULL) {
-		error_fatal
-		    ("Unable to find the BBS user %s in /etc/passwd. Aborting.",
-		     BBSUSERNAME);
-	} else
-		memcpy (&bbspass, passwd, sizeof (bbspass));
+	if ((s = getenv ("BBSGID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsgid = atoi (s);
 
+	if ((s = getenv ("BBSUUID")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	} else bbsuuid = atoi (s);
+
+	if ((bbsuser = getenv ("BBSUSER")) == NULL) {
+		error_fatal ("Environment improperly set. The rc.bbs script is broken.");
+	}
 
 	if (getuid ()) {
 		error_fatal ("bbslogin must be run by the super user.");
 	}
 
-	bbsuid = bbspass.pw_uid;
-	bbsgid = bbspass.pw_gid;
-
 	strcpy (tty, getenv ("CHANNEL"));
 	strcpy (baudrate, getenv ("BAUD"));
-	setenv ("PREFIX", mkfname (""), 1);
+	//setenv ("PREFIX", mkfname (""), 1);
 	setenv ("BINDIR", mkfname (BINDIR), 1);
 	setenv ("CHANNEL", tty, 1);
 	setenv ("BAUD", baudrate, 1);
@@ -601,7 +625,6 @@ init ()
 	msg = msg_open ("login");
 	msg_setlanguage (chan_last->lang >
 			 0 ? chan_last->lang : -chan_last->lang);
-	unixuid = msg_string (UNIXUID);
 	lonalrm = msg_int (LONALRM, 0, 32767) * 60;
 	terminal = msg_string (TERMINAL);
 	metab4 = msg_bool (METAB4);
@@ -623,21 +646,26 @@ init ()
 void
 idler ()
 {
+#if 0
 	char    fname[256];
 
 	fclose (stdout);
 	fclose (stdin);
-	sprintf (fname, "%s/.pid-%s", mkfname (CHANDEFDIR), tty);
+	sprintf (fname, "%s/pid-%s", mkfname (BBSRUNDIR), tty);
 	execl (mkfname (IDLERBIN), "idler", ">", fname, "2>", fname, NULL);
+#endif
+
+	while (1) sleep (86400);
 }
 
 
 void
 showttyinfo ()
 {
-	char    fname[256];
+        char    fname[512], tmp[512];
 
-	sprintf (fname, mkfname (TTYINFOFILE), tty);
+	sprintf (tmp, TTYINFOFILE, tty);
+	strcpy (fname, mkfname (tmp));
 	out_printfile (fname);
 }
 
@@ -768,7 +796,7 @@ askxlation ()
 
 	/* Check the available translation tables and make the first one the
 	   default */
-
+	
 	for (i = 0; i < NUMXLATIONS; i++) {
 		strcpy (fname, mkfname (XLATIONDIR "/" XLATIONSRC, i));
 		xltmap[i] = (stat (fname, &st) == 0);
@@ -789,6 +817,7 @@ askxlation ()
 			xlation = atoi (inp_buffer);
 		else if (!strlen (inp_buffer))
 			xlation = def;
+		
 		if (!xltmap[xlation])
 			prompt (XLATEE);
 		else
@@ -904,7 +933,7 @@ check_interbbs ()
 void
 authenticate ()
 {
-	struct passwd *passwd, pass;
+	//struct passwd *passwd, pass;
 	char    status = 0, filename[256];
 	FILE   *fp;
 	int     givenprompt = 0, strikes = 0, signup = 0;
@@ -1051,7 +1080,7 @@ authenticate ()
 		mod_init (INI_SYSVARS);
 	} else {
 		out_printfile (LOGINMSGFILE);
-		showttyinfo ();
+		showttyinfo();
 		prompt (BBSOFF, NULL);
 		sleep (10);
 		channel_hangup ();
@@ -1164,6 +1193,12 @@ authenticate ()
 				setenv ("USERID", userid, 1);
 				setenv ("CHANNEL", tty, 1);
 				setenv ("TERM", terminal, 1);
+				sprintf (parm, "%d", lang % 999);
+				setenv ("LANG", parm, 1);
+				sprintf (parm, "%d", xlation);
+				setenv ("XLATION", parm, 1);
+				sprintf (parm, "%d", (out_flags & OFL_ANSIENABLE) != 0);
+				setenv ("ANSI", parm, 1);
 				updateutmp (userid);
 
 				strcpy (parm, "-");
@@ -1305,6 +1340,7 @@ authenticate ()
 		}
 
 		setchannelstate (LSR_LOGIN, "[NO-USER]");
+#if 0
 		if (atoi (unixuid) > 0)
 			passwd = getpwuid (atoi (unixuid));
 		else
@@ -1317,6 +1353,7 @@ authenticate ()
 		}
 
 		memcpy (&pass, passwd, sizeof (pass));
+#endif
 
 
 		for (;;) {
@@ -1343,8 +1380,8 @@ authenticate ()
 				setenv ("USERID", userid, 1);
 				setenv ("CHANNEL", tty, 1);
 
-				uid = pass.pw_uid;
-				gid = pass.pw_gid;
+				uid = bbsuuid;
+				gid = bbsgid;
 				writeonline (status);
 
 				if (sysvar->lonaud)
@@ -1369,11 +1406,13 @@ authenticate ()
 				out_setflags (OFL_AFTERINPUT);
 				fmt_resetvpos (0);
 
+#if 0
 				if (atoi (unixuid) > 0)
 					passwd = getpwuid (atoi (unixuid));
 				else
 					passwd = getpwnam (unixuid);
 				memcpy (&pass, passwd, sizeof (pass));
+#endif
 
 				if (ansiopt)
 					out_setflags (OFL_ANSIENABLE);
@@ -1425,12 +1464,17 @@ authenticate ()
 				   set /root: set /tmp */
 				{
 					struct stat st;
+					struct passwd * pass;
 
-					if (!stat (pass.pw_dir, &st))
-						setenv ("HOME", pass.pw_dir,
-							1);
-					else
-						setenv ("HOME", "/tmp", 1);
+					pass = getpwnam (bbsuser);
+
+					if (pass != NULL) {
+						if (!stat (pass->pw_dir, &st)) {
+							setenv ("HOME", pass->pw_dir, 1);
+						} else {
+							setenv ("HOME", "/tmp", 1);
+						}
+					} else setenv ("HOME", "/tmp", 1);
 				}
 /*
   
@@ -1440,38 +1484,40 @@ authenticate ()
 	else setenv("PATH", _PATH_DEFPATH_ROOT":"BINDIR, 1); */
 
 
+#if 0
 				setenv ("SHELL", pass.pw_shell, 1);
 				sprintf (tmp, "%s/%s", _PATH_MAILDIR, userid);
 				setenv ("MAIL", tmp, 0);
-				setenv ("USERNAME", userid, 1);
 				sprintf (tmp, "%s/.bashrc", pass.pw_dir);
 				setenv ("ENV", tmp, 1);
+#endif
+				setenv ("USERNAME", userid, 1);
 
 				sprintf (tmp, "/dev/%s", tty);
 				chmod (tmp, 0660);
-				chown (tmp, pass.pw_uid, pass.pw_gid);
-				setgid (pass.pw_gid);
-				if (initgroups (pass.pw_name, pass.pw_gid) < 0) {
+				chown (tmp, bbsuuid, bbsgid);
+				setgid (bbsgid);
+				if (initgroups (bbsuser, bbsgid) < 0) {
 					error_fatal
-					    ("Unable to init groups for user %s",
-					     pass.pw_name);
+						("Unable to init groups for user %s",
+						 bbsuser);
 				}
-				umask (0007);
+				umask (0000);
 
-				updateutmp (pass.pw_name);
+				updateutmp (bbsuser);
 
 				/* Kludge: chmod() /etc/passwd to fix permissions problem */
 				/*chmod("/etc/passwd",0644); */
 
-				setgid (pass.pw_gid);
-				setuid (pass.pw_uid);
+				setgid (bbsgid);
+				setuid (bbsuuid);
 
 				/* Even paranoids have enemies */
 
 				if (getuid () == 0 || getgid () == 0) {
 					error_fatal
 					    ("User %s appears to have root uid/gid!",
-					     pass.pw_name);
+					     bbsuser);
 				}
 
 				msg_setlanguage (uacc.language);

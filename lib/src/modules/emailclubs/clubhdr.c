@@ -28,6 +28,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/07/15 14:51:49  alexios
+ * Minor code beautification. Fixed a bug whereby setclubax() would try
+ * to close a file that was never opened to begin with, resulting in
+ * Segmentation Faults.
+ *
  * Revision 1.5  2003/12/25 13:33:29  alexios
  * Fixed #includes. Changed instances of struct message to
  * message_t. Other minor changes.
@@ -337,8 +346,8 @@ getclubax (useracc_t * uacc, char *club)
 void
 setclubax (useracc_t * uacc, char *club, int ax)
 {
-	char    fname1[256], fname2[256], clubname[256], access =
-	    0, command[768];
+	char    fname1[256], fname2[256], clubname[256];
+	char    access = 0, command[768];
 	FILE   *fp1, *fp2;
 	int     done = (ax == CAX_DEFAULT), i;
 
@@ -350,12 +359,11 @@ setclubax (useracc_t * uacc, char *club, int ax)
 		error_fatalsys ("Unable to create temp file %s", fname2);
 	}
 
-	if (fp1)
+	if (fp1) {
 		while (!feof (fp1)) {
 			if (fscanf (fp1, "%s %c", clubname, &access) == 2) {
 				if (sameas (clubname, club)) {
-					if (done)
-						continue;
+					if (done) continue;
 					done = 1;
 					for (i = 0; accesses[i]; i += 2) {
 						if (ax == accesses[i + 1]) {
@@ -368,6 +376,9 @@ setclubax (useracc_t * uacc, char *club, int ax)
 			}
 		}
 
+		fclose (fp1);
+	}
+
 	if (!done) {
 		for (i = 0; accesses[i]; i += 2) {
 			if (ax == accesses[i + 1]) {
@@ -378,7 +389,6 @@ setclubax (useracc_t * uacc, char *club, int ax)
 		fprintf (fp2, "%s %c\n", club, access);
 	}
 
-	fclose (fp1);
 	fclose (fp2);
 
 	sprintf (command, "mv -f %s %s >&/dev/null", fname2, fname1);

@@ -28,6 +28,17 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:40:57  alexios
+ * Try to open msg_sys if it isn't open already.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -76,10 +87,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -100,238 +109,253 @@ const char *__RCS=RCS_VER;
 #define WANT_GRP_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <mbk/mbk_sysvar.h>
 #include "bbsd.h"
 
 
-static time_t sysvartime=0;
-static time_t classtime=0;
+static time_t sysvartime = 0;
+static time_t classtime = 0;
 
 
 inline static void
-logoutaudit()
+logoutaudit ()
 {
-  /* We always log abnormal/forced exits */
+	/* We always log abnormal/forced exits */
 
 #ifdef DEBUG
-  fprintf(stderr,"Logging user disconnection (user=%s)\n",thisuseronl.userid);
+	fprintf (stderr, "Logging user disconnection (user=%s)\n",
+		 thisuseronl.userid);
 #endif
 
-  /* Log a normal exit */
+	/* Log a normal exit */
 
-  if(sysvar->lofaud){
-    if(thisuseronl.flags&OLF_LOGGEDOUT){
-      audit(thisuseronl.channel,AUDIT(LOGOUT),
-	    thisuseronl.userid,
-	    channel_baudstg(thisuseronl.baudrate));
-      return;
-    }
-  }
+	if (sysvar->lofaud) {
+		if (thisuseronl.flags & OLF_LOGGEDOUT) {
+			audit (thisuseronl.channel, AUDIT (LOGOUT),
+			       thisuseronl.userid,
+			       channel_baudstg (thisuseronl.baudrate));
+			return;
+		}
+	}
 
-  if(thisuseronl.flags&OLF_RELOGGED)
-    audit(thisuseronl.channel,AUDIT(RELOGON),
-	  thisuseronl.userid,
-	  channel_baudstg(thisuseronl.baudrate));
-  else {
-    switch(thisuseronl.lastpage){
-    case EXIT_CREDS:		/* User ran out of credits */
-      audit(thisuseronl.channel,AUDIT(CREDHUP),
-	    thisuseronl.userid,
-	    channel_baudstg(thisuseronl.baudrate));
-      return;
-    case EXIT_TIMEOUT:		/* Connection timed out */
-      audit(thisuseronl.channel,AUDIT(TIMEOUT),
-	    thisuseronl.userid,
-	    channel_baudstg(thisuseronl.baudrate));
-      return;
-    case EXIT_TIME:		/* Time limit reached */
-      audit(thisuseronl.channel,AUDIT(TIMEHUP),
-	    thisuseronl.userid,
-	    channel_baudstg(thisuseronl.baudrate));
-      return;
-    case EXIT_DISCON:		/* User disconnected or line died */
-    default:
-      /*audit(thisuseronl.channel,AUDIT(DISCON),
-	    thisuseronl.userid,
-	    channel_baudstg(thisuseronl.baudrate));
-	    return;*/
-    }
-  }
-  
-  /* User disconnected or line died */
-  audit(thisuseronl.channel,AUDIT(DISCON),
-	thisuseronl.userid,
-	channel_baudstg(thisuseronl.baudrate));
+	if (thisuseronl.flags & OLF_RELOGGED)
+		audit (thisuseronl.channel, AUDIT (RELOGON),
+		       thisuseronl.userid,
+		       channel_baudstg (thisuseronl.baudrate));
+	else {
+		switch (thisuseronl.lastpage) {
+		case EXIT_CREDS:	/* User ran out of credits */
+			audit (thisuseronl.channel, AUDIT (CREDHUP),
+			       thisuseronl.userid,
+			       channel_baudstg (thisuseronl.baudrate));
+			return;
+		case EXIT_TIMEOUT:	/* Connection timed out */
+			audit (thisuseronl.channel, AUDIT (TIMEOUT),
+			       thisuseronl.userid,
+			       channel_baudstg (thisuseronl.baudrate));
+			return;
+		case EXIT_TIME:	/* Time limit reached */
+			audit (thisuseronl.channel, AUDIT (TIMEHUP),
+			       thisuseronl.userid,
+			       channel_baudstg (thisuseronl.baudrate));
+			return;
+		case EXIT_DISCON:	/* User disconnected or line died */
+		default:
+			/*audit(thisuseronl.channel,AUDIT(DISCON),
+			   thisuseronl.userid,
+			   channel_baudstg(thisuseronl.baudrate));
+			   return; */
+
+			;	/* To get rid of a spurious warning */
+		}
+	}
+
+	/* User disconnected or line died */
+	audit (thisuseronl.channel, AUDIT (DISCON),
+	       thisuseronl.userid, channel_baudstg (thisuseronl.baudrate));
 }
 
 
 static void
-dorecent()
+dorecent ()
 {
-  FILE *fp;
-  char *recentdir=mkfname(RECENTDIR);
-  char fname[256],command[256];
-  int i;
+	FILE   *fp;
+	char   *recentdir = mkfname (RECENTDIR);
+	char    fname[256], command[256];
+	int     i;
 
-  i=time(0);
-  fp=fopen(mkfname(RECENTFILE),"a");
-  fprintf(fp,"%s %s %08x %08x\n",thisuseronl.userid,
-	  thisuseronl.channel,thisuseronl.loggedin,i);
-  fclose(fp);
-  
-  sprintf(fname,"%s/%s",recentdir,thisuseronl.userid);
-  fp=fopen(fname,"a");
-  fprintf(fp,"%s %08x %08x\n",thisuseronl.channel,thisuseronl.loggedin,i);
-  fclose(fp);
-  
-  sprintf(command,
-	  "tail -%d %s >%s/tmp%08x;\\mv %s/tmp%08x %s;chown bbs.bbs %s",
-	  RECENT_ENTRIES,fname,recentdir,i,recentdir,i,fname,fname);
-  system(command);
+	i = time (0);
+	fp = fopen (mkfname (RECENTFILE), "a");
+	fprintf (fp, "%s %s %08x %08x\n", thisuseronl.userid,
+		 thisuseronl.channel, thisuseronl.loggedin, i);
+	fclose (fp);
 
-  chown(fname,bbsuid,bbsgid);
-  chmod(fname,0660);
-  sprintf(fname,"%s/.%s",mkfname(ONLINEDIR),thisuseronl.channel);
-  unlink(fname);
+	sprintf (fname, "%s/%s", recentdir, thisuseronl.userid);
+	fp = fopen (fname, "a");
+	fprintf (fp, "%s %08x %08x\n", thisuseronl.channel,
+		 thisuseronl.loggedin, i);
+	fclose (fp);
+
+	sprintf (command,
+		 "tail -%d %s >%s/tmp%08x;\\mv %s/tmp%08x %s;chown bbs.bbs %s",
+		 RECENT_ENTRIES, fname, recentdir, i, recentdir, i, fname,
+		 fname);
+	system (command);
+
+	chown (fname, bbsuid, bbsgid);
+	chmod (fname, 0660);
+	sprintf (fname, "%s/.%s", mkfname (ONLINEDIR), thisuseronl.channel);
+	unlink (fname);
 }
 
 
 static void
-killinjoth()
+killinjoth ()
 {
-  struct msqid_ds buf;
-      
-  if(msgctl(thisuseronl.injothqueue,IPC_RMID,&buf)<0)return;
+	struct msqid_ds buf;
+
+	if (msgctl (thisuseronl.injothqueue, IPC_RMID, &buf) < 0)
+		return;
 }
 
 
 static void
-cleanup()
+cleanup ()
 {
-  channel_status_t status;
-  channel_getstatus(thisuseronl.channel,&status);
-  status.user[0]=0;
-  channel_setstatus(thisuseronl.channel,&status);
+	channel_status_t status;
+
+	channel_getstatus (thisuseronl.channel, &status);
+	status.user[0] = 0;
+	channel_setstatus (thisuseronl.channel, &status);
 }
 
 
 void
-logoutuser()
+logoutuser ()
 {
-  int pid;
+	int     pid;
 
-  if(!(thisuseronl.userid[0]&&thisuseronl.loggedin))return;
+	if (!(thisuseronl.userid[0] && thisuseronl.loggedin))
+		return;
 
-  switch(pid=fork()){
-  case -1:
-    error_logsys("Unable to fork() while spawning getty");
-    return;
-  case 0:
-    break;
-  default:
-    return;
-  }
-
-
-  /* Kill the usr_injoth() message queue */
-
-  killinjoth();
-
-  
-  /* Become a plain user -- we're going to do file handling */
-
-  setgid(bbsgid);
-  initgroups(BBSUSERNAME,bbsgid);
-  setuid(bbsuid);
+	switch (pid = fork ()) {
+	case -1:
+		error_logsys ("Unable to fork() while spawning getty");
+		return;
+	case 0:
+		break;
+	default:
+		return;
+	}
 
 
-  /* Record the user's exit in the audit trail */
+	/* Kill the usr_injoth() message queue */
 
-  logoutaudit();
-
-
-  /* Record the user's exit in the RECENT file */
-
-  dorecent();
+	killinjoth ();
 
 
-  /* Cleanup misc files */
+	/* Become a plain user -- we're going to do file handling */
 
-  cleanup();
-  
-  exit(0);
+	setgid (bbsgid);
+	initgroups (getenv ("BBSOWNER"), bbsgid);
+	setuid (bbsuid);
+
+
+	/* Record the user's exit in the audit trail */
+
+	logoutaudit ();
+
+
+	/* Record the user's exit in the RECENT file */
+
+	dorecent ();
+
+
+	/* Cleanup misc files */
+
+	cleanup ();
+
+	exit (0);
 }
 
 
 void
-refreshsysvars()
+refreshsysvars ()
 {
-  struct stat s;
-  if(stat(mkfname(SYSVARFILE),&s)){
-    error_fatalsys("Unable to stat() sysvar file (%s)!",mkfname(SYSVARFILE));
-  }
+	struct stat s;
 
-  if (s.st_ctime!=sysvartime && sysvar) {
-    FILE *sysvarf;
+	if (stat (mkfname (SYSVARFILE), &s)) {
+		error_fatalsys ("Unable to stat() sysvar file (%s)!",
+				mkfname (SYSVARFILE));
+	}
 
-    sysvartime=s.st_ctime;
-    
-    if((sysvarf=fopen(mkfname(SYSVARFILE),"r"))!=NULL){
-      fread(sysvar,sizeof(struct sysvar),1,sysvarf);
-    }
+	if (s.st_ctime != sysvartime && sysvar) {
+		FILE   *sysvarf;
 
-    fclose(sysvarf);
-  }
+		sysvartime = s.st_ctime;
+
+		if ((sysvarf = fopen (mkfname (SYSVARFILE), "r")) != NULL) {
+			fread (sysvar, sizeof (struct sysvar), 1, sysvarf);
+		}
+
+		fclose (sysvarf);
+	}
 }
 
 
 void
-refreshclasses()
+refreshclasses ()
 {
-  struct stat s;
-  if(stat(mkfname(CLASSFILE),&s)){
-    error_fatalsys("Unable to stat() class file (%s)!",mkfname(CLASSFILE));
-  }
-  if (s.st_ctime!=classtime) {
-    classtime=s.st_ctime;
-    mod_init(INI_CLASSES);
-  }
+	struct stat s;
+
+	if (stat (mkfname (CLASSFILE), &s)) {
+		error_fatalsys ("Unable to stat() class file (%s)!",
+				mkfname (CLASSFILE));
+	}
+	if (s.st_ctime != classtime) {
+		classtime = s.st_ctime;
+		mod_init (INI_CLASSES);
+	}
 }
 
 
 void
-byebye(struct shmuserrec *ushm,int prompt)
+byebye (struct shmuserrec *ushm, int prompt)
 {
-  FILE *fp;
-  char fname[64], *outbuf;
-  int  chan=chan_getindex(ushm->onl.channel);
-  
-  msg_set(msg_sys);
-  outbuf=msg_getl(prompt,ushm->acc.language-1);
-	    
-  if(outbuf){
-    sprintf(fname,DEVDIR"/%s",ushm->onl.emupty);
-    if((fp=fopen(fname,"w"))!=NULL){
-      fprintf(fp,"%s",outbuf);
-    }
-    fflush(fp);
-    fclose(fp);
-  }
+	FILE   *fp;
+	char    fname[64], *outbuf;
+	int     chan = chan_getindex (ushm->onl.channel);
 
+	if (msg_sys == NULL) msg_sys = msg_open ("sysvar");
+	msg_set (msg_sys);
+	outbuf = msg_getl (prompt, ushm->acc.language - 1);
+
+	if (outbuf) {
+		sprintf (fname, DEVDIR "/%s", ushm->onl.emupty);
+		if ((fp = fopen (fname, "w")) != NULL) {
+			fprintf (fp, "%s", outbuf);
+		}
+		fflush (fp);
+		fclose (fp);
+	}
 #ifdef DEBUG
-  fprintf(stderr,"byebye(): killing process group %d for tty %s\n",
-	  gettys[chan].pid,ushm->onl.channel);
+	fprintf (stderr, "byebye(): killing process group %d for tty %s\n",
+		 gettys[chan].pid, ushm->onl.channel);
 #endif
 
-  if(!gettys[chan].pid)return;
-  kill(-gettys[chan].pid,SIGHUP);
-  if(kill(-gettys[chan].pid,0)){
-    sleep(1);
-    kill(-gettys[chan].pid,SIGTERM);
-    if(kill(-gettys[chan].pid,0)){
-      sleep(1);
-      kill(-gettys[chan].pid,SIGKILL);
-    }
-  }
+	if (!gettys[chan].pid)
+		return;
+	kill (-gettys[chan].pid, SIGHUP);
+	if (kill (-gettys[chan].pid, 0)) {
+		sleep (1);
+		kill (-gettys[chan].pid, SIGTERM);
+		if (kill (-gettys[chan].pid, 0)) {
+			sleep (1);
+			kill (-gettys[chan].pid, SIGKILL);
+		}
+	}
 }
+
+
+/* End of File */

@@ -30,6 +30,18 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:51  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.7  2004/05/21 20:25:27  alexios
+ * Fixed a typo.
+ *
+ * Revision 1.6  2004/05/21 20:05:01  alexios
+ * Removed hardwired, system(3)-based chown operation to bbs.bbs in
+ * favour of using the chown(2) system call and the appropriate BBS
+ * instance UID and GIDs. This may fix serious permission-related bugs.
+ *
  * Revision 1.5  2003/12/29 07:51:38  alexios
  * Adjusted #includes; changed all instances of struct message to message_t.
  *
@@ -241,13 +253,7 @@ copyatt (int copymode, message_t *msg, int email, char *attachment)
 
 		chmod (attname, 0660);
 
-		if ((!getuid ()) || (!getpid ())) {
-			char    command[256];
-
-			sprintf (command, "chown -f bbs.bbs %s >&/dev/null",
-				 attname);
-			system (command);
-		}
+		if ((!getuid ()) || (!getpid ())) chown (attname, bbs_uid, bbs_gid);
 	}
 }
 

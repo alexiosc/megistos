@@ -49,6 +49,19 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.8  2004/02/29 17:10:14  alexios
+ * Various changes to reflect the new infrastructure.
+ *
+ * Revision 1.7  2004/02/22 18:52:39  alexios
+ * Obsoleted BBSUSERNAME. Added BBSRUNDIR where all the PIDs are stored
+ * (it was BBSETCDIR previously). Added DAEMONDIR which is where the
+ * daemons live. It's used by bbsinitd to spawn the daemons. Fixed MBKDIR
+ * so it's a child of BBSDATADIR, not BBSLIBDIR.
+ *
  * Revision 1.6  2003/12/19 13:23:51  alexios
  * Updated include directives; updated some of the directory #defines.
  *
@@ -122,7 +135,7 @@
 #define CONFIG_H
 
 
-#include <megistos/bbsconfig.h>
+#include <bbsconfig.h>
 #define WANT_SIGNAL_H 1
 #include <megistos/bbsinclude.h>
 #include <megistos/version.h>
@@ -181,8 +194,11 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define BBSETCDIR      "etc"
 #define BBSFILEDIR     BBSDATADIR"/files"
 #define BBSLIBDIR      "lib"
-#define BBSMODULEDIR   BBSLIBDIR"/modules"
+#define BBSMODULERCDIR BBSETC"/module.rc"
+#define BBSRUNDIR      "run"
 #define BINDIR         "bin"
+#define DAEMONDIR      BINDIR"/daemons"
+#define MODULEDIR      BINDIR"/modules"
 #define BLTDBDIR       MSGSDIR"/..bltdb"
 #define CHANDEFDIR     BBSETCDIR"/channel.defs"
 #define CLUBAXDIR      MSGSDIR"/..access"
@@ -206,7 +222,7 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define MAILERFILESDIR MAILERDIR"/QWKfiles"
 #define MAILERREQDIR   MAILERDIR"/requests"
 #define MAILERUSRDIR   MAILERDIR"/usr"
-#define MBKDIR         BBSLIBDIR"/prompts"
+#define MBKDIR         BBSDATADIR"/prompts"
 #define MBKINCLUDEDIR  __INCLUDEDIR"/mbk"
 #define MENUMANDIR     BBSDATADIR"/menuman"
 #define MSGATTDIR      ".ATT"
@@ -225,6 +241,7 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define TELEDIR        BBSDATADIR"/telecon"
 #define TELEETCDIR     TELEDIR"/.etc"
 #define TELEPLUGINDIR  TELEETCDIR
+#define TELEPLUGINBIN  BBSLIBDIR"/telecon"
 #define TELEQDIR       TELEETCDIR
 #define TELEUSRDIR     TELEDIR"/.usr"
 #define USRDIR         BBSDATADIR"/usr"
@@ -250,14 +267,13 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 
 #define BBSDIALOGBIN   BINDIR"/bbsdialog"
 #define BBSMAILBIN     BINDIR"/bbsmail"
-#define BULLETINBIN    BINDIR"/bulletins"
-#define EMUDBIN        BINDIR"/emud"
-#define IDLERBIN       BINDIR"/idler"
+#define BULLETINBIN    MODULEDIR"/bulletins"
+#define EMUDBIN        DAEMONDIR"/emud"
 #define LINEDBIN       BINDIR"/lined"
 #define LOGINBIN       "/bin/login"
 #define BBSLOGINBIN    BINDIR"/bbslogin"
 #define LOGOUTBIN      BINDIR"/bbslogout"
-#define REMSYSBIN      BINDIR"/remsys"
+#define REMSYSBIN      MODULEDIR"/remsys"
 #define SIGNUPBIN      BINDIR"/signup"
 #define STATSBIN       BINDIR"/stats"
 #define STTYBIN        "/bin/stty"
@@ -307,7 +323,7 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define FLETTRWORDS    BBSETCDIR"/four.letter.words" /**< A list of words used to create passwords */
 #define LANGUAGEFILE   BBSETCDIR"/languages" /**< List of languages of the BBS */
 #define LOGINMSGFILE   BBSETCDIR"/login.message" /**< The login message of the day */
-#define LOGINSCRIPT    BINDIR"/bbs.session" /**< The script that manages a user's entire session */
+#define LOGINSCRIPT    BBSETCDIR"/bbs.session" /**< The script that manages a user's entire session */
 #define MENUMANINDEX   MENUMANDIR"/.index" /**< Index file for Menuman */
 #define MENUMANPAGES   MENUMANDIR"/.pages" /**< Page directory for Menuman */
 #define MODSTATFILE    STATDIR"/modstats" /**< Module usage statistics log file */
@@ -352,9 +368,11 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define BLTREADLOCK    "LCK..BLT"
 
 #define BBSD_IPC       0x42425344  /**< This spells "BBSD" (BBS restart) */
+#if 0 /* Obsoleted */
 #ifndef BBSUSERNAME
 #define BBSUSERNAME    "bbs" /**< BBS UNIX username (<tt>chown</tt>s and BBS restart) */
 #endif
+#endif /* Obsoleted */
 #define DELETEDCLASS   "DELETED" /**< Where do deleted users go? (may need to change other classes) */
 #define EMAILCLUBNAME  "Email"
 #define EMUD_IPC       0x454d5544 /**< This spells "EMUD" (BBS restart) */

@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.5  2003/12/22 18:19:06  alexios
  * Added more Bxxx bps control bits for those kernels that support
  * them. Values up to 4 Mbps (on FIR ports) are supported. No-one's ever

@@ -1,41 +1,115 @@
 #!/bin/sh
-# This file starts the BBS up, running daemons and things
-
+#
+# This program is free software; you  can redistribute it and/or modify
+# it under the terms of the GNU  General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed  in the hope  that it will be useful, but
+# WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of
+# MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU
+# General Public License for more details.
+#                                                                      
+# You  should have received a copy   of the GNU  General Public License
+# along with    this program;  if   not, write  to  the   Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.            
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:56  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2004/02/29 12:03:50  alexios
+# Major rewrite of the run control script to rationalise things, reset
+# permissions, regenerate files, et cetera.
+#
+#
+# This file starts/stops the BBS, running/killing daemons and things
 
 # Uncomment this for debugging (very verbose)
 #set -x
 
 nofixup=$1
 
+# Make sure we're the superuser
+if [ `id -u` != 0 ]; then
+	echo >&2 "$0: Only the superuser may execute this script."
+	echo >&2 "Please do not call this script directly. Use megistos-admin instead."
+	exit 1
+fi
 
-# Find out what our directory prefix is
-prefix=$0
-basename=`basename $prefix`
-prefix=`echo $prefix|sed 's/\/etc\/'$basename'$//'`
-prefix=`(((echo $prefix|grep ^/)&&echo $prefix)||echo $PWD/$prefix)`
-prefix=`echo $prefix|sed 's/\/'$basename'$//'`
-prefix=`(cd $prefix;pwd) 2>/dev/null|sed 's/\/\+etc\/*$//'`
+# Lock it all down
 
+declare -r BBSPREFIX BBSCODE BBSOWNER BBSGROUP BBSUSER BBSUID BBSGID BBSUUID
+
+# Sanity checks
+
+if [ \
+    x$BBSPREFIX = x -o \
+    x$BBSCODE   = x -o \
+    x$BBSOWNER  = x -o \
+    x$BBSGROUP  = x -o \
+    x$BBSUSER   = x -o \
+    x$BBSUID    = x -o \
+    x$BBSGID    = x -o \
+    x$BBSUUID   = x \
+   ]; then
+    echo >&2 "$0: environment not properly set up."
+    echo >&2 "Please do not call this script directly. Use megistos-admin instead."
+    exit 1
+fi
+
+## Find out what our directory prefix is
+#if [ x$BBSPREFIX = x ]; then
+#    prefix=$0
+#    basename=`basename $prefix`
+#    prefix=`echo $prefix|sed 's/\/etc\/'$basename'$//'`
+#    prefix=`(((echo $prefix|grep ^/) && echo $prefix) || echo $PWD/$prefix)`
+#    prefix=`echo $prefix|sed 's/\/'$basename'$//'`
+#    prefix=`(cd $prefix;pwd) 2>/dev/null|sed 's/\/\+etc\/*$//'`
+#else
+    prefix=$BBSPREFIX
+#fi
+
+# Paranoia check.
+
+if [ ! -e $prefix/etc/rc.bbs ]; then
+    echo >&2 "$0: paranoia check failed for prefix \"$prefix\", bailing out."
+    echo >&2 "Please do not call this script directly. Use megistos-admin instead."
+    exit 1
+fi
+
+#echo $prefix
+#set
+#exit
+
+# Read the global configuration
+
+set -e
+[ -r /etc/megistos.conf ] && . /etc/megistos.conf
+set +e
+
+# Set the umask
+if [ x$LOCKDOWN != xfalse ]; then
+    umask 007
+else
+    umask 000
+fi
 
 # Change to the prefix directory
 cd ${prefix}
 
-
 # Export the prefix and bin directories to our descendants
 declare -xr prefix
 declare -xr PREFIX=$prefix
+#declare -xr BBSPREFIX=$prefix
 declare -xr BINDIR=${prefix}/bin
 
 
 # Make sure people can read our own magic file
 declare -x MAGIC=${prefix}/etc/magic:/etc/magic:/usr/lib/magic
-
-
-# Make sure we're the superuser
-if [ `whoami` != root ]; then
-	echo Only the superuser may execute this script.
-	exit
-fi
 
 
 # Be nice and verbose
@@ -47,58 +121,105 @@ export PATH=/bin:/usr/local/bin:/usr/bin:/bin:${prefix}/bin:
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${prefix}/lib
 
 
-# If we're restarting the system, kill every binary remaining
+# Regenerate and clean up things. This is kept quiet.
 
-echo Sending any running BBS processes the TERM signal...
-killall bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
-sleep 3
-echo Sending any running BBS processes the KILL signal...
-killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
-killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
-killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
-
-
-# Lock the system variables files/shared memory block
-echo 1 >${prefix}/lock/LCK..sysvarshm
-
-# Clean up ${prefix}/data/usr
-echo Cleaning up temporary files under ${prefix}
 (
-    rm -f ${prefix}/data/usr/.[0-9]*
 
-# Clean up ${prefix}/etc/online
+    # If we're restarting the system, kill every binary remaining
+    
+    #echo Sending any running BBS processes the TERM signal...
+    #killall bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+    #sleep 3
+    #echo Sending any running BBS processes the KILL signal...
+    #killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+    #killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+    #killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+    
+    # (Re)generate the system variables.
+    [ -s ${prefix}/etc/sysvar ] || rm ${prefix}/etc/sysvar
+    ${prefix}/bin/mksysvar
+
+    # (Re)generate the channel index
+    ${prefix}/bin/mkchan
+
+    # (Re)generate the channel index
+    ${prefix}/bin/mkmtree ${prefix}/data/menuman/pagedefs
+
+    # (Re)generate the translation tables
+    ${prefix}/bin/mkxlation
+
+    # (Re)generate the module run control directories.
+    rm -f ${prefix}/etc/module.rc/*/[0-9][0-9]_*
+    (
+	mkdir -m 0755 ${prefix}/etc/module.rc
+	chown ${BBSOWNER}:${BBSGROUP} ${prefix}/etc/module.rc
+	cd ${prefix}/etc/module.rc
+	for a in ${prefix}/bin/modules/*; do
+	    for b in `$a --install 2>/dev/null | grep ^create: | cut -d' ' -f2-`; do
+		mkdir `echo $b | cut -d/ -f1` >&/dev/null
+		ln -s $a $b;
+	    done
+	done
+    )
+
+    # (Re)generate the teleconference actions and plugins
+    ${prefix}/bin/mkaction
+    ${prefix}/bin/mkplugin
+
+    # (Re)set permissions
+    chmod -R ug+rw,o-w ${prefix}/online
+    chmod -R ug+rw,o-w ${prefix}/run
+    chmod -R ug+rw,o-w ${prefix}/data/usr
+    chown -R ${BBSOWNER}:${BBSGROUP} ${prefix}/data
+    find ${prefix}/data -type d -print0 | xargs -0 chmod ug+rw,o-w
+    find ${prefix}/data -type d -print0 | xargs -0 chmod ug+rwx,o-w
+
+    # Set up for logging.
+    chown -R ${BBSOWNER}:${BBSGROUP} ${prefix}/log
+    chmod 660 ${prefix}/log/*
+
+    # Lock the system variables files/shared memory block
+    echo 1 >${prefix}/lock/LCK..sysvarshm
+
+    # Clean up ${prefix}/data/usr
+    echo Cleaning up temporary files under ${prefix}
+    
+    rm -f ${prefix}/data/usr/.[0-9]*
+    
+    # Clean up ${prefix}/etc/online
     rm -f ${prefix}/etc/online/* \
 	${prefix}/etc/online/.[A-z]* \
 	${prefix}/etc/.* \
-
-# Clean up ${prefix}/lock
+	
+    # Clean up ${prefix}/lock
     rm -f ${prefix}/lock/* \
 	${prefix}/lock/.*
-
-# Clean up ${prefix}/etc
+    
+    # Clean up ${prefix}/etc
     rm -f ${prefix}/etc/*pid \
 	${prefix}/etc/register* \
 	${prefix}/etc/.emu* \
 	${prefix}/etc/.shmid* \
 	${prefix}/etc/sysvar-shm \
 	${prefix}/etc/sysvar.[0-9]*
-
-# Clean up ${prefix}/channel.defs (this should start all lines in the
-# NORMAL state)
-    rm -f ${prefix}/etc/channel.defs/.pid-* \
+    
+    # Clean up ${prefix}/channel.defs (this should start all lines in the
+    # NORMAL state)
+    rm -f ${prefix}/run/* \
 	${prefix}/etc/channel.defs/.status-*
-
-# Clean up ${prefix}/data/telecon
+    
+    # Clean up ${prefix}/data/telecon
     rm -rf ${prefix}/data/telecon/[A-Z_]*
 
-# Clean up our files from /tmp
-#find /tmp -group bbs -maxdepth 1 -exec \rm -rf \{\} \;
+    # Clean up our files from /tmp
+    #find /tmp -group bbs -maxdepth 1 -exec \rm -rf \{\} \;
+
 ) >&/dev/null
 
 
 echo -n "Starting BBS INIT daemon from ${prefix}: "
 
-${prefix}/bin/bbsinit
+${prefix}/bin/daemons/bbsinit
 echo -n "bbsinit "
 
 #${prefix}/bin/bbslockd
@@ -107,7 +228,7 @@ echo -n "bbsinit "
 #${prefix}/bin/bbsd
 #echo -n "bbsd "
 
-#${prefix}/bin/statd
+#valgrind -v --leak-check=yes ${prefix}/bin/daemons/bbsinit
 #echo -n "statd "
 
 #if [ .$nofixup != .nofixup ]; then
@@ -122,3 +243,6 @@ echo
 
 # End of BBS initialisation
 echo End of BBS initialisation.
+
+
+# End of file.

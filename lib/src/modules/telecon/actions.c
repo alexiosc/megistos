@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.5  2003/12/27 12:37:29  alexios
  * Adjusted #includes. Minor cosmetic changes. Removed dependency on
  * compiled action list (via mbk_teleactions.h) by hardwiring indices for

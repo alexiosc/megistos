@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:54  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+#
+# This script lists the contents of either a gzipped or a tar-gzipped file.
+# It works by first attempting to view a gzip compressed tar archive (with
+# "tar -tzv". If this fails, we assume the file is not tar.gzip, so we
+# just list the contents of the gzip file using gzip -l.
+# Alexios, 21-OCT-94.
+
+if tar -tzvf $1 2>/dev/null; then echo; else gzip -l $1; fi
+
+# End of file.

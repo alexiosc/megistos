@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.5  2003/12/25 13:33:28  alexios
  * Fixed #includes. Changed instances of struct message to
  * message_t. Other minor changes.

@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -72,10 +80,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define WANT_STDIO_H 1
@@ -96,191 +102,218 @@ const char *__RCS=RCS_VER;
 #define WANT_WAIT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
 #include "bbsd.h"
 
 
 /* Event warning times. The line below means 'warn every 60 mins */
 /* until less than 60 mins are left, then every 30 mins', etc.   */
 
-static int warntimes [] = {60,30,15,10,5,4,3,2,1,-1};
+static int warntimes[] = { 60, 30, 15, 10, 5, 4, 3, 2, 1, -1 };
 
 
 void
-eventexec(char *command, char *name)
+eventexec (char *command, char *name)
 {
-  int pid, status;
+	int     pid, status;
 
-  if((pid=fork())==0){
-    
-    signed short int res;
+	if ((pid = fork ()) == 0) {
 
-    /* Become a mere mortal to run the event */
+		signed short int res;
 
-    setgid(bbsgid);
-    initgroups(BBSUSERNAME,bbsgid);
-    setuid(bbsuid);
-    
-    /*    error_log("executing event (%s)",command); */
-    if(!chdir(mkfname(BINDIR)))res=system(command);
-    else {
-      error_logsys("eventexec(): unable to chdir(\"%s\") to run event",
-	       mkfname(BINDIR));
-      exit(0);
-    }
+		/* Become a mere mortal to run the event */
 
-    if(name!=NULL)
-      audit("BBS DAEMON",AUDIT(EVEND),name,res);
-    
-    exit(0);
-  } else if(pid>1)waitpid(pid,&status,0);
+		setgid (bbsgid);
+		initgroups (getenv ("BBSOWNER"), bbsgid);
+		setuid (bbsuid);
+
+		/*    error_log("executing event (%s)",command); */
+		if (!chdir (mkfname (BINDIR)))
+			res = system (command);
+		else {
+			error_logsys
+			    ("eventexec(): unable to chdir(\"%s\") to run event",
+			     mkfname (BINDIR));
+			exit (0);
+		}
+
+		if (name != NULL)
+			audit ("BBS DAEMON", AUDIT (EVEND), name, res);
+
+		exit (0);
+	} else if (pid > 1)
+		waitpid (pid, &status, 0);
 }
 
 
 void
-asapevents()
+asapevents ()
 {
-  struct dirent *dirent;
-  DIR *dp;
-  int numusers=-1;
+	struct dirent *dirent;
+	DIR    *dp;
+	int     numusers = -1;
 
-  switch(fork()){
-  case -1:
-    error_logsys("Unable to fork() in asapevents()");
-    return;
-  case 0:
-    break;
-  default:
-    return;
-  }
-  
-  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
-    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
-  }
-
-  while((dirent=readdir(dp))!=NULL){
-    if(dirent->d_name[0]!='.'){
-      struct event event;
-      FILE *fp;
-      char s[256];
-      int i;
-	
-      memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
-      if((fp=fopen(s,"r"))==NULL)continue;
-      fread(&event,sizeof(event),1,fp);
-      fclose(fp);
-
-      if((event.flags&EVF_ASAP)==0)continue;
-
-      if(numusers<0){
-	for(i=0,numusers=0;i<chan_count;i++){
-	  channel_status_t status;
-	  if(!channel_getstatus(channels[i].ttyname,&status))continue;
-	  if(status.result==LSR_USER)numusers++;
+	switch (fork ()) {
+	case -1:
+		error_logsys ("Unable to fork() in asapevents()");
+		return;
+	case 0:
+		break;
+	default:
+		return;
 	}
-      }
-      
-      /* There are still some users in the system */
 
-      if(numusers>0)break;
-      
-      /* Kill the event file (ASAP events are one-shot */
+	if ((dp = opendir (mkfname (EVENTDIR))) == NULL) {
+		error_fatalsys ("Unable to opendir %s", mkfname (EVENTDIR));
+	}
 
-      unlink(s);
+	while ((dirent = readdir (dp)) != NULL) {
+		if (dirent->d_name[0] != '.') {
+			struct event event;
+			FILE   *fp;
+			char    s[256];
+			int     i;
 
-      /* Spawn it */
+			memset (&event, 0, sizeof (event));
+			sprintf (s, "%s/%s", mkfname (EVENTDIR),
+				 dirent->d_name);
+			if ((fp = fopen (s, "r")) == NULL)
+				continue;
+			fread (&event, sizeof (event), 1, fp);
+			fclose (fp);
 
-      audit("BBS DAEMON",AUDIT(EVSPAWN),"[bbsd]",s);
-      eventexec(event.command,s);
-    }
-  }
-  closedir(dp);
-  exit(0);
+			if ((event.flags & EVF_ASAP) == 0)
+				continue;
+
+			if (numusers < 0) {
+				for (i = 0, numusers = 0; i < chan_count; i++) {
+					channel_status_t status;
+
+					if (!channel_getstatus
+					    (channels[i].ttyname, &status))
+						continue;
+					if (status.result == LSR_USER)
+						numusers++;
+				}
+			}
+
+			/* There are still some users in the system */
+
+			if (numusers > 0)
+				break;
+
+			/* Kill the event file (ASAP events are one-shot */
+
+			unlink (s);
+
+			/* Spawn it */
+
+			audit ("BBS DAEMON", AUDIT (EVSPAWN), "[bbsd]", s);
+			eventexec (event.command, s);
+		}
+	}
+	closedir (dp);
+	exit (0);
 }
 
 
 void
-events()
+events ()
 {
-  struct dirent *dirent;
-  DIR *dp;
+	struct dirent *dirent;
+	DIR    *dp;
 
 #ifdef DEBUG
-  fprintf(stderr,"Forking to handle events.\n");
+	fprintf (stderr, "Forking to handle events.\n");
 #endif
 
-  switch(fork()){
-  case -1:
-    error_logsys("Unable to fork() in events()");
-    return;
-  case 0:
-    break;
-  default:
-    return;
-  }
-    
-#ifdef DEBUG
-  fprintf(stderr,"Handling events.\n");
-#endif
-
-  if((dp=opendir(mkfname(EVENTDIR)))==NULL){
-    error_fatalsys("Unable to opendir %s",mkfname(EVENTDIR));
-  }
-
-  while((dirent=readdir(dp))!=NULL){
-#ifdef DEBUG
-  fprintf(stderr,"Found filename %s\n",dirent->d_name);
-#endif
-    if(dirent->d_name[0]!='.'){
-      struct event event;
-      FILE *fp;
-      int t, hour, min;
-      char s[256];
-	
-      memset(&event,0,sizeof(event));
-      sprintf(s,"%s/%s",mkfname(EVENTDIR),dirent->d_name);
-      if((fp=fopen(s,"r"))==NULL)continue;
-      fread(&event,sizeof(event),1,fp);
-      fclose(fp);
-      
-      if(event.flags&EVF_NOW || event.flags&EVF_ASAP)continue;
-      
-      t=now();
-      hour=tdhour(t);
-      min=tdmin(t);
-      
-#ifdef DEBUG
-  fprintf(stderr,"Found event %s (exec at %02d:%02d, time now: %02d:%02d)\n",
-	  dirent->d_name,event.hour,event.min,hour,min);
-#endif
-      if(hour==event.hour && min==event.min){
-	if(event.flags&EVF_ONLYONCE)unlink(s);
-	audit("BBS DAEMON",AUDIT(EVSPAWN),"[bbsd]",s);
-	eventexec(event.command,s);
-      } else if(event.flags&EVF_WARN){
-	int t1 = hour*60+min;
-	int t2 = event.hour*60+event.min;
-	int t,i;
-	
-	if(t2<t1)t2+=24*60;
-	
-	t=t2-t1;
-	for(i=0;warntimes[i]>0;i++){
-	  if(t>=warntimes[i]){
-	    if((t%warntimes[i])==0){
-	      char command[512];
-	      sprintf(command,"%s -warn %d",event.command,t);
-	      eventexec(command,NULL);
-	    }
-	    break;
-	  }
+	switch (fork ()) {
+	case -1:
+		error_logsys ("Unable to fork() in events()");
+		return;
+	case 0:
+		break;
+	default:
+		return;
 	}
-      }
-    }
-  }
-  closedir(dp);
-    
-  exit(0);
+
+#ifdef DEBUG
+	fprintf (stderr, "Handling events.\n");
+#endif
+
+	if ((dp = opendir (mkfname (EVENTDIR))) == NULL) {
+		error_fatalsys ("Unable to opendir %s", mkfname (EVENTDIR));
+	}
+
+	while ((dirent = readdir (dp)) != NULL) {
+#ifdef DEBUG
+		fprintf (stderr, "Found filename %s\n", dirent->d_name);
+#endif
+		if (dirent->d_name[0] != '.') {
+			struct event event;
+			FILE   *fp;
+			int     t, hour, min;
+			char    s[256];
+
+			memset (&event, 0, sizeof (event));
+			sprintf (s, "%s/%s", mkfname (EVENTDIR),
+				 dirent->d_name);
+			if ((fp = fopen (s, "r")) == NULL)
+				continue;
+			fread (&event, sizeof (event), 1, fp);
+			fclose (fp);
+
+			if (event.flags & EVF_NOW || event.flags & EVF_ASAP)
+				continue;
+
+			t = now ();
+			hour = tdhour (t);
+			min = tdmin (t);
+
+#ifdef DEBUG
+			fprintf (stderr,
+				 "Found event %s (exec at %02d:%02d, time now: %02d:%02d)\n",
+				 dirent->d_name, event.hour, event.min, hour,
+				 min);
+#endif
+			if (hour == event.hour && min == event.min) {
+				if (event.flags & EVF_ONLYONCE)
+					unlink (s);
+				audit ("BBS DAEMON", AUDIT (EVSPAWN), "[bbsd]",
+				       s);
+				eventexec (event.command, s);
+			} else if (event.flags & EVF_WARN) {
+				int     t1 = hour * 60 + min;
+				int     t2 = event.hour * 60 + event.min;
+				int     t, i;
+
+				if (t2 < t1)
+					t2 += 24 * 60;
+
+				t = t2 - t1;
+				for (i = 0; warntimes[i] > 0; i++) {
+					if (t >= warntimes[i]) {
+						if ((t % warntimes[i]) == 0) {
+							char    command[512];
+
+							sprintf (command,
+								 "%s -warn %d",
+								 event.command,
+								 t);
+							eventexec (command,
+								   NULL);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	closedir (dp);
+
+	exit (0);
 }
+
+
+/* End of File */

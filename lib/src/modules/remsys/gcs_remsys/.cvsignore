@@ -3,4 +3,5 @@
 Makefile
 Makefile.in
 gcs_remsys.lo
+libgcs90_remsys.la
 libgcs_remsys.la

@@ -28,6 +28,17 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:40:41  alexios
+ * Disabled debugging.
+ *
+ * Revision 1.4  2004/02/29 18:25:30  alexios
+ * Ran through megistos-config --oh. Various minor changes to account for
+ * new directory structure.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -58,15 +69,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
-
-
-
-/*
-#define DEBUG 1
-*/
+/*#define DEBUG 1*/
 
 
 
@@ -88,69 +91,69 @@
 #define EXIT_TIME    -4
 
 #define MAXCOUNT     10
-#define DISABLETIME  5*60        /* 5 mins, like init(8) */
+#define DISABLETIME  5*60	/* 5 mins, like init(8) */
 
 
 struct getty {
-  int           channel;
-  char          ttyname[16];
-  char          user[24];
-  int           pid;
-  int           flags;
-  int           spawncount;
-  int           disabled;
-  int           shmid;
+	int     channel;
+	char    ttyname[16];
+	char    user[24];
+	int     pid;
+	int     flags;
+	int     spawncount;
+	int     disabled;
+	int     shmid;
 };
 
 
 extern int bbsuid, bbsgid;
 
-extern struct getty   *gettys;
+extern struct getty *gettys;
 
 extern int supzap, idlovr;
 
 
 /* channels.c */
 
-void readchannels();
+void    readchannels ();
 
 
 /* respawn.c */
 
-void sepuku();
+void    sepuku ();
 
-void respawn();
+void    respawn ();
 
-void resetcounts();
+void    resetcounts ();
 
 
 /* commands.c */
 
-void processcommands();
+void    processcommands ();
 
 
 /* misc.c */
 
-void logoutuser();
+void    logoutuser ();
 
-void refreshsysvars();
+void    refreshsysvars ();
 
-void refreshclasses();
+void    refreshclasses ();
 
-void byebye(struct shmuserrec *ushm,int prompt);
+void    byebye (struct shmuserrec *ushm, int prompt);
 
 
 /* shm.c */
 
-void cleanuponline();
+void    cleanuponline ();
 
-int makeshm(char *userid);
+int     makeshm (char *userid);
 
-void killshm(char *userid, int shmid);
+void    killshm (char *userid, int shmid);
 
-void monitorshm();
+void    monitorshm ();
 
-void sysvarshm();
+void    sysvarshm ();
 
 
 /* charge.c */
@@ -163,23 +166,23 @@ extern int last_registration_time;
 #endif
 
 
-void charge();
+void    charge ();
 
 
 /* events.c */
 
-void asapevents();
+void    asapevents ();
 
-void events();
+void    events ();
 
-void eventexec(char *command, char *name);
+void    eventexec (char *command, char *name);
 
 
 /* metabbs.c */
 
 #ifdef HAVE_METABBS
 
-extern int   telnet_port;
+extern int telnet_port;
 extern char *bbscod;
 extern char *url;
 extern char *email;
@@ -187,7 +190,10 @@ extern char *allow;
 extern char *deny;
 extern char *bbsad;
 
-void init_non_megistos();
-void register_with_metabbs();
+void    init_non_megistos ();
+void    register_with_metabbs ();
 
 #endif
+
+
+/* End of File */

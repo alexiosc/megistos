@@ -1,0 +1,86 @@
+-*- Mode:text -*-
+
+Privilege Separation notes
+
+
+Version 0.
+
+Originally, Megistos generated one UNIX user account per BBS user. Our
+original BBS allowed certain trusted users to use a somewhat
+restricted UNIX shell (to get acquainted with *nixes etc).
+
+There was a bbs user and bbs group (to which all users belonged). All
+BBS files belonged to group bbs, and had a umask of at least 007 so no
+other group could access the BBS.
+
+This was an accounting and security nightmare (and ls(1) started
+taking far too long to map UIDs to usernames), so it was discontinued.
+
+
+Version 1.
+
+In version 1, there were just two users, bbs, and one group of the
+same name. Users weren't allowed to go anywhere near the shell (with
+the exception of a few admins who needed this). All BBS users used the
+same UNIX UID, bbsuser:bbs. Directories again belonged to bbs:bbs, and
+a umask of at least 007 was used.
+
+
+Version 2.
+
+This was dictated by the need to run elegantly at least two different
+BBSs on the same system.
+
+There is one top-level user, megistos:megistos that owns the library
+directory and top-level instance directory (/var/lib/megistos). The
+top-level directory has 754 permissions.
+
+There is one second-level user per instance, $INSTANCE:$INSTANCE that
+owns the instance under /var/lib/megistos/$INSTANCE. User $INSTANCE
+also belongs to the megistos group (in /etc/groups). The
+/var/lib/megistos/$INSTANCE directory has 750 permissions.
+
+There is one third-level user per instance, $INSTANCE-userr:$INSTANCE,
+that corresponds to the version 1 bbsuser and owns any user-generated
+files.
+
+Assuming INSTANCE=acro, here is what this setup could look like:
+
+$ INSTANCE=acro
+$ id megistos; id $INSTANCE; id ${INSTANCE}-user
+uid=102(megistos) gid=101(megistos) groups=101(megistos)
+uid=106(acro) gid=114(acro) groups=114(acro),101(megistos)
+uid=113(acro-user) gid=114(acro) groups=114(acro)
+
+And the directory structure of /var/lib/megistos could look something
+like this (this only showcases the ownership and permissions, NOT the
+directory structure under /var/lib/megistos/$INSTANCE.
+
+$ find /var/lib/megistos -ls
+ 62604    4 drwxr-x--x   3 megistos megistos     4096 Feb  7 12:43 /var/lib/megistos/
+ 78243    4 drwxr-x---   3 acro     acro         4096 Feb  7 12:51 /var/lib/megistos/acro
+ 78244    0 -rw-------   1 acro     acro            0 Feb  7 12:39 /var/lib/megistos/acro/private-file
+ 78245    0 -rw-r-----   1 acro     acro            0 Feb  7 12:39 /var/lib/megistos/acro/semiprivate-file
+ 78246    4 -rw-rw----   1 acro     acro          335 Feb  7 12:43 /var/lib/megistos/acro/public-file
+156492    4 drwxrwx---   2 acro     acro         4096 Feb  7 12:51 /var/lib/megistos/acro/public-dir
+156494    4 -rw-r-----   1 acro-use acro          403 Feb  7 12:51 /var/lib/megistos/acro/public-dir/user-generated-file
+
+
+
+-------
+
+CVS information and emacs stuff follows
+
+$Id$
+
+$Log$
+Revision 2.0  2004/09/13 19:44:30  alexios
+Stepped version to recover CVS repository after near-catastrophic disk
+crash.
+
+Revision 1.1  2004/02/23 16:56:27  alexios
+Initial revision.
+
+
+
+

@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:59:30  alexios
+ * Fixed a slight bug that caused the module to crash when entering club
+ * channels.
+ *
  * Revision 1.5  2003/12/27 12:29:39  alexios
  * Adjusted #includes.
  *
@@ -315,7 +323,6 @@ readchanhdr (char *channel)
 
 	if ((fp = fopen (fname, "r")) == NULL) {
 		lock_rm (lock);
-		fclose (fp);
 		return NULL;
 	}
 

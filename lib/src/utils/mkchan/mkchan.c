@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 12:29:52  alexios
+ * Set up so warnings (e.g. about MetaBBS channels when MetaBBS isn't
+ * compiled in) are only issued once.
+ *
  * Revision 1.4  2003/12/23 08:14:06  alexios
  * Ran through megistos-config --oh.
  *
@@ -98,6 +106,10 @@ main (int argc, char **argv)
 {
 	FILE   *fpin, *fpout;
 	int     linenum = 0, errors = 0;
+
+#ifndef HAVE_METABBS
+	int     warned = 0;
+#endif /* HAVE_METABBS */
 
 	mod_setprogname (argv[0]);
 	if ((fpin = fopen (mkfname (CHANDEFSRCFILE), "r")) == NULL) {
@@ -232,10 +244,13 @@ main (int argc, char **argv)
 					channels[chan_count - 1].flags |=
 					    TTF_METABBS;
 #else
-					fprintf (stderr,
-						 "mkchan: line %d: Warning: ignoring flag 'M' which "
-						 "enables MetaBBS (not installed).\n",
-						 linenum);
+					if ((warned & 1) == 0) {
+						fprintf (stderr,
+							 "mkchan: line %d: Warning: ignoring flag 'M' which "
+							 "enables MetaBBS (not installed).\n",
+							 linenum);
+						warned |= 1;
+					}
 #endif
 					break;
 				case 'C':
@@ -243,10 +258,13 @@ main (int argc, char **argv)
 					channels[chan_count - 1].flags |=
 					    TTF_INTERBBS;
 #else
-					fprintf (stderr,
-						 "mkchan: line %d: Warning: ignoring flag 'C' which "
-						 "enables MetaBBS inter-BBS connections (not installed).\n",
-						 linenum);
+					if ((warned & 2) == 0) {
+						fprintf (stderr,
+							 "mkchan: line %d: Warning: ignoring flag 'C' which "
+							 "enables MetaBBS inter-BBS connections (not installed).\n",
+							 linenum);
+						warned |= 2;
+					}
 #endif
 
 					break;

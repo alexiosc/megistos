@@ -28,6 +28,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.8  2004/05/03 05:32:21  alexios
+ * Made sure msg_sys isn't opened multiple times by checking its handle.
+ *
  * Revision 1.7  2003/12/24 18:35:08  alexios
  * Fixed #includes.
  *
@@ -157,7 +164,7 @@ isvarchar (char c)
 void
 out_init ()
 {
-	msg_sys = msg_open ("sysvar");
+	if (msg_sys == NULL) msg_sys = msg_open ("sysvar");
 
 	out_initsubstvars ();
 	out_setwaittoclear (1);

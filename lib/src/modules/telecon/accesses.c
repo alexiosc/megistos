@@ -28,6 +28,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:59:45  alexios
+ * Minor permission/file location issues fixed to account for the new infrastructure.
+ *
  * Revision 1.5  2003/12/27 12:29:39  alexios
  * Adjusted #includes.
  *
@@ -141,14 +148,17 @@ getusrax (char *channel, char *userid)
 	if (sameas (channel, MAINCHAN)) {	/* Main */
 		strcpy (channel, MAINCHAN);
 		return CUF_ACCESS | (sop ? CUF_MODERATOR : 0);
-
+		
 	} else if (sameas (userid, channel)) {	/* Own personal channel */
 		strcpy (channel, userid);
 		return CUF_ACCESS | CUF_MODERATOR;
-
+		
 	} else {		/* Other channels, non-default ax */
-		struct chanhdr *hdr = readchanhdr (channel);
-		struct chanusr *usr = readchanusr (channel, userid);
+		struct chanhdr *hdr;
+		struct chanusr *usr;
+
+		hdr = readchanhdr (channel);
+		usr = readchanusr (channel, userid);
 
 		if (hdr != NULL && usr != NULL) {
 			if (usr->flags & CUF_EXPLICIT)

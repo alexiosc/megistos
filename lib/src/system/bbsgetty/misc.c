@@ -26,6 +26,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/02/29 17:58:32  alexios
+ * Minor permission/file location issues fixed to account for the new
+ * infrastructure.
+ *
  * Revision 1.5  2003/12/23 08:18:08  alexios
  * Corrected minor #include discrepancies.
  *
@@ -136,8 +144,8 @@ execute_as_mortal (char *command)
 			execl ("/bin/sh", "sh", "-c", command, NULL);
 			system (command);
 		}
-		error_fatal ("Unable to become " BBSUSERNAME " to run \"%s\".",
-			     command);
+		error_fatal ("Unable to become uid:pid %d:%d to run \"%s\".",
+			     bbsuid, bbsgid, command);
 		exit (1);
 	case -1:
 		error_fatal ("Unable to fork() child process to run \"%s\"!",

@@ -1,6 +1,8 @@
-#!/usr/local/bbs/bin/mkaction
+#!/usr/lib/megistos/bin/mkaction
 #
 # MEGISTOS BBS ACTION VERB DEFINITION FILE
+#
+# Process with mkaction
 #
 # FORMAT DESCRIPTION AND INSTRUCTIONS
 #

@@ -28,6 +28,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/21 20:05:56  alexios
+ * Removed hardwired, system(3)-based chown operation to bbs.bbs in
+ * favour of using the chown(2) system call and the appropriate BBS
+ * instance UID and GIDs. This may fix serious permission-related bugs.
+ *
  * Revision 1.5  2003/12/27 12:29:39  alexios
  * Adjusted #includes.
  *
@@ -147,10 +156,7 @@ mergedaystats (char *dir, char *name)
 	fclose (out);
 	rename (fname1, fname2);
 
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (fname1, "chown bbs.bbs %s >&/dev/null", fname2);
-		system (fname1);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname2, bbs_uid, bbs_gid);
 
 	printf (" Done.\n");
 }
@@ -253,10 +259,7 @@ mergettystats (char *dir, char *name)
 	}
 	fclose (out);
 	rename (fname1, fname2);
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (fname1, "chown bbs.bbs %s >&/dev/null", fname2);
-		system (fname1);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname2, bbs_uid, bbs_gid);
 
 	printf (" Done.\n");
 }
@@ -355,10 +358,7 @@ mergebaudstats (char *dir, char *name)
 	}
 	fclose (out);
 	rename (fname1, fname2);
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (fname1, "chown bbs.bbs %s >&/dev/null", fname2);
-		system (fname1);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname2, bbs_uid, bbs_gid);
 
 	printf (" Done.\n");
 }
@@ -456,10 +456,8 @@ mergeclsstats (char *dir, char *name)
 	fclose (out);
 	rename (fname1, fname2);
 
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (fname1, "chown bbs.bbs %s >&/dev/null", fname2);
-		system (fname1);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname2, bbs_uid, bbs_gid);
+
 	printf (" Done.\n");
 }
 
@@ -577,10 +575,7 @@ mergemodstats (char *dir, char *name)
 	fclose (out);
 	rename (fname1, fname2);
 
-	if ((!getuid ()) || (!getgid ())) {
-		sprintf (fname1, "chown bbs.bbs %s >&/dev/null", fname2);
-		system (fname1);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (fname2, bbs_uid, bbs_gid);
 	printf (" Done.\n");
 }
 

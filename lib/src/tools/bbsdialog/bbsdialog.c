@@ -29,6 +29,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/22 19:29:45  alexios
+ * Added a workaround for a TERMIOS bug that corrupts the TERMIOS when
+ * field help is shown.
+ *
  * Revision 1.5  2003/12/24 18:32:08  alexios
  * Fixed #includes.
  *
@@ -72,6 +80,7 @@ static const char rcsinfo[] =
 #define WANT_STRING_H 1
 #define WANT_UNISTD_H 1
 #define WANT_NCURSES_H 1
+#define WANT_TERMIOS_H 1
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
@@ -89,6 +98,8 @@ char   *mbkname = NULL;
 int     vtnum = 0;
 int     ltnum = 0;
 char   *dfname = NULL;
+
+struct termios oldtermios;
 
 
 void
@@ -180,6 +191,8 @@ main (int argc, char *argv[])
 	}
 
 	mod_init (INI_ALL);
+	tcgetattr (0, &oldtermios);
+
 	msg = msg_open ("bbsdialog");
 	msg_setlanguage (thisuseracc.language);
 	templates = msg_open (mbkname);

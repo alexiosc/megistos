@@ -3,6 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:53  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.3  2004/07/15 14:46:19  alexios
+# Changed instances of CFLAGS to AM_CFLAGS so as not to override user
+# settings.
+#
 # Revision 1.2  2003/12/27 13:00:06  alexios
 # Compiled this by defining appropriate preprocessor symbols.
 #
@@ -31,6 +39,6 @@ bjack_SOURCES = \
 
 include $(top_srcdir)/templates/teleconplugin
 
-CFLAGS += -DMEGISTOS_BBS -DBBSPROMPTS
+AM_CFLAGS += -DMEGISTOS_BBS -DBBSPROMPTS
 
 # End of file

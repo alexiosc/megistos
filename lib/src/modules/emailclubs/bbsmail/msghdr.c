@@ -30,6 +30,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:51  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/21 20:04:51  alexios
+ * Removed hardwired, system(3)-based chown operation to bbs.bbs in
+ * favour of using the chown(2) system call and the appropriate BBS
+ * instance UID and GIDs. This may fix serious permission-related bugs.
+ *
  * Revision 1.5  2003/12/29 07:51:38  alexios
  * Adjusted #includes; changed all instances of struct message to message_t.
  *
@@ -256,12 +265,7 @@ writemessage (char *srcname, message_t *msg, int email)
 
 	/* Adjust ownership if we're the super-user */
 
-	if ((!getuid ()) || (!getgid ())) {
-		char    command[256];
-
-		sprintf (command, "chown -f bbs.bbs %s", msgname);
-		system (command);
-	}
+	if ((!getuid ()) || (!getgid ())) chown (msgname, bbs_uid, bbs_gid);
 }
 
 

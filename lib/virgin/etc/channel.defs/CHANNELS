@@ -76,7 +76,7 @@
 #--------------------------------------------------------------------
 #tty1	11	Console		C	Y	0	1	1VM
 #tty2	12	Console		C	Y	0	1	1VM
-tty11	11	Console		C	Y	0	1	1VM
+#tty11	11	Console		C	Y	0	1	1VM
 #tty12	12	Console		C	Y	0	1	1VM
 
 # telnet channels follow

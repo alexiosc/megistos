@@ -26,6 +26,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.4  2003/12/31 06:59:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -81,13 +85,13 @@ struct version {
 } VERSION = {
 2, 4, 4, 1};
 
-#include <megistos/gsc.h>
+#include "gsc.h"
 
 #if defined(__BORLANDC__)
-#include <megistos/glps-bcc.h>
+#include "glps-bcc.h"
 #else
 
-#include <megistos/gallups.h>
+#include "gallups.h"
 #endif
 
 int     gscflags = 0;
@@ -95,7 +99,11 @@ int     gscflags = 0;
 #ifdef __BORLANDC__
 #  define show		if(!(gscflags&QUIET))printf
 #else
-#  define show(f...)	if(!(gscflags&QUIET))printf(##f)
+#  if __GNUC__ < 3
+#    define show(f...)	if(!(gscflags&QUIET))printf(##f)
+#  else
+#    define show(...) if (!(gscflags & QUIET)) printf(__VA_ARGS__)
+#  endif /* __GNUC__ < 3 */
 #endif
 
 #define showinfo(flag)	if(gflgs(ginfo) & flag)show("%s ", #flag)

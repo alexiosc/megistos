@@ -29,6 +29,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 17:46:31  alexios
+ * One slight change in structure naming to account for the new library.
+ *
  * Revision 1.4  2003/12/23 06:38:04  alexios
  * Ran through megistos-config --oh.
  *
@@ -59,10 +66,10 @@ static const char rcsinfo[] = "$Id$";
 int
 main (int argc, char **argv)
 {
-	FILE   *fp;
-	int     res;
-	struct message msg;
-	char    command[1024], header[256], body[256];
+	FILE      *fp;
+	int        res;
+	message_t  msg;
+	char       command[1024], header[256], body[256];
 
 	if (argc != 2) {
 		fprintf (stderr, "%s: syntax: %s filename\n", argv[0],

@@ -38,6 +38,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:34  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:36:48  alexios
+ * Added size and data fields to the promptblock_t struct to allow
+ * message blocks to reside in memory.
+ *
  * Revision 1.4  2003/09/27 20:32:00  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -126,6 +134,8 @@ typedef struct {
 	int   language;		        /**< Currently active language */
 	int   langoffs[NUMLANGUAGES];	/**< Indices to where languages start */
 	idx_t *index;			/**< Prompt index structure */
+	long  size;                     /**< Size of data block. */
+	char  *data;		        /**< Prompt data */
 } promptblock_t;
 
 

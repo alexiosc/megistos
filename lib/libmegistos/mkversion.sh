@@ -26,6 +26,10 @@
 # $Id$
 #
 # $Log$
+# Revision 2.0  2004/09/13 19:44:34  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
 # Revision 1.4  2003/12/19 13:27:42  alexios
 # Added conditional (include-once) directives to the header file output
 # by the script. Added banner and test harness. Also included build

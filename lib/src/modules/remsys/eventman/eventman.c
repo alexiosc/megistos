@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:52  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
  * Revision 1.4  2001/10/03 18:13:51  alexios
  * Migrated to snprintf() for security reasons.
  *

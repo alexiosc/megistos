@@ -28,6 +28,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:50  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.6  2004/05/13 15:21:04  alexios
+ * Added missing NUL termination for attfile. It caused the bbsmail
+ * invocation to fail.
+ *
  * Revision 1.5  2003/12/25 13:33:28  alexios
  * Fixed #includes. Changed instances of struct message to
  * message_t. Other minor changes.
@@ -260,6 +268,7 @@ reply (message_t *org, int forceemail)
 	char    attfile[256];
 	int     clubmsg = 0;
 
+	attfile [0] = '\0';
 	clubmsg = (org->club[0] != 0);
 	loadclubhdr (org->club);
 

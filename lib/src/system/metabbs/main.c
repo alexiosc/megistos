@@ -27,6 +27,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/02/29 17:45:56  alexios
+ * storepid() now stores the PID file under run/.
+ *
  * Revision 1.4  2003/12/23 08:22:30  alexios
  * Ran through megistos-config --oh.
  *
@@ -181,15 +188,19 @@ rpc_svc_run ()
 static void
 storepid ()
 {
-	FILE   *fp = fopen (mkfname (BBSETCDIR "/rpc.metabbs.pid"), "w");
+	char fname [512];
+	FILE   *fp;
 
-	if (fp != NULL) {
-		fprintf (fp, "%d", getpid ());
-		fclose (fp);
-
-		chmod (mkfname (BBSETCDIR "/rpc.metabbs.pid"), 0600);
-		chown (mkfname (BBSETCDIR "/rpc.metabbs.pid"), 0, 0);
+	strncpy (fname, mkfname (BBSRUNDIR "/rpc.metabbs.pid"), sizeof (fname));
+	
+	if ((fp = fopen (fname, "w")) == NULL) {
+		error_fatalsys ("Unable to open %s for writing.", fname);
+		exit (1);
 	}
+	fprintf (fp, "%d", getpid ());
+	fclose (fp);
+	chmod (fname, 0600);
+	chown (fname, 0, 0);
 }
 
 

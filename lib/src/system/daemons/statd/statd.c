@@ -33,6 +33,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.0  2004/09/13 19:44:54  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.5  2004/05/03 05:45:05  alexios
+ * Added setsid() and close() calls to make this a better daemon.
+ *
+ * Revision 1.4  2004/02/29 16:33:47  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -55,10 +65,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -74,18 +82,18 @@ const char *__RCS=RCS_VER;
 #define WANT_TERMIOS_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mbk_sysvar.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_sysvar.h>
 
 
-/*#define DEBUG 1*/
+/*#define DEBUG*/
 
 #ifdef DEBUG
-#define debug(s) fprintf(stderr,s)
-#define debug2(s,f) fprintf(stderr,s,f)
+#  define debug(s) fprintf(stderr,s)
+#  define debug2(s,f) fprintf(stderr,s,f)
 #else
-#define debug(s)
-#define debug2(s,f)
+#  define debug(s)
+#  define debug2(s,f)
 #endif
 
 #define MAXCLSS 128
@@ -93,581 +101,697 @@ const char *__RCS=RCS_VER;
 #define MAXBAUDS 32
 #define MAXMODS 128
 
-#define SLEEPTIME    1000000 /* useconds */
-#define TICKTIME     12      /* run stuff every 12 secs */
+#define SLEEPTIME    1000000	/* useconds */
+#define TICKTIME     12		/* run stuff every 12 secs */
 
 
-promptblock_t         *msg;
-time_t            classtime=0;
-time_t            channeltime=0;
-time_t            daystattime=0;
-time_t            ttystattime=0;
-time_t            clsstattime=0;
-time_t            baudstattime=0;
-time_t            modstattime=0;
-struct clsstats   clsstats[MAXCLSS];
-int               numclsstats=0;
-struct ttystats   ttystats[MAXTTYS];
-int               numttystats=0;
-struct baudstats  baudstats[MAXBAUDS];
-int               numbaudstats=0;
+promptblock_t *msg;
+time_t  classtime = 0;
+time_t  channeltime = 0;
+time_t  daystattime = 0;
+time_t  ttystattime = 0;
+time_t  clsstattime = 0;
+time_t  baudstattime = 0;
+time_t  modstattime = 0;
+struct clsstats clsstats[MAXCLSS];
+int     numclsstats = 0;
+struct ttystats ttystats[MAXTTYS];
+int     numttystats = 0;
+struct baudstats baudstats[MAXBAUDS];
+int     numbaudstats = 0;
 struct usagestats daystats[24];
-struct modstats   modstats[MAXMODS];
-int               nummodstats=0;
+struct modstats modstats[MAXMODS];
+int     nummodstats = 0;
 
 
 void
-storepid()
+storepid ()
 {
-  FILE *fp;
-  char fname[256];
-  
-  sprintf(fname,"%s/statd.pid",mkfname(BBSETCDIR));
-  if((fp=fopen(fname,"w"))==NULL)return;
-  fprintf(fp,"%d",getpid());
-  fclose(fp);
-  chmod(fname,0600);
-  chown(fname,0,0);
+	FILE   *fp;
+	char    fname[256];
+
+	sprintf (fname, "%s/statd.pid", mkfname (BBSRUNDIR));
+	if ((fp = fopen (fname, "w")) == NULL)
+		return;
+	fprintf (fp, "%d", getpid ());
+	fclose (fp);
+	chmod (fname, 0600);
+	chown (fname, 0, 0);
 }
 
 
 void
-refreshclasses()
+refreshclasses ()
 {
-  struct stat s;
-  stat(mkfname(CLASSFILE),&s);
-  if (s.st_ctime!=classtime) {
-    debug("REFRESHING CLASSES...\n");
-    classtime=s.st_ctime;
-    mod_init(INI_CLASSES);
-  }
+	struct stat s;
+
+	stat (mkfname (CLASSFILE), &s);
+	if (s.st_ctime != classtime) {
+		debug ("REFRESHING CLASSES...\n");
+		classtime = s.st_ctime;
+		mod_init (INI_CLASSES);
+	}
 }
 
 
 void
-refreshchannels()
+refreshchannels ()
 {
-  struct stat s;
-  if(stat(mkfname(CHANDEFFILE),&s))return;
-  if (s.st_ctime!=channeltime) {
-    debug("REFRESHING CHANNELS...\n");
-    channeltime=s.st_ctime;
-    chan_init();
-  }
+	struct stat s;
+
+	if (stat (mkfname (CHANDEFFILE), &s))
+		return;
+	if (s.st_ctime != channeltime) {
+		debug ("REFRESHING CHANNELS...\n");
+		channeltime = s.st_ctime;
+		chan_init ();
+	}
 }
 
 
 void
-readdaystats()
+readdaystats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  if(stat(mkfname(DAYSTATFILE),&s)){
-    memset(daystats,0,sizeof(daystats));
-    return;
-  }
-  if (s.st_ctime==daystattime)return;
-  debug("READING DAY STATS...\n");
-  memset(daystats,0,sizeof(daystats));
-  if((fp=fopen(mkfname(DAYSTATFILE),"r"))==NULL)return;
-  for(i=0;i<24;i++){
-    fscanf(fp,"%d %d\n",&daystats[i].credits,&daystats[i].minutes);
-  }
-  fclose(fp);
+	if (stat (mkfname (DAYSTATFILE), &s)) {
+		memset (daystats, 0, sizeof (daystats));
+		return;
+	}
+	if (s.st_ctime == daystattime)
+		return;
+	debug ("READING DAY STATS...\n");
+	memset (daystats, 0, sizeof (daystats));
+	if ((fp = fopen (mkfname (DAYSTATFILE), "r")) == NULL)
+		return;
+	for (i = 0; i < 24; i++) {
+		fscanf (fp, "%d %d\n", &daystats[i].credits,
+			&daystats[i].minutes);
+	}
+	fclose (fp);
 }
 
 
 void
-writedaystats()
+writedaystats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  debug("WRITING DAY STATS...\n");
-  if((fp=fopen(mkfname(DAYSTATFILE),"w"))==NULL){
-    error_intsys("Unable to write %s",mkfname(DAYSTATFILE));
-    return;
-  }
-  for(i=0;i<24;i++){
-    fprintf(fp,"%d %d\n",daystats[i].credits,daystats[i].minutes);
-  }
-  fclose(fp);
-  if(!stat(mkfname(DAYSTATFILE),&s))daystattime=s.st_ctime;
+	debug ("WRITING DAY STATS...\n");
+	if ((fp = fopen (mkfname (DAYSTATFILE), "w")) == NULL) {
+		char fname [512];
+
+		strncpy (fname, mkfname (DAYSTATFILE), sizeof (fname));
+		error_intsys ("Unable to write %s", fname);
+		return;
+	}
+	for (i = 0; i < 24; i++) {
+		fprintf (fp, "%d %d\n", daystats[i].credits,
+			 daystats[i].minutes);
+	}
+	fclose (fp);
+	if (!stat (mkfname (DAYSTATFILE), &s))
+		daystattime = s.st_ctime;
 }
 
 
 void
-readttystats()
+readttystats ()
 {
-  FILE *fp;
-  struct stat s;
+	FILE   *fp;
+	struct stat s;
 
-  if(stat(mkfname(TTYSTATFILE),&s)){
-    numttystats=0;
-    return;
-  }
-  if (s.st_ctime==ttystattime)return;
-  debug("READING TTY STATS...\n");
-  numttystats=0;
-  if((fp=fopen(mkfname(TTYSTATFILE),"r"))==NULL)return;
-  while(!feof(fp)){
-    struct ttystats *tty=&ttystats[numttystats];
-    int i=fscanf(fp,"%s %x %d %d %d\n",tty->name,&tty->channel,
-		 &tty->credits,&tty->minutes,&tty->calls);
-    if(numttystats>=MAXTTYS)break;
-    if(i==5)numttystats++;
-  }
-  fclose(fp);
+	if (stat (mkfname (TTYSTATFILE), &s)) {
+		numttystats = 0;
+		return;
+	}
+	if (s.st_ctime == ttystattime)
+		return;
+	debug ("READING TTY STATS...\n");
+	numttystats = 0;
+	if ((fp = fopen (mkfname (TTYSTATFILE), "r")) == NULL)
+		return;
+	while (!feof (fp)) {
+		struct ttystats *tty = &ttystats[numttystats];
+		int     i =
+		    fscanf (fp, "%s %x %d %d %d\n", tty->name, &tty->channel,
+			    &tty->credits, &tty->minutes, &tty->calls);
+
+		if (numttystats >= MAXTTYS)
+			break;
+		if (i == 5)
+			numttystats++;
+	}
+	fclose (fp);
 }
 
 
 void
-writettystats()
+writettystats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  debug("WRITING TTY STATS...\n");
-  if((fp=fopen(mkfname(TTYSTATFILE),"w"))==NULL){
-    error_intsys("Unable to write %s",mkfname(TTYSTATFILE));
-    return;
-  }
-  for(i=0;i<numttystats;i++){
-    fprintf(fp,"%s %x %d %d %d\n",ttystats[i].name,
-	    ttystats[i].channel,ttystats[i].credits,
-	    ttystats[i].minutes,ttystats[i].calls);
-  }
-  fclose(fp);
-  if(!stat(mkfname(TTYSTATFILE),&s))ttystattime=s.st_ctime;
+	debug ("WRITING TTY STATS...\n");
+	if ((fp = fopen (mkfname (TTYSTATFILE), "w")) == NULL) {
+		char fname [512];
+
+		strncpy (fname, mkfname (TTYSTATFILE), sizeof (fname));
+		error_intsys ("Unable to write %s", fname);
+		return;
+	}
+	for (i = 0; i < numttystats; i++) {
+		fprintf (fp, "%s %x %d %d %d\n", ttystats[i].name,
+			 ttystats[i].channel, ttystats[i].credits,
+			 ttystats[i].minutes, ttystats[i].calls);
+	}
+	fclose (fp);
+	if (!stat (mkfname (TTYSTATFILE), &s))
+		ttystattime = s.st_ctime;
 }
 
 
 int
-findtty(char *tty)
+findtty (char *tty)
 {
-  int found=0,i;
+	int     found = 0, i;
 
-  for(i=0;i<numttystats;i++){
-    if(!strcmp(ttystats[i].name,tty)){
-      found=1;
-      break;
-    }
-  }
-  debug2("FOUND TTYSTAT: %s\n",tty);
-  if(found)return i;
+	for (i = 0; i < numttystats; i++) {
+		if (!strcmp (ttystats[i].name, tty)) {
+			found = 1;
+			break;
+		}
+	}
+	debug2 ("FOUND TTYSTAT: %s\n", tty);
+	if (found)
+		return i;
 
-  if(numttystats>=MAXTTYS)return -1;
-  memset(&ttystats[numttystats],0,sizeof(struct ttystats));
-  strcpy(ttystats[numttystats].name,tty);
-  ttystats[numttystats].channel=chan_getnum(tty);
-  numttystats++;
-  debug2("CREATED TTYSTAT: %s\n",tty);
-  return numttystats-1;
+	if (numttystats >= MAXTTYS)
+		return -1;
+	memset (&ttystats[numttystats], 0, sizeof (struct ttystats));
+	strcpy (ttystats[numttystats].name, tty);
+	ttystats[numttystats].channel = chan_getnum (tty);
+	numttystats++;
+	debug2 ("CREATED TTYSTAT: %s\n", tty);
+	return numttystats - 1;
 }
 
 
 void
-readclsstats()
+readclsstats ()
 {
-  FILE *fp;
-  struct stat s;
+	FILE   *fp;
+	struct stat s;
 
-  if(stat(mkfname(CLSSTATFILE),&s)){
-    if(clsstats)free(clsstats);
-    numclsstats=0;
-    return;
-  }
-  if (s.st_ctime==clsstattime)return;
-  debug("READING CLASS STATS...\n");
-  numclsstats=0;
-  if((fp=fopen(mkfname(CLSSTATFILE),"r"))==NULL)return;
-  while(!feof(fp)){
-    int i=fscanf(fp,"%s %d %d\n",
-		 clsstats[numclsstats].name,
-		 &clsstats[numclsstats].credits,
-		 &clsstats[numclsstats].minutes);
+	if (stat (mkfname (CLSSTATFILE), &s)) {
+		numclsstats = 0;
+		return;
+	}
+	if (s.st_ctime == clsstattime) return;
+	debug ("READING CLASS STATS...\n");
+	numclsstats = 0;
+	if ((fp = fopen (mkfname (CLSSTATFILE), "r")) == NULL)
+		return;
+	while (!feof (fp)) {
+		int     i = fscanf (fp, "%s %d %d\n",
+				    clsstats[numclsstats].name,
+				    &clsstats[numclsstats].credits,
+				    &clsstats[numclsstats].minutes);
 
-    if(numclsstats>=MAXCLSS)break;
-    if(i==3)numclsstats++;
-  }
-  fclose(fp);
+		if (numclsstats >= MAXCLSS)
+			break;
+		if (i == 3)
+			numclsstats++;
+	}
+	fclose (fp);
 }
 
 
 void
-writeclsstats()
+writeclsstats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  debug("WRITING CLASS STATS...\n");
-  if((fp=fopen(mkfname(CLSSTATFILE),"w"))==NULL){
-    error_intsys("Unable to write %s",mkfname(CLSSTATFILE));
-    return;
-  }
-  for(i=0;i<numclsstats;i++){
-    fprintf(fp,"%s %d %d\n",clsstats[i].name,clsstats[i].credits,
-	    clsstats[i].minutes);
-  }
-  fclose(fp);
-  if(!stat(mkfname(CLSSTATFILE),&s))clsstattime=s.st_ctime;
+	debug ("WRITING CLASS STATS...\n");
+	if ((fp = fopen (mkfname (CLSSTATFILE), "w")) == NULL) {
+		char fname [512];
+
+		strncpy (fname, mkfname (CLSSTATFILE), sizeof (fname));
+		error_intsys ("Unable to write %s", fname);
+		return;
+	}
+	for (i = 0; i < numclsstats; i++) {
+		fprintf (fp, "%s %d %d\n", clsstats[i].name,
+			 clsstats[i].credits, clsstats[i].minutes);
+	}
+	fclose (fp);
+	if (!stat (mkfname (CLSSTATFILE), &s))
+		clsstattime = s.st_ctime;
 }
 
 
 int
-findcls(char *cls)
+findcls (char *cls)
 {
-  int found=0,i;
+	int     found = 0, i;
 
-  for(i=0;i<numclsstats;i++){
-    if(!strcmp(clsstats[i].name,cls)){
-      found=1;
-      break;
-    }
-  }
-  debug2("FOUND CLSSTAT: %s\n",cls);
-  if(found)return i;
+	for (i = 0; i < numclsstats; i++) {
+		if (!strcmp (clsstats[i].name, cls)) {
+			found = 1;
+			break;
+		}
+	}
+	debug2 ("FOUND CLSSTAT: %s\n", cls);
+	if (found)
+		return i;
 
-  if(numclsstats>=MAXCLSS)return -1;
-  
-  memset(&clsstats[numclsstats],0,sizeof(struct clsstats));
-  strcpy(clsstats[numclsstats].name,cls);
-  numclsstats++;
-  debug2("CREATED CLSSTAT: %s\n",cls);
-  return numclsstats-1;
+	if (numclsstats >= MAXCLSS)
+		return -1;
+
+	memset (&clsstats[numclsstats], 0, sizeof (struct clsstats));
+	strcpy (clsstats[numclsstats].name, cls);
+	numclsstats++;
+	debug2 ("CREATED CLSSTAT: %s\n", cls);
+	return numclsstats - 1;
 }
 
 
 void
-readbaudstats()
+readbaudstats ()
 {
-  FILE *fp;
-  struct stat s;
+	FILE   *fp;
+	struct stat s;
 
-  if(stat(mkfname(BAUDSTATFILE),&s)){
-    numbaudstats=0;
-    return;
-  }
-  if (s.st_ctime==baudstattime)return;
-  debug("READING BAUD STATS...\n");
-  numbaudstats=0;
-  if((fp=fopen(mkfname(BAUDSTATFILE),"r"))==NULL)return;
-  while(!feof(fp)){
-    int i=fscanf(fp,"%d %d %d %d\n",
-		 &baudstats[numbaudstats].baud,
-		 &baudstats[numbaudstats].credits,
-		 &baudstats[numbaudstats].minutes,
-		 &baudstats[numbaudstats].calls);
-    if(numbaudstats>=MAXBAUDS)break;
-    if(i==4)numbaudstats++;
-  }
-  fclose(fp);
+	if (stat (mkfname (BAUDSTATFILE), &s)) {
+		numbaudstats = 0;
+		return;
+	}
+	if (s.st_ctime == baudstattime)
+		return;
+	debug ("READING BAUD STATS...\n");
+	numbaudstats = 0;
+	if ((fp = fopen (mkfname (BAUDSTATFILE), "r")) == NULL)
+		return;
+	while (!feof (fp)) {
+		int     i = fscanf (fp, "%d %d %d %d\n",
+				    &baudstats[numbaudstats].baud,
+				    &baudstats[numbaudstats].credits,
+				    &baudstats[numbaudstats].minutes,
+				    &baudstats[numbaudstats].calls);
+
+		if (numbaudstats >= MAXBAUDS)
+			break;
+		if (i == 4)
+			numbaudstats++;
+	}
+	fclose (fp);
 }
 
 
 void
-writebaudstats()
+writebaudstats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  debug("WRITING BAUD STATS...\n");
-  if((fp=fopen(mkfname(BAUDSTATFILE),"w"))==NULL){
-    error_intsys("Unable to write %s",mkfname(BAUDSTATFILE));
-    return;
-  }
-  for(i=0;i<numbaudstats;i++){
-    fprintf(fp,"%d %d %d %d\n",baudstats[i].baud,baudstats[i].credits,
-	    baudstats[i].minutes,baudstats[i].calls);
-  }
-  fclose(fp);
-  if(!stat(mkfname(BAUDSTATFILE),&s))baudstattime=s.st_ctime;
+	debug ("WRITING BAUD STATS...\n");
+	if ((fp = fopen (mkfname (BAUDSTATFILE), "w")) == NULL) {
+		char fname [512];
+
+		strncpy (fname, mkfname (BAUDSTATFILE), sizeof (fname));
+		error_intsys ("Unable to write %s", fname);
+		return;
+	}
+	for (i = 0; i < numbaudstats; i++) {
+		fprintf (fp, "%d %d %d %d\n", baudstats[i].baud,
+			 baudstats[i].credits, baudstats[i].minutes,
+			 baudstats[i].calls);
+	}
+	fclose (fp);
+	if (!stat (mkfname (BAUDSTATFILE), &s))
+		baudstattime = s.st_ctime;
 }
 
 
 int
-findbaud(long baud)
+findbaud (long baud)
 {
-  int found=0,i;
+	int     found = 0, i;
 
-  for(i=0;i<numbaudstats;i++){
-    if(baudstats[i].baud==baud){
-      found=1;
-      break;
-    }
-  }
-  debug2("FOUND BAUDSTAT: %ld\n",baud);
-  if(found)return i;
+	for (i = 0; i < numbaudstats; i++) {
+		if (baudstats[i].baud == baud) {
+			found = 1;
+			break;
+		}
+	}
+	debug2 ("FOUND BAUDSTAT: %ld\n", baud);
+	if (found)
+		return i;
 
-  if(numbaudstats>=MAXBAUDS)return -1;
-  memset(&baudstats[numbaudstats],0,sizeof(struct baudstats));
-  baudstats[numbaudstats].baud=baud;
-  numbaudstats++;
-  debug2("CREATED BAUDSTAT: %ld\n",baud);
-  return numbaudstats-1;
+	if (numbaudstats >= MAXBAUDS)
+		return -1;
+	memset (&baudstats[numbaudstats], 0, sizeof (struct baudstats));
+	baudstats[numbaudstats].baud = baud;
+	numbaudstats++;
+	debug2 ("CREATED BAUDSTAT: %ld\n", baud);
+	return numbaudstats - 1;
 }
 
 
 void
-readmodstats()
+readmodstats ()
 {
-  FILE *fp;
-  struct stat s;
-  struct modstats mod;
+	FILE   *fp;
+	struct stat s;
+	struct modstats mod;
 
-  if(stat(mkfname(MODSTATFILE),&s)){
-    nummodstats=0;
-    return;
-  }
-  if (s.st_ctime==modstattime)return;
-  debug("READING MOD STATS...\n");
-  nummodstats=0;
-  if((fp=fopen(mkfname(MODSTATFILE),"r"))==NULL)return;
-  while(!feof(fp)){
-    char line[1024],*cp;
-    int len,ptr;
-    
-    if(nummodstats>=MAXMODS)break;
-    
-    if(!fgets(line,sizeof(line),fp))continue;
-    if(!sscanf(line,"%d %n",&len,&ptr))continue;
+	if (stat (mkfname (MODSTATFILE), &s)) {
+		nummodstats = 0;
+		return;
+	}
+	if (s.st_ctime == modstattime)
+		return;
+	debug ("READING MOD STATS...\n");
+	nummodstats = 0;
+	if ((fp = fopen (mkfname (MODSTATFILE), "r")) == NULL)
+		return;
+	while (!feof (fp)) {
+		char    line[1024], *cp;
+		int     len, ptr;
 
-    cp=&line[ptr];
-    cp[len]=0;
-    strncpy(mod.name,cp,sizeof(mod.name));
-    cp+=len+1;
+		if (nummodstats >= MAXMODS)
+			break;
 
-    if(sscanf(cp,"%d %d\n",&mod.credits,&mod.minutes)==2){
-      memcpy(&modstats[nummodstats++],&mod,sizeof(struct modstats));
-    }
-  }
-  fclose(fp);
+		if (!fgets (line, sizeof (line), fp))
+			continue;
+		if (!sscanf (line, "%d %n", &len, &ptr))
+			continue;
+
+		cp = &line[ptr];
+		cp[len] = 0;
+		strncpy (mod.name, cp, sizeof (mod.name));
+		cp += len + 1;
+
+		if (sscanf (cp, "%d %d\n", &mod.credits, &mod.minutes) == 2) {
+			memcpy (&modstats[nummodstats++], &mod,
+				sizeof (struct modstats));
+		}
+	}
+	fclose (fp);
 }
 
 
 void
-writemodstats()
+writemodstats ()
 {
-  FILE *fp;
-  int i;
-  struct stat s;
+	FILE   *fp;
+	int     i;
+	struct stat s;
 
-  debug("WRITING MOD STATS...\n");
-  if((fp=fopen(mkfname(MODSTATFILE),"w"))==NULL){
-    error_intsys("Unable to write %s",mkfname(MODSTATFILE));
-    return;
-  }
-  for(i=0;i<nummodstats;i++){
-    fprintf(fp,"%d %s %d %d\n",strlen(modstats[i].name),modstats[i].name,
-	    modstats[i].credits,modstats[i].minutes);
-  }
-  fclose(fp);
-  if(!stat(mkfname(MODSTATFILE),&s))modstattime=s.st_ctime;
+	debug ("WRITING MOD STATS...\n");
+	if ((fp = fopen (mkfname (MODSTATFILE), "w")) == NULL) {
+		char fname [512];
+
+		strncpy (fname, mkfname (MODSTATFILE), sizeof (fname));
+		error_intsys ("Unable to write %s", fname);
+		return;
+	}
+	for (i = 0; i < nummodstats; i++) {
+		fprintf (fp, "%d %s %d %d\n", strlen (modstats[i].name),
+			 modstats[i].name, modstats[i].credits,
+			 modstats[i].minutes);
+	}
+	fclose (fp);
+	if (!stat (mkfname (MODSTATFILE), &s))
+		modstattime = s.st_ctime;
 }
 
 
 int
-findmod(char *mod)
+findmod (char *mod)
 {
-  int found=0,i;
+	int     found = 0, i;
 
-  for(i=0;i<nummodstats;i++){
-    if(!strcmp(modstats[i].name,mod)){
-      found=1;
-      break;
-    }
-  }
-  debug2("FOUND MODSTAT: %s\n",mod);
-  if(found)return i;
+	for (i = 0; i < nummodstats; i++) {
+		if (!strcmp (modstats[i].name, mod)) {
+			found = 1;
+			break;
+		}
+	}
+	debug2 ("FOUND MODSTAT: %s\n", mod);
+	if (found)
+		return i;
 
-  if(nummodstats>=MAXMODS)return -1;
+	if (nummodstats >= MAXMODS)
+		return -1;
 
-  memset(&modstats[nummodstats],0,sizeof(struct modstats));
-  strncpy(modstats[nummodstats].name,mod,sizeof(modstats[0].name));
-  nummodstats++;
-  debug2("CREATED MODSTAT: %s\n",mod);
-  return nummodstats-1;
+	memset (&modstats[nummodstats], 0, sizeof (struct modstats));
+	strncpy (modstats[nummodstats].name, mod, sizeof (modstats[0].name));
+	nummodstats++;
+	debug2 ("CREATED MODSTAT: %s\n", mod);
+	return nummodstats - 1;
 }
 
 
 void
-mainloop()
+mainloop ()
 {
-  int i, savecount=0, index;
-  int sec=-1,min=0,oldsec=-1,oldmin=0;
-  channel_status_t status;
-  struct shmuserrec *ushm=NULL;
+	int     i, savecount = 0, index;
+	int     sec = -1, min = 0, oldsec = -1, oldmin = 0;
+	channel_status_t status;
+	struct shmuserrec *ushm = NULL;
 
-  for(;;){
-    debug("\nTICK!\n");
+	//fprintf(stderr, "---2 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+	for (;;) {
+		debug ("\nTICK!\n");
 
-    readdaystats();
-    readttystats();
-    readclsstats();
-    readbaudstats();
-    readmodstats();
-    refreshclasses();
-    refreshchannels();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		readdaystats ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		readttystats ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		readclsstats ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		readbaudstats ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		readmodstats ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		refreshclasses ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		refreshchannels ();
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
 
-    debug("Going on...\n");
+		debug ("Going on...\n");
 
-    for(i=0;i<chan_count;i++){
-      if(!channel_getstatus(channels[i].ttyname,&status))continue;
-      if(status.result!=LSR_USER)continue;
-      if(status.user[0]=='[')continue;
-      if(!usr_insystem(status.user,0,&ushm))continue;
-      if(!ushm->onl.userid[0])continue;
-      debug2("USER: %s\n",status.user);
+		for (i = 0; i < chan_count; i++) {
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (!channel_getstatus (channels[i].ttyname, &status))
+				continue;
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (status.result != LSR_USER)
+				continue;
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (status.user[0] == '[')
+				continue;
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (!usr_insystem (status.user, 0, &ushm))
+				continue;
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (!ushm->onl.userid[0])
+				continue;
+			debug2 ("USER: %s\n", status.user);
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
 
-      /* Day stats */
+			/* Day stats */
 
-      index=tdhour(now());
-      if(ushm->onl.statcreds>0){
-	daystats[index].credits+=ushm->onl.statcreds;
-	debug2("DAYSTATS: CREDITS++ = %ld\n",daystats[index].credits);
-      } else {
-	debug("DAYSTATS: CREDITS<=0\n");
-      }
-      if(!sec){
-	daystats[index].minutes++;
-	debug2("DAYSTATS: MINUTE++ = %ld\n",daystats[index].minutes);
-      }
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			index = tdhour (now ());
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (ushm->onl.statcreds > 0) {
+				daystats[index].credits += ushm->onl.statcreds;
+				debug2 ("DAYSTATS: CREDITS++ = %ld\n",
+					daystats[index].credits);
+			} else {
+				debug ("DAYSTATS: CREDITS<=0\n");
+			}
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			if (!sec) {
+				daystats[index].minutes++;
+				debug2 ("DAYSTATS: MINUTE++ = %ld\n",
+					daystats[index].minutes);
+			}
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
 
-      /* TTY stats */
+			/* TTY stats */
 
-      index=findtty(channels[i].ttyname);
-      if(index>=0 && index<numttystats){
-	if(ushm->onl.statptrs&STF_FIRST)ttystats[index].calls++;
-	if(ushm->onl.statcreds>0){
-	  ttystats[index].credits+=ushm->onl.statcreds;
-	  debug2("TTYSTATS: CREDITS++ = %ld\n",ttystats[index].credits);
-	} else {
-	  debug("TTYSTATS: CREDITS<=0\n");
+			index = findtty (channels[i].ttyname);
+			if (index >= 0 && index < numttystats) {
+				if (ushm->onl.statptrs & STF_FIRST)
+					ttystats[index].calls++;
+				if (ushm->onl.statcreds > 0) {
+					ttystats[index].credits +=
+					    ushm->onl.statcreds;
+					debug2 ("TTYSTATS: CREDITS++ = %ld\n",
+						ttystats[index].credits);
+				} else {
+					debug ("TTYSTATS: CREDITS<=0\n");
+				}
+				if (!sec) {
+					ttystats[index].minutes++;
+					debug2 ("TTYSTATS: MINUTE++ = %ld\n",
+						ttystats[index].minutes);
+				}
+			}
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+
+			/* Class stats */
+
+			index = findcls (ushm->acc.curclss);
+			if (index >= 0 && index < numclsstats) {
+				if (ushm->onl.statcreds > 0) {
+					clsstats[index].credits +=
+					    ushm->onl.statcreds;
+					debug2 ("CLSSTATS: CREDITS++ = %ld\n",
+						clsstats[index].credits);
+				} else {
+					debug ("CLSSTATS: CREDITS<=0\n");
+				}
+				if (!sec) {
+					clsstats[index].minutes++;
+					debug2 ("CLSSTATS: MINUTE++ = %ld\n",
+						clsstats[index].minutes);
+				}
+			}
+
+			/* BAUD stats */
+
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			index = findbaud (ushm->onl.baudrate);
+			if (index >= 0 && index < numbaudstats) {
+				if (ushm->onl.statptrs & STF_FIRST)
+					baudstats[index].calls++;
+				if (ushm->onl.statcreds > 0) {
+					baudstats[index].credits +=
+					    ushm->onl.statcreds;
+					debug2 ("BAUDSTATS: CREDITS++ = %ld\n",
+						baudstats[index].credits);
+				} else {
+					debug ("BAUDSTATS: CREDITS<=0\n");
+				}
+				if (!sec) {
+					baudstats[index].minutes++;
+					debug2 ("BAUDSTATS: MINUTE++ = %ld\n",
+						baudstats[index].minutes);
+				}
+			}
+
+			/* Module stats */
+
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			index = findmod (ushm->onl.descr[0]);
+			if (index >= 0 && index < nummodstats) {
+				if (ushm->onl.statcreds > 0) {
+					modstats[index].credits +=
+					    ushm->onl.statcreds;
+					debug2 ("MODSTATS: CREDITS++ = %ld\n",
+						modstats[index].credits);
+				} else {
+					debug ("MODSTATS: CREDITS<=0\n");
+				}
+				if (!sec) {
+					modstats[index].minutes++;
+					debug2 ("MODSTATS: MINUTE++ = %ld\n",
+						modstats[index].minutes);
+				}
+			}
+
+			/* Reset stuff */
+
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			ushm->onl.statptrs &= ~STF_FIRST;
+			ushm->onl.statcreds = 0;
+			shmdt ((char *) ushm);
+		}
+
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		for (;;) {
+			usleep (SLEEPTIME);
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+			sec = tdsec (now ());
+			min = tdmin (now ());
+			debug2 (":%02d\n", sec);
+			if ((sec % TICKTIME) == 0) {
+				if (oldsec != sec || oldmin != min) {
+					oldsec = sec;
+					oldmin = min;
+					break;
+				}
+			}
+		//fprintf(stderr, "---3 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+		}
+
+		/* Periodic stat flushing */
+
+		if (!sec) {
+			if (!savecount) {
+				//fprintf(stderr, "---4 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+				writedaystats ();
+				writettystats ();
+				writeclsstats ();
+				writebaudstats ();
+				writemodstats ();
+			}
+			savecount = (savecount + 1) % sysvar->saverate;
+		}
 	}
-	if(!sec){
-	  ttystats[index].minutes++;
-	  debug2("TTYSTATS: MINUTE++ = %ld\n",ttystats[index].minutes);
-	}
-      }
-
-      /* Class stats */
-
-      index=findcls(ushm->acc.curclss);
-      if(index>=0 && index<numclsstats){
-	if(ushm->onl.statcreds>0){
-	  clsstats[index].credits+=ushm->onl.statcreds;
-	  debug2("CLSSTATS: CREDITS++ = %ld\n",clsstats[index].credits);
-	} else {
-	  debug("CLSSTATS: CREDITS<=0\n");
-	}
-	if(!sec){
-	  clsstats[index].minutes++;
-	  debug2("CLSSTATS: MINUTE++ = %ld\n",clsstats[index].minutes);
-	}
-      }
-
-      /* BAUD stats */
-
-      index=findbaud(ushm->onl.baudrate);
-      if(index>=0 && index<numbaudstats){
-	if(ushm->onl.statptrs&STF_FIRST)baudstats[index].calls++;
-	if(ushm->onl.statcreds>0){
-	  baudstats[index].credits+=ushm->onl.statcreds;
-	  debug2("BAUDSTATS: CREDITS++ = %ld\n",baudstats[index].credits);
-	} else {
-	  debug("BAUDSTATS: CREDITS<=0\n");
-	}
-	if(!sec){
-	  baudstats[index].minutes++;
-	  debug2("BAUDSTATS: MINUTE++ = %ld\n",baudstats[index].minutes);
-	}
-      }
-
-      /* Module stats */
-
-      index=findmod(ushm->onl.descr[0]);
-      if(index>=0 && index<nummodstats){
-	if(ushm->onl.statcreds>0){
-	  modstats[index].credits+=ushm->onl.statcreds;
-	  debug2("MODSTATS: CREDITS++ = %ld\n",modstats[index].credits);
-	} else {
-	  debug("MODSTATS: CREDITS<=0\n");
-	}
-	if(!sec){
-	  modstats[index].minutes++;
-	  debug2("MODSTATS: MINUTE++ = %ld\n",modstats[index].minutes);
-	}
-      }
-
-      /* Reset stuff */
-
-      ushm->onl.statptrs&=~STF_FIRST;
-      ushm->onl.statcreds=0;
-      shmdt((char *)ushm);
-    }
-
-    for(;;){
-      usleep(SLEEPTIME);
-      sec=tdsec(now());
-      min=tdmin(now());
-      debug2(":%02d\n",sec);
-      if((sec%TICKTIME)==0){
-	if(oldsec!=sec || oldmin!=min){
-	  oldsec=sec;
-	  oldmin=min;
-	  break;
-	}
-      }
-    }
-
-    /* Periodic stat flushing */
-
-    if(!sec){
-      if(!savecount){
-	writedaystats();
-	writettystats();
-	writeclsstats();
-	writebaudstats();
-	writemodstats();
-      }
-      savecount=(savecount+1)%sysvar->saverate;
-    }
-  }
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  if (getuid()){
-    fprintf(stderr, "%s: getuid: not super-user\n", argv[0]);
-    exit(1);
-  }
+	mod_setprogname (argv[0]);
+	if (getuid ()) {
+		fprintf (stderr, "%s: getuid: not super-user\n", argv[0]);
+		exit (1);
+	}
 
-  switch(fork()){
-  case -1:
-    fprintf(stderr,"%s: fork: unable to fork daemon\n",argv[0]);
-    exit(1);
-  case 0:
-    break;
-  default:
-    exit(0);
-  }
-  
-  mod_init(INI_TTYNUM|INI_SYSVARS|INI_CLASSES);
-  msg=msg_open("sysvar");
-  error_setnotify(0);
-  storepid();
-  ioctl(0,TIOCNOTTY,NULL);
+#if 1
+	switch (fork ()) {
+	case -1:
+		fprintf (stderr, "%s: fork: unable to fork daemon\n", argv[0]);
+		exit (1);
+	case 0:
+		ioctl (0, TIOCNOTTY, NULL);
+		setsid ();
+		close (0);
+		close (1);
+		close (2);
+		break;
+	default:
+		exit (0);
+	}
+#endif
 
-  mainloop();
+	mod_init (INI_TTYNUM | INI_SYSVARS | INI_CLASSES);
+	msg = msg_open ("sysvar");
+	error_setnotify (0);
+	storepid ();
+	ioctl (0, TIOCNOTTY, NULL);
 
-  return 0;
+	//fprintf(stderr, "---1 %s:%d %s\n", __FILE__,__LINE__,__FUNCTION__);
+	mainloop ();
+
+	return 0;
 }
+
+
+/* End of File */

@@ -1,0 +1,40 @@
+#!/bin/sh -e
+# -*- shell -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 2.0  2004/09/13 19:44:28  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.1  2004/02/29 16:40:18  alexios
+# Initial revision.
+#
+
+# Automatically added by dh_makeshlibs
+if [ "$1" = "configure" ]; then
+	ldconfig
+fi
+# End automatically added section
+
+# config
+#instancedir=`megistos-config --instance-dir`
+#tlu=megistos
+#tlg=megistos
+
+## Add the top-level privilege separation group
+#if ! getent group $tlg >/dev/null; then
+#    addgroup --system --quiet $tlg
+#fi
+#
+## Add the top-level privilege separation user
+#if ! getent passwd $tlu >/dev/null; then
+#    adduser --quiet --system --no-create-home --home $instancedir $tlu
+#fi
+#
+## Set permissions for the top level directory
+#if [ ! -e $instancedir ]; then
+#    mkdir -m 754 $instancedir
+#    chown $tlu.$tlg $instancedir
+#fi
