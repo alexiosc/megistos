@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.6  2003/12/19 13:26:23  alexios
  * Updated include directories; changed behaviour of mkfname() to reflect
  * new build structure.
@@ -113,7 +116,7 @@ static const char rcsinfo[] =
 #include <megistos/bbs.h>
 #include <megistos/menuman.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 
 

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.7  2003/12/19 13:24:30  alexios
  * Updated include directives.
  *
@@ -130,7 +133,7 @@ static const char rcsinfo[] =
 #include <megistos/security.h>
 #include <megistos/bots.h>
 #define __SYSVAR_UNAMBIGUOUS__
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 static struct termios oldkbdtermios;
 static struct termios newkbdtermios;

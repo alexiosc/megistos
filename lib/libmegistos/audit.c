@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.7  2003/12/19 13:23:29  alexios
  * Updated include directives; updated some of the directory #defines.
  *
@@ -93,7 +96,7 @@ static const char rcsinfo[] =
 #include <megistos/security.h>
 #include <megistos/miscfx.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 
 static char *auditfile = NULL;

@@ -37,6 +37,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.5  2003/09/27 20:29:47  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -68,6 +71,9 @@
 
 #ifndef CHANNELS_H
 #define CHANNELS_H
+
+
+#include <bbsconfig.h>
 
 
 /** @defgroup channels BBS Channel Functionality

@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:32:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/23 23:20:24  alexios
  * Ran through megistos-config --oh.
  *
@@ -72,8 +75,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsdialog.h>
-#include <megistos/mbk_bbsdialog.h>
+#include "bbsdialog.h"
+#include "mbk_bbsdialog.h"
 
 
 

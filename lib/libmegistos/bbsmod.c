@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.10  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.9  2003/12/19 13:23:29  alexios
  * Updated include directives; updated some of the directory #defines.
  *
@@ -119,7 +122,7 @@ static const char rcsinfo[] =
 #include <megistos/bbs.h>
 #include <megistos/systemversion.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 
 #define _m(x) mkfname("%s%s",SYSVARFILE,x)

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/24 18:35:07  alexios
+ * Fixed #includes.
+ *
  * Revision 1.6  2003/12/19 13:25:18  alexios
  * Updated include directives.
  *
@@ -78,7 +81,7 @@ static const char rcsinfo[] =
 
 #include <megistos/bbs.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 
 struct shmuserrec *thisshm = NULL, *othrshm = NULL;

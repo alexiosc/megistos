@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:38:43  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -94,8 +97,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/updown.h>
-#include <megistos/mbk_updown.h>
+#include "updown.h"
+#include "mbk_updown.h"
 
 
 int     firstentry = 0;

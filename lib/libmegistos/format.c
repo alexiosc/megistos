@@ -105,6 +105,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.6  2003/12/19 13:24:10  alexios
  * Updated include directives.
  *
@@ -172,7 +175,7 @@ static const char rcsinfo[] =
 #include <megistos/output.h>
 #include <megistos/input.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 
 #define INHIBIT_FORMATTING (inhibit||IS_BOT)

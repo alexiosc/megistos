@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.6  2003/12/19 13:25:18  alexios
  * Updated include directives.
  *
@@ -125,7 +128,7 @@ static const char rcsinfo[] =
 #include <megistos/bots.h>
 #include <megistos/useracc.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 char    out_buffer[8192];
 uint32  out_flags = OFL_WAITTOCLEAR | OFL_ANSIENABLE;

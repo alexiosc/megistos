@@ -38,6 +38,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/19 13:20:11  alexios
  * Brought into the new build tree; ran it through indent(1).
  *
@@ -85,7 +88,7 @@ const char *__RCS = RCS_VER;
 
 #include <megistos/bbs.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 promptblock_t *sysvars;
 

@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  2003/12/24 18:35:08  alexios
+ * Fixed #includes.
+ *
  * Revision 1.7  2003/12/19 13:24:30  alexios
  * Updated include directives.
  *
@@ -61,7 +64,7 @@ static const char rcsinfo[] =
 
 #include <megistos/bbs.h>
 
-#include "mbk_sysvar.h"
+#include <mbk/mbk_sysvar.h>
 
 #define USERPAGED (othruseronl.onlinetime-othruseronl.lastpage \
 		   <othruseracc.pagetime)
