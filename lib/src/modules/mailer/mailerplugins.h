@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:40:55  alexios
+ * Moved various declarations from mailer.h to this file.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -44,8 +47,25 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
+#ifndef __MAILERPLUGINS_H
+#define __MAILERPLUGINS_H
+
+
+#ifdef __MAILERPLUGIN__
+
+
+#include "request.h"
+
+
+/* plugindef.c (partial) */
+
+
+#define MAXPLUGINS 34
+#define NAMELEN    32
+#define DESCRLEN   64
+
+
+/* request.c */
 
 
 #define RQF_POSTPONE 0x01
@@ -73,6 +93,70 @@ int     rmrequest (struct reqidx *idx);
 
 int     updrequest (struct reqidx *idx);
 
+
+/* usr.c */
+
+struct usrtag {
+	char    plugin[NAMELEN];
+	int     len;
+};
+
+
+#define NUMOLDREP 4
+
+struct usrqwk {
+	int     compressor;
+	int     decompressor;
+	int     flags;
+	char    packetname[11];
+	unsigned long oldcrc[NUMOLDREP];
+	int     oldlen[NUMOLDREP];
+
+	char    dummy[64];
+};
+
+#define USQ_GREEKQWK 0x0001
+
+#define OMF_TR0    0x0010
+#define OMF_TR1    0x0020
+#define OMF_TR2    0x0040
+#define OMF_TR3    0x0080
+
+#define OMF_SHIFT  4
+#define OMF_TR     (OMF_TR0|OMF_TR1|OMF_TR2|OMF_TR3)
+
+#define USERQWK "userqwk"
+
+extern struct usrqwk userqwk;
+
+int     loadprefs (char *plugin, void *buffer);
+
+void    saveprefs (char *plugin, int len, void *buffer);
+
+
+/* xlate.c */
+
+extern char kbdxlation[NUMXLATIONS][256];
+extern char xlation[NUMXLATIONS][256];
+extern int xlationtable;
+
+#define xlate_in(s)    faststgxlate(s,kbdxlation[xlationtable]);
+#define xlate_out(s)   faststgxlate(s,xlation[xlationtable]);
+
+void    readxlation ();
+
+/* Specifying source==target does not clobber source. */
+
+void    unix2dos (char *source, char *target);
+
+
+
+#else
+#  error mailerplugins.h file should only be included by mailer plugins.
+#endif /* __MAILERPLUGIN__ */
+
+
+#endif /* __MAILERPLUGINS_H */
 
 
 /* End of File */
