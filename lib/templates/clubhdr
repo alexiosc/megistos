@@ -3,11 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/27 09:40:29  alexios
 # Initial revision.
 #
 
-LDFLAGS_EXTRA = -L$(top_builddir)/src/modules/emailclubs
+ECDIR = $(top_builddir)/src/modules/emailclubs
+LDFLAGS_EXTRA += -L$(ECDIR)
+CFLAGS += -I$(ECDIR)
 LDADD += -lmegistos_clubhdr
 
 # End of file.

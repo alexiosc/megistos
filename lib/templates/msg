@@ -3,12 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/24 11:26:35  alexios
 # Initial revision.
 #
 
+MBKDIR = $(shell /bin/sh $(MEGISTOS_CONFIG) --virgin-src)
 MEGISTOS_CONFIG=@top_builddir@/libmegistos/megistos-config
-MSGIDX = VIRGINDIR=`/bin/sh $(MEGISTOS_CONFIG) --virgin-src` @top_builddir@/libmegistos/msgidx
+MSGIDX = VIRGINDIR=$(MBKDIR) @top_builddir@/libmegistos/msgidx
 
 mbk_%.h %.mbk: %.msg
 	$(MSGIDX) $<

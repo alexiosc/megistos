@@ -3,10 +3,14 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/24 11:26:35  alexios
 # Initial revision.
 #
 
-CURSES_IF_NEEDED = @CURSESLIB@
+CURSES_IF_NEEDED = @CURSES_LIBS@
 
 # End of file.

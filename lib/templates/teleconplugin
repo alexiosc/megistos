@@ -3,13 +3,23 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/25 08:22:16  alexios
 # Initial revision.
 #
 
 include $(top_srcdir)/templates/base
+include $(top_srcdir)/templates/clubhdr
 
 pkglib_PROGRAMS = $(PROGNAMES)
+TELECONDIR = $(top_srcdir)/src/modules/telecon
+CFLAGS += -I$(TELECONDIR)
+MISCDEFS = -D__TELEPLUGIN__
+LDFLAGS_EXTRA += -L$(top_builddir)/src/modules/telecon
+LDADD += -lmegistos_teleconplugin
 
 include $(top_srcdir)/templates/msg
 

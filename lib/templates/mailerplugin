@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/25 08:22:16  alexios
 # Initial revision.
 #
@@ -10,7 +14,13 @@
 include $(top_srcdir)/templates/base
 
 pkglib_PROGRAMS = $(PROGNAMES)
+MAILERDIR = $(top_srcdir)/src/modules/mailer
+CFLAGS += -I$(MAILERDIR)
+MISCDEFS = -D__MAILERPLUGIN__
+LDFLAGS_EXTRA += -L$(MAILERDIR)
+LDADD += -lmegistos_mailerplugin
 
 include $(top_srcdir)/templates/msg
+include $(top_srcdir)/templates/typhoon
 
 # End of file.

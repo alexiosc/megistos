@@ -3,17 +3,22 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
 # Revision 1.1  2003/12/24 11:26:35  alexios
 # Initial revision.
 #
 
+LDFLAGS_EXTRA =
 pkgdatadir = @PKGDATADIR@
 pkglibdir = @PKGLIBDIR@
 pkgincludedir = @PKGINCLUDEDIR@
 
-#DEFS = @DEFS@
-CFLAGS = @CFLAGS@ -I $(top_srcdir)/@LIBMEGISTOS@
-LDFLAGS = -L$(top_srcdir)/@LIBMEGISTOS@ @LDFLAGS@
-LDADD = -lmegistos $(CURSES_IF_NEEDED)
+#DEFS = @DEFS@ 
+CFLAGS = @CFLAGS@ -D_GNU_SOURCE -I $(top_srcdir)/@LIBMEGISTOS@ $(MISCDEFS)
+LDFLAGS = -L$(top_srcdir)/@LIBMEGISTOS@ @LDFLAGS@ $(LDFLAGS_EXTRA)
+LDADD = -lmegistos $(CURSES_IF_NEEDED) $(TYPHOON_IF_NEEDED)
 
 # End of file.
