@@ -1,0 +1,13 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/27 09:40:29  alexios
+# Initial revision.
+#
+
+LDFLAGS_EXTRA = -L$(top_builddir)/src/modules/emailclubs
+LDADD += -lmegistos_clubhdr
+
+# End of file.
