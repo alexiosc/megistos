@@ -28,6 +28,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:37:29  alexios
+ * Adjusted #includes. Minor cosmetic changes. Removed dependency on
+ * compiled action list (via mbk_teleactions.h) by hardwiring indices for
+ * the number of action verbs and the beginning of the action list, which
+ * was really all we needed before, too.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -68,9 +74,14 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/actions.h>
-#include <megistos/mbk_teleactions.h>
+#include "telecon.h"
+#include "actions.h"
+#if 0
+#  include <mbk/mbk_teleactions.h>
+#else
+#  define NUMVERBS 2
+#  define BEGNVERB (NUMVERBS+1)
+#endif
 
 
 static struct actionidx *actions = NULL;
@@ -90,21 +101,18 @@ initactions ()
 
 	actionblk = msg_open ("teleactions");
 	numactions = msg_int (NUMVERBS, 0, 1 << 20);	/* 1M actions SHOULD suffice */
-	if (!numactions)
-		return;
-
-	if (actions)
-		free (actions);
+	if (!numactions) return;
+	if (actions) free (actions);
 	actions = alcmem (numactions * sizeof (struct actionidx));
 
 	pr = BEGNVERB + 1;
 
 	for (i = 0; i < numactions; i++) {
-/*  print("%d. ",pr);fflush(stdout); */
+                /*  print("%d. ",pr);fflush(stdout); */
 		actions[i].index = pr;
 		actions[i].verb = strdup (msg_get (pr));
 		type = msg_char (pr + 1);
-/*  print("%c (%s)\n",type,actions[i].verb); */
+                /*  print("%c (%s)\n",type,actions[i].verb); */
 		switch (type) {
 		case TYPE_SIMPLE:
 			pr += 4 + 2 * NUMLANGUAGES;
