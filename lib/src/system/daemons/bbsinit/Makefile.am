@@ -1,18 +1,12 @@
+# -*- Makefile -*-
+#
 # $Id$
 #
 # $Log$
-# Revision 1.1  2003/09/30 14:53:05  alexios
-# Initial revision.
+# Revision 1.2  2003/12/22 16:22:31  alexios
+# Rewrote Makefile.am using the daemon template.
 #
 
-pkgdatadir = @PKGDATADIR@
-pkglibdir = @PKGLIBDIR@
-pkgincludedir = @PKGINCLUDEDIR@
+PROGNAMES = bbsinit
 
-DEFS = @DEFS@
-CFLAGS = @CFLAGS@ -I $(top_srcdir)/@LIBMEGISTOS@
-LDFLAGS = -L$(top_srcdir)/@LIBMEGISTOS@ @LDFLAGS@
-
-bin_PROGRAMS = bbsinit
-bbsinit_SOURCES = bbsinit.c
-bbsinit_LDADD = -lmegistos
+include $(top_srcdir)/templates/daemon
