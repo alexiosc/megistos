@@ -280,7 +280,7 @@
 #  elif defined(HAVE_TERMIO_H)
 #    include <termio.h>
 #  elif defined(HAVE_SYS_TERMIO_H)
-#    include <sys/termio.h>
+#    inlcude <sys/termio.h>
 #  endif
 #endif
 

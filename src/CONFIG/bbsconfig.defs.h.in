@@ -114,6 +114,9 @@
 /* Define if you have the vhangup function.  */
 #undef HAVE_VHANGUP
 
+/* Define if you have the getpt function.  */
+#undef HAVE_GETPT
+
 /* Define if you have the <arpa/telnet.h> header file.  */
 #undef HAVE_ARPA_TELNET_H
 
