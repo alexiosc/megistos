@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:33:15  alexios
+ * Fixed a conditional compilation glitch (just a minor warning).
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -78,7 +81,9 @@ int
 checkchars (char *s, char *also, int num)
 {
 	char   *cp;
+#ifdef GREEK
 	int     i;
+#endif /* GREEK */
 
 	for (cp = s; *cp; cp++) {
 		if (isalpha (*cp))
@@ -93,7 +98,7 @@ checkchars (char *s, char *also, int num)
 		i = -*cp;
 		if ((i >= 81 && i <= 128) || (i >= 23 && i <= 32))
 			continue;
-#endif
+#endif /* GREEK */
 		return 0;
 	}
 	return 1;
