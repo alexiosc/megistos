@@ -1,0 +1,117 @@
+-*- Mode:text -*-
+
+
+
+Megistos Directory Structure
+
+Megistos 0.99 followed a bizarre  structure based on a hardwired root directory
+that included  source code, object code,  executables and BBS  data files. This
+meant a separate installation and compilation was needed for each BBS served on
+a machine.
+
+Starting with Megistos 1.0, we've moved to a Debian Policy-compliant structure,
+which incidentally is the Filesystem Hierarchy Standard (FHS) version 2.1. We
+have the following bits of data to sort into directories:
+
+  * Source code
+  * Development files
+  * Libraries
+  * BBS-Specific object code
+  * System-wide binaries (things that non-BBS users should be able to use)
+  * Instance-specific data trees
+
+Here is the proposed directory structure, assuming a prefix of /usr:
+
+     (Parenthesised acronym legend: AI = Architecture Independent, AD =
+     Architecture Dependent, NW = Network-wide (shareable), L = Local -- these
+     follow the FHS)
+
+/etc/megistos:
+
+	Global configuration (L).
+
+/etc/megistos/instance/$BBSCODE:
+
+	Configuration for BBS $BBSCODE (symlinked from
+	/var/lib/megistos/$BBSCODE/etc) (L)
+
+/usr/lib:
+
+	Megistos shared and static libraries (libmegistos) (AD,NW).
+
+/usr/lib/megistos:
+
+	Top-level library/binary directory (AD,NW). Architecture independent,
+	network-exportable. Under which are directories such as:
+
+	/usr/lib/megistos/bin:
+
+		Binaries needed internally by the BBS.
+
+	/usr/lib/megistos/plugins:
+
+		Plugin object code.
+
+	/usr/lib/megistos/virgin:
+
+		The `virgin' instance. This includes an uninstantiated BBS
+		skeleton that is copied to /var/lib/megistos/$BBSCODE create a
+		new system called $BBSCODE. It should optimally be under
+		/usr/share/megistos, but is currently architecture dependent so
+		this is impossible.
+
+/usr/share/doc/megistos:
+
+	All documentation. (AI,NW).
+
+/var/lib/megistos/$BBSCODE:
+
+	This where data for the BBS called $BBSCODE lies. It follows the old
+	Megistos 0.99 $PREFIX/data structure. Directories like lib and bin are
+	symlinked from /usr/lib/megistos/{lib,bin}. (AD,L)
+
+
+
+The Strange And Terrifying Story of msgidx.
+
+Msgidx reads configuration and message block files (.msg files) and converts
+them into binary configuration/message blocks (.mbk). For the benefit of the
+programmer, it also outputs a C header file (.h) with indices into the .mbk
+file #define'd for easier access.
+
+This was built to mirror the Major BBS utility of the same name, so as to port
+our .msg files from Major to Megistos with minimal hassle. In the process, the
+two formats have grown apart and I doubt they're even compatible now.
+
+Now, the Major BBS used a mostly flat directory structure. Megistos follows the
+FHS, so files must go to the right place.
+
+As of Megistos version 1.0.2, Msgidx follows this algorithm:
+
+   (a) if run within the source tree, it assumes .h files are needed to compile
+       the system and thus leaves them in the current directory. .mbk files are
+       copied over to the virgin/lib/mbk directory.
+
+       Header files generated from msgidx are installed under
+       $prefix/include/megistos/mbk. Compiled message blocks are installed
+       under $prefix/lib/megistos/virgin.
+
+   (b) if run within a BBS instance, header files are not generated, but are
+       checked against the system-wide version and an error is emitted if
+       differences are encountered. This forces the file structure to be
+       identical so the binaries can work with the .mbk files. MBK files go to
+       /var/lib/megistos/$BBSCODE/data/msgs.
+
+
+
+
+-------
+
+CVS information and emacs stuff follows
+
+$Id$
+
+$Log$
+Revision 1.1  2003/12/14 20:57:38  alexios
+Initial revision.
+
