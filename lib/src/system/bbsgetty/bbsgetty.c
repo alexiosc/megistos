@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/22 18:18:11  alexios
+ * Migrated to the new #include scheme.
+ *
  * Revision 1.4  2003/12/22 17:23:37  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -53,8 +56,8 @@ static const char rcsinfo[] = "$Id$";
 #define WANT_SIGNAL_H 1
 #define WANT_UNISTD_H 1
 #define WANT_FCNTL_H 1
-#include <bbsinclude.h>
-#include <bbs.h>
+#include <megistos/bbsinclude.h>
+#include <megistos/bbs.h>
 #include <megistos/bbsgetty.h>
 
 
@@ -91,6 +94,7 @@ startemud ()
 	i = errno;
 
 	/* If we get to this point, something's gone wrong */
+
 	debug (D_RUN,
 	       "Aieee, something's gone very wrong. Couldn't spawn emud.");
 	errno = i;
