@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:41:44  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -54,7 +57,7 @@ static const char rcsinfo[] =
 #define WANT_TIME_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include <megistos/netclub.h>
+#include "netclub.h"
 #include <megistos/metaservices.h>
 
 

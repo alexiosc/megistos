@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:41:37  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -44,9 +47,6 @@ static const char rcsinfo[] =
 
 
 
-#define __TELEPLUGIN__
-
-
 #define WANT_STDLIB_H 1
 #define WANT_STDIO_H 1
 #define WANT_CTYPE_H 1
@@ -60,8 +60,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/plugins.h>
+#include <telecon.h>
+#include <teleconplugins.h>
 
 
 int     lucky_number;
