@@ -6842,7 +6842,9 @@ instance:!)
 
 !JThe first part is the fully qualified domain name 
 
----- THIS NEEDS TO BE REVIEWED -----
+
+---- THE UNDERLYING NETWORKING CODE IS UNDERGOING MASSIVE CHANGES.
+     THIS NEEDS TO BE REVIEWED, SO I'LL LEAVE IT UNTRANSLATED FOR NOW -----
 
 ’¦ §¨é«¦ £â¨¦ª œå¤˜   §¢ã¨ª Internet › œçŸ¬¤© «¦¬ £®˜¤ã£˜«¦ª §¦¬
 ­ ¢¦¥œ¤œå «¤ ™á©. €¡¦¢¦¬Ÿœå ¦ ¡à› ¡æª › ¡«çà©ª «ª ™á©ª (BBSNAME) ¡˜ 
@@ -8144,182 +8146,176 @@ COPMVT {[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mModify Message[0;30;47m 
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Club-op menu, modify club message, visual template
 
 
-COPMLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m‹œ«˜™¦¢ã £¤ç£˜«¦ª[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+COPMLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mModify Message[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m1[30m. ‡â£˜ . . . . [34m@63;56;0s[0;1;47;37m ³ [0m
+[30;47m ³ [31m1[30m. Subject  . . [34m@63;56;0s[0;1;47;37m ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m2[30m. €¨®œå¦  . . . . . . . . . . . . . . . . . . . . . .  [34m@16;16;0s[0;1;47;37m ³ [0m
+[30;47m ³ [31m2[30m. Filename  . . . . . . . . . . . . . . . . . . . . .  [34m@16;16;0s[0;1;47;37m ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m3[30m. „š¡¨ © ˜¨®œå¦¬  . . . . . . . . . . . . . . . . . . . . . . . .  [34m@"X "t[0;1;47;37m ³ [0m
+[30;47m ³ [31m3[30m. File approved  . . . . . . . . . . . . . . . . . . . . . . . . .  [34m@"X "t[0;1;47;37m ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m4[30m. ‹ › ˜š¨á¯ £¦  . . . . . . . . . . . . . . . . . . . . . . . . .  [34m@"X "t[0;1;47;37m ³ [0m
+[30;47m ³ [31m4[30m. Delete exempt  . . . . . . . . . . . . . . . . . . . . . . . . .  [34m@"X "t[0;1;47;37m ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m5[30m. œ¨å¦›¦ª £¤ç£˜«¦ª . . . . . . . . . . . . . . . . . . . . . . [34m@6;0;999999;1n[0;1;47;37m ³ [0m
+[30;47m ³ [31m5[30m. Periodic, every  . . . . . . . . . . . . . . . . . . . . . . . [34m@6;0;999999;1n[0;1;47;37m ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
-[30;47m ³ [31m6[30m. ‹œ«˜™¦¢ã ¡œ £â¤¦¬ £¤ç£˜«¦ª@1;"6Edit"b                                         [1;37m  ³ [0m
+[30;47m ³ [31m6[30m. Edit message test          @1;"6Edit"b                                         [1;37m  ³ [0m
 [30;47m ³                                                                          [1;37m³ [0m
 [30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
 } T Club-op menu, modify club message, linear template
 
 
 COPMLT1 {[0;1m
-!Jƒé©«œ «¦ ¤â¦ Ÿâ£˜ «¦¬ £¤ç£˜«æª ©˜ª.!)
+!JPlease enter the new subject for this message.!)
 } T Club-op menu, modify club message, linear template field #1
 
 
 COPMLT2 {[0;1m
-!Jƒé©«œ «¦ ¤â¦ æ¤¦£˜ «¦¬ ©¬¤££â¤¦¬ ˜¨®œå¦¬. €¤ ˜­ã©œ«œ «¦ æ¤¦£˜ ¡œ¤æ,
-Ÿ˜ œ§˜¤â¢Ÿœ  ˜¬«æ£˜«˜ ©«¦ ¡˜«á ©¬¤Ÿã¡ æ¤¦£˜, xxx.att, æ§¦¬ xxx ¦ ˜¨ Ÿ£æª
-«¦¬ £¤ç£˜«¦ª. €¬«æ «¦ §œ›å¦ Ÿ˜ ˜š¤¦Ÿœå ˜¤ ›œ¤ â®œ«œ œ§ ©¬¤á¯œ  ˜¨®œå¦ ©«¦
-£ã¤¬£á ©˜ª.!)
+!JPlease enter a new name for the attached file. If you don't
+specify a name, the default filename will be reinstated (xxx.att, where xxx
+is the message number). Changing the filename does nothing if this message
+doesn't have a file attached.!)
 } T Club-op menu, modify club message, linear template field #2
 
 
 COPMLT3 {[0;1m
-!J† « £ã ˜¬«¦ç «¦¬ §œ›å¦¬ ¡˜Ÿ¦¨åœ  ˜¤ «¦ ©¬¤££â¤¦ ˜¨®œå¦ œå¤˜  œš¡œ¡¨ ££â¤¦ ã æ® .
-€¤ ›œ¤ ¬§á¨®œ  ©¬¤££â¤¦ ˜¨®œå¦, ˜¬«æ «¦ §œ›å¦ Ÿ˜ ˜š¤¦Ÿœå.!)
+!JThis field controls the approval state of the attached file (if any).
+Most users will only be able to download approved files. If this message
+has no attached file, this field has no effect.!)
 } T Club-op menu, modify club message, linear template field #3
 
 
 COPMLT4 {[0;1m
-!J† « £ã ˜¬«¦ç «¦¬ §œ›å¦¬ ¡˜Ÿ¦¨åœ  ˜¤ «¦ £ã¤¬£˜ œå¤˜  £ › ˜š¨á¯ £¦ ã æ® .!)
+!JThis field controls whether the message is exempt from deletions.!)
 } T Club-op menu, modify club message, linear template field #4
 
 
 COPMLT5 {[0;1m
-!J’˜ §œ¨ ¦› ¡á £¤ç£˜«˜ œå¤˜  £¤ç£˜«˜ §¦¬ œ£­˜¤å¦¤«˜  «˜¡« ¡á ©«¦ club. €¬«æ «¦ §œ›å¦
-¡˜Ÿ¦¨åœ  ˜¤ «¦ £ã¤¬£˜ §¦¬ £œ«˜™á¢¢œ«œ œå¤˜  §œ¨ ¦› ¡æ, ¡˜  ˜¤ ¤˜ , ¡áŸœ §æ©œª £â¨œª Ÿ˜
-œ£­˜¤åœ«˜ . ƒé©«œ §œ¨å¦›¦ [33m0[37m š ˜ ¤˜ ¡á¤œ«œ «¦ £ã¤¬£˜ £ §œ¨ ¦› ¡æ.
-€¢¢ éª, ›é©«œ «¤ §œ¨å¦›æ «¦¬ ©œ £â¨œª. ‹œ §œ¨å¦›¦ [33m1[37m, «¦ £ã¤¬£˜ ¥˜¤˜œ£­˜¤åœ«˜ 
-©«¦ club ¡áŸœ £â¨˜.!)
+!JPeriodic messages are automatically re-posted to a club at regular
+intervals. This field controls whether this message is periodic, and if so,
+how often it should be re-posted. If the number is [33m0[37m, the message is not
+periodic. Any other message specifies how many days to wait before
+re-posting. For instance, enter a period of [33m1[37m to cause the message
+to be re-posted every day, or [33m30[37m to get a (roughly) monthly
+re-posting.!)
 } T Club-op menu, modify club message, linear template field #5
 
 
 COPMW1 {[0;1;31m
-!J’¦ £ã¤¬£˜ ›œ¤ â®œ  ©¬¤££â¤¦ ˜¨®œå¦. ’¦ §œ›å¦ âš¡¨ ©ª ˜š¤¦œå«˜ .!)
+!JThis message lacks an attached file. The approval field has been ignored.!)
 [0;1m} T Club-op menu, modify club message, warning 1
 
 
 COPOK1 {[0;1;32m
-!J’¦ ©¬¤££â¤¦ ©œ ˜¬«æ «¦ £ã¤¬£˜ ˜¨®œå¦ œš¡¨å¤œ«˜  š ˜ ¢ã¯.!)
+!JThe file attached to this message has been approved for download.!)
 [0;1m} T Club-op menu, approved message
 
 
 COPOK2 {[0;1;32m
-!J† âš¡¨ © ¢ã¯ª «¦¬ ©¬¤££â¤¦¬ ©œ ˜¬«æ «¦ £ã¤¬£˜ ˜¨®œå¦¬ á¨œ«˜ .!)
+!JThe approval state of the file attached to this message has been revoked.
+The file is no longer available for download.!)
 [0;1m} T Club-op menu, unapproved message
 
 
 COPOK3 {[0;1;32m
-!J’¦ £ã¤¬£˜ œå¤˜  §¢â¦¤ £ › ˜š¨á¯ £¦.!)
+!JThis message is now exempt from deletion.!)
 [0;1m} T Club-op menu, exempted message
 
 
 COPOK4 {[0;1;32m
-!J’¦ £ã¤¬£˜ £§¦¨œå §¢â¦¤ ¤˜ › ˜š¨˜­œå.!)
+!JThis message is no longer exempt from deletion.!)
 [0;1m} T Club-op menu, unexempted message
 
 
 COPOK5 {[0;1;32m
-!J’¦ £ã¤¬£˜ œå¤˜  §¢â¦¤ §œ¨ ¦› ¡æ, £œ §œ¨å¦›¦ [37m%d £â¨%s[32m.!)
+!JThis message is now periodic, re-posted every [37m%d day%s[32m.!)
 [0;1m} T Club-op menu, periodic message
 
 
 COPOK6 {[0;1;32m
-!J’¦ £ã¤¬£˜ ›œ¤ œå¤˜  §¢â¦¤ §œ¨ ¦› ¡æ.!)
+!JThis message is now non-periodic.!)
 [0;1m} T Club-op menu, non-periodic message
 
 
 COPIAMNU {[0;1m
-!W’  ˜¡¨ ™éª Ÿâ¢œ«œ ¤˜ ¡á¤œ«œ £œ «¦ ©¬¤££â¤¦ ˜¨®œå¦;!)
+!WWhat would you like to do with the attached file?!)
 
- [[33mO[37m]verwrite body . . . . . . .  œ§ ¡á¢¬¯ ©é£˜«¦ª £¤ç£˜«¦ª
- [[33mA[37m]ppend to body  . . .  œ§ §¨æ©Ÿœ© ©«¦ ©é£˜ «¦¬ £¤ç£˜«¦ª
-e[[33mX[37m]it  . . . . . . . . . . . .  ˜¡ç¨à© › ˜› ¡˜©å˜ª, â¥¦›¦ª
+ [[33mO[37m]verwrite body . .  Replace message body with text of attached file
+ [[33mA[37m]ppend to body  . . Add text of attached file to end of message body
+e[[33mX[37m]it  . . . . . . .  Cancel
 [0;1m} T Club-op menu, insert attachment menu
 
 
 COPIASMNU {[0;1m
-!Wƒé©«œ «¤ œ§ ¢¦šã ©˜ª ([33mO[37m,[33mA[37m, [33m?[37m  š ˜ ™¦ãŸœ ˜, ã [33mX[37m š ˜ â¥¦›¦):!) [0m} T Club-op menu, insert attachment short menu
+!WEnter your choice ([33mO[37m,[33mA[37m, [33m?[37m for help, or [33mX[37m to cancel):!) [0m} T Club-op menu, insert attachment short menu
 
 
 COPIARS {[0;1;31m
-!WŠ¬§á£˜ , ˜¬«ã  œ§ ¢¦šã ›œ¤ œå¤˜  ›¬¤˜«ã.!)
+!WSorry, this isn't an option at this stage.!)
 [0;1m} T Club-op menu, insert attachment, invalid selection
 
 
 COPIAH {[0;1m
 
-!WOverwrite: !i’¦ ©¬¤££â¤¦ ˜¨®œå¦ ˜¤« ¡˜Ÿ ©«á «¦ ©é£˜ «¦¬ £¤ç£˜«¦ª.
-’¦ ˜¨® ¡æ ©é£˜ «¦¬ £¤ç£˜«¦ª ®á¤œ«˜  ˜¤œ§ ©«¨œ§«å.!)
+!WOverwrite: !iThe text of the attached file replaces the body of the message. The original
+message body is irretrievably lost.!)
 !0l
-!WAppend:    !i’¦ ©¬¤££â¤¦ ˜¨®œå¦ §¨¦©«åŸœ«˜  ©«¦ «â¢¦ª «¦¬ ©é£˜«¦ª «¦¬
-£¤ç£˜«¦ª.!)
+!WAppend:    !iThe text of the attached file is appended to the body of the message.!)
 !0l
-!W[0;1;33;5mÛÛ[0;1;33m  ‘•†: !i¨ ¤ ®¨© £¦§¦ ã©œ«œ ˜¬«ã «¤ œ¤«¦¢ã,
-œ§ ™œ™˜ é©«œ æ«  «¦ ©¬¤££â¤¦ ˜¨®œå¦ §¦¬ §¨¦©§˜Ÿœå«œ ¤˜ œ¤©à£˜«é©œ«œ œå¤˜ 
-æ¤«àª ˜¨®œå¦ ¡œ £â¤¦¬, ¡˜  æ®  ¡á§¦ ¦ ›¬˜› ¡æ ˜¨®œå¦.!)
+!W[0;1;33;5mÛÛ[0;1;33m  ATTENTION: !iBefore using this command,
+please ensure that the file attachment is in fact an uncompressed text file and not
+a compressed or binary file.!)
 !0l
 [0;1m} T Club-op menu, insert attachment, help
 
 
 COPIAO {[0;1;32m
-!J‰˜¢éª, «¦ ©¬¤££â¤¦ ˜¨®œå¦ â®œ  §¢â¦¤ ˜¤« ¡˜«˜©«ã©œ  «¦ ©é£˜ «¦¬ £¤ç£˜«¦ª.!)
+!JOK, the contents of the attached file have replaced the body of the message.!)
 [0;1m} T Club-op menu, insert attachment, overwritten
 
 
 COPIAA {[0;1;32m
-!J‰˜¢éª, «¦ ©¬¤££â¤¦ ˜¨®œå¦ â®œ  §¢â¦¤ §¨¦©«œŸœå ©«¦ «â¢¦ª «¦¬ ©é£˜«¦ª
-«¦¬ £¤ç£˜«¦ª.!)
+!JOK, the attached file has been appended to the message body.!)
 [0;1m} T Club-op menu, insert attachment, appended
 
 
 COPIAR {[0;1;31m
-!J“§ã¨¥œ ©­á¢£˜ œšš¨˜­ãª/˜¤áš¤à©ª ¡˜«á «¤ › á¨¡œ ˜ «ª › ˜› ¡˜©å˜ª.
-˜¨˜¡˜¢é œ ›¦§¦ ã©«œ «¦¤ •œ ¨ ©«ã ‘¬©«ã£˜«¦ª š ˜ « ª ©¬¤Ÿã¡œª §¦¬ ›£ ¦ç¨š©˜¤
-˜¬«æ «¦ ¢áŸ¦ª.!)
+!JThere was in input/output error during the procedure.
+Please notify the Sysop about the conditions leading up to this.!)
 [0;1m} T Club-op menu, insert attachment, error
 
 
 RKASK {[0;1m
-!Wƒé©«œ £å˜ ã §œ¨ ©©æ«œ¨œª ¢â¥œ ª ¡¢œ ›å˜, ã [33m?[37m š ˜ ™¦ãŸœ ˜:!)[0m } T Keyword scan, get search key(s)
+!WEnter one or more keywords, or [33m?[37m for help:!)[0m } T Keyword scan, get search key(s)
 
 
 RKHELP {[0;1m
-!J† œ§ ¢¦šã ˜¬«ã ˜¤ ®¤œçœ  æ¢˜ «˜ £¤ç£˜«˜ œ¤æª Club ©«˜£˜«é¤«˜ª £æ¤¦ ©œ ˜¬«á
-§¦¬ §œ¨ â®¦¬¤ « ª ¢â¥œ ª ¡¢œ › á §¦¬ ¦¨å©˜«œ. ‚ ˜ ¤˜ ¦¨å©œ«œ £æ¤¦ £å˜ ¢â¥
-¡¢œ ›å, ˜§¢éª ›é©«œ « ¢â¥ ¡˜  §˜«ã©«œ [33mEnter[37m. ‚ ˜ §œ¨ ©©æ«œ¨œª ¢â¥œ ª
-¡¢œ › á, › ˜®à¨ã©«œ « ª £œ ¡œ¤á. €¤ â®œ«œ £ ˜ ©ç¤Ÿœ« ¢â¥ ¡¢œ ›å §¦¬ §œ¨ â®œ 
-¡œ¤á, ®¨© £¦§¦ ã©«œ £ ˜ §˜ç¢˜ ([33m-[37m):  §˜ç¢˜ ©£˜å¤œ  ¡œ¤æ, ©£œå¦ ©«å¥ª,
-©ç£™¦¢¦ ã ¡˜  «˜ «¨å˜ £˜å.!)
+!JThis command searches through club messages for one or more keywords that you supply.
+Separate multiple keywords with spaces. If one of your keywords contains spaces, substitute
+a dash ([33m-[37m) for the spaces. The dash stands for space, punctuation, and other symbols.!)
 
-!J† â¨œ¬¤˜ œå¤˜  ­à¤« ¡ã, é©«œ ¤˜ ¥œ§œ¨¤á ˜¤¦¨Ÿ¦š¨˜­åœª ¡˜  á¢¢˜ ¢áŸ.
-ƒ¢˜›ã,  ¢â¥ ¡¢œ ›å "Sysop" «˜ ¨ áœ  £œ ¦§¦ ˜›ã§¦«œ ˜§æ « ª ¢â¥œ ª "©¬©¦§",
-"©¬©à§", "‘“‘", "SYSOP".!)
+!JFor example, if you supply the keywords "demo system" you will scan for messages containing
+"demo" or "system". The keywords will also match phrases like
+"drugs [32msystem[37matically [32mdemo[37mlish your brain".!)
 
-!J‚ ˜ §˜¨á›œ š£˜, ˜¤ ›é©œ«œ àª ¢â¥œ ª ¡¢œ ›å˜ "demo system" š ˜ ¤˜ ˜¤ ®¤œç©œ«œ
-«˜ £¤ç£˜«˜ £œ « ª ¢â¥œ ª "demo" ¡˜  "system", «¦ ˜§¦«â¢œ©£˜ Ÿ˜ ©¬£§œ¨ ¢á™œ 
-œ¥å©¦¬ «¤ ­¨á© "drugs [32msystem[37matically [32mdemo[37mlish your brain".!)
-
-!J‚ ˜ ¤˜ ©¬š¡œ¡¨ £œ¤¦§¦ ã©œ«œ «¤ ˜¤å®¤œ¬© ©œ "DH Demo System",
-›é©«œ "DH-demo-system". €¢¢á œå¤˜  ¡˜¢ç«œ¨˜ ¤˜ â®œ«œ £œ¨ ¡á £¤ç£˜«˜ §˜¨˜§á¤à
-§˜¨á ¤˜ ®á©œ«œ ¡á§¦ ˜ á¢¢˜ ©£˜¤« ¡á!!)
+!JTo search for "DH Demo System" explicitly,
+enter "DH-demo-system", although it's better to get slightly more hits than you'd want
+rather than to lose important messages!!)
 [0;1m} T Keyword scan, help on searching
 
 
 RKSCAN1 {[0;1m
-!W€¤ ®¤œçà «¦ club [32m@CLUB@[37m š ˜ «¤ ¢â¥ ¡¢œ ›å "[32m%s[37m"...!)
+!WScanning club [32m@CLUB@[37m for keyword "[32m%s[37m"...!)
 [0;1m} T Keyword scan, start scanning (single keyword)
 
 
 RKSCAN2 {[0;1m
-!W€¤ ®¤œçà «¦ club [32m@CLUB@[37m š ˜ « ª ¢â¥œ ª ¡¢œ › á "[32m%s[37m"} T Keyword scan, start scanning (multiple keyword)
+!WScanning club [32m@CLUB@[37m for keywords "[32m%s[37m"} T Keyword scan, start scanning (multiple keyword)
 
 
 RKSCAN3 {, "[32m%s[37m"} T Keyword scan, keyword
 
 
-RKSCAN4 { ¡˜  "[32m%s[37m".!)
+RKSCAN4 { and "[32m%s[37m".!)
 [0;1m} T Keyword scan, last keyword
 
 
@@ -8338,32 +8334,32 @@ RKINDE {[u[0;1m[K} T Keyword scan, work indicator, end
 
 
 RKFOUND {[0;1;32m
-!WÛÛ  !i† ¢â¥ ¡¢œ ›å "%s" ™¨âŸ¡œ.!)
+!WÛÛ  !iKeyword "%s" found.!)
 !0l[0;1m} T Keyword scan, found the keyword
 
 
 RKCAN {[0;1;31m
 
-!Jƒ ˜¡æ§¡œ ˜§æ «¦¤ ®¨ã©«.!)
+!JAborted by the user.!)
 [0;1m} T Keyword scan, aborted
 
 
 FAPPSCN {[0;1;32m
-!J–á®¤à «¦ club [37m@CLUB@[32m š ˜ ˜¨®œå˜ §¦¬ ˜¤˜£â¤¦¬¤ âš¡¨ ©.!)
+!JSearching club [37m@CLUB@[32m for unapproved files.!)
 [0;1m} T File approval, scanning for unapproved files
 
 
 FAPPASK {[0;1m
-!W‡â¢œ«œ ¤˜ œš¡¨å¤œ«œ ˜¬«æ «¦ ˜¨®œå¦; [[33mY[37m]yes=¤˜  / [[33mN[37m]o=æ® ):!)[0m } T File approval, approval question
+!WApprove this file? [[33mY[37m]yes / [[33mN[37m]o):!)[0m } T File approval, approval question
 
 
 FAPPERR {[0;1;31m
-!JŠ¬§á£˜ , ˜¬«ã  œ§ ¢¦šã ›œ¤ œå¤˜  ›¬¤˜«ã.!)
+!JSorry, this option isn't possible here.!)
 [0;1m} T File approval, error in answer to FAPPASK
 
 
 FAPPAPP {[0;1;32m
-!J‰˜¢éª, «¦ ˜¨®œå¦ œå¤˜  §¢â¦¤ œš¡œ¡¨ £â¤¦ ¡˜  › ˜Ÿâ© £¦ š ˜ ¢ã¯.!)
+!JOK, the file's been approved and is available for download.!)
 [0;1m} T File approval, file has been approved
 
 
@@ -8371,276 +8367,275 @@ FAPPAPP {[0;1;32m
 
 
 QSEMPTY {[0;1;31m
-!J‘¬šš¤é£, ˜¢¢á ›œ¤ ¬§á¨®¦¬¤ clubs ©«¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ãª ©˜ª.
-•¨© £¦§¦ ã©«œ «¤ œ¤«¦¢ã [33mRQC[31m ˜§æ «¦ ¡œ¤«¨ ¡æ £œ¤¦ç «à¤ clubs š ˜ ¤˜
-¦¨å©œ«œ ©œ §¦ ˜ clubs Ÿ˜ šå¤œ«˜   š¨ãš¦¨ ˜¤å®¤œ¬©.!)
+!JSorry, there aren't any clubs in your quickscan list.
+Issue the command [33mRQC[31m at the main clubs menu to
+add clubs to your quickscan list.!)
 [0;1m} T Quickscan, quickscan record is empty.
 
 
 QSNONEW {[0;1;33m
-!Jƒœ¤ ™¨âŸ¡˜¤ ¤â˜ £¤ç£˜«˜.!)
+!JNo new messages found.!)
 [0;1m} T Quickscan, no new messages found
 
 
 QSSCAN {[0;1;32m
-!W€¤å®¤œ¬© «¦¬ [37m/%s[32m...!)
+!WQuickscanning [37m/%s[32m...!)
 [0;1m} T Quickscan, quick scanning
 
 
 QSEND {[0;1;32m
-!J’â¢¦ª «ª ˜¤å®¤œ¬©ª.!)
+!JEnd of quickscan.!)
 [0;1m} T Quickscan, end of quickscan
 
 
 QSABORT {[0;1;31m
-!J’œ¨£˜« ©£æª «ª š¨ãš¦¨ª ˜¤å®¤œ¬©ª.!)
+!JQuickscan aborted.!)
 [0;1m} T Quickscan, aborted
 
 
 QSLEAVE {[0;1;32m
-!J”œçš¦¬£œ ˜§æ «¦ club [37m/@CLUB@[32m.!)
+!JLeaving club [37m/@CLUB@[32m.!)
 [0;1m} T Quickscan, leaving current club
 
 
 QSDONE {[0;1m
-!J’â¢¦ª «ª š¨ãš¦¨ª ˜¤å®¤œ¬©ª.!)
+!JEnd of quickscan.!)
 [0;1m} T Quickscan, done with quickscan
 
 
 QSNNEM {[0;1;32m
-!Jƒœ¤ ¬§á¨®¦¬¤ ¤â˜ £¤ç£˜«˜ ©«¦ †¢œ¡«¨¦¤ ¡æ ’˜®¬›¨¦£œå¦.!)
+!JNo new Email messages.!)
 [0;1m} T Email Quickscan, no new mail in email area
 
 
 QSLVEM {[0;1;32m
-!J”œçš¦¬£œ ˜§æ «˜ £¤ç£˜«˜ †¢œ¡«¨¦¤ ¡¦ç ’˜®¬›¨¦£œå¦¬...!)
+!JLeaving Email area...!)
 [0;1m} T Email Quickscan, leaving email area
 
 
 QWRT2EM {[0;1;32m
-!J„§ ©«¨â­¦¬£œ ©«˜ £¤ç£˜«˜ †¢œ¡«¨¦¤ ¡¦ç ’˜®¬›¨¦£œå¦¬...!)
+!JBack to the Email area...!)
 [0;1m} T Email Quickscan, back to email messages
 
 
 QSNOJMP {[0;1;31m
-!JŠ¬§á£˜ , ˜¬«ã  œ¤«¦¢ã ›œ¤ œå¤˜  ›¬¤˜«ã ©œ ˜¬«æ «¦ ©£œå¦.!)
+!JSorry, this isn't a valid option at this stage.!)
 [0;1m} T Email Quickscan, can't use jump commands here
 
 
 RQSRMNU1 {[0;1m
-[[33mN[37m]ext . . . . . . . „§æ£œ¤¦ £ã¤¬£˜   [[33mP[37m]revious  . .  ¨¦š¦ç£œ¤¦ £ã¤¬£˜
-[[33mE[37m]mail reply .  ¨¦©à§ ¡ã ˜§á¤«©   [[33mR[37m]eply  . . . . . . . . . €§á¤«©
-[[33mT[37m]hread . . . . €¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬   [[33mQ[37m]uickscan . . . ‚¨ãš¦¨ ˜¤å®¤œ¬©
-e[[33mX[37m]it  . . . . . . . . . .  „¥¦›¦ª
+[[33mN[37m]ext         [[33mP[37m]revious
+[[33mE[37m]mail reply  [[33mR[37m]eply
+[[33mT[37m]hread       [[33mQ[37m]uickscan
+e[[33mX[37m]it
 
-† œ§ ¢¦šã ©˜ª ([33m?[37m š ˜ ™¦ãŸœ ˜); } T Quickscan, choices after reading message
+Your choice ([33m?[37m for help)? } T Quickscan, choices after reading message
 
 
 RQSRMNU1H {[0;1m
 
-!J‹§¦¨œå«œ ¤˜ ›é©œ«œ « ª œ¥ãª œ¤«¦¢âª ©œ ˜¬«æ «¦ ©£œå¦:!)
+!JHere are your choices at this stage:!)
 
-!W[33mN[37mext:      !i‹œ«˜­â¨œ©«œ ©«¦ œ§æ£œ¤¦ £ã¤¬£˜.
-‹§¦¨œå«œ ¤˜ ®¨© £¦§¦ ã©œ«œ ˜¬«ã «¤ œ¤«¦¢ã š ˜ â¤˜ œå›¦ª ˜§¢ãª ˜¤å®¤œ¬©ª «à¤ £¤¬£á«à¤.
-ƒé©«œ §¦¢¢âª ­¦¨âª «¤ œ¤«¦¢ã N àª ©ç¤«£©, ¡˜  «¦ ©ç©«£˜ Ÿ˜ §¨¦®à¨ã©œ  œ£­˜¤å¦¤«áª ©˜ª
-« ª œ§ ¡œ­˜¢å›œª (headers) «à¤ £¤¬£á«à¤ §¦¬ §œ¨¤áœ . „«© , £œ «¤ œ¤«¦¢ã [33mNNNN[37m,
- ™á© Ÿ˜ ©˜ª ›œå¥œ  « ª œ§ ¡œ­˜¢å›œª «à¤ œ§æ£œ¤à¤ «œ©©á¨à¤ £¤¬£á«à¤, ¡˜  Ÿ˜ ©«˜£˜«ã©œ  ©«¦ «œ¢œ¬«˜å¦.!)
-!0l 
-!W[33mP[37mrevious:  !i‹œ«˜­â¨œ©«œ ©«¦ §¨¦š¦ç£œ¤¦ £ã¤¬£˜. Šœ «¦¬¨šœå æ§àª ˜¡¨ ™éª ¡˜   §¨¦š¦ç£œ¤ œ¤«¦¢ã.!)
+!W[33mN[37mext:      !iJump to the next message without reading this one. You can
+use this command as a simple means of scanning messages. Concatenate N multiple times
+e.g. [33mNNNNN[37m) and message headers of the next few (five, in this example) messages
+will be printed, leaving you at the last one.!)
 !0l
-!W[33m#[37m:         !i’¦ ©ç©«£˜ Ÿ˜ ©˜ª «ã©œ  â¤˜¤ ˜¨ Ÿ£æ £¤ç£˜«¦ª ©«¦ ¦§¦å¦ Ÿ˜ £œ«˜™œå«œ.
-€¤ «¦ £ã¤¬£˜ ›œ¤ ™¨œŸœå, Ÿ˜ «¦§¦Ÿœ«Ÿœå«œ ©«¦ ¡¦¤« ¤æ«œ¨¦ £ã¤¬£˜. ‹§¦¨œå«œ ¡˜  œ›é ¤˜ ®¨© £¦§¦ ã©œ«œ
-©¬¤«£ã©œ ª:  œ¤«¦¢ã [33m#1000[37m Ÿ˜ ©˜ª §áœ  ¡˜«œ¬Ÿœå˜¤ ©«¦ £ã¤¬£˜ 1000.!)
+!W[33mP[37mrevious:  !iJump to the previous message. Works just like the above command.!)
 !0l
-!W[33mT[37mhread:    !i€¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬. €¬«ã  œ¤«¦¢ã ©˜ª œ£­˜¤åœ 
-â¤˜ ˜¡æ£˜ £œ¤¦ç, £œ «¤ ™¦ãŸœ ˜ «¦¬ ¦§¦å¦¬ £§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦
-§¨¦š¦ç£œ¤¦ ã œ§æ£œ¤¦ £ã¤¬£˜ «ª ©¬ã«©ª. ‹§¦¨œå«œ œ§å©ª ¤˜ §á«œ ©«¦
-£ã¤¬£˜ §¨¦ª «¦ ¦§¦å¦ ˜§˜¤«á «¦ «¨â®¦¤ £ã¤¬£˜.!)
+!W[33m#[37m:         !iEnter a message number after the [33m#[37m and you can jump to that
+message, or the closest available one if the desired message isn't available. You can also use
+[33m#L[37m (last message) and [33m#F[37m (first message).!)
 !0l
-!W[33mQ[37muickscan: !i„›é Ÿ˜ ™¨œå«œ ¡á§¦ œª œ › ¡âª œ¤«¦¢âª š ˜ «¤ š¨ãš¦¨
-˜¤å®¤œ¬©. ‹§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦ œ§æ£œ¤¦ ã §¨¦š¦ç£œ¤¦ club, ¤˜ ˜­˜ ¨â©œ«œ «¦
-«¨â®¦¤ club ˜§æ «¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ª, ¡˜  á¢¢˜.!)
+!W[33mT[37mhread:    !iMessage threading. This leads you to a submenu.
+Use it to move to the previous or next message in this discussion (thread).
+You can also jump to the message this one is a reply to.!)
 !0l
-!W[33mE[37mmail:     !i‘®£˜«åœ«œ ˜§á¤«© §¨¦ª ˜¬«æ «¦ £ã¤¬£˜. † ˜§á¤«© Ÿ˜ ©«˜¢œå àª
-§¨¦©à§ ¡æ £ã¤¬£˜ ©«¦ ˜§¦©«¦¢â˜ «¦¬ £¤ç£˜«¦ª.!)
-!W[33mR[37meply:     !iƒ£ ¦¬¨šœå«˜  ›£æ© ¦ £ã¤¬£˜-˜§á¤«© §¨¦ª «¦ «¨â®¦¤ £ã¤¬£˜.!)
+!W[33mQ[37muickscan: !iThis opens a submenu. Use it to handle your
+quickscan process: you can jump to the previous or next club, remove the
+current club from your quickscan list, catch up with this club, and more.!)
+!0l
+!W[33mE[37mmail:     !iReply to this message in private. Your reply is
+sent as email, not to the club.!)
+!0l
+!W[33mR[37meply:     !iPublic reply to this message.!)
 !0l
 [0;1m} T Quickscan, help about reading messages, version 1
 
 
 RQSRMNU2 {[0;1m
-[[33mN[37m]ext . . . . . . . „§æ£œ¤¦ £ã¤¬£˜   [[33mP[37m]revious . . . ¨¦š¦ç£œ¤¦ £ã¤¬£˜
-[[33mC[37m]lear . . . .  ƒ ˜š¨˜­ã £¤ç£˜«¦ª   [[33mM[37m]odify  . . . .  €¢¢˜šã £¤ç£˜«¦ª
-[[33mE[37m]mail reply  . ¨¦©à§ ¡ã ˜§á¤«©   [[33mR[37m]eply  . . . . . . . . . €§á¤«©
-[[33mT[37m]hread  . . .  €¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬   [[33mQ[37m]uickscan . . . ‚¨ãš¦¨ ˜¤å®¤œ¬©
-e[[33mX[37m]it  . . . . . . . . . .  „¥¦›¦ª
+[[33mN[37m]ext            [[33mP[37m]revious
+[[33mC[37m]lear (delete)  [[33mM[37m]odify message
+[[33mE[37m]mail reply     [[33mR[37m]eply
+[[33mT[37m]hread          [[33mQ[37m]uickscan
+e[[33mX[37m]it
 
-† œ§ ¢¦šã ©˜ª ([33m?[37m š ˜ ™¦ãŸœ ˜); } T Quickscan, choices after reading message
+Your choice ([33m?[37m for help)? } T Quickscan, choices after reading message
 
 
 RQSRMNU2H {[0;1m
 
-!J‹§¦¨œå«œ ¤˜ ›é©œ«œ « ª œ¥ãª œ¤«¦¢âª ©œ ˜¬«æ «¦ ©£œå¦:!)
+!JHere are your choices at this stage:!)
 
-!W[33mN[37mext:     !i‹œ«˜­â¨œ©«œ ©«¦ œ§æ£œ¤¦ £ã¤¬£˜.
-‹§¦¨œå«œ ¤˜ ®¨© £¦§¦ ã©œ«œ ˜¬«ã «¤ œ¤«¦¢ã š ˜ â¤˜ œå›¦ª ˜§¢ãª ˜¤å®¤œ¬©ª «à¤ £¤¬£á«à¤.
-ƒé©«œ §¦¢¢âª ­¦¨âª «¤ œ¤«¦¢ã N àª ©ç¤«£©, ¡˜  «¦ ©ç©«£˜ Ÿ˜ §¨¦®à¨ã©œ  œ£­˜¤å¦¤«áª ©˜ª
-« ª œ§ ¡œ­˜¢å›œª (headers) «à¤ £¤¬£á«à¤ §¦¬ §œ¨¤áœ . „«© , £œ «¤ œ¤«¦¢ã [33mNNNN[37m,
- ™á© Ÿ˜ ©˜ª ›œå¥œ  « ª œ§ ¡œ­˜¢å›œª «à¤ œ§æ£œ¤à¤ «œ©©á¨à¤ £¤¬£á«à¤, ¡˜  Ÿ˜ ©«˜£˜«ã©œ  ©«¦ «œ¢œ¬«˜å¦.!)
+!W[33mN[37mext:      !iJump to the next message without reading this one. You can
+use this command as a simple means of scanning messages. Concatenate N multiple times
+e.g. [33mNNNNN[37m) and message headers of the next few (five, in this example) messages
+will be printed, leaving you at the last one.!)
 !0l
-!W[33mP[37mrevious: !i‹œ«˜­â¨œ©«œ ©«¦ §¨¦š¦ç£œ¤¦ £ã¤¬£˜. Šœ «¦¬¨šœå æ§àª ˜¡¨ ™éª ¡˜   §¨¦š¦ç£œ¤ œ¤«¦¢ã.!)
+!W[33mP[37mrevious:  !iJump to the previous message. Works just like the above command.!)
 !0l
-!W[33m#[37m:        !i’¦ ©ç©«£˜ Ÿ˜ ©˜ª «ã©œ  â¤˜¤ ˜¨ Ÿ£æ £¤ç£˜«¦ª ©«¦ ¦§¦å¦ Ÿ˜ £œ«˜™œå«œ.
-€¤ «¦ £ã¤¬£˜ ›œ¤ ™¨œŸœå, Ÿ˜ «¦§¦Ÿœ«Ÿœå«œ ©«¦ ¡¦¤« ¤æ«œ¨¦ £ã¤¬£˜. ‹§¦¨œå«œ ¡˜  œ›é ¤˜ ®¨© £¦§¦ ã©œ«œ
-©¬¤«£ã©œ ª:  œ¤«¦¢ã [33m#1000[37m Ÿ˜ ©˜ª §áœ  ¡˜«œ¬Ÿœå˜¤ ©«¦ £ã¤¬£˜ 1000.!)
+!W[33m#[37m:         !iEnter a message number after the [33m#[37m and you can jump to that
+message, or the closest available one if the desired message isn't available. You can also use
+[33m#L[37m (last message) and [33m#F[37m (first message).!)
 !0l
-!W[33mM[37modify:   !i’¦ £ã¤¬£˜ â®œ  ©«˜¢œå ˜§æ œ©áª. „®œ«œ «¦ › ¡˜åà£˜ ¤˜ ˜¢¢á¥œ«œ «˜ §œ¨ œ®æ£œ¤á «¦¬.
-€¬«ã  œ¤«¦¢ã ©˜ª œ§ «¨â§œ  ¤˜ ¡á¤œ«œ ˜¡¨ ™éª ˜¬«æ.!)
+!W[33mM[37modify:    !iYou are the sender of this message. You can
+modify its contents using this command.!)
 !0l
-!W[33mC[37mlear:    !i’¦ £ã¤¬£˜ â®œ  ©«˜¢œå ˜§æ œ©áª. ‹œ ˜¬«ã «¤ œ¤«¦¢ã «¦ › ˜š¨á­œ«œ ˜§æ «¦ club @CLUB@.
-ƒœ¤ Ÿ˜ ¬§á¨¥œ  ¡˜££å˜ œ¨é«© œ§ ™œ™˜åà©ª.!)
+!W[33mC[37mlear:     !iYou are the sender of this message. You can
+delete this message with this command. Beware: you won't be asked for confirmation.!)
 !0l
-!W[33mT[37mhread:   !i€¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬. €¬«ã  œ¤«¦¢ã ©˜ª œ£­˜¤åœ 
-â¤˜ ˜¡æ£˜ £œ¤¦ç, £œ «¤ ™¦ãŸœ ˜ «¦¬ ¦§¦å¦¬ £§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦
-§¨¦š¦ç£œ¤¦ ã œ§æ£œ¤¦ £ã¤¬£˜ «ª ©¬ã«©ª. ‹§¦¨œå«œ œ§å©ª ¤˜ §á«œ ©«¦
-£ã¤¬£˜ §¨¦ª «¦ ¦§¦å¦ ˜§˜¤«á «¦ «¨â®¦¤ £ã¤¬£˜.!)
-!W[33mQ[37muickscan: !i„›é Ÿ˜ ™¨œå«œ ¡á§¦ œª œ › ¡âª œ¤«¦¢âª š ˜ «¤ š¨ãš¦¨
-˜¤å®¤œ¬©. ‹§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦ œ§æ£œ¤¦ ã §¨¦š¦ç£œ¤¦ club, ¤˜ ˜­˜ ¨â©œ«œ «¦
-«¨â®¦¤ club ˜§æ «¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ª, ¡˜  á¢¢˜.!)
+!W[33mT[37mhread:    !iMessage threading. This leads you to a submenu.
+Use it to move to the previous or next message in this discussion (thread).
+You can also jump to the message this one is a reply to.!)
 !0l
+!W[33mQ[37muickscan: !iThis opens a submenu. Use it to handle your
+quickscan process: you can jump to the previous or next club, remove the
+current club from your quickscan list, catch up with this club, and more.!)
 !0l
-!W[33mE[37mmail:    !i‘®£˜«åœ«œ ˜§á¤«© §¨¦ª ˜¬«æ «¦ £ã¤¬£˜. † ˜§á¤«© Ÿ˜ ©«˜¢œå àª
-§¨¦©à§ ¡æ £ã¤¬£˜ ©«¦ ˜§¦©«¦¢â˜ «¦¬ £¤ç£˜«¦ª.!)
+!W[33mE[37mmail:     !iReply to this message in private. Your reply is
+sent as email, not to the club.!)
 !0l
-!W[33mR[37meply:    !iƒ£ ¦¬¨šœå«˜  ›£æ© ¦ £ã¤¬£˜-˜§á¤«© §¨¦ª «¦ «¨â®¦¤ £ã¤¬£˜.!)
+!W[33mR[37meply:     !iPublic reply to this message.!)
 !0l
 [0;1m} T Quickscan, help about reading messages, version 2
 
 
 RQSRMNU3 {[0;1m
-[[33mN[37m]ext  . . . . . .  „§æ£œ¤¦ £ã¤¬£˜   [[33mP[37m]revious . . . ¨¦š¦ç£œ¤¦ £ã¤¬£˜
-[[33mE[37m]mail reply  . ¨¦©à§ ¡ã ˜§á¤«©   [[33mR[37m]eply . . . . . . . . .  €§á¤«©
-[[33mT[37m]hread  . . .  €¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬   [[33mS[37m]IGop menu . . . „¤«¦¢âª ¦¨š˜¤à«ã
-[[33mQ[37m]uickscan . . . ‚¨ãš¦¨ ˜¤å®¤œ¬©   e[[33mX[37m]it . . . . . . . . . . . „¥¦›¦ª
+[[33mN[37m]ext            [[33mP[37m]revious
+[[33mE[37m]mail reply     [[33mR[37m]eply
+[[33mT[37m]hread          [[33mS[37m]IGop menu
+[[33mQ[37m]uickscan       e[[33mX[37m]it
 
-† œ§ ¢¦šã ©˜ª ([33m?[37m š ˜ ™¦ãŸœ ˜); } T Quickscan, choices after reading message
+Your choice ([33m?[37m for help)? } T Quickscan, choices after reading message
 
 
 RQSRMNU3H {[0;1m
 
-!J‹§¦¨œå«œ ¤˜ ›é©œ«œ « ª œ¥ãª œ¤«¦¢âª ©œ ˜¬«æ «¦ ©£œå¦:!)
+!JHere are your choices at this stage:!)
 
-!W[33mN[37mext:     !i‹œ«˜­â¨œ©«œ ©«¦ œ§æ£œ¤¦ £ã¤¬£˜.
-‹§¦¨œå«œ ¤˜ ®¨© £¦§¦ ã©œ«œ ˜¬«ã «¤ œ¤«¦¢ã š ˜ â¤˜ œå›¦ª ˜§¢ãª ˜¤å®¤œ¬©ª «à¤ £¤¬£á«à¤.
-ƒé©«œ §¦¢¢âª ­¦¨âª «¤ œ¤«¦¢ã N àª ©ç¤«£©, ¡˜  «¦ ©ç©«£˜ Ÿ˜ §¨¦®à¨ã©œ  œ£­˜¤å¦¤«áª ©˜ª
-« ª œ§ ¡œ­˜¢å›œª (headers) «à¤ £¤¬£á«à¤ §¦¬ §œ¨¤áœ . „«© , £œ «¤ œ¤«¦¢ã [33mNNNN[37m,
- ™á© Ÿ˜ ©˜ª ›œå¥œ  « ª œ§ ¡œ­˜¢å›œª «à¤ œ§æ£œ¤à¤ «œ©©á¨à¤ £¤¬£á«à¤, ¡˜  Ÿ˜ ©«˜£˜«ã©œ  ©«¦ «œ¢œ¬«˜å¦.!)
+!W[33mN[37mext:      !iJump to the next message without reading this one. You can
+use this command as a simple means of scanning messages. Concatenate N multiple times
+e.g. [33mNNNNN[37m) and message headers of the next few (five, in this example) messages
+will be printed, leaving you at the last one.!)
 !0l
-!W[33mP[37mrevious: !i‹œ«˜­â¨œ©«œ ©«¦ §¨¦š¦ç£œ¤¦ £ã¤¬£˜. Šœ «¦¬¨šœå æ§àª ˜¡¨ ™éª ¡˜   §¨¦š¦ç£œ¤ œ¤«¦¢ã.!)
+!W[33mP[37mrevious:  !iJump to the previous message. Works just like the above command.!)
 !0l
-!W[33m#[37m:        !i’¦ ©ç©«£˜ Ÿ˜ ©˜ª «ã©œ  â¤˜¤ ˜¨ Ÿ£æ £¤ç£˜«¦ª ©«¦ ¦§¦å¦ Ÿ˜ £œ«˜™œå«œ.
-€¤ «¦ £ã¤¬£˜ ›œ¤ ™¨œŸœå, Ÿ˜ «¦§¦Ÿœ«Ÿœå«œ ©«¦ ¡¦¤« ¤æ«œ¨¦ £ã¤¬£˜. ‹§¦¨œå«œ ¡˜  œ›é ¤˜ ®¨© £¦§¦ ã©œ«œ
-©¬¤«£ã©œ ª:  œ¤«¦¢ã [33m#1000[37m Ÿ˜ ©˜ª §áœ  ¡˜«œ¬Ÿœå˜¤ ©«¦ £ã¤¬£˜ 1000.!)
+!W[33m#[37m:         !iEnter a message number after the [33m#[37m and you can jump to that
+message, or the closest available one if the desired message isn't available. You can also use
+[33m#L[37m (last message) and [33m#F[37m (first message).!)
 !0l
-!W[33mT[37mhread:   !i€¡¦¢¦¬Ÿå˜ › ˜¢æš¦¬. €¬«ã  œ¤«¦¢ã ©˜ª œ£­˜¤åœ 
-â¤˜ ˜¡æ£˜ £œ¤¦ç, £œ «¤ ™¦ãŸœ ˜ «¦¬ ¦§¦å¦¬ £§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦
-§¨¦š¦ç£œ¤¦ ã œ§æ£œ¤¦ £ã¤¬£˜ «ª ©¬ã«©ª. ‹§¦¨œå«œ œ§å©ª ¤˜ §á«œ ©«¦
-£ã¤¬£˜ §¨¦ª «¦ ¦§¦å¦ ˜§˜¤«á «¦ «¨â®¦¤ £ã¤¬£˜.!)
+!W[33mM[37modify:    !iYou are the sender of this message. You can
+modify its contents using this command.!)
 !0l
-!W[33mQ[37muickscan: !i„›é Ÿ˜ ™¨œå«œ ¡á§¦ œª œ › ¡âª œ¤«¦¢âª š ˜ «¤ š¨ãš¦¨
-˜¤å®¤œ¬©. ‹§¦¨œå«œ ¤˜ ¡ ¤Ÿœå«œ ©«¦ œ§æ£œ¤¦ ã §¨¦š¦ç£œ¤¦ club, ¤˜ ˜­˜ ¨â©œ«œ «¦
-«¨â®¦¤ club ˜§æ «¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ª, ¡˜  á¢¢˜.!)
+!W[33mC[37mlear:     !iYou are the sender of this message. You can
+delete this message with this command. Beware: you won't be asked for confirmation.!)
 !0l
-!W[33mE[37mmail:    !i‘®£˜«åœ«œ ˜§á¤«© §¨¦ª ˜¬«æ «¦ £ã¤¬£˜. † ˜§á¤«© Ÿ˜ ©«˜¢œå àª
-§¨¦©à§ ¡æ £ã¤¬£˜ ©«¦ ˜§¦©«¦¢â˜ «¦¬ £¤ç£˜«¦ª.!)
-!W[33mR[37meply:    !iƒ£ ¦¬¨šœå«˜  ›£æ© ¦ £ã¤¬£˜-˜§á¤«© §¨¦ª «¦ «¨â®¦¤ £ã¤¬£˜.!)
+!W[33mT[37mhread:    !iMessage threading. This leads you to a submenu.
+Use it to move to the previous or next message in this discussion (thread).
+You can also jump to the message this one is a reply to.!)
 !0l
-!W[33mS[37mIGop:    !i‹œ«˜­â¨œ©«œ ©«¦ £œ¤¦ç ¦¨š˜¤à«ã «¦¬ club @CLUB@. „¡œå £§¦¨œå«œ ¤˜
-˜¤« š¨á¯œ«œ, ¤˜ §¨¦àŸã©œ«œ, ¤˜ › ˜š¨á¯œ«œ ¡˜  ¤˜ £œ«˜™á¢¢œ«œ £¤ç£˜«˜, ¡˜  á¢¢˜. ‚ ˜ §œ¨ ©©æ«œ¨œª §¢¨¦­¦¨åœª
-£§œå«œ ©«¦ £œ¤¦ç ¡˜  «ã©«œ ™¦ãŸœ ˜.!)
+!W[33mE[37mmail:     !iReply to this user in private. The message will
+be sent via email.!)
+!W[33mR[37meply:     !iPublically reply to this message.!)
+!0l
+!W[33mQ[37muickscan: !iThis opens a submenu. Use it to handle your
+quickscan process: you can jump to the previous or next club, remove the
+current club from your quickscan list, catch up with this club, and more.!)
+!0l
+!W[33mE[37mmail:     !iReply to this message in private. Your reply is
+sent as email, not to the club.!)
+!0l
+!W[33mR[37meply:     !iPublic reply to this message.!)
+!0l
+!W[33mS[37mIGop:     !iMoves you to the operator's menu for club @CLUB@.
+There, you can copy, forward, delete and modify this message, among other
+things. For more information, enter the menu and request help there.!)
 !0l
 [0;1m} T Quickscan, help about reading messages, version 3
 
 
 QSMMNU {[0;1m
-„¤«¦¢âª š¨ãš¦¨ª ˜¤å®¤œ¬©ª:
+Quickscan commands:
 
-[[33mN[37m]ext club . . . . .  „§æ£œ¤¦ club   [[33mP[37m]revious club  . ¨¦š¦ç£œ¤¦ club
-[[33mR[37m]emove club . . . . €­˜å¨œ© club   [[33mB[37m]ookmark  . . . . . ‘œ¢ ›¦›œå¡«ª
-[[33mC[37m]atch up . . ’â¢¦ª ˜¤áš¤à©ª club   [[33mS[37m]elect club  . . . . „§ ¢¦šã club
-e[[33mX[37m]it  . . . . . . . . . .  „¥¦›¦ª
+[[33mN[37m]ext club      [[33mP[37m]revious club
+[[33mR[37m]emove club    [[33mB[37m]ookmark message
+[[33mC[37m]atch up       [[33mS[37m]elect club
+e[[33mX[37m]it
 
-† œ§ ¢¦šã ©˜ª ([33m?[37m š ˜ ™¦ãŸœ ˜); } T Quickscan menu
+Your choice ([33m?[37m for help)? } T Quickscan menu
 
 
 QWMNUR {[0;1;31m
-!JŠ¬§á£˜ , ˜¬«ã  œ§ ¢¦šã ›œ¤ œå¤˜  ›¬¤˜«ã.!)
+!JSorry, that is not a valid option at this point.!)
 [0;1m} T Quickscan menu, invalid selection
 
 
 QSMNUH {[0;1m
 
-!J‹§¦¨œå«œ ¤˜ ›é©œ«œ « ª œ¥ãª œ¤«¦¢âª ©œ ˜¬«æ «¦ ©£œå¦:!)
+!JAt this point, you can do the following:!)
 
-!W[33mN[37mext club:     !i‹œ«˜­â¨œ©«œ ©«¦ œ§æ£œ¤¦ club «ª š¨ãš¦¨ª ˜¤å®¤œ¬©ãª ©˜ª.
-©˜ £¤ç£˜«˜ ›œ¤ â®œ«œ ˜¡æ£˜ › ˜™á©œ  ©œ ˜¬«æ «¦ club §˜¨˜£â¤¦¬¤ ˜› á™˜©«˜ ¡˜  Ÿ˜ ©˜ª §¨¦©­œ¨Ÿ¦ç¤
-š ˜ ˜¤áš¤à© ©«¤ œ§æ£œ¤ š¨ãš¦¨ ˜¤å®¤œ¬©. €¤ ›œ¤ ¬§á¨®œ  œ§æ£œ¤¦ club, «æ«œ
- š¨ãš¦¨ ˜¤å®¤œ¬© ©«˜£˜«áœ  œ›é.!)
+!W[33mN[37mext club:     !iJump to the next club in your quickscan list.
+Any unread messages in this club will be shown again in your next quickscan.
+If this is the last club in your quickscan list, this command concludes the
+scan.!)
 !0l
-!W[33mP[37mrevious club: !iŠœ «¦¬¨šœå æ§àª ˜¡¨ ™éª ¡˜   §¨¦š¦ç£œ¤ œ¤«¦¢ã, ˜¢¢á ©˜ª
-£œ«˜­â¨œ  ©«¦ §¨¦š¦ç£œ¤¦ club.!)
+!W[33mP[37mrevious club: !iJust like the above command, but jumps to the
+previous club.!)
 !0l
-!W[33mR[37memove club:   !i€­˜ ¨œå «¦ «¨â®¦¤ club ˜§æ «¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ãª ©˜ª.
-‹œ«˜­â¨œ©«œ ˜¬«æ£˜«˜ ©«¦ œ§æ£œ¤¦ club. ’˜ ¤â˜ £¤ç£˜«˜ «¦¬ club ›œ¤ Ÿ˜ ©˜ª §¨¦©­â¨¦¤«˜ 
-§¢â¦¤ š ˜ ˜¤áš¤à©, œ¡«æª ¡  ˜¤ ¥˜¤˜§¨¦©Ÿâ©œ«œ «¦ club ©«¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ãª ©˜ª,
-£œ «¤ œ¤«¦¢ã [33mCRQC[37m ˜§æ «¦ ¡œ¤«¨ ¡æ £œ¤¦ç «ª ™á©ª.!)
+!W[33mR[37memove club:   !iRemoves this club from your quickscan list
+and moves you to the next one. To add the club to your quiskcan list again,
+use the [33mRQC[37m command at the main club menu.!)
 !0l
-!W[33mB[37mookmark:      !i‹œ ˜¬«ã «¤ œ¤«¦¢ã ¦¨åœ«œ §¦ ¦ Ÿ˜ Ÿœà¨œå«˜  «¦ «œ¢œ¬«˜å¦
-› ˜™˜©£â¤¦ £ã¤¬£˜ «¦¬ club. ’¦ «¨â®¦¤ £ã¤¬£˜ ¡˜  æ¢˜ «˜ œ§æ£œ¤˜ £¤ç£˜«˜ «¦¬ club
-Ÿ˜ Ÿœà¨Ÿ¦ç¤ £ › ˜™˜©£â¤˜ ¡˜  Ÿ˜ ©˜ª §¨¦©­œ¨Ÿ¦ç¤ š ˜ ˜¤áš¤à© ©«¤ œ§æ£œ¤ š¨ãš¦¨ ˜¤å®¤œ¬©. €¬«ã
- œ¤«¦¢ã œå¤˜  ®¨ã© £ ˜¤ â®œ«œ ã› › ˜™á©œ  «¦ club, ˜¢¢á Ÿâ¢œ«œ ¤˜ «¦ ¥˜¤˜› ˜™á©œ«œ § ¦ §¨¦©œ¡« ¡á
-˜¨šæ«œ¨˜.!)
+!W[33mB[37mookmark:      !iSets this message to be the 'last read' message
+for this club. This message and all previous ones will be considered read;
+all further messages will be considered unread and will be presented to you
+at your next cleanup. This command is useful when you've already read the
+messages in a club, but you'd like to come back later on for a more careful reading.!)
 !0l
-!W[33mC[37match up:      !i¢˜ «˜ £¤ç£˜«˜ «¦¬ club Ÿœà¨¦ç¤«˜  ˜¬«æ£˜«˜ › ˜™˜©£â¤˜. ‹œ«˜­â¨œ©«œ
-©«¦ œ§æ£œ¤¦ club.!)
+!W[33mC[37match up:      !iMarks all messages in this club as read.
+Takes you to the next club.!)
 !0l
-!W[33mS[37melect club:   !i‹œ ˜¬«ã «¤ œ¤«¦¢ã £§¦¨œå«œ ¤˜ £œ«˜­œ¨Ÿœå«œ ©œ â¤˜ á¢¢¦ club ›å¤¦¤«˜ª
-˜§¢éª «¦ æ¤¦£á «¦¬. ’¦ club ›œ¤ œå¤˜  ˜¤áš¡ ¤˜ §œ¨ ¢˜£™á¤œ«˜  ©«¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ãª
-©˜ª.!)
+!W[33mS[37melect club:   !iJumps to a club of your choice. The club need
+not be in your quickscan list.!)
 !0l
 [0;1m} T Quickscan menu, help
 
 
 QSMBM {[0;1;32m
-!J‰˜¢éª, «¦ £ã¤¬£˜ [37m%d[32m Ÿœà¨œå«˜  «¦ §¨é«¦ £ › ˜™˜©£â¤¦ £ã¤¬£˜ «¦¬
-club [37m%s[32m.!)
+!JOK, bookmark place on message [37m%d[32m for club [37m%s[32m.!)
 [0;1m} T Quickscan menu, bookmark placed
 
 
 QSMCU {[0;1;32m
-!J‰˜¢éª, æ¢˜ «˜ £¤ç£˜«˜ «¦¬ club [37m%s[32m Ÿœà¨¦ç¤«˜  › ˜™˜©£â¤˜.!)
+!JOK, all messages in club [37m%s[32m have been marked as read.!)
 [0;1m} T Quickscan menu, caught up
 
 
 QSMRM {[0;1;32m
-!J‰˜¢éª, «¦ club [37m%s[32m ˜­˜ ¨œå«˜  ˜§æ «¤ ¢å©«˜ š¨ãš¦¨ª ˜¤å®¤œ¬©ª.
-€¤ Ÿâ¢œ«œ ¤˜ «¦ ¥˜¤˜§¨¦©Ÿâ©œ«œ, §¨â§œ  ¤˜ ®¨© £¦§¦ ã©œ«œ «¤ œ¤«¦¢ã
-[33mCRQC[32m ˜§æ «¦ ¡œ¤«¨ ¡æ £œ¤¦ç «ª ™á©ª ([33mRQC[32m ˜§æ «¦
-¡œ¤«¨ ¡æ £œ¤¦ç «à¤ clubs).!)
+!JOK, club [37m%s[32m has been removed from your quickscan list.
+To add it again, use the [33mRQC[32m command at the main club menu.!)
 [0;1m} T Quickscan menu, removed club from quickscan configuration
 
 
 TLCNAX {[0;1;31m
-!JŠ¬§á£˜ , «¦ œ§å§œ›æ ©˜ª ›œ¤ œ§ «¨â§œ  ¤˜ £§œå«œ ©«¦ ¡˜¤á¢  «¢œ©¬¤¦£ ¢ é¤
-˜¬«¦ç «¦¬ club.!)
+!JSorry, this club's teleconference channel isn't available to your access
+level.!)
 [0;1m} T Enter teleconferences, access denied
 
 
 BLTNAX {[0;1;31m
-!JŠ¬§á£˜ , «¦ œ§å§œ›æ ©˜ª ›œ¤ œ§ «¨â§œ  ¤˜ £§œå«œ ©«¦ ˜¤˜š¤à©«ã¨ ¦ á¨Ÿ¨à¤
-˜¬«¦ç «¦¬ club.!)
+!JSorry, this club's  bulletin area isn't available to your access level.!)
 [0;1m} T Enter bulletin reader, access denied
 
 
 LANGEND {}
-
