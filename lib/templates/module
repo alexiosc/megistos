@@ -1,0 +1,16 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+include $(top_srcdir)/templates/base
+
+pkglib_PROGRAMS = $(PROGNAMES)
+
+include $(top_srcdir)/templates/msg
+
+# End of file.

@@ -1,0 +1,19 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+pkgdatadir = @PKGDATADIR@
+pkglibdir = @PKGLIBDIR@
+pkgincludedir = @PKGINCLUDEDIR@
+
+#DEFS = @DEFS@
+CFLAGS = @CFLAGS@ -I $(top_srcdir)/@LIBMEGISTOS@
+LDFLAGS = -L$(top_srcdir)/@LIBMEGISTOS@ @LDFLAGS@
+LDADD = -lmegistos $(CURSES_IF_NEEDED)
+
+# End of file.

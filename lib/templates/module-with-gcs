@@ -1,0 +1,14 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+include $(top_srcdir)/templates/module
+
+lib_LTLIBRARIES = $(GCS)
+
+# End of file.

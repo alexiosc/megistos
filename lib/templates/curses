@@ -1,0 +1,12 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+CURSES_IF_NEEDED = @CURSESLIB@
+
+# End of file.
