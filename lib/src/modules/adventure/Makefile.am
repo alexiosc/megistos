@@ -3,14 +3,24 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/24 20:30:57  alexios
+# Fixed the makefile (adventure was really two binaries).
+#
 # Revision 1.1  2003/12/24 20:11:27  alexios
 # Initial revision.
 #
 
-PROGNAMES = adventure
+# Both of these are compiled with the `module' template. Although only
+# adventure is an actual Megistos module, infoint also uses the very
+# same infrastructure (minus the module declaration).
 
-adventure_SOURCES = \
-	adventure.c \
+PROGNAMES = adventure infoint
+
+BUILT_SOURCES = mbk_adventure.h
+
+adventure_SOURCES = adventure.c
+
+infoint_SOURCES = \
 	control.c \
 	extern.c \
 	fileio.c \
@@ -30,6 +40,5 @@ adventure_SOURCES = \
 	ztypes.h
 
 include $(top_srcdir)/templates/module
-include $(top_srcdir)/templates/msg
 
 # End of file
