@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:40:38  alexios
+ * Removed rcsinfo. Moved various declarations to mailerplugins.h.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,11 +59,7 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-#define VERSION "0.9"
+#define MAILER_VERSION "0.9"
 
 
 /* mailer.c */
@@ -78,28 +77,16 @@ extern int audupl;
 extern int uplkey;
 
 
-/* xlate.c */
+/* Mailer plugins */
 
-extern char kbdxlation[NUMXLATIONS][256];
-extern char xlation[NUMXLATIONS][256];
-extern int xlationtable;
-
-#define xlate_in(s)    faststgxlate(s,kbdxlation[xlationtable]);
-#define xlate_out(s)   faststgxlate(s,xlation[xlationtable]);
-
-void    readxlation ();
-
-/* Specifying source==target does not clobber source. */
-
-void    unix2dos (char *source, char *target);
+#ifdef __MAILERPLUGIN__
+#error This should not be defined here
+#endif
+#define __MAILERPLUGIN__
+#include "mailerplugins.h"
 
 
 /* plugindef.c */
-
-
-#define MAXPLUGINS 34
-#define NAMELEN    32
-#define DESCRLEN   64
 
 struct plugin {
 	char    name[NAMELEN];
@@ -132,46 +119,6 @@ void    defaultvals ();
 void    setup ();
 
 
-/* usr.c */
-
-struct usrtag {
-	char    plugin[NAMELEN];
-	int     len;
-};
-
-
-#define NUMOLDREP 4
-
-struct usrqwk {
-	int     compressor;
-	int     decompressor;
-	int     flags;
-	char    packetname[11];
-	unsigned long oldcrc[NUMOLDREP];
-	int     oldlen[NUMOLDREP];
-
-	char    dummy[64];
-};
-
-#define USQ_GREEKQWK 0x0001
-
-#define OMF_TR0    0x0010
-#define OMF_TR1    0x0020
-#define OMF_TR2    0x0040
-#define OMF_TR3    0x0080
-
-#define OMF_SHIFT  4
-#define OMF_TR     (OMF_TR0|OMF_TR1|OMF_TR2|OMF_TR3)
-
-#define USERQWK "userqwk"
-
-extern struct usrqwk userqwk;
-
-int     loadprefs (char *plugin, void *buffer);
-
-void    saveprefs (char *plugin, int len, void *buffer);
-
-
 /* download.c */
 
 void    download ();
@@ -184,6 +131,7 @@ void    upload ();
 /* cksum.c */
 
 int     cksum (char *file, unsigned long *retcrc, int *retlen);
+
 
 
 /* End of File */
