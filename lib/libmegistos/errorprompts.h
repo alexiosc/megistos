@@ -54,6 +54,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/09/28 22:30:20  alexios
+ * Included gettext.h.
+ *
  * Revision 1.5  2003/09/28 13:12:18  alexios
  * Added support for I18N to this file (indeed, this is the main reason
  * why I18N is necesary in libmegistos, as the fatal error messages are
@@ -88,6 +91,9 @@
 
 #ifndef ERRORPROMPTS_H
 #define ERRORPROMPTS_H
+
+
+#include "gettext.h"
 
 
 /* Fall back to locale-driven messages. The symbol GREEK is only kept
