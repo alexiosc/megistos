@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:51:56  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -70,8 +73,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_registry.h>
-#include <megistos/registry.h>
+#include "mbk_registry.h"
+#include "registry.h"
 
 
 promptblock_t *msg;

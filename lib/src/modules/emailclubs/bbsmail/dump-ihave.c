@@ -7,10 +7,10 @@
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
-#include <megistos/ihavedb.h>
-#include <megistos/typhoon.h>
-#include <megistos/mbk_emailclubs.h>
+#include "bbsmail.h"
+#include "../ihavedb.h"
+#include <libtyphoon/typhoon.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 int

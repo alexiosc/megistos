@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/29 07:48:53  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/23 08:14:06  alexios
  * Ran through megistos-config --oh.
  *
@@ -72,8 +75,8 @@ static const char rcsinfo[] = "$Id$";
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/ecdbase.h>
-#include <megistos/typhoon.h>
+#include "../ecdbase.h"
+#include <libtyphoon/typhoon.h>
 
 
 static int

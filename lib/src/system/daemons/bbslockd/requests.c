@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/29 07:46:08  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -42,10 +45,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+const static char rcsinfo [] =
+"$Id$";
 
 
 #define __BBSLOCKD__ 1
@@ -55,8 +56,8 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_UN_H 1
 #define WANT_FCNTL_H 1
 #define WANT_PWD_H 1
-#include <bbsinclude.h>
-#include <bbs.h>
+#include <megistos/bbsinclude.h>
+#include <megistos/bbs.h>
 #include "bbslockd.h"
 
 

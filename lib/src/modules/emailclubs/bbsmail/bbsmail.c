@@ -53,6 +53,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:51:15  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.5  2003/12/27 12:29:38  alexios
  * Adjusted #includes.
  *
@@ -106,8 +109,8 @@ static const char rcsinfo[] =
 #include "bbsmail.h"
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
-#include <megistos/mbk_sysvar.h>
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_sysvar.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 /*#define DEBUG 1*/
