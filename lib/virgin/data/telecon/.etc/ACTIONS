@@ -484,540 +484,724 @@ verb D curse
   secret @USERID@ is cursing you secretly.
 
 
-verb D lakkos
-  user ...Та нихбЮ... КжмбШдабсбаШ бжблШхЮв...
-  user ...Oh horrors... Assorted sausages...
-  
-  simple @ARTNOM@ @USERID@ еЬйбЬзсЭЬа лж Ксббж гЬ лжмк ЛзвсЯиЬк. Оа ЛзвсЯиЬк тожмд дШ нсдЬ вжмбШдабсбаШ ЬЫщ бШа Ымж гудЬк.
-  simple @USERID@ is uncovering the Blatrhas Pit. The Blathras beasts haven't had any sausages for two months.
-
-  other Ч нихбЮ! @ARTNOM@ @USERID@ гцвак зтлШеЬ @OTHACC@ @OTHUID@ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк.
-  other Oh horrors! @USERID@ just threw @OTHUID@ into the Blathras Pit.
-
-  all @ARTNOM@ @USERID@ йШк зЬлсЬа цвжмк йлж Ксббж гЬ лжмк ЛзвсЯиЬк. ХШис зжм ЯШ бсджмд жа ЛзвсЯиЬк...
-  all @USERID@ throws you all into the Blathras Pit. And boy they'll be happy...  
-
-  target Та ниаблу лчоЮ. @ARTNOM@ @USERID@ гцвак йШк зтлШеЬ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк.
-  target What a horrible fate. @USERID@ just threw you into the Blathras Pit.
-
-  secret Та ниаблу лчоЮ. @ARTNOM@ @USERID@ гцвак йШк зтлШеЬ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк орихк дШ лж бШлШвсЩЬа бШдтдШк.
-  secret What a horrible fate. @USERID@ just threw you into the Blathras Pit without anyone noticing.
-
-  key 128
-
-  
 verb D dance
   user ...ЧиШхЬк наЪжчиЬк!
+  user ...Nice style!
 
   simple @ARTNOM@ @USERID@ ожиЬчЬа тдШ ЪиуЪжиж имЯгц!
+  simple @USERID@ dances!
  
   other @ARTNOM@ @USERID@ ожиЬчЬа гЬ @OTHACC@ @OTHUID@.
+  other @USERID@ dances with @OTHUID@.
 
   target @ARTNOM@ @USERID@ ожиЬчЬа гШЭх йШк.
+  target @USERID@ dances with you.
 
   all @ARTNOM@ @USERID@ ожиЬчЬа гЬ цвжмк.
+  all @USERID@ dances with everyone.
 
   secret @ARTNOM@ @USERID@ ожиЬчЬа гШЭх йШк бимнс Шзц лжмк сввжмк.
+  secret @USERID@ dances with you in secret.
 
 
 verb A demand
   user ...ЖймохШ зШиШбШвщ!
+  user ...Could I have your attention please!
 
   simple  @ARTNOM@ @USERID@ ШзШалЬх лЮд зижйжоу йШк!
+  simple  @USERID@ is demanding your attention!
   
   adverb <гЬ ШзШалЮлабц лцдж>
+  adverb <in a demanding tone>
 
 
 verb D frown
   user ...Пр зр бШлйжчнаШйгШ!
+  user ...What a frown!
 
   simple @ARTNOM@ @USERID@ бШлйжчнаШйЬ.
+  simple @USERID@ is frowning.
 
   other @ARTNOM@ @USERID@ бжалсЭЬа @OTHACC@ @OTHUID@ гЬ бШлйжмнаШйгтдж чнжк.
+  other @USERID@ frowns at @OTHUID@.
 
   target @ARTNOM@ @USERID@ йШк бжалсЭЬа гЬ бШлйжмнаШйгтдж чнжк.
+  target @USERID@ frowns at you.
 
   all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк гЬ бШлйжмнаШйгтдж чнжк.
+  all @USERID@ frowns at everyone.
 
   secret @ARTNOM@ @USERID@ йШк бжалсЭЬа гЬ бШлйжмнаШйгтдж чнжк бимнс Шзц лжмк сввжмк.
+  secret @USERID@ flashes you a frown without anyone noticing.
 
 
 verb S giggle
   user ...Ха оа оа!
+  user ...Hee hee!
 
   simple @ARTNOM@ @USERID@ оШоШдхЭЬа мйлЬиабс.
+  simple @USERID@ giggles uncontrollably.
 
 
 verb D glare
   user ...Та сЪиаж ЩвтггШ!
+  user ...What a glare!
 
   other @ARTNOM@ @USERID@ бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк.
+  other @USERID@ glares at @OTHUID@.
 
   target @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк.
+  target @USERID@ glares at you @OTHUID@.
 
   secret @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ flashes you a quick glare without anyone noticing.
 
   simple @ARTNOM@ @USERID@ ШЪиажбжалсЭЬа Ъчир @ARTGEN@.
+  simple @USERID@ glares.
 
   all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк гЬ сЪиаж чнжк.
+  all @USERID@ glares at everyone.
 
 
 
 verb A groan
   user ...Чо!
+  user ...Groan!
 
   simple @ARTNOM@ @USERID@ ЩжЪЪсЬа!
+  simple @USERID@ groans!
 
   adverb <ЩжЪЪщдлШк>
+  adverb <groaning>
 
 
 verb O handshake
   user ...ЗЬигу оЬаиШпхШ!
+  user ...Shake shake shake!
 
   other @ARTNOM@ @USERID@ оШаиЬлсЬа @OTHACC@ @OTHUID@ ЫаШ оЬаиШпхШк.
+  other @USERID@ gives @OTHUID@ a firm handshake.
 
   target @ARTNOM@ @USERID@ йШк оШаиЬлсЬа ЫаШ оЬаиШпхШк.
+  target @USERID@ gives you a firm handshake.
 
   all @ARTNOM@ @USERID@ йШк оШаиЬлсЬа цвжмк ЫаШ оЬаиШпхШк.
+  all @USERID@ gives everyone a firm handshake.
 
   secret @ARTNOM@ @USERID@ йШк оШаиЬлсЬа ЫаШ оЬаиШпхШк, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ gives you a handshake. Somehow, no-one else notices.
 
 
   
 verb S hide
   user ...ЧиШхШ бимпщдШ!
+  user ...Excellent hiding place!
 
   simple @ARTNOM@ @USERID@ бичЩЬлШа зхйр Шзц лж Ысблмвц @ARTGEN@.
+  simple @USERID@ hides behind @ARTGEN@ finger.
 
 
 verb O hit
   user ...БШислЬ ШвчзЮлШ!
+  user ...Show no mercy!
   
   other @ARTNOM@ @USERID@ олмзсЬа @OTHACC@ @OTHUID@ ШвчзЮлШ.
+  other @USERID@ hits @OTHUID@ mercilessly.
 
   target @ARTNOM@ @USERID@ йШк олмзсЬа ШвчзЮлШ.
+  target @USERID@ hits you mercilessly.
 
   secret @ARTNOM@ @USERID@ йШк олмзсЬа ШвчзЮлШ, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ hits you mercilessly. Somehow, no-one notices.
 
   all @ARTNOM@ @USERID@ йШк олмзсЬа цвжмк ШвчзЮлШ.
+  all @USERID@ hits you all mercilessly.
   
 
 verb O hug
   user  ...Та ЯЬигу ШЪбШвас!
+  user  ...Hug!
 
   other @ARTNOM@ @USERID@ ШЪбШвасЭЬа @OTHACC@ @OTHUID@ йнаолс!
+  other @USERID@ hugs @OTHUID@!
 
   target @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа йнаолс!
+  target @USERID@ hugs you!
 
   all @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа цвжмк йнаолс!
+  all @USERID@ gives everyone a hug!
 
   secret @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа йнаолс, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ hugs you in secret!
 
 
 verb A hum
   user ...Хггггггггггг!
+  user ...Hmm!
 
   simple @ARTNOM@ @USERID@ гжмигжмихЭЬа гаШ гЬврЫхШ!
+  simple @USERID@ hums a tune!
 
   adverb <йаЪжлиШЪжмЫщдлШк>
+  adverb <humming>
 
 
 verb O kick
   user ...Пр зр ЩаШацлЮлШ!
+  user ...What violence!
 
-  other @ARTNOM@ @USERID@ бврлйсЬа ЩхШаШ @OTHACC@ @OTHUID@.
+  other @ARTNOM@ @USERID@ бврлйсЬа ЩхШаШ @OTHACC@ @OTHUID@!
+  other @USERID@ kicks @OTHUID@ violently!
 
-  target @ARTNOM@ @USERID@ йШк бврлйсЬа ЩхШаШ.
+  target @ARTNOM@ @USERID@ йШк бврлйсЬа ЩхШаШ!
+  target @USERID@ kicks you violently!
 
-  all @ARTNOM@ @USERID@ йШк бврлйсЬа цвжмк ЩхШаШ.
+  all @ARTNOM@ @USERID@ йШк бврлйсЬа цвжмк ЩхШаШ!
+  all @USERID@ kicks everyone violently!
 
   secret @ARTNOM@ @USERID@ йШк бврлйсЬа бимнс Шзц лжмк сввжмк.
+  secret @USERID@ kicks you on the shin without anyone noticing.
 
 
 verb O kiss
   user ...ЛШлк-гжмлк!
+  user ...Smooch!
 
   other @ARTNOM@ @USERID@ нхвЮйЬ @OTHACC@ @OTHUID@ йлж гсЪжмвж!
+  other @USERID@ kissed @OTHUID@ on the cheek.
 
   target @ARTNOM@ @USERID@ йШк нхвЮйЬ йлж гсЪжмвж.
+  target @USERID@ just kissed you on the cheek.
 
   secret @ARTNOM@ @USERID@ йШк нхвЮйЬ йлж гсЪжмвж бимнс Шзц лжмк сввжмк.
+  secret @USERID@ secretly kissed you on the cheek.
 
   all @ARTNOM@ @USERID@ йШк навсЬа цвжмк йлж гсЪжмвж.
+  all @USERID@ just kissed everyone on the cheek.
 
 
 verb D laugh
   user ...ХШи оШи оШи!
+  user ...Har har har!
 
   simple @ARTNOM@ @USERID@ тйбШйЬ йлШ ЪтваШ!
+  simple @USERID@ bursts out laughing!
 
   other @ARTNOM@ @USERID@ ЪЬвсЬа гЬ @OTHACC@ @OTHUID@!
+  other @USERID@ laughs at @OTHACC@ @OTHUID@!
 
   target @ARTNOM@ @USERID@ ЪЬвсЬа гШЭх йШк!
+  target @USERID@ laughs at you!
 
   all @ARTNOM@ @USERID@ ЪЬвсЬа гЬ цвжмк йШк!
+  all @USERID@ laughs at everyone!
 
   secret @ARTNOM@ @USERID@ ЪЬвсЬа гШЭх йШк, бимнс Шзц лжмк сввжмк!
+  secret @USERID@ laughs at you secretly!
 
 
 verb D look
   user ...БвтзЬлЬ лхзжлШ ЬдЫаШнтижд;
+  user ...See anything you like?
 
   other @ARTNOM@ @USERID@ бжалсЭЬа зЬихЬиЪШ @OTHACC@ @OTHUID@.
+  other @USERID@ looks at @OTHUID@ curiously.
 
   simple @ARTNOM@ @USERID@ псодЬа дШ ЫЬа бсла ЬдЫаШнтижд Ъчир @ARTGEN@.
+  simple @USERID@ looks around @ARTACC@.
 
   target @ARTNOM@ @USERID@ йШк бжалсЭЬа зЬихЬиЪШ.
+  target @USERID@ looks at you curiously.
 
   secret @ARTNOM@ @USERID@ йШк бжалсЭЬа зЬихЬиЪШ, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ flashes you a curious look in secret.
 
   all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк зЬихЬиЪШ.
+  all @USERID@ looks at everyone curiously.
 
 
 verb O massage
   user ...ТШ отиаШ йШк бсджмд ЯШчгШлШ!
+  user ...Rub rub rub!
 
   other @ARTNOM@ @USERID@ оШвШищдЬа @OTHACC@ @OTHUID@ бсдждлШк @OTHGEN@ гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+  other @USERID@ relaxes @OTHUID@ by massaging @OTHACC@ with @ARTGEN@ magic hands!
 
   target @ARTNOM@ @USERID@ йШк оШвШищдЬа бсдждлШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+  target @USERID@ relaxes you by massaging you with @ARTGEN@ magic hands!
 
   secret @ARTNOM@ @USERID@ йШк оШвШищдЬа бимнс Шзц лжмк сввжмк, бсдждлск йШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+  secret @USERID@ relaxes you by secretly massaging you with @ARTGEN@ magic hands!
 
   all @ARTNOM@ @USERID@ йШк оШвШищдЬа цвжмк бсдждлск йШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+  all @USERID@ йШк оШвШищдЬа цвжмк бсдждлск йШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
 
 
 verb A moan
   user ...СЪбижмгн!
+  user ...Humph.
 
   simple @ARTNOM@ @USERID@ ЪбиадасЭЬа!
+  simple @USERID@ is grumbling!
 
   adverb <ЪбиадасЭждлШк>
+  adverb <grumbling>
 
 
 verb D nod
   user ...Об, йчгнрджа.
+  user ...Ok, right.
 
   simple @ARTNOM@ @USERID@ бжмдсЬа лж бЬнсва @ARTGEN@ ймгнрдцдлШк.
+  simple @USERID@ shakes @ARTGEN@ head, agreeing.
 
   other @ARTNOM@ @USERID@ ймгнрдЬх гЬ @OTHACC@ @OTHUID@ бжмдщдлШк лж бЬнсва @ARTGEN@.
+  other @USERID@ shakes @ARTGETN@ head, agreeing with @OTHUID@.
 
   target @ARTNOM@ @USERID@ ймгнрдЬх гШЭх йШк бжмдщдлШк лж бЬнсва @ARTGEN@.
+  target @USERID@ shakes @ARTGETN@ head, agreeing with you.
 
   secret @ARTNOM@ @USERID@ ймгнрдЬх гШЭх йШк бимнс Шзц лжмк сввжмк, бжмдщдлШк лж бЬнсва @ARTGEN@.
+  secret @USERID@ shakes @ARTGEN@ head at you in agreement without anyone noticing.
 
   all @ARTNOM@ @USERID@ ймгнрдЬх гЬ цвжмк, бжмдщдлШк лж бЬнсва @ARTGEN@.
+  all @USERID@ shakes @ARTGEN@ head, agreeing with everyone.
 
 
 verb O notice
   user ...Та зШиШлЮиЮлабцлЮлШ!
+  user ...What powers of observation!
 
   other @ARTNOM@ @USERID@ гцвак зицйЬеЬ @OTHACC@ @OTHUID@.
+  other @USERID@ just noticed @OTHUID@.
 
   target @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ.
+  target @USERID@ just noticed you.
 
   secret @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ, Шввс бШлснЬиЬ дШ лж бичпЬа Шзц лжмк сввжмк.
+  secret @USERID@ just noticed you, but no-one else realised.
 
   all @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ цвжмк. 
+  all @USERID@ just noticed all of you.
 
 
 verb O nudge
   user ...Вбжмз Ъбжмз (йбжчдлЮгШ).
+  user ...nudge nudge.
 
   other @ARTNOM@ @USERID@ йбжмдлсЬа @OTHACC@ @OTHUID@ ЫЬходждлШк бсла.
+  other @USERID@ nudges @OTHUID@, pointing at something.
 
   target @ARTNOM@ @USERID@ йШк йбжмдлсЬа ЫЬходждлШк бсла.
+  target @USERID@ nudges you, pointing at something.
 
   secret @ARTNOM@ @USERID@ йШк йбжмдлсЬа бимнс Шзц лжмк сввжмк, ЫЬходждлШк бсла.
+  secret @USERID@ nudges you in secret, pointing at something.
 
   all @ARTNOM@ @USERID@ йШк йбжмдлсЬа цвжмк, ЫЬходждлШк бсла.
+  all @USERID@ nudges everyone, pointing at something.
 
 
 verb A order
   user ...Та ЯтвЬлЬ дШ зШиШЪЪЬхвЬлЬ;
+  user ...What do you want to order?
 
   simple @ARTNOM@ @USERID@ йбтнлЬлШа ла ЯШ зШиШЪЪЬхвЬа!
+  simple @USERID@ is looking at the menu.
 
   adverb <зШиШЪЪтвдждлШк>
+  adverb <ordering>
 
 
 verb O pinch
   user ...Ажмлк!
+  user ...Ouch!
 
   other @ARTNOM@ @USERID@ гцвак лйхгзЮйЬ @OTHACC@ @OTHUID@!
+  other @USERID@ just pinched @OTHUID@!
 
   target @ARTNOM@ @USERID@ гцвак йШк лйхгзЮйЬ!
+  target @USERID@ just pinched you!
 
   secret @ARTNOM@ @USERID@ гцвак йШк лйхгзЮйЬ бимнс Шзц лжмк сввжмк!
+  secret @USERID@ just pinched you in secret!
 
   all @ARTNOM@ @USERID@ йШк лйагзсЬа цвжмк!
+  all @USERID@ pinches everyone!
 
 
 verb S ponder
   user ...ОзжхШк навжйжнабск ЬбвсгпЬак!
+  user ...Thou art truly philosophical!
 
   simple @ARTNOM@ @USERID@ ймввжЪслШа лЮ ЕрЮ, лж СчгзШд бШа лШ зсдлШ (оггг 42).
+  simple @USERID@ ponders Life, the Universe, and Everything (hmmm, 42).
 
 
 verb S pray
   user ...Агуд!
+  user ...Amen!
  
   simple @ARTNOM@ @USERID@ зижйЬчоЬлШа гЬ ЯиЮйбЬмлабу бШлсдмеЮ.
+  simple @USERID@ prays.
 
 
 verb O punch
   user ...МШ тдШ зЬайлабц ЬзаоЬхиЮгШ!
+  user ...A convincing argument!
 
-  other @ARTNOM@ @USERID@ гцвак ЩсиЬйЬ гаШ гзжмдас й@ARTNOM@ @USERID@!
+  other @ARTNOM@ @USERID@ гцвак ЩсиЬйЬ гаШ гзжмдас й@OTHACC@ @OTHUID@!
+  other @USERID@ just punched @USERID@!
 
   target @ARTNOM@ @USERID@ гцвак йШк ЩсиЬйЬ гаШ гзжмдас.
+  target @USERID@ just punched you!
 
   secret ARTNOM@ @USERID@ гцвак йШк ЩсиЬйЬ гаШ гзжмдас, бШлШнтидждлШк дШ гЮд @OTHACC@ зижйтеЬа бШдЬхк.
+  secret @USERID@ just punched you, and somehow no-one noticed @ARTACC@.
 
   all @ARTNOM@ @USERID@ ЩШисЬа гзжмдатк йЬ цвжмк (гЮд йзищодЬйлЬ, цвжа ЯШ зсиЬлЬ).
+  all @USERID@ lands punches on everyone (line up!).
 
 
 verb O question
   user ...ЛЮд еЬосйЬлЬ лЮ всгзШ!
+  user ...Ve haf vays ov making you talk!
 
   other @ARTNOM@ @USERID@ ШдШбихдЬа @OTHACC@ @OTHUID@ гЬ гЬйШардабтк гЬЯцЫжмк!
+  other @USERID@ questions @OTHUID@ using time-honoured medieval methods!
 
   target @ARTNOM@ @USERID@ йШк ШдШбихдЬа гЬ гЬйШардабтк гЬЯцЫжмк!
+  target @USERID@ questions you using time-honoured medieval methods!
 
   secret @ARTNOM@ @USERID@ йШк ШдШбихдЬа гЬ гЬйШардабтк гЬЯцЫжмк, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ questions you, but no-one takes notice.
 
   all @ARTNOM@ @USERID@ йШк ШдШбихдЬа цвжмк гЬ гЬйШардабтк гЬЯцЫжмк!
+  all @USERID@ questions everyone using time-honoured medieval methods!
 
 
 verb A request
   user ...Та ЯтвЬлЬ дШ ЭЮлуйЬлЬ;
+  user ...What would you like?
 
   simple @ARTNOM@ @USERID@ зижйзШЯЬх дШ ЭЮлуйЬа бсла.
+  simple @USERID@ is trying to ask for something.
 
   adverb <ЭЮлщдлШк>
+  adverb <requesting>
 
 
 verb S shiver
   user ...Лзииии!
+  user ...Shiver!
 
   simple @ARTNOM@ @USERID@ литгЬа.
+  simple @USERID@ shivers.
 
 
 verb O shoot
   user ...ЛзШг!
+  user ...Bang! Shlick-shlack!
 
   other @ARTNOM@ @USERID@ змижЩцвЮйЬ @OTHACC@ @OTHUID@!
+  other @USERID@ just shot @OTHUID@!
 
   target @ARTNOM@ @USERID@ гцвак йШк змижЩцвЮйЬ!
+  target @USERID@ just shot you!
 
-  secret @ARTNOM@ @USERID@ гцвак йШк змижЩцвЮйЬ. ПЬиатиЪрк бШдЬхк ЫЬд лжд зицйЬеЬ.
+  secret @ARTNOM@ @USERID@ гцвак йШк змижЩцвЮйЬ. ПЬиатиЪрк бШдЬхк ЫЬд @ARTACC@ зицйЬеЬ.
+  secret @USERID@ just shot you. Strangely enough, no-one noticed @ARTACC@. 
 
   all @ARTNOM@ @USERID@ йШк змижЩжвЬх цвжмк!
+  all @USERID@ shoots you all!
 
 
 verb A shout
   user ...ЛЮ нрдсЭЬлЬ лцйж ЫмдШлс!
+  user ...Not so loud!
 
   simple @ARTNOM@ @USERID@ нрдсЭЬа гЬ цвЮ @ARTGEN@ лЮ ЫчдШгЮ!
+  simple @USERID@ yells @ARTGEN@ lungs out!
 
   adverb <нрдсЭждлШк>
+  adverb <yelling>
 
 
 verb D shrug
   user ...Чо ШЫЬинт!
+  user ...Oh well.
 
   simple @ARTNOM@ @USERID@ йЮбщдЬа ШЫаснжиШ лжмк щгжмк @ARTGEN@.
+  simple @USERID@ shrugs apathetically.
 
   target @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ Ьйск.
+  target @USERID@ shrugs at you.
  
   other @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ @OTHACC@ @OTHUID@.
+  other @USERID@ shrugs at @OTHUID@.
 
+  secret @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ Ьйск йЮбщдждлШк лжмк щгжмк @ARTGEN@ бимнс Шзц лжмк сввжмк.
   secret @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ Ьйск йЮбщдждлШк лжмк щгжмк @ARTGEN@ бимнс Шзц лжмк сввжмк.
 
   all @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ цвжмк.
+  all @USERID@ shrugs at everyone.
 
 
 verb A sigh
   user ...АШШШШо!
+  user ...Sigh!
 
   simple @ARTNOM@ @USERID@ ШдШйлЬдсЭЬа.
+  simple @USERID@ sighs.
 
   adverb <ШдШйлЬдсЭждлШк>
+  adverb <sighing>
 
 
 verb A sing
   user ...ТиШ вШ ва вШиажг!
+  user ...Singing!
 
   simple @ARTNOM@ @USERID@ лиШЪжмЫсЬа (вхЪж нсвлйШ).
+  simple @USERID@ sings (a bit off-key).
 
   adverb <лиШЪжмЫщдлШк>
+  adverb <singing>
 
 
 verb O slap
   user ...Пан зШн зан!
+  user ...*SLAP*!
 
   other @ARTNOM@ @USERID@ оШйлжмбхЭЬа ЫмдШлс @OTHACC@ @OTHUID@!
+  other @USERID@ just slapped @OTHUID@ across the face!
 
   target @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа ЫмдШлс!
+  target @USERID@ just slapped you across the face!
 
   all @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа ЫмдШлс цвжмк!
+  all @USERID@ just slapped everyone across the face!
 
   secret @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа орихк дШ лж бШлШвсЩЬа бШдЬхк.
+  secret @USERID@ just slapped you. Strangely enough, no-one noticed this.
 
 
 verb O slay
   user ...Пр зр ШхгШлШ!
+  user ...Blood everywhere!
 
   other @ARTNOM@ @USERID@ йнШЪасЭЬа @OTHACC@ @OTHUID@!
+  other @USERID@ slays @OTHUID@!
 
   target @ARTNOM@ @USERID@ гцвак йШк тйнШеЬ!
+  target @USERID@ slays you!
 
   secret @ARTNOM@ @USERID@ йШк тйнШеЬ бимнс Шзц лжмк сввжмк!
+  secret @USERID@ slays you in secret. And no-one noticed!
 
   all @ARTNOM@ @USERID@ йШк йнсЭЬа цвжмк!
+  all @USERID@ slays everyone!
 
 
 
 verb O smack
   user ...СгШб!
+  user ...Smack!
 
   other @ARTNOM@ @USERID@ гцвак нхвЮйЬ @OTHACC@ @OTHUID@ йлж йлцгШ!
+  other @USERID@ french-kisses @OTHUID@!
 
   target @ARTNOM@ @USERID@ гцвак йШк нхвЮйЬ йлж йлцгШ!
+  target @USERID@ french-kisses you!
 
   secret @ARTNOM@ @USERID@ гцвак йШк нхвЮйЬ йлж йлцгШ бимнс Шзц лжмк сввжмк!
+  secret @USERID@ french-kisses you secretly!
 
   all @ARTNOM@ @USERID@ йШк навсЬа цвжмк йлж йлцгШ!
+  all @USERID@ french-kisses everyone!
 
 
 verb A smile
   user ...Та цгжинж оШгцЪЬвж!
+  user ...What a pretty smile!
 
   simple @ARTNOM@ @USERID@ оШгжЪЬвсЬа.
+  simple @USERID@ smiles.
 
   adverb <оШгжЪЬвщдлШк>
+  adverb <smiling>
 
 
 verb S sneeze
   user ...ВЬхлйЬк!
+  user ...Bless you!
 
   simple @ARTNOM@ @USERID@ нлШидхйлЮбЬ!
+  simple @USERID@ sneezes!
 
 
 verb S sniff
   user ...Сдан, йдан.
+  user ...Sniff!
 
-  simple @ARTNOM@ @USERID@ гмихЭЬа лж ощиж Ъчир лжм.
+  simple @ARTNOM@ @USERID@ гмихЭЬа лж ощиж Ъчир @ARTGEN@.
+  simple @USERID@ sniffs the air around @ARTACC@.
 
 
 verb S strip
   user ...You can leave your hat on!
+  user ...You can leave your hat on!
 
   simple @ARTNOM@ @USERID@ ЪЫчдЬлШа ШайЯЮйаШбс.
+  simple @USERID@ strips sensually.
 
 
 verb O tease
   user ...ПЬаиШолуиа!
+  user ...What a tease!
 
   other @ARTNOM@ @USERID@ зЬаисЭЬа @OTHACC@ @OTHUID@.
+  other @USERID@ teases @OTHUID@.
 
   target @ARTNOM@ @USERID@ йШк зЬаисЭЬа.
+  target @USERID@ is teasing you.
 
   secret @ARTNOM@ @USERID@ йШк зЬаисЭЬа бимнс Шзц лжмк Шввжмк.
+  secret @USERID@ teases you in secret.
 
   all @ARTNOM@ @USERID@ йШк зЬаисЭЬа цвжмк.
+  all @USERID@ teases everyone.
 
 
 verb A think
   user ...СбтнлжгШа сиШ мзсиор.
+  user ...I think, therefore I am.
 
   simple @ARTNOM@ @USERID@ тоЬа ЩмЯайлЬх йлак йбтпЬак @ARTGEN@.
+  simple @USERID@ is deep in thought.
 
   adverb <ЬбнисЭждлШк ЫмдШлс лЮ йбтпЮ>
+  adverb <thinking aloud>
 
 
 verb O tickle
   user ...Вбва Ъбва Ъбва!
+  user ...Tickle!
 
   other @ARTNOM@ @USERID@ ЪШиЪШвсЬа @OTHACC@ @OTHUID@ йлШ звЬмис!
+  other @USERID@ tickles @OTHUID@ with a feather!
 
   target @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа йлШ звЬмис!
+  target @USERID@ tickles you with a feather!
 
   secret @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа йлШ звЬмис бимнс Шзц лжмк сввжмк!
+  secret @USERID@ tickles you secretly with a feather!
 
   all @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа цвжмк йлШ звЬмис!
-
+  all @USERID@ tickles everyone with a feather!
 
 verb S wait
   user ...КтлЬ дШ ШиЪуйЬа;
+  user ...Is it going to be long?
 
   simple @ARTNOM@ @USERID@ зЬиагтдЬа мзжгждЬлабс...
+  simple @USERID@ waits patiently...
 
 
 verb D wave
   user ...Важчожм!
+  user ...Yoohoo!
 
   simple @ARTNOM@ @USERID@ оШаиЬлсЬа.
+  simple @USERID@ waves.
 
   other @ARTNOM@ @USERID@ оШаиЬлсЬа @OTHACC@ @OTHUID@.
+  other @USERID@ waves at @OTHUID@.
  
   target @ARTNOM@ @USERID@ йШк оШаиЬлсЬа.
+  target @USERID@ waves at you.
 
   secret @ARTNOM@ @USERID@ йШк оШаиЬлсЬа бимнс Шзц лжмк сввжмк.
+  secret @USERID@ йШк оШаиЬлсЬа бимнс Шзц лжмк сввжмк.
 
   all @ARTNOM@ @USERID@ йШк оШаиЬлсЬа цвжмк.
+  all @USERID@ waves at everyone.
 
 
 verb O whip
   user ...АвчзЮлШ!
+  user ...No mercy!
 
   other @ARTNOM@ @USERID@ гШйлаЪщдЬа ШвчзЮлШ @OTHACC@ @OTHUID@ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк).
+  other @USERID@ whips @OTHUID@ merciless with @ACCGEN@ cat o'nine tails.
 
   target @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа ШвчзЮлШ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк).
+  target @USERID@ whips you mercilessly with @ACCGEN@ cat o'nine tails.
 
   secret @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа ШвчзЮлШ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк), Шввс орихк дШ лж зижйтеЬа бШдЬхк.
+  secret @USERID@ whips you mercilessly with @ACCGEN@ cat o'nine tails. Unbelievably, no-one notices.
 
   all @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа цвжмк ШвчзЮлШ (гЬ лж гШйлхЪаж гЬ лак 9 жмитк).
+  all @USERID@ whips you all mercilessly with @ACCGEN@ cat o'nine tails.
 
 
 verb D whistle
   user ...Фжмал нажм!
+  user ...Whistle!
   
   simple @ARTNOM@ @USERID@ йнмихЭЬа гаШ гЬврЫхШ.
+  simple @USERID@ whistles a tune.
 
   other @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк ЩвтзЬа @OTHACC@ @OTHUID@.
+  other @USERID@ whistles as @ARTNOM@ sees @OTHUID@.
 
   target @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк йШк ЩвтзЬа.
+  target @USERID@ whistles as @ARTNOM@ sees you.
 
   all @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк ЩвтзЬа цвжмк йШк.
+  all @USERID@ whistles as @ARTNOM@ sees you all.
 
   secret @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк йШк ЩвтзЬа, орихк дШ лжд ШбжчйЬа бШдЬхк сввжк.
+  secret @USERID@ whistles as @ARTNOM@ he sees you, but only you hear it.
 
 
 verb D wink
   user ...ПждЮижчвабж!
+  user ...Say no more!
 
   simple @ARTNOM@ @USERID@ бвЬхдЬа лж гсла @ARTGEN@ зждЮис!
+  simple @USERID@ winks!
 
   other @ARTNOM@ @USERID@ тбвЬайЬ лж гсла тождлШк зждЮитк йбтпЬак ЪаШ @OTHACC@ @OTHUID@!
+  other @USERID@ winks at @OTHUID@!
 
   target @ARTNOM@ @USERID@ йШк тбвЬайЬ лж гсла тождлШк зждЮитк йбтпЬак!
+  target @USERID@ winks at you!
 
   all @ARTNOM@ @USERID@ бвЬхдЬа лж гсла йЬ цвжмк тождлШк зждЮитк йбтпЬак!
+  all @USERID@ winks at everyone!
 
   secret @ARTNOM@ @USERID@ йШк бвЬхдЬа лж гсла тождлШк зждЮитк йбтпЬак, бимнс Шзц лжмк сввжмк!
+  secret @USERID@ winks at you secretly!
 
 
 verb A yawn
   user ...ЧиШ ЪаШ чздж!
+  user ...Bedtime!
 
   simple @ARTNOM@ @USERID@ оШйгжмиатлШа.
+  simple @USERID@ yawns.
 
   adverb <гЬ бжагайгтдж чнжк>
+  adverb <yawning>
 
 
 verb A yell
   user ...Пр зр нрду!
+  user ...Not so loud!
 
   simple @ARTNOM@ @USERID@ еЬвШимЪЪасЭЬлШа!
+  simple @USERID@ yells @ARTGEN@ lungs out!
 
   adverb <жмивасЭждлШк>
+  adverb <yelling>
