@@ -14,6 +14,22 @@ megistos (1.0.2) unstable; urgency=low
     (currently only global command handlers).
   * Restructured source tree to rationalise build. Removed old Makefiles
     in favour of one simple Makefile.am per sub-project.
+  * Added new functionality to megistos-config to aid in development and
+    modernisation of packages.
+  * Added documentation about the new standards-compliant directory
+    structure.
+  * Added documentation about packages derived from others.
+  * Dropped last remnants of the rzsz distribution.
+  * Updated msgidx to support the new directory hierarchy and to support
+    rebuilding message block files without the source being present (or
+    writeable).
+  * Ran indent(1) on all code.
+  * Updated #include directives to use the new directory structure and to
+    decrease ambiguities with other header files.
+  * Wrote a hierarchy of Automake templates to facilitate building
+    different components of the system (daemons, unix programs, BBS
+    programs, modules, file transport protocols, global command handlers,
+    et cetera).
 
  --
 
