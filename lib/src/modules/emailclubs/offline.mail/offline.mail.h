@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:34:28  alexios
+ * Adjusted #includes. Changed struct message to message_t. Removed
+ * extraneous rcsinfo. Minor cosmetic changes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,16 +60,11 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include <megistos/typhoon.h>
-#include <megistos/request.h>
-#include <megistos/../../../clubs/ecdb.h>
+#include <libtyphoon/typhoon.h>
+#include <ecdb.h>
 
 
 /* offline.mail.c */
@@ -76,33 +75,34 @@ extern promptblock_t *emailclubs_msg;
 
 extern char *progname;
 
-extern int sopkey;
-extern int wrtkey;
-extern int netkey;
-extern int rrrkey;
-extern int wrtchg;
-extern int netchg;
-extern int rrrchg;
-extern int msglen;
+extern int   sopkey;
+extern int   wrtkey;
+extern int   netkey;
+extern int   rrrkey;
+extern int   wrtchg;
+extern int   netchg;
+extern int   rrrchg;
+extern int   msglen;
 extern char *defclub;
 
 extern char *bbsid;
-extern int ansihi;
-extern int ansibye;
+extern int   ansihi;
+extern int   ansibye;
 extern char *hifile;
 extern char *byefile;
 extern char *ctlname[6];
+extern int   qwkuc;
 
-extern int updqsc;
-extern int defatt;
-extern int defreq;
-extern int defhdr;
+extern int   updqsc;
+extern int   defatt;
+extern int   defreq;
+extern int   defhdr;
 extern char *omceml;
 extern char *allnam;
-extern int usepass;
-extern int fixeta;
-extern char etaxlt;
-extern int prgind;
+extern int   usepass;
+extern int   fixeta;
+extern char  etaxlt;
+extern int   prgind;
 
 
 /* setup.c */
@@ -291,14 +291,14 @@ int     omdownload ();
    #define BSD_GE    (BSD_GT|BSD_EQ) */
 
 
-struct message header;
+extern message_t header;
 
 
-int     getmsgheader (int msgno, struct message *msg);
+int     getmsgheader (int msgno, message_t *msg);
 
-int     writemsgheader (struct message *msg);
+int     writemsgheader (message_t *msg);
 
-void    dbrm (struct message *msg);
+void    dbrm (message_t *msg);
 
 int     dbgetindex (struct ecidx *idx);
 
@@ -326,14 +326,14 @@ int     npmsgto (int *msgno, char *whom, int targetnum, int dir);
 
 int     messagesdat ();
 
-void    outmsg (int clubid, struct message *msg);
+void    outmsg (int clubid, message_t *msg);
 
 
 /* ../../../clubs/funcs.c */
 
 char   *xlatehist (char *hist);
 
-void    showheader (char *sig, struct message *msg);
+void    showheader (char *sig, message_t *msg);
 
 int     writeecuser (char *uid, struct emailuser *user);
 
@@ -349,7 +349,8 @@ char   *addhistory (char *h, char *s, int len);
 
 /* request.c */
 
-#include <megistos/req.h>
+
+/* #include <megistos/req.h> */
 
 /* attachments.c */
 
@@ -378,7 +379,7 @@ int     getclubid (int id);
 
 void    outcontroltypes (FILE * fp);
 
-int     handlecontrolmsg (struct qwkhdr *qwkhdr, struct message *msg);
+int     handlecontrolmsg (struct qwkhdr *qwkhdr, message_t *msg);
 
 
 /* reqman.c */
