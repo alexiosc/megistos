@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  2003/12/27 13:07:09  alexios
+# Moved bbsmail as a subdirectory of this one.
+#
 # Revision 1.4  2003/12/27 12:50:31  alexios
 # Moved numerous objects from the program build to the library. Realised
 # that clubs needs to be compiled with -DCLUBS, and added declarations
@@ -20,7 +23,7 @@
 # Initial revision.
 #
 
-SUBDIRS = . offline.mail
+SUBDIRS = . bbsmail offline.mail
 
 PROGNAMES = email clubs
 
