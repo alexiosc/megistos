@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 19:43:34  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/23 23:20:22  alexios
  * Ran through megistos-config --oh.
  *
@@ -78,8 +81,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/vised.h>
-#include <megistos/mbk_vised.h>
+#include "vised.h"
+#include "mbk_vised.h"
 
 
 void
