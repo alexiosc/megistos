@@ -552,18 +552,31 @@ LANG {LANGUAGE 1}
 
 
 
+LNGSEL1 {[2J[0;1m
+The following languages are available:
+
+} T Language menu, header
+
+LNGSEL2 {%d. %s
+} T Language menu, one line of menu
+
+LNGSEL3 {
+Please select your language of choice (%d-%d). Enter ? to see the menu: } T Language menu, prompt.
+
+LNGSLRR {
+Please enter a number within the above limits.
+} T Language menu, error.
+
+
 
 LNGSLOK {
 !jYour language will be set to %s. You may later change this language, if
 you wish!).
 
-!JThis system has been created for greek users. We have done our best to
-provide national language support for as much of the system as possible.
-If you find anything at all that needs rectification, please do not
-hesitate to notify the system operator.!)
-
 } T Language selected OK.
 
+
+B4QANS {[2J} T Signup, clear screen (hopefully) before ANSI question
 
 
 NEWANS {!C[0;1;31m  ÛÛÛ[32m  ÛÛÛ[34m  ÛÛÛ  [37m!)
@@ -868,4 +881,88 @@ on-line credit.!)
 
 
 
+ This string will become the topic of the message that is
+ automatically created for each new user.
+
+ If the message has an attachment, then the name of the file
+ will be pre-pended to the topic you give here, so that the
+ message will appear as a bona-fide "file description" (thus
+ prompting the user with the filename at the download point
+ and defaulting the auto-download filename properly in case
+ you happen to be running the File Library Edition).
+
+S2UTPC {Welcome} (SUPE2U=YES) S 30 New-user auto-message topic:
+
+
+ This message can be up to 23 lines of up to 76 characters
+ each.  It is automatically sent to new users as E-Mail
+ from Sysop as soon as the user's account is created.
+
+ If you do not wish to provide an attachment to this
+ message, be sure to change the wording of the message,
+ and to set the value of the following configuration
+ variable, E2UATT, to blank.
+
+ To edit this configuration variable text, press F2.
+
+S2UTXT {[0;1m
+Dear new user,
+
+Welcome to @BBS@. We hope you'll like it here. Attached please find
+a file with our terms and conditions which you should read and accept
+before using the system any further.
+
+We hope your experience in @BBS@ is a pleasant one.
+
+} T Text of E-Mail message to new users from Sysop
+
+
+U2STPC {Œâ¦ª ®¨ã©«žª %s} T Topic of signup message to Sysop
+
+
+CKSHEADER {
+[0;1;32m
+‘•ŽŠˆ€:
+
+} T Checksup header
+
+
+CKSNAME {Name:     !i} T Checksup, name
+
+CKSNAME1 {Contains unusual characters.
+} T Checksup, invalid characters in name
+
+CKSNAME2 {Doesn't contain at least two words.
+} T Checksup, bad number of words in name
+
+
+CKSADDR {Address: !i} T Checksup, address
+
+CKSADDR1 {Contains unusual characters.
+} T Checksup, invalid characters in address
+
+CKSADDR2 {Doesn't contain numbers on both lines.
+} T Checksup, no numbers in address
+
+
+CKSPHONE {Phone number:  !i} T Checksup, phone
+
+CKSPHONE1 {Contains unusual characters.
+} T Checksup, invalid characters in phone
+
+
+CKSPHONE2 {Is longer than 7 characters.
+} T Checksup, phone longer than 7 characters
+
+
+CKSFOOTER {!0l
+
+[0m} T Checksup, footer
+
+
+CKSDIV {!0l
+} T Checksup, divider
+
+
+ 
 LANGEND {}

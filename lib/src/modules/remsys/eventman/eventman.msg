@@ -366,3 +366,337 @@ EVCASK {[0;1m
 EVCAN  {[0;1;32m
 ‰˜¢éª, «¦ event [37m%s[32m £˜«˜ éŸ¡œ œ§'˜æ¨ ©«¦¤.
 [0;1m} T Cancel event: Success
+
+
+
+LANG {}
+
+NOENTRY {[0;1;31m
+Sorry, you don't have access to this area.
+[0;1m} T You don't have access to this module
+
+
+MENU {[2J[0m[47;1;37m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;30;47m¿ [40m
+[47;1;37m ³  [0;47;30mEvent Manager 0.5     [0;47;30m³ [40m
+[47;1;37m ³  [0;47;30mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mS[30mhutdown BBS          [30m³ [40m
+[47;1;37m ³  [0;31;47mU[30mndo shutdown         [30m³ [40m
+[47;1;37m ³                        [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mL[30mist events           [30m³ [40m
+[47;1;37m ³  [0;31;47mA[30mdd (schedule) event  [30m³ [40m
+[47;1;37m ³  [0;31;47mC[30mancel event          [30m³ [40m
+[47;1;37m ³                        [0;47;30m³ [40m
+[47;1;37m ³ [0;30;47me[31mX[30mit                   [30m³ [40m
+[47;1;37m À[0;30;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+
+[32mEvent Manager[37m
+Please enter your choice: [0m} T Main menu, normal version
+
+
+SHMENU {[0;1;32m
+Event Manager[37m
+!WEnter your choice ([33mS[37m,[33mU[37m,[33mL[37m,[33mA[37m,[33mC[37m,[33mX[37m
+to exit, or [33m?[37m for the menu): !)[0m} T Short menu, normal version
+
+
+PMENU {[2J[0m[47;1;37m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;30;47m¿ [40m
+[47;1;37m ³  [0;47;30mEvent Manager 0.5     [0;47;30m³ [40m
+[47;1;37m ³  [0;47;30mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mS[30mhutdown BBS          [30m³ [40m
+[47;1;37m ³  [0;31;47mU[30mndo shutdown         [30m³ [40m
+[47;1;37m ³                        [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mL[30mist events           [30m³ [40m
+[47;1;37m ³  [0;31;47mA[30mdd (schedule) event  [30m³ [40m
+[47;1;37m ³  [0;31;47mC[30mancel event          [30m³ [40m
+[47;1;37m ³                        [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mN[30mew event             [30m³ [40m
+[47;1;37m ³  [0;31;47mD[30melete event          [30m³ [40m
+[47;1;37m ³                        [0;47;30m³ [40m
+[47;1;37m ³ [0;30;47me[31mX[30mit                   [30m³ [40m
+[47;1;37m À[0;30;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+
+[32mEvent Manager[37m
+Please enter your choice: [0m} T Main menu, privileged version
+
+
+SHPMENU {[0;1;32m
+Event Manager[37m
+!WEnter your choice ([33mS[37m,[33mU[37m,[33mL[37m,[33mA[37m,[33mC[37m,[33mN[37m,[33mD[37m,[33mX[37m to exit, or [33m?[37m for the menu): !)[0m} T Short menu, privileged version
+
+
+ERRSEL {[0;1;31m
+Sorry, that is not an available option at this stage.
+[0;1m} T Invalid option
+
+
+LEAVE {[0;1m
+Leaving the event manager.
+} T Leaving the event manager
+
+
+EVNNAME {[0;1;32m
+!JTo begin with, you need to give a short name (up to 13 characters) to
+the new event. The name can only contain letters and numbers. Typical names
+are "shutdown", "cleanup", etc.!)[37m
+
+                                             ÃÄÄÄÄÄÄÄÄÄÄÄ´
+Enter the name of the new event ([33mX[37m to exit): [0m} T New event: Asking for event name
+
+
+EVNALRX {[0;1;31m
+An event by that name already exists.
+[0;1m} T New event: Event name already exists
+
+
+EVNCHR {[0;1;31m
+The name contains unacceptable characters.
+[0;1m} T New event: Event name contains invalid characters
+
+
+EVNDESC {[0;1;32m
+!JYou must now provide a brief description of this event, up to 40
+characters in length. Make it easy to understand and self-explanatory,
+in case the name doesn't manage to convey the nature of the event. The
+description may contain any characters you like, of course.!)[37m
+
+                                   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+Enter the description ([33mX[37m to exit): [0m} T New event: Asking for event description
+
+
+EVNPROG {[0;1;32m
+!JEnter the UNIX command this event will execute. Specify the full path
+of the binary. Obviously, if you don't know what you're doing, don't do
+it here!!)[37m
+
+Event command line ([33mX[37m š ˜ â¥¦›¦): [0m} T New event: Asking for event command
+
+
+EVNONCE {[0;1;32m
+!JThe following three (and last) questions will determine the nature
+of the new event.!)
+
+!JDo you want the event to stay scheduled after it's executed? Answering
+yes here will make an event execute every day at the specified time.
+Answering no will make it an one-off event that you'll need to schedule
+every time you want it executed. Maintenance and
+cleanup-type events are examples of events for which you should answer yes.
+Something like a BBS shutdown should not normally be regular, so you would
+say no.!)[37m
+
+Execute this event every day ([33mX[37m to exit)? [0m} T New event: Running once/daily?
+
+
+EVNUNIQ {[0;1;32m
+!JSome events need to be scheduled multiple times in a day.
+For instance, two shutdown events scheduled for the same time could
+wreak havoc. Answer yes if the event belongs to this category.!)[37m
+
+!WAllow only one event of this type to be scheduled at any one time
+([33mX[37m to exit)?!) [0m} T New event: Unique event?
+
+
+EVNWARN {[0;1;32m
+!JDo you want users to be warned of the execution of this event?
+The event will be asked to warn users at regular intervals before it's
+finally executed. This must be supported by the event executable.
+If it's not, it's probably a bad idea to say yes here.!)[37m
+
+Issue warnings to users ([33mX[37m to exit)? [0m} T New event: Do you want warnings?
+
+
+EVNOK {[0;1;32m
+!JEvent [37m%s[32m was created successfully.
+You can use the [33mA[37m command to schedule it if you wish.!)
+[0;1m} T New event created successfully
+
+
+CANCEL {[0;1;31m
+Aborted.[0;1m
+} T Cancelling...
+
+
+EVDWARN {[0;1;31;5m
+ÛÛ  [0;1;31mCAUTION: !J!14iYou're about to permanently [37mdelete[31m an
+event type. You should not remove certain event types (such as cleanup and
+shutdown) because they're not easy to recreate. If you don't know what you're
+doing, press [33mX[37m now.!)
+!0l[0;1m} T Delete event: Warning
+
+
+EVDASK {[0;1m
+!WWhat event would you like to delete ([33m?[37m for a list,
+[33mX[37m to exit)?!) [0m} T Delete event: Which one?
+
+
+EVDNEXS {[0;1;31m
+There is no event by that name. Enter [33m?[31m for a list.
+[0;1m} T Delete event: Unknown event name
+
+
+EVDCONF {[0;1;31m
+!WPlease confirm that you want to [37mdelete[31m this event type.
+This is your last chance to quit, and you cannot undelete the event type
+once it's gone.!)
+
+[37mAre you sure you want to delete this event ([[33mY[37m]yes / [[33mN[37m]o)? [0m} T Delete event: Confirm deletion
+
+
+EVDOK {[0;1m
+OK, event [32m%s[37m was deleted.
+} T Delete event: Event deleted
+
+
+EVPHDR {[0;1;32m
+List of existing events
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Event name      ³ Description                              ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+} T List event prototypes: header
+
+
+EVPTAB {[0;1;32m³ [37m%-15s [32m³ [37m%-40s[32m ³
+} T List event prototypes: table line
+
+
+EVPFTR {[0;1;32mÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+[0;1;32m} T List event prototypes: footer
+
+
+EVANAM {[0;1m
+!WPlease enter the name of the event to schedule ([33m?[37m for a list,
+[33mX[37m to exit):!) [0m} T Schedule event: What event?
+
+
+EVANEX {[0;1;31m
+Ther is no such event. Enter [33m?[31m for a list of events.
+[0;1m} T Schedule event: Unknown event name
+
+
+EVAUNI {[0;1;31m
+!JSorry, but event [33m%s[31m is already scheduled and you
+can't have more than one scheduled event of this type.!)
+[0;1m} T Schedule event: Can't schedule more than one unique event
+
+
+EVAWHH {[0;1;32m
+!JWhen should the event be executed? There are three ways to set the
+execution time:!)
+
+!2i!JEnter [37mHH:MM[32m to set the exact time (in 24 hour format, with HH in the range 0-23).!)
+!0l
+!2i!JEnter a number (e.g. [37m60[32m) to execute the event in that many minutes from now.!)
+!0l
+!2i!JEnter [37mNOW[32m to execute the event immediately.!)
+!0l
+!2i!JFinally, with [37mASAP[32m, unused lines are changed to the BUSY-OUT state.
+Users are notified of the event having been scheduled. When they logout, their lines
+also drop to the BUSY-OUT state. When all users have logged out, the event is
+executed. [31mDON'T USE THIS UNLESS YOU KNOW WHAT YOU'RE DOING: LINES [37mDO NOT[31m
+REVERT TO THEIR ORIGINAL STATE AFTER THE EVENT IS EXECUTED, EFFECTIVELY LOCKING EVERYONE OUTE.
+ASAP IS MOSTLY USED TO SHUTDOWN THE SYSTEM NICELY.!)
+!0l[0;1m} T Schedule event: Help
+
+
+EVAWHN {[0;1m
+!WWhen would you like to execute this event? ([33mhh:mm[37m, [33mxx[37m,
+[33mNOW[37m, [33mASAP[37m, [33m?[37m for help, or [33mX[37m to exit):!) [0m} T Schedule event: When?
+
+
+EVAWARN {[0;1;31;5m
+ÛÛ  [0;1;31mCAUTION: !J!14iYou're about to
+schedule an event to be executed [37mNOW[31m.
+If this event shuts down the BBS or otherwise changes line states,
+you might only be able to restart it from the system console (or a remote login
+to an underlying UNIX account, if you have one).!)
+!0l[0;1m
+Are you sure? ([[33mY[37m]yes / [[33mN[37m]o) [0m} T Schedule event: Final warning
+
+
+
+EVAWHE {[0;1;31m
+Invalid schedule time. Please try again.
+[0;1m} T Schedule event: Invalid time specification
+
+
+EVA2MN {[0;1;31m
+!JYou can't have more than 100 scheduled %s type events. Aborting.!)
+[0;1m} T Schedule event: Too many events of that type scheduled
+
+
+EVADD1 {[0;1;32m
+!WEvent [37m%s[32m scheduled to run at [37m%02d:%02d[32m.!)
+[0;1m} T Schedule event: Event scheduled (to be run once)
+
+
+EVADD2 {[0;1;32m
+!WEvent [37m%s[32m scheduled to be executed daily at [37m%02d:%02d[32m!).
+[0;1m} T Schedule event: Event scheduled (to be run daily)
+
+
+EVADD3 {[0;1;32m
+!WEvent [37m%s[32m scheduled to be executed ASAP (i.e. when all
+users have disconnected).!)
+[0;1m} T Schedule event: Event scheduled (to be run ASAP)
+
+
+EVADD4 {[0;1;32m
+!WEvent [37m%s[32m scheduled to be executed immediately.!)
+[0;1m} T Schedule event: Event scheduled (to be run NOW)
+
+
+EVLHDR {[0;1;32m
+
+                          List of scheduled events
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄ¿
+³ Event name       ³ Time  ³ Description                            ³ Daily ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÂÄÄÄÄ´
+} T List events: List header
+
+
+EVLTAB {[0;1;32m³ [37m%-16s [32m³ [37m%-5s [32m³ [37m%-40s [32m³ [37m%-3s [32m³
+} T List events: List line
+
+
+EVLFTR {[0;1;32mÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÙ
+[0;1m} T List events: List footer
+
+
+EVLASAP {ASAP} T List events: ASAP string
+
+
+EVLNO {No} T List events: NO string
+
+
+EVLYES {Yes} T List events: YES string
+
+
+EVCNAM {[0;1m
+!WEnter the full name of the event instance (e.g. shutdown-00) to cancel
+([33m?[37m for a list, [33mX[37m to exit):!) [0m} T Cancel event: What event?
+
+
+EVCNEX {[0;1;31m
+There is no such event. Enter [33m?[31m for a list.
+[0;1m} T Cancel event: Unknown event name
+
+
+EVCWARN {[0;1;31;5m
+ÛÛ  [0;1;31mCAUTION: !J!14iYou are about to cancel event instance [37m%s[31m.
+If you answer yes, execution of this event will be cancelled. If the event is
+executed regularly, it will NOT be executed again, unless you re-schedule it.!)
+!0l[0;1m} T Cancel event: Warning
+
+
+EVCASK {[0;1m
+Please confirm cancelation of this event instance ([[33mY[37m]yes / [[33mN[37m]o): [0m} T Cancel event: Yes or no?
+
+
+EVCAN  {[0;1;32m
+OK, event instance [37m%s[32m was cancelled.
+[0;1m} T Cancel event: Success
+
+
+
+LANGEND {}

@@ -40,28 +40,29 @@ LINEAR {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 
 FIELD1 {[0;1m
-!Wƒé©«œ £â®¨  80 ®˜¨˜¡«ã¨œª š ˜ ˜¬«æ «¦ §œ›å¦.!)
+!WThis field does this and that and it's important for this and that
+reason. Enter up to 80 characters for this field.!)
 } T Linear prompt #1
 
 
 FIELD2 {[0;1m
-!Wƒé©«œ £â®¨  40 ®˜¨˜¡«ã¨œª š ˜ ˜¬«æ «¦ §œ›å¦.!)
+!WThis should provide help on this field, only the field doesn't really DO
+anything. Enter up to 40 characters for this field.!)
 } T Linear prompt #2
 
 
 FIELD3 {[0;1m
-!Wƒé©«œ £â®¨  8 ®˜¨˜¡«ã¨œª š ˜ ˜¬«æ «¦ §œ›å¦ (›œ¤ Ÿ˜ ™¢â§œ«œ «¦¬ª
-®˜¨˜¡«ã¨œª).!)
+!WEnter up to 8 characters for this password field (asterisks will echo).!)
 } T Linear prompt #3
 
 
 FIELD4 {[0;1m
-!W„¤˜ šœ¤ ¡ãª ®¨ã©ª ˜¨ Ÿ£« ¡æ §œ›å¦ (left-justified)!)
+!WA general-purpose numeric field (left-justified)!)
 } T Linear prompt #4
 
 
 FIELD5 {[0;1m
-!W„¤˜ šœ¤ ¡ãª ®¨ã©ª ˜¨ Ÿ£« ¡æ §œ›å¦ (right-flushed)!)
+!WA general-purpose numeric field (right-flushed)!)
 } T Linear prompt #4
 
 
