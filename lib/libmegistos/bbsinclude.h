@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.9  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.8  2003/09/30 15:08:43  alexios
  * Modified to handle libtool's libltdl and to display a deprecation
  * notice whenever the Linux-native header dlfcn.h is requested.
@@ -48,7 +51,7 @@
 
 /* Start by loading up autoconf definitions */
 
-#include "bbsconfig.h"
+#include <megistos/bbsconfig.h>
 
 
 /* Always include standard string/memory headers
@@ -546,7 +549,7 @@
 #endif
 
 #if ENABLE_NLS
-#  include <gettext.h>
+#  include <megistos/gettext.h>
 #  define _(Text) gettext (Text)
 #else
 #  define textdomain(Domain)

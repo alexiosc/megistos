@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.6  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -74,21 +77,22 @@ static const char rcsinfo[] =
 #define WANT_SYS_SHM_H 1
 #define WANT_SYS_TYPES_H 1
 #define WANT_SYS_STAT_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "config.h"
-#include "audit.h"
-#include "useracc.h"
-#include "miscfx.h"
-#include "sysstruct.h"
-#include "output.h"
-#include "prompts.h"
-#include "timedate.h"
-#include "bbsmod.h"
-#include "ttynum.h"
-#include "channels.h"
-#include "security.h"
-#include "miscfx.h"
+#include <megistos/config.h>
+#include <megistos/audit.h>
+#include <megistos/useracc.h>
+#include <megistos/miscfx.h>
+#include <megistos/sysstruct.h>
+#include <megistos/output.h>
+#include <megistos/prompts.h>
+#include <megistos/timedate.h>
+#include <megistos/bbsmod.h>
+#include <megistos/ttynum.h>
+#include <megistos/channels.h>
+#include <megistos/security.h>
+#include <megistos/miscfx.h>
+
 #include "mbk_sysvar.h"
 
 

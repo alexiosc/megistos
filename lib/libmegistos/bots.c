@@ -27,6 +27,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.3  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -51,7 +54,7 @@ static const char rcsinfo[] =
 #define WANT_STRINGS_H 1
 #define WANT_CTYPE_H 1
 #define WANT_UNISTD_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 
 

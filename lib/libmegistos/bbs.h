@@ -41,6 +41,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.5  2003/09/28 22:27:04  alexios
  * Added gettext.h inclusion.
  *
@@ -74,29 +77,29 @@
 
 #include <bbsinclude.h>
 
-#include "gettext.h"
+#include <megistos/gettext.h>
 
-#include "config.h"
-#include "errors.h"
-#include "prompts.h"
-#include "useracc.h"
-#include "miscfx.h"
-#include "bbsmod.h"
-#include "input.h"
-#include "format.h"
-#include "output.h"
-#include "sysstruct.h"
-#include "timedate.h"
-#include "globalcmd.h"
-#include "ttynum.h"
-#include "lock.h"
-#include "audit.h"
-#include "filexfer.h"
-#include "mail.h"
-#include "security.h"
-#include "channels.h"
-#include "dialog.h"
-#include "bots.h"
+#include <megistos/config.h>
+#include <megistos/errors.h>
+#include <megistos/prompts.h>
+#include <megistos/useracc.h>
+#include <megistos/miscfx.h>
+#include <megistos/bbsmod.h>
+#include <megistos/input.h>
+#include <megistos/format.h>
+#include <megistos/output.h>
+#include <megistos/sysstruct.h>
+#include <megistos/timedate.h>
+#include <megistos/globalcmd.h>
+#include <megistos/ttynum.h>
+#include <megistos/lock.h>
+#include <megistos/audit.h>
+#include <megistos/filexfer.h>
+#include <megistos/mail.h>
+#include <megistos/security.h>
+#include <megistos/channels.h>
+#include <megistos/dialog.h>
+#include <megistos/bots.h>
 
 
 #endif /* BBS_H */

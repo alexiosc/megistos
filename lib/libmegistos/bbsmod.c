@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.9  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.8  2003/09/28 22:30:08  alexios
  * Added NLS initialisation to mod_init() and mod_main().
  *
@@ -110,11 +113,12 @@ static const char rcsinfo[] =
 #define WANT_SYS_SHM_H 1
 #define WANT_PWD_H 1
 #define WANT_SEND_OUT 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "gettext.h"
-#include "bbs.h"
-#include "systemversion.h"
+#include <megistos/gettext.h>
+#include <megistos/bbs.h>
+#include <megistos/systemversion.h>
+
 #include "mbk_sysvar.h"
 
 

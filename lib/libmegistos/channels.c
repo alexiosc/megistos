@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -57,14 +60,14 @@ static const char rcsinfo[] =
 #define WANT_SYS_STAT_H 1
 #define WANT_UNISTD_H 1
 #define WANT_FCNTL_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 #define CHANNELS_C
-#include "config.h"
-#include "channels.h"
-#include "miscfx.h"
-#include "errors.h"
-#include "bbsmod.h"
+#include <megistos/config.h>
+#include <megistos/channels.h>
+#include <megistos/miscfx.h>
+#include <megistos/errors.h>
+#include <megistos/bbsmod.h>
 
 
 /* The default linestatus */

@@ -49,6 +49,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:23:51  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.5  2003/09/27 20:29:54  alexios
  * Documented more of the file and moved existing documentation from
  * doc++ to doxygen format.
@@ -119,9 +122,10 @@
 #define CONFIG_H
 
 
-#include <bbsconfig.h>
+#include <megistos/bbsconfig.h>
 #define WANT_SIGNAL_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
+#include <megistos/version.h>
 
 
 
@@ -172,6 +176,7 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #if 0
 #define BBSDIR         __BASEDIR
 #endif
+
 #define BBSDATADIR     "data"
 #define BBSETCDIR      "etc"
 #define BBSFILEDIR     BBSDATADIR"/files"
@@ -202,6 +207,7 @@ typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 #define MAILERREQDIR   MAILERDIR"/requests"
 #define MAILERUSRDIR   MAILERDIR"/usr"
 #define MBKDIR         BBSLIBDIR"/prompts"
+#define MBKINCLUDEDIR  __INCLUDEDIR"/mbk"
 #define MENUMANDIR     BBSDATADIR"/menuman"
 #define MSGATTDIR      ".ATT"
 #define MSGBLTDIR      ".BLT"

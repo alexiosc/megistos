@@ -54,6 +54,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  2003/12/19 13:23:55  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
  * Revision 1.6  2003/09/28 22:30:20  alexios
  * Included gettext.h.
  *
@@ -93,7 +96,7 @@
 #define ERRORPROMPTS_H
 
 
-#include "gettext.h"
+#include <megistos/gettext.h>
 
 
 /* Fall back to locale-driven messages. The symbol GREEK is only kept
