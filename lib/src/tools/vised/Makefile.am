@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/24 19:44:00  alexios
+# Linked against curses; added message block.
+#
 # Revision 1.2  2003/12/23 23:21:20  alexios
 # Minor simplifications.
 #
@@ -11,6 +14,8 @@
 #
 
 PROGNAMES = vised
+
+BUILT_SOURCES = mbk_vised.h
 
 vised_SOURCES = \
 	blocks.c \
@@ -24,5 +29,6 @@ vised_SOURCES = \
 	vised.h
 
 include $(top_srcdir)/templates/module
+include $(top_srcdir)/templates/curses
 
 # End of file
