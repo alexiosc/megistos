@@ -1,6 +1,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  2003/09/30 15:14:30  alexios
+# Updated SUBDIRS for new directory structure.
+#
 # Revision 1.4  2003/09/29 21:37:22  alexios
 # Renamed src/ directory to lib/ to accommodate more source code in this
 # tree.
@@ -21,7 +24,7 @@ else !HAVE_DOXYGEN
 DOCDIR = 
 endif !HAVE_DOXYGEN
 
-SUBDIRS = po intl m4 lib $(DOCDIR)
+SUBDIRS = po intl m4 $(DOCDIR) libltdl libmegistos src
 
 ACLOCAL_AMFLAGS = -I m4
 
