@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/27 12:49:19  alexios
+# Added current subdirectory to SUBDIRS to force postfix building.
+#
 # Revision 1.2  2003/12/24 21:28:21  alexios
 # Split off gcs_cookie.
 #
@@ -14,7 +17,7 @@ PROGNAMES = cookie
 
 cookie_SOURCES = cookie.c
 
-SUBDIRS = gcs_cookie
+SUBDIRS = . gcs_cookie
 
 include $(top_srcdir)/templates/module
 
