@@ -75,6 +75,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:14:14  alexios
+ * A slight cpp fix.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -196,7 +199,7 @@ int key_owns(useracc_t *user,int key);
 void key_set(bbskey_t *keys, int key, int set);
 
 
-#endif SECURITY_H
+#endif /* SECURITY_H */
 
 /*@}*/
 
