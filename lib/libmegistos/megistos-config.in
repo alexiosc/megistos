@@ -26,6 +26,12 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/20 10:20:29  alexios
+# Added code to generate Makefile.am files for existing source subtrees,
+# with the aid of templates. Added code to overhaul code by fixing
+# automatically various little annoying details that previously needed
+# to be rectified manually.
+#
 # Revision 1.2  2003/12/19 13:25:56  alexios
 # Significant update in functionality to accommodate new build
 # structure.
@@ -54,13 +60,15 @@ instancedir="@INSTANCEDIR@"
 virgininstance="@VIRGININSTANCE@"
 virginsrc="$builddir/@VIRGINDIR@"
 
+templatedir="@top_srcdir@/templates"
+
 usage()
 {
     cat <<EOF
 Usage: $0 [OPTIONS]
-Options:
-    [--prefix[=DIR]]
-    [--exec-prefix[=DIR]]
+Options (informational):
+    [--prefix]
+    [--exec-prefix]
     [--version]
     [--ldflags]
     [--cflags]
@@ -68,9 +76,19 @@ Options:
     [--data-dir]
     [--instance-dir]
     [--virgin-dir]
+    [--virgin-src]
     [--build-dir]
     [--source-dir]
     [--include-dir]
+
+Commands:
+
+    [--am=template] Prints to standard output a Makefile.am for this directory
+      using the directory name as the program name and all sources found. Uses
+      the template specified (as found in @top_srcdir@/templates).
+
+    [--oh] Overhauls the source code in this directory by running indent(1) (if
+      available) and fixing coding issues.
 
 Version:                $version
 Prefix:                 $prefix
@@ -99,20 +117,27 @@ while test $# -gt 0; do
     esac
 
     case $1 in
-	--prefix=*)
-	    prefix=$optarg
-	    if test $exec_prefix_set = no ; then
-		exec_prefix=$optarg
+	--am*)
+	    echo_makefile=yes
+	    template=$optarg
+	    if test ! -r $templatedir/$template ; then
+		echo $template: not found or not readable.
+		template=""
 	    fi
+	    if test x$template = x ; then
+		echo You must specify a template. Available templates are:
+		echo
+		(cd $templatedir; ls *[^~])
+		exit 1
+	    fi
+	    ;;
+
+	--oh)
+	    overhaul_source=yes
 	    ;;
 
 	--prefix)
 	    echo_prefix=yes
-	    ;;
-
-	--exec-prefix=*)
-	    exec_prefix=$optarg
-	    exec_prefix_set=yes
 	    ;;
 
 	--exec-prefix)
@@ -145,6 +170,10 @@ while test $# -gt 0; do
 
 	--virgin-dir)
 	    echo_virgin_dir=yes
+	    ;;
+
+	--virgin-src)
+	    echo_virgin_src=yes
 	    ;;
 
 	--build-dir)
@@ -214,6 +243,10 @@ if test "$echo_virgin_dir" = "yes"; then
     echo $virgininstance
 fi
 
+if test "$echo_virgin_src" = "yes"; then
+    echo $virginsrc
+fi
+
 if test "$echo_build_dir" = "yes"; then
     echo $builddir
 fi
@@ -237,3 +270,71 @@ if test "$echo_header" = "yes"; then
 #define __INCLUDEDIR   "$includedir"
 EOF
 fi
+
+
+# Output a Makefile.am for this file.
+
+if test "$echo_makefile" = "yes"; then
+
+    progname=`basename $PWD`
+
+    cat <<EOF
+# -*- Makefile -*-
+#
+# \$Id\$
+#
+# \$Log\$
+
+PROGNAMES = $progname
+
+${progname}_SOURCES = \\
+EOF
+
+    ls *.[ch] | sed -e 's/^/\t/' -e 's/$/ \\/'
+
+cat <<EOF
+
+include \$(top_srcdir)/templates/$template
+
+# End of file
+EOF
+fi
+
+
+
+# Overhaul the source.
+
+if test "$overhaul_source" = "yes"; then
+
+    # Keep backups of the code
+
+    echo 1>&2 Making backups...
+    for a in *.[ch]; do cp $a $a-oh; done
+
+    for a in *.[ch]; do
+	echo 1>&2 "Processing $a"
+
+        # Add 'end of file' notices (in a very naive way)
+
+	grep -i '/* End of File */' $a >&/dev/null ||
+	echo -e '\n\n/* End of File */' >> $a
+
+        # Fix broken rcsinfo(1) tags
+
+	sed -i '/^#ifndef RCS_VER/,/^#endif/ c\static const char rcsinfo="$Id$";' $a
+
+    done
+
+    # Indent the code
+
+    #args="-kr -ts8 -i8 -pcs -cs -bs -saf -sai -saw -psl -brs -l79 -nbbo -hnl -bad -di8 -ppi2"
+    args="-kr -ts8 -i8 -pcs -cs -bs -saf -sai -saw -psl -brs -l79 -nbbo -hnl -bad -di8"
+    if test "@INDENT@" != "" -a -x "@INDENT@" ; then
+	echo 1>&2 "Running code through indent(1)..."
+	indent $args *.[ch]
+    fi
+
+fi
+
+
+# End of file
