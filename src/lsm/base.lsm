@@ -1,6 +1,6 @@
 Begin3
 Title:           Megistos BBS (base package)
-Version:         @major.@minor
+Version:         @major.@minor.@patch
 Entered-date:    @date
 Description:     Megistos is a BBS for Linux. It is indended for large
                  systems with high standards and unusual requirements.
