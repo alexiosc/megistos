@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/19 13:26:23  alexios
+ * Updated include directories; changed behaviour of mkfname() to reflect
+ * new build structure.
+ *
  * Revision 1.5  2003/09/28 11:40:07  alexios
  * Ran indent(1) on all C source to improve readability.
  *
@@ -103,11 +107,12 @@ static const char rcsinfo[] =
 #define WANT_SYS_STAT_H 1
 #define WANT_FCNTL_H 1
 #define WANT_VARARGS_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include "config.h"
-#include "bbs.h"
-#include "menuman.h"
+#include <megistos/config.h>
+#include <megistos/bbs.h>
+#include <megistos/menuman.h>
+
 #include "mbk_sysvar.h"
 
 
@@ -149,7 +154,9 @@ mkfname (char *fmt, ...)
 		else if (getenv ("PREFIX"))
 			bbsprefix = strdup (getenv ("PREFIX"));
 		else
-			bbsprefix = strdup (BASEDIR);
+			perror ("Neither BBSPREFIX nor PREFIX are set, bailing out.");
+		/*bbsprefix = strdup (BASEDIR);*/
+		/* There is no longer a hardwired fallback prefix. */
 	}
 
 	/* Prepend the prefix to the format. Chop double slashes */
