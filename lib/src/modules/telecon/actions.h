@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:37:41  alexios
+ * Removed extraneous rcsinfo.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -42,12 +45,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
-
 
 
 #define ACTIONTYPES "SODAG"

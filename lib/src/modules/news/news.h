@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:39:20  alexios
+ * Removed extraneous rcsinfo.
+ *
  * Revision 1.4  2003/12/24 20:12:10  alexios
  * Ran through megistos-config --oh.
  *
@@ -42,11 +45,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
 
 
 #define NEWSFNAME NEWSDIR"/blt-%03d"
