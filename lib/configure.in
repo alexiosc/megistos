@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/08/15 20:07:59  alexios
+# Added enough information and variables for megistos-config.
+#
 # Revision 1.1  2003/08/15 18:06:56  alexios
 # Initial revision.
 #
@@ -139,13 +142,29 @@ AC_CHECK_FUNCS(
 	vhangup \
 )
 
-if [[ x$prefix = xNONE ]];
+if [[ x$datadir = xNONE ]];
 then
-	p=$ac_default_prefix
+	p=$datadir
 else
 	p=$prefix
 fi
-BASEDIR=$p/lib/megistos
+
+BASENAME=megistos
+AC_SUBST(BASENAME)
+AC_DEFINE_UNQUOTED(BASENAME,"$BASENAME",[The default system directory name.])
+
+BASEDIR=$p/lib/$BASENAME
+AC_SUBST(BASEDIR)
 AC_DEFINE_UNQUOTED(BASEDIR,"$BASEDIR",[The default base directory of the system's data files.])
 
-AC_OUTPUT(Makefile src/Makefile)
+PKGDATADIR=$datadir/$BASENAME
+PKGLIBDIR=$libdir/$BASENAME
+PKGINCLUDEDIR=$includedir/$BASENAME
+
+AC_SUBST(PKGDATADIR)
+AC_SUBST(PKGLIBDIR)
+AC_SUBST(PKGINCLUDEDIR)
+
+CFLAGS="$CFLAGS -Wall"
+
+AC_OUTPUT(Makefile src/Makefile src/megistos-config)

@@ -3,9 +3,16 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/08/15 20:09:00  alexios
+# Added enough information and variables for megistos-config.
+#
 # Revision 1.1  2003/08/15 18:05:34  alexios
 # Initial revision.
 #
+
+pkgdatadir = @PKGDATADIR@
+pkglibdir = @PKGLIBDIR@
+pkgincludedir = @PKGINCLUDEDIR@
 
 lib_LTLIBRARIES = libmegistos.la
 
@@ -44,12 +51,14 @@ libmegistos_la_SOURCES =						    \
 	bots.c filexfer.c globalcmd.c miscfx.c security.c useracc.c	    \
 	$(HDR)
 
-include_HEADERS = $(HDR)
+pkginclude_HEADERS = $(HDR)
 
 noinst_HEADERS = mbk_sysvar.h
 
 libmegistos_la_LDFLAGS = -version-info 3:5:1
 libmegistos_la_CFLAGS += -Wall -pedantic
+
+bin_SCRIPTS = megistos-config
 
 version.h:	version.mk $(libmegistos_la_SOURCES)
 		./mkversion.sh $(VERSION)
