@@ -1,5 +1,5 @@
-/** @name    bots.h
-    @memo    Support for (ro)bots, AIs, artificial users and scripts
+/** @file    bots.h
+    @brief    Support for (ro)bots, AIs, artificial users and scripts
     @author  Alexios
 
     @doc
@@ -10,8 +10,8 @@
 
     Original banner, legalese and change history follow.
 
-{\footnotesize
-\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -42,12 +42,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.2  2003/09/27 20:29:41  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.1  2001/04/22 15:20:51  alexios
  * Initial checkin.
  *
 
-\end{verbatim}
-} */
+@endverbatim
+*/
 
 /*@{*/
 
@@ -69,23 +73,23 @@
 
     @doc Just like FTP and similar protocols, the bot API issues these
     three-digit numbers to notify the bot of the current state of affairs. The
-    hundreds digit denotes the message type (information, error, etc); the
-    other two digits uniquely identify the message type.
+    hundreds digit denotes the message type (information, error, etc); the other
+    two digits uniquely identify the message type.
 
 */
 /*@{*/
 
-#define BTS_PROMPT_STARTS   601	/** Beginning of a prompt */
-#define BTS_PROMPT_ARGUMENT 602	/** A prompt argument (%s etc) follows */
-#define BTS_PROMPT_TEXT     603 /** Human-readable prompt follows */
-#define BTS_PROMPT_ENDS     609 /** End of prompt */
+#define BTS_PROMPT_STARTS   601	/**< Beginning of a prompt */
+#define BTS_PROMPT_ARGUMENT 602	/**< A prompt argument (%s etc) follows */
+#define BTS_PROMPT_TEXT     603 /**< Human-readable prompt follows */
+#define BTS_PROMPT_ENDS     609 /**< End of prompt */
 
-#define BTS_FILE_STARTS     610 /** Beginning of a long file display */
-#define BTS_FILE_ENDS       619 /** End of a long file display */
+#define BTS_FILE_STARTS     610 /**< Beginning of a long file display */
+#define BTS_FILE_ENDS       619 /**< End of a long file display */
 
-#define BTS_INJECTED_PROMPT 630 /** Message from other user follows */
+#define BTS_INJECTED_PROMPT 630 /**< Message from other user follows */
 
-#define BTS_INPUT_EXPECTED  650 /** Input expected now */
+#define BTS_INPUT_EXPECTED  650 /**< Input expected now */
 
 /*@}*/
 
@@ -96,18 +100,19 @@
     @doc Bots depend on rigidly defined return codes. However, since return
     codes consist of easily used ASCII characters, it's necessary to escape
     arbitrary user-provided strings. Any character sequences that look like
-    {\tt new-line digit digit digit space} are escaped. You can use {\tt
-    bot_unescape()} to reverse this.
+    <tt>new-line digit digit digit space</tt> are escaped by changing the
+    newline to an <tt>ESC</tt> (ASCII 27). You can use bot_unescape() to reverse
+    this.
 
     @param s The string to escape. The string itself is modified, not a copy
     thereof.
 
     @return The escaped string. You can either call the function for its side
-    effect, it's return value, or both, just like {\tt strcpy()}.
+    effect, it's return value, or both, just like <tt>strcpy()</tt>.
 
     @see bot_unescape().  */
 
-char *bot_escape(char *s);
+char *bot_escape (char *s);
 
 
 /** Unescape a string after it's been received by a bot
@@ -122,11 +127,11 @@ char *bot_escape(char *s);
     thereof.
 
     @return The original string. You can either call the function for its side
-    effect, it's return value, or both, just like {\tt strcpy()}.
+    effect, it's return value, or both, just like <tt>strcpy()</tt>.
 
     @see bot_escape().  */
 
-char *bot_unescape(char *s);
+char *bot_unescape (char *s);
 
 
 

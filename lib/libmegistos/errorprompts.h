@@ -1,25 +1,27 @@
-/** @name     errorprompts.h
-    @memo     Hardwired fatal error messages.
+/*! @file     errorprompts.h
+    @brief     Hardwired fatal error messages.
     @author   Alexios
 
     @doc
 
     Megistos is almost completely configurable. Because there are almost no
     strings hardwired to the binaries, fatal error reporting is a tricky
-    business. We solve this problem by hard-wiring two prompts into the system:
-    those issued to a user to notify them of fatal and non-fatal errors.
+    business. We solve this problem by hard-wiring two prompts into the system
+    (and not by using I18N and locales): those issued to a user to notify them
+    of fatal and non-fatal errors.
 
     The two messages here are conditionally compiled based on the GREEK
     symbol. This is just selfish, really, but we like to be able to have code
     that compiles and incorporates into our existing BBS with minimal
-    hassle. This solution is {\em very} inelegant. I'm investigating a better,
-    possibly multilingual one. It's likely we can just read these messages off
-    a message prompt file at compilation time and store one set per supported
-    language.
+    hassle. This solution is <em>very</em> inelegant. I'm investigating a
+    better, possibly multilingual one. It's likely we can just read these
+    messages off a message prompt file at compilation time and store one set per
+    supported language.
 
     Original banner, legalese and change history follow.
 
-    {\small\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -52,6 +54,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:30:08  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -64,8 +70,8 @@
  *
  *
 
-\end{verbatim}
-} */
+@endverbatim
+*/
 
 /*@{*/
 

@@ -1,9 +1,7 @@
-/** @name    timedate.h
-    @memo    Time and date operations.
+/** @file    timedate.h
+    @brief   Time and date operations.
     @author  Alexios
 
-    @doc
-    
     This header file includes functions for obtaining and operating on times
     and dates. This was the first interface I specified for Megistos, while I
     was still a UNIX-newbie in 1994. As such, it could be suitable for a
@@ -11,31 +9,27 @@
     64-bit modern operating system. Expect these functions to go away in the
     near future. Here's the plan:
 
-    \begin{enumerate}
+    - Kludge API to obtain and deal with proper, <tt>time_t</tt>-based dates
+      and times. It should still try to deal with the existing 16-bit
+      ones. This should be easy, as the 16-bit values are all less that 65535
+      and all dates past 6pm on the 1st of January, 1970 are greater than
+      65535. Both time formats should be accepted, but only the proper
+      (<tt>time_t</tt>) format should be written.
 
-    \item Kludge API to obtain and deal with proper, {\tt time_t}-based dates
-    and times. It should still try to deal with the existing 16-bit ones. This
-    should be easy, as the 16-bit values are all less that 65535 and all dates
-    past 6pm on the 1st of January, 1970 are greater than 65535. Both time
-    formats should be accepted, but only the proper ({\tt time_t}) format
-    should be written.
+    - Make conversion scripts for times/dates in existing modules.
 
-    \item Make conversion scripts for times/dates in existing modules.
+    - Do away with the original function names to avoid modules calling them
+      and assuming the wrong assumptions. Write new, (<tt>time_t</tt>)-only
+      API.
 
-    \item Do away with the original function names to avoid modules calling
-    them and assuming the wrong assumptions. Write new, ({\tt time_t})-only
-    API.
+    - Correct all subsystems and modules that will no longer compile.
 
-    \item Correct all subsystems and modules that will no longer compile.
-
-    \item Document new API.
-
-    \end{itemize}
+    - Document new API.
 
     Original banner, legalese and change history follow.
 
-    {\footnotesize
-    \begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -66,6 +60,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:32:21  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -83,8 +81,8 @@
  *
  *
 
-\end{verbatim}
-} */
+@endverbatim
+*/
 
 /*@{*/
 
@@ -97,6 +95,21 @@
 
 #ifndef TIMEDATE_H
 #define TIMEDATE_H
+
+
+/** @defgroup timedate Time and Date handling
+
+    This module is populated mostly by horrible legacy functions originally
+    meant to provide a modicum of Major BBS compatibility in time
+    calculations. UNIX, of course, does not separate time and date functions
+    like MS-DOS (and the Major BBS), which is why the functions here are so
+    bletcherous. Thankfully, they can be replaced by more modern equivalent
+    functions @e and retain their kludgy old functionality.
+
+    Currently, the functions here are not documented, and they will become
+    deprecated soon enough.
+
+@{*/
 
 
 /* We include this preemptively so that compilers don't complain about

@@ -1,32 +1,11 @@
-/** @name     lock.h
-    @memo     Resource locking.
+/*! @file     lock.h
+    @brief    Resource locking.
     @author   Alexios
-
-    @doc This header defines an interface to the locking features of the
-    BBS. Locks are implemented with the aid of the lock daemon, which listens
-    to commands on a socket.
-
-    Lockd requests are strings sent to the daemon's socket. They look like
-    this:
-
-    \begin{verbatim}
-    MAKE foo 42 bar  Creates lock "foo" with info "bar" for PID 42
-    CHCK foo 42      Checks for the presence of lock "foo" (we're PID 42)
-    KILL foo 42      Removes lock "foo" on behalf of process with PID 42
-    \end{verbatim}
-
-    Results are integers in decimal (matching the {\tt LKR_} constants below)
-    followed by a string. A positive result code denotes the PID of a process
-    holding the lock. In this case, the result code is followed by a string
-    containing the {\tt info} field of the lock. Negative result codes denote
-    error conditions.
-
-    All this is slightly academic, though. The details of the transactions with
-    the daemon are hidden from the user.
 
     Original banner, legalese and change history follow.
 
-    {\small\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -58,6 +37,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:31:31  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -74,10 +57,8 @@
  *
  *
 
-\end{verbatim}
+@endverbatim
 }*/
-
-/*@{*/
 
 
 #ifndef RCS_VER 
@@ -88,6 +69,32 @@
 
 #ifndef LOCK_H
 #define LOCK_H
+
+
+/** @defgroup lock Resource Locking and Serialisation
+
+    This header defines an interface to the locking features of the BBS. Locks
+    are implemented with the aid of the lock daemon, lockd, which listens to
+    commands on a socket.
+
+    Lockd requests are strings sent to the daemon's socket. They look like this:
+
+@verbatim
+MAKE foo 42 bar  Creates lock "foo" with info "bar" for PID 42
+CHCK foo 42      Checks for the presence of lock "foo" (we're PID 42)
+KILL foo 42      Removes lock "foo" on behalf of process with PID 42
+@endverbatim
+
+    Results are integers in decimal (matching the <tt>LKR_</tt> constants below)
+    followed by a string. A positive result code denotes the PID of a process
+    holding the lock. In this case, the result code is followed by a string
+    containing the <tt>info</tt> field of the lock. Negative result codes denote
+    error conditions.
+
+    All this is slightly academic, though. The details of the transactions with
+    the daemon are hidden from the user.
+
+@{ */
 
 
 /* The lock daemon's UNIX domain socket name */
@@ -105,8 +112,7 @@
 
 
 
-/** @name Lock result codes
-    @filename LKR_flags
+/** @defgroup LKR_flags Lock result codes (LKR_x)
 
     @memo Resource locking result codes.
 
@@ -114,39 +120,33 @@
     succeeded, and, if not, why. They are a necessary part of resource
     locking.
 
-    \begin{description}
-    
-    \item[{\tt LKR_OK}] All is well, the lock request was successful.
+    - LKR_OK. All is well, the lock request was successful.
 
-    \item[{\tt LKR_STALE}] The requested resource is locked, but the lock is
-    stale. That is, the process that owned the lock has died. Your process may
-    lock the resource.
+    - LKR_STALE. The requested resource is locked, but the lock is stale. That
+      is, the process that owned the lock has died. Your process may lock the
+      resource.
 
-    \item[{\tt LKR_OWN}] The lock exists, and belongs to you.
+    - LKR_OWN. The lock exists, and belongs to you.
 
-    \item[{\tt LKR_TIMEOUT}] There was a timeout while waiting for the lock to
-    be removed. This result code is not returned by the daemon. Handling
-    timeouts is the responsibility of the BBS library and they are reported
-    locally.
+    - LKR_TIMEOUT. There was a timeout while waiting for the lock to be
+      removed. This result code is not returned by the daemon. Handling timeouts
+      is the responsibility of the BBS library and they are reported locally.
 
-    \item[{\tt LKR_ERROR}] A strange error has occur-ed. Whoops.
+    - LKR_ERROR. A strange error has occur-ed. Whoops.
 
-    \item[{\tt LKR_SYNTAX}] The lock daemon could not understand your request.
-
-    \end{description}
-
+    - LKR_SYNTAX. The lock daemon could not understand your request.
 
     Any other result code greater than zero denotes the PID of a process
     holding the lock in question. */
 
 /*@{*/
 
-#define LKR_OK       0		/** Operation successful */
-#define LKR_STALE   -1		/** Lock's owner is dead, lock is removed */
-#define LKR_OWN     -2		/** Lock belongs to the caller */
-#define LKR_TIMEOUT -3		/** Timeout waiting for lock to be removed */
-#define LKR_ERROR   -4		/** Some other error occurred */
-#define LKR_SYNTAX  -5		/** Lockd failed to parse the request */
+#define LKR_OK       0		/**< Operation successful */
+#define LKR_STALE   -1		/**< Lock's owner is dead, lock is removed */
+#define LKR_OWN     -2		/**< Lock belongs to the caller */
+#define LKR_TIMEOUT -3		/**< Timeout waiting for lock to be removed */
+#define LKR_ERROR   -4		/**< Some other error occurred */
+#define LKR_SYNTAX  -5		/**< Lockd failed to parse the request */
 
 /*@}*/
 
@@ -168,7 +168,7 @@
     @param info a short description of the lock. This is for your benefit only,
     so that processes competing for a lock will know why a lock is in place.
 
-    @return One of the {\tt LKR_x} result codes.  */
+    @return One of the <tt>LKR_x</tt> result codes.  */
 
 int lock_place(const char *name, const char *info);
 
@@ -183,10 +183,10 @@ int lock_place(const char *name, const char *info);
     @param name the name of the resource to be checked (filename of the lock,
     too).
 
-    @param info if the lock exists, its {\tt info} field is copied to the
+    @param info if the lock exists, its <tt>info</tt> field is copied to the
     supplied string.
 
-    @return One of the {\tt LKR_x} result codes. */
+    @return One of the <tt>LKR_x</tt> result codes. */
 
 int lock_check(const char *name, char *info);
 
@@ -197,8 +197,8 @@ int lock_check(const char *name, char *info);
  
     @param name the name of the lock to be removed.
 
-    @return One of the {\tt LKR_x} result codes. {\tt LKR_ERROR} denotes an
-    error with {\tt unlink()}, in which case the error will be left in {\tt
+    @return One of the <tt>LKR_x} result codes. {\tt LKR_ERROR</tt> denotes an
+    error with <tt>unlink()</tt>, in which case the error will be left in {\tt
     errno} for your delectation. */
 
 int lock_rm(const char *name);
@@ -213,16 +213,17 @@ int lock_rm(const char *name);
 
     @param delay the maximum time to wait in seconds.
 
-    @return One of the {\tt LKR_x} result codes representing the state of the
-    lock when the process exist. {\tt LKR_TIMEOUT} is reported when the time
-    specified by {\tt delay} expired and the lock was still unavailable. */
+    @return One of the <tt>LKR_x</tt> result codes representing the state of the
+    lock when the process exist. <tt>LKR_TIMEOUT</tt> is reported when the time
+    specified by <tt>delay</tt> expired and the lock was still unavailable. */
 
 int lock_wait(const char *name,int delay);
 
 
-#endif /* LOCK_H */
+/**@}*/
 
-/*@}*/
+
+#endif /* LOCK_H */
 
 /*
 LocalWords: Alexios doc BBS Lockd foo PID CHCK tt LKR legalese alexios Exp

@@ -1,8 +1,6 @@
-/** @name    miscfx.h
-    @memo    Miscelaneous functions
+/** @file    miscfx.h
+    @brief   Miscelaneous functions
     @author  Alexios
-
-    @doc
 
     These functions are declared here because, frankly, they wouldn't fit
     anywhere else. Some of them should be considered deprecated. All in due
@@ -10,8 +8,8 @@
 
     Original banner, legalese and change history follow.
 
-    {\footnotesize
-    \begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -43,6 +41,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:31:51  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -79,11 +81,8 @@
  *
  *
 
-\end{verbatim}
+@endverbatim
 } */
-
-/*@{*/
-
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -97,6 +96,11 @@
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
+
+
+/** @defgroup miscfx Miscellaneous Functionality
+
+@{*/
 
 
 #define PHONETIC "\000\000\000\000\000\000\000\000"  /* 0-7              */ \
@@ -170,12 +174,14 @@
 
 /** A simple way to get (pseudo-)random numbers
 
-    This macro is just a wrapper for the C function {\tt rand()}. {\em DO NOT
-    USE THIS FUNCTION FOR RANDOMNESS-SENSITIVE TASKS LIKE KEY GENERATION.}
+    This macro is just a wrapper for the C function <tt>rand()</tt>.
+
+    @warning DO NOT USE THIS FUNCTION FOR RANDOMNESS-SENSITIVE TASKS
+    LIKE KEY GENERATION.
 
     @param num The maximum random number (plus 1) that will be generated.
 
-    @return A (pseudo-)random number between 0 and {\tt num}-1.
+    @return A (pseudo-)random number between 0 and <tt>num</tt>-1.
 
     @see randomize() */
 
@@ -185,7 +191,7 @@
 /** Seed the random number generator.
 
     A macro that uses the current time and process ID to seed the pseudo-random
-    number generator. Future versions should look for the /dev/random or
+    number generator. Future versions should look for the @c /dev/random or @c
     /dev/urandom devices and use those, if they're available.
 
     @see rnd() */
@@ -229,14 +235,14 @@
 
 /** Safe memory allocation.
 
-    Attempts to allocate memory, halting the module with an {\tt error_fatal()}
-    if memory couldn't be allocated. The arguments are identical to those of
-    {\tt malloc()}, which this function calls internally.
+    Attempts to allocate memory, halting the module with an error_fatal() if
+    memory couldn't be allocated. The arguments are identical to those of
+    malloc(), which this function calls internally.
 
     @param size The number of bytes to allocate.
 
     @return a pointer to the block of memory allocated. This function never
-    returns {\tt NULL}. If an allocation error occurs, the current program is
+    returns <tt>NULL</tt>. If an allocation error occurs, the current program is
     terminated. */
 
 void *alcmem (size_t size);
@@ -246,7 +252,7 @@ void *alcmem (size_t size);
 
     @param s A null-terminated string.
 
-    @return The string {\tt s} with all upper case characters converted to
+    @return The string <tt>s</tt> with all upper case characters converted to
     lower case.
 
     @see upperc() */
@@ -258,7 +264,7 @@ char *lowerc (char *s);
 
     @param s A null-terminated string.
 
-    @return The string {\tt s} with all lower case characters converted to
+    @return The string <tt>s</tt> with all lower case characters converted to
     upper case.
 
     @see lowerc() */
@@ -270,7 +276,7 @@ char *upperc (char *s);
 
     @param s A null-terminated string.
 
-    @return The string {\tt s} with all leading and trailing white space
+    @return The string <tt>s</tt> with all leading and trailing white space
     removed.
 
     @see lowerc() */
@@ -284,7 +290,7 @@ char *stripspace(char *s);
 
     @param longs The string in which to search.
 
-    @return Returns non-zero if {\tt shorts} was found at the beginning of {\tt
+    @return Returns non-zero if <tt>shorts</tt> was found at the beginning of {\tt
     longs}. Zero is returned otherwise. Case-insensitive comparison is used.
 
     @see sameas()
@@ -315,19 +321,19 @@ int sameas(char *stg1, char *stg2);
 
     This function appears inane, and it is (partially). The first version was
     written in 1992, when I was dealing with Major BBS modules. The database
-    system, {\em BTrieve}, didn't know about terminating nulls in strings. If a
-    key was 24 bytes long, equality meant an identical 24 bytes. So, all
-    database keys had to be zero-padded to avoid some very obscure bugs. These
-    days, {\tt zeropad} is only useful where sensitive information is likely to
-    be held in memory and we don't want it written to disk along with a
-    string. But it's much easier (not to mention faster) to use {\tt bzero()}
-    or {\tt memchr()} to do the trick.
+    system, Novell's <em>BTrieve</em>, didn't know about terminating nulls in
+    strings and the C API didn't care. If a key was 24 bytes long, equality
+    meant an identical 24 bytes. So, all database keys had to be zero-padded to
+    avoid some very obscure bugs. These days, <tt>zeropad</tt> is only useful
+    where sensitive information is likely to be held in memory and we don't want
+    it written to disk along with a string. But it's much easier (not to mention
+    faster) to use <tt>bzero()</tt> or <tt>memchr()</tt> to do the trick.
 
     @param s The string array to zero-pad.
 
     @param count The size of the string array.
 
-    @return A pointer to {\tt s}, with any post-null bytes zero-padded.
+    @return A pointer to <tt>s</tt>, with any post-null bytes zero-padded.
 
     @see bzero(), memchr() */
 
@@ -338,15 +344,15 @@ char *zeropad(char *s, int count);
 
     @param s A string to translate.
 
-    @param table A translation table. This is a {\tt char} array with 256
-    elements. Translation of character x is done by the expression {\tt
-    table[x]!=0 ? table[x] : x}. That is, the {\tt x}-th element of {\tt table}
-    holds the new value of character with ASCII code {\tt x}. If the {\tt x}-th
-    element of {\tt table} is zero, the character is not translated. This is
-    done for convenience to the programmer.
+    @param table A translation table. This is a <tt>char</tt> array with 256
+    elements. Translation of character x is done by the expression
+    <tt>table[x]!=0 ? table[x] : x</tt>. That is, the <tt>x</tt>-th element of
+    <tt>table</tt> holds the new value of character with ASCII code <tt>x}. If
+    the <tt>x</tt>-th element of <tt>table</tt> is zero, the character is not
+    translated. This is done for convenience to the programmer.
 
-    @return A pointer to {\tt s} with the characters translated as above. It
-    should be obvious that this is a {\em destructive} function! The translated
+    @return A pointer to <tt>s</tt> with the characters translated as above. It
+    should be obvious that this is a <em>destructive</em> function! The translated
     string overwrites the original one. 
 
     @see faststgxlate() */
@@ -357,13 +363,12 @@ inline char *stgxlate(char *s, char *table);
 
     @param s A string to translate.
 
-    @param table A translation table. This is a {\tt char} array with 256
-    elements. Translation of character x is done by the expression {\tt
-    table[x]}. Unlike {\tt stgxlate()}, {\em all} characters will be
-    translated.
+    @param table A translation table. This is a <tt>char</tt> array with 256
+    elements. Translation of character @c x is done by the expression {\tt
+    table[x]}. Unlike <tt>stgxlate()</tt>, @e all characters will be translated.
 
-    @return A pointer to {\tt s} with the characters translated as above. It
-    should be obvious that this is a {\em destructive} function! The translated
+    @return A pointer to <tt>s</tt> with the characters translated as above. It
+    should be obvious that this is a <em>destructive</em> function! The translated
     string overwrites the original one. 
 
     @see stgxlate() */
@@ -373,19 +378,19 @@ inline char *faststgxlate(char *s, char *table);
 
 /** Sends a command to the BBS daemon.
 
-    This function composes a command to the BBS daemon, {\tt bbsd}, and sends
+    This function composes a command to the BBS daemon, <tt>bbsd</tt>, and sends
     it. BBS commands perform certain restricted tasks, like throwing other BBS
     users off the system, et cetera.
 
-    This is a low-level command. Most existing {\tt bbsd} commands have
+    This is a low-level command. Most existing <tt>bbsd</tt> commands have
     individual functions to simplify the interface for the user.
 
-    @param command The command to send to {\tt bbsd}.
+    @param command The command to send to <tt>bbsd</tt>.
 
-    @param tty The first argument of the {\tt bbsd} command is always a BBS
-    channel name, in the form of a TTY device name, without the {\tt
-    "/dev/"}. For instance, the third Linux virtual console would be identified
-    as {\tt "tty3"}.
+    @param tty The first argument of the <tt>bbsd</tt> command is always a BBS
+    channel name, in the form of a TTY device name, without the
+    <tt>"/dev/"</tt>. For instance, the third Linux virtual console would be
+    identified as <tt>"tty3"</tt>.
 
     @param arg The second argument of the command.  */
 
@@ -394,10 +399,11 @@ int bbsdcommand(char *command, char *tty, char *arg);
 
 /** Search a string for a set of keywords.
 
-    This function uses case-sensitive searching ({\tt strstr()} to locate any
-    of a set of keywords within a string. Partial matching is done, so that,
-    for instance, {\tt "word"} will match {\tt "keywords"}. Please note that
-    {\em THE {\tt keywords} ARGUMENT WILL BE DESTROYED IN THE PROCESS OF
+    This function uses case-sensitive searching (<tt>strstr()</tt> to locate any
+    of a set of keywords within a string. Partial matching is done, so that, for
+    instance, <tt>"word"</tt> will match <tt>"keywords"</tt>.
+    
+    @warning THE <tt>keywords</tt> ARGUMENT WILL BE DESTROYED IN THE PROCESS OF
     SEARCHING}.
 
     @param string The string to search in.
@@ -415,7 +421,7 @@ int search(char *string, char *keywords);
     
     @param command The command to execute.
     
-    @return The same values as {\tt system()}.
+    @return The same values as <tt>system()</tt>.
 
     @see system() */
 
@@ -424,14 +430,13 @@ int runmodule(char *command);
 
 /** Executes a command.
 
-    Runs a UNIX command, making sure the module and BBS are aware of
-    this for initialisation, charging, idling, statistics and other
-    purposes. This is the best way to call external commands with
-    minimal hassle.
+    Runs a UNIX command, making sure the module and BBS are aware of this for
+    initialisation, charging, idling, statistics and other purposes. This is the
+    best way to call external commands with minimal hassle.
     
     @param command The command to execute.
     
-    @return The same values as {\tt system()}.
+    @return The same values as <tt>system()</tt>.
 
     @see system() */
 
@@ -443,19 +448,21 @@ int runcommand(char *command);
     Executes the visual or line editor (depending on user's settings) to edit a
     given file.
 
-    The correct way to edit a file is to either create it in {\tt /tmp}, or to
-    make a symbolic link to it. If the user cancels the editing process, {\em
-    THE FILE WILL BE DELETED}.
+    The correct way to edit a file is to either create it in <tt>/tmp</tt>, or
+    to make a symbolic link to it.
+
+    @warning IF THE USER CANCELS THE EDITING PROCESS, <EM>THE FILE WILL BE
+    DELETED</EM>.
 
     @param fname The full filename of the file to edit.
 
     @param limit The size limit of the file. BBS editors, unlike most other
     editors, can impose this limit on users.
 
-    @return The same values as {\tt runmodule()}, which are the same as {\tt
-    system()}. If the user saved the file, the {\tt fname} will still exist and
-    will contain the updated content. If the user chose to cancel the editing
-    session without saving, {\tt fname} will no longer exist. */
+    @return The same values as runmodule(), which are the same as
+    <tt>system()</tt>. If the user saved the file, the <tt>fname</tt> will still
+    exist and will contain the updated content. If the user chose to cancel the
+    editing session without saving, <tt>fname</tt> will no longer exist. */
 
 int editor(char *fname,int limit);
 
@@ -479,14 +486,14 @@ void mmgopage(char *page); /* This is for Menuman's use only */
 /** Copy a file.
 
     A useful function to copy a file to another one. The semantics are almost
-    identical to those of the shell command {\tt cp}.
+    identical to those of the shell command <tt>cp</tt>.
 
     @param source The filename of the source file.
 
     @param target Filename of the target file.
     
     @return Zero indicates success. Non-zero indicates an error, in which case
-    {\tt errno} will be set accordingly. */
+    <tt>errno</tt> will be set accordingly. */
 
 int fcopy(char *source, char *target);
 
@@ -497,8 +504,8 @@ int fcopy(char *source, char *target);
     it (the standard way, drawn from the standard include files). This is the
     actual documentation of the function from the person pages:
 
-    The usleep() function suspends execution of the calling process for {\tt
-    __usec} microseconds.  The sleep may be lengthened slightly by any system
+    The usleep() function suspends execution of the calling process for @c
+    __usec microseconds.  The sleep may be lengthened slightly by any system
     activity or by the time spent processing the call.
 
     @param __usec The time delay in question.  */
@@ -513,10 +520,10 @@ extern void usleep ((unsigned long __usec));
 /** Format a filename.
 
     This function formats a filename string for a subdirectory under the BBS
-    prefix. The environment variables {\tt BBSPREFIX} and {\tt PREFIX} are
-    first checked, followed by the BBS prefix defined at compile time.
+    prefix. The environment variables @c BBSPREFIX and @c PREFIX are first
+    checked, followed by the BBS prefix defined at compile time.
 
-    @param fmt A {\tt printf()}-like format string, followed by any necessary
+    @param fmt A <tt>printf()</tt>-like format string, followed by any necessary
     parameters. The prefix will be automatically prepended to the format string
     to form the fully qualified filename.
     

@@ -1,16 +1,14 @@
-/** @name    ttynum.h
-    @memo    Mapping between devices and BBS channels.
+/** @file    ttynum.h
+    @brief   Mapping between devices and BBS channels.
     @author  Alexios
-
-    @doc
 
     This header provides function to map between the physical, UNIX device
     names users are riding and the convenient, numerical BBS channels.
 
     Original banner, legalese and change history follow.
 
-    {\footnotesize
-    \begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -42,6 +40,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:32:31  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -68,12 +70,11 @@
  * First registered revision. Adequate.
  *
  *
- *
+*
 
-\end{verbatim}
-} */
+@endverbatim
+*/
 
-/*@{*/
 
 
 #ifndef RCS_VER 
@@ -83,6 +84,12 @@
 
 #ifndef TTYNUM_H
 #define TTYNUM_H
+
+
+/** @addtogroup channels
+
+@{*/
+
 
 
 /** The channel file magic number */
@@ -96,131 +103,125 @@
     this structure. All of the information in the CHANNELS table is available
     here, too.
 
-    \begin{description}
+    - @c ttyname. The name of the device special this channel is on, minus the
+      <tt>"/dev/"</tt>. For instance, the third virtual console on a Linux box
+      is <tt>"tty3"</tt>.
 
-    \item[{\tt ttyname}] The name of the device special this channel is on,
-    minus the {\tt "/dev/"}. For instance, the third virtual console on a Linux
-    box is {\tt "tty3"}.
+    - @c config. The name of the @c bbsgetty config file to load for this
+      channel. Each config file corresponds to one type of hardware (one make
+      and model of modem, serial hardware, et cetera), and prepares it for use
+      by the BBS. In the case of a modem, for example, it sends initialisation
+      strings, sets the bps rate, and instructs @c bbsgetty to wait for a
+      <tt>RING</tt>.
 
-    \item[{\tt config}] The name of the {\tt bbsgetty} config file to load for
-    this channel. Each config file corresponds to one type of hardware (one
-    make and model of modem, serial hardware, et cetera), and prepares it for
-    use by the BBS. In the case of a modem, for example, it sends
-    initialisation strings, sets the bps rate, and instructs {\tt bbsgetty} to
-    wait for a {\tt RING}.
+    - @c channel. The channel number. This is printed as a hexadecimal number
+      to keep it short and for traditional reasons: Major did it because their
+      popular 'Galactibox' ISO bus expander had 16 slots, and there were
+      Galacticomm multiple modems with power-of-two devices on each card, up
+      to, I think, eight. Besides, with Major only supporting 64 (and later
+      256) lines, a 16x4 and then 16x16 arrangement was a good idea. Thus, bear
+      in mind that channel <tt>"20"</tt>, is, in fact, channel 0x20,
+      i.e. 32. Channels are almost always referred to in this confusing manner
+      (i.e. without any indication of base). It is considered a good idea to
+      avoid (if possible) using numbers such as {\tt 1a} because they've been
+      known to drive computer-naive users nuts.
 
-    \item[{\tt channel}] The channel number. This is printed as a hexadecimal
-    number to keep it short and for traditional reasons: Major did it because a
-    Galactibox had 16 slots, and there were Galacticomm multiple modems with
-    power-of-two devices on each card, up to, I think, eight. Besides, with
-    Major only supporting 64 (and then 256) lines, a 16x4 and then 16x16
-    arrangement was a good idea. Thus, bear in mind that channel {\tt "20"},
-    is, in fact, channel 0x20, i.e. 32. Channels are almost always referred to
-    in this confusing manner (i.e. without any indication of base). It is
-    considered a good idea to avoid (if possible) using numbers such as {\tt
-    1a} because they've been known to drive computer-naive users nuts.
+    - @c key. The key required to allow users to login on this channel.
 
-    \item[{\tt key}] The key required to allow users to login on this channel.
+    - @c lang. The default language to use for this channel. Different channels
+      can have different languages. The reason is simple: certain encodings
+      don't mix well with certain connections (older telnet clients, 7-bit
+      ASCII serial connections, et cetera). It'd be a good idea to be able to
+      display a language the users can <em>read</em> in order to login. The
+      default language may be negative, in which case a language selection menu
+      is presented to the user, and the default language is the absolute value
+      of this field.
 
-    \item[{\tt lang}] The default language to use for this channel. Different
-    channels can have different languages. The reason is simple: certain
-    encodings don't mix well with certain connections (older telnet clients,
-    7-bit ASCII serial connections, et cetera). It'd be a good idea to be able
-    to display a language the users can {\em read} in order to login. The
-    default language may be negative, in which case a language selection menu
-    is presented to the user, and the default language is the absolute value of
-    this field.
+    - @c flags. Flags for this channel, in the form of @c TTF_x flags ORred
+      together. This field sets the channel's defaults and assumptions, like
+      whether to assume that users have ANSI enabled, et cetera.
 
-    \item[{\tt flags}] Flags for this channel, in the form of {\tt TTF_x} flags
-    ORred together. This field sets the channel's defaults and assumptions,
-    like whether to assume that users have ANSI enabled, et cetera.
-
-    \item[{\tt xlation}] The default translation mode for this channel. It's
-    here for the same reasons as the default language field, {\tt lang}.
-
-    \end{description}
+    - @c xlation. The default translation mode for this channel. It's here for
+      the same reasons as the default language field, <tt>lang</tt>.
 
  */
 
 struct channeldef {
-  char          ttyname [16];	/** Name of the device, minus {\tt "/dev/"}. */
-  char          config  [32];	/** Config file for {\tt bbsgetty}. */
-  unsigned int  channel;	/** BBS channel number. */
-  bbskey_t      key;		/** Key required to login. */
-  int32         lang;		/** Default language for this channel. */
-  uint32        flags;		/** Channel flags ({\tt TTF_x} flags). */
-  int32         xlation;	/** Default translation mode. */
+	char          ttyname [16];	/**< Name of the device, minus <tt>"/dev/"</tt>. */
+	char          config  [32];	/**< Config file for <tt>bbsgetty</tt>. */
+	unsigned int  channel;	        /**< BBS channel number. */
+	bbskey_t      key;		/**< Key required to login. */
+	int32         lang;		/**< Default language for this channel. */
+	uint32        flags;		/**< Channel flags (<tt>TTF_x</tt> flags). */
+	int32         xlation;          /**< Default translation mode. */
 };
 
 
-/** @name Channel definition flags.
-    @filename TTF_flags
+/** @defgroup TTF_flags Channel definition flags (TTF_x)
 
-    @memo Flags controlling default channel behaviour.
+    @brief Flags controlling default channel behaviour.
 
-    @doc The flags control the default behaviour of channels with respect to
+    The flags control the default behaviour of channels with respect to
     translation, language and terminal settings.
 
-    \begin{description}
-    
-    \item[{\tt TTF_CONSOLE}] This channel is on the system console. Console
-    lines behave slightly different during login. For instance, they interpret
-    as blank user ID as a {\em redraw} command and redraw their screen. This is
-    reminiscent of both the way {\tt getty} and the Major BBS operate.
+    - @c TTF_CONSOLE This channel is on the system console. Console lines
+      behave slightly different during login. For instance, they interpret as
+      blank user ID as a <em>redraw</em> command and redraw their screen. This
+      is reminiscent of both the way <tt>getty</tt> and the Major BBS operate.
 
-    \item[{\tt TTF_SERIAL}] This channel is on a serial line, probably
-    connected to a local terminal of sorts.
+    - @c TTF_SERIAL This channel is on a serial line, probably connected to a
+      local terminal of sorts.
 
-    \item[{\tt TTF_MODEM}] This channel is a modem. Modem channels have
-    slightly different initialisation semantics from other types of channels.
+    - @c TTF_MODEM This channel is a modem. Modem channels have slightly
+      different initialisation semantics from other types of channels.
 
-    \item[{\tt TTF_TELNET}] This channel is for incoming telnet
-    connections. This has {\em very} different semantics from other channels
-    types! For one, it's the only type of line the BBS isn't watching on a
-    constant basis. When a telnet connection is established, {\em then} the BBS
-    knows about it.
+    - @c TTF_TELNET This channel is for incoming telnet connections. This has
+      <em>very</em> different semantics from other channels types! For one,
+      it's the only type of line the BBS isn't watching on a constant
+      basis. When a telnet connection is established, <em>then</em> the BBS
+      knows about it.
 
-    \item[{\tt TTF_SIGNUPS}] Allow new user signups on this line. This can be
-    used to limit use of certain lines to existing users.
+    - @c TTF_SIGNUPS Allow new user signups on this line. This can be used to
+      limit use of certain lines to existing users.
 
-    \item[{\tt TTF_ASKXLT}] Present a menu so that the user can select the
-    translation mode they require upon connection. If this flag is set, the
-    {\tt xlation} field in {\tt struct channeldef} defines the translation mode
-    selected when the user simply presses {\tt Enter} in this menu.
+    - @c TTF_ASKXLT Present a menu so that the user can select the translation
+      mode they require upon connection. If this flag is set, the @c xlation
+      field in @c struct channeldef defines the translation mode selected when
+      the user simply presses @c Enter in this menu.
 
-    \item[{\tt TTF_ANSI}] Set this flag to specify that this channel will
-    output ANSI terminal directives by default.
+    - @c TTF_ANSI Set this flag to specify that this channel will output ANSI
+      terminal directives by default.
 
-    \item[{\tt TTF_ASKANSI}] Like {\tt TTF_ASKXLT}, present a menu so that the
-    user can choose whether they'd like ANSI directives or not. The value of
-    {\tt TTF_ANSI} is the default menu selection.
+    - @c TTF_ASKANSI Like {\tt TTF_ASKXLT</tt>, present a menu so that the user
+      can choose whether they'd like ANSI directives or not. The value of @c
+      TTF_ANSI is the default menu selection.
 
-    \item[{\tt TTF_METABBS}] Allow use of the MetaBBS subsystem on this
-    channel. Users are allows to use this line to connect to another friendly
-    BBS, without connecting to yours (without even having an {\em account} on
-    yours).
+    - @c TTF_METABBS Allow use of the MetaBBS subsystem on this channel. Users
+      are allowed to use this line to connect to another friendly BBS, without
+      connecting to yours (and indeed without even having an <em>account</em>
+      on yours).
 
-    \item[{\tt TTF_INTERBBS}] Allow other systems to use this channel for
-    networking. This causes a slight pause before presenting a user-oriented
-    login screen, so that automated systems can issue their respective
-    handshakes. The timeout is small, so it should not annoy your users.
+    - @c TTF_INTERBBS Allow other systems to use this channel for
+      networking. This causes a slight pause before presenting a user-oriented
+      login screen, so that automated systems can issue their respective
+      handshakes. The timeout is small, so it should not annoy your users.
 
     \end{description} */
 /*@{*/
 
-#define TTF_CONSOLE  0x0001	/** Channel is on the system console */
-#define TTF_SERIAL   0x0002	/** Channel is a plain serial line */
-#define TTF_MODEM    0x0004	/** There's a modem on this channel */
-#define TTF_TELNET   0x0008	/** This channel is for telnet connections */
-#define TTF_SIGNUPS  0x0010	/** Signups are allowed here */
-#define TTF_ASKXLT   0x0100	/** Ask people for translation mode */
-#define TTF_ANSI     0x0200	/** ANSI enabled on this channel by default */
-#define TTF_ASKANSI  0x0400	/** Ask people whether they need ANSI */
+#define TTF_CONSOLE  0x0001	/**< Channel is on the system console */
+#define TTF_SERIAL   0x0002	/**< Channel is a plain serial line */
+#define TTF_MODEM    0x0004	/**< There's a modem on this channel */
+#define TTF_TELNET   0x0008	/**< This channel is for telnet connections */
+#define TTF_SIGNUPS  0x0010	/**< Signups are allowed here */
+#define TTF_ASKXLT   0x0100	/**< Ask people for translation mode */
+#define TTF_ANSI     0x0200	/**< ANSI enabled on this channel by default */
+#define TTF_ASKANSI  0x0400	/**< Ask people whether they need ANSI */
 
 #ifdef HAVE_METABBS
-#define TTF_METABBS  0x0800	/** Enable the MetaBBS client for this line */
-#define TTF_INTERBBS  0x1000	/** Allow other BBSs to use this channel for
-                                    MetaBBS networking. */
+#define TTF_METABBS  0x0800	/**< Enable the MetaBBS client for this line */
+#define TTF_INTERBBS  0x1000	/**< Allow other BBSs to use this channel for
+                                     MetaBBS networking. */
 #endif
 
 /*@}*/
@@ -231,12 +232,12 @@ struct channeldef {
 extern struct channeldef *channels;
 
 
-/** Last referenced element of {\tt channels}. */
+/** Last referenced element of <tt>channels</tt>. */
 
 extern struct channeldef *chan_last;
 
 
-/** Number of channels in {\tt channels}. */
+/** Number of channels in <tt>channels</tt>. */
 
 extern int chan_count;
 
@@ -253,20 +254,20 @@ void chan_init();
     Maps device name to channel number, effectively yielding the number of a
     channel associated with the given device.
 
-    @param tty The name of a device special, without the {\tt "/dev/"}.
+    @param tty The name of a device special, without the <tt>"/dev/"</tt>.
 
-    @return The channel number associated with the given device, or {\tt NULL}
-    if the device is not associated with a BBS channel. */
+    @return The channel number associated with the given device, or @c NULL if
+    the device is not associated with a BBS channel. */
 
 uint32 chan_getnum(char *tty);
 
 
-/** Find the index of a channel in {\tt channels}.
+/** Find the index of a channel in <tt>channels</tt>.
 
     Given a device name, this function yields the index of the channel
-    structure in the {\tt channels} array.
+    structure in the <tt>channels</tt> array.
     
-    @param tty The name of a device special, without the {\tt "/dev/"}.
+    @param tty The name of a device special, without the <tt>"/dev/"</tt>.
 
     @return The index of the channel associated with the given device, or -1 if
     the device is not associated with a BBS channel. */
@@ -277,12 +278,12 @@ uint32 chan_getindex(char *tty);
 /** Find the device associated with a channel.
 
     Given the number of a channel, this function returns the device (minus the
-    leading {\tt "/dev/"}) associated with it.
+    leading <tt>"/dev/"</tt>) associated with it.
 
     @param num A channel number.
 
-    @return The device name of channel {\tt num}, or {\tt NULL} if {\tt num} is
-    not a existing BBS channel. */
+    @return The device name of channel @c num, or @c NULL if @c num is not a
+    existing BBS channel. */
 
 char *chan_getname(uint32 num);
 
@@ -297,9 +298,7 @@ uint32 chan_telnetlinecount();
 
 
 #endif /* TTYNUM_H */
-
-/*@}*/
-
+/**@}*/
 /*
 LocalWords: ttynum BBS Alexios doc legalese otnotesize alexios Exp bbs GPL
 LocalWords: MetaBBS xlation struct channeldef config bbsgetty ifndef VER

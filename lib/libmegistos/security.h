@@ -1,49 +1,11 @@
-/** @name    security.h
-    @memo    Definitions pertaining to access levels and security.
+/** @file    security.h
+    @brief   Definitions pertaining to access levels and security.
     @author  Alexios
-
-    @doc
-
-    This header implements system security. Namely, sysop privilege checking
-    and key/lock security.
-    
-    Sysops have an array of flags denoting a number of different command and
-    privileges. Most of those privileges are available within the Remote Sysop
-    module, but they have to be checked for in other places, too.
-
-    Keys are similar to sysop privileges, but are available everywhere. Keys
-    are numerical (work is underway to establish a better, database-driven,
-    alphanumeric key system). On a normal system (i.e. not hacked and kludged),
-    there are 130 keys, 128 of which are available to people:
-
-    \begin{description}
-
-    \item[{\tt 0}] All users implicitly have this key. It cannot be added or
-    removed, but it can be checked for.
-
-    \item[{\tt 1--128}] These keys can be added or removed freely.
-
-    \item[{\tt 129}] Only the user ID `Sysop' has this key, or whatever user ID
-    is specified in the {\tt SYSOP} macro in {\tt config.h}. The key cannot be
-    added to anyone and it cannot be removed from Sysop's keyring.
-
-    \end{description}
-
-    BBS features have locks on them. Each lock can only be unlocked by one,
-    specified key. A user needs to possess this key in order to access locked
-    features.
-
-    There are two sources of keys for users: their class keyring, and their
-    own, personal keyring. The class keyring is a set of keys granted to an
-    entire user class. Belonging to the class implies ownership of those
-    keys. The personal keyring is the obvious: a keyring that only the user
-    possesses. Operators can grant keys to individuals in addition to the keys
-    their classes provide.
 
     Original banner, legalese and change history follow.
 
-    {\footnotesize
-    \begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -75,6 +37,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/27 20:32:02  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.4  2003/08/15 18:14:14  alexios
  * A slight cpp fix.
  *
@@ -87,11 +53,8 @@
  *
  *
 
-\end{verbatim}
-} */
-
-/*@{*/
-
+@endverbatim
+*/
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -103,6 +66,43 @@
 #define SECURITY_H
 
 
+/** @defgroup security Security Functions
+
+    This header implements system security. Namely, sysop privilege checking and
+    key/lock security.
+    
+    Sysops have an array of flags denoting a number of different command and
+    privileges. Most of those privileges are available within the Remote Sysop
+    module, but they have to be checked for in other places, too.
+
+    Keys are similar to sysop privileges, but are available everywhere. Keys are
+    numerical (work is underway to establish a better, database-driven,
+    alphanumeric key system). On a normal system (i.e. not hacked and kludged),
+    there are 130 keys, 128 of which are available to people:
+
+    - 0. All users implicitly have this key. It cannot be added or removed, but
+      it can be checked for.
+
+    - 1--128. These keys can be added or removed freely.
+
+    - 129. Only the user ID `Sysop' has this key, or whatever user ID is
+      specified in the #SYSOP macro in @c config.h. The key cannot be added to
+      anyone and it cannot be removed from Sysop's keyring.
+
+    BBS features have locks on them. Each lock can only be unlocked by one,
+    specified key. A user needs to possess this key in order to access locked
+    features.
+
+    There are two sources of keys for users: their class keyring, and their own,
+    personal keyring. The class keyring is a set of keys granted to an entire
+    user class. Belonging to the class implies ownership of those keys. The
+    personal keyring is the obvious: a keyring that only the user
+    possesses. Operators can grant keys to individuals in addition to the keys
+    their classes provide.
+
+@{*/
+
+
 /** Check if a user has a certain operator command.
     
     This function checks a user account record for the existence of a specified
@@ -111,7 +111,7 @@
     @param user Pointer to the account record of the user in question.
 
     @param index The number of the privilege or operator command in
-    question. This is one of the {\tt USY_x} constants.
+    question. This is one of the <tt>USY_x</tt> constants.
 
     @return Zero if the user lacks the privilege or command, non-zero if they
     have it. */
@@ -134,7 +134,7 @@ int hassysaxs(useracc_t *user,int index);
     tue union of the two keyrings. This is effectively the return value of the
     function. 
 
-    @return The function returns {\tt unionkeys} for no particular reason. */
+    @return The function returns <tt>unionkeys</tt> for no particular reason. */
 
 bbskey_t * key_make(bbskey_t *userkeys,
 		    bbskey_t *classkeys,
@@ -145,14 +145,13 @@ bbskey_t * key_make(bbskey_t *userkeys,
 
     Examines the given key array for ownership of the specified key. Two keys
     are handled specially: key 0 is the `non-key'. All users implicitly have
-    this one. Key 129 is the Sysop key. Only user `Sysop' (or whatever the
-    value of the macro {\tt SYSOP} is) has this key. Not even users with the
-    master key (usually 128, but can be changed at will) can unlock features
-    locked with the Sysop key. All other keys are explicitly specified in the
-    key array.
+    this one. Key 129 is the Sysop key. Only user `Sysop' (or whatever the value
+    of the macro #SYSOP is) has this key. Not even users with the master key
+    (usually 128, but can be changed at will) can unlock features locked with
+    the Sysop key. All other keys are explicitly specified in the key array.
 
     If you need to check a user for ownership of a key, this isn't the right
-    function. You need {\tt key_owns()}.
+    function. You need key_owns().
     
     @param keys A key array to test for key ownership.
 
@@ -187,9 +186,9 @@ int key_owns(useracc_t *user,int key);
 
     @param keys The key array to modify.
 
-    @param key The key to add or remove. Key 0 cannot be added or removed, it
-    is implicitly present in all keyrings. Key 129 cannot be added or removed,
-    it is implicitly absent from all keyrings (won't even fit, on a normal
+    @param key The key to add or remove. Key 0 cannot be added or removed, it is
+    implicitly present in all keyrings. Key 129 cannot be added or removed, it
+    is implicitly absent from all keyrings (won't even fit, on a normal
     system). Specifying an invalid key number causes no error, but no operation
     either.
 

@@ -1,33 +1,11 @@
-/** @name    audit.h
-    @memo    Auditing (logging) events.
+/*! @file    audit.h
+    @brief   Auditing (logging) events.
     @author  Alexios
-
-    @doc
-
-    This header file provides functionality needed to use Megistos logging
-    facilities. The system logs a variety of information:
-
-    \begin{itemize}
-    \item Date,
-    \item Time,
-    \item BBS channel (or daemon/service name, where a channel isn't
-	  available),
-    \item Message flags, giving the type and severity of the log entry,
-    \item Entry summary (typically a canned string), and
-    \item Detailed entry text.
-    \end{itemize}
-
-    The default log file set up by the BBS library is the Audit Trail (Major
-    users should be at home with the name). The API defined here allows you to
-    switch to other files.
-
-    In addition to the API, this include file predefines most of the entries
-    that are most widely used by the standard modules.
 
     Original banner, legalese and change history follow.
 
-{\footnotesize
-\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -59,6 +37,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/27 20:27:37  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.4  2001/05/20 13:58:13  alexios
  * Wisely changed HACKTRY to CRACKTRY. Cosmetic changes.
  *
@@ -109,11 +91,8 @@
  *
  *
 
-\end{verbatim}
-}
+@endverbatim
 */
-
-/*@{*/
 
 #ifndef RCS_VER 
 #define RCS_VER "$Id$"
@@ -125,6 +104,29 @@
 #define AUDIT_H
 
 
+
+/** @defgroup audit Auditing (logging)
+
+    This header file provides functionality needed to use Megistos logging
+    facilities. The system logs a variety of information:
+
+    - Date,
+    - Time,
+    - BBS channel (or daemon/service name, where a channel isn't
+	  available),
+    - Message flags, giving the type and severity of the log entry,
+    - Entry summary (typically a canned string), and
+    - Detailed entry text.
+
+    The default log file set up by the BBS library is the Audit Trail (Major
+    users should be at home with the name). The API defined here allows you to
+    switch to other files.
+
+    In addition to the API, this include file predefines most of the entries
+    that are most widely used by the standard modules.
+
+@{
+*/
 
 /** @name Audit entry flags
     @filename AUF_flags
@@ -138,17 +140,17 @@
 */
 /*@{*/
 
-#define AUF_SECURITY   0x0001	/** Security auditing */
-#define AUF_ACCOUNTING 0x0002	/** Accounting (statistics etc) */
-#define AUF_TRANSFER   0x0004	/** File transfers/reads, etc */
-#define AUF_EVENT      0x0008	/** Event execution/logging */
-#define AUF_OPERATION  0x0010	/** System operation of some kind */
-#define AUF_USERLOG    0x0020	/** User logs (login/logout etc) */
-#define AUF_OTHER      0x0040	/** Other, miscellaneous kinds of auditing */
+#define AUF_SECURITY   0x0001	/**< Security auditing */
+#define AUF_ACCOUNTING 0x0002	/**< Accounting (statistics etc) */
+#define AUF_TRANSFER   0x0004	/**< File transfers/reads, etc */
+#define AUF_EVENT      0x0008	/**< Event execution/logging */
+#define AUF_OPERATION  0x0010	/**< System operation of some kind */
+#define AUF_USERLOG    0x0020	/**< User logs (login/logout etc) */
+#define AUF_OTHER      0x0040	/**< Other, miscellaneous kinds of auditing */
 
-#define AUF_INFO       0x0080   /** Informational (severity) */
-#define AUF_CAUTION    0x0100   /** Cautionary (severity) */
-#define AUF_EMERGENCY  0x0200	/** Emergency (severity) */
+#define AUF_INFO       0x0080   /**< Informational (severity) */
+#define AUF_CAUTION    0x0100   /**< Cautionary (severity) */
+#define AUF_EMERGENCY  0x0200	/**< Emergency (severity) */
 
 #define AUF_SEVERITY   (AUF_INFO|AUF_CAUTION|AUF_EMERGENCY)
 #define AUF_SEVSHIFT   7
@@ -276,20 +278,20 @@
 /** The main auditing function.
 
     In most cases, this function is all you need to know. It takes quite a few
-    arguments and comes with a helper macro, AUDIT (which is quite handy).
+    arguments and comes with a helper macro, #AUDIT (which is quite handy).
     
     @param channel the name of the current user's channel, or a daemon/service
-    name if a channel is not available. A value of {\tt NULL} is equivalent to
-    {\tt thisuesronl.channel}.
+    name if a channel is not available. A value of <tt>NULL</tt> is equivalent to
+    thisuesronl::channel.
 
-    @param flags the type and severity of this message, using {\tt AUF_}
+    @param flags the type and severity of this message, using <tt>AUF_</tt>
     constants.
 
     @param summary a string summarising the logged event. This is in capital
     letters by (Majoresque) convention.
 
-    @param format a {\tt printf()}-like fmt string that formats the detailed
-    log text. Like {\tt printf()}, this argument is followed by as many
+    @param format a <tt>printf()</tt>-like fmt string that formats the detailed
+    log text. Like <tt>printf()</tt>, this argument is followed by as many
     additional arguments as are required by the format specifiers.
 
     @return If the audit file could not be appended to, zero is returned, and
@@ -303,12 +305,12 @@ int audit(char *channel, uint32 flags, char *summary, char *format, ...);
 
 /** AUDIT convenience macro.
 
-    This macro shortens considerably most calls to {\tt audit()}. By
-    convention, audit entry flags, summary and detailed text are {\tt #define}d
-    as {\tt AUT_x}, {\tt AUS_x} and {\tt AUD_x} macros, where {\tt x} is a name
-    common to all three. Given an argument x, the macro expands to the triplet
-    {\tt AUT_x,AUS_x,AUD_x}. In this way, arguments 2 to 4 of {\tt audit()} can
-    be replaced by a simple {\tt AUDIT} call.
+    This macro shortens considerably most calls to audit(). By convention, audit
+    entry flags, summary and detailed text are <tt>#define</tt>d as
+    <tt>AUT_x</tt>, <tt>AUS_x</tt> and <tt>AUD_x</tt> macros, where @c x is a
+    name common to all three. Given an argument x, the macro expands to the
+    triplet <tt>AUT_x,AUS_x,AUD_x</tt>. In this way, arguments 2 to 4 of audit()
+    can be replaced by a simple #AUDIT call.
 
     @see audit()
 */
@@ -318,12 +320,12 @@ int audit(char *channel, uint32 flags, char *summary, char *format, ...);
 
 /** Set the audit file.
 
-    Specifies the audit file to which subsequent calls to {\tt audit()} will
-    append entries. In default of a call to this function, the Audit Trail will
-    be used.
+    Specifies the audit file to which subsequent calls to audit() will append
+    entries. In default of a call to this function, the Audit Trail will be
+    used.
 
     @param filename the full pathname of a file to set as the current audit
-    file. A value of {\tt NULL} is equivalent to calling {\tt audit_resetfile}.
+    file. A value of @c NULL is equivalent to calling {\tt audit_resetfile</tt>.
 
     @see audit_resetfile()
 */

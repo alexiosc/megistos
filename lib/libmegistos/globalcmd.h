@@ -1,24 +1,6 @@
-/** @name     globalcmd.h
-    @memo     Global command plugin interface.
+/*! @file     globalcmd.h
+    @brief    Global command plugin interface.
     @author   Alexios
-
-    @doc
-
-    Global commands are commands that work almost anywhere on the
-    system. Although it's no rule of thumb, commands that start with a
-    slash ({\tt /}) are global commands.
-
-    Megistos implements a dynamic plugin system for global commands. We used to
-    put everything in this source file, which made things inelegant, big and
-    ugly. Now, GCS (global command service) plugins can be compiled as
-    dynamically loaded shared objects (DLLs in the DOS/Windows world, SOs in
-    the UNIX world) and loaded at runtime. This way, commands are implemented
-    by the modules that contribute them. I can't even begin to list the
-    advantages of this scheme.
-
-    To see a simple example of a global command handler, please see the {\em
-    Cookie} module and file {\tt gcs_cookie.c} in particular. A more complete
-    collection is in file {\tt gcs_builtin.c} in the {\tt LIB} directory.
 
     This header file defines functions used by the global command manager. You
     don't need to know about this API, unless you want to add a global command
@@ -26,7 +8,8 @@
 
     Original banner, legalese and change history follow.
 
-    {\small\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -58,6 +41,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:31:12  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -70,10 +57,8 @@
  *
  *
 
-\end{verbatim}
-}*/
-
-/*@{*/
+@endverbatim
+*/
 
 
 #ifndef RCS_VER 
@@ -81,26 +66,45 @@
 #endif
 
 
-
-
 #ifndef GLOBALCMD_H
 #define GLOBALCMD_H
+
+
+/** @defgroup gcs Declaring Global Commands
+
+    Global commands are commands that work almost anywhere on the
+    system. Although it's no rule of thumb, commands that start with a
+    slash (<tt>/</tt>) are global commands.
+
+    Megistos implements a dynamic plugin system for global commands. We used to
+    put everything in this source file, which made things inelegant, big and
+    ugly. Now, GCS (global command service) plugins can be compiled as
+    dynamically loaded shared objects (DLLs in the DOS/Windows world, SOs in the
+    UNIX world) and loaded at runtime. This way, commands are implemented by the
+    modules that contribute them. I can't even begin to list the advantages of
+    this scheme.
+
+    To see a simple example of a global command handler, please see the Cookie
+    module and file @c gcs_cookie.c in particular. A more complete collection is
+    in file @c gcs_builtin.c in the main BBS library directory.
+
+@{*/
 
 
 /** Declaration for a GCS handler.
 
     This is a pointer to a function similar to:
 
-    \begin{verbatim}
-    int handler (void)
-    \end{verbatim}
+    @verbatim
+int handler (void)
+    @endverbatim
     
     The handler takes no arguments. Its duties include parsing a user command
     that has already been input. You may use any means provided by the BBS
-    library to this effect. I usually use the {\tt margc} and {\tt margv}
-    technique because it's more elegant (and because I started my BBS
-    programming days writing for the Major BBS, where this was right about the
-    only decent way of parsing input). 
+    library to this effect. I usually use the ::margc and ::margv technique
+    because it's more elegant (and because I started my BBS programming days
+    writing for the Major BBS, where this was right about the only decent way of
+    parsing input).
 
     The handler must check to see if the user input is the command it
     implements. If so, it must perform any processing and return a value of 1
@@ -118,19 +122,19 @@ typedef int (*gcs_t)(void);
     This somewhat surreal function is mostly used internally. You can use it to
     add your own handlers, but they will only be valid while the user is in
     your module. This is still useful to implement commands that work anywhere
-    within {\em one} module only.
+    within <em>one</em> module only.
 
     @param gcs the global command service handler.  */
 
-void gcs_add(gcs_t gcs);
+void gcs_add (gcs_t gcs);
 
 
 /** Initialise the global command services.
 
     This scans the directory lib/gcs for GCS plugins, loads them and installs
-    the handlers. It is called by {\tt mod_init} when specified with {\tt
-    INI_GCS} (or, of course, {\tt INI_ALL}). No need for you to call it
-    manually, unless you're doing something strange. */
+    the handlers. It is called by mod_init() when specified with #INI_GLOBCMD
+    (or, of course, #INI_ALL). No need for you to call it manually, unless
+    you're doing something strange. */
 
 void gcs_init();
 
@@ -146,6 +150,14 @@ int gcs_handle();
 
 
 #endif /* GLOBALCMD_H */
+
+/** \example gcs_builtin.c
+
+    A very long example demonstrating how to write global commands. This file
+    implements the builtin global commands for this system. It serves as an
+    example of numerous BBS methods.
+*/
+
 
 /*@}*/
 

@@ -1,16 +1,14 @@
-/** @name     config.h
-    @memo     High-level, hardwired system configuration.
+/*! @file     config.h
+    @brief     High-level, hardwired system configuration.
     @author   Alexios
 
-    @doc
-
     This is a sensitive file that contains a lot of values that are hardwired
-    into the system. In fact, it contains almost {\em all} of the values that
+    into the system. In fact, it contains almost <em>all</em> of the values that
     aren't readily configurable by the end user (erm, Sysop).
 
-    You can change these, but you shouldn't do so after your system has
-    compiled and ran for the first time. Oh, unless you're into heavy wizardry
-    and/or pain (to misquote Larry Wall).
+    You can change these, but you shouldn't do so after your system has compiled
+    and ran for the first time. Oh, unless you're into heavy wizardry and/or
+    pain (to misquote Larry Wall).
 
     Subsequent documentation will clearly note which options can be frobbed and
     at what stage. But take it with a pinch of salt. Anything that isn't
@@ -18,7 +16,8 @@
 
     Original banner, legalese and change history follow.
 
-    {\small\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -50,6 +49,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/09/27 20:29:54  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.4  2003/08/15 18:17:17  alexios
  * Switched from including bbsconfig.defs.h to bbsconfig.h.
  *
@@ -99,7 +102,7 @@
  *
  *
 
-\end{verbatim}
+@endverbatim
 }*/
 
 /*@{*/
@@ -127,26 +130,26 @@
 
     @memo Aliases for the standard integer types.
 
-    @doc The {\tt _t} suffix slows me down, but the standard integer
-    types are very useful, so I'll just define a few {\tt typedefs} to
+    @doc The <tt>_t</tt> suffix slows me down, but the standard integer
+    types are very useful, so I'll just define a few <tt>typedefs</tt> to
     make my life easier. */
 
 /*@{*/
 
-typedef int8_t  int8;		/** 8-bit signed integer */
-typedef int16_t int16;		/** 16-bit signed integer */
-typedef int32_t int32;		/** 32-bit signed integer */
-typedef int64_t int64;		/** 64-bit signed integer */
+typedef int8_t  int8;		/**< 8-bit signed integer */
+typedef int16_t int16;		/**< 16-bit signed integer */
+typedef int32_t int32;		/**< 32-bit signed integer */
+typedef int64_t int64;		/**< 64-bit signed integer */
 
-typedef uint8_t  uint8;		/** 8-bit unsigned integer */
-typedef uint16_t uint16;	/** 16-bit unsigned integer */
-typedef uint32_t uint32;	/** 32-bit unsigned integer */
-typedef uint64_t uint64;	/** 64-bit unsigned integer */
+typedef uint8_t  uint8;		/**< 8-bit unsigned integer */
+typedef uint16_t uint16;	/**< 16-bit unsigned integer */
+typedef uint32_t uint32;	/**< 32-bit unsigned integer */
+typedef uint64_t uint64;	/**< 64-bit unsigned integer */
 
 /*@}*/
 
 
-typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
+typedef uint32 bbskey_t;	/**< Type of security `keys' and `locks' */
 
 
 /** @name Directory names
@@ -157,8 +160,11 @@ typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
     @doc Lots of these here. You can change these, but there's no guarantee
     that this won't break some braindead module with hard-wired strings (eugh).
 
-    Do {\em NOT} change anything after your system has ran for the first time,
-    unless you're out for a ticket to breakage city.
+    Do <em>NOT</em> change anything after your system has ran for the first
+    time, unless you're out for a ticket to breakage city. The BBS prefix itself
+    is soft, however. This allows you to install more than one BBS per host
+    system, and configure it to live wherever you like. But the subdirectory
+    tree has to be essentially identical for every BBS.
 */
 
 /*@{*/
@@ -268,54 +274,52 @@ typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
     @memo Common filenames.
 
     @doc Full names of files used by the system for all sorts of storage
-    requirements. I suppose you {\em could} change a few of these, {\em BEFORE}
+    requirements. I suppose you <em>could} change a few of these, {\em BEFORE</em>
     you install the BBS. I've documented those that are the most likely not to
-    hurt anything (much).  */
-
-
+    hurt anything (much).  Oh yes, it's ugly. */
 /*@{*/
 
-#define AUDITFILE      LOGDIR"/audit" /** Full path to the Audit Trail */
-#define BADPASSFILE    BBSETCDIR"/stupid.passwords" /** A list of forbidden passwords */
-#define BADUIDFILE     BBSETCDIR"/bad.userids" /** A list of forbidden user IDs */
-#define BAUDSTATFILE   STATDIR"/baudstats" /** Speed statistics log file */
+#define AUDITFILE      LOGDIR"/audit" /**< Full path to the Audit Trail */
+#define BADPASSFILE    BBSETCDIR"/stupid.passwords" /**< A list of forbidden passwords */
+#define BADUIDFILE     BBSETCDIR"/bad.userids" /**< A list of forbidden user IDs */
+#define BAUDSTATFILE   STATDIR"/baudstats" /**< Speed statistics log file */
 #define BBSDPIPEFILE   BBSETCDIR"/pbbsd"
 #define BBSRESTARTFILE BBSETCDIR"/rc.bbs"
-#define CHANDEFFILE    CHANDEFDIR"/channels" /** Binary file where channels are defined */
-#define GETTYDEFFILE   CHANDEFDIR"/bbsgetty." /** bbsgetty channel definition file */
-#define CHANDEFSRCFILE CHANDEFDIR"/CHANNELS" /** Text file where channels are defined */
-#define CLASSFILE      BBSETCDIR"/userclasses" /** Binary file where user classes are stored */
-#define CLNUPAUDITFILE LOGDIR"/audit.cleanup" /** Cleanup log file */
-#define CLSSTATFILE    STATDIR"/clsstats" /** User class statistics log file */
+#define CHANDEFFILE    CHANDEFDIR"/channels" /**< Binary file where channels are defined */
+#define GETTYDEFFILE   CHANDEFDIR"/bbsgetty." /**< bbsgetty channel definition file */
+#define CHANDEFSRCFILE CHANDEFDIR"/CHANNELS" /**< Text file where channels are defined */
+#define CLASSFILE      BBSETCDIR"/userclasses" /**< Binary file where user classes are stored */
+#define CLNUPAUDITFILE LOGDIR"/audit.cleanup" /**< Cleanup log file */
+#define CLSSTATFILE    STATDIR"/clsstats" /**< User class statistics log file */
 #define COOKIEFILE     COOKIEDIR"/cookies-%02d.dat"
 #define COOKIEIDXFILE  COOKIEDIR"/cookies-%02d.idx"
-#define DAYSTATFILE    STATDIR"/daystats" /** Daily traffic log file */
-#define DEMOSTATFILE   STATDIR"/demographics" /** Demographics log file */
+#define DAYSTATFILE    STATDIR"/daystats" /**< Daily traffic log file */
+#define DEMOSTATFILE   STATDIR"/demographics" /**< Demographics log file */
 #define EMLLISTFILE    EMAILDIR"/"MSGLISTFILE
-#define ERRORFILE      LOGDIR"/errors" /** Fatal error log file */
-#define ETCTTYFILE     "/etc/ttys" /** The UNIX /etc/ttys file that maps terminal types to ttys */
-#define FLETTRWORDS    BBSETCDIR"/four.letter.words" /** A list of words used to create passwords */
-#define LANGUAGEFILE   BBSETCDIR"/languages" /** List of languages of the BBS */
-#define LOGINMSGFILE   BBSETCDIR"/login.message" /** The login message of the day */
-#define LOGINSCRIPT    BINDIR"/bbs.session" /** The script that manages a user's entire session */
-#define MENUMANINDEX   MENUMANDIR"/.index" /** Index file for Menuman */
-#define MENUMANPAGES   MENUMANDIR"/.pages" /** Page directory for Menuman */
-#define MODSTATFILE    STATDIR"/modstats" /** Module usage statistics log file */
-#define MONITORFILE    BBSETCDIR"/monitor" /** The system monitor file */
+#define ERRORFILE      LOGDIR"/errors" /**< Fatal error log file */
+#define ETCTTYFILE     "/etc/ttys" /**< The UNIX /etc/ttys file that maps terminal types to ttys */
+#define FLETTRWORDS    BBSETCDIR"/four.letter.words" /**< A list of words used to create passwords */
+#define LANGUAGEFILE   BBSETCDIR"/languages" /**< List of languages of the BBS */
+#define LOGINMSGFILE   BBSETCDIR"/login.message" /**< The login message of the day */
+#define LOGINSCRIPT    BINDIR"/bbs.session" /**< The script that manages a user's entire session */
+#define MENUMANINDEX   MENUMANDIR"/.index" /**< Index file for Menuman */
+#define MENUMANPAGES   MENUMANDIR"/.pages" /**< Page directory for Menuman */
+#define MODSTATFILE    STATDIR"/modstats" /**< Module usage statistics log file */
+#define MONITORFILE    BBSETCDIR"/monitor" /**< The system monitor file */
 #define MSGLISTFILE    ".LIST"
-#define PROTOCOLFILE   BBSETCDIR"/protocols" /** The file transfer protocol definition file */
-#define RECENTFILE     LOGDIR"/recent.global" /** The Megistos equivalent of utmp */
-#define SYSVARFILE     BBSETCDIR"/sysvar" /** The main system variable block */
-#define SYSVARBKFILE   BBSETCDIR"/sysvar-backup" /** Backup of the system variables */
-#define SYSVARSHMFILE  BBSETCDIR"/sysvar-shm" /** Shared memory ID of the system variable block */
+#define PROTOCOLFILE   BBSETCDIR"/protocols" /**< The file transfer protocol definition file */
+#define RECENTFILE     LOGDIR"/recent.global" /**< The Megistos equivalent of utmp */
+#define SYSVARFILE     BBSETCDIR"/sysvar" /**< The main system variable block */
+#define SYSVARBKFILE   BBSETCDIR"/sysvar-backup" /**< Backup of the system variables */
+#define SYSVARSHMFILE  BBSETCDIR"/sysvar-shm" /**< Shared memory ID of the system variable block */
 #define TELEACTIONFILE MBKDIR"/teleactions.mbk"
 #define TELEACTMSGFILE TELEACTIONDIR"/teleactions.msg"
 #define TELEACTSRCFILE TELEACTIONDIR"/ACTIONS"
 #define TELEPISRCFILE  TELEPLUGINDIR"/PLUGINS"
 #define TELEPLUGINFILE TELEPLUGINDIR"/plugins"
-#define TTYINFOFILE    CHANDEFDIR"/msg-%s" /** Per-channel message of the day */ 
-#define TTYSTATFILE    STATDIR"/ttystats" /** Channel usage statistics log file */
-#define XLATIONFILE    XLATIONDIR"/xlation-binary" /** Encoding translation table */
+#define TTYINFOFILE    CHANDEFDIR"/msg-%s" /**< Per-channel message of the day */ 
+#define TTYSTATFILE    STATDIR"/ttystats" /**< Channel usage statistics log file */
+#define XLATIONFILE    XLATIONDIR"/xlation-binary" /**< Encoding translation table */
 
 /*@}*/
 
@@ -341,39 +345,39 @@ typedef uint32 bbskey_t;	/** Type of security `keys' and `locks' */
 #define NEMESSAGELOCK  "LCK..emsgn"
 #define BLTREADLOCK    "LCK..BLT"
 
-#define BBSD_IPC       0x42425344  /** This spells "BBSD" (BBS restart) */
+#define BBSD_IPC       0x42425344  /**< This spells "BBSD" (BBS restart) */
 #ifndef BBSUSERNAME
-#define BBSUSERNAME    "bbs" /** BBS UNIX username ({\tt chown}s and BBS restart) */
+#define BBSUSERNAME    "bbs" /**< BBS UNIX username (<tt>chown</tt>s and BBS restart) */
 #endif
-#define DELETEDCLASS   "DELETED" /** Where do deleted users go? (may need to change other classes) */
+#define DELETEDCLASS   "DELETED" /**< Where do deleted users go? (may need to change other classes) */
 #define EMAILCLUBNAME  "Email"
-#define EMUD_IPC       0x454d5544 /** This spells "EMUD" (BBS restart) */
+#define EMUD_IPC       0x454d5544 /**< This spells "EMUD" (BBS restart) */
 #define EMULOGSIZE     4e096
-#define FILEATTACHMENT "%d.att" /** The format of message attachments */
+#define FILEATTACHMENT "%d.att" /**< The format of message attachments */
 #define KEYLENGTH      4
-#define LOGINSTRIKES   3 /** Hard-wired number of login attempts */
-#define MAXARCHIVERS   20 /** Maximum number of archivers allowed */
-#define MAXCLASS       64 /** Maximum number of classes allowed (rebuild class file) */
-#define MAXINPLEN      2048 /** Length of user input buf (may cause overflows in silly modules) */
-#define NUMLANGUAGES   9 /** Maximum number of languages */
-#define NUMXLATIONS    10 /** Maximum number of encodings */
+#define LOGINSTRIKES   3 /**< Hard-wired number of login attempts */
+#define MAXARCHIVERS   20 /**< Maximum number of archivers allowed */
+#define MAXCLASS       64 /**< Maximum number of classes allowed (rebuild class file) */
+#define MAXINPLEN      2048 /**< Length of user input buf (may cause overflows in silly modules) */
+#define NUMLANGUAGES   9 /**< Maximum number of languages */
+#define NUMXLATIONS    10 /**< Maximum number of encodings */
 #define MESSAGEFILE    "%010d"
-#define MSGBUFSIZE     8192 /** Buffer for preparing user prompts */
+#define MSGBUFSIZE     8192 /**< Buffer for preparing user prompts */
 #define MSGINDEX       ".INDEX%d"
-#define RECENT_ENTRIES 20 /** Number of recent per-user logons retained */
-#define REGISTRYSIZE   1024 /** Size of user registry record */
-#define SIGCHAT        SIGUSR1 /** The signal used to toggle Sysop chat */
-#define SIGMAIN        SIGUSR2 /** Signal to drop to main channel in teleconferences */
-#define SIGNUPID       "new" /** What new users have to type to signup */
+#define RECENT_ENTRIES 20 /**< Number of recent per-user logons retained */
+#define REGISTRYSIZE   1024 /**< Size of user registry record */
+#define SIGCHAT        SIGUSR1 /**< The signal used to toggle Sysop chat */
+#define SIGMAIN        SIGUSR2 /**< Signal to drop to main channel in teleconferences */
+#define SIGNUPID       "new" /**< What new users have to type to signup */
 #ifdef HAVE_METABBS
-#define METABBSID      "out" /** What users have to type to start the MetaBBS client */
+#define METABBSID      "out" /**< What users have to type to start the MetaBBS client */
 #endif
-#define SYSOP          "Sysop" /** The username of the Sysop */
-#define TOP_N_ENTRIES  30 /** Number of entries in the Top listings */
+#define SYSOP          "Sysop" /**< The username of the Sysop */
+#define TOP_N_ENTRIES  30 /**< Number of entries in the Top listings */
 #define EMAILDIRNAME   ".email"
 #define INJOTHFNAME    ONLINEDIR"/.injoth-%s"
-#define XLATIONSRC     "xlation.%d" /** Output translation tables */
-#define KBDXLATIONSRC  "kbdxlation.%d" /** Input translation tables */
+#define XLATIONSRC     "xlation.%d" /**< Output translation tables */
+#define KBDXLATIONSRC  "kbdxlation.%d" /**< Input translation tables */
 
 
 /** @memo Characters allowed in user-supplied filenames. */

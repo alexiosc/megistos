@@ -1,17 +1,15 @@
-/** @name     bbs.h
-    @memo     The Mother of All BBS Include Files.
+/*! @file     bbs.h
+    @brief    The Mother of All BBS Include Files.
     @author   Alexios
 
-    @doc
-
-    This is a wildcard header file that includes {\em all} of the other header
+    This is a wildcard header file that includes <em>all</em> of the other header
     files. This is the strongly recommended way to include BBS header files in
     your code.
 
     Original banner, legalese and change history follow
 
-{\small
-\begin{verbatim}
+    @par
+    @verbatim
 
  *****************************************************************************
  **                                                                         **
@@ -43,6 +41,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:27:45  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -58,15 +60,10 @@
  *
  *
 
-\end{verbatim}
-} */
+@endverbatim
+*/
 
 /*@{*/
-
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
-
 
 
 #ifndef BBS_H
