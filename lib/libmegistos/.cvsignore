@@ -6,6 +6,9 @@ Makefile
 Makefile.in
 libmegistos.la
 megistos-config
+mksysvar
+msgidx
 version.h
 version.mk
 visual
+mbk_sysvar.h

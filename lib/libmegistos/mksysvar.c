@@ -38,6 +38,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/19 13:20:11  alexios
+ * Brought into the new build tree; ran it through indent(1).
+ *
  * Revision 1.3  2001/04/22 14:49:08  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -66,9 +69,9 @@
  */
 
 
-#ifndef RCS_VER 
+#ifndef RCS_VER
 #define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
+const char *__RCS = RCS_VER;
 #endif
 
 
@@ -80,7 +83,7 @@ const char *__RCS=RCS_VER;
 #define WANT_STRING_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
+#include <megistos/bbs.h>
 
 #include "mbk_sysvar.h"
 
@@ -88,62 +91,69 @@ promptblock_t *sysvars;
 
 
 int
-main()
+main ()
 {
-  FILE *sysvarf;
-  struct sysvar sysvar;
-  int exists=0;
-  sysvars=msg_open("sysvar");
+	FILE   *sysvarf;
+	struct sysvar sysvar;
+	int     exists = 0;
 
-  if((sysvarf=fopen(mkfname(SYSVARFILE),"r+"))!=NULL)exists=1;
-  else if((sysvarf=fopen(mkfname(SYSVARFILE),"w+"))!=NULL)exists=0;
-  else error_fatalsys("Unable to open/create %s.",mkfname(SYSVARFILE),0);
+	sysvars = msg_open ("sysvar");
 
-  if(!exists){
-    fprintf(stderr,"%s does not exist, creating it.\n",mkfname(SYSVARFILE));
-    memset(&sysvar,0x00,sizeof(struct sysvar));
-  } else {
-    if(fread(&sysvar,sizeof(struct sysvar),1,sysvarf)!=1){
-      error_fatalsys("Error reading %s.",mkfname(SYSVARFILE),0);
-    }
-  }
+	if ((sysvarf = fopen (mkfname (SYSVARFILE), "r+")) != NULL)
+		exists = 1;
+	else if ((sysvarf = fopen (mkfname (SYSVARFILE), "w+")) != NULL)
+		exists = 0;
+	else
+		error_fatalsys ("Unable to open/create %s.",
+				mkfname (SYSVARFILE), 0);
 
-  strcpy(sysvar.bbstitle,msg_string(BBSTTL));
-  strcpy(sysvar.company,msg_string(COMPANY));
-  strcpy(sysvar.address1,msg_string(ADDRES1));
-  strcpy(sysvar.address2,msg_string(ADDRES2));
-  strcpy(sysvar.city,msg_string(CITY));
-  strcpy(sysvar.dataphone,msg_string(DATAPH));
-  strcpy(sysvar.voicephone,msg_string(VOICEPH));
-  strcpy(sysvar.livephone,msg_string(LIVEPH));
-  sysvar.idlezap=msg_int(IDLZAP,0,32767);
-  sysvar.idlovr=msg_int(IDLOVR,0,129);
-  sysvar.saverate=msg_int(SVRATE,0,32767);
-  strcpy(sysvar.chargehour,msg_string(CHGHOUR));
-  strcpy(sysvar.mincredits,msg_string(CHGTIME));
-  strcpy(sysvar.minmoney,msg_string(CHGMIN));
-  sysvar.bbsrst=msg_int(BBSRST,0,9999);
+	if (!exists) {
+		fprintf (stderr, "%s does not exist, creating it.\n",
+			 mkfname (SYSVARFILE));
+		memset (&sysvar, 0x00, sizeof (struct sysvar));
+	} else {
+		if (fread (&sysvar, sizeof (struct sysvar), 1, sysvarf) != 1) {
+			error_fatalsys ("Error reading %s.",
+					mkfname (SYSVARFILE), 0);
+		}
+	}
 
-  sysvar.pswexpiry=msg_int(PSWEXP,0,360);
-  sysvar.pagekey=msg_int(PAGEKEY,0,129);
-  sysvar.pgovkey=msg_int(PGOVKEY,0,129);
-  sysvar.pallkey=msg_int(PALLKEY,0,129);
-  sysvar.glockie=msg_bool(GLOCKIE);
-  sysvar.lonaud=msg_bool(LONAUD);
-  sysvar.lofaud=msg_bool(LOFAUD);
-  sysvar.tnlmax=msg_int(TNLMAX,1,32767);
+	strcpy (sysvar.bbstitle, msg_string (BBSTTL));
+	strcpy (sysvar.company, msg_string (COMPANY));
+	strcpy (sysvar.address1, msg_string (ADDRES1));
+	strcpy (sysvar.address2, msg_string (ADDRES2));
+	strcpy (sysvar.city, msg_string (CITY));
+	strcpy (sysvar.dataphone, msg_string (DATAPH));
+	strcpy (sysvar.voicephone, msg_string (VOICEPH));
+	strcpy (sysvar.livephone, msg_string (LIVEPH));
+	sysvar.idlezap = msg_int (IDLZAP, 0, 32767);
+	sysvar.idlovr = msg_int (IDLOVR, 0, 129);
+	sysvar.saverate = msg_int (SVRATE, 0, 32767);
+	strcpy (sysvar.chargehour, msg_string (CHGHOUR));
+	strcpy (sysvar.mincredits, msg_string (CHGTIME));
+	strcpy (sysvar.minmoney, msg_string (CHGMIN));
+	sysvar.bbsrst = msg_int (BBSRST, 0, 9999);
 
-  /* Stamp it with the magic number */
+	sysvar.pswexpiry = msg_int (PSWEXP, 0, 360);
+	sysvar.pagekey = msg_int (PAGEKEY, 0, 129);
+	sysvar.pgovkey = msg_int (PGOVKEY, 0, 129);
+	sysvar.pallkey = msg_int (PALLKEY, 0, 129);
+	sysvar.glockie = msg_bool (GLOCKIE);
+	sysvar.lonaud = msg_bool (LONAUD);
+	sysvar.lofaud = msg_bool (LOFAUD);
+	sysvar.tnlmax = msg_int (TNLMAX, 1, 32767);
 
-  memcpy(sysvar.magic,SYSVAR_MAGIC,sizeof(sysvar.magic));
+	/* Stamp it with the magic number */
 
-  if(fseek(sysvarf,0,SEEK_SET)){
-    error_fatalsys("Error seeking %s.",mkfname(SYSVARFILE),0);
-  }
-  if(fwrite(&sysvar,sizeof(struct sysvar),1,sysvarf)!=1){
-    error_fatalsys("Error writing %s.",mkfname(SYSVARFILE),0);
-  }
-  fclose(sysvarf);
+	memcpy (sysvar.magic, SYSVAR_MAGIC, sizeof (sysvar.magic));
 
-  return 0;
+	if (fseek (sysvarf, 0, SEEK_SET)) {
+		error_fatalsys ("Error seeking %s.", mkfname (SYSVARFILE), 0);
+	}
+	if (fwrite (&sysvar, sizeof (struct sysvar), 1, sysvarf) != 1) {
+		error_fatalsys ("Error writing %s.", mkfname (SYSVARFILE), 0);
+	}
+	fclose (sysvarf);
+
+	return 0;
 }
