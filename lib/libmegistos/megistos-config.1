@@ -1,0 +1,92 @@
+.\"                              hey, Emacs:   -*- nroff -*-
+.\" Megistos BBS is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; see the file COPYING.  If not, write to
+.\" the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" $Id$
+.\"
+.\" $Log$
+.\" Revision 1.1  2003/09/30 12:02:21  alexios
+.\" Initial revision.
+.\"
+.\"
+.TH megistos-config 1 "30th September, 2003"
+.\" Please update the above date whenever this man page is modified.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins (default)
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+megistos-config \- obtain information about the installed version of Megistos BBS.
+.SH SYNOPSIS
+.B megistos-config
+.RI [--prefix[=DIR]]
+.RI [--exec-prefix[=DIR]]
+.RI [--cflags]
+.RI [--ldflags]
+.RI [--data-dir]
+.RI [--lib-dir]
+.RI [--version]
+.PP
+\fBmegistos-config\fP is a script that is used to obtain information about
+the Megistos BBS installation on this system. Its main use is in
+compiling and linking additional software for the BBS, mainly modules.
+.SH OPTIONS
+.l
+\fBmegistos-config\fP accepts the following options (most of which can be combined to produce more than one item of information on separate lines):
+.TP
+.BR --prefix[=\fIDIR\fP]
+Issues the installation prefix of the system. If \fIDIR\fP is
+specified, the prefix (and exec-prefix) used to calculate other
+directories within \fBmegistos-config\fP is set accordingly. In this
+case, this option must appear before others on the command line.
+.TP
+.BR --exec-prefix[=\fIDIR\fP]
+Issues the exec-prefix of the system. If \fIDIR\fP is specified, the
+exec-prefix used to calculate other directories within
+\fBmegistos-config\fP is set accordingly. In this case, this option must
+appear before others on the commandline (but after
+\fB--prefix=\fP\fIDIR\fP, if that is present too).
+.TP
+.B --cflags
+Issues command-line arguments that need to be passed to the compiler to
+produce Megistos object code.
+.TP
+.B --ldflags
+Issues command-line arguments that need to be passed to the linker to
+link executable Megistos software.
+.TP
+.B --data-dir-dir
+Issues the Megistos data directory.
+.TP
+.B --lib-dir
+Issues the global Megistos library directory.
+.TP
+.BR --version
+Issues the currently installed version of Megistos BBS.
+.SH AUTHOR
+Written by Alexios Chouchoulas.
+.SH "REPORTING BUGS"
+Report bugs to Alexios Chouchoulas <alexios@dai.ed.ac.uk>.
+.SH COPYRIGHT
+Copyright \(co 1999-2002 Alexios Chouchoulas <alexios@dai.ed.ac.uk>.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
