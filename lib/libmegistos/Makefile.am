@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  2003/09/28 22:26:52  alexios
+# Added DEFS and fixed gcc command-line arguments.
+#
 # Revision 1.4  2003/08/15 20:40:04  alexios
 # Fixed slight dependency bug.
 #
@@ -21,6 +24,8 @@
 pkgdatadir = @PKGDATADIR@
 pkglibdir = @PKGLIBDIR@
 pkgincludedir = @PKGINCLUDEDIR@
+
+DEFS = @DEFS@
 
 lib_LTLIBRARIES = libmegistos.la
 
@@ -63,8 +68,8 @@ pkginclude_HEADERS = $(HDR)
 
 noinst_HEADERS = mbk_sysvar.h
 
-libmegistos_la_LDFLAGS = -version-info 3:5:1
-libmegistos_la_CFLAGS += -Wall -pedantic
+libmegistos_la_LDFLAGS = @LDFLAGS@ -version-info 3:5:1
+libmegistos_la_CFLAGS = @CFLAGS@ -Wall
 
 bin_SCRIPTS = megistos-config
 
