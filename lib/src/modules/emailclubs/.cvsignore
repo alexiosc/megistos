@@ -1,11 +1,13 @@
+.dbd
+.ddl
 .deps
 .libs
 Makefile
 Makefile.in
+clubhdr.lo
 clubs
-email
-mbk_emailclubs.h
 ecdb.h
+email
 ihavedb.h
-.ddl
-.dbd
+libmegistos_clubhdr.la
+mbk_emailclubs.h
