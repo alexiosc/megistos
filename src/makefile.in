@@ -12,8 +12,9 @@ CONFIG		= CONFIG/Make.config
 NEEDTYPHOON	= $(shell ./needtyphoon)
 DISTRIBUTION	= distbin
 DISTDIR		= dist
-DISTNAME	= megistos-$(MAJORVERSION).$(MINORVERSION)
-MKLSM		= lsm/mklsm.sh $(MAJORVERSION) $(MINORVERSION)
+DISTNAME	= megistos
+DISTVER		= $(MAJORVERSION).$(MINORVERSION).$(PATCH)
+MKLSM		= lsm/mklsm.sh $(MAJORVERSION) $(MINORVERSION) $(PATCH)
 
 include $(CONFIG)
 include .dirdep
@@ -108,8 +109,8 @@ distsecurity:
 
 distsrc:	
 		@$(SHOWSTATUS) MAKING SOURCE DISTRIBUTION UPDATE.
-		$(RM) $(DISTDIR)/$(DISTNAME)-src.*
-		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)-src.*asc
+		$(RM) $(DISTDIR)/$(DISTNAME)_src-$(DISTVER).*
+		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)_src-$(DISTVER).*asc
 		mkdir $(DISTDIR)/$(DISTNAME)
 		$(CHMOD) 0750 $(DISTDIR)/$(DISTNAME)
 		cd ..; find src -mindepth 1 -maxdepth 1|grep -v /dist >/tmp/distsrc
@@ -126,17 +127,17 @@ distsrc:
 			-or -name makefile \
 			-or -name config.log \
 			-or -name config.cache | xargs rm
-		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)-src.tar $(DISTNAME)
-		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)-src.tar >$(DISTNAME)-src.tar.gz
-		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)-src.tar
+		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)_src-$(DISTVER).tar $(DISTNAME)
+		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)_src-$(DISTVER).tar >$(DISTNAME)_src-$(DISTVER).tar.gz
+		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)_src-$(DISTVER).tar
 		$(RM) -rf $(DISTDIR)/$(DISTNAME)
-		$(MKLSM) src >$(DISTDIR)/$(DISTNAME)-src.lsm
+		$(MKLSM) src >$(DISTDIR)/$(DISTNAME)_src-$(DISTVER).lsm
 		$(CP) ../COPYING 0* $(DISTDIR)
 
 distmsgs:	
 		@$(SHOWSTATUS) MAKING MESSAGE BLOCK DISTRIBUTION UPDATE.
-		$(RM) $(DISTDIR)/$(DISTNAME)-msgs.*
-		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)-msgs.*asc
+		$(RM) $(DISTDIR)/$(DISTNAME)_msgs-$(DISTVER).*
+		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)_msgs-$(DISTVER).*asc
 		mkdir $(DISTDIR)/$(DISTNAME)
 		$(CHMOD) 0750 $(DISTDIR)/$(DISTNAME)
 		cd ..;find -type f -name '*.msg*' >/tmp/distsrc
@@ -144,33 +145,33 @@ distmsgs:
 		$(RM) /tmp/distsrc
 		cd $(DISTDIR)/$(DISTNAME); for a in `find -name '*.msg.orig'`; do \
 			mv -v $$a `echo $$a|sed 's/.orig$$//'`; done
-		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)-msgs.tar $(DISTNAME)
-		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)-msgs.tar >$(DISTNAME)-msgs.tar.gz
-		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)-msgs.tar
+		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)_msgs-$(DISTVER).tar $(DISTNAME)
+		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)_msgs-$(DISTVER).tar >$(DISTNAME)_msgs-$(DISTVER).tar.gz
+		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)_msgs-$(DISTVER).tar
 		$(RM) -rf $(DISTDIR)/$(DISTNAME)
-		$(MKLSM) msgs >$(DISTDIR)/$(DISTNAME)-msgs.lsm
+		$(MKLSM) msgs >$(DISTDIR)/$(DISTNAME)_msgs-$(DISTVER).lsm
 		$(CP) ../COPYING 0* $(DISTDIR)
 
 distbin:
 		@$(SHOWSTATUS) MAKING BINARY DISTRIBUTION UPDATE.
-		$(RM) $(DISTDIR)/$(DISTNAME)-bin.*
-		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)-bin.*asc
+		$(RM) $(DISTDIR)/$(DISTNAME)_bin-$(DISTVER).*
+		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)_bin-$(DISTVER).*asc
 		mkdir $(DISTDIR)/$(DISTNAME)
 		$(CHMOD) 0750 $(DISTDIR)/$(DISTNAME)
 		umask 000; $(CP) -rv ../bin ../lib $(DISTDIR)/$(DISTNAME)
 		$(STRIP) $(DISTDIR)/$(DISTNAME)/bin/* 2>/dev/null || true
 		$(RM) $(DISTDIR)/$(DISTNAME)/lib/prompts/*
-		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)-bin.tar $(DISTNAME)
-		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)-bin.tar >$(DISTNAME)-bin.tar.gz
-		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)-bin.tar
+		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)_bin-$(DISTVER).tar $(DISTNAME)
+		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)_bin-$(DISTVER).tar >$(DISTNAME)_bin-$(DISTVER).tar.gz
+		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)_bin-$(DISTVER).tar
 		$(RM) -rf $(DISTDIR)/$(DISTNAME)
-		$(MKLSM) bin >$(DISTDIR)/$(DISTNAME)-bin.lsm
+		$(MKLSM) bin >$(DISTDIR)/$(DISTNAME)_bin-$(DISTVER).lsm
 		$(CP) ../COPYING 0* $(DISTDIR)
 
 distbase:	
 		@$(SHOWSTATUS) MAKING BINARY DISTRIBUTION UPDATE.
-		$(RM) $(DISTDIR)/$(DISTNAME)-base.*
-		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)-base.*asc
+		$(RM) $(DISTDIR)/$(DISTNAME)_base-$(DISTVER).*
+		$(RM) -rf $(DISTDIR)/$(DISTNAME) $(DISTDIR)/$(DISTNAME)_base-$(DISTVER).*asc
 		mkdir $(DISTDIR)/$(DISTNAME)
 		$(CP) ../COPYING 0* $(DISTDIR)/$(DISTNAME)/
 		$(CHMOD) 644 $(DISTDIR)/$(DISTNAME)/COPYING
@@ -180,10 +181,9 @@ distbase:
 		done
 		$(CHMOD) 700 $(DISTDIR)/$(DISTNAME)/src
 		cd virgin; umask 000; $(CP) -rv . ../$(DISTDIR)/$(DISTNAME)
-		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)-base.tar $(DISTNAME)
-		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)-base.tar >$(DISTNAME)-base.tar.gz
-		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)-base.tar
+		cd $(DISTDIR); $(TAR) cvf $(DISTNAME)_base-$(DISTVER).tar $(DISTNAME)
+		cd $(DISTDIR); $(GZIP) -9v <$(DISTNAME)_base-$(DISTVER).tar >$(DISTNAME)_base-$(DISTVER).tar.gz
+		cd $(DISTDIR); $(BZIP2) -9v $(DISTNAME)_base-$(DISTVER).tar
 		$(RM) -rf $(DISTDIR)/$(DISTNAME)
-		$(MKLSM) base >$(DISTDIR)/$(DISTNAME)-base.lsm
+		$(MKLSM) base >$(DISTDIR)/$(DISTNAME)_base-$(DISTVER).lsm
 		$(CP) ../COPYING 0* $(DISTDIR)
-
