@@ -31,6 +31,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 08:20:44  alexios
+ * Changed struct message to message_t. Fixed #includes.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -84,9 +87,9 @@ static const char rcsinfo[] = "$Id$";
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_sysvar.h>
-#include <megistos/mbk_signup.h>
-#include <megistos/mbk_login.h>
+#include <mbk/mbk_sysvar.h>
+#include <mbk/mbk_signup.h>
+#include <mbk/mbk_login.h>
 
 
 promptblock_t *signup;
@@ -101,17 +104,17 @@ int     e2urrr;
 void
 sendu2s ()
 {
-	FILE   *fp;
-	char    header[256], body[256];
-	int     kgdnam, kgdcom, kgdadr, kgdpho, kgdage, kgdsex;
-	int     kgdpss, kgdpass;
-	char    wh[80], age[80], sex[80];
-	char    s1[80], s2[80], s3[80], s4[80];
-	char    d1[80], d2[80];
-	char    sys[80], ns[80], lang[80];
-	char    buffer[MSGBUFSIZE], *supauth;
-	char    command[256];
-	struct message msg;
+	message_t  msg;
+	FILE      *fp;
+	char       header[256], body[256];
+	int        kgdnam, kgdcom, kgdadr, kgdpho, kgdage, kgdsex;
+	int        kgdpss, kgdpass;
+	char       wh[80], age[80], sex[80];
+	char       s1[80], s2[80], s3[80], s4[80];
+	char       d1[80], d2[80];
+	char       sys[80], ns[80], lang[80];
+	char       buffer[MSGBUFSIZE], *supauth;
+	char       command[256];
 
 	msg_set (msg_sys);
 
@@ -197,11 +200,11 @@ sendu2s ()
 void
 sends2u ()
 {
-	FILE   *fp;
-	char    header[256], body[256];
-	char    command[256];
-	struct message msg;
-	char   *e2uatt;
+	FILE      *fp;
+	char       header[256], body[256];
+	char       command[256];
+	message_t  msg;
+	char      *e2uatt;
 
 	sprintf (body, "/tmp/s2u%dB", getpid ());
 	if ((fp = fopen (body, "w")) == NULL)
