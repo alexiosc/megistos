@@ -1,0 +1,109 @@
+# libmegistos POT file.
+#
+# Copyright (C) YEAR Alexios Chouchoulas
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/09/28 13:10:22  alexios
+# Added CVS IDs.
+#
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: megistos@vennea.demon.co.uk\n"
+"POT-Creation-Date: 2003-09-28 13:05+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/bbsmod.c:660
+#, c-format
+msgid ""
+"Megistos BBS\n"
+"\n"
+"Module:  %s (%s)\n"
+"Author:  %s\n"
+"Version: %s\n"
+"RCS ID:  %s\n"
+"Library: %s\n"
+"\n"
+"%s\n"
+"\n"
+msgstr ""
+
+#: src/bbsmod.c:667
+#, c-format
+msgid "\t--%-20s %s\n"
+msgstr ""
+
+#: src/bbsmod.c:685
+#, c-format
+msgid ""
+"Syntax: %s command module_options\n"
+"\n"
+"Where command is one of:\n"
+msgstr ""
+
+#: src/bbsmod.c:690
+msgid "User login handler"
+msgstr ""
+
+#: src/bbsmod.c:693
+msgid "User-interactive handler"
+msgstr ""
+
+#: src/bbsmod.c:696
+msgid "User logout handler"
+msgstr ""
+
+#: src/bbsmod.c:699
+msgid "User hangup handler"
+msgstr ""
+
+#: src/bbsmod.c:702
+msgid "Cleanup handler"
+msgstr ""
+
+#: src/bbsmod.c:705
+msgid "User deletion handler"
+msgstr ""
+
+#: src/bbsmod.c:707
+msgid "You're reading it"
+msgstr ""
+
+#: src/bbsmod.c:709
+msgid "Issues installation script"
+msgstr ""
+
+#: src/bbsmod.c:711
+msgid "Issues uninstall script"
+msgstr ""
+
+#: src/bbsmod.c:713
+msgid "Module version and information"
+msgstr ""
+
+#: src/errorprompts.h:112
+msgid ""
+"[0;1;31;5mCaution: [0;1;31mA non-fatal error has interrupted this process.\n"
+"         Please notify the Sysop about the conditions\n"
+"         that led to it. We apologise for the inconvenience.[0;1m\n"
+"\n"
+msgstr ""
+
+#: src/errorprompts.h:135
+msgid ""
+"[0;1;31;5mCAUTION: [0;1;31mA fatal error has interrupted this process.\n"
+"         Please notify the Sysop about the conditions\n"
+"         that led to it. We apologise for the inconvenience.[0;1m\n"
+"\n"
+msgstr ""

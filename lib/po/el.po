@@ -3,6 +3,13 @@
 # This file is distributed under the same license as the libmegistos package.
 # Alexios Chouchoulas <alexios@vennea.demon.co.uk>, 2003.
 #
+# $Id$
+#
+# $Log$
+# Revision 1.2  2003/09/28 13:09:31  alexios
+# Added CVS IDs.
+#
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: libmegistos\n"
