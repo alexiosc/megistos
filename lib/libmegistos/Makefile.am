@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 2.1  2004/12/05 12:27:52  alexios
+# Removed a minor dependence on the Debian build infrastructure.
+#
 # Revision 2.0  2004/09/13 19:44:34  alexios
 # Stepped version to recover CVS repository after near-catastrophic disk
 # crash.
@@ -126,7 +129,7 @@ DISTCLEANFILES = version.mk
 
 EXTRA_DIST = mkversion.sh sysvar.msg
 
-version.h version.mk:	$(filter-out $(libmegistos_la_SOURCES),version.h) ../configure-stamp megistos-config mkversion.sh
+version.h version.mk:	$(filter-out $(libmegistos_la_SOURCES),version.h) ../stamp-h1 megistos-config mkversion.sh
 			./mkversion.sh $(VERSION)
 			touch version.c
 
