@@ -1,0 +1,125 @@
+# Greek translations for libmegistos package.
+# Copyright (C) 2003 Alexios Chouchoulas
+# This file is distributed under the same license as the libmegistos package.
+# Alexios Chouchoulas <alexios@vennea.demon.co.uk>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libmegistos\n"
+"Report-Msgid-Bugs-To: megistos@vennea.demon.co.uk\n"
+"POT-Creation-Date: 2003-09-28 13:05+0100\n"
+"PO-Revision-Date: 2003-09-28 13:16+0100\n"
+"Last-Translator: Alexios Chouchoulas <alexios@vennea.demon.co.uk>\n"
+"Language-Team: Greek\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/bbsmod.c:660
+#, c-format
+msgid ""
+"Megistos BBS\n"
+"\n"
+"Module:  %s (%s)\n"
+"Author:  %s\n"
+"Version: %s\n"
+"RCS ID:  %s\n"
+"Library: %s\n"
+"\n"
+"%s\n"
+"\n"
+msgstr ""
+"Μέγιστος BBS\n"
+"\n"
+"Μονάδα:     %s (%s)\n"
+"Συγγραφέας: %s\n"
+"Έκδοση:     %s\n"
+"RCS ID:     %s\n"
+"Βιβλιοθήκη: %s\n"
+"\n"
+"%s\n"
+"\n"
+
+#: src/bbsmod.c:667
+#, c-format
+msgid "\t--%-20s %s\n"
+msgstr ""
+
+#: src/bbsmod.c:685
+#, c-format
+msgid ""
+"Syntax: %s command module_options\n"
+"\n"
+"Where command is one of:\n"
+msgstr ""
+"Σύνταξη: %s εντολή επιλογές\n"
+"\n"
+"Όπου η «εντολή» είναι μία από:\n"
+
+#: src/bbsmod.c:690
+msgid "User login handler"
+msgstr "Αρχική είσοδος στο σύστημα (login)"
+
+#: src/bbsmod.c:693
+msgid "User-interactive handler"
+msgstr "Κανονική χρήση (interactive)"
+
+#: src/bbsmod.c:696
+msgid "User logout handler"
+msgstr "Αποσύνδεση από το σύστημα"
+
+#: src/bbsmod.c:699
+msgid "User hangup handler"
+msgstr "Ξαφνική αποσύνδεση από το σύστημα"
+
+#: src/bbsmod.c:702
+msgid "Cleanup handler"
+msgstr "Ημερήσιο cleanup"
+
+#: src/bbsmod.c:705
+msgid "User deletion handler"
+msgstr "Διαγραφή χρήστη"
+
+#: src/bbsmod.c:707
+msgid "You're reading it"
+msgstr "Την διαβάζετε τώρα"
+
+#: src/bbsmod.c:709
+msgid "Issues installation script"
+msgstr "Εκτυπώνει εντολές εγκατάστασης"
+
+#: src/bbsmod.c:711
+msgid "Issues uninstall script"
+msgstr "Εκτυπώνει εντολές απεγκατάστασης"
+
+#: src/bbsmod.c:713
+msgid "Module version and information"
+msgstr "Έκδοση μονάδας και πληροφορίες"
+
+#: src/errorprompts.h:112
+msgid ""
+"[0;1;31;5mCaution: [0;1;31mA non-fatal error has interrupted this process.\n"
+"         Please notify the Sysop about the conditions\n"
+"         that led to it. We apologise for the inconvenience.[0;1m\n"
+"\n"
+msgstr ""
+"[0;1;31;5mΠροσοχή: [0;1;31mΜη κρίσιμο σφάλμα εμπόδισε την ολοκλήρωση της\n"
+"         εργασίας. Παρακαλούμε ενημερώστε τον Χειριστή Συστήματος\n"
+"         για τις συνθήκες που το δημιούργησαν. Ζητούμε συγγνώμη\n"
+"         για την ταλαιπωρία.[0;1m\n"
+"\n"
+
+#: src/errorprompts.h:135
+msgid ""
+"[0;1;31;5mCAUTION: [0;1;31mA fatal error has interrupted this process.\n"
+"         Please notify the Sysop about the conditions\n"
+"         that led to it. We apologise for the inconvenience.[0;1m\n"
+"\n"
+msgstr ""
+"[0;1;31;5mΠροσοχή: [0;1;31mΣοβαρό σφάλμα εμπόδισε την ολοκλήρωση της "
+"εργασίας.\n"
+"         Παρακαλούμε ενημερώστε τον Χειριστή Συστήματος για τις\n"
+"         συνθήκες που το δημιούργησαν. Ζητούμε συγγνώμη για την\n"
+"         ταλαιπωρία.[0;1m\n"
+"\n"
