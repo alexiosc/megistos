@@ -1,4 +1,14 @@
-/*****************************************************************************\
+/*! @file     systemversion.h
+    @brief    Declare strings to hold system version numbers
+    @author   Alexios
+
+    This simple header file only declares symbols to hold version
+    information on when the Megistos libraries were built.
+
+    @par
+    @verbatim
+
+ *****************************************************************************\
  **                                                                         **
  **  FILE:     systemversion.h                                              **
  **  AUTHORS:  Alexios                                                      **
@@ -24,13 +34,16 @@
  **  along with    this program;  if   not, write  to  the   Free Software  **
  **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
  **                                                                         **
-\*****************************************************************************/
+\*****************************************************************************
 
 
-/*
+ *
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/09/27 20:32:53  alexios
+ * Documented this file. An easy task.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,29 +60,37 @@
  * First registered revision. Adequate.
  *
  *
- */
+ *
+
+@endverbatim
+
+@{*/
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+
+#ifndef SYSTEMVERSION_H
+#define SYSTEMVERSION_H
 
 
-
-extern char bbs_shortversion[];
-extern char bbs_systemversion[];
-extern char bbs_compiledby[];
-extern char bbs_compiledon[];
-extern char bbs_majorversion[];
-extern char bbs_minorversion[];
-extern char bbs_patchlevel[];
-extern char bbs_makenumber[];
+extern char bbs_shortversion [];
+extern char bbs_systemversion [];
+extern char bbs_compiledby [];
+extern char bbs_compiledon [];
+extern char bbs_majorversion [];
+extern char bbs_minorversion [];
+extern char bbs_patchlevel [];
+extern char bbs_makenumber [];
 
 
 #ifdef I_AM_VERSION_C
-#ifndef SYSTEMVERSION
-#define SHORTVERSION  "Megistos "__MAJORVERSION"."__MINORVERSION"."__PATCHLEVEL
-#define SYSTEMVERSION SHORTVERSION" ("__COMPILED_BY") #"__MAKE_NUMBER" "__DATE
-
-#endif /* SYSTEMVERSION */
+#  ifndef SYSTEMVERSION
+#    define SHORTVERSION  "Megistos "__MAJORVERSION"."__MINORVERSION"."__PATCHLEVEL
+#    define SYSTEMVERSION SHORTVERSION" ("__COMPILED_BY") #"__MAKE_NUMBER" "__DATE
+#  endif /* SYSTEMVERSION */
 #endif /* I_AM_VERSION_C */
+
+
+/*@}*/
+
+
+#endif /* SYSTEMVERSION_H */
