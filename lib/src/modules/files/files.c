@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 09:00:09  alexios
+ * Adjusted #includes. Disabled libcnv compilation.
+ *
  * Revision 1.4  2003/12/24 20:12:12  alexios
  * Ran through megistos-config --oh.
  *
@@ -74,14 +77,14 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 #define __UPDOWN_UNAMBIGUOUS__
-#include <megistos/mbk_updown.h>
+#include <mbk/mbk_updown.h>
 
 
 promptblock_t *msg;
@@ -394,10 +397,12 @@ mod_info_t mod_info_files = {
 int
 main (int argc, char *argv[])
 {
+#if 0
 	if (strstr (argv[0], "libcnv")) {
 		mod_setprogname ("libcnv");
 		return cnvmain (argc, argv);
 	}
+#endif
 
 	mod_setinfo (&mod_info_files);
 	return mod_main (argc, argv);
