@@ -3,17 +3,16 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/24 11:27:14  alexios
+# Further simplifications; removed settings common to all files and
+# placed them as a single 'base' template.
+#
 # Revision 1.1  2003/12/22 17:10:12  alexios
 # Initial revision.
 #
 
-pkgdatadir = @PKGDATADIR@
-pkglibdir = @PKGLIBDIR@
-pkgincludedir = @PKGINCLUDEDIR@
-
-DEFS = @DEFS@
-CFLAGS = @CFLAGS@ -I $(top_srcdir)/@LIBMEGISTOS@
-LDFLAGS = -L$(top_srcdir)/@LIBMEGISTOS@ @LDFLAGS@
-LDADD = -lmegistos
+include $(top_srcdir)/templates/base
 
 pkglib_PROGRAMS = $(PROGNAMES)
+
+# End of file.
