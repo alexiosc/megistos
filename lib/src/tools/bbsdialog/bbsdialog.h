@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 18:31:19  alexios
+ * Removed detrimental rcsinfo declaration.
+ *
  * Revision 1.4  2003/12/23 23:20:24  alexios
  * Ran through megistos-config --oh.
  *
@@ -49,12 +52,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
-
 
 
 struct stringfield {
