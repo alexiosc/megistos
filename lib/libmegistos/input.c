@@ -28,6 +28,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2001/06/30 10:34:37  alexios
+ * Fixed significant security fault a symptom of which was SF bug #223631. The
+ * patch was provided by Lucas Maneos, although I was *sure* I'd already
+ * applied one of my own. Hm.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -216,7 +221,7 @@ inp_acceptinjoth()
 	      BTS_INJECTED_PROMPT,
 	      strlen(buf->m.simple));
       }
-      print(buf->m.simple);
+      print("%s", buf->m.simple);
       break;
 
     case INJ_MESSAGE_ACK:	/* Injoth message with acknowledgement */
@@ -227,7 +232,7 @@ inp_acceptinjoth()
 	      strlen(buf->m.withack.msg));
       }
       
-      print(buf->m.withack.msg);
+      print("%s", buf->m.withack.msg);
 
       /* We don't use usr_insys() here so as not to clobber any work the caller
          function is in the process of performing. */
