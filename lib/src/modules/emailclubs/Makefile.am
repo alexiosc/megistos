@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  2003/12/27 13:16:53  alexios
+# Moved the netclub tool here, compiled if MetaBBS is enabled.
+#
 # Revision 1.5  2003/12/27 13:07:09  alexios
 # Moved bbsmail as a subdirectory of this one.
 #
@@ -23,7 +26,13 @@
 # Initial revision.
 #
 
-SUBDIRS = . bbsmail offline.mail
+if HAVE_METABBS
+METABBS = netclub
+else !HAVE_METABBS
+METABBS =
+endif !HAVE_METABBS
+
+SUBDIRS = . bbsmail $(METABBS) offline.mail
 
 PROGNAMES = email clubs
 
