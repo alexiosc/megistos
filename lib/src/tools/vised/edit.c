@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:43:34  alexios
  * Fixed #includes.
  *
@@ -215,8 +219,8 @@ joinlines (int target)
 
 	if (target < 1 || target == numlines)
 		return;
-	l1 = getline (target);
-	l2 = getline (target + 1);
+	l1 = vised_getline (target);
+	l2 = vised_getline (target + 1);
 	num = rmargin - strlen (l1->text);
 	if (num <= 0)
 		return;
@@ -225,12 +229,12 @@ joinlines (int target)
 		strcat (l1->text, l2->text);
 		numbytes += strlen (l2->text);
 		deleteline (target + 1);
-		top = getline (toprow);
+		top = vised_getline (toprow);
 		cy = target;
 		if (cy == toprow)
 			current = top;
 		else
-			current = getline (cy);
+			current = vised_getline (cy);
 	} else {
 		char    temp[1024];
 
@@ -240,7 +244,7 @@ joinlines (int target)
 		strcat (l1->text, temp);
 		cy = target;
 	}
-	current = getline (cy);
+	current = vised_getline (cy);
 	if (cy < toprow)
 		centerline ();
 	showtext (0);
@@ -269,11 +273,11 @@ void
 delline ()
 {
 	deleteline (cy);
-	top = getline (toprow);
+	top = vised_getline (toprow);
 	if (cy == toprow)
 		current = top;
 	else
-		current = getline (cy);
+		current = vised_getline (cy);
 	cx = 0;
 	if (cy > numlines) {
 		insertline (last, "");

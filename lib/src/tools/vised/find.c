@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:43:34  alexios
  * Fixed #includes.
  *
@@ -345,7 +349,7 @@ replace ()
 						} else {
 							cx -= strlen (ftxt);
 							cx += strlen (reptxt);
-							current = getline (cy =
+							current = vised_getline (cy =
 									   n);
 							putcursor ();
 							action = 1;

@@ -29,6 +29,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:44:40  alexios
  * Minor fixes. Removed rcsinfo.
  *
@@ -163,7 +167,7 @@ void    deletechar ();
 
 /* utils.c */
 
-struct line *getline (int line);
+struct line *vised_getline (int line);
 void    insertline (struct line *afterline, char *s);
 void    deleteline (int num);
 void    centerline ();

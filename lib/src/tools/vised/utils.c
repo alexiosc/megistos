@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:44:11  alexios
  * Curses fixes.
  *
@@ -82,7 +86,7 @@ static const char rcsinfo[] =
 
 
 struct line *
-getline (int line)
+vised_getline (int line)
 {
 	struct line *l;
 	int     i;
@@ -126,10 +130,10 @@ deleteline (int num)
 	struct line *l = NULL, *p = NULL;
 
 	if (num > 1) {
-		p = getline (num - 1);
+		p = vised_getline (num - 1);
 		l = p->next;
 	} else
-		l = getline (num);
+		l = vised_getline (num);
 	if (first == l)
 		first = l->next;
 	if (!l->next)
@@ -151,7 +155,7 @@ centerline ()
 	if (cy - c < 1)
 		c = cy - 1;
 	toprow = cy - c;
-	top = getline (toprow);
+	top = vised_getline (toprow);
 }
 
 
@@ -208,10 +212,10 @@ movecursor (int dy, int dx)
 		}
 		if (--cy < 1)
 			cy = 1;
-		current = getline (cy);
+		current = vised_getline (cy);
 		if (cy < toprow) {
 			toprow = max (toprow - vscrinc, 1);
-			top = getline (toprow);
+			top = vised_getline (toprow);
 			showtext (0);
 		}
 	} else if (dy == 1) {
@@ -230,11 +234,11 @@ movecursor (int dy, int dx)
 				bel (ERRSIZ);
 			}
 		} else
-			current = getline (cy);
+			current = vised_getline (cy);
 		if (((signed) cy - (signed) ((signed) LINES - 3)) >=
 		    (signed) toprow) {
 			toprow = min (toprow + vscrinc, numlines);
-			top = getline (toprow);
+			top = vised_getline (toprow);
 			showtext (0);
 		}
 	}
@@ -276,13 +280,13 @@ movepage (int incr)
 	if (toprow < 1) {
 		toprow = 1;
 		cy = 1;
-		current = top = getline (toprow);
+		current = top = vised_getline (toprow);
 	} else if (toprow > numlines) {
-		current = getline (cy = numlines);
+		current = vised_getline (cy = numlines);
 		centerline ();
 	} else {
-		current = getline (cy);
-		top = getline (toprow);
+		current = vised_getline (cy);
+		top = vised_getline (toprow);
 	}
 
 	if (current && (strlen (current->text) >= COLS) && (cx >= COLS)) {

@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:43:34  alexios
  * Fixed #includes.
  *
@@ -225,14 +229,14 @@ formatwrap (int pass)
 
 	oldcy = cy;
 	while (cy <= numlines && sameas (nohsp (current->text), ""))
-		current = getline (++cy);
+		current = vised_getline (++cy);
 	if (cy > numlines) {
 		cy = oldcy;
 		return;
 	}
 
 	if (cy > 1)
-		tip = getline (cy - 1);
+		tip = vised_getline (cy - 1);
 	else {
 		struct line *new = alcmem (sizeof (struct line));
 
@@ -252,7 +256,7 @@ formatwrap (int pass)
 				char    s[1024];
 				int     i;
 
-				p = getline (cy - 1);
+				p = vised_getline (cy - 1);
 				strcpy (s, p->text);
 				i = strlen (s) - 1;
 /*	while((i>=0)&&(s[i]==32))s[i--]=0; */
@@ -266,7 +270,7 @@ formatwrap (int pass)
 				l = p->next;
 			} else {
 				p = NULL;
-				l = getline (cy);
+				l = vised_getline (cy);
 			}
 
 			strcpy (temp, l->text);
@@ -385,7 +389,7 @@ formatwrap (int pass)
 			showtext (-(cy - toprow + 1));
 		}
 	} else {
-		top = getline (toprow);
+		top = vised_getline (toprow);
 		showtext (0);
 	}
 }
@@ -403,25 +407,25 @@ formatflush (int pass)
 
 	oldcy = cy;
 	while (cy <= numlines && sameas (current->text, ""))
-		current = getline (++cy);
+		current = vised_getline (++cy);
 	if (cy > numlines) {
 		cy = oldcy;
 		return;
 	}
 
 	if (cy > 1)
-		tip = getline (cy - 1);
+		tip = vised_getline (cy - 1);
 	else
 		tip = NULL;
 
 	for (; cy <= numlines || carry[0];) {
 		if (cy <= numlines) {
 			if (cy > 1) {
-				p = getline (cy - 1);
+				p = vised_getline (cy - 1);
 				l = p->next;
 			} else {
 				p = NULL;
-				l = getline (cy);
+				l = vised_getline (cy);
 			}
 
 			strcpy (temp, nohsp (l->text));

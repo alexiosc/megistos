@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/29 07:50:12  alexios
+ * Renamed getline() to vised_getline() to disambiguate it from a GNU
+ * extension in stdio.h.
+ *
  * Revision 1.5  2003/12/24 19:43:34  alexios
  * Fixed #includes.
  *
@@ -90,11 +94,11 @@ delblock ()
 	if (!BLOCK)
 		return;
 
-	current = getline (cy = kby);
+	current = vised_getline (cy = kby);
 	cx = kbx;
 
 	if (kby == kky) {
-		struct line *l = getline (kby);
+		struct line *l = vised_getline (kby);
 
 		numbytes -= strlen (l->text);
 		strcpy (&l->text[kbx], &l->text[kkx]);
@@ -105,16 +109,16 @@ delblock ()
 
 	for (i = kky; i >= kby; i--) {
 		if (i == kby && kbx) {
-			struct line *l = getline (i);
+			struct line *l = vised_getline (i);
 
 			numbytes -= strlen (l->text);
 			l->text[kbx] = 0;
 			numbytes += strlen (l->text);
-			current = getline (cy = kby);
+			current = vised_getline (cy = kby);
 			cx = kby;
 			join++;
 		} else if (i == kky && kkx) {
-			struct line *l = getline (i);
+			struct line *l = vised_getline (i);
 
 			numbytes -= strlen (l->text);
 			strcpy (l->text, &l->text[kkx]);
@@ -132,11 +136,11 @@ delblock ()
 	else
 		noblock ();
 
-	top = getline (toprow);
+	top = vised_getline (toprow);
 	if (cy == toprow)
 		current = top;
 	else
-		current = getline (cy);
+		current = vised_getline (cy);
 	cx = 0;
 	if (cy > numlines) {
 		insertline (last, "");
@@ -164,14 +168,14 @@ copyblock (int move)
 	if (cy == (kky - (kkx == 0)) && cx < kkx)
 		return;
 
-	l = getline (kby);
+	l = vised_getline (kby);
 	if (cx) {
 		splitline ();
 	}
 	if (cy == 1)
 		insp = NULL;
 	else
-		insp = getline (cy - 1);
+		insp = vised_getline (cy - 1);
 
 	for (i = kby; i <= (kky - (kkx == 0)); i++) {
 		if (i == kby && kby == kky && kkx > 0) {
