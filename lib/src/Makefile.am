@@ -1,6 +1,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/29 07:54:36  alexios
+# Added modules to SUBDIRS.
+#
 # Revision 1.2  2003/12/23 08:26:07  alexios
 # Added tools subdirectory.
 #
@@ -8,4 +11,8 @@
 # Initial revision.
 #
 
-SUBDIRS = system tools utils
+SUBDIRS = \
+	modules \
+	system \
+	tools \
+	utils
