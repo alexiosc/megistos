@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/29 07:52:41  alexios
+# Removed dump_ihave from the bbsmail objects and compiled it as a
+# separate tool (which it was, anyway).
+#
 # Revision 1.2  2003/12/23 23:21:20  alexios
 # Minor simplifications.
 #
@@ -10,21 +14,22 @@
 # Initial revision.
 #
 
-PROGNAMES = bbsmail
+PROGNAMES = bbsmail dump-ihave
 
 bbsmail_SOURCES = \
 	bbsmail.c \
 	bbsmail.h \
 	bbsmail_run.c \
 	database.c \
-	dump-ihave.c \
 	msghdr.c \
 	msgnum.c \
 	netmail.c \
 	resolve.c \
-	test.c \
 	utils.c
 
-include $(top_srcdir)/templates/module
+ #	test.c
+
+include $(top_srcdir)/templates/program
+include $(top_srcdir)/templates/typhoon
 
 # End of file
