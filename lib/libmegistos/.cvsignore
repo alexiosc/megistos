@@ -5,3 +5,5 @@ Makefile.in
 version.h
 version.mk
 visual
+*.o
+*.lo

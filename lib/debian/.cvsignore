@@ -1,4 +1,9 @@
 files
+libmegistos-dev
+libmegistos1
+libmegistos1.postinst.debhelper
+libmegistos1.postrm.debhelper
+libmegistos1.substvars
 shlibs.local
 tmp
 typhoon-dev
