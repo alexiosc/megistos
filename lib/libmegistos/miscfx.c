@@ -28,6 +28,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:15:36  alexios
+ * Rationalised the RCS/CVS ident(1) strings. Updated usage of variable
+ * argument functions. Changed default, fall-back prefix to BASEDIR
+ * instead of __BASEDIR.
+ *
  * Revision 1.3  2001/04/22 14:49:05  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -79,10 +84,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 #define MISCFX_O
@@ -127,9 +129,7 @@ static char *bbsprefix=NULL;
 
 
 char *
-mkfname(fmt,va_alist)
-char *fmt;
-va_dcl
+mkfname(char * fmt, ...)
 {
   va_list args;
   char tmp[2048];
@@ -140,7 +140,7 @@ va_dcl
   if(bbsprefix==NULL){
     if(getenv("BBSPREFIX")) bbsprefix=strdup(getenv("BBSPREFIX"));
     else if(getenv("PREFIX")) bbsprefix=strdup(getenv("PREFIX"));
-    else bbsprefix=strdup(__BASEDIR);
+    else bbsprefix=strdup(BASEDIR);
   }
 
   /* Prepend the prefix to the format. Chop double slashes */
@@ -153,7 +153,7 @@ va_dcl
 
   /* And format the string */
 
-  va_start(args);
+  va_start(args, fmt);
   vsprintf(buf,tmp,args);
   va_end(args);
 
