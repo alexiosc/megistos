@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.3  2001/04/17 18:36:02  alexios
+ * Minor changes.
+ *
  * Revision 1.2  2001/04/16 21:56:28  alexios
  * Completed 0.99.2 API, dragged all source code to that level (not as easy as
  * it sounds).
@@ -141,6 +144,7 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
   FILE    *fp;
   char    s[60],chanstr[32];
   char    entry[132]={0};
+  int     c;
 
   va_start(args,format);
 
@@ -148,11 +152,10 @@ audit(char *channel, uint32 flags, char *summary, char *format,...)
 
   if(channel==NULL)channel=thisuseronl.channel;
 
-  if(sameto("tty",channel)){
-    int c=chan_getnum(channel);
-    if(c!=-1)sprintf(chanstr,"CHANNEL %02x",c);
-    else sprintf(chanstr,"%-10s",channel);
-  } else sprintf(chanstr,"%-10s",channel);
+  c=chan_getnum(channel);
+  if(c!=-1)sprintf(chanstr,"CHANNEL %02x",c);
+  else sprintf(chanstr,"%-10s",channel);
+
   fflush(stdout);
 
   vsprintf(s,format,args);

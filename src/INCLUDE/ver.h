@@ -3,8 +3,8 @@
 #define __MINORVERSION "99"
 #define __PATCHLEVEL   "1"
 #define __COMPILED_BY  "bbs@vennea"
-#define __MAKE_NUMBER  "282"
-#define __DATE         "01-04-16 11:04"
+#define __MAKE_NUMBER  "284"
+#define __DATE         "01-04-17 18:04"
 
 extern char bbs_shortversion[];
 extern char bbs_systemversion[];
