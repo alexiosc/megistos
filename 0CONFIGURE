@@ -1,0 +1,655 @@
+TIPS ON CONFIGURING MEGISTOS BBS
+
+This  document is  organised on  a file-by-file  basis.  We'll  examine various
+files and  how to tweak them.   Most files have usage  instructions embedded in
+them  as comments, but  it never  hurts to  give some  information.  Especially
+given the current lack of documentation on Megistos BBS.
+
+All  filenames are  given  relative  to the  BBS  installation directory.   For
+instance,       file      "etc/bad.userids"      might       actually      mean
+/usr/local/megistos-0.98/etc/bad.userids,  depending on where  you've installed
+your system.
+
+
+-------------------------------------------------------------------------------
+
+How to set up Megistos BBS for telnet access
+
+Simple! As the superuser, add the following line to your /etc/inetd.conf:
+
+--- CUT HERE ------------------------------------------------------------------
+bbs stream tcp nowait root /usr/sbin/tcpd in.telnetd -L /usr/local/bbs/bin/emud
+--- CUT HERE ------------------------------------------------------------------
+
+Change the directory /usr/local/bbs to where your own BBS is installed. The one
+above   is   installed  under   /usr/local/bbs   --   yours   might  be   under
+/usr/local/megistos-0.98   or  something.    Then   add  this   line  to   your
+/etc/services:
+
+--- CUT HERE ------------------------------------------------------------------
+bbs              9999/tcp       megistos          # Megistos telnet
+--- CUT HERE ------------------------------------------------------------------
+
+You can change  9999 to any port  you want between 1024 and  65535 (ports below
+1024 are reserved). Avoid those. Then, still as the superuser, do:
+
+# killall -HUP inetd
+
+This will cause  inetd to reload its tables. Assuming  TCP/IP networking is set
+up OK, there  are no pesky firewalls between you and  the Megistos machine, and
+you haven't disabled the telnet channels in the etc/channel.defs/CHANNELS file,
+you should be able to get into the system by typing:
+
+# telnet localhost 9999   (or whatever port you selected)
+
+If your machine  has a static IP  connection of some sort, people  can login to
+your   BBS    over   the   Internet.   Assuming   your    machine   is   called
+billybob.shatner.org, people can login from anywhere in the world by giving:
+
+telnet billybob.shatner.org 9999
+
+Or, as a URL:
+
+telnet://billybob.shatner.org:9999/
+
+You're  set! Now read  ahead about  the CHANNELS  file and  the msg  files. The
+CHANNELS file allows you to  set the behaviour, automatic translation, language
+etc  of your  telnet lines.  Option TNLMAX  in  file bbs/etc/prompts/sysvar.msg
+controls how  many users  can be connected  through telnet  simultaneously. The
+default value is 15. You might want to change it.
+
+-------------------------------------------------------------------------------
+
+etc/bad.userids
+
+Lists user  IDs that  can't be chosen  by a  new user.  One  user ID  per line.
+Typically used to  forbid certain IDs used in  spoofing or 'social engineering'
+attempts, like  root, admin, etc.  Also used to  mark certain IDs  as unusable,
+perhaps because your users find them offensive.
+
+-------------------------------------------------------------------------------
+
+etc/four.letter.words
+
+This is a  list of (literally) four-letter words, one per  line. These are used
+to form passwords  that are suggested to new users. There's  no reason to alter
+the word list.
+
+-------------------------------------------------------------------------------
+
+etc/languages
+
+Defines the names of the languages  known by the system. The order is important
+in the current version of the system. Given that only Greek language support is
+currently complete, there's little reason to change this file yet.
+
+-------------------------------------------------------------------------------
+
+etc/magic
+
+Magic file used  by the file(1) command. Contains  support for various Megistos
+formats and  is used internally by  the file download service  to identify file
+types. You can  use it yourself. Check the file(1) man  page for details. Don't
+alter the file unless you know what you're doing.
+
+-------------------------------------------------------------------------------
+
+etc/megistos
+
+Terminal definition that covers some of the REALLY braindead terminal emulators
+out there. It's  worked with a lot of communications  software, but might break
+others. I'm no  expert in designing termcap/terminfo entries.  Check the tic(1)
+man page  for information  on how  to compile this  file and  where to  move it
+afterwards.
+
+-------------------------------------------------------------------------------
+
+etc/protocols
+
+Defines the file transfer protocols used  by the system. The file is thoroughly
+documented,  so  you  won't  have  problems  figuring out  how  to  define  new
+protocols.
+
+-------------------------------------------------------------------------------
+
+etc/stupid.passwords
+
+A word list giving passwords that  are so monumentally stupid we can't possibly
+allow our users to have them.  All time favourites include '123', 'qwerty', and
+other marvels of imagination. Feel free to add more!
+
+-------------------------------------------------------------------------------
+
+etc/userclasses
+
+Binary  file containing  the user  classes  and information  about them.   User
+classes are similar to those in the Major BBS (R). Don't try to tweak this file
+with an editor. There's an actual tool, the class editor. Login as Sysop, go to
+the  Sysop  menu   (using  the  /@  global  command)   and  issue  the  CLASSED
+command. There's a lot of help and information in there.
+
+-------------------------------------------------------------------------------
+
+etc/channel.defs/CHANNELS
+
+A particularly important  file! This one defines all  the BBS channels/lines or
+whatever you like to call them, along with some parameters. The file is very
+well documented internally. You need to remember one thing, though:
+
+AFTER EDITING THE FILE, RUN THE mkchan COMMAND (you might need to give the full
+path) TO COMPILE THE FILE INTO SOMETHING MEGISTOS CAN READ EASILY.
+
+*** YOU'LL NEED TO RESTART THE BBS IMMEDIATELY AFTER THAT!!!
+
+*** YOU'LL NEED TO RESTART THE BBS IMMEDIATELY AFTER THAT!!!
+
+*** YOU'LL NEED TO RESTART THE BBS IMMEDIATELY AFTER THAT!!!
+
+If you're a Greek user and only have ISO-8859-7 on your console, you can set up
+Megistos to translate everything for  you (The Greek language setting currently
+uses the  older, non-standard  codepage 737 for  its message blocks).  Load the
+file etc/channel.defs/CHANNELS  into your editor. Look for  the console channel
+definitions. It should look like this:
+
+# console channels follow
+#
+# tty   channel config file     type    signups key     lang    flags
+#--------------------------------------------------------------------
+#tty1   11      Console         C       Y       0       1       1VM
+#tty2   12      Console         C       Y       0       1       1VM
+tty11   11      Console         C       Y       0       1       1VM
+#tty12  12      Console         C       Y       0       1       1VM
+
+The line  starting 'tty11' is the  only active console channel.  It has channel
+number 11 (to  match its virtual console number),  allows signups, doesn't need
+you to have a certain access key in order to login, logs you in with language 1
+(Greek in  this version), and  uses auto-translation 1 (one-to-one  by default)
+with ANSI graphics enabled ('V' flag) and the MetaBBS option open ('M' flag).
+
+All you need to  do is change the '1' in the 'flags'  column to '2'. The second
+translation mode changes 737 to ISO-8859-7, which is what you need. Now save,
+exit the editor, and type:
+
+$ mkchan
+
+If all goes  well, you won't get  any error messages (or anything  else at all,
+for that matter). Restart the BBS:
+
+$ su -c "/usr/local/megistos-0.98/etc/rc.bbs"
+
+Don't forger  to change the directory  name above to reflect  where your system
+has been installed.
+
+This will  start the console in ISO-8859-7  mode. If you have  Greek Support 2.0
+installed, you'll also need to load etc/channel.defs/bbsgetty.Console. Find the
+last line:
+
+# Enable greek keyboard for the console
+PRECONNECT=/usr/local/sbin/gren 437G >&/dev/null; echo -ne '\033[?24;0;0c'
+
+And comment it out:
+
+# Enable greek keyboard for the console
+#PRECONNECT=/usr/local/sbin/gren 437G >&/dev/null; echo -ne '\033[?24;0;0c'
+
+Alternatively,  you could  use Greek  2.0 to  install the  necessary  fonts and
+keymaps for the ISO-8859-7 encoding by changing the invocation slightly:
+
+# Enable greek keyboard for the console
+PRECONNECT=/usr/local/sbin/gren ISO >&/dev/null; echo -ne '\033[?24;0;0c'
+
+-------------------------------------------------------------------------------
+
+etc/channel.defs/bbsgettydefs
+
+Identical  to  the /etc/gettydefs  file,  but applies  only  to  the BBS  login
+program. You won't normally need to change this file.
+
+-------------------------------------------------------------------------------
+
+etc/channel.defs/bbsgetty.*
+
+These  files control  the  behaviour of  the  various devices  used to  connect
+Megistos  BBS  to  the  outside  world.  You'll  find  a  small  collection  of
+them.  There is  one file  per channel,  plus one  file per  device  class. For
+instance, if /dev/tty11 is your console, then you'll need a bbsgetty.tty11 file
+and a bbsgetty.Console file (this is  the file specified in the CHANNELS config
+file, on the 'Config file' column).
+
+WARNING: unless you have a bbsgetty.tty<something> file for each and every line
+on your system, the BBS won't work normally. Empty files are OK, though. Expect
+this problem to be rectified soon enough  -- it's far too annoying to be a good
+idea.
+
+Back to the  example: the system reads the  'class' file bbsgetty.Console, then
+updates its settings by reading the  bbsgetty.tty11 file. This way, we can have
+defaults for entire device classes (eg the Linux console, serial lines, certain
+models of  modems, etc),  but still  be able to  modify individual  channels to
+tweak performance or alter options. This  isn't normally needed, so most of the
+bbsgetty.tty files are empty.
+
+The contents of  the bbsgetty.* files specify init  strings, timeouts, etc. You
+can  get information  on the  format by  reading the  files  themselves. Things
+should be simple enough.
+
+-------------------------------------------------------------------------------
+
+etc/prompts/*.msg
+
+You'll feel at home here if you've  had exposure to The Major BBS (R). The .msg
+files are  very similar to those  used by it,  although the format is  going to
+change before Megistos 1.00 to account for various desirable features.
+
+MSG files configure individual parts  (called modules) of the system. Each file
+is made up of a large number of key-value pairs, with optional help strings and
+mandatory information on the allowed type and range of the value. For instance,
+you might see something like:
+
+
+
+   This sets the termcap/terminfo terminal name for the default
+   terminal type used by the system.
+
+TERMINAL {megistos} S 32 Default terminal type of BBS channels
+
+
+The first two (indented) lines are for the user's benefit only; they provide
+help on what is to follow. The name of the parameter is TERMINAL. The content
+is "megistos", and its short description follows (the 'S 32' thing means that
+the content is a string of up to 32 characters).
+
+The files  are split into sections called  levels. Level 1 is  reserved in this
+version. Level 2 contains configuration  options. Level 3 contains all messages
+shown to  the user (nothing is  hardwired in Megistos). After  the LANG keyword
+starts a  fresh language  definition for the  exact same messages.  The current
+version only  has Greek  and some  English messages. This  is going  to improve
+soon, though.
+
+This way you can (and SHOULD) go round and modify the Megistos configuration to
+fit your tastes. You'll  find too many options for words --  the system is very
+customisable.   We recommend  reading  through the  entire  files and  changing
+options and messages  given to the users. Do it  carefully, though. There's not
+much documentation on what goes where, so backups of the files might be useful.
+
+After you make any changes, type:
+
+$ make
+
+The system  will recompile  any changed  files and make  them available  to the
+BBS. Note however, that if any BBS  users are in the module whose file you just
+edited, they'll have to exit and re-enter the module for things to look the way
+you intended. The re-opening of the compiled prompt files will become automatic
+before Megistos 1.00 to avoid such problems.
+
+-------------------------------------------------------------------------------
+
+etc/xlation
+
+Here's a copy of the README file from the xlation directory.
+
+This directory contains  various translation tables which you  can choose.  BBS
+translation tables have filenames like:
+
+xlation.0
+xlation.1
+:  :  :
+xlation.9
+
+and
+
+kbdxlation.0
+kbdxlation.1
+:  :  :  :
+kbdxlation.9
+
+There  can be  up to  ten  translation tables  installed, numbered  arbitrarily
+within the range [0,9]. The number  controls which key will be assigned to that
+table when the user is asked to  select a translation mode. So you may not want
+to use 0 unless you're forced to (i.e. you already have nine other tables).
+
+To use one of the ready made ones, read on:
+
+Your BBS uses  one character set internally; your users  may use different ones
+(that's  why we  need translation,  anyway). The  translation tables  are named
+thusly:
+
+BBS.charset--to--user.charset
+
+For example, if your BBS runs  on the Latin-1 charset internally and some users
+are likely to be using the IBM  PC extended character set (code page 437), then
+you  use translation  table LATIN-1.ISO-8859-1--to--437.PC  (ISO-8859-1  is the
+official name of Latin-1). Long filenames? Filename completion is your friend.
+
+Since some users will have exactly the same charset as you, you'll also have to
+install 1--to--1, the trivial translation table (no translation whatsoever).
+
+Also, since  some users  will have  no compatible character  set (or  use 7-bit
+ASCII), you'll also have to install one of the *--to--US-ASCII tables (US-ASCII
+is another name for plain, 7-bit ASCII).
+
+1--to--1   gives   the  best   capabilities   but   the  least   compatibility.
+*--to--US-ASCII gives the least capabilities but absolute compatibility (unless
+you're    using   EBCDIC,    in   which    case   write    your    OWN   bloody
+decrypt^H^H^H^H^H^H^Htranslation  table).  They're  the ends  of  the spectrum.
+Always include both of them if you want to cover all cases.
+
+To install the necessary translation tables, make symbolic links (man ln) to
+them. For instance, one possible configuration would be:
+
+kbdxlation.1 -> 1--to--1
+kbdxlation.2 -> ELOT928.ISO-8859-7--to--437G.737
+kbdxlation.3 -> 437.PC--to--US-ASCII
+kbdxlation.4 -> 1--to--1
+xlation.1    -> 1--to--1
+xlation.2    -> 437G.737--to--ELOT928.ISO-8859-7
+xlation.3    -> 437G.737--to--437.PC
+xlation.4    -> 437G.737--to--US-ASCII
+
+
+THE KEYBOARD TRANSLATION TABLES
+
+If you expect  the user to issue non-ASCII characters,  you should create files
+kbdxlation.[0-9].  These translation tables  are for  converting what  the user
+types into the BBS's internal character set.
+
+The   BBS  cannot  determine   this  from   the  BBS->USER   translation  table
+(xlation.[0-9]), because the mapping is  not one-to-one(? my math is failing me
+currently), hence  the inverse mapping  is not a  function. In other  words, we
+lack information to generate this automatically in a reliable manner (there are
+heuristic  methods to  do so  under certain  circumstances, but  that's another
+story).
+
+So,  to accept  non-ASCII characters  from users  and translate  them  into the
+system's internal encoding, you should  create kbdxlation tables as well.  Have
+a look at the next section about  how to do this.  Each translation table lists
+reasonable  choices   for  its  reverse   mappings  as  a  comment   (look  for
+'KBDXLATION').
+
+If a  kbdxlation table does not  exist, no input translation  takes place (i.e.
+one-to-one mapping). So, if you  have xlation.3 but no kbdxlation.3, the system
+will assume it doesn't need to translate input characters in xlation type 3.
+
+
+WRITING TRANSLATION TABLES
+
+
+Here's a simple example. This one translates LATIN-1 characters to US-ASCII.
+
+
+--- CUT HERE ------------------------------------------------------------------
+# This is a Megistos translation table.  Anything to the *RIGHT* of the first
+# hash (#) character in a line is a comment. 256 translations are given, one
+# for each of the possible character values. The format of the file is:
+#
+#
+# translation_for_character_000
+# translation_for_character_001
+# : : :
+# translation_for_character_255
+#
+# translation_for_character may be either:
+#    * a hexadecimal value in the form xx (00 to ff). ALWAYS specify
+#      both digits. Pad with 0 if necessary.
+#    * a character value EXCEPT white space (tabs, newlines, spaces) and the
+#      backslash (\). ALWAYS specify single characters (obviously).
+#
+# In order to specify white space, specify the character's hexadecimal ASCII
+# code. To specify the hash (#), use its hexadecimal ASCII value (23).
+#
+# White space is ignored, but we've organised the translation table as a
+# 16x16 matrix for obvious reasons.
+#
+# To leave a character untranslated, specify \000. Obviously, \000 is always
+# untranslated (why would you want to translate THAT?).
+
+
+# PURPOSE: Translate Latin-1/ISO-8859-1 to 7-bit US-ASCII.
+#
+# KBDXLATION: Since the user is assumed to be unable to type non-ASCII
+# characters, a suitable reverse (kbdxlation) mapping would be 1--to--1.
+
+
+#   0  1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+#  --------------------------------------------------------------
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 0
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 1
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 2
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 3
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 4
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 5
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 6
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 7
+   20  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20	# 8
+   20  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20	# 9
+   20   !   c  23  23   Y   |   S   "   C   a   "   !   -   R   ~	# A
+    o   ?   ?   ?   '   u   P   *   ,   '   o   "   ?   ?   ?   ?	# B
+    A   A   A   A   A   A   E   C   E   E   E   E   I   I   I   I	# C
+    D   N   O   O   O   O   O   x   0   U   U   U   U   Y   P   s	# D
+    a   a   a   a   a   a   e   c   e   e   e   e   i   i   i   i	# E
+    d   n   o   o   o   o   o   /   0   u   u   u   u   y   p   y	# F
+--- CUT HERE ------------------------------------------------------------------
+
+
+
+INSTALLING TRANSLATION TABLES
+
+A practical idea (as stated above) is to just make links to them. For example,
+
+$ ln -s 1--to--1 xlation.1
+$ ln -s LATIN-1.ISO-8859-1--to--437.PC xlation.2
+$ ln -s LATIN-1.ISO-8859-1--to--US-ASCII xlation.3
+
+This would allow  everybody to use your BBS, regardless  of their character set
+(US-ASCII xlation is there -- not the best solution, but it's there).
+
+Once the links have been formed, run ../../bin/mkxlation to parse the tables in
+and form the binary version. Any errors will be identified at this point.
+
+If errors ARE identified, check if:
+
+  * You're  using the  hash  (#) symbol  as  a character  to translate  another
+    into. The  parser is  treating it as  a comment.  Change '#' for  '23' (its
+    ASCII code in hex).
+
+  * You're specifying  an ASCII code in  hex, but you're not  using both digits
+    (eg '2').  This is  WRONG --  the parser will  think what  you mean  is the
+    CHARACTER '2', with ASCII code 0x32 (50). Pad with an extra zero (eg '02')
+    to get the desired effect.
+
+  * You're using  a white-space character  as a character to  translate another
+    into. The  parser treats it  as white space  and ignores it. Use  the ASCII
+    code instead  (i.e. 20  for space, 0a  for newline  (\n), 09 for  tab (\t),
+    etc).
+
+Dat's all.
+
+More problems? Don't forget to run ../../bin/mkxlation!
+
+-------------------------------------------------------------------------------
+
+data/mailer/plugins
+
+This where off-line  mailer plugins are specified. You  shouldn't normally have
+to change anything there, but the  file is well documented anyway. Just open it
+with your favourite editor.
+
+-------------------------------------------------------------------------------
+
+data/mailer/QWKfiles/*
+
+The two files in there are  the "ANSI" introduction and epilogue files shown by
+the   user's  mail   reader  when   a  QWK   package  is   opened   and  closed
+respectively. You'll  want to change  them to show  your own system's  logo and
+ad. You can use  any old ANSI editor, but remember to  convert the file to UNIX
+text format first (strip all the ASCII 13s).
+
+-------------------------------------------------------------------------------
+
+data/menuman/pagedefs
+
+This  is where  you define  the  menu structure  of your  system. Certain  menu
+hierarchies can't  be modified (eg when  they're inside a module),  but you can
+simplify or  enhance the look and feel  of your system by  customising the main
+menu and/or building submenus and other things to baffle your users. :-)
+
+Like most  other files, this  one contains its  syntax as a large  comment. For
+details, please see  the file itself. The Menu Manager  deals in "pages". Users
+can  jump from  one  page to  another by  issuing  the global  command /go  foo
+(assuming  there's a  page  named foo).   Apart  from the  /go command,  system
+navigation hinges  on menus and submenus.  The pagedefs file defines  a tree of
+things that the user encounters while navigating your BBS.
+
+There are  basically four different types of  tree nodes you can  put into your
+Menu Manager:
+
+* Menus: these print  an "ANSI" or plain ASCII file that  you specify, and they
+  wait for  an option.  The printed file  is expected  to show and  explain the
+  user's options. Each option takes the user to a specified page.
+
+* Exec pages: these execute a Megistos  module. There is one such page for each
+  module the system  contains. After the module's execution  (assuming the user
+  didn't hang up,  wasn't kicked out and didn't issue a  /go command), the user
+  is returned to the previous page.
+
+* Run  pages: run  a UNIX  command  instead of  a module.   There are  slightly
+  different  semantics  here,  hence   the  difference  between  exec  and  run
+  pages. After the execution, the user is returned to the previous page.
+
+* File pages: these simply print out a specified file, then go back to the page
+  the user was before. File pages are useful for short information files.
+
+All  of these  pages  share  a number  of  parameters.  Each  has  one or  more
+descriptions  (one  for  each  supported   language,  in  the  order  given  in
+etc/languages). The description appears to users when they issue the /# ("who")
+global command.
+
+Pages may be locked by a key, in which case the system will pretend to not even
+know the page, if the user doesn't  possess the right access key. They may also
+be   locked  by   user  class,   or  just   hidden  from   anyone,  effectively
+disabled.  Credit consumption  may be  altered, so  that certain  areas  of the
+system cost more to use than others.
+
+After altering the file, don't forget to run:
+
+$ /usr/local/megistos-0.98/bin/mkchan pagedefs
+
+This will  parse the file and  write a binary  version which is faster  for the
+Menu Manager to use. You will also  get a listing of errors found while parsing
+the file.
+
+A  note about  filenames: the  filenames  shown for  menus and  file pages  are
+changed  slightly.  To  start  with,  they should  reside  in the  data/menuman
+directory.  The  Menu Manager  will change a  file, for instance  "mainmenu" to
+something like "mainmenu-0.ans" or  "mainmenu-5.asc". The number represents the
+language required by  the user. The .ans and  .asc extensions represent whether
+the user can see "ANSI" files,  or only plain ASCII. If the user's requirements
+can't be satisfied,  i.e. the requested file is missing,  the Menu Manager will
+try other files,  according to the following algorithm  (supposing the filename
+is again  mainmenu, the  user's current  language is 2,  and "ANSI"  support is
+required):
+
+      First,
+      try    mainmenu-2.ans     If not found,
+      try    mainmenu-2.asc     If not found,
+      try    mainmenu-1.ans     If not found,                
+      try    mainmenu-1.asc     If not found,
+      try    mainmenu-0.ans     If not found,
+      try    mainmenu-0.asc     If not found,
+      try    mainmenu.ans       If not found,
+      try    mainmenu.asc       If not found,
+      try    mainmenu           If not found,
+      log an error and display nothing.
+
+-------------------------------------------------------------------------------
+
+data/telecon/.etc/ACTIONS
+
+This file  defines the teleconference  action verbs, adventure  game-like verbs
+that users may issue now and then  (or maybe all the time) for variety and fun.
+Unlike  other systems,  Megistos  gives  full freedom  in  defining the  verbs.
+Internationalised verbs are fully  supported. Most European languages should be
+easy to support.  Others may need slight verbal tricks.  Due to the flexibility
+of  the action  definition language,  the language  grammar tends  to be  a bit
+difficult to master. Please refer to the file itself, where everything is fully
+documented.
+
+In short, there are many different types of verbs: simple (eg 'faint', 'hide');
+objective (eg 'kick someone',  'kiss someone'); simple/objective (eg verbs like
+'clap' which can also be used like  'clap user' to direct the action to someone
+in particular); adverbs (eg 'yell shut up!' might show as 'From user (yelling):
+shut up!'); and generic verbs that are completely freeform.
+
+Issuer,  object-user and  third parties  are given  different strings  for each
+verb. The  verb may  be restricted to  a certain  group of users  (specified by
+their IDs), or locked  by access key. There is no limit  to the number of verbs
+that can be defined.
+
+Once the file has been modified, please run mkaction to check it for errors and
+compile it into something that Megistos can use.
+
+-------------------------------------------------------------------------------
+
+data/telecon/.etc/PLUGINS
+
+This defines the teleconference plugins  used by the system (eg games, helpers,
+bots,  etc).  There's  not  much currently,  but  the file  format  is easy  to
+understand and allows full access control  (the grammar is included in the file
+as  a  comment).  Please  bear  in  mind  that  this  file  format  may  change
+considerably in the future.
+
+-------------------------------------------------------------------------------
+
+doc/COPYING
+
+This  is the  GNU Public  License.   MODIFICATION OR  REMOVAL OF  THIS FILE  IS
+EXPRESSLY DISALLOWED.
+
+-------------------------------------------------------------------------------
+
+doc/RULES
+
+This is where you put your acceptable  use policy if you have one, or rules and
+guidelines for your users.
+
+-------------------------------------------------------------------------------
+
+doc/newuser.txt
+
+This is a file that is mailed to all new users after signing up. It may contain
+anything you want. Typical uses are:
+
+* Getting Started guide
+* Acceptable Use Policy and/or some agreement
+* Guidelines for use
+* Features of the system
+
+Possibly bad uses are:
+
+* Latest news (use the News module for that)
+* Anything that changes constantly
+* A welcome message (this is issued as the body of the message this file is
+  attached to).
+
+The file is attached to an E-mail message sent to new users. The body of the
+message is also customisable. It usually holds a brief greeting to the
+system. Legalese may be necessary, too, especially if you need to get your
+users to read your Acceptable Use Policy or guidelines.
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+Please ignore anything below this line. It's used by Emacs.
+
+
+ LocalWords:  MEGISTOS BBS Megistos IDs admin megistos braindead terminfo Sysop
+ LocalWords:  qwerty userclasses mkchan codepage config signups lang VM MetaBBS
+ LocalWords:  su greek PRECONNECT ne keymaps bbsgetty eg init msg xlation ln ff
+ LocalWords:  README kbdxlation charset Htranslation BBS's Dat's plugins QWK IP
+ LocalWords:  submenus foo pagedefs menuman mainmenu ans asc freeform mkaction
+ LocalWords:  bots doc Legalese bbs tcp nowait telnetd killall HUP inetd URL
+ LocalWords:  localhost TNLMAX

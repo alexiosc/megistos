@@ -1,0 +1,2 @@
+#!/bin/sh
+fgrep -c '^#define[ ]\+HAVE_LIBTYPHOON[ ]\+1$$' <CONFIG/bbsconfig.defs.h

@@ -1,0 +1,306 @@
+HOW TO INSTALL MEGISTOS BBS
+
+
+
+*** IF YOU DON'T  FOLLOW THE INSTRUCTIONS BELOW TO THE LETTER,  YOU WILL NOT BE
+*** ABLE TO INSTALL THE SYSTEM CORRECTLY. YOU HAVE BEEN WARNED.
+
+
+
+SYSTEM REQUIREMENTS
+
+At a glance:
+
+  Minimum requirements: 386SX-16 MHZ, 4  Mbytes RAM, 40 Mbytes free HDD. Tested
+     on Slackware and Red Hat Linux.
+
+  Recommended: Pentium 100 or above/equivalent, 16 MBytes RAM, 200 Mbytes free
+     HDD, one or more modems or other network adapter.
+
+
+Detailed:
+
+  * CPU: any machine that can run  Linux. For the time being, Megistos has only
+    been tested on the x86 platform, but it'll soon be tested on the Sun SPARC,
+    too. A  BBS isn't particularly  CPU-intensive, especially under  Linux, but
+    you might want to nip out for a quick coffee if you're compiling the system
+    on anything less than a Pentium 100.
+
+  * RAM: I've developed  most of the system  on a machine with 12  megs of RAM,
+    later upgraded to 16.  The more memory you have, though, the merrier. Linux
+    takes good  advantage of it.  For example, Acrobase  runs on 64  Mbytes and
+    never misses a beat. GATE runs on 32 megs and is equally nippy.
+
+  * HDD: at  least 40 Mbytes  free hard disk  space to install and  compile the
+    system. Say around 100-150 Mbytes for a medium sized BBS. It all depends on
+    how much information you store, of course.
+
+  * Network devices:  modems, Ethernet cards, ISDN TAs,  wireless modems, smoke
+    signals, anything  that Linux can  use to connect  to the outside  world is
+    fine.
+
+  * Operating  system:  tested  and  used  thoroughly on  several  versions  of
+    Slackware and Red  Hat Linux. The code should  compile (relatively) cleanly
+    on both libc and glibc-based Linuxen.
+
+
+
+
+MANIFEST
+
+You'll need the following packages:
+
+  1. The BASE package (megistos-x.yy-base.tar.{bz2,gz})
+  2. The BIN package (megistos-x.yy-bin.tar.{bz2,gz})
+  3. The SRC package (megistos-x.yy-src.tar.{bz2,gz})
+  4. The MSGS package (megistos-x.yy-msgs.tar.{bz2,gz})
+
+
+
+
+INSTALLATION
+
+0. For Greek users only:
+
+  If  you  intend  to use  Greek  on  your  console,  please find  and  install
+greek-2.0.tar.gz. This will require a  recompilation of your kernel, I'm afraid
+(due to  a possible bug of the  VT102 emulator). Greek 2.0  installs cleanly on
+Slackware systems.  A  newer version for recent systems  (including Red Hat 6.0
+and above) should  be available soon. Check the usual FTP  sites.  If you don't
+want to do all that, simply  switch your console to the standard Greek encoding
+(ISO-8859-7, aka ELOT-928, aka codepage 928, aka Windows-1253), and arrange for
+Megistos  to  auto-translate its  internal  Greek  encoding  (codepage 737)  to
+ISO-8859-7.  For  instructions, see the  file 0CONFIGURE after  you've finished
+installing the system.
+
+
+1. Create the BBS users and group
+
+   Become the superuser  and add two new users to your  system:
+
+   * The 'bbs'  user (you can change  the name, but you'll  need to reconfigure
+     the system  -- unless you know  what you're doing, stick  with 'bbs'). Our
+     'bbs', who is the owner of all files in the distribution packages, has UID
+     502. You'll use the 'bbs' user to compile the system and make all sorts of
+     changes to it.
+
+   * The 'bbsuser' user. All users of the system are logged in as this guy.
+
+  Apart from the two users, you'll also need to make a 'bbs' group.  Ours had a
+GID of 200. Yours might be different.
+
+  The distribution tars  all belong to bbs  (UID 502, GID 200). This  is just a
+normal  user that  you'll  be logging  in  as to  compile  Megistos and  modify
+configuration files.
+
+  NEVER COMPILE OR MODIFY FILES AS ROOT.
+
+  Let me say this again:
+  
+  NEVER COMPILE OR MODIFY FILES AS ROOT.
+
+  It's not just a  security issue, if you let root modify  or create any of the
+BBS' files, you run the risk of completely ruining the permissions to the point
+where nothing will  work. Take our word for it, we've  tracked lots of problems
+to our running things as root by mistake. :-/
+
+  Here's our /etc/passwd entry for bbs:
+
+$ grep bbs /etc/passwd
+bbs:x:502:200:Megistos Project:/home/bbs:/bin/bash
+bbsuser:x:503:200:BBS User:/home/bbsuser:/bin/bash
+
+  And here's the group bbs:
+
+$ grep bbs /etc/group
+bbs:x:200:bbs bbsuser
+
+
+2. Login as bbs
+
+  Don't forget to set bbs' password! Keep the password secret.
+
+
+3. Choose a nice directory
+
+  Any directory will  do, but try to respect the  Linux hierarchy. We typically
+install the system under /usr/local,  but /usr/local/lib or /opt or or whatever
+else will do fine. Let's assume we're installing under /usr/local.
+
+
+4. Untar the distribution
+
+  As bbs (NEVER NEVER NEVER  AS ROOT!!!), type these. Don't forget any
+of the commands, especially umask!
+
+$ cd /usr/local     (or wherever you've decided to install the system)
+$ umask 000
+
+  Depending  on where  you  are, you  might  have to  create the  root
+Megistos directory as the superuser:
+
+$ su -c "mkdir megistos-0.98; chown bbs.bbs $_"
+
+  Then, assuming you're using the .tar.gz archives:
+
+$ tar -xzvf megistos-0.98-base.tar.gz
+$ tar -xzvf megistos-0.98-bin.tar.gz
+$ tar -xzvf megistos-0.98-msgs.tar.gz
+$ tar -xzvf megistos-0.98-src.tar.gz
+
+  If you're using the tar.bz2 archives, you can use:
+
+$ cd /usr/local
+$ umask 000
+$ bzcat megistos-0.98-base.tar.bz2|tar -xvf -
+$ bzcat megistos-0.98-bin.tar.bz2|tar -xvf -
+$ bzcat megistos-0.98-msgs.tar.bz2|tar -xvf -
+$ bzcat megistos-0.98-src.tar.bz2|tar -xvf -
+
+  Everything  should be  under  megistos-0.98 (or  whatever  other version  you
+have). If  you changed the UID  of the 'bbs' user  from the default  of 502, it
+won't hurt to  chown(1) the directory. Megistos, like  most large UNIX systems,
+is sensitive to file permissions and ownerships going wrong. So, enter:
+
+$ su -c "chown -R bbs.bbs megistos-0.98"
+
+
+5. Configure and compile the source code
+
+$ cd megistos-0.98/src
+$ ./configure
+$ make dep
+$ make
+
+
+6. Go for a cup of coffee
+
+  Hmm, all right, you don't have  to follow THIS step to the letter if
+you don't want to. :-)
+
+
+7. Compile the message blocks and the BBS configuration
+
+
+$ cd /usr/local/megistos-0.98/etc/prompts
+$ make
+
+  This won't take long, no need to catch another coffee.
+
+
+8. Running for the first time
+
+  That's it, now we can try it out. Execute /usr/local/megistos-0.98/etc/rc.bbs
+as the superuser. For instance:
+
+$ su -c /usr/local/megistos-0.98/etc/rc.bbs
+
+  You should see the following:
+
+Starting Megistos BBS under /usr/local/megistos-0.98
+Sending any running BBS processes the TERM signal...
+Sending any running BBS processes the KILL signal...
+Cleaning up temporary files under /usr/local/megistos-0.98
+Starting BBS INIT daemon from /usr/local/megistos-0.98: bbsinit
+End of BBS initialisation.
+
+  If all goes well, there'll be a bit of disk grinding as the BBS daemons get
+started, and the Megistos login prompt will appear on virtual console 11 (press
+Alt-F11).
+
+
+9. Login as Sysop
+
+  Switch to console 11 (Alt-F11).  The Sysop password is 'megistos' without the
+quotes.  Needless  to say,  CHANGE  THE  PASSWORD  IMMEDIATELY. Play  around  a
+bit. Congratulations, you've just installed the system.
+
+
+
+10. Starting the system at boot time
+
+
+  Under Slackware, add the following to your /etc/rc.d/rc.local:
+
+# Start the BBS
+/usr/local/megistos-0.98/etc/rc.bbs
+
+  Under Red Hat Linux, things are slightly more complicated. Cut the file below
+and paste it as /etc/rc.d/init.d/megistos:
+
+---CUT HERE--------------------------------------------------------------------
+#!/bin/bash
+
+# chkconfig: 2345 99 99
+# description: Megistos runs Megistos BBS at boot time.
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+# change this prefix to where your BBS is
+
+PREFIX=/usr/local/bbs
+
+case "$1" in
+  start)
+        echo -n "Firing up Megistos BBS: "
+
+        daemon ${PREFIX}/etc/rc.bbs
+        echo
+        touch /var/lock/subsys/megistos
+        ;;
+  stop)
+        # no need to do anything here, init(8) will kill the processes
+        # anyway.
+
+        rm -f /var/lock/subsys/megistos
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  status)
+        status megistos
+        ;;
+  *)
+        echo "Usage: megistos {start|status|restart}"
+        exit 1
+esac
+
+exit 0
+---CUT HERE--------------------------------------------------------------------
+
+  Then, to enable the script, issue (as the superuser):
+
+# chkconfig --add megistos
+
+
+  I don't know much about Debian or SUSE, so you're on your own if you have one
+of those. Chances are things are reasonably similar to either Slackware or Red
+Hat.
+
+
+
+11. Configuring the system
+
+
+  Megistos has  a LOT  to configure. There's  a separate file,  0CONFIGURE that
+briefly explains the processes. Please have a look at that.
+
+  Apart from that, welcome to Megistos BBS, have fun and keep BBSing! :-)
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+Please ignore anything below this line. It's used by Emacs.
+
+ LocalWords:  MEGISTOS BBS SX Mbytes HDD Slackware Pentium MBytes Megistos megs
+ LocalWords:  Acrobase nippy TAs libc glibc Linuxen SRC MSGS VT aka ELOT aka cd
+ LocalWords:  codepage aka bbs bbs UID grep Untar umask xzvf bz bzcat xvf dep
+ LocalWords:  megistos su INIT bbsinit initialisation Alt Sysop chkconfig init
+ LocalWords:  rm esac Debian SUSE BBSing bbsuser GID mkdir chown gz Hmm

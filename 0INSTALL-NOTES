@@ -1,0 +1,88 @@
+ 0. Install and test Greek Support
+ 1. Create group bbs (GID 200 on vennea)
+ 2. Create user bbs.bbs (UID 502 on vennea)
+ 3. Untar the archive, files go under /usr/local/bbs
+
+ 5. run /usr/local/bbs/etc/fix-access
+ 6. /etc/inittab: (examples)
+
+	#d1:456:respawn:/bbs/bin/bbsgetty ttyS1 9600
+	d2:456:respawn:/bbs/bin/bbsgetty ttyS2 38400
+	d3:456:respawn:/bbs/bin/bbsgetty tty7 38400
+	d4:456:respawn:/bbs/bin/bbsgetty tty8 38400
+
+7. If you change ttys, check the contents of /bbs/channel.defs/bbsgetty.*
+   and copy these as well. There *MUST* be a bbsgetty.* file for each and
+   every tty. The files already there serve as examples: there are two modem files
+   (ttyS1, ttyS2) and two VC files (tty7, tty8). You should not have to change
+   anything in them.
+
+ 8. /etc/gettydefs:
+
+  Here's mine... Try it out if you get any 8-bit or CR/LF problems.
+
+#
+# This file works only with getty_ps.
+#
+# default/virtual console entry:
+#
+vc# B9600 CS8 HUPCL # B9600 CS8 HUPCL CLOCAL #@S login: #vc
+
+#  Modem locked at 38400:
+#
+38400L# B38400 CS8 CRTSCTS # B38400 CS8 HUPCL CRTSCTS #@S login: #38400L
+
+#  Modem locked at 9600:
+#
+9600L# B9600 CS8 CRTSCTS # B9600 CS8 HUPCL CRTSCTS #@S login: #9600L
+
+#  Modem that autobauds to different speeds, terminal locked at 9600, etc:
+#	- SANE includes CS8 ISTRIP HUPCL
+#	- DON'T USE SANE or ECHO for initial config!!!!!
+#
+
+38400# OPOST ONLCR B38400 CS8 # B38400 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #19200
+
+19200# OPOST ONLCR B19200 CS8 # B19200 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #9600
+
+9600# OPOST ONLCR B9600 CS8 # B9600 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #2400
+
+2400# OPOST ONLCR B2400 CS8 # B2400 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #1200
+
+1200# OPOST ONLCR B1200 CS8 # B1200 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #300
+
+300# OPOST ONLCR B300 CS8 # B300 SANE -ISTRIP HUPCL CRTSCTS IXON IXOFF #@S @L @B login: #38400
+
+
+ 9. add /bbs/lib to /etc/ld.so.conf and do an ldconfig
+
+10. for telnet access: append the following to /etc/services
+
+# Megistos BBS Project
+#
+bbstelnet	1023/tcp
+
+
+11. for telnet access: append the following to /etc/inetd.conf
+
+# Megistos BBS Project services
+#
+bbstelnet	stream  tcp     nowait  root    /usr/sbin/tcpd	/bbs/bin/bbstelnetd
+# /usr/sbin/tcpd	/usr/sbin/in.telnetd
+
+  Restart your net daemons.
+
+12. Add a line to call /bbs/etc/rc.bbs from /etc/rc.d/rc.local
+13. /etc/passwd: You'll have to manually add lines for users you want to
+    use (signup does that automatically). Here's an entry for Sysop:
+
+sysop:!:2000:200:[BBS user]:/home/sysop:/bbs/noauth
+
+14. Check /bbs/channel.defs/CHANNELS and define your BBS channel numbers etc.
+15. Manually run /bbs/etc/rc.bbs
+
+That should do it (but don't quote me on that)
+
+
+Should you need to compile anything, cd to that directory and make. To compile
+everything, do make clean/make dep/make/whatever in /bbs/src.
