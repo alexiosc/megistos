@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  2003/09/28 13:14:32  alexios
+# Added gettext tests and support.
+#
 # Revision 1.4  2003/08/15 20:30:54  alexios
 # Added magic to get the version from debian/changelog, so it only needs
 # to be changed in one place, and it's done automatically too.
@@ -41,6 +44,10 @@ AC_PROG_RANLIB
 
 dnl Use libtool to make a shared library.
 AC_PROG_LIBTOOL
+
+dnl Check for i18n
+AM_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION(0.12.1)
 
 # Checks for libraries.
 
@@ -181,4 +188,4 @@ AC_SUBST(PKGINCLUDEDIR)
 
 CFLAGS="$CFLAGS -Wall"
 
-AC_OUTPUT(Makefile src/Makefile src/megistos-config)
+AC_OUTPUT([Makefile src/Makefile src/megistos-config intl/Makefile po/Makefile.in m4/Makefile])
