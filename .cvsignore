@@ -1,4 +1,5 @@
+*.changes
 *.deb
 *.dsc
 *.tar.gz
-*.changes
+megistos
