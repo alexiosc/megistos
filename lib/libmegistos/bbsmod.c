@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  2003/09/28 22:30:08  alexios
+ * Added NLS initialisation to mod_init() and mod_main().
+ *
  * Revision 1.7  2003/09/28 13:11:15  alexios
  * Renamed locally used convenience macro _() which clashed with the I18N
  * convenience macro of the same name.
@@ -109,6 +112,7 @@ static const char rcsinfo[] =
 #define WANT_SEND_OUT 1
 #include <bbsinclude.h>
 
+#include "gettext.h"
 #include "bbs.h"
 #include "systemversion.h"
 #include "mbk_sysvar.h"
@@ -491,6 +495,17 @@ mod_init (uint32 f)
 {
 	struct passwd *pass;
 
+#ifdef HAVE_SETLOCALE
+	/* Set locale via LC_ALL.  */
+	setlocale (LC_ALL, "");
+#endif
+	
+#if ENABLE_NLS
+	/* Set the text message domain.  */
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+#endif
+
 	umask (0007);
 	mod_regpid (getenv ("CHANNEL"));
 	initialised |= f;
@@ -753,6 +768,18 @@ mod_install ()
 int
 mod_main (int argc, char **argv)
 {
+
+#ifdef HAVE_SETLOCALE
+	/* Set locale via LC_ALL.  */
+	setlocale (LC_ALL, "");
+#endif
+	
+#if ENABLE_NLS
+	/* Set the text message domain.  */
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+#endif
+
 	error_setnotify (0);
 
 	/* Check the validity of the module information block */
