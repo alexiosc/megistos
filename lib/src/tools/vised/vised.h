@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 19:44:40  alexios
+ * Minor fixes. Removed rcsinfo.
+ *
  * Revision 1.4  2003/12/23 23:20:22  alexios
  * Ran through megistos-config --oh.
  *
@@ -58,11 +61,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
 
 
 #define mygetch() (inp_resetidle(),getch())
@@ -176,7 +174,7 @@ int     getlinenum (struct line *l);
 void    counttext ();
 char   *getstg (char *def, int maxlen);
 void    printansi (char *s);
-void    attr (int cga_attr);
+attr_t  attr (int cga_attr);
 void    cleartoeol ();
 void    maskblock (int x1, int y1, int x2, int y2, unsigned char a);
 
