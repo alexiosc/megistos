@@ -26,6 +26,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.5  2003/12/22 16:24:03  alexios
+# Fixed broken templatedir variable; added sed script to update #include
+# directives.
+#
 # Revision 1.4  2003/12/20 18:19:26  alexios
 # Sorted the command line options.
 #
@@ -63,7 +67,7 @@ instancedir="@INSTANCEDIR@"
 virgininstance="@VIRGININSTANCE@"
 virginsrc="$builddir/@VIRGINDIR@"
 
-templatedir="@top_srcdir@/templates"
+templatedir="@abs_top_srcdir@/templates"
 
 usage()
 {
@@ -322,10 +326,11 @@ if test "$overhaul_source" = "yes"; then
 	grep -i '/* End of File */' $a >&/dev/null ||
 	echo -e '\n\n/* End of File */' >> $a
 
-        # Fix broken rcsinfo(1) tags
+        # Fix broken rcsinfo(1) tags; fix include directives.
 
-	sed -i '/^#ifndef RCS_VER/,/^#endif/ c\static const char rcsinfo="$Id$";' $a
-
+	sed $a -i \
+	    -e '/^#ifndef RCS_VER/,/^#endif/ c\static const char rcsinfo [] = "$Id$";' \
+	    -e 's/^#include "\(.*\)"/#include <megistos\/\1>/'
     done
 
     # Indent the code
