@@ -1,4 +1,6 @@
 .deps
+.libs
 Makefile
 Makefile.in
 mbk_offline.graffiti.h
+offline.graffiti

@@ -6,8 +6,14 @@ Makefile
 Makefile.in
 clubhdr.lo
 clubs
+database.lo
+dbfrom.lo
+dbnum.lo
+dbsubj.lo
+dbto.lo
 ecdb.h
 email
+funcs.lo
 ihavedb.h
 libmegistos_clubhdr.la
 mbk_emailclubs.h

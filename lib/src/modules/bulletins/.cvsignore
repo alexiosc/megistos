@@ -2,4 +2,5 @@
 .libs
 Makefile
 Makefile.in
+bulletins
 mbk_bulletins.h

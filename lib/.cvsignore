@@ -17,6 +17,7 @@ configure
 configure-stamp
 libltdl
 libtool
+log
 mkinstalldirs
 stamp-h
 stamp-h.in
