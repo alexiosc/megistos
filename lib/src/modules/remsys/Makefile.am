@@ -3,6 +3,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/27 12:58:27  alexios
+# Moved some of the tools (namely, classed and eventman) from the old
+# ADMIN subdirectory to this one. These modules are mostly called by
+# remsys anyway.
+#
 # Revision 1.2  2003/12/24 21:53:45  alexios
 # Moved the GCS into its own directory; added the msg file.
 #
@@ -10,7 +15,7 @@
 # Initial revision.
 #
 
-SUBDIRS = . gcs_remsys
+SUBDIRS = . gcs_remsys classed eventman
 
 PROGNAMES = remsys
 
