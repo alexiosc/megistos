@@ -123,44 +123,10 @@
  * $Id$
  *
  * $Log$
- * Revision 1.4  2003/12/23 07:35:32  alexios
- * Ran through megistos-config --oh.
+ * Revision 1.5  2003/12/23 08:01:25  alexios
+ * One minor error-reporting bugfix; fixed file header that included
+ * CVS/RCS log twice; and removed use of tmpnam(3).
  *
- * Revision 1.3  2001/04/22 14:49:07  alexios
- * Merged in leftover 0.99.2 changes and additional bug fixes.
- *
- * Revision 1.5  1998/12/27 16:06:28  alexios
- * Added autoconf support.
- *
- * Revision 1.4  1998/08/11 10:18:18  alexios
- * Fixed initialisation bug.
- *
- * Revision 1.3  1998/07/24 10:22:39  alexios
- * Migrated to bbslib 0.6.
- *
- * Revision 1.2  1997/11/06 20:13:23  alexios
- * This program is now stable.
- *
- * Revision 1.1  1997/11/06 20:05:15  alexios
- * Added GPL legalese to the top of this file.
- *
- * Revision 1.0  1997/08/28 11:01:50  alexios
- * Initial revision
- *
- *
- */
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
-
-
-
-/*
- * $Id$
- *
- * $Log$
  * Revision 1.4  2003/12/23 07:35:32  alexios
  * Ran through megistos-config --oh.
  *
@@ -382,11 +348,11 @@ parse ()
 			 MENUMANPAGES);
 		exit (-1);
 	}
-
-	sprintf (fname, "%s", tmpnam (0));
+	
+	sprintf (fname, ".mkmtree.%x%x", getpid(), (unsigned int) time (NULL));
 	if ((idx = fopen (fname, "w")) == NULL) {
 		fprintf (stderr, "mkmtree: Unable to write %s\n",
-			 MENUMANPAGES);
+			 fname);
 		exit (-1);
 	}
 
