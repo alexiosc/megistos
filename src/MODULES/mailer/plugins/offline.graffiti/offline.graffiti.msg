@@ -98,3 +98,97 @@ LINPLR {âª} T 'Lines', plural form
 
 
 
+LANG {}
+
+
+OGVT {[0m[30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mOff-line Graffiti Wall Settings[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Include graffiti wall in packages:      [0;30;46m [@"X "t] [0;47;30m        (Space to toggle)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  ANSI colour wall:                       [0;30;46m [@"X "t] [0;47;30m        (Space to toggle)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Maximum number of lines:                [1;37;44m@5;0;10000;0n[0;47;30m      (0..10000, 0=all)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R for help                 [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
+[30;47m ³                                   ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Setup, Visual template
+
+
+OGLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mOff-line Graffiti Wall Settings[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m1[30m. Include graffiti wall in pckages  . . . . . . . . . . . . . . . [34m@"X "t[0;1;47;37m   ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m2[30m. ANSI colour wall . . . . . . . . . . . . . . . . . . . . . . .  [34m@"X "t[0;1;47;37m   ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m3[30m. Maximum number of lines . . . . . . . . . . . . . . . . . . . . [34m@5;0;10000;0n[0;1;47;37m ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+} T Setup QWK, Linear template
+
+
+OGWALL {[0;1m
+!JTurn this on to have a copy of the Graffiti Wall included with
+every package you download.!)
+[0;1m} T Setup QWK, Linear template, enable/disable wall
+
+
+OGANSI {[0;1m
+!JThis option controls whether ANSI colour will be used in the Graffiti
+Wall. In order to see the Wall in colour, your off-line reader must also
+support ANSI colour directives.!)
+[0;1m} T Setup QWK, Linear template, enable/disable ANSI colour
+
+
+OGLINES {[0;1m
+!JThis controls how much of the wall will be included in your packages.
+The number limits the number of lines (entries) to be included, in the range
+0-10,000. Zero has a special meaning: it includes the entire Wall.!)
+[0;1m} T Setup QWK, Linear template, number of lines
+
+
+DLHDR {[0;1m
+[0;1;35mG[36mr[33ma[32mf[31mf[34mi[37m[35mt[36mi Wall: } T Graffiti Wall Download: header
+
+
+DLDMT {[0;1;33mThe Wall is freshly painted and blank.
+[0;1m} T Graffiti Wall Download: Empty wall
+
+
+DLNAX {[0;1;31mYou have no access to the Graffiti Wall.
+[0;1m} T Graffiti Wall Download: no access
+
+
+DLOK {[0;1;32mDone.
+[0;1m} T Graffiti Wall Download: ok
+
+
+ULWRH {[0;1m
+[0;1;35mG[36mr[33ma[32mf[31mf[34mi[37m[35mt[36mi Wall: } T Graffiti Wall Upload: Command header
+
+
+ULWMT {[1;31mNo lines found to graffiti.
+[0;1m} T Graffiti Wall Upload: No lines found
+
+
+ULWRT {[1;32m%sSuccessfully written %d line%s.
+[0;1m} T Graffiti Wall Upload: Written all lines
+
+
+ULNWR {[1;33m%sWritten %d of %d line%s.
+[0;1m} T Reply table: Written some lines
+
+
+WRTSNG {} T 'Written', singular form
+WRTPLR {} T 'Written', plural form
+
+LINSNG {} T 'Lines', singular form
+LINPLR {s} T 'Lines', plural form
+
+
+
+
+
+
+LANGEND {}
+

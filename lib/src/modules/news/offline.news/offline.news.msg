@@ -47,3 +47,50 @@ ONDNAX {[0;1;31m!W’¦ œ§å§œ›¦ §¨æ©™˜©ãª ©˜ª ›œ¤ œ§ «¨â§œ  « ¢ã¯.!)
 
 ONDOK {[0;1;32m!W„¤«á¥œ .!)
 !0l[0;1m} T News Download: done
+
+
+
+LANG {}
+
+
+ONVT {[0m[30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mLatest News Properties[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Include latest news in packages  . . . . . .  [0;30;46m [@"X "t] [0;47;30m  (Space to toggle)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R for help                 [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
+[30;47m ³                                   ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Setup, Visual template
+
+
+ONLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mLatest News Properties[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m1[30m. Include latest news in packages . . . . . . . . . . . . . . . . . [34m@"X "t[0;1;47;37m ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+} T Setup QWK, Linear template
+
+
+ONNEWS {[0;1m
+!JTurn this on to receive the latest news of the BBS in your mail packages.!)
+[0;1m} T Setup QWK, Linear template, enable/disable news
+
+
+ONDHDR {
+[0;1mLatest news: } T News Download: header
+
+
+ONDMT {[0;1;33m!WNo news.!)
+!0l[0;1m} T News Download: news database is empty
+
+
+ONDNAX {[0;1;31m!WSorry, you don't have access to the latest news.!)
+!0l[0;1m} T News Download: access denied
+
+
+ONDOK {[0;1;32m!WDone.!)
+!0l[0;1m} T News Download: done
+
+
+
+LANGEND {}
