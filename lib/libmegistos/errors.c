@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:16:46  alexios
+ * Rationalised the RCS/CVS ident(1) strings. Fixed vararg.h issues.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -61,10 +64,7 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] = "$Id$";
 
 
 
@@ -112,14 +112,11 @@ void *parmlist;
 
 
 void
-_interror(file,line,format,va_alist)
-char *format,*file;
-int line;
-va_dcl
+_interror(char * file, int line, char * format, ...)
 {
   char *chan;
   va_list args;
-  va_start(args);
+  va_start(args, format);
   bbserror(file,line,"ERROR",format,args);
   if(circular==0){
     circular=1;
@@ -132,14 +129,11 @@ va_dcl
 
 
 void
-_logerror(file,line,format,va_alist)
-char *format,*file;
-int line;
-va_dcl
+_logerror(char * file, int line, char * format, ...)
 {
   char *chan;
   va_list args;
-  va_start(args);
+  va_start(args, format);
   bbserror(file,line,"ERROR",format,args);
   va_end(args);
   if(circular==0){
@@ -153,14 +147,11 @@ va_dcl
 
 
 void
-_fatal(file,line,format,va_alist)
-char *format,*file;
-int line;
-va_dcl
+_fatal(char * file, int line, char * format, ...)
 {
   char *chan;
   va_list args;
-  va_start(args);
+  va_start(args, format);
   bbserror(file,line,"FATAL",format,args);
   va_end(args);
   if(circular==0){
@@ -187,15 +178,12 @@ error_setnotify(int state)
    error, too. */
 
 void
-_interrorsys(file,line,err,format,va_alist)
-char *format,*file;
-int line,err;
-va_dcl
+_interrorsys(char * file, int line, int err, char * format, ...)
 {
   char *chan;
   char fmt[512];
   va_list args;
-  va_start(args);
+  va_start(args, format);
 #ifdef HAVE_STRERROR
   sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
 #else
@@ -213,15 +201,12 @@ va_dcl
 
 
 void
-_logerrorsys(file,line,err,format,va_alist)
-char *format,*file;
-int line,err;
-va_dcl
+_logerrorsys(char * file, int line, int err, char * format, ...)
 {
   char *chan;
   char fmt[512];
   va_list args;
-  va_start(args);
+  va_start(args, format);
 #ifdef HAVE_STRERROR
   sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
 #else
@@ -240,15 +225,12 @@ va_dcl
 
 
 void
-_fatalsys(file,line,err,format,va_alist)
-char *format,*file;
-int line,err;
-va_dcl
+_fatalsys(char * file, int line, int err, char * format, ...)
 {
   char fmt[512];
   char *chan;
   va_list args;
-  va_start(args);
+  va_start(args, format);
 #ifdef HAVE_STRERROR
   sprintf(fmt,"%s (errno=%d, %s)",format,err,strerror(err));
 #else
