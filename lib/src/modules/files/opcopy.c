@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 09:00:49  alexios
+ * Adjusted #includes. Fixed a gcc warning about label usage (bletch).
+ *
  * Revision 1.4  2003/12/24 20:12:12  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,8 +59,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/files.h>
-#include <megistos/mbk/mbk_files.h>
+#include "files.h"
+#include "mbk_files.h"
 
 
 static char *
@@ -172,7 +175,9 @@ gettargetlibname (struct libidx *l)
 			}
 		}
 		break;
+
 	      outerloop:
+		;
 	}
 
       enter:
