@@ -553,7 +553,7 @@ verb D glare
   target @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк.
   target @USERID@ glares at you @OTHUID@.
 
-  secret @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк, бимнс Шзц лжмк сввжмк.
+  secret @ARTNOM@ @USERID@ йШк бжалсЭЬа гЬ сЪиаж чнжк, бимнс Шзц лжмк сввжмк.
   secret @USERID@ flashes you a quick glare without anyone noticing.
 
   simple @ARTNOM@ @USERID@ ШЪиажбжалсЭЬа Ъчир @ARTGEN@.
