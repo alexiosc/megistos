@@ -3,8 +3,13 @@ libmegistos (1.0.2) unstable; urgency=low
   * Added first draft of a megistos-config script to yield
     compiler/linking options and directories for compiling further source
     code.
+  * Beautified code, added documentation to numerous objects, and converted
+    existing doc++ documentation to doxygen format.
+  * Added I18N to the code so that the few (14 as of last count) strings
+    in the Megistos library can be translated without the need for kludgy
+    #defines.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 15 Aug 2003 21:40:16 +0100
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sun, 28 Sep 2003 14:13:52 +0100
 
 libmegistos (1.0.1) unstable; urgency=low
 
