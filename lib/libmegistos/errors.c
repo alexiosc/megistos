@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/08/15 20:09:13  alexios
+ * Fixed code to remove warnings.
+ *
  * Revision 1.4  2003/08/15 18:16:46  alexios
  * Rationalised the RCS/CVS ident(1) strings. Fixed vararg.h issues.
  *
@@ -88,6 +91,8 @@ static const char rcsinfo[] = "$Id$";
 static int errormessageflag;
 static int circular=0;
 static char *chan_unknown="[no channel]";
+
+char * mkfname(char * fmt, ...);
 
 static void
 bbserror(file,line,reason,format,parmlist)
