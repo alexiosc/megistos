@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/23 07:20:54  alexios
+# One more slight modification to the template used.
+#
 # Revision 1.2  2003/12/23 07:11:33  alexios
 # Modified to build the /go GCS as a shared object.
 #
@@ -16,6 +19,6 @@ menuman_SOURCES = menuman.c
 GCS = libgcs_go.la
 libgcs_go_la_SOURCES = gcs_go.c
 
-include $(top_srcdir)/templates/module
+include $(top_srcdir)/templates/module-with-gcs
 
 # End of file
