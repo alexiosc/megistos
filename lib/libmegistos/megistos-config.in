@@ -26,6 +26,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/19 13:25:56  alexios
+# Significant update in functionality to accommodate new build
+# structure.
+#
 # Revision 1.1  2003/08/15 20:09:51  alexios
 # Initial revision.
 #
@@ -42,15 +46,13 @@ exec_prefix="@exec_prefix@"
 exec_prefix_set=no
 data_dir="@PKGDATADIR@"
 version="@VERSION@"
-include_dir="@PKGINCLUDEDIR@"
-lib_dir="@PKGLIBDIR@"
-
-#module_dir="@moduledir@"
-#visualization_plugin_dir="${exec_prefix}/lib/xmms/Visualization"
-#input_plugin_dir="${exec_prefix}/lib/xmms/Input"
-#output_plugin_dir="${exec_prefix}/lib/xmms/Output"
-#effect_plugin_dir="${exec_prefix}/lib/xmms/Effect"
-#general_plugin_dir="${exec_prefix}/lib/xmms/General"
+includedir="@PKGINCLUDEDIR@"
+libdir="@PKGLIBDIR@"
+builddir=`echo @abs_top_builddir@ | sed 's/libmegistos\/..\/*//'`
+srcdir=`echo @abs_top_srcdir@ | sed 's/libmegistos\/..\/*//'`
+instancedir="@INSTANCEDIR@"
+virgininstance="@VIRGININSTANCE@"
+virginsrc="$builddir/@VIRGINDIR@"
 
 usage()
 {
@@ -64,6 +66,22 @@ Options:
     [--cflags]
     [--lib-dir]
     [--data-dir]
+    [--instance-dir]
+    [--virgin-dir]
+    [--build-dir]
+    [--source-dir]
+    [--include-dir]
+
+Version:                $version
+Prefix:                 $prefix
+Exec prefix:            $exec_prefix
+Library directory:      $libdir
+Build directory:        $builddir
+Source directory:       $srcdir
+Include directory:      $includedir
+Instance directory:     $instancedir
+Virgin instance source: $virginsrc
+Virgin instance:        $virgininstance
 
 EOF
     exit $1
@@ -121,6 +139,30 @@ while test $# -gt 0; do
 	    echo_lib_dir=yes
 	    ;;
 
+	--instance-dir)
+	    echo_instance_dir=yes
+	    ;;
+
+	--virgin-dir)
+	    echo_virgin_dir=yes
+	    ;;
+
+	--build-dir)
+	    echo_build_dir=yes
+	    ;;
+
+	--source-dir)
+	    echo_source_dir=yes
+	    ;;
+
+	--include-dir)
+	    echo_include_dir=yes
+	    ;;
+
+	--header)
+	    echo_header=yes
+	    ;;
+
 	*)
 	    usage 1 1>&2
 	    ;;
@@ -136,10 +178,10 @@ if test "$echo_exec_prefix" = "yes"; then
     echo $exec_prefix
 fi
 
-if test "$include_dir" != "/usr/include"; then
-    cflags="-I$include_dir @CFLAGS@"
+if test "$includedir" != "/usr/include"; then
+    cflags="-I$includedir -I$includedir/mbk @CFLAGS@"
 else
-    cflags="-I$include_dir @CFLAGS@"
+    cflags="-I$includedir -I$includedir/mbk @CFLAGS@"
 fi
 
 if test "$lib_dir" != "/usr/lib"; then
@@ -161,6 +203,37 @@ if test "$echo_data_dir" = "yes"; then
 fi
 
 if test "$echo_lib_dir" = "yes"; then
-    echo $lib_dir
+    echo $libdir
 fi
 
+if test "$echo_instance_dir" = "yes"; then
+    echo $instancedir
+fi
+
+if test "$echo_virgin_dir" = "yes"; then
+    echo $virgininstance
+fi
+
+if test "$echo_build_dir" = "yes"; then
+    echo $builddir
+fi
+
+if test "$echo_source_dir" = "yes"; then
+    echo $srcdir
+fi
+
+if test "$echo_include_dir" = "yes"; then
+    echo $includedir
+fi
+
+if test "$echo_header" = "yes"; then
+    cat <<EOF
+#define __PREFIX       "$prefix"
+#define __EXECPREFIX   "$exec_prefix"
+#define __VIRGINDIR    "$virgininstance"
+#define __LIBDIR       "$libdir"
+#define __DATADIR      "$data_dir"
+#define __INSTANCEDIR  "$instancedir"
+#define __INCLUDEDIR   "$includedir"
+EOF
+fi
