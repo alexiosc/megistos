@@ -32,7 +32,7 @@ offline.graffiti	Y	Y
 offline.mail		Y	Y
 offline.news		Y	Y
 registry		Y	Y
-remsys			4	Y
+remsys			Y	Y
 signup			Y	Y
 stats			Y	Y
 sysvar			Y	Y
@@ -48,6 +48,9 @@ CVS/RCS History:
 $Id$
 
 $Log$
+Revision 1.8  2001/05/20 13:57:14  alexios
+Updated translation status (completed remsys.msg translation).
+
 Revision 1.7  2001/04/27 09:26:27  alexios
 Updated status of translation project.
 
