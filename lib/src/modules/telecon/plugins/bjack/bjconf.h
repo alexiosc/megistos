@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,8 +57,8 @@
 
 #ifndef __BJCONF_H
 #define __BJCONF_H
- 
- 
+
+
 /* define if under development, enables special debugging and other options */
 #define DEVEL
 
@@ -110,5 +113,8 @@
 #endif
 
 
-#endif	/* __BJCONF_H */
+#endif				/* __BJCONF_H */
 
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,112 +62,116 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.graffiti.h"
-#include "../../mailer.h"
-#include "mbk_offline.graffiti.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.graffiti.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.graffiti.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __GRAFFITI_UNAMBIGUOUS__
-#include "mbk_graffiti.h"
+#include <megistos/mbk_graffiti.h>
 
 
 promptblock_t *msg;
 promptblock_t *graffiti_msg;
 promptblock_t *mailer_msg;
 
-int  entrykey;
-int  ovrkey;
-int  maxmsgs;
-int  maxsize;
+int     entrykey;
+int     ovrkey;
+int     maxmsgs;
+int     maxsize;
 
-int  defwall;
-int  defansi;
-int  deflins;
-char *wallfil;
+int     defwall;
+int     defansi;
+int     deflins;
+char   *wallfil;
 
-char *progname;
+char   *progname;
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
+	mod_init (INI_ALL);
 
-  mailer_msg=msg_open("mailer");
+	mailer_msg = msg_open ("mailer");
 
-  graffiti_msg=msg_open("graffiti");
-  entrykey=msg_int(GRAFFITI_ENTRYKEY,0,129);
-  ovrkey=msg_int(GRAFFITI_OVRKEY,0,129);
-  maxmsgs=msg_int(GRAFFITI_MAXMSGS,1,100);
-  maxsize=msg_int(GRAFFITI_MAXSIZE,1,32767);
+	graffiti_msg = msg_open ("graffiti");
+	entrykey = msg_int (GRAFFITI_ENTRYKEY, 0, 129);
+	ovrkey = msg_int (GRAFFITI_OVRKEY, 0, 129);
+	maxmsgs = msg_int (GRAFFITI_MAXMSGS, 1, 100);
+	maxsize = msg_int (GRAFFITI_MAXSIZE, 1, 32767);
 
-  msg=msg_open("offline.graffiti");
-  defwall=msg_bool(DEFWALL);
-  defansi=msg_bool(DEFANSI);
-  deflins=msg_int(DEFLINS,0,10000);
-  wallfil=msg_string(WALLFIL);
+	msg = msg_open ("offline.graffiti");
+	defwall = msg_bool (DEFWALL);
+	defansi = msg_bool (DEFANSI);
+	deflins = msg_int (DEFLINS, 0, 10000);
+	wallfil = msg_string (WALLFIL);
 
-  msg_setlanguage(thisuseracc.language);
+	msg_setlanguage (thisuseracc.language);
 }
 
 
 void
-done()
+done ()
 {
-  msg_close(mailer_msg);
-  msg_close(msg);
+	msg_close (mailer_msg);
+	msg_close (msg);
 }
 
 
 void
-warn()
+warn ()
 {
-  fprintf(stderr,"This is a Mailer plugin. ");
-  fprintf(stderr,"It should not be run by the user.\n");
-  exit(1);
+	fprintf (stderr, "This is a Mailer plugin. ");
+	fprintf (stderr, "It should not be run by the user.\n");
+	exit (1);
 }
 
 
 mod_info_t mod_info_offline_graffiti = {
-  "offline.graffiti",
-  "Mailer Plugin: Graffiti Wall",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Packages the Graffiti Wall and handles off-line wall write requests.",
-  RCS_VER,
-  "1.0",
-  {0,NULL},			/* Login handler */
-  {0,NULL},			/* Interactive handler */
-  {0,NULL},			/* Install logout handler */
-  {0,NULL},			/* Hangup handler */
-  {0,NULL},			/* Cleanup handler */
-  {0,NULL}			/* Delete user handler */
+	"offline.graffiti",
+	"Mailer Plugin: Graffiti Wall",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Packages the Graffiti Wall and handles off-line wall write requests.",
+	RCS_VER,
+	"1.0",
+	{0, NULL},		/* Login handler */
+	{0, NULL},		/* Interactive handler */
+	{0, NULL},		/* Install logout handler */
+	{0, NULL},		/* Hangup handler */
+	{0, NULL},		/* Cleanup handler */
+	{0, NULL}		/* Delete user handler */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  progname=mod_info_offline_graffiti.progname;
-  mod_setinfo(&mod_info_offline_graffiti);
+	progname = mod_info_offline_graffiti.progname;
+	mod_setinfo (&mod_info_offline_graffiti);
 
-  if(argc!=2)return mod_main(argc,argv);
+	if (argc != 2)
+		return mod_main (argc, argv);
 
-  if(!strcmp(argv[1],"--setup")){
-    atexit(done);
-    init();
-    setup();
-  } else if(!strcmp(argv[1],"--download")){
-    atexit(done);
-    init();
-    return ogdownload();
-  } else if(!strcmp(argv[1],"--upload")){
-    atexit(done);
-    init();
-    return ogupload();
-  }
+	if (!strcmp (argv[1], "--setup")) {
+		atexit (done);
+		init ();
+		setup ();
+	} else if (!strcmp (argv[1], "--download")) {
+		atexit (done);
+		init ();
+		return ogdownload ();
+	} else if (!strcmp (argv[1], "--upload")) {
+		atexit (done);
+		init ();
+		return ogupload ();
+	}
 
-  /* This should only return help, info, etc */
-  return mod_main(argc,argv);
+	/* This should only return help, info, etc */
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

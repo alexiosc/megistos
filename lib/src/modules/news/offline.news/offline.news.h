@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -44,13 +47,12 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
-#include "typhoon.h"
-#include "../offline.mail/request.h"
+#include <megistos/typhoon.h>
+#include <megistos/../offline.mail/request.h>
 
 
 /* offline.news.c */
@@ -58,8 +60,8 @@
 extern promptblock_t *msg;
 extern promptblock_t *news_msg;
 
-extern int  onkey;
-extern int  defnews;
+extern int onkey;
+extern int defnews;
 extern char *newsfile;
 
 extern int sopkey;
@@ -70,9 +72,9 @@ extern char *progname;
 /* setup.c */
 
 struct prefs {
-  int flags;
+	int     flags;
 
-  char dummy[60];
+	char    dummy[60];
 };
 
 
@@ -82,19 +84,22 @@ struct prefs prefs;
 #define ONF_YES    0x0001
 
 
-void readprefs(struct prefs *prefs);
+void    readprefs (struct prefs *prefs);
 
-void writeprefs(struct prefs *prefs);
+void    writeprefs (struct prefs *prefs);
 
-void setup();
+void    setup ();
 
 
 /* download.c */
 
-int ondownload();
+int     ondownload ();
 
 
 /* setup.c */
 
-void setup();
+void    setup ();
 
+
+
+/* End of File */

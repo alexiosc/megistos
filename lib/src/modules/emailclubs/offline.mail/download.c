@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -68,269 +69,308 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 
-static int           nummsgs=0;
-static int           num4u=0;
-static int           numconf=0;
+static int nummsgs = 0;
+static int num4u = 0;
+static int numconf = 0;
 
 
 static int
-doemail()
+doemail ()
 {
-  int res;
-  int t;
-  int n=0,n4=0;
-  int shown=0, first=1;
-  char c;
-  
-  if(!readecuser(thisuseracc.userid,&emlu)){
-    error_fatal("Unable to read E-mail preference file for %s",
-	  thisuseracc.userid);
-  }
-  
-  prompt(OMDLEM);
-  goclub(NULL);
+	int     res;
+	int     t;
+	int     n = 0, n4 = 0;
+	int     shown = 0, first = 1;
+	char    c;
 
-  res=findmsgto(&t,thisuseracc.userid,emlu.lastemailqwk+1,BSD_GT);
+	if (!readecuser (thisuseracc.userid, &emlu)) {
+		error_fatal ("Unable to read E-mail preference file for %s",
+			     thisuseracc.userid);
+	}
 
-  inp_nonblock();
-  thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
+	prompt (OMDLEM);
+	goclub (NULL);
 
-  if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-  if(fmt_lastresult==PAUSE_QUIT)abort();
+	res =
+	    findmsgto (&t, thisuseracc.userid, emlu.lastemailqwk + 1, BSD_GT);
 
-  while(res==BSE_FOUND){
-    struct message msg;
+	inp_nonblock ();
+	thisuseronl.flags |= (OLF_BUSY | OLF_NOTIMEOUT);
 
-    if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-    if(fmt_lastresult==PAUSE_QUIT)abort();
+	if (read (0, &c, 1))
+		if (c == 27 || c == 15 || c == 3)
+			abort ();
+	if (fmt_lastresult == PAUSE_QUIT)
+		abort ();
 
-    if(!first){
-      if((res=npmsgto(&t,thisuseracc.userid,t+1,BSD_GT))!=BSE_FOUND)break;
-    } else first=0;
+	while (res == BSE_FOUND) {
+		struct message msg;
 
-    getmsgheader(t,&msg);
-    if(t>msg.msgno)break;
-    if(!shown){
-      shown=1;
-      startind();
-    } else progressind(1);
-    outmsg(0,&msg);
-    nummsgs++;
-    n++;
-    num4u++;
-    n4++;
-    emlu.lastemailqwk=msg.msgno;
-  }
-  inp_block();
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  if(shown)endind();
+		if (read (0, &c, 1))
+			if (c == 27 || c == 15 || c == 3)
+				abort ();
+		if (fmt_lastresult == PAUSE_QUIT)
+			abort ();
 
-  prompt(OMDLT2,n,n4);
-  return 0;
+		if (!first) {
+			if ((res =
+			     npmsgto (&t, thisuseracc.userid, t + 1,
+				      BSD_GT)) != BSE_FOUND)
+				break;
+		} else
+			first = 0;
+
+		getmsgheader (t, &msg);
+		if (t > msg.msgno)
+			break;
+		if (!shown) {
+			shown = 1;
+			startind ();
+		} else
+			progressind (1);
+		outmsg (0, &msg);
+		nummsgs++;
+		n++;
+		num4u++;
+		n4++;
+		emlu.lastemailqwk = msg.msgno;
+	}
+	inp_block ();
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	if (shown)
+		endind ();
+
+	prompt (OMDLT2, n, n4);
+	return 0;
 }
 
 
 static int
-doclub(struct lastread *p)
+doclub (struct lastread *p)
 {
-  int res;
-  int t;
-  int n=0,n4=0;
-  int shown=0;
-  int first=1;
-  char c;
+	int     res;
+	int     t;
+	int     n = 0, n4 = 0;
+	int     shown = 0;
+	int     first = 1;
+	char    c;
 
-  if(!((p->flags&LRF_INQWK)&&(getclubax(&thisuseracc,p->club)>CAX_ZERO)))
-    return 0;
-  
-  numconf++;
+	if (!
+	    ((p->flags & LRF_INQWK) &&
+	     (getclubax (&thisuseracc, p->club) > CAX_ZERO)))
+		return 0;
 
-  prompt(OMDLT1,p->club,clubhdr.descr);
-  goclub(p->club);
+	numconf++;
 
-  res=findmsgnum(&t,p->qwklast+1,BSD_GT);
+	prompt (OMDLT1, p->club, clubhdr.descr);
+	goclub (p->club);
 
-  thisuseronl.flags|=(OLF_BUSY|OLF_NOTIMEOUT);
-  inp_nonblock();
+	res = findmsgnum (&t, p->qwklast + 1, BSD_GT);
 
-  if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-  if(fmt_lastresult==PAUSE_QUIT)abort();
+	thisuseronl.flags |= (OLF_BUSY | OLF_NOTIMEOUT);
+	inp_nonblock ();
 
-  while(res==BSE_FOUND){
-    struct message msg;
-    
-    if(read(0,&c,1))if(c==27||c==15||c==3)abort();
-    if(fmt_lastresult==PAUSE_QUIT)abort();
+	if (read (0, &c, 1))
+		if (c == 27 || c == 15 || c == 3)
+			abort ();
+	if (fmt_lastresult == PAUSE_QUIT)
+		abort ();
 
-    if(!first){
-      if((res=npmsgnum(&t,t+1,BSD_GT))!=BSE_FOUND)continue;
-    } else first=0;
+	while (res == BSE_FOUND) {
+		struct message msg;
 
-    getmsgheader(t,&msg);
-    if(t>msg.msgno)break;
-    if(!shown){
-      shown=1;
-      startind();
-    } else progressind(1);
-    outmsg(clubhdr.clubid,&msg);
-    nummsgs++;
-    n++;
-    if(sameas(msg.to,thisuseracc.userid)){
-      n4++;
-      num4u++;
-    }
-    p->qwklast=t;
-  }
-  inp_block();
+		if (read (0, &c, 1))
+			if (c == 27 || c == 15 || c == 3)
+				abort ();
+		if (fmt_lastresult == PAUSE_QUIT)
+			abort ();
 
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  if(shown)endind();
-  prompt(OMDLT2,n,n4);
-  return 0;
+		if (!first) {
+			if ((res = npmsgnum (&t, t + 1, BSD_GT)) != BSE_FOUND)
+				continue;
+		} else
+			first = 0;
+
+		getmsgheader (t, &msg);
+		if (t > msg.msgno)
+			break;
+		if (!shown) {
+			shown = 1;
+			startind ();
+		} else
+			progressind (1);
+		outmsg (clubhdr.clubid, &msg);
+		nummsgs++;
+		n++;
+		if (sameas (msg.to, thisuseracc.userid)) {
+			n4++;
+			num4u++;
+		}
+		p->qwklast = t;
+	}
+	inp_block ();
+
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	if (shown)
+		endind ();
+	prompt (OMDLT2, n, n4);
+	return 0;
 }
 
 
 
 static int
-controldat()
+controldat ()
 {
-  FILE *fp=fopen("control.dat","w");
-  struct lastread *p;
-  char tmp[256];
+	FILE   *fp = fopen ("control.dat", "w");
+	struct lastread *p;
+	char    tmp[256];
 
-  if(!fp){
-    error_logsys("Unable to create control.dat");
-    return 1;
-  }
+	if (!fp) {
+		error_logsys ("Unable to create control.dat");
+		return 1;
+	}
 
-  strcpy(tmp,sysvar->bbstitle);
-  xlate_out(tmp);
-  fprintf(fp,"%s\r\n",tmp);
+	strcpy (tmp, sysvar->bbstitle);
+	xlate_out (tmp);
+	fprintf (fp, "%s\r\n", tmp);
 
-  strcpy(tmp,sysvar->city);
-  xlate_out(tmp);
-  fprintf(fp,"%s\r\n",tmp);
+	strcpy (tmp, sysvar->city);
+	xlate_out (tmp);
+	fprintf (fp, "%s\r\n", tmp);
 
-  strcpy(tmp,sysvar->dataphone);
-  xlate_out(tmp);
-  fprintf(fp,"%s\r\n",tmp);
-  
-  strcpy(tmp,msg_get(ADMNAM));
-  xlate_out(tmp);
-  fprintf(fp,"%s\r\n",tmp);
+	strcpy (tmp, sysvar->dataphone);
+	xlate_out (tmp);
+	fprintf (fp, "%s\r\n", tmp);
 
-  fprintf(fp,"00000,%s\r\n",bbsid);
-  fprintf(fp,"%s,%s\r\n",qwkdate(today()),strtime(now(),1));
-  fprintf(fp,"%s\r\n\r\n0\r\n",thisuseracc.userid);
-  fprintf(fp,"%d\r\n",nummsgs);
-  fprintf(fp,"%d\r\n",numconf);
+	strcpy (tmp, msg_get (ADMNAM));
+	xlate_out (tmp);
+	fprintf (fp, "%s\r\n", tmp);
 
-  fprintf(fp,"0\r\n%s\r\n",omceml);
+	fprintf (fp, "00000,%s\r\n", bbsid);
+	fprintf (fp, "%s,%s\r\n", qwkdate (today ()), strtime (now (), 1));
+	fprintf (fp, "%s\r\n\r\n0\r\n", thisuseracc.userid);
+	fprintf (fp, "%d\r\n", nummsgs);
+	fprintf (fp, "%d\r\n", numconf);
 
-  p=resetqsc();
-  while(p!=NULL){
-    if(!((p->flags&LRF_INQWK)&&(getclubax(&thisuseracc,p->club)>CAX_ZERO)))
-      goto next;
-    fprintf(fp,"%d\r\n%s\r\n",clubhdr.clubid,p->club);
-  next:
-    p=nextqsc();
-  }
+	fprintf (fp, "0\r\n%s\r\n", omceml);
 
-  fprintf(fp,"%s\r\n%s\r\n%s\r\n",
-	  ansihi?hifile:"",
-	  "",
-	  ansibye?byefile:"");
-  fclose(fp);
+	p = resetqsc ();
+	while (p != NULL) {
+		if (!
+		    ((p->flags & LRF_INQWK) &&
+		     (getclubax (&thisuseracc, p->club) > CAX_ZERO)))
+			goto next;
+		fprintf (fp, "%d\r\n%s\r\n", clubhdr.clubid, p->club);
+	      next:
+		p = nextqsc ();
+	}
 
-  return 0;
+	fprintf (fp, "%s\r\n%s\r\n%s\r\n",
+		 ansihi ? hifile : "", "", ansibye ? byefile : "");
+	fclose (fp);
+
+	return 0;
 }
 
 
 static int
-addtodoorid()
+addtodoorid ()
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen("door.id","a"))==NULL){
-    fclose(fp);
-    return 1;
-  }
+	if ((fp = fopen ("door.id", "a")) == NULL) {
+		fclose (fp);
+		return 1;
+	}
 #ifdef GREEK
-  if(userqwk.flags&USQ_GREEKQWK)fprintf(fp,"GREEKQWK\r\n");
+	if (userqwk.flags & USQ_GREEKQWK)
+		fprintf (fp, "GREEKQWK\r\n");
 #endif
-  fprintf(fp,"RECEIPT\r\n");
-  outcontroltypes(fp);
-  fclose(fp);
+	fprintf (fp, "RECEIPT\r\n");
+	outcontroltypes (fp);
+	fclose (fp);
 
-  return 0;
+	return 0;
 }
 
 
 int
-omdownload()
+omdownload ()
 {
-  struct lastread *p;
-  int res;
+	struct lastread *p;
+	int     res;
 
-  readprefs(&prefs);
+	readprefs (&prefs);
 
-  if(addtodoorid())return 1;
+	if (addtodoorid ())
+		return 1;
 
-  nummsgs=num4u=numconf=0;
+	nummsgs = num4u = numconf = 0;
 
-  prompt(OMDLHD);
+	prompt (OMDLHD);
 
-  openreqdb();
+	openreqdb ();
 
-  if((res=messagesdat())!=0)return res;
+	if ((res = messagesdat ()) != 0)
+		return res;
 
-  if((res=doemail())!=0)return res;
+	if ((res = doemail ()) != 0)
+		return res;
 
-  p=startqsc();
-  while(p){
-    if((res=doclub(p))!=0)return res;
-    if(fmt_lastresult==PAUSE_QUIT)return 1;
-    p=nextqsc();
-  }
+	p = startqsc ();
+	while (p) {
+		if ((res = doclub (p)) != 0)
+			return res;
+		if (fmt_lastresult == PAUSE_QUIT)
+			return 1;
+		p = nextqsc ();
+	}
 
-  prompt(OMCLF);
+	prompt (OMCLF);
 
-  /* Deal with requested files and attachments */
+	/* Deal with requested files and attachments */
 
-  {
-    int i=getnumatt();
-    
-    prompt(MSGSTOT,nummsgs,msg_getunit(MSGSNG,nummsgs));
-    if(num4u)prompt(MSGS4U,num4u,msg_getunit(MSGSNG,num4u));
-    if(i)prompt(MSGSAT,i,msg_getunit(MSGSNG,i));
-  }
+	{
+		int     i = getnumatt ();
 
-  doatt();
-  
-  if((res=controldat())!=0)return res;
+		prompt (MSGSTOT, nummsgs, msg_getunit (MSGSNG, nummsgs));
+		if (num4u)
+			prompt (MSGS4U, num4u, msg_getunit (MSGSNG, num4u));
+		if (i)
+			prompt (MSGSAT, i, msg_getunit (MSGSNG, i));
+	}
 
-  /* Everything's ok, update the structures */
+	doatt ();
 
-  if(!writeecuser(thisuseracc.userid,&emlu)){
-    error_fatal("Unable to write E-mail preference file for %s",
-	  thisuseracc.userid);
-  }
+	if ((res = controldat ()) != 0)
+		return res;
 
-  updateqsc();
-  saveqsc();
-  doneqsc();
+	/* Everything's ok, update the structures */
 
-  return 0;
+	if (!writeecuser (thisuseracc.userid, &emlu)) {
+		error_fatal ("Unable to write E-mail preference file for %s",
+			     thisuseracc.userid);
+	}
+
+	updateqsc ();
+	saveqsc ();
+	doneqsc ();
+
+	return 0;
 }
+
+
+/* End of File */

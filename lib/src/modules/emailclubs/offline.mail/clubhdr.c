@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -53,10 +56,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -70,184 +71,206 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 
 
-char defaultclub[32]={0};
+char    defaultclub[32] = { 0 };
 
 
 struct clubheader clubhdr;
-time_t            clubhdrtime=0;
+time_t  clubhdrtime = 0;
 
 
 int
-hdrselect(const struct dirent *d)
+hdrselect (const struct dirent *d)
 {
-  return d->d_name[0]=='h';
+	return d->d_name[0] == 'h';
 }
 
 
 int
-ncsalphasort(const struct dirent * const *A, const struct dirent * const *B)
+ncsalphasort (const struct dirent *const *A, const struct dirent *const *B)
 {
-  register char *a=(*A)->d_name;
-  register char *b=(*B)->d_name;
-  register char ca;
-  register char cb;
-again:
-  ca=toupper(*a);
-  cb=toupper(*b);
-  if(ca!=cb)return ca-cb;
-  if(!*a)return 0;
-  a++,b++;
-  goto again;
+	register char *a = (*A)->d_name;
+	register char *b = (*B)->d_name;
+	register char ca;
+	register char cb;
+
+      again:
+	ca = toupper (*a);
+	cb = toupper (*b);
+	if (ca != cb)
+		return ca - cb;
+	if (!*a)
+		return 0;
+	a++, b++;
+	goto again;
 }
 
 
 int
-findclub(char *club)
+findclub (char *club)
 {
-  DIR *dp;
-  struct dirent *dir;
-  
-  if(*club=='/')club++;
-  if(!isalpha(*club))return 0;
+	DIR    *dp;
+	struct dirent *dir;
 
-  if((dp=opendir(mkfname(CLUBHDRDIR)))==NULL){
-    error_fatalsys("Unable to open directory %s",mkfname(CLUBHDRDIR));
-  }
-  while((dir=readdir(dp))!=NULL){
-    if(dir->d_name[0]!='h')continue;
-    if(sameas(&(dir->d_name[1]),club)){
-      strcpy(club,&(dir->d_name[1]));
-      closedir(dp);
-      return getclubax(&thisuseracc,&(dir->d_name[1]))>CAX_ZERO;
-    }
-  }
-  closedir(dp);
-  return 0;
+	if (*club == '/')
+		club++;
+	if (!isalpha (*club))
+		return 0;
+
+	if ((dp = opendir (mkfname (CLUBHDRDIR))) == NULL) {
+		error_fatalsys ("Unable to open directory %s",
+				mkfname (CLUBHDRDIR));
+	}
+	while ((dir = readdir (dp)) != NULL) {
+		if (dir->d_name[0] != 'h')
+			continue;
+		if (sameas (&(dir->d_name[1]), club)) {
+			strcpy (club, &(dir->d_name[1]));
+			closedir (dp);
+			return getclubax (&thisuseracc,
+					  &(dir->d_name[1])) > CAX_ZERO;
+		}
+	}
+	closedir (dp);
+	return 0;
 }
 
 
 int
-loadclubhdr(char *club)
+loadclubhdr (char *club)
 {
-  FILE *fp;
-  char fname[256];
-  struct stat st;
+	FILE   *fp;
+	char    fname[256];
+	struct stat st;
 
-  if(*club=='/')club++;
-  sprintf(fname,"%s/h%s",mkfname(CLUBHDRDIR),club);
-  if(stat(fname,&st)){
-    clubhdrtime=0;
-    return 0;
-  }
-  
-  if((strcmp(club,clubhdr.club)==0)&&(st.st_ctime==clubhdrtime))return 1;
+	if (*club == '/')
+		club++;
+	sprintf (fname, "%s/h%s", mkfname (CLUBHDRDIR), club);
+	if (stat (fname, &st)) {
+		clubhdrtime = 0;
+		return 0;
+	}
 
-  clubhdrtime=st.st_ctime;
-  if((fp=fopen(fname,"r"))==NULL){
-    clubhdrtime=0;
-    return 0;
-  }
+	if ((strcmp (club, clubhdr.club) == 0) && (st.st_ctime == clubhdrtime))
+		return 1;
 
-  if(fread(&clubhdr,sizeof(clubhdr),1,fp)!=1){
-    fclose(fp);
-    clubhdrtime=0;
-    return 0;
-  }
-  fclose(fp);
+	clubhdrtime = st.st_ctime;
+	if ((fp = fopen (fname, "r")) == NULL) {
+		clubhdrtime = 0;
+		return 0;
+	}
 
-  return 1;
+	if (fread (&clubhdr, sizeof (clubhdr), 1, fp) != 1) {
+		fclose (fp);
+		clubhdrtime = 0;
+		return 0;
+	}
+	fclose (fp);
+
+	return 1;
 }
 
 
 int
-getdefaultax(useracc_t *uacc, char *club)
+getdefaultax (useracc_t * uacc, char *club)
 {
-  if(!loadclubhdr(club)){/* soup */
-    return CAX_ZERO;
-  }
+	if (!loadclubhdr (club)) {	/* soup */
+		return CAX_ZERO;
+	}
 
-  if(key_owns(uacc,clubhdr.keyuplax))return CAX_UPLOAD;
-  if(key_owns(uacc,clubhdr.keywriteax))return CAX_WRITE;
-  if(key_owns(uacc,clubhdr.keydnlax))return CAX_DNLOAD;
-  if(key_owns(uacc,clubhdr.keyreadax))return CAX_READ;
+	if (key_owns (uacc, clubhdr.keyuplax))
+		return CAX_UPLOAD;
+	if (key_owns (uacc, clubhdr.keywriteax))
+		return CAX_WRITE;
+	if (key_owns (uacc, clubhdr.keydnlax))
+		return CAX_DNLOAD;
+	if (key_owns (uacc, clubhdr.keyreadax))
+		return CAX_READ;
 
-  /* Everyone always has access to the Default club. */
-  return sameas(club,defaultclub)?CAX_READ:CAX_ZERO;
+	/* Everyone always has access to the Default club. */
+	return sameas (club, defaultclub) ? CAX_READ : CAX_ZERO;
 }
 
 
 int
-getclubax(useracc_t *uacc, char *club)
+getclubax (useracc_t * uacc, char *club)
 {
-  char fname[256], clubname[256], access;
-  int ax=CAX_ZERO, found=0;
-  char tmp[32];
-  FILE *fp;
+	char    fname[256], clubname[256], access;
+	int     ax = CAX_ZERO, found = 0;
+	char    tmp[32];
+	FILE   *fp;
 
-  strcpy(tmp,club);
-  if(!loadclubhdr(club)){
-    return CAX_ZERO;
-  }
+	strcpy (tmp, club);
+	if (!loadclubhdr (club)) {
+		return CAX_ZERO;
+	}
 
-  strcpy(club,tmp);
+	strcpy (club, tmp);
 
-  if(key_owns(uacc,sopkey))return CAX_SYSOP;
-  else if(!strcmp(uacc->userid,clubhdr.clubop))return CAX_CLUBOP;
+	if (key_owns (uacc, sopkey))
+		return CAX_SYSOP;
+	else if (!strcmp (uacc->userid, clubhdr.clubop))
+		return CAX_CLUBOP;
 
-  sprintf(fname,"%s/%s",mkfname(CLUBAXDIR),uacc->userid);
-  strcpy(tmp,club);
-  if((fp=fopen(fname,"r"))==NULL){
-    strcpy(club,tmp);
-    return getdefaultax(uacc,club);
-  }
+	sprintf (fname, "%s/%s", mkfname (CLUBAXDIR), uacc->userid);
+	strcpy (tmp, club);
+	if ((fp = fopen (fname, "r")) == NULL) {
+		strcpy (club, tmp);
+		return getdefaultax (uacc, club);
+	}
 
-  while(!feof(fp)){
-    if(fscanf(fp,"%s %c",clubname,&access)!=2)continue;
-    if(!strcmp(clubname,club)){
-      found=1;
-      switch(access){
-      case 'Z':
-	ax=sameas(club,defaultclub)?CAX_READ:CAX_ZERO;
-	break;
-      case 'R':
-	ax=CAX_READ;
-	break;
-      case 'D':
-	ax=CAX_DNLOAD;
-	break;
-      case 'W':
-	ax=CAX_WRITE;
-	break;
-      case 'U':
-	ax=CAX_UPLOAD;
-	break;
-      case 'C':
-	ax=CAX_COOP;
-	break;
-      default:
-	ax=getdefaultax(uacc,club);
-	break;
-      }
-      break;
-    }
-  }
-  fclose(fp);
+	while (!feof (fp)) {
+		if (fscanf (fp, "%s %c", clubname, &access) != 2)
+			continue;
+		if (!strcmp (clubname, club)) {
+			found = 1;
+			switch (access) {
+			case 'Z':
+				ax = sameas (club,
+					     defaultclub) ? CAX_READ :
+				    CAX_ZERO;
+				break;
+			case 'R':
+				ax = CAX_READ;
+				break;
+			case 'D':
+				ax = CAX_DNLOAD;
+				break;
+			case 'W':
+				ax = CAX_WRITE;
+				break;
+			case 'U':
+				ax = CAX_UPLOAD;
+				break;
+			case 'C':
+				ax = CAX_COOP;
+				break;
+			default:
+				ax = getdefaultax (uacc, club);
+				break;
+			}
+			break;
+		}
+	}
+	fclose (fp);
 
-  if(!found){
-    return getdefaultax(uacc,tmp);
-  }
-  return ax;
+	if (!found) {
+		return getdefaultax (uacc, tmp);
+	}
+	return ax;
 }
+
+
+/* End of File */

@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -67,73 +70,76 @@
  * Revision 0.1  1999/08/06 20:08:15  valis
  * first working revision
  *
- */ 
+ */
 
 #include <time.h>
 #include <stdio.h>
 
-#include "bjconf.h"
-#include "bjack.h"
-#include "bjintrfc.h"
+#include <megistos/bjconf.h>
+#include <megistos/bjack.h>
+#include <megistos/bjintrfc.h>
 
 
-#ifndef RCS_VER
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
-char cmd_names[][10] = {"no_cmd", "on", "off", "bet", "raise", "call", "fold", "pot", 
-	"hit", "stay", "hand", "turn", "help", "rules", "scan", "exit" , "info", "bell"
-
+char    cmd_names[][10] =
+    { "no_cmd", "on", "off", "bet", "raise", "call", "fold", "pot",
+	"hit", "stay", "hand", "turn", "help", "rules", "scan", "exit", "info",
+	    "bell"
 #ifdef CHEATS
-	, "sdeck", "scard"
+	    , "sdeck", "scard"
 #endif
 #ifdef DEVEL
-	, "start", "debug"
+	    , "start", "debug"
 #endif
-	};
-	
-char stat_names[][10] = {"NOGAME", "NEWGAME", "BETTING", "HITTING", "WINNER"};
+};
+
+char    stat_names[][10] =
+    { "NOGAME", "NEWGAME", "BETTING", "HITTING", "WINNER" };
 
 
-int P_WDOG_EXP;
-int P_TICK_EXP;
-int P_PAUSE_EXP;
-int P_PAUSE_WARN;
-int P_EPAUSE_WARN;
-int P_WARN_EXP;
-int P_SYSOPS_NOCHARGE;
-int P_SYSTEM_PERC;
-int P_MIN_CREDITS;
-int P_MAX_BET;
-int P_LIGHT_CREDITS;
-int P_MIN_PLAYERS;
-int P_MAX_PLAYERS;
-int P_SYSOPS_DEBUG;
+int     P_WDOG_EXP;
+int     P_TICK_EXP;
+int     P_PAUSE_EXP;
+int     P_PAUSE_WARN;
+int     P_EPAUSE_WARN;
+int     P_WARN_EXP;
+int     P_SYSOPS_NOCHARGE;
+int     P_SYSTEM_PERC;
+int     P_MIN_CREDITS;
+int     P_MAX_BET;
+int     P_LIGHT_CREDITS;
+int     P_MIN_PLAYERS;
+int     P_MAX_PLAYERS;
+int     P_SYSOPS_DEBUG;
 
 #ifdef BBSPROMPTS
-promptblock_t *msg=NULL;
+promptblock_t *msg = NULL;
 #endif
 
-int total_bets=0;
-int current_bet=0;
-int CUR_PLAYERS=0;
-int play_count=0;		/* number of players still playing */
-int stay_count=0;		/* number of players that have stayed */
-int advance_user=0;
-char bj_userid[24];
-char *bj_channel;
+int     total_bets = 0;
+int     current_bet = 0;
+int     CUR_PLAYERS = 0;
+int     play_count = 0;		/* number of players still playing */
+int     stay_count = 0;		/* number of players that have stayed */
+int     advance_user = 0;
+char    bj_userid[24];
+char   *bj_channel;
 struct bj_player *player_list;
 struct bj_player *player_list_tail;
 struct bj_player *c_player;
-int STATUS;
+int     STATUS;
 
-int watchdog_timer=0;
-int tick_timer=0;
-int pause_timer=0;
-int tick_warn=0;
-int card_deck[52];
-int card_index;
+int     watchdog_timer = 0;
+int     tick_timer = 0;
+int     pause_timer = 0;
+int     tick_warn = 0;
+int     card_deck[52];
+int     card_index;
 
 
+
+
+/* End of File */

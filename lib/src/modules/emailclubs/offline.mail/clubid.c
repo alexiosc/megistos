@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -63,82 +64,92 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 
-static struct clubheader *clubids=NULL;
-static int               numclubs;
+static struct clubheader *clubids = NULL;
+static int numclubs;
 
 
 void
-doneclubids()
+doneclubids ()
 {
-  if(clubids){
-    free(clubids);
-    clubids=NULL;
-    numclubs=0;
-  }
+	if (clubids) {
+		free (clubids);
+		clubids = NULL;
+		numclubs = 0;
+	}
 }
 
 
 static int
-hdrsel(const struct dirent *d)
+hdrsel (const struct dirent *d)
 {
-  return d->d_name[0]=='h';
+	return d->d_name[0] == 'h';
 }
 
 
 static int
-clubcmp(const void *a, const void *b)
+clubcmp (const void *a, const void *b)
 {
-  return ((struct clubheader*)a)->clubid - ((struct clubheader*)b)->clubid;
+	return ((struct clubheader *) a)->clubid -
+	    ((struct clubheader *) b)->clubid;
 }
 
 
 void
-loadclubids()
+loadclubids ()
 {
-  struct dirent **d;
-  int i,j;
+	struct dirent **d;
+	int     i, j;
 
-  if(clubids)doneclubids();
+	if (clubids)
+		doneclubids ();
 
-  j=scandir(mkfname(CLUBHDRDIR),&d,hdrsel,alphasort);
-  if(!j){
-    error_fatal("No club headers found. Yow!.");
-  }
+	j = scandir (mkfname (CLUBHDRDIR), &d, hdrsel, alphasort);
+	if (!j) {
+		error_fatal ("No club headers found. Yow!.");
+	}
 
-  for(i=0;i<j;i++){
-    struct clubheader *tmp;
+	for (i = 0; i < j; i++) {
+		struct clubheader *tmp;
 
-    if(!loadclubhdr(&(d[i]->d_name[1]))){
-      error_fatal("Unable to load club header for /%s",
-	    &(d[i]->d_name[1]));
-    }
+		if (!loadclubhdr (&(d[i]->d_name[1]))) {
+			error_fatal ("Unable to load club header for /%s",
+				     &(d[i]->d_name[1]));
+		}
 
-    tmp=alcmem(sizeof(struct clubheader)*++numclubs);
-    memcpy(tmp,clubids,sizeof(struct clubheader)*(numclubs-1));
-    memcpy(&tmp[numclubs-1],&clubhdr,sizeof(struct clubheader));
-    free(clubids);
-    clubids=tmp;
+		tmp = alcmem (sizeof (struct clubheader) * ++numclubs);
+		memcpy (tmp, clubids,
+			sizeof (struct clubheader) * (numclubs - 1));
+		memcpy (&tmp[numclubs - 1], &clubhdr,
+			sizeof (struct clubheader));
+		free (clubids);
+		clubids = tmp;
 
-  }
+	}
 
-  qsort(clubids,numclubs,sizeof(struct clubheader),clubcmp);
+	qsort (clubids, numclubs, sizeof (struct clubheader), clubcmp);
 }
 
 
 int
-getclubid(int id)
+getclubid (int id)
 {
-  struct clubheader a, *p;
-  bzero(&a,sizeof(a));
-  a.clubid=id;
-  p=bsearch(&a,clubids,numclubs,sizeof(struct clubheader),clubcmp);
-  if(p==NULL)return 0;
-  memcpy(&clubhdr,p,sizeof(struct clubheader));
-  return 1;
+	struct clubheader a, *p;
+
+	bzero (&a, sizeof (a));
+	a.clubid = id;
+	p = bsearch (&a, clubids, numclubs, sizeof (struct clubheader),
+		     clubcmp);
+	if (p == NULL)
+		return 0;
+	memcpy (&clubhdr, p, sizeof (struct clubheader));
+	return 1;
 }
+
+
+/* End of File */

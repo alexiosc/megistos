@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,9 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -59,10 +61,13 @@ extern int cturn;		/* Whose turn is it? */
 
 
 
-void bg_set_players(int num_players); /* 1 or 2 only, of course */
+void    bg_set_players (int num_players);	/* 1 or 2 only, of course */
 
-void bg_initialise();
+void    bg_initialise ();
 
-void bg_firstroll();
+void    bg_firstroll ();
 
-void bg_board(int player_num);	/* 0 or 1 */
+void    bg_board (int player_num);	/* 0 or 1 */
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,97 +65,101 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.news.h"
-#include "../../mailer.h"
-#include "mbk_offline.news.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.news.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.news.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __NEWS_UNAMBIGUOUS__
-#include "mbk_news.h"
+#include <megistos/mbk_news.h>
 
 
 promptblock_t *msg;
 promptblock_t *news_msg;
 
 
-int  onkey;
-int  defnews;
-char *newsfile;
+int     onkey;
+int     defnews;
+char   *newsfile;
 
-int  sopkey;
+int     sopkey;
 
 
-char *progname;
+char   *progname;
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
+	mod_init (INI_ALL);
 
-  news_msg=msg_open("news");
-  sopkey=msg_int(NEWS_SOPKEY,0,129);
+	news_msg = msg_open ("news");
+	sopkey = msg_int (NEWS_SOPKEY, 0, 129);
 
-  msg=msg_open("offline.news");
-  onkey=msg_int(ONKEY,0,129);
-  defnews=msg_bool(DEFNEWS);
-  newsfile=msg_string(NEWSFILE);
-  msg_setlanguage(thisuseracc.language);
+	msg = msg_open ("offline.news");
+	onkey = msg_int (ONKEY, 0, 129);
+	defnews = msg_bool (DEFNEWS);
+	newsfile = msg_string (NEWSFILE);
+	msg_setlanguage (thisuseracc.language);
 }
 
 
 void
-done()
+done ()
 {
-  msg_close(msg);
+	msg_close (msg);
 }
 
 
 void
-warn()
+warn ()
 {
-  fprintf(stderr,"This is a Mailer plugin. ");
-  fprintf(stderr,"It should not be run by the user.\n");
-  exit(1);
+	fprintf (stderr, "This is a Mailer plugin. ");
+	fprintf (stderr, "It should not be run by the user.\n");
+	exit (1);
 }
 
 
 mod_info_t mod_info_offline_news = {
-  "offline.news",
-  "Mailer Plugin: News Bulletins",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Packages logon news bulletins.",
-  RCS_VER,
-  "1.0",
-  {0,NULL},			/* Login handler */
-  {0,NULL},			/* Interactive handler */
-  {0,NULL},			/* Install logout handler */
-  {0,NULL},			/* Hangup handler */
-  {0,NULL},			/* Cleanup handler */
-  {0,NULL}			/* Delete user handler */
+	"offline.news",
+	"Mailer Plugin: News Bulletins",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Packages logon news bulletins.",
+	RCS_VER,
+	"1.0",
+	{0, NULL},		/* Login handler */
+	{0, NULL},		/* Interactive handler */
+	{0, NULL},		/* Install logout handler */
+	{0, NULL},		/* Hangup handler */
+	{0, NULL},		/* Cleanup handler */
+	{0, NULL}		/* Delete user handler */
 };
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  progname=mod_info_offline_news.progname;
-  mod_setinfo(&mod_info_offline_news);
+	progname = mod_info_offline_news.progname;
+	mod_setinfo (&mod_info_offline_news);
 
-  if(argc!=2)return mod_main(argc,argv);
+	if (argc != 2)
+		return mod_main (argc, argv);
 
-  if(!strcmp(argv[1],"--setup")){
-    atexit(done);
-    init();
-    setup();
-  } else if(!strcmp(argv[1],"--download")){
-    atexit(done);
-    init();
-    return ondownload();
-  }
+	if (!strcmp (argv[1], "--setup")) {
+		atexit (done);
+		init ();
+		setup ();
+	} else if (!strcmp (argv[1], "--download")) {
+		atexit (done);
+		init ();
+		return ondownload ();
+	}
 
-  /* This should only return help, info, etc */
-  return mod_main(argc,argv);
+	/* This should only return help, info, etc */
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

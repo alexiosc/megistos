@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -51,10 +54,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -66,227 +67,258 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 
 
 static char
-attmenu()
+attmenu ()
 {
-  char c;
+	char    c;
 
-  cnc_end();
-  for(;;){
-    fmt_lastresult=0;
-    inp_get(1);
-    if(!margc)return 0;
-    cnc_begin();
-    c=toupper(cnc_chr());
-    cnc_end();
-    if(margc && inp_isX(margv[0]))return 'X';
-    else if(margc && (c=='?'||sameas(margv[0],"?"))){
-      return '?';
-    } else if(strchr("YNAOPM",c))return toupper(c);
-    else {
-      prompt(QWKCPER);
-      return 0;
-    }
-  }
-  return 0;
-}
-
-
-void
-previewheader(struct reqidx *idx)
-{
-  struct message msg;
-  goclub(sameas(idx->reqarea,EMAILCLUBNAME)?NULL:idx->reqarea);
-  getmsgheader(idx->msgno,&msg);
-  prompt(QWKCPHH);
-  msg_set(emailclubs_msg);
-  showheader(idx->reqarea,&msg);
-  msg_set(mail_msg);
-  prompt(QWKCPHF);
-  prompt(QWKCPHD);
-}
-
-
-void
-doatt()
-{
-  struct reqidx idx;
-  int res;
-  int p=-1;
-  int warn=0;
-  int lock=0;
-  int shown=0;
-  char opt;
-
-  res=getfirstreq(&idx);
-
-  while(res){
-    struct stat st;
-
-    if(idx.reqflags&RQF_INVIS)goto next;
-
-    if(!shown){
-      shown=1;
-      prompt(QWKCOPY);
-    }
-
-    if(p!=idx.priority){
-      switch(p=idx.priority){
-      case RQP_POSTPONE:
-	prompt(QWKCPPPN);
-	break;
-      case RQP_ATT:
-	prompt(QWKCPATT);
-	break;
-      case RQP_ATTREQ:
-	prompt(QWKCPREQ);
-	break;
-      default:
-	prompt(QWKCPOTH);
-      }
-      prompt(QWKCPHD);
-    }
-    if(idx.priority!=RQP_ATT)warn++;
-
-
-    /* Stat the file and report size if found */
-
-    if(stat(idx.reqfname,&st)){
-      prompt(QWKCPTB,idx.dosfname,idx.reqarea,0);
-      prompt(QWKCPNF);
-      goto next;
-   }
-
-    /* Insert attachment into the packet */
-
-    opt=0;
-    if(idx.priority==RQP_ATT){
-      if(prefs.flags&OMF_ATTASK)opt=0;
-      else if(prefs.flags&OMF_ATTYES)opt='Y';
-      else opt='I';
-    } else {
-      if(prefs.flags&OMF_REQASK)opt=0;
-      else if(prefs.flags&OMF_REQYES)opt='Y';
-      else opt='I';
-    }
-    if(lock)opt=lock=='A'?'Y':'N';
-
-    if(opt)prompt(QWKCPTB,idx.dosfname,idx.reqarea,st.st_size);
-
-    /* Ask user about what to do with file */
-
-    else if(!opt)for(;;){
-      prompt(QWKCPTB,idx.dosfname,idx.reqarea,st.st_size);
-      prompt(QWKCPAC);
-
-      opt=attmenu();
-      if(opt=='?'){
-	prompt(QWKASKH);
-	prompt(QWKCPHD);
-	continue;
-      } else if(!opt){
-	prompt(QWKCPER);
-	continue;
-      } else if(opt=='M')previewheader(&idx);
-      else if(opt=='X')abort();
-      else break;
-    }
-
-    if(opt=='A'||opt=='O'){
-      lock=opt;
-      opt=lock=='A'?'Y':'N';
-    }
-
-    switch(opt){
-
-      /* Copying files to the QWK packet */
-
-    case 'Y':
-
-      /* Enter the club and check for download permissions */
-
-      if(sameas(idx.reqarea,EMAILCLUBNAME)){
-	goclub(NULL);
-      } else {
-	goclub(idx.reqarea);
-	if(getclubax(&thisuseracc,idx.reqarea)<CAX_DNLOAD){
-	  prompt(QWKCPNA);
-	  break;
-	} else {
-	  struct message msg;
-
-	  /* Check if the file is approved */
-
-	  bzero(&msg,sizeof(msg));
-	  getmsgheader(idx.msgno,&msg);
-	  if((msg.flags&MSF_APPROVD)==0&&
-	     getclubax(&thisuseracc,msg.club)<CAX_COOP){
-	    prompt(QWKCPAP);
-	    break;
-	  }
+	cnc_end ();
+	for (;;) {
+		fmt_lastresult = 0;
+		inp_get (1);
+		if (!margc)
+			return 0;
+		cnc_begin ();
+		c = toupper (cnc_chr ());
+		cnc_end ();
+		if (margc && inp_isX (margv[0]))
+			return 'X';
+		else if (margc && (c == '?' || sameas (margv[0], "?"))) {
+			return '?';
+		} else if (strchr ("YNAOPM", c))
+			return toupper (c);
+		else {
+			prompt (QWKCPER);
+			return 0;
+		}
 	}
-      }
-
-      /* Copy the file into the packet */
-
-      prompt(QWKCPCP);
-      if(fcopy(idx.reqfname,idx.dosfname))prompt(QWKCPIO);
-      prompt(QWKCPOK);
-
-      /* Remove the current request from the database */
-      
-      if(!rmrequest(&idx)){
-	error_fatal("Unable to remove request %d from the database.",
-	      idx.reqnum);
-      }
-      break;
-
-
-      /* Aborting files */
-
-    case 'N':
-
-      if(!rmrequest(&idx)){
-	error_fatal("Unable to remove request %d from the database.",
-	      idx.reqnum);
-      }
-      prompt(QWKCPCA);
-      break;
-
-
-      /* Postponing files  */
-
-    default:
-
-      /* Just change the priority and update the record */
-
-      idx.reqflags|=RQF_POSTPONE;
-      if(idx.priority==RQP_ATT)idx.priority=RQP_POSTPONE;
-      if(!updrequest(&idx)){
-	error_fatal("Unable to update request %d.",idx.reqnum);
-      }
-      prompt(QWKCPPO);
-    }
-
-
-    /* Process next request */
-
-  next:
-    res=getnextreq(&idx);
-  }
-
-  if(warn&&(prefs.flags&OMF_REQ)==0)prompt(ATTLEFT);
+	return 0;
 }
+
+
+void
+previewheader (struct reqidx *idx)
+{
+	struct message msg;
+
+	goclub (sameas (idx->reqarea, EMAILCLUBNAME) ? NULL : idx->reqarea);
+	getmsgheader (idx->msgno, &msg);
+	prompt (QWKCPHH);
+	msg_set (emailclubs_msg);
+	showheader (idx->reqarea, &msg);
+	msg_set (mail_msg);
+	prompt (QWKCPHF);
+	prompt (QWKCPHD);
+}
+
+
+void
+doatt ()
+{
+	struct reqidx idx;
+	int     res;
+	int     p = -1;
+	int     warn = 0;
+	int     lock = 0;
+	int     shown = 0;
+	char    opt;
+
+	res = getfirstreq (&idx);
+
+	while (res) {
+		struct stat st;
+
+		if (idx.reqflags & RQF_INVIS)
+			goto next;
+
+		if (!shown) {
+			shown = 1;
+			prompt (QWKCOPY);
+		}
+
+		if (p != idx.priority) {
+			switch (p = idx.priority) {
+			case RQP_POSTPONE:
+				prompt (QWKCPPPN);
+				break;
+			case RQP_ATT:
+				prompt (QWKCPATT);
+				break;
+			case RQP_ATTREQ:
+				prompt (QWKCPREQ);
+				break;
+			default:
+				prompt (QWKCPOTH);
+			}
+			prompt (QWKCPHD);
+		}
+		if (idx.priority != RQP_ATT)
+			warn++;
+
+
+		/* Stat the file and report size if found */
+
+		if (stat (idx.reqfname, &st)) {
+			prompt (QWKCPTB, idx.dosfname, idx.reqarea, 0);
+			prompt (QWKCPNF);
+			goto next;
+		}
+
+		/* Insert attachment into the packet */
+
+		opt = 0;
+		if (idx.priority == RQP_ATT) {
+			if (prefs.flags & OMF_ATTASK)
+				opt = 0;
+			else if (prefs.flags & OMF_ATTYES)
+				opt = 'Y';
+			else
+				opt = 'I';
+		} else {
+			if (prefs.flags & OMF_REQASK)
+				opt = 0;
+			else if (prefs.flags & OMF_REQYES)
+				opt = 'Y';
+			else
+				opt = 'I';
+		}
+		if (lock)
+			opt = lock == 'A' ? 'Y' : 'N';
+
+		if (opt)
+			prompt (QWKCPTB, idx.dosfname, idx.reqarea,
+				st.st_size);
+
+		/* Ask user about what to do with file */
+
+		else if (!opt)
+			for (;;) {
+				prompt (QWKCPTB, idx.dosfname, idx.reqarea,
+					st.st_size);
+				prompt (QWKCPAC);
+
+				opt = attmenu ();
+				if (opt == '?') {
+					prompt (QWKASKH);
+					prompt (QWKCPHD);
+					continue;
+				} else if (!opt) {
+					prompt (QWKCPER);
+					continue;
+				} else if (opt == 'M')
+					previewheader (&idx);
+				else if (opt == 'X')
+					abort ();
+				else
+					break;
+			}
+
+		if (opt == 'A' || opt == 'O') {
+			lock = opt;
+			opt = lock == 'A' ? 'Y' : 'N';
+		}
+
+		switch (opt) {
+
+			/* Copying files to the QWK packet */
+
+		case 'Y':
+
+			/* Enter the club and check for download permissions */
+
+			if (sameas (idx.reqarea, EMAILCLUBNAME)) {
+				goclub (NULL);
+			} else {
+				goclub (idx.reqarea);
+				if (getclubax (&thisuseracc, idx.reqarea) <
+				    CAX_DNLOAD) {
+					prompt (QWKCPNA);
+					break;
+				} else {
+					struct message msg;
+
+					/* Check if the file is approved */
+
+					bzero (&msg, sizeof (msg));
+					getmsgheader (idx.msgno, &msg);
+					if ((msg.flags & MSF_APPROVD) == 0 &&
+					    getclubax (&thisuseracc,
+						       msg.club) < CAX_COOP) {
+						prompt (QWKCPAP);
+						break;
+					}
+				}
+			}
+
+			/* Copy the file into the packet */
+
+			prompt (QWKCPCP);
+			if (fcopy (idx.reqfname, idx.dosfname))
+				prompt (QWKCPIO);
+			prompt (QWKCPOK);
+
+			/* Remove the current request from the database */
+
+			if (!rmrequest (&idx)) {
+				error_fatal
+				    ("Unable to remove request %d from the database.",
+				     idx.reqnum);
+			}
+			break;
+
+
+			/* Aborting files */
+
+		case 'N':
+
+			if (!rmrequest (&idx)) {
+				error_fatal
+				    ("Unable to remove request %d from the database.",
+				     idx.reqnum);
+			}
+			prompt (QWKCPCA);
+			break;
+
+
+			/* Postponing files  */
+
+		default:
+
+			/* Just change the priority and update the record */
+
+			idx.reqflags |= RQF_POSTPONE;
+			if (idx.priority == RQP_ATT)
+				idx.priority = RQP_POSTPONE;
+			if (!updrequest (&idx)) {
+				error_fatal ("Unable to update request %d.",
+					     idx.reqnum);
+			}
+			prompt (QWKCPPO);
+		}
+
+
+		/* Process next request */
+
+	      next:
+		res = getnextreq (&idx);
+	}
+
+	if (warn && (prefs.flags & OMF_REQ) == 0)
+		prompt (ATTLEFT);
+}
+
+
+/* End of File */

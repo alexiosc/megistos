@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -38,10 +41,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #define __TELEPLUGIN__
@@ -60,10 +61,10 @@ const char *__RCS=RCS_VER;
 #include <bbsinclude.h>
 #include <mbk/mbk_telecon.bg.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "plugins.h"
-#include "telecon.bg.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/plugins.h>
+#include <megistos/telecon.bg.h>
 
 
 
@@ -71,21 +72,23 @@ static int fx_d1, fx_d2;
 
 
 static char *
-fx_firstroll(struct chanusr *u)
+fx_firstroll (struct chanusr *u)
 {
-  char s1[80], s2[80];
+	char    s1[80], s2[80];
 
-  if(sameas(u->userid,player[0])||sameas(u->userid,player[1]))return NULL;
+	if (sameas (u->userid, player[0]) || sameas (u->userid, player[1]))
+		return NULL;
 
-  strcpy(s1,msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language));
-  strcpy(s2,msg_getunitl(SEXML,sex[1]==USX_MALE,othruseracc.language));
+	strcpy (s1,
+		msg_getunitl (SEXM, sex[0] == USX_MALE, othruseracc.language));
+	strcpy (s2,
+		msg_getunitl (SEXML, sex[1] == USX_MALE,
+			      othruseracc.language));
 
-  sprintf(fx_prompt,msg_getl(ROL13RD,othruseracc.language),
-	  s1,player[0],fx_d1,
-	  s2,player[1],fx_d2,
-	  s1,player[0]);
+	sprintf (fx_prompt, msg_getl (ROL13RD, othruseracc.language),
+		 s1, player[0], fx_d1, s2, player[1], fx_d2, s1, player[0]);
 
-  return fx_prompt;
+	return fx_prompt;
 }
 
 
@@ -93,64 +96,67 @@ fx_firstroll(struct chanusr *u)
 /* Do the first roll. If necessary, swap the two players round. */
 
 void
-bg_firstroll()
+bg_firstroll ()
 {
-  int d1, d2;
-  
-
-  /* Roll the dice */
-
-  do {
-    d1=rnd6();
-    d2=rnd6();
-  } while(d1==d2);
+	int     d1, d2;
 
 
-  /* Swap the players, if we needs to */
+	/* Roll the dice */
 
-  if(d1>d2){
-    cturn=1;
-  } else {
-    char tmp[24];
-
-    strcpy(tmp,player[0]);	/* Swap player names. player[0] has white */
-    strcpy(player[0],player[1]);
-    strcpy(player[1],tmp);
-
-    tmp[0]=sex[0];		/* Swapping sexes? Definitely kinky */
-    sex[0]=sex[1];
-    sex[1]=tmp[0];
-
-    tmp[0]=d1;			/* Make sure d1 is the winning roll */
-    d1=d2;
-    d2=tmp[0];
-    cturn=-1;
-  }
+	do {
+		d1 = rnd6 ();
+		d2 = rnd6 ();
+	} while (d1 == d2);
 
 
-  /* Notify winner */
+	/* Swap the players, if we needs to */
 
-  if(!usr_insys(player[0],0))exit(0);
-  sprompt_other(othrshm,out_buffer,ROLL1WIN,
-		msg_getunitl(SEXM,sex[1]==USX_MALE,othruseracc.language),
-		player[1],
-		d2,d1);
-  usr_injoth(&othruseronl,out_buffer,0);
-	  
+	if (d1 > d2) {
+		cturn = 1;
+	} else {
+		char    tmp[24];
 
-  /* Notify loser */
+		strcpy (tmp, player[0]);	/* Swap player names. player[0] has white */
+		strcpy (player[0], player[1]);
+		strcpy (player[1], tmp);
 
-  if(!usr_insys(player[1],0))exit(0);
-  sprompt_other(othrshm,out_buffer,ROLL1LOS,
-		msg_getunitl(SEXM,sex[0]==USX_MALE,othruseracc.language),
-		player[0],
-		d1,d2);
-  usr_injoth(&othruseronl,out_buffer,0);
-	  
+		tmp[0] = sex[0];	/* Swapping sexes? Definitely kinky */
+		sex[0] = sex[1];
+		sex[1] = tmp[0];
 
-  /* Notify everyone else */
-  
-  fx_d1=d1;
-  fx_d2=d2;
-  broadcastchnall(channel,fx_firstroll,1);
+		tmp[0] = d1;	/* Make sure d1 is the winning roll */
+		d1 = d2;
+		d2 = tmp[0];
+		cturn = -1;
+	}
+
+
+	/* Notify winner */
+
+	if (!usr_insys (player[0], 0))
+		exit (0);
+	sprompt_other (othrshm, out_buffer, ROLL1WIN,
+		       msg_getunitl (SEXM, sex[1] == USX_MALE,
+				     othruseracc.language), player[1], d2, d1);
+	usr_injoth (&othruseronl, out_buffer, 0);
+
+
+	/* Notify loser */
+
+	if (!usr_insys (player[1], 0))
+		exit (0);
+	sprompt_other (othrshm, out_buffer, ROLL1LOS,
+		       msg_getunitl (SEXM, sex[0] == USX_MALE,
+				     othruseracc.language), player[0], d1, d2);
+	usr_injoth (&othruseronl, out_buffer, 0);
+
+
+	/* Notify everyone else */
+
+	fx_d1 = d1;
+	fx_d2 = d2;
+	broadcastchnall (channel, fx_firstroll, 1);
 }
+
+
+/* End of File */

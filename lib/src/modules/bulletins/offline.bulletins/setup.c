@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,60 +65,71 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.bulletins.h"
-#include "../../mailer.h"
-#include "mbk_offline.bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.bulletins.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.bulletins.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __BULLETINS_UNAMBIGUOUS__
-#include "mbk_bulletins.h"
+#include <megistos/mbk_bulletins.h>
 
 
 struct prefs prefs;
 
 
-void readprefs(struct prefs *prefs)
+void
+readprefs (struct prefs *prefs)
 {
-  if(loadprefs(progname,prefs)!=1){
-    bzero(prefs,sizeof(struct prefs));
-    prefs->flags=defblt?OBF_INDEX:0;
-    if(defansi)prefs->flags|=OBF_ANSI;
-    writeprefs(prefs);
-  }
-}
-
-
-void writeprefs(struct prefs *prefs)
-{
-  saveprefs(progname,sizeof(struct prefs),prefs);
+	if (loadprefs (progname, prefs) != 1) {
+		bzero (prefs, sizeof (struct prefs));
+		prefs->flags = defblt ? OBF_INDEX : 0;
+		if (defansi)
+			prefs->flags |= OBF_ANSI;
+		writeprefs (prefs);
+	}
 }
 
 
 void
-setup()
+writeprefs (struct prefs *prefs)
 {
-  readprefs(&prefs);
-
-  sprintf(inp_buffer,"%s\n%s\nOK\nCANCEL\n",
-	  prefs.flags&OBF_INDEX?"on":"off",
-	  prefs.flags&OBF_ANSI?"on":"off");
-
-  if(dialog_run("offline.bulletins",OBVT,OBLT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    return;
-  }
-
-  dialog_parse(inp_buffer);
-
-  if(sameas(margv[4],"OK")||sameas(margv[4],margv[2])){
-    if(sameas("on",margv[0]))prefs.flags|=OBF_INDEX;
-    else prefs.flags&=~OBF_INDEX;
-    if(sameas("on",margv[1]))prefs.flags|=OBF_ANSI;
-    else prefs.flags&=~OBF_ANSI;
-
-    saveprefs(progname,sizeof(prefs),&prefs);
-  }
+	saveprefs (progname, sizeof (struct prefs), prefs);
 }
+
+
+void
+setup ()
+{
+	readprefs (&prefs);
+
+	sprintf (inp_buffer, "%s\n%s\nOK\nCANCEL\n",
+		 prefs.flags & OBF_INDEX ? "on" : "off",
+		 prefs.flags & OBF_ANSI ? "on" : "off");
+
+	if (dialog_run ("offline.bulletins", OBVT, OBLT, inp_buffer, MAXINPLEN)
+	    != 0) {
+		error_log ("Unable to run data entry subsystem");
+		return;
+	}
+
+	dialog_parse (inp_buffer);
+
+	if (sameas (margv[4], "OK") || sameas (margv[4], margv[2])) {
+		if (sameas ("on", margv[0]))
+			prefs.flags |= OBF_INDEX;
+		else
+			prefs.flags &= ~OBF_INDEX;
+		if (sameas ("on", margv[1]))
+			prefs.flags |= OBF_ANSI;
+		else
+			prefs.flags &= ~OBF_ANSI;
+
+		saveprefs (progname, sizeof (prefs), &prefs);
+	}
+}
+
+
+/* End of File */

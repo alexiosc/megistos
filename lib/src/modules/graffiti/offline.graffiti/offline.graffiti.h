@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,14 +44,13 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
-#include "typhoon.h"
-#include "../offline.mail/request.h"
-#include "../offline.mail/req.h"
+#include <megistos/typhoon.h>
+#include <megistos/../offline.mail/request.h>
+#include <megistos/../offline.mail/req.h>
 
 
 /* offline.news.c */
@@ -57,14 +59,14 @@ extern promptblock_t *msg;
 extern promptblock_t *mailer_msg;
 extern promptblock_t *graffiti_msg;
 
-extern int  entrykey;
-extern int  ovrkey;
-extern int  maxmsgs;
-extern int  maxsize;
+extern int entrykey;
+extern int ovrkey;
+extern int maxmsgs;
+extern int maxsize;
 
-extern int  defwall;
-extern int  defansi;
-extern int  deflins;
+extern int defwall;
+extern int defansi;
+extern int deflins;
 extern char *wallfil;
 
 extern char *progname;
@@ -73,10 +75,10 @@ extern char *progname;
 /* setup.c */
 
 struct prefs {
-  int flags;
-  int numlines;
+	int     flags;
+	int     numlines;
 
-  char dummy[60];
+	char    dummy[60];
 };
 
 
@@ -87,25 +89,28 @@ struct prefs prefs;
 #define OGF_ANSI   0x0002
 
 
-void readprefs(struct prefs *prefs);
+void    readprefs (struct prefs *prefs);
 
-void writeprefs(struct prefs *prefs);
+void    writeprefs (struct prefs *prefs);
 
-void setup();
+void    setup ();
 
 
 /* download.c */
 
-int ogdownload();
+int     ogdownload ();
 
 
 /* setup.c */
 
-void setup();
+void    setup ();
 
 
 /* upload.c */
 
-int ogupload();
+int     ogupload ();
 
 
+
+
+/* End of File */

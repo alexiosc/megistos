@@ -36,6 +36,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -48,10 +51,13 @@
 #ifndef __CARDS_H
 #define __CARDS_H
 
-char card_value(int cardidx);
-char card_sign(int cardidx);
-void map_cards(int *array, int count);
-void draw_cards(int *array, int count);
-char *buf_index(int index);
+char    card_value (int cardidx);
+char    card_sign (int cardidx);
+void    map_cards (int *array, int count);
+void    draw_cards (int *array, int count);
+char   *buf_index (int index);
 
-#endif	/* __CARDS_H */
+#endif				/* __CARDS_H */
+
+
+/* End of File */

@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -23,10 +26,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,21 +72,24 @@ const char *__RCS=RCS_VER;
 
 				/* name of executable object programs */
 
-int	pnum	= 2;		/* color of player:
-					-1 = white
-					 1 = red
-					 0 = both
-					 2 = not yet init'ed */
+int     pnum = 2;		/* color of player:
+				   -1 = white
+				   1 = red
+				   0 = both
+				   2 = not yet init'ed */
 
-int	acnt	= 0;		/* length of args */
-int	aflag	= 1;		/* flag to ask for rules or instructions */
-int	bflag	= 0;		/* flag for automatic board printing */
-int	cflag	= 0;		/* case conversion flag */
-int	hflag	= 1;		/* flag for cleaning screen */
-int	mflag	= 0;		/* backgammon flag */
-int	raflag	= 0;		/* 'roll again' flag for recovered game */
-int	rflag	= 0;		/* recovered game flag */
-int	iroll	= 0;		/* special flag for inputting rolls */
-int	rfl	= 0;
+int     acnt = 0;		/* length of args */
+int     aflag = 1;		/* flag to ask for rules or instructions */
+int     bflag = 0;		/* flag for automatic board printing */
+int     cflag = 0;		/* case conversion flag */
+int     hflag = 1;		/* flag for cleaning screen */
+int     mflag = 0;		/* backgammon flag */
+int     raflag = 0;		/* 'roll again' flag for recovered game */
+int     rflag = 0;		/* recovered game flag */
+int     iroll = 0;		/* special flag for inputting rolls */
+int     rfl = 0;
 
-char	*color[] = {"White","Red","white","red"};
+char   *color[] = { "White", "Red", "white", "red" };
+
+
+/* End of File */

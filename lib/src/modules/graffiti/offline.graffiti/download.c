@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,114 +72,128 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.graffiti.h"
-#include "../../mailer.h"
-#include "mbk_offline.graffiti.h"
-#include "../../../graffiti/graffiti.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.graffiti.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.graffiti.h>
+#include <megistos/../../../graffiti/graffiti.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __GRAFFITI_UNAMBIGUOUS__
-#include "mbk_graffiti.h"
+#include <megistos/mbk_graffiti.h>
 
 
 static int
-addtodoorid()
+addtodoorid ()
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen("door.id","a"))==NULL){
-    fclose(fp);
-    return 1;
-  }
-  fprintf(fp,"CONTROLTYPE = WALL\rFILE\n_WALL = %s\r\n",wallfil);
-  fclose(fp);
-  return 0;
+	if ((fp = fopen ("door.id", "a")) == NULL) {
+		fclose (fp);
+		return 1;
+	}
+	fprintf (fp, "CONTROLTYPE = WALL\rFILE\n_WALL = %s\r\n", wallfil);
+	fclose (fp);
+	return 0;
 }
 
 
-static char *zonk(char *s)
+static char *
+zonk (char *s)
 {
-  int i;
-  for(i=strlen(s)-1;i>0;i--)if(s[i]==32)s[i]=0; else break;
-  return s;
+	int     i;
+
+	for (i = strlen (s) - 1; i > 0; i--)
+		if (s[i] == 32)
+			s[i] = 0;
+		else
+			break;
+	return s;
 }
 
 
 int
-ogdownload()
+ogdownload ()
 {
-  FILE           *fp, *out;
-  struct wallmsg wallmsg;
-  struct stat    st;
-  char           buf[8192];
-  int            shown=0;
-  int            oldansi;
-  int            numlines=0;
+	FILE   *fp, *out;
+	struct wallmsg wallmsg;
+	struct stat st;
+	char    buf[8192];
+	int     shown = 0;
+	int     oldansi;
+	int     numlines = 0;
 
-  if(!loadprefs(USERQWK,&userqwk)){
-    error_fatal("Unable to read user mailer preferences for %s",
-	  thisuseracc.userid);
-  }
+	if (!loadprefs (USERQWK, &userqwk)) {
+		error_fatal ("Unable to read user mailer preferences for %s",
+			     thisuseracc.userid);
+	}
 
-  readxlation();
-  xlationtable=(userqwk.flags&OMF_TR)>>OMF_SHIFT;
+	readxlation ();
+	xlationtable = (userqwk.flags & OMF_TR) >> OMF_SHIFT;
 
-  readprefs(&prefs);
+	readprefs (&prefs);
 
-  if(!(prefs.flags&OGF_YES))return 0;
+	if (!(prefs.flags & OGF_YES))
+		return 0;
 
-  prompt(DLHDR);
-  if(!key_owns(&thisuseracc,entrykey)){
-    prompt(DLNAX);
-    return 0;
-  }
-  
-  if(stat(mkfname(WALLFILE),&st)){
-    prompt(DLDMT);
-    return 0;
-  }
+	prompt (DLHDR);
+	if (!key_owns (&thisuseracc, entrykey)) {
+		prompt (DLNAX);
+		return 0;
+	}
 
-  msg_set(graffiti_msg);
-  oldansi=out_flags&OFL_ANSIENABLE;
-  out_setansiflag((prefs.flags&OGF_ANSI)==1);
+	if (stat (mkfname (WALLFILE), &st)) {
+		prompt (DLDMT);
+		return 0;
+	}
 
-  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
-    error_fatalsys("Unable to open %s for reading.",mkfname(WALLFILE));
-  }
+	msg_set (graffiti_msg);
+	oldansi = out_flags & OFL_ANSIENABLE;
+	out_setansiflag ((prefs.flags & OGF_ANSI) == 1);
 
-  if((out=fopen(wallfil,"w"))==NULL){
-    error_fatalsys("Unable to create wall file %s",wallfil);
-  }
+	if ((fp = fopen (mkfname (WALLFILE), "r")) == NULL) {
+		error_fatalsys ("Unable to open %s for reading.",
+				mkfname (WALLFILE));
+	}
 
-  fread(&wallmsg,sizeof(wallmsg),1,fp);
-  while(!feof(fp)){
-    if(!fread(&wallmsg,sizeof(wallmsg),1,fp))continue;
-    if(wallmsg.userid[0]){
-      if(!shown){
-	shown=1;
-	sprompt(buf,GRAFFITI_WALLHEAD);
-	fputs(buf,out);
-      }
-      zonk(wallmsg.message);
-      fprintf(out,"%s%s\r\n",
-	      prefs.flags&OGF_ANSI?colors[rnd(MAXCOLOR)]:"",
-	      wallmsg.message);
-      numlines++;
-      if((prefs.numlines>0) && numlines>=prefs.numlines)break;
-    }
-  }
-  sprompt(buf,GRAFFITI_WALLEND);
-  fputs(buf,out);
+	if ((out = fopen (wallfil, "w")) == NULL) {
+		error_fatalsys ("Unable to create wall file %s", wallfil);
+	}
 
-  out_setansiflag(oldansi);
-  fclose(fp);
-  fclose(out);
-  unix2dos(wallfil,wallfil);
-  msg_reset();
-  prompt(DLOK);
+	fread (&wallmsg, sizeof (wallmsg), 1, fp);
+	while (!feof (fp)) {
+		if (!fread (&wallmsg, sizeof (wallmsg), 1, fp))
+			continue;
+		if (wallmsg.userid[0]) {
+			if (!shown) {
+				shown = 1;
+				sprompt (buf, GRAFFITI_WALLHEAD);
+				fputs (buf, out);
+			}
+			zonk (wallmsg.message);
+			fprintf (out, "%s%s\r\n",
+				 prefs.
+				 flags & OGF_ANSI ? colors[rnd (MAXCOLOR)] :
+				 "", wallmsg.message);
+			numlines++;
+			if ((prefs.numlines > 0) && numlines >= prefs.numlines)
+				break;
+		}
+	}
+	sprompt (buf, GRAFFITI_WALLEND);
+	fputs (buf, out);
 
-  return addtodoorid();
+	out_setansiflag (oldansi);
+	fclose (fp);
+	fclose (out);
+	unix2dos (wallfil, wallfil);
+	msg_reset ();
+	prompt (DLOK);
+
+	return addtodoorid ();
 }
+
+
+/* End of File */

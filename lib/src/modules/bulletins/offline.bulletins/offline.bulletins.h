@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -41,15 +44,14 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
-#include "typhoon.h"
-#include "../../../bulletins/bltidx.h"
-#include "../offline.mail/request.h"
-#include "../offline.mail/req.h"
+#include <megistos/typhoon.h>
+#include <megistos/../../../bulletins/bltidx.h>
+#include <megistos/../offline.mail/request.h>
+#include <megistos/../offline.mail/req.h>
 
 
 /* offline.news.c */
@@ -58,11 +60,11 @@ extern promptblock_t *msg;
 extern promptblock_t *bulletins_msg;
 extern promptblock_t *emailclubs_msg;
 
-extern int  defblt;
-extern int  defansi;
+extern int defblt;
+extern int defansi;
 extern char *bltidfn;
 
-extern int  sopkey;
+extern int sopkey;
 
 extern char *progname;
 
@@ -70,9 +72,9 @@ extern char *progname;
 /* setup.c */
 
 struct prefs {
-  int flags;
+	int     flags;
 
-  char dummy[60];
+	char    dummy[60];
 };
 
 
@@ -84,72 +86,75 @@ struct prefs prefs;
 #define OBF_REQIDX 0x04
 
 
-void readprefs(struct prefs *prefs);
+void    readprefs (struct prefs *prefs);
 
-void writeprefs(struct prefs *prefs);
+void    writeprefs (struct prefs *prefs);
 
-void setup();
+void    setup ();
 
 
 /* download.c */
 
-int obdownload();
+int     obdownload ();
 
 
 /* setup.c */
 
-void setup();
+void    setup ();
 
 
 /* upload.c */
 
-int obupload();
+int     obupload ();
 
 
 
 /* db.c */
 
-void dbopen();
+void    dbopen ();
 
-void dbclose();
+void    dbclose ();
 
-int dbgetfirst();
+int     dbgetfirst ();
 
-int dbgetlast();
+int     dbgetlast ();
 
-int dbins(struct bltidx *blt);
+int     dbins (struct bltidx *blt);
 
-int dbexists(char *area, char *fname);
+int     dbexists (char *area, char *fname);
 
-void dbget(struct bltidx *blt);
+void    dbget (struct bltidx *blt);
 
-int dblistfind(char *club, int num);
+int     dblistfind (char *club, int num);
 
-int dbfound();
+int     dbfound ();
 
-int dblistfirst();
+int     dblistfirst ();
 
-int dblistnext();
+int     dblistnext ();
 
-int dblistlast();
+int     dblistlast ();
 
-int dblistprev();
+int     dblistprev ();
 
-int dbnumexists(int num);
+int     dbnumexists (int num);
 
-int dbchkambiguity(char *fname);
+int     dbchkambiguity (char *fname);
 
-int dbupdate(struct bltidx *blt);
+int     dbupdate (struct bltidx *blt);
 
-int dbdelete();
+int     dbdelete ();
 
 
 /* clubhdr.c */
 
-int findclub(char *club);
+int     findclub (char *club);
 
-int loadclubhdr(char *club);
+int     loadclubhdr (char *club);
 
-int getdefaultax(useracc_t *uacc, char *club);
+int     getdefaultax (useracc_t * uacc, char *club);
 
-int getclubax(useracc_t *uacc, char *club);
+int     getclubax (useracc_t * uacc, char *club);
+
+
+/* End of File */

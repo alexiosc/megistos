@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -35,10 +38,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -58,83 +59,88 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "telecon.h"
-#include "plugins.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/plugins.h>
 
 
-int lucky_number;
+int     lucky_number;
 
 
 void
-controllingpart()
+controllingpart ()
 {
-  print("\033!JThis is the controlling part of the plugin.\n");
-  print("It behaves just like an ordinary Megistos BBS module ");
-  print("-- the plugin can interact with the user to establish ");
-  print("configuration options etc. \n");
-  print("Only the user who initially activates the plugin will ");
-  print("see this bit, IF a plug-in has it, of course.");
-  print("\033!)\n\n");
-  
-  for(lucky_number=-1;lucky_number<=0;){
-    print("Enter your lucky number (1-999): ");
-    inp_get(3);
-    lucky_number=atoi(inp_buffer);
-  }
+	print ("\033!JThis is the controlling part of the plugin.\n");
+	print ("It behaves just like an ordinary Megistos BBS module ");
+	print ("-- the plugin can interact with the user to establish ");
+	print ("configuration options etc. \n");
+	print ("Only the user who initially activates the plugin will ");
+	print ("see this bit, IF a plug-in has it, of course.");
+	print ("\033!)\n\n");
+
+	for (lucky_number = -1; lucky_number <= 0;) {
+		print ("Enter your lucky number (1-999): ");
+		inp_get (3);
+		lucky_number = atoi (inp_buffer);
+	}
 }
 
 
 static char fx_prompt[8192];
 struct pluginmsg p;
 
-char *
-fx_test(struct chanusr *u)
+char   *
+fx_test (struct chanusr *u)
 {
-  sprintf(fx_prompt,
-	  "\033!WHello %s, %s's lucky number is %d.\n%s Says '%s'\033!)\n",
-	  u->userid,thisuseracc.userid,lucky_number,p.userid,p.text);
-  return fx_prompt;
+	sprintf (fx_prompt,
+		 "\033!WHello %s, %s's lucky number is %d.\n%s Says '%s'\033!)\n",
+		 u->userid, thisuseracc.userid, lucky_number, p.userid,
+		 p.text);
+	return fx_prompt;
 }
 
 
-char *
-fx_end(struct chanusr *u)
+char   *
+fx_end (struct chanusr *u)
 {
-  strcpy(fx_prompt,"Finished with plugin, removing...\n");
-  return fx_prompt;
+	strcpy (fx_prompt, "Finished with plugin, removing...\n");
+	return fx_prompt;
 }
 
 
 void
-run()
+run ()
 {
-  int n;
-  int a=0;
+	int     n;
+	int     a = 0;
 
-  for(a=0;a<10;){
-    n=msgrcv(qid,(struct msg_buffer*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
-    if(n>0){
-      a++;
-      broadcastchnall(channel,fx_test,1);
-    }
-    usleep(50000);
-  }
-  broadcastchnall(channel,fx_end,1);
+	for (a = 0; a < 10;) {
+		n = msgrcv (qid, (struct msg_buffer *) &p,
+			    sizeof (p) - sizeof (long), 0, IPC_NOWAIT);
+		if (n > 0) {
+			a++;
+			broadcastchnall (channel, fx_test, 1);
+		}
+		usleep (50000);
+	}
+	broadcastchnall (channel, fx_end, 1);
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  mod_setprogname(argv[0]);
-  initplugin(argc,argv);
+	mod_setprogname (argv[0]);
+	initplugin (argc, argv);
 
-  controllingpart();
+	controllingpart ();
 
-  becomeserver();
+	becomeserver ();
 
-  run();
+	run ();
 
-  exit(0); 
+	exit (0);
 }
+
+
+/* End of File */

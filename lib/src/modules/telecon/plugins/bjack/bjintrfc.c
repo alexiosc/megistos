@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -59,15 +62,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
 
-#ifndef RCS_VER
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #ifdef MEGISTOS_BBS
@@ -78,46 +79,49 @@ const char *__RCS=RCS_VER;
 #undef LOGDIR
 #endif
 
-#include "bbs.h"
-#include "telecon.h"
-#include "plugins.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/plugins.h>
 
-#endif	/* MEGISTOS_BBS */
+#endif				/* MEGISTOS_BBS */
 
 
-#include "bjconf.h"
-#include "bjack.h"
-#include "bjintrfc.h"
+#include <megistos/bjconf.h>
+#include <megistos/bjack.h>
+#include <megistos/bjintrfc.h>
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-#include "mbk_bjack.h"
+#include <megistos/mbk_bjack.h>
 #endif
 
 #else
-#include "bjmsg.h"
+#include <megistos/bjmsg.h>
 
-#endif	/* BBSPROMPTS */
-
-
-char temp_prompt[8192];
-char pfix_prompt[3][50];		/* define 3 arrays for pre/post-fixes */
-char buffer[4096], buf1[4096];
+#endif				/* BBSPROMPTS */
 
 
-char *bj_get_prompt(int index)
+char    temp_prompt[8192];
+char    pfix_prompt[3][50];	/* define 3 arrays for pre/post-fixes */
+char    buffer[4096], buf1[4096];
+
+
+char   *
+bj_get_prompt (int index)
 {
 
-	strcpy(temp_prompt, "");
-	if (!index) return temp_prompt;
-	
+	strcpy (temp_prompt, "");
+	if (!index)
+		return temp_prompt;
+
 #ifdef BBSPROMPTS
-	msg_set(msg);
-	strcpy(temp_prompt, msg_get(index));
+	msg_set (msg);
+	strcpy (temp_prompt, msg_get (index));
 
 #ifdef DEBUG_LOG
-	bj_logmsg("--- bj_get_prompt(): read #%i len=%i text=%s", index, strlen(temp_prompt), temp_prompt);
+	bj_logmsg ("--- bj_get_prompt(): read #%i len=%i text=%s", index,
+		   strlen (temp_prompt), temp_prompt);
 #endif
 
 	return temp_prompt;
@@ -127,20 +131,23 @@ char *bj_get_prompt(int index)
 }
 
 
-char *bj_get_pfix(int pidx, int index, int value)
+char   *
+bj_get_pfix (int pidx, int index, int value)
 {
 
-	strcpy(pfix_prompt[pidx], "");
-	if (!index) return pfix_prompt[pidx];
-	
+	strcpy (pfix_prompt[pidx], "");
+	if (!index)
+		return pfix_prompt[pidx];
+
 #ifdef BBSPROMPTS
-	msg_set(msg);
+	msg_set (msg);
 
 /* if value=1 then get message (index), otherwise get message (index+1) */
-	strcpy(pfix_prompt[pidx], msg_getunit(index, value));
+	strcpy (pfix_prompt[pidx], msg_getunit (index, value));
 
 #ifdef DEBUG_LOG
-	bj_logmsg("--- bj_get_pfix: read #%i len=%i text=%s", index, strlen(pfix_prompt[pidx]), pfix_prompt[pidx]);
+	bj_logmsg ("--- bj_get_pfix: read #%i len=%i text=%s", index,
+		   strlen (pfix_prompt[pidx]), pfix_prompt[pidx]);
 #endif
 
 	return pfix_prompt[pidx];
@@ -149,60 +156,65 @@ char *bj_get_pfix(int pidx, int index, int value)
 #endif
 }
 
-char *fx_bj_msg(struct chanusr *u)
+char   *
+fx_bj_msg (struct chanusr *u)
 {
-  struct bj_player *pl;
+	struct bj_player *pl;
 
-  pl = player_list;
-  while (pl!=NULL) {
-    if (!strcasecmp(pl->userid, u->userid)) break;
-    pl=pl->next;
-  }
+	pl = player_list;
+	while (pl != NULL) {
+		if (!strcasecmp (pl->userid, u->userid))
+			break;
+		pl = pl->next;
+	}
 
-  if (!strcasecmp(bj_message.userid, u->userid)) {
-    sprint(out_buffer,bj_message.this_msg);
-    return ((out_buffer[0])?out_buffer:NULL);
-  } else {
-    sprint(out_buffer,bj_message.other_msg);
-    return((pl==NULL)?NULL:out_buffer[0]?out_buffer:NULL);
-  }
+	if (!strcasecmp (bj_message.userid, u->userid)) {
+		sprint (out_buffer, bj_message.this_msg);
+		return ((out_buffer[0]) ? out_buffer : NULL);
+	} else {
+		sprint (out_buffer, bj_message.other_msg);
+		return ((pl ==
+			 NULL) ? NULL : out_buffer[0] ? out_buffer : NULL);
+	}
 }
 
 
-void bj_broadcast_msg(int this_idx, int other_idx, char *userid, ...)
+void
+bj_broadcast_msg (int this_idx, int other_idx, char *userid, ...)
 {
-  va_list va_l;
+	va_list va_l;
 
-  char *buf2;
-	
-	strcpy(buf1, "");
-	
-	if (this_idx>0)
-		strcat(buf1, bj_get_prompt(this_idx));
+	char   *buf2;
 
-	strcat(buf1, "~~");
-	
-	if (other_idx>0)
-		strcat(buf1, bj_get_prompt(other_idx));
+	strcpy (buf1, "");
+
+	if (this_idx > 0)
+		strcat (buf1, bj_get_prompt (this_idx));
+
+	strcat (buf1, "~~");
+
+	if (other_idx > 0)
+		strcat (buf1, bj_get_prompt (other_idx));
 
 
-	strcpy(buffer, "");
-	va_start(va_l, userid);
-	vsprintf(out_buffer, buf1, va_l);
-	sprint(buffer,out_buffer);
-	va_end(va_l);
+	strcpy (buffer, "");
+	va_start (va_l, userid);
+	vsprintf (out_buffer, buf1, va_l);
+	sprint (buffer, out_buffer);
+	va_end (va_l);
 
 	buf2 = buffer;
 
 /* restore the two concatenated strings */
-	strcpy(bj_message.this_msg,strsep(&buf2, "~~"));
-	while (*buf2=='~') buf2++;				/* eliminate the tildes */
-	
-		
-	strcpy(bj_message.other_msg, buf2);
-	strcpy(bj_message.userid, userid);
+	strcpy (bj_message.this_msg, strsep (&buf2, "~~"));
+	while (*buf2 == '~')
+		buf2++;		/* eliminate the tildes */
 
-	
+
+	strcpy (bj_message.other_msg, buf2);
+	strcpy (bj_message.userid, userid);
+
+
 /*	
 	if (bj_message.this_msg[0]) {
 		sprintf(buffer, "\033!(%s\033!)", bj_message.this_msg);
@@ -215,7 +227,7 @@ void bj_broadcast_msg(int this_idx, int other_idx, char *userid, ...)
 	}
 */
 
-	broadcastchnall(bj_channel, fx_bj_msg, 1);
+	broadcastchnall (bj_channel, fx_bj_msg, 1);
 }
 
 
@@ -226,7 +238,8 @@ void bj_broadcast_msg(int this_idx, int other_idx, char *userid, ...)
 
 
 /* returns the credits that a player owns. It should call the apropriate library function */
-int bj_player_credits(struct bj_player *player)
+int
+bj_player_credits (struct bj_player *player)
 {
 
 #ifdef FAKE_POSTING
@@ -236,76 +249,86 @@ int bj_player_credits(struct bj_player *player)
 #else
 
 #ifdef MEGISTOS_BBS
-  useracc user, *uacc=&user;
-	  
-	if(!usr_insys(player->userid,0))usr_loadaccount(player->userid,uacc);
-	else uacc=&othruseracc;
-	if(!uacc) return 0;
-	
+	useracc user, *uacc = &user;
+
+	if (!usr_insys (player->userid, 0))
+		usr_loadaccount (player->userid, uacc);
+	else
+		uacc = &othruseracc;
+	if (!uacc)
+		return 0;
+
 	return uacc->credits;
 
-#endif	/* MEGISTOS_BBS */
+#endif				/* MEGISTOS_BBS */
 
-#endif	/* FAKE_POSTING */
+#endif				/* FAKE_POSTING */
 }
 
 
 /* posts a user some credits (+/-). It should call the apropriate library function */
-void bj_post_credits(struct bj_player *player, int credits)
+void
+bj_post_credits (struct bj_player *player, int credits)
 {
 
 #ifdef FAKE_POSTING
 	player->credits += credits;
 
-#else 
+#else
 
 #ifdef MEGISTOS_BBS
-	
+
 /* do not charge the damn sysops */
-	if ((player->flags&bjfNOCHARGE)!=0) return;
-	
+	if ((player->flags & bjfNOCHARGE) != 0)
+		return;
+
 
 /* this is extremely dangerous */
-	loadsysvars();
+	loadsysvars ();
 
 /* this is the  Megistos library function to post credits to a user */
-	usr_postcredits(player->userid, credits, 0);
+	usr_postcredits (player->userid, credits, 0);
 
 /* we done the first, shall we stop here? */
-	savesysvars();
-	
-#endif	/* MEGISTOS_BBS */
+	savesysvars ();
 
-#endif	/* FAKE_POSTING */
+#endif				/* MEGISTOS_BBS */
+
+#endif				/* FAKE_POSTING */
 
 
 /* log all credit postings for security reasons */
 #ifdef POST_LOG
 
 #ifdef FAKE_POSTING
-	bj_logmsg("*FAKE* Posting player %s [%i] credits", player->userid, credits);
+	bj_logmsg ("*FAKE* Posting player %s [%i] credits", player->userid,
+		   credits);
 #else
-	bj_logmsg("*REAL* Posting player %s [%i] credits", player->userid, credits);
+	bj_logmsg ("*REAL* Posting player %s [%i] credits", player->userid,
+		   credits);
 #endif
 
 /* NOTE: Logging is done after the library calls to ensure credit posting (!) */
 
-#endif	/* POST_LOG */
+#endif				/* POST_LOG */
 }
 
 
 /* return 1 for male, 0 for female (hope there won't be a third sex...) */
-int bj_player_sex(struct bj_player *player)
+int
+bj_player_sex (struct bj_player *player)
 {
 #ifdef MEGISTOS_BBS
-  useracc_t user, *uacc=&user;
-  
-	if (!usr_insys(player->userid, 0))usr_loadaccount(player->userid, uacc);
-	else 
-	uacc=&othruseracc;
-	if(!uacc) return 0;
-  
-	return ((uacc->sex=='M')?bjfSEX:0);
+	useracc_t user, *uacc = &user;
+
+	if (!usr_insys (player->userid, 0))
+		usr_loadaccount (player->userid, uacc);
+	else
+		uacc = &othruseracc;
+	if (!uacc)
+		return 0;
+
+	return ((uacc->sex == 'M') ? bjfSEX : 0);
 
 #endif
 
@@ -314,7 +337,8 @@ int bj_player_sex(struct bj_player *player)
 
 
 /* return 0 if player will be charged, 1 if he can bet to death */
-int bj_player_nocharge(struct bj_player *player)
+int
+bj_player_nocharge (struct bj_player *player)
 {
 #ifdef MEGISTOS_BBS
 /*
@@ -322,51 +346,59 @@ int bj_player_nocharge(struct bj_player *player)
   should be scanned and its users must not be charged for positive credits (subtract).
   Positive charges will be allowed, but can also be deactivated
 */
-  classrec_t class, *uclass=&class;
+	classrec_t class, *uclass = &class;
 
 /* check if option disabled */
-	if (!P_SYSOPS_NOCHARGE) return 0;
-	
-	uclass = cls_find(othruseracc.curclss);
-  
-	if (uclass->flags&CLF_NOCHRGE) return bjfNOCHARGE;
-	else return 0;
+	if (!P_SYSOPS_NOCHARGE)
+		return 0;
 
-#endif	/* MEGISTOS_BBS */
+	uclass = cls_find (othruseracc.curclss);
+
+	if (uclass->flags & CLF_NOCHRGE)
+		return bjfNOCHARGE;
+	else
+		return 0;
+
+#endif				/* MEGISTOS_BBS */
 
 	return 0;		/* just in case */
 }
 
 
 /* pass the userid and the command text */
-int bj_get_cmd(char *userid, char *text)
+int
+bj_get_cmd (char *userid, char *text)
 {
 #ifdef MEGISTOS_BBS
-  struct pluginmsg p;
-  int n;
+	struct pluginmsg p;
+	int     n;
 
-  if(thisuseronl.flags&OLF_MMCONCAT){
-    strcpy(text,thisuseronl.input);
-    strcpy(userid,thisuseronl.userid);
-    thisuseronl.flags&=~OLF_MMCONCAT;
-    return 1;
-  }
+	if (thisuseronl.flags & OLF_MMCONCAT) {
+		strcpy (text, thisuseronl.input);
+		strcpy (userid, thisuseronl.userid);
+		thisuseronl.flags &= ~OLF_MMCONCAT;
+		return 1;
+	}
 
-  n=msgrcv(qid,(struct msgbuf*)&p,sizeof(p)-sizeof(long),0,IPC_NOWAIT);
+	n = msgrcv (qid, (struct msgbuf *) &p, sizeof (p) - sizeof (long), 0,
+		    IPC_NOWAIT);
 
-  if (n>0) {
-    strcpy(userid, p.userid);
-    strcpy(text, p.text);
-		
-    return n;
-  } else {
-    userid[0]=0;
-    text[0]=0;
-  }
-	
-  return n;
+	if (n > 0) {
+		strcpy (userid, p.userid);
+		strcpy (text, p.text);
 
-#endif	/* MEGISTOS_BBS */
+		return n;
+	} else {
+		userid[0] = 0;
+		text[0] = 0;
+	}
 
-  return 0;
+	return n;
+
+#endif				/* MEGISTOS_BBS */
+
+	return 0;
 }
+
+
+/* End of File */

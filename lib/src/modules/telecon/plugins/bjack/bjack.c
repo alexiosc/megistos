@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -59,9 +62,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -75,134 +77,148 @@
 #ifdef MEGISTOS_BBS
 
 #define __TELEPLUGIN__
-#include "bbs.h"
-#include "telecon.h"
-#include "plugins.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/plugins.h>
 
-#endif	/* MEGISTOS_BBS */
+#endif				/* MEGISTOS_BBS */
 
-#include "bjver.h"
-#include "bjconf.h"
-#include "bjack.h"
-#include "bjintrfc.h"
+#include <megistos/bjver.h>
+#include <megistos/bjconf.h>
+#include <megistos/bjack.h>
+#include <megistos/bjintrfc.h>
 
 
 
-#ifndef RCS_VER
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-#include "mbk_bjack.h"
+#include <megistos/mbk_bjack.h>
 #endif
 
 #else
-#include "bjmsg.h"
+#include <megistos/bjmsg.h>
 
-#endif	/* BBSPROMPTS */
+#endif				/* BBSPROMPTS */
 
 
-const char MODULE_ID[] = "BlackJack "BJ_MAJORVERSION"."BJ_MINORVERSION" ["BJ_COMPILED_BY"] #"BJ_MAKE_NUMBER" "BJ_DATE;
+const char MODULE_ID[] =
+    "BlackJack " BJ_MAJORVERSION "." BJ_MINORVERSION " [" BJ_COMPILED_BY "] #"
+    BJ_MAKE_NUMBER " " BJ_DATE;
 
 
 void
-controllingpart()
+controllingpart ()
 {
-	srand(time(0));
+	srand (time (0));
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-	msg = msg_open("bjack");
-#endif	/* MEGISTOS_BBS */
+	msg = msg_open ("bjack");
+#endif				/* MEGISTOS_BBS */
 
-#endif	/* BBSPROMPTS */
+#endif				/* BBSPROMPTS */
 
-	bj_init();
+	bj_init ();
 
-	STATUS=STAT_NOGAME;
+	STATUS = STAT_NOGAME;
 	bj_channel = channel;
 
-	pause_timer = time(0) + P_PAUSE_EXP;		/* wait for next game */
+	pause_timer = time (0) + P_PAUSE_EXP;	/* wait for next game */
 }
 
 
 /* Honor the original teleconference test module */
-void run(void)
+void
+run (void)
 {
-	bj_loop();
+	bj_loop ();
 }
 
 
 /* Honor the turbo vision subsystem from turbo pascal */
-void end(void)
+void
+end (void)
 {
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-	msg_close(msg);
-#endif	/* MEGISTOS_BBS */
-	
-#endif	/* BBSPROMPS */
+	msg_close (msg);
+#endif				/* MEGISTOS_BBS */
+
+#endif				/* BBSPROMPS */
 
 }
 
-#if 0	
-void init_wdog_module(void)
+#if 0
+void
+init_wdog_module (void)
 {
-	init_wdog();
-	set_params(30, getpid(), 15);
-	
-	wdog_pid = fork();
-	
-	switch(wdog_pid) {
-	case 0: {
-	  bj_logmsg("Starting watchdog module (parent pid = %i)", getppid());
-	  loop();
-	  exit(0);
-	}; break;
-	default: {
-	  bj_logmsg("Parent pid=%i Child pid=%i", getpid(), wdog_pid); 
-	  return; 
-	}; break;
+	init_wdog ();
+	set_params (30, getpid (), 15);
+
+	wdog_pid = fork ();
+
+	switch (wdog_pid) {
+	case 0:{
+			bj_logmsg
+			    ("Starting watchdog module (parent pid = %i)",
+			     getppid ());
+			loop ();
+			exit (0);
+		};
+		break;
+	default:{
+			bj_logmsg ("Parent pid=%i Child pid=%i", getpid (),
+				   wdog_pid);
+			return;
+		};
+		break;
 	}
 }
 #endif
 
 
-char *sv_bell()
+char   *
+sv_bell ()
 {
-  if (player_list!=NULL) return (player_list->flags&bjfPFIX)?"":"\007";
-  return "\007";
+	if (player_list != NULL)
+		return (player_list->flags & bjfPFIX) ? "" : "\007";
+	return "\007";
 }
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-	
-	bj_logmsg("--- BJACK session begins [ %s.%s #%s ] ---", BJ_MAJORVERSION, BJ_MINORVERSION, BJ_MAKE_NUMBER);
 
-	atexit( end );
-	
-	mod_setprogname(argv[0]);
+	bj_logmsg ("--- BJACK session begins [ %s.%s #%s ] ---",
+		   BJ_MAJORVERSION, BJ_MINORVERSION, BJ_MAKE_NUMBER);
 
-	initplugin(argc,argv);
+	atexit (end);
 
-	controllingpart();
+	mod_setprogname (argv[0]);
 
-	becomeserver();
-	mod_init(INI_OUTPUT|INI_SYSVARS);
-	out_addsubstvar("@BELL@",sv_bell);
+	initplugin (argc, argv);
 
-	run();
+	controllingpart ();
 
-	bj_logmsg("--- BJACK session ends ---");
+	becomeserver ();
+	mod_init (INI_OUTPUT | INI_SYSVARS);
+	out_addsubstvar ("@BELL@", sv_bell);
+
+	run ();
+
+	bj_logmsg ("--- BJACK session ends ---");
 
 	return 0;
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -63,173 +64,186 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 
 static int oldverticalformat;
-static int ind=0;
+static int ind = 0;
 
 struct clubheader clubhdr;
 
 
 int
-getclub(char *club, int pr, int err, int all, int email)
+getclub (char *club, int pr, int err, int all, int email)
 {
-  char *i;
-  char c;
+	char   *i;
+	char    c;
 
-  for(;;){
-    fmt_lastresult=0;
-    if((c=cnc_more())!=0){
-      if(sameas(cnc_nxtcmd,"X"))return 0;
-      if(sameas(cnc_nxtcmd,"?")){
-	listclubs();
-	cnc_end();
-	continue;
-      }
-      i=cnc_word();
-    } else {
-      prompt(pr);
-      inp_get(0);
-      cnc_begin();
-      i=cnc_word();
-      if(!margc){
-	cnc_end();
-	continue;
-      } else if(inp_isX(margv[0]))return 0;
-      if(sameas(margv[0],"?")){
-	listclubs();
-	cnc_end();
-	continue;
-      }
-    }
+	for (;;) {
+		fmt_lastresult = 0;
+		if ((c = cnc_more ()) != 0) {
+			if (sameas (cnc_nxtcmd, "X"))
+				return 0;
+			if (sameas (cnc_nxtcmd, "?")) {
+				listclubs ();
+				cnc_end ();
+				continue;
+			}
+			i = cnc_word ();
+		} else {
+			prompt (pr);
+			inp_get (0);
+			cnc_begin ();
+			i = cnc_word ();
+			if (!margc) {
+				cnc_end ();
+				continue;
+			} else if (inp_isX (margv[0]))
+				return 0;
+			if (sameas (margv[0], "?")) {
+				listclubs ();
+				cnc_end ();
+				continue;
+			}
+		}
 
-    if(*i=='/')i++;
+		if (*i == '/')
+			i++;
 
-    if(sameas(i,"ALL")&all){
-      strcpy(club,"ALL");
-      return 1;
-    } else if(sameas(i,omceml)&&email){
-      strcpy(club,omceml);
-      return 1;
-    }
-    if(!findclub(i)){
-      prompt(err);
-      cnc_end();
-      continue;
-    } else break;
-    return 1;
-  }
+		if (sameas (i, "ALL") & all) {
+			strcpy (club, "ALL");
+			return 1;
+		} else if (sameas (i, omceml) && email) {
+			strcpy (club, omceml);
+			return 1;
+		}
+		if (!findclub (i)) {
+			prompt (err);
+			cnc_end ();
+			continue;
+		} else
+			break;
+		return 1;
+	}
 
-  strcpy(club,i);
-  return 1;
+	strcpy (club, i);
+	return 1;
 }
 
 
 void
-listclubs()
+listclubs ()
 {
-  struct dirent **clubs;
-  int n,i;
+	struct dirent **clubs;
+	int     n, i;
 
-  msg_set(emailclubs_msg);
-  n=scandir(mkfname(CLUBHDRDIR),&clubs,hdrselect,alphasort);
-  prompt(EMAILCLUBS_LCHDR);
-  for(i=0;i<n;free(clubs[i]),i++){
-    char *cp=&clubs[i]->d_name[1];
-    if(!loadclubhdr(cp))continue;
-    if(fmt_lastresult==PAUSE_QUIT)break;
-    if(getclubax(&thisuseracc,cp)==CAX_ZERO)continue;
-    prompt(EMAILCLUBS_LCTAB,clubhdr.club,clubhdr.clubop,clubhdr.descr);
-  }
-  free(clubs);
-  if(fmt_lastresult==PAUSE_QUIT){
-    msg_set(mail_msg);
-    return;
-  }
-  prompt(EMAILCLUBS_LCFTR);
-  msg_set(mail_msg);
+	msg_set (emailclubs_msg);
+	n = scandir (mkfname (CLUBHDRDIR), &clubs, hdrselect, alphasort);
+	prompt (EMAILCLUBS_LCHDR);
+	for (i = 0; i < n; free (clubs[i]), i++) {
+		char   *cp = &clubs[i]->d_name[1];
+
+		if (!loadclubhdr (cp))
+			continue;
+		if (fmt_lastresult == PAUSE_QUIT)
+			break;
+		if (getclubax (&thisuseracc, cp) == CAX_ZERO)
+			continue;
+		prompt (EMAILCLUBS_LCTAB, clubhdr.club, clubhdr.clubop,
+			clubhdr.descr);
+	}
+	free (clubs);
+	if (fmt_lastresult == PAUSE_QUIT) {
+		msg_set (mail_msg);
+		return;
+	}
+	prompt (EMAILCLUBS_LCFTR);
+	msg_set (mail_msg);
 }
 
 
 unsigned long
-mkstol(unsigned long x)
+mkstol (unsigned long x)
 {
-  return(((x&~0xff000000)|0x00800000)>>(24-((x>>24)&0x7f)));
+	return (((x & ~0xff000000) | 0x00800000) >> (24 - ((x >> 24) & 0x7f)));
 }
 
 
 unsigned long
-ltomks(unsigned long x)
+ltomks (unsigned long x)
 {
-  int exp;
+	int     exp;
 
-  exp=0;
-  if (!x) exp=0x80+24;
-  else if (x>=0x01000000) {
-    while (x&0xff000000) {
-      x>>=1;
-      exp--;
-    }
-  }
-  else {
-    while (!(x&0x00800000)) {
-      x<<=1;
-      exp++;
-    }
-  }
-  return((x&~0x00800000)|((24L-exp+0x80)<<24));
+	exp = 0;
+	if (!x)
+		exp = 0x80 + 24;
+	else if (x >= 0x01000000) {
+		while (x & 0xff000000) {
+			x >>= 1;
+			exp--;
+		}
+	} else {
+		while (!(x & 0x00800000)) {
+			x <<= 1;
+			exp++;
+		}
+	}
+	return ((x & ~0x00800000) | ((24L - exp + 0x80) << 24));
 }
 
 
-char *qwkdate(int date)
+char   *
+qwkdate (int date)
 {
-  static char buff[32]={0};
-  struct tm dt={0};
+	static char buff[32] = { 0 };
+	struct tm dt = { 0 };
 
-  dt.tm_mday=tdday(date);
-  dt.tm_mon=tdmonth(date);
-  dt.tm_year=tdyear(date);
-  strftime(buff,32,"%m-%d-%y",&dt);
-  return buff;
-}
-
-
-void
-startind()
-{
-  if(!prgind)return;
-  oldverticalformat=fmt_verticalformat;
-  fmt_setverticalformat(0);
-  prompt(OMDLIND0);
-  ind=0;
+	dt.tm_mday = tdday (date);
+	dt.tm_mon = tdmonth (date);
+	dt.tm_year = tdyear (date);
+	strftime (buff, 32, "%m-%d-%y", &dt);
+	return buff;
 }
 
 
 void
-progressind(int i)
+startind ()
 {
-  if(!prgind)return;
-  prompt(OMDLIND1+ind,i);
-  ind=(ind+1)%8;
+	if (!prgind)
+		return;
+	oldverticalformat = fmt_verticalformat;
+	fmt_setverticalformat (0);
+	prompt (OMDLIND0);
+	ind = 0;
 }
 
 
 void
-endind()
+progressind (int i)
 {
-  if(!prgind)return;
-  fmt_setverticalformat(oldverticalformat);
-  prompt(OMDLINDE);
+	if (!prgind)
+		return;
+	prompt (OMDLIND1 + ind, i);
+	ind = (ind + 1) % 8;
+}
+
+
+void
+endind ()
+{
+	if (!prgind)
+		return;
+	fmt_setverticalformat (oldverticalformat);
+	prompt (OMDLINDE);
 }
 
 
@@ -237,23 +251,26 @@ static char inclublock[256];
 
 
 void
-goclub(char *club)
+goclub (char *club)
 {
-  lock_rm(inclublock);
-  if(club){
-    sprintf(inclublock,INCLUBLOCK,thisuseronl.channel,club);
-    lock_place(inclublock,"reading");
-  }
-  setclub(club);
+	lock_rm (inclublock);
+	if (club) {
+		sprintf (inclublock, INCLUBLOCK, thisuseronl.channel, club);
+		lock_place (inclublock, "reading");
+	}
+	setclub (club);
 }
 
 
 void
-abort()
+abort ()
 {
-  inp_block();
-  thisuseronl.flags&=~(OLF_BUSY|OLF_NOTIMEOUT);
-  msg_set(mailer_msg);
-  prompt(MAILER_ABORT);
-  exit(2);
+	inp_block ();
+	thisuseronl.flags &= ~(OLF_BUSY | OLF_NOTIMEOUT);
+	msg_set (mailer_msg);
+	prompt (MAILER_ABORT);
+	exit (2);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,136 +65,144 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.bulletins.h"
-#include "../../mailer.h"
-#include "mbk_offline.bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.bulletins.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.bulletins.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __BULLETINS_UNAMBIGUOUS__
-#include "mbk_bulletins.h"
+#include <megistos/mbk_bulletins.h>
 
 
 static int bltdb;
 
 
 static char *
-zonk(char *s, int len)
+zonk (char *s, int len)
 {
-  int i;
-  for(i=len-1;i&&((s[i]==' ')||(s[i]==0));i--)s[i]=0;
-  for(i=0;s[i]==' ';i++);
-  return &s[i];
+	int     i;
+
+	for (i = len - 1; i && ((s[i] == ' ') || (s[i] == 0)); i--)
+		s[i] = 0;
+	for (i = 0; s[i] == ' '; i++);
+	return &s[i];
 }
 
 
 static int
-process(char *command)
+process (char *command)
 {
-  if(sameas(command,"BLT-IDX")){
-    if(prefs.flags&OBF_INDEX){
-      prompt(OBULIDNN);
-    } else {
-      prompt(OBULIDOK);
-      prefs.flags|=OBF_REQIDX;
-      writeprefs(&prefs);
-    }
-  } else if(sameto("BLT-REQ",command)){
-    char *cp;
-    char blt[256];
-    struct bltidx idx;
+	if (sameas (command, "BLT-IDX")) {
+		if (prefs.flags & OBF_INDEX) {
+			prompt (OBULIDNN);
+		} else {
+			prompt (OBULIDOK);
+			prefs.flags |= OBF_REQIDX;
+			writeprefs (&prefs);
+		}
+	} else if (sameto ("BLT-REQ", command)) {
+		char   *cp;
+		char    blt[256];
+		struct bltidx idx;
 
-    /* Scan the argument first */
+		/* Scan the argument first */
 
-    if(sscanf(command,"%*s %s",blt)!=1){
-      prompt(OBULRR,&command[7]);
-      return 0;
-    }
+		if (sscanf (command, "%*s %s", blt) != 1) {
+			prompt (OBULRR, &command[7]);
+			return 0;
+		}
 
-    /* Properly formulated? */
+		/* Properly formulated? */
 
-    if((cp=strchr(blt,'/'))==NULL){
-      prompt(OBULRR,blt);
-      return 0;
-    }
-    *cp++=0;
+		if ((cp = strchr (blt, '/')) == NULL) {
+			prompt (OBULRR, blt);
+			return 0;
+		}
+		*cp++ = 0;
 
-    /* Does the club exist? */
-    if(!findclub(blt)){
-      prompt(OBULUC,blt,cp);
-      return 0;
-    }
+		/* Does the club exist? */
+		if (!findclub (blt)) {
+			prompt (OBULUC, blt, cp);
+			return 0;
+		}
 
-    /* Do we have permission to read the article? */
-    if(getclubax(&thisuseracc,blt)<CAX_READ){
-      prompt(OBULUC,blt,cp);
-      return 0;
-    }
+		/* Do we have permission to read the article? */
+		if (getclubax (&thisuseracc, blt) < CAX_READ) {
+			prompt (OBULUC, blt, cp);
+			return 0;
+		}
 
-    /* Does the bulletin exist? */
-    d_dbset(bltdb);
-    if(!dbexists(blt,cp)){
-      prompt(OBULUB,blt,cp);
-      return 0;
-    }
-   
-    /* Load the bulletin and add a request record for it */
-    
-    dbget(&idx);
+		/* Does the bulletin exist? */
+		d_dbset (bltdb);
+		if (!dbexists (blt, cp)) {
+			prompt (OBULUB, blt, cp);
+			return 0;
+		}
 
-    mkrequest(idx.area,
-	      "BULLETIN",
-	      idx.fname,
-	      -1,
-	      RQP_OTHER,
-	      RQF_INVIS|RQF_BULLETIN);
+		/* Load the bulletin and add a request record for it */
 
-    prompt(OBULOK);
+		dbget (&idx);
 
-  } else return 1; /* Should never happen */
+		mkrequest (idx.area,
+			   "BULLETIN",
+			   idx.fname, -1, RQP_OTHER, RQF_INVIS | RQF_BULLETIN);
 
-  return 0;
+		prompt (OBULOK);
+
+	} else
+		return 1;	/* Should never happen */
+
+	return 0;
 }
 
 
 int
-obupload()
+obupload ()
 {
-  struct reqidx idx;
-  int res, stop=0;
-  char *s;
-  int shown=0;
+	struct reqidx idx;
+	int     res, stop = 0;
+	char   *s;
+	int     shown = 0;
 
-  readprefs(&prefs);
-  openreqdb();
-  dbopen();
-  d_dbget(&bltdb);
-  res=getfirstreq(&idx);
+	readprefs (&prefs);
+	openreqdb ();
+	dbopen ();
+	d_dbget (&bltdb);
+	res = getfirstreq (&idx);
 
-  for(res=getfirstreq(&idx);res;res=getnextreq(&idx)){
-    if(idx.priority!=RQP_CTLMSG)continue;
+	for (res = getfirstreq (&idx); res; res = getnextreq (&idx)) {
+		if (idx.priority != RQP_CTLMSG)
+			continue;
 
-    s=zonk(idx.reqfname,sizeof(idx.reqfname));
-    if(!(sameas(s,"BLT-IDX")||sameto("BLT-REQ",s)))continue;
-    if(!shown){
-      shown=1;
-      prompt(OBUPL);
-    }
-    stop=process(s);
+		s = zonk (idx.reqfname, sizeof (idx.reqfname));
+		if (!(sameas (s, "BLT-IDX") || sameto ("BLT-REQ", s)))
+			continue;
+		if (!shown) {
+			shown = 1;
+			prompt (OBUPL);
+		}
+		stop = process (s);
 
-    /* Remove the current request from the database */
+		/* Remove the current request from the database */
 
-    unlink(idx.dosfname);
-    if(!rmrequest(&idx)){
-      error_fatal("Unable to remove request %d from the database.",
-	    idx.reqnum);
-    }
+		unlink (idx.dosfname);
+		if (!rmrequest (&idx)) {
+			error_fatal
+			    ("Unable to remove request %d from the database.",
+			     idx.reqnum);
+		}
 
-    if(stop)break;
-  }
-  if(shown)prompt(OBULEND);
+		if (stop)
+			break;
+	}
+	if (shown)
+		prompt (OBULEND);
 
-  return 0;
+	return 0;
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,41 +62,47 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 
 
 int
-reqman()
+reqman ()
 {
-  struct reqidx idx;
-  int res, shown=0;
+	struct reqidx idx;
+	int     res, shown = 0;
 
-  openreqdb();
-  res=getfirstreq(&idx);
+	openreqdb ();
+	res = getfirstreq (&idx);
 
-  for(res=getfirstreq(&idx);res;res=getnextreq(&idx)){
-    if(idx.priority!=RQP_CTLMSG)continue;
-  
-    if(!shown){
-      shown=1;
-      prompt(RQMUNS);
-    }
+	for (res = getfirstreq (&idx); res; res = getnextreq (&idx)) {
+		if (idx.priority != RQP_CTLMSG)
+			continue;
 
-    /* Remove the current request from the database */
+		if (!shown) {
+			shown = 1;
+			prompt (RQMUNS);
+		}
 
-    prompt(RQMTAB,ctlname[0],idx.reqarea,idx.reqfname);
-    
-    unlink(idx.dosfname);
-    if(!rmrequest(&idx)){
-      error_fatal("Unable to remove request %d from the database.",
-	    idx.reqnum);
-    }
-  }
+		/* Remove the current request from the database */
 
-  if(shown)prompt(ENDRQM);
-  return 0;
+		prompt (RQMTAB, ctlname[0], idx.reqarea, idx.reqfname);
+
+		unlink (idx.dosfname);
+		if (!rmrequest (&idx)) {
+			error_fatal
+			    ("Unable to remove request %d from the database.",
+			     idx.reqnum);
+		}
+	}
+
+	if (shown)
+		prompt (ENDRQM);
+	return 0;
 }
+
+
+/* End of File */

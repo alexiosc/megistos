@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -23,10 +26,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -67,111 +68,140 @@ const char *__RCS=RCS_VER;
 
 #include <bbs.h>
 #include <mbk/mbk_telecon.bg.h>
-#include "back.h"
-#include "telecon.bg.h"
+#include <megistos/back.h>
+#include <megistos/telecon.bg.h>
 
 
 #define sgn(x) ((x)>0?1:((x)==0?0:-1))
 
 
 static char *
-mkrow(int *row, int lang, int top)
+mkrow (int *row, int lang, int top)
 {
-  static char s[256];
-  int cur=0,i;
+	static char s[256];
+	int     cur = 0, i;
 
-  s[0]=0;
-  for(i=0;i<6;i++){
-    if(sgn(row[i]) != cur){
-      if(row[i]) strcat(s,msg_getl(row[i]>0?BDCOL1:BDCOL2,lang));
-      cur=sgn(row[i]);
-    }
-    
-    if(row[i]==0)strcat(s,msg_getl(BDEMPT,lang));
-    else if(row[i]==1)strcat(s,msg_getl(BDSTN1,lang));
-    else if(row[i]==-1)strcat(s,msg_getl(BDSTN2,lang));
-    else if(row[i]>1){
-      char tmp[16];
-      sprintf(tmp,msg_getl(BDSTNN,lang),row[i]-5);
-      strcat(s,tmp);
-    } else if(row[i]<-1){
-      char tmp[16];
-      sprintf(tmp,msg_getl(BDSTNN,lang),abs(row[i])-5);
-      strcat(s,tmp);
-    }
-  }
-  return s;
+	s[0] = 0;
+	for (i = 0; i < 6; i++) {
+		if (sgn (row[i]) != cur) {
+			if (row[i])
+				strcat (s,
+					msg_getl (row[i] > 0 ? BDCOL1 : BDCOL2,
+						  lang));
+			cur = sgn (row[i]);
+		}
+
+		if (row[i] == 0)
+			strcat (s, msg_getl (BDEMPT, lang));
+		else if (row[i] == 1)
+			strcat (s, msg_getl (BDSTN1, lang));
+		else if (row[i] == -1)
+			strcat (s, msg_getl (BDSTN2, lang));
+		else if (row[i] > 1) {
+			char    tmp[16];
+
+			sprintf (tmp, msg_getl (BDSTNN, lang), row[i] - 5);
+			strcat (s, tmp);
+		} else if (row[i] < -1) {
+			char    tmp[16];
+
+			sprintf (tmp, msg_getl (BDSTNN, lang),
+				 abs (row[i]) - 5);
+			strcat (s, tmp);
+		}
+	}
+	return s;
 }
 
 
 void
-bg_board (int n)  {
-  int i,j;
-  char b[24][256];		/* 24 rows, not columns (coincidence) */
+bg_board (int n)
+{
+	int     i, j;
+	char    b[24][256];	/* 24 rows, not columns (coincidence) */
 
-  if(!usr_insys(player[n],0))exit(0);
+	if (!usr_insys (player[n], 0))
+		exit (0);
 
-  for(i=0;i<6;i++){
-    int row[6];
+	for (i = 0; i < 6; i++) {
+		int     row[6];
 
-    /* The top left quadrant (0-5) */
+		/* The top left quadrant (0-5) */
 
-    bzero(row,sizeof(row));
-    if(i<5){
-      for(j=1;j<=6;j++) if(abs(board[j])>i) row[j-1]=(board[j]>0)?1:-1;
-    } else {
-      for(j=1;j<=6;j++) if(abs(board[j])>i) row[j-1]=board[j];
-    }
-    strcpy(b[i],mkrow(row,othruseracc.language,1));
-
-    
-    /* The top right quadrant (6-11) */
-
-    bzero(row,sizeof(row));
-    if(i<5){
-      for(j=1;j<=6;j++) if(abs(board[6+j])>i) row[j-1]=(board[6+j]>0)?1:-1;
-    } else {
-      for(j=1;j<=6;j++) if(abs(board[6+j])>i) row[j-1]=board[6+j];
-    }
-    strcpy(b[6+i],mkrow(row,othruseracc.language,1));
+		bzero (row, sizeof (row));
+		if (i < 5) {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[j]) > i)
+					row[j - 1] = (board[j] > 0) ? 1 : -1;
+		} else {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[j]) > i)
+					row[j - 1] = board[j];
+		}
+		strcpy (b[i], mkrow (row, othruseracc.language, 1));
 
 
-    /* The lower right quadrant (12-17) */
+		/* The top right quadrant (6-11) */
 
-    bzero(row,sizeof(row));
-    if(i<5){
-      for(j=1;j<=6;j++) if(abs(board[19-j])>i) row[j-1]=(board[19-j]>0)?1:-1;
-    } else {
-      for(j=1;j<=6;j++) if(abs(board[19-j])>i) row[j-1]=board[19-j];
-    }
-    strcpy(b[12+i],mkrow(row,othruseracc.language,0));
+		bzero (row, sizeof (row));
+		if (i < 5) {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[6 + j]) > i)
+					row[j - 1] =
+					    (board[6 + j] > 0) ? 1 : -1;
+		} else {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[6 + j]) > i)
+					row[j - 1] = board[6 + j];
+		}
+		strcpy (b[6 + i], mkrow (row, othruseracc.language, 1));
 
 
-    /* The lower left quadrant (18-23) */
+		/* The lower right quadrant (12-17) */
 
-    bzero(row,sizeof(row));
-    if(i<5){
-      for(j=1;j<=6;j++) if(abs(board[25-j])>i) row[j-1]=(board[25-j]>0)?1:-1;
-    } else {
-      for(j=1;j<=6;j++) if(abs(board[25-j])>i) row[j-1]=board[25-j];
-    }
-    strcpy(b[18+i],mkrow(row,othruseracc.language,0));
-  }
+		bzero (row, sizeof (row));
+		if (i < 5) {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[19 - j]) > i)
+					row[j - 1] =
+					    (board[19 - j] > 0) ? 1 : -1;
+		} else {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[19 - j]) > i)
+					row[j - 1] = board[19 - j];
+		}
+		strcpy (b[12 + i], mkrow (row, othruseracc.language, 0));
 
-  sprompt_other(othrshm,out_buffer,BOARD,
-	  b[0], b[6],
-	  b[1], b[7],
-	  b[2], b[8],
-	  b[3], b[9],
-	  b[4], b[10],
-	  b[5], b[11],
 
-	  b[23], b[17],
-	  b[22], b[16],
-	  b[21], b[15],
-	  b[20], b[14],
-	  b[19], b[13],
-	  b[18], b[12]);
+		/* The lower left quadrant (18-23) */
 
-  usr_injoth(&othruseronl,out_buffer,0);
+		bzero (row, sizeof (row));
+		if (i < 5) {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[25 - j]) > i)
+					row[j - 1] =
+					    (board[25 - j] > 0) ? 1 : -1;
+		} else {
+			for (j = 1; j <= 6; j++)
+				if (abs (board[25 - j]) > i)
+					row[j - 1] = board[25 - j];
+		}
+		strcpy (b[18 + i], mkrow (row, othruseracc.language, 0));
+	}
+
+	sprompt_other (othrshm, out_buffer, BOARD,
+		       b[0], b[6],
+		       b[1], b[7],
+		       b[2], b[8],
+		       b[3], b[9],
+		       b[4], b[10],
+		       b[5], b[11],
+		       b[23], b[17],
+		       b[22], b[16],
+		       b[21], b[15], b[20], b[14], b[19], b[13], b[18], b[12]);
+
+	usr_injoth (&othruseronl, out_buffer, 0);
 }
+
+
+/* End of File */

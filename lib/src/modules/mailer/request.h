@@ -2,23 +2,23 @@
 /* alignment is 4 */
 
 /*---------- structures ----------*/
-struct reqidx {  /* size 340 */
-    int     reqnum;
-    char    userid[24];
-    char    reqarea[24];
-    char    reqfname[256];
-    char    dosfname[13];
-    int     priority;
-    long    reqflags;
-    int     reqdate;
-    int     msgno;
+struct reqidx {			/* size 340 */
+	int     reqnum;
+	char    userid[24];
+	char    reqarea[24];
+	char    reqfname[256];
+	char    dosfname[13];
+	int     priority;
+	long    reqflags;
+	int     reqdate;
+	int     msgno;
 };
 
-struct orderc {  /* size 56 */
-    char    userid[24];
-    char    reqarea[24];
-    int     reqnum;
-    int     priority;
+struct orderc {			/* size 56 */
+	char    userid[24];
+	char    reqarea[24];
+	int     reqnum;
+	int     priority;
 };
 
 /*---------- record names ----------*/
@@ -38,3 +38,6 @@ struct orderc {  /* size 56 */
 #define AREALEN 24
 #define FNAMELEN 256
 #define DOSFNAMELEN 13
+
+
+/* End of File */

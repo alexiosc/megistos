@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,107 +62,111 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.bulletins.h"
-#include "../../mailer.h"
-#include "mbk_offline.bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.bulletins.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.bulletins.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __BULLETINS_UNAMBIGUOUS__
-#include "mbk_bulletins.h"
+#include <megistos/mbk_bulletins.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 
 promptblock_t *msg;
 promptblock_t *bulletins_msg;
 promptblock_t *emailclubs_msg;
 
-int  sopkey;
-int  defblt;
-int  defansi;
-char *bltidfn;
+int     sopkey;
+int     defblt;
+int     defansi;
+char   *bltidfn;
 
 void
-init()
+init ()
 {
-  mod_init(INI_ALL);
+	mod_init (INI_ALL);
 
-  emailclubs_msg=msg_open("emailclubs");
-  sopkey=msg_int(EMAILCLUBS_SOPKEY,0,129);
-  msg_close(emailclubs_msg);
+	emailclubs_msg = msg_open ("emailclubs");
+	sopkey = msg_int (EMAILCLUBS_SOPKEY, 0, 129);
+	msg_close (emailclubs_msg);
 
-  bulletins_msg=msg_open("bulletins");
+	bulletins_msg = msg_open ("bulletins");
 
-  msg=msg_open("offline.bulletins");
-  defblt=msg_bool(DEFBLT);
-  defansi=msg_bool(DEFANSI);
-  bltidfn=msg_string(BLTIDFN);
+	msg = msg_open ("offline.bulletins");
+	defblt = msg_bool (DEFBLT);
+	defansi = msg_bool (DEFANSI);
+	bltidfn = msg_string (BLTIDFN);
 
-  msg_setlanguage(thisuseracc.language);
+	msg_setlanguage (thisuseracc.language);
 }
 
 
 void
-done()
+done ()
 {
-  msg_close(msg);
+	msg_close (msg);
 }
 
 
 void
-warn()
+warn ()
 {
-  fprintf(stderr,"This is a Mailer plugin. ");
-  fprintf(stderr,"It should not be run as an ordinary module.\n");
-  exit(1);
+	fprintf (stderr, "This is a Mailer plugin. ");
+	fprintf (stderr, "It should not be run as an ordinary module.\n");
+	exit (1);
 }
 
 
 mod_info_t mod_info_offline_bulletins = {
-  "offline.bulletins",
-  "Mailer Plugin: Bulletins",
-  "Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
-  "Packages off-line requested bulletins and lists of bulletins.",
-  RCS_VER,
-  "1.0",
-  {0,NULL},			/* Login handler */
-  {0,NULL},			/* Interactive handler */
-  {0,NULL},			/* Install logout handler */
-  {0,NULL},			/* Hangup handler */
-  {0,NULL},			/* Cleanup handler */
-  {0,NULL}			/* Delete user handler */
+	"offline.bulletins",
+	"Mailer Plugin: Bulletins",
+	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Packages off-line requested bulletins and lists of bulletins.",
+	RCS_VER,
+	"1.0",
+	{0, NULL},		/* Login handler */
+	{0, NULL},		/* Interactive handler */
+	{0, NULL},		/* Install logout handler */
+	{0, NULL},		/* Hangup handler */
+	{0, NULL},		/* Cleanup handler */
+	{0, NULL}		/* Delete user handler */
 };
 
 
-char *progname;
+char   *progname;
 
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-  progname=mod_info_offline_bulletins.progname;
-  mod_setinfo(&mod_info_offline_bulletins);
+	progname = mod_info_offline_bulletins.progname;
+	mod_setinfo (&mod_info_offline_bulletins);
 
-  if(argc!=2)return mod_main(argc,argv);
+	if (argc != 2)
+		return mod_main (argc, argv);
 
-  if(!strcmp(argv[1],"--setup")){
-    atexit(done);
-    init();
-    setup();
-  } else if(!strcmp(argv[1],"--download")){
-    atexit(done);
-    init();
-    return obdownload();
-  } else if(!strcmp(argv[1],"--upload")){
-    atexit(done);
-    init();
-    return obupload();
-  }
+	if (!strcmp (argv[1], "--setup")) {
+		atexit (done);
+		init ();
+		setup ();
+	} else if (!strcmp (argv[1], "--download")) {
+		atexit (done);
+		init ();
+		return obdownload ();
+	} else if (!strcmp (argv[1], "--upload")) {
+		atexit (done);
+		init ();
+		return obupload ();
+	}
 
-  /* This should only return help, info, etc */
-  return mod_main(argc,argv);
+	/* This should only return help, info, etc */
+	return mod_main (argc, argv);
 }
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -66,10 +69,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -81,168 +82,191 @@ const char *__RCS=RCS_VER;
 #define WANT_SYS_STAT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "mail.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/mail.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include "mbk_emailclubs.h"
+#include <megistos/mbk_emailclubs.h>
 
 #ifdef USE_LIBZ
 #define WANT_ZLIB_H 1
 #endif
 
 
-static int           msgno=0;
-static int           lastconf=-1;
-static FILE          *msgdat;
-static FILE          *ndx=NULL;
-static FILE          *ndxpers;
+static int msgno = 0;
+static int lastconf = -1;
+static FILE *msgdat;
+static FILE *ndx = NULL;
+static FILE *ndxpers;
 static struct qwkhdr qwkhdr;
-static char          qwkbuf[128];
-static int           numatt;
+static char qwkbuf[128];
+static int numatt;
 
 
 static void
-clrbuf()
+clrbuf ()
 {
-  memset(qwkbuf,0x20,128);
+	memset (qwkbuf, 0x20, 128);
 }
 
 
 static void
-strbuf(char *s)
+strbuf (char *s)
 {
-  memcpy(qwkbuf,s,strlen(s));
+	memcpy (qwkbuf, s, strlen (s));
 }
 
 
 static void
-wrtbuf()
+wrtbuf ()
 {
-  if(!fwrite(qwkbuf,128,1,msgdat)){
-    error_fatalsys("Unable to write to messages.dat");
-  }
+	if (!fwrite (qwkbuf, 128, 1, msgdat)) {
+		error_fatalsys ("Unable to write to messages.dat");
+	}
 }
 
 
 static char *
-mkfield(char *f, char *s, int len)
+mkfield (char *f, char *s, int len)
 {
-  memset(f,0x20,len);
-  memcpy(f,s,min(len,strlen(s)));
-  return f;
+	memset (f, 0x20, len);
+	memcpy (f, s, min (len, strlen (s)));
+	return f;
 }
 
 
 static char *
-mkfielduc(char *f, char *s, int len)
+mkfielduc (char *f, char *s, int len)
 {
-  int i,j=strlen(s);
-  memset(f,0x20,min(j,len));
-  memcpy(f,s,j);
-  for(i=0;i<j;i++)f[i]=toupper(f[i]);
-  return f;
+	int     i, j = strlen (s);
+
+	memset (f, 0x20, min (j, len));
+	memcpy (f, s, j);
+	for (i = 0; i < j; i++)
+		f[i] = toupper (f[i]);
+	return f;
 }
 
 
 static void
-makeheader(int clubid, struct message *msg)
+makeheader (int clubid, struct message *msg)
 {
-  char tmp[256], topic[128];
+	char    tmp[256], topic[128];
 
-  memset(&qwkhdr,0x20,sizeof(struct qwkhdr));
-  qwkhdr.status=clubid?STATUS_N:STATUS_P;
-  sprintf(tmp,"%d",msg->msgno);
-  mkfield(qwkhdr.number,tmp,sizeof(qwkhdr.number));
-  mkfield(qwkhdr.date,qwkdate(msg->crdate),sizeof(qwkhdr.date));
-  mkfield(qwkhdr.time,strtime(msg->crtime,0),sizeof(qwkhdr.time));
-  mkfielduc(qwkhdr.whoto,sameas(msg->to,MSG_ALL)?QWK_ALL:msg->to,
-	    sizeof(qwkhdr.whoto));
-  mkfielduc(qwkhdr.from,msg->from,sizeof(qwkhdr.from));
-  strcpy(topic,msg->subject);
-  xlate_out(topic);
-  mkfield(qwkhdr.subject,topic,
-	  sizeof(qwkhdr.subject)+(usepass?sizeof(qwkhdr.password):0));
-  if(msg->flags&MSF_REPLY){
-    sprintf(tmp,"%d",msg->replyto);
-    mkfield(qwkhdr.reference,tmp,sizeof(qwkhdr.reference));
-  }
-  qwkhdr.active=MSG_ACT;
-  qwkhdr.conference[0]=clubid&0xff;
-  qwkhdr.conference[1]=(clubid&0xff00)>>8;
-  qwkhdr.msgno[0]=msgno&0xff;
-  qwkhdr.msgno[1]=(msgno&0xff00)>>8;
+	memset (&qwkhdr, 0x20, sizeof (struct qwkhdr));
+	qwkhdr.status = clubid ? STATUS_N : STATUS_P;
+	sprintf (tmp, "%d", msg->msgno);
+	mkfield (qwkhdr.number, tmp, sizeof (qwkhdr.number));
+	mkfield (qwkhdr.date, qwkdate (msg->crdate), sizeof (qwkhdr.date));
+	mkfield (qwkhdr.time, strtime (msg->crtime, 0), sizeof (qwkhdr.time));
+	mkfielduc (qwkhdr.whoto, sameas (msg->to, MSG_ALL) ? QWK_ALL : msg->to,
+		   sizeof (qwkhdr.whoto));
+	mkfielduc (qwkhdr.from, msg->from, sizeof (qwkhdr.from));
+	strcpy (topic, msg->subject);
+	xlate_out (topic);
+	mkfield (qwkhdr.subject, topic,
+		 sizeof (qwkhdr.subject) +
+		 (usepass ? sizeof (qwkhdr.password) : 0));
+	if (msg->flags & MSF_REPLY) {
+		sprintf (tmp, "%d", msg->replyto);
+		mkfield (qwkhdr.reference, tmp, sizeof (qwkhdr.reference));
+	}
+	qwkhdr.active = MSG_ACT;
+	qwkhdr.conference[0] = clubid & 0xff;
+	qwkhdr.conference[1] = (clubid & 0xff00) >> 8;
+	qwkhdr.msgno[0] = msgno & 0xff;
+	qwkhdr.msgno[1] = (msgno & 0xff00) >> 8;
 }
 
 
 static char *
-mkpre(int clubid, struct message *msg)
+mkpre (int clubid, struct message *msg)
 {
-  if(prefs.flags&OMF_HEADER){
-    char s1[256]={0}, s2[256]={0}, s3[256]={0}, s4[256]={0};
-    char s5[256]={0}, s6[256]={0}, s7[256]={0}, m4u[256]={0};
-    
-    msg_set(emailclubs_msg);
-    strcpy(s1,xlatehist(msg->history));
-    msg_set(mail_msg);
-    sprintf(s2,"%s/%d  ",clubid?clubhdr.club:EMAILCLUBNAME,msg->msgno);
-    if(strlen(s1)+strlen(s2)>thisuseracc.scnwidth-1){
-      s1[78-strlen(s2)]='*';
-      s1[79-strlen(s2)]=0;
-    }
-    
-    strcpy(s3,msg_get(MHDAY0+getdow(msg->crdate)));
-    strcpy(s4,msg_get(MHJAN+tdmonth(msg->crdate)));
-    sprintf(s2,"%s, %d %s %d, %s",
-	    s3, tdday(msg->crdate), s4, tdyear(msg->crdate),
-	    strtime(msg->crtime,1));
-    
-    if(clubid)strcpy(m4u,msg_get(MHFORU));
-    
-    if(msg->period){
-      sprint(s3,msg_get(MHPERIOD),msg->period,msg_getunit(DAYSNG,msg->period));
-    } else {
-      strcpy(s3,msg->flags&MSF_EXEMPT?msg_get(MHXMPT):"");
-    }
-    strcpy(s4,msg->flags&MSF_RECEIPT?msg_get(MHRRR):"");
-    
-    if(msg->timesread){
-      strcpy(s6,msg_get(MHTMRD));
-      sprint(s5,s6,msg->timesread,msg_getunit(TIMSNG,msg->timesread));
-    }else strcpy(s5,"");
-    
-    if(msg->replies){
-      strcpy(s7,msg_get(MHNREP));
-      sprint(s6,s7,msg->replies,msg_getunit(REPSNG,msg->replies));
-    }else strcpy(s6,"");
-    
-    sprint(out_buffer,msg_get(MSGHDR1),
-	    clubid?clubhdr.club:EMAILCLUBNAME,msg->msgno,s1,
-	    s2,s3,
-	    msg->from,s4,
-	    (msg->club[0]&&(sameas(thisuseracc.userid,msg->to)))?m4u:"",
-	    sameas(msg->to,MSG_ALL)?msg_getunit(MHALL,1):msg->to,s5,
-	    msg->subject,s6);
-    
-    if(msg->flags&MSF_FILEATT){
-      if(msg->timesdnl){
-	strcpy(s1,msg_get(MHNDNL));
-	sprint(s2,s1,msg->timesdnl,msg_getunit(TIMSNG,msg->timesdnl));
-      } else strcpy(s2,"");
-      sprint(&out_buffer[strlen(out_buffer)],msg_get(MSGHDR2),msg->fatt,s2);
-    }
-    
-    strcat(out_buffer,msg_get(MSGHDR3));
-    return strdup(out_buffer);
-  }
+	if (prefs.flags & OMF_HEADER) {
+		char    s1[256] = { 0 }, s2[256] = {
+		0}, s3[256] = {
+		0}, s4[256] = {
+		0};
+		char    s5[256] = { 0 }, s6[256] = {
+		0}, s7[256] = {
+		0}, m4u[256] = {
+		0};
 
-  return NULL;
+		msg_set (emailclubs_msg);
+		strcpy (s1, xlatehist (msg->history));
+		msg_set (mail_msg);
+		sprintf (s2, "%s/%d  ", clubid ? clubhdr.club : EMAILCLUBNAME,
+			 msg->msgno);
+		if (strlen (s1) + strlen (s2) > thisuseracc.scnwidth - 1) {
+			s1[78 - strlen (s2)] = '*';
+			s1[79 - strlen (s2)] = 0;
+		}
+
+		strcpy (s3, msg_get (MHDAY0 + getdow (msg->crdate)));
+		strcpy (s4, msg_get (MHJAN + tdmonth (msg->crdate)));
+		sprintf (s2, "%s, %d %s %d, %s",
+			 s3, tdday (msg->crdate), s4, tdyear (msg->crdate),
+			 strtime (msg->crtime, 1));
+
+		if (clubid)
+			strcpy (m4u, msg_get (MHFORU));
+
+		if (msg->period) {
+			sprint (s3, msg_get (MHPERIOD), msg->period,
+				msg_getunit (DAYSNG, msg->period));
+		} else {
+			strcpy (s3,
+				msg->
+				flags & MSF_EXEMPT ? msg_get (MHXMPT) : "");
+		}
+		strcpy (s4, msg->flags & MSF_RECEIPT ? msg_get (MHRRR) : "");
+
+		if (msg->timesread) {
+			strcpy (s6, msg_get (MHTMRD));
+			sprint (s5, s6, msg->timesread,
+				msg_getunit (TIMSNG, msg->timesread));
+		} else
+			strcpy (s5, "");
+
+		if (msg->replies) {
+			strcpy (s7, msg_get (MHNREP));
+			sprint (s6, s7, msg->replies,
+				msg_getunit (REPSNG, msg->replies));
+		} else
+			strcpy (s6, "");
+
+		sprint (out_buffer, msg_get (MSGHDR1),
+			clubid ? clubhdr.club : EMAILCLUBNAME, msg->msgno, s1,
+			s2, s3,
+			msg->from, s4,
+			(msg->club[0] &&
+			 (sameas (thisuseracc.userid, msg->to))) ? m4u : "",
+			sameas (msg->to, MSG_ALL) ? msg_getunit (MHALL,
+								 1) : msg->to,
+			s5, msg->subject, s6);
+
+		if (msg->flags & MSF_FILEATT) {
+			if (msg->timesdnl) {
+				strcpy (s1, msg_get (MHNDNL));
+				sprint (s2, s1, msg->timesdnl,
+					msg_getunit (TIMSNG, msg->timesdnl));
+			} else
+				strcpy (s2, "");
+			sprint (&out_buffer[strlen (out_buffer)],
+				msg_get (MSGHDR2), msg->fatt, s2);
+		}
+
+		strcat (out_buffer, msg_get (MSGHDR3));
+		return strdup (out_buffer);
+	}
+
+	return NULL;
 }
 
 
@@ -250,406 +274,449 @@ mkpre(int clubid, struct message *msg)
 
 
 static char *
-mkbody(int clubid, struct message *msg)
+mkbody (int clubid, struct message *msg)
 {
-  char fname[256], *body=NULL;
-  gzFile *zfp;
+	char    fname[256], *body = NULL;
+	gzFile *zfp;
 
-  strcpy(fname,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,
-		       msg->club[0]?msg->club:EMAILDIRNAME,
-		       (long)msg->msgno));
-  if((zfp=gzopen(fname,"rb"))==NULL){
-    gzclose(zfp);
-    error_fatalsys("Unable to open message %s/%d for reading",
-	  mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
-  } else {
-    struct message dummy;
-    if(gzread(zfp,&dummy,sizeof(dummy))<=0){
-      gzclose(zfp);
-      error_fatalsys("Unable to fseek() message %s/%d",
-	    mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
-    }
-  }
-  
-  for(;;){
-    char buffer[1025];
-    int bytes=0;
+	strcpy (fname, mkfname ("%s/%s/" MESSAGEFILE, MSGSDIR,
+				msg->club[0] ? msg->club : EMAILDIRNAME,
+				(long) msg->msgno));
+	if ((zfp = gzopen (fname, "rb")) == NULL) {
+		gzclose (zfp);
+		error_fatalsys ("Unable to open message %s/%d for reading",
+				mkfname (msg->club[0] ? msg->
+					 club : EMAILDIRNAME, msg->msgno));
+	} else {
+		struct message dummy;
 
-    bytes=gzread(zfp,buffer,sizeof(buffer)-1);
-    if(!bytes)break;
-    else buffer[bytes]=0;
+		if (gzread (zfp, &dummy, sizeof (dummy)) <= 0) {
+			gzclose (zfp);
+			error_fatalsys ("Unable to fseek() message %s/%d",
+					mkfname (msg->club[0] ? msg->
+						 club : EMAILDIRNAME,
+						 msg->msgno));
+		}
+	}
 
-    if(msg->cryptkey)bbscrypt(buffer,bytes,msg->cryptkey);
+	for (;;) {
+		char    buffer[1025];
+		int     bytes = 0;
 
-    if(body==NULL)body=strdup(buffer);
-    else {
-      char *tmp=alcmem(strlen(body)+bytes+1);
-      sprintf(tmp,"%s%s",body,buffer);
-      free(body);
-      body=tmp;
-    }
-  }
-  gzclose(zfp);
-  return body;
+		bytes = gzread (zfp, buffer, sizeof (buffer) - 1);
+		if (!bytes)
+			break;
+		else
+			buffer[bytes] = 0;
+
+		if (msg->cryptkey)
+			bbscrypt (buffer, bytes, msg->cryptkey);
+
+		if (body == NULL)
+			body = strdup (buffer);
+		else {
+			char   *tmp = alcmem (strlen (body) + bytes + 1);
+
+			sprintf (tmp, "%s%s", body, buffer);
+			free (body);
+			body = tmp;
+		}
+	}
+	gzclose (zfp);
+	return body;
 }
 
 
-#else /* DON'T USE_LIBZ */
+#else				/* DON'T USE_LIBZ */
 
 
 static char *
-mkbody(int clubid, struct message *msg)
+mkbody (int clubid, struct message *msg)
 {
-  char fname[256], *body=NULL;
-  FILE *fp;
+	char    fname[256], *body = NULL;
+	FILE   *fp;
 
-  strcpy(fname,mkfname("%s/%s/"MESSAGEFILE,MSGSDIR,
-		       msg->club[0]?msg->club:EMAILDIRNAME,
-		       msg->msgno));
-  if((fp=fopen(fname,"r"))==NULL){
-    fclose(fp);
-    error_fatalsys("Unable to open message %s/%d for reading",
-	     mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
-  } else if(fseek(fp,sizeof(struct message),SEEK_SET)){
-    int i=errno;
-    fclose(fp);
-    errno=i;
-    error_fatalsys("Unable to fseek() message %s/%d",
-	  mkfname(msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
-  }
-  while(!feof(fp)){
-    char buffer[1025];
-    int bytes=0;
+	strcpy (fname, mkfname ("%s/%s/" MESSAGEFILE, MSGSDIR,
+				msg->club[0] ? msg->club : EMAILDIRNAME,
+				msg->msgno));
+	if ((fp = fopen (fname, "r")) == NULL) {
+		fclose (fp);
+		error_fatalsys ("Unable to open message %s/%d for reading",
+				mkfname (msg->club[0] ? msg->
+					 club : EMAILDIRNAME, msg->msgno));
+	} else if (fseek (fp, sizeof (struct message), SEEK_SET)) {
+		int     i = errno;
 
-    bytes=fread(buffer,1,sizeof(buffer)-1,fp);
-    if(!bytes)break;
-    else buffer[bytes]=0;
+		fclose (fp);
+		errno = i;
+		error_fatalsys ("Unable to fseek() message %s/%d",
+				mkfname (msg->club[0] ? msg->
+					 club : EMAILDIRNAME, msg->msgno));
+	}
+	while (!feof (fp)) {
+		char    buffer[1025];
+		int     bytes = 0;
 
-    if(msg->cryptkey)bbscrypt(buffer,bytes,msg->cryptkey);
+		bytes = fread (buffer, 1, sizeof (buffer) - 1, fp);
+		if (!bytes)
+			break;
+		else
+			buffer[bytes] = 0;
 
-    if(body==NULL)body=strdup(buffer);
-    else {
-      char *tmp=alcmem(strlen(body)+bytes+1);
-      sprintf(tmp,"%s%s",body,buffer);
-      free(body);
-      body=tmp;
-    }
-  }
-  fclose(fp);
-  return body;
+		if (msg->cryptkey)
+			bbscrypt (buffer, bytes, msg->cryptkey);
+
+		if (body == NULL)
+			body = strdup (buffer);
+		else {
+			char   *tmp = alcmem (strlen (body) + bytes + 1);
+
+			sprintf (tmp, "%s%s", body, buffer);
+			free (body);
+			body = tmp;
+		}
+	}
+	fclose (fp);
+	return body;
 }
 
 
-#endif /* USE_LIBZ */
+#endif				/* USE_LIBZ */
 
 
 static char *
-mkfooter(int clubid, struct message *msg)
+mkfooter (int clubid, struct message *msg)
 {
-  if(msg->flags&MSF_FILEATT){
-    char fname[256];
-    int res;
-    struct stat st;
+	if (msg->flags & MSF_FILEATT) {
+		char    fname[256];
+		int     res;
+		struct stat st;
 
-    strcpy(fname,mkfname("%s/%s/"MSGATTDIR"/"FILEATTACHMENT,MSGSDIR,
-			 msg->club[0]?msg->club:EMAILDIRNAME,msg->msgno));
+		strcpy (fname,
+			mkfname ("%s/%s/" MSGATTDIR "/" FILEATTACHMENT,
+				 MSGSDIR,
+				 msg->club[0] ? msg->club : EMAILDIRNAME,
+				 msg->msgno));
 
-    /* Check if the file is there */
-    
-    if(stat(fname,&st)){
-      sprint(out_buffer,msg_get(ATTNOT6));
-      return strdup(out_buffer);
-    }
+		/* Check if the file is there */
+
+		if (stat (fname, &st)) {
+			sprint (out_buffer, msg_get (ATTNOT6));
+			return strdup (out_buffer);
+		}
 
 
-    /* Attempt to make the request for the file */
+		/* Attempt to make the request for the file */
 
-    if(prefs.flags&OMF_ATT){
-      char dosfname[13], num[13];
-      int i;
+		if (prefs.flags & OMF_ATT) {
+			char    dosfname[13], num[13];
+			int     i;
 
-      sprintf(dosfname,"%-8.8s.att",clubid?msg->club:EMAILCLUBNAME);
-      sprintf(num,"%d",msg->msgno);
-      strncpy(&dosfname[strlen(dosfname)-4-strlen(num)],num,strlen(num));
-      for(i=0;dosfname[i];i++){
-	dosfname[i]=dosfname[i]==' '?'-':
-	qwkuc?toupper(dosfname[i]):tolower(dosfname[i]);
-      }
+			sprintf (dosfname, "%-8.8s.att",
+				 clubid ? msg->club : EMAILCLUBNAME);
+			sprintf (num, "%d", msg->msgno);
+			strncpy (&dosfname
+				 [strlen (dosfname) - 4 - strlen (num)], num,
+				 strlen (num));
+			for (i = 0; dosfname[i]; i++) {
+				dosfname[i] = dosfname[i] == ' ' ? '-' :
+				    qwkuc ? toupper (dosfname[i]) :
+				    tolower (dosfname[i]);
+			}
 
-      numatt++;
-      res=mkrequest(clubid?msg->club:EMAILCLUBNAME,
-		    dosfname,
-		    fname,
-		    msg->msgno,
-		    RQP_ATT,
-		    RQF_ATT);
-    } else res=1;
+			numatt++;
+			res = mkrequest (clubid ? msg->club : EMAILCLUBNAME,
+					 dosfname,
+					 fname, msg->msgno, RQP_ATT, RQF_ATT);
+		} else
+			res = 1;
 
-    if(msg->club[0]&&(msg->flags&MSF_APPROVD)==0&&
-       getclubax(&thisuseracc,msg->club)<CAX_COOP){
-      sprint(out_buffer,msg_get(ATTNOT5),msg->fatt,st.st_size);
-    } else if(msg->club[0]&&getclubax(&thisuseracc,msg->club)<CAX_DNLOAD){
-      sprint(out_buffer,msg_get(ATTNOT4),msg->fatt,st.st_size);
-    } else if(res&&prefs.flags&OMF_ATTYES){
-      sprint(out_buffer,msg_get(ATTNOT2),msg->fatt,st.st_size,
-	     ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
-	     msg->msgno);
-    } else if(res&&prefs.flags&OMF_ATTASK){
-      sprint(out_buffer,msg_get(ATTNOT3),msg->fatt,st.st_size,
-	     ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
-	     msg->msgno);
-    } else sprint(out_buffer,msg_get(ATTNOT1),msg->fatt,st.st_size,
-		  ctlname[0],msg->club[0]?msg->club:EMAILCLUBNAME,
-		  msg->msgno);
-    
-    return strdup(out_buffer);
-  }
+		if (msg->club[0] && (msg->flags & MSF_APPROVD) == 0 &&
+		    getclubax (&thisuseracc, msg->club) < CAX_COOP) {
+			sprint (out_buffer, msg_get (ATTNOT5), msg->fatt,
+				st.st_size);
+		} else if (msg->club[0] &&
+			   getclubax (&thisuseracc, msg->club) < CAX_DNLOAD) {
+			sprint (out_buffer, msg_get (ATTNOT4), msg->fatt,
+				st.st_size);
+		} else if (res && prefs.flags & OMF_ATTYES) {
+			sprint (out_buffer, msg_get (ATTNOT2), msg->fatt,
+				st.st_size, ctlname[0],
+				msg->club[0] ? msg->club : EMAILCLUBNAME,
+				msg->msgno);
+		} else if (res && prefs.flags & OMF_ATTASK) {
+			sprint (out_buffer, msg_get (ATTNOT3), msg->fatt,
+				st.st_size, ctlname[0],
+				msg->club[0] ? msg->club : EMAILCLUBNAME,
+				msg->msgno);
+		} else
+			sprint (out_buffer, msg_get (ATTNOT1), msg->fatt,
+				st.st_size, ctlname[0],
+				msg->club[0] ? msg->club : EMAILCLUBNAME,
+				msg->msgno);
 
-  return NULL;
+		return strdup (out_buffer);
+	}
+
+	return NULL;
 }
 
 
 void
-dumpndx(int clubid, struct message *msg)
+dumpndx (int clubid, struct message *msg)
 {
-  struct qwkndx ndxrec;
+	struct qwkndx ndxrec;
 
-  if(clubid!=lastconf){
-    char fname[256];
+	if (clubid != lastconf) {
+		char    fname[256];
 
-    if(ndx){
-      fclose(ndx);
-      ndx=NULL;
-    }
-    
-    sprint(fname,"%03d.ndx",lastconf=clubid);
-    if((ndx=fopen(fname,"w"))==NULL){
-      error_fatalsys("Unable to create index file %s",fname);
-    }
-  }
+		if (ndx) {
+			fclose (ndx);
+			ndx = NULL;
+		}
 
-  /* Form the index record */
+		sprint (fname, "%03d.ndx", lastconf = clubid);
+		if ((ndx = fopen (fname, "w")) == NULL) {
+			error_fatalsys ("Unable to create index file %s",
+					fname);
+		}
+	}
 
-  ndxrec.blkofs=ltomks(1L+(long)ftell(msgdat)/128L);
-  ndxrec.sig=clubid&0xff;
+	/* Form the index record */
 
-  /* Always write exactly five bytes. Ignore 32bit word alignment. */
+	ndxrec.blkofs = ltomks (1L + (long) ftell (msgdat) / 128L);
+	ndxrec.sig = clubid & 0xff;
 
-  if(!fwrite(&ndxrec,5,1,ndx)){
-    error_fatalsys("Unable to write to index file.");
-  }
+	/* Always write exactly five bytes. Ignore 32bit word alignment. */
 
-  /* Write to PERSONAL.NDX if we need to */
+	if (!fwrite (&ndxrec, 5, 1, ndx)) {
+		error_fatalsys ("Unable to write to index file.");
+	}
 
-  if(!sameas(msg->to,thisuseracc.userid))return;
+	/* Write to PERSONAL.NDX if we need to */
 
-  if(!fwrite(&ndxrec,5,1,ndxpers)){
-    error_fatalsys("Unable to write to personal.ndx.");
-  }
+	if (!sameas (msg->to, thisuseracc.userid))
+		return;
+
+	if (!fwrite (&ndxrec, 5, 1, ndxpers)) {
+		error_fatalsys ("Unable to write to personal.ndx.");
+	}
 }
 
 
 void
-dumpmsg(char *pre, char *body, char *post)
+dumpmsg (char *pre, char *body, char *post)
 {
-  int n=0;
-  char tmp[7];
+	int     n = 0;
+	char    tmp[7];
 
-  n+=pre?strlen(pre):0;
-  n+=body?strlen(body):0;
-  n+=post?strlen(post):0;
+	n += pre ? strlen (pre) : 0;
+	n += body ? strlen (body) : 0;
+	n += post ? strlen (post) : 0;
 
-  sprintf(tmp,"%-6d",1+(n+127)/128);
-  strncpy(qwkhdr.blocks,tmp,6);
+	sprintf (tmp, "%-6d", 1 + (n + 127) / 128);
+	strncpy (qwkhdr.blocks, tmp, 6);
 
-  memcpy(qwkbuf,&qwkhdr,sizeof(qwkbuf));
-  wrtbuf();
+	memcpy (qwkbuf, &qwkhdr, sizeof (qwkbuf));
+	wrtbuf ();
 
-  if(pre){
-    xlate_out(pre);
-    if(!fwrite(pre,strlen(pre),1,msgdat)){
-      error_fatalsys("Unable to write to messages.dat");
-    }
-    free(pre);
-  }
-  if(body){
-    xlate_out(body);
-    if(fwrite(body,strlen(body),1,msgdat)!=1){
-      error_fatalsys("Unable to write to messages.dat");
-    }
-    free(body);
-  }
-  if(post){
-    xlate_out(post);
-    if(!fwrite(post,strlen(post),1,msgdat)){
-      error_fatalsys("Unable to write to messages.dat");
-    }
-    free(post);
-  }
+	if (pre) {
+		xlate_out (pre);
+		if (!fwrite (pre, strlen (pre), 1, msgdat)) {
+			error_fatalsys ("Unable to write to messages.dat");
+		}
+		free (pre);
+	}
+	if (body) {
+		xlate_out (body);
+		if (fwrite (body, strlen (body), 1, msgdat) != 1) {
+			error_fatalsys ("Unable to write to messages.dat");
+		}
+		free (body);
+	}
+	if (post) {
+		xlate_out (post);
+		if (!fwrite (post, strlen (post), 1, msgdat)) {
+			error_fatalsys ("Unable to write to messages.dat");
+		}
+		free (post);
+	}
 
-  clrbuf();
-  if(n%128){
-    if(!fwrite(qwkbuf,128-(n%128),1,msgdat)){
-      error_fatalsys("Unable to write to messages.dat");
-    }
-  }
+	clrbuf ();
+	if (n % 128) {
+		if (!fwrite (qwkbuf, 128 - (n % 128), 1, msgdat)) {
+			error_fatalsys ("Unable to write to messages.dat");
+		}
+	}
 }
 
 
 static void
-updatemsg(int clubid, struct message *msg)
+updatemsg (int clubid, struct message *msg)
 {
-  struct message m;
-  getmsgheader(msg->msgno,&m);
-  m.timesread++;
-  writemsgheader(&m);
+	struct message m;
+
+	getmsgheader (msg->msgno, &m);
+	m.timesread++;
+	writemsgheader (&m);
 }
 
 
 void
-receipt(int clubdid, struct message *msg)
+receipt (int clubdid, struct message *msg)
 {
-  struct message rrr;
-  char hdrname[256], fname[256], s1[256], s2[256];
-  char command[256];
-  FILE *fp;
+	struct message rrr;
+	char    hdrname[256], fname[256], s1[256], s2[256];
+	char    command[256];
+	FILE   *fp;
 
-  if(strcmp(msg->to,thisuseracc.userid))return;
-  sprintf(fname,TMPDIR"/rrrB%d%lx",getpid(),time(0));
-  if((fp=fopen(fname,"w"))==NULL)return;
+	if (strcmp (msg->to, thisuseracc.userid))
+		return;
+	sprintf (fname, TMPDIR "/rrrB%d%lx", getpid (), time (0));
+	if ((fp = fopen (fname, "w")) == NULL)
+		return;
 
-  strcpy(s1,msg_get(EMAILCLUBS_MHDAY0+(cofdate(msg->crdate)-4)%7));
-  strcpy(s2,msg_get(EMAILCLUBS_MHJAN+tdmonth(msg->crdate)));
-  
-  fprintf(fp,msg_get(EMAILCLUBS_RRRBODY),
-	  msg_getunit(EMAILCLUBS_SEXMALE,thisuseracc.sex==USX_MALE),thisuseracc.userid,
-	  EMAILCLUBNAME,msg->msgno,
-	  s1, tdday(msg->crdate), s2, tdyear(msg->crdate),
-	  strtime(msg->crtime,1));
-  
-  fclose(fp);
+	strcpy (s1,
+		msg_get (EMAILCLUBS_MHDAY0 + (cofdate (msg->crdate) - 4) % 7));
+	strcpy (s2, msg_get (EMAILCLUBS_MHJAN + tdmonth (msg->crdate)));
 
-  memset(&rrr,0,sizeof(rrr));
-  strcpy(rrr.from,thisuseracc.userid);
-  strcpy(rrr.to,msg->from);
-  sprintf(rrr.subject,msg_get(EMAILCLUBS_RRRSUBJ),EMAILCLUBNAME,msg->msgno);
-  sprintf(rrr.history,HST_RECEIPT" %s/%d",EMAILCLUBNAME,msg->msgno);
-  rrr.flags=MSF_CANTMOD;
+	fprintf (fp, msg_get (EMAILCLUBS_RRRBODY),
+		 msg_getunit (EMAILCLUBS_SEXMALE, thisuseracc.sex == USX_MALE),
+		 thisuseracc.userid, EMAILCLUBNAME, msg->msgno, s1,
+		 tdday (msg->crdate), s2, tdyear (msg->crdate),
+		 strtime (msg->crtime, 1));
 
-  sprintf(hdrname,TMPDIR"/rrrH%d%lx",getpid(),time(0));
-  if((fp=fopen(hdrname,"w"))==NULL){
-    unlink(fname);
-    return;
-  }
-  fwrite(&rrr,sizeof(rrr),1,fp);
-  fclose(fp);
+	fclose (fp);
 
-  sprintf(command,"%s %s %s",mkfname(BBSMAILBIN),hdrname,fname);
-  system(command);
-  unlink(hdrname);
-  unlink(fname);
+	memset (&rrr, 0, sizeof (rrr));
+	strcpy (rrr.from, thisuseracc.userid);
+	strcpy (rrr.to, msg->from);
+	sprintf (rrr.subject, msg_get (EMAILCLUBS_RRRSUBJ), EMAILCLUBNAME,
+		 msg->msgno);
+	sprintf (rrr.history, HST_RECEIPT " %s/%d", EMAILCLUBNAME, msg->msgno);
+	rrr.flags = MSF_CANTMOD;
 
-  if(usr_insys(msg->from,1)){
-    msg_set(mail_msg);
-    sprompt_other(othrshm,out_buffer,RRRINJ,thisuseracc.userid);
-    usr_injoth(&othruseronl,out_buffer,0);
-  }
-  
-  msg->flags&=~MSF_RECEIPT;
+	sprintf (hdrname, TMPDIR "/rrrH%d%lx", getpid (), time (0));
+	if ((fp = fopen (hdrname, "w")) == NULL) {
+		unlink (fname);
+		return;
+	}
+	fwrite (&rrr, sizeof (rrr), 1, fp);
+	fclose (fp);
+
+	sprintf (command, "%s %s %s", mkfname (BBSMAILBIN), hdrname, fname);
+	system (command);
+	unlink (hdrname);
+	unlink (fname);
+
+	if (usr_insys (msg->from, 1)) {
+		msg_set (mail_msg);
+		sprompt_other (othrshm, out_buffer, RRRINJ,
+			       thisuseracc.userid);
+		usr_injoth (&othruseronl, out_buffer, 0);
+	}
+
+	msg->flags &= ~MSF_RECEIPT;
 }
 
 
 void
-outmsg(int clubid, struct message *msg)
+outmsg (int clubid, struct message *msg)
 {
-  char *preamble, *body, *footer;
-  makeheader(clubid,msg);
+	char   *preamble, *body, *footer;
 
-  preamble=mkpre(clubid,msg);
-  body=mkbody(clubid,msg);
-  footer=mkfooter(clubid,msg);
+	makeheader (clubid, msg);
 
-  dumpndx(clubid,msg);
-  dumpmsg(preamble,body,footer);
-  
-  if(msg->flags&MSF_RECEIPT){
-    msg_set(emailclubs_msg);
-    receipt(clubid,msg);
-    msg_set(mail_msg);
-  }
-  updatemsg(clubid,msg);
+	preamble = mkpre (clubid, msg);
+	body = mkbody (clubid, msg);
+	footer = mkfooter (clubid, msg);
+
+	dumpndx (clubid, msg);
+	dumpmsg (preamble, body, footer);
+
+	if (msg->flags & MSF_RECEIPT) {
+		msg_set (emailclubs_msg);
+		receipt (clubid, msg);
+		msg_set (mail_msg);
+	}
+	updatemsg (clubid, msg);
 }
 
 
 void static
-mkxlation()
+mkxlation ()
 {
-  if(!loadprefs(USERQWK,&userqwk)){
-    error_fatal("Unable to read user mailer preferences for %s",
-	  thisuseracc.userid);
-  }
+	if (!loadprefs (USERQWK, &userqwk)) {
+		error_fatal ("Unable to read user mailer preferences for %s",
+			     thisuseracc.userid);
+	}
 
-  readxlation();
-  xlationtable=(userqwk.flags&OMF_TR)>>OMF_SHIFT;
+	readxlation ();
+	xlationtable = (userqwk.flags & OMF_TR) >> OMF_SHIFT;
 
-  if(userqwk.flags&USQ_GREEKQWK){
+	if (userqwk.flags & USQ_GREEKQWK) {
 
-    /* Greek QWK, translate NL/CR to ASCII 0x0c */
+		/* Greek QWK, translate NL/CR to ASCII 0x0c */
 
-    xlation[xlationtable]['\n']=EOL_GREEKQWK;
-    xlation[xlationtable]['\r']=EOL_GREEKQWK;
+		xlation[xlationtable]['\n'] = EOL_GREEKQWK;
+		xlation[xlationtable]['\r'] = EOL_GREEKQWK;
 
-  } else {
+	} else {
 
-    /* Normal QWK, translate NL/CR to ASCII 224 */
+		/* Normal QWK, translate NL/CR to ASCII 224 */
 
-    xlation[xlationtable]['\n']=EOL_QWK;
-    xlation[xlationtable]['\r']=EOL_QWK;
+		xlation[xlationtable]['\n'] = EOL_QWK;
+		xlation[xlationtable]['\r'] = EOL_QWK;
 
 #ifdef GREEK
 
-    /* Translate accented lower case eta (ASCII 224) to "n" */
-    /* It isn't an eta, but it looks extremely close and we */
-    /* can't know the exact charset used, so only ASCII is  */
-    /* a certainty. */
+		/* Translate accented lower case eta (ASCII 224) to "n" */
+		/* It isn't an eta, but it looks extremely close and we */
+		/* can't know the exact charset used, so only ASCII is  */
+		/* a certainty. */
 
-    if(fixeta)xlation[xlationtable][224]=etaxlt;
+		if (fixeta)
+			xlation[xlationtable][224] = etaxlt;
 
-#endif /* GREEK */
+#endif				/* GREEK */
 
-  }
+	}
 }
 
 
 int
-messagesdat()
+messagesdat ()
 {
-  if((msgdat=fopen("messages.dat","w"))==NULL){
-    error_logsys("Unable to create messages.dat");
-    return 1;
-  }
+	if ((msgdat = fopen ("messages.dat", "w")) == NULL) {
+		error_logsys ("Unable to create messages.dat");
+		return 1;
+	}
 
-  if((ndxpers=fopen("personal.ndx","w"))==NULL){
-    error_logsys("Unable to create personal.ndx");
-    return 1;
-  }
+	if ((ndxpers = fopen ("personal.ndx", "w")) == NULL) {
+		error_logsys ("Unable to create personal.ndx");
+		return 1;
+	}
 
-  mkxlation();
+	mkxlation ();
 
-  msgno=numatt=0;
-  lastconf=-1;
+	msgno = numatt = 0;
+	lastconf = -1;
 
-  /* Write the QWK copyright signature */
+	/* Write the QWK copyright signature */
 
-  clrbuf();
-  strbuf(QWKSIG);
-  wrtbuf();
+	clrbuf ();
+	strbuf (QWKSIG);
+	wrtbuf ();
 
-  return 0;
+	return 0;
 }
 
 
-int getnumatt()
+int
+getnumatt ()
 {
-  return numatt;
+	return numatt;
 }
+
+
+/* End of File */

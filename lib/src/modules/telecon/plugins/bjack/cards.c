@@ -36,6 +36,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -49,18 +52,16 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "cards.h"
+#include <megistos/cards.h>
 
 #ifdef MEGISTOS_BBS
-#include "bbs.h"
-#include "mbk_bjack.h"
+#include <megistos/bbs.h>
+#include <megistos/mbk_bjack.h>
 #endif
 
 
-#ifndef RCS_VER
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 /* cards colors in ANSI format */
 
@@ -70,108 +71,141 @@ const char *__RCS=RCS_VER;
 #define ANSI_White	"\033[0;47m"
 #define ANSI_Normal	"\033[0m"
 
-char Card_Template[][7][9] = {
-{ "ÚÄÄÄÄÄÄÄ¿",  "³2      ³",  "³   !   ³",  "³       ³",  "³   !   ³",  "³      2³",  "ÀÄÄÄÄÄÄÄÙ" },  
-{ "ÚÄÄÄÄÄÄÄ¿",  "³3      ³",  "³   !   ³",  "³   !   ³",  "³   !   ³",  "³      3³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³4      ³",  "³  ! !  ³",  "³       ³",  "³  ! !  ³",  "³      4³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³5      ³",  "³  ! !  ³",  "³   !   ³",  "³  ! !  ³",  "³      5³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³6      ³",  "³  ! !  ³",  "³  ! !  ³",  "³  ! !  ³",  "³      6³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³7      ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³      7³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³8      ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³      8³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³9      ³",  "³ ! ! ! ³",  "³ ! ! ! ³",  "³ ! ! ! ³",  "³      9³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³10 !   ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³   ! 10³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³A      ³",  "³       ³",  "³   !   ³",  "³       ³",  "³      A³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³J  !   ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³   !  J³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³Q  !   ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³   !  Q³",  "ÀÄÄÄÄÄÄÄÙ" },
-{ "ÚÄÄÄÄÄÄÄ¿",  "³K  !   ³",  "³ ! ! ! ³",  "³ !   ! ³",  "³ ! ! ! ³",  "³   !  K³",  "ÀÄÄÄÄÄÄÄÙ" }
+char    Card_Template[][7][9] = {
+	{"ÚÄÄÄÄÄÄÄ¿", "³2      ³", "³   !   ³", "³       ³", "³   !   ³",
+	 "³      2³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³3      ³", "³   !   ³", "³   !   ³", "³   !   ³",
+	 "³      3³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³4      ³", "³  ! !  ³", "³       ³", "³  ! !  ³",
+	 "³      4³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³5      ³", "³  ! !  ³", "³   !   ³", "³  ! !  ³",
+	 "³      5³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³6      ³", "³  ! !  ³", "³  ! !  ³", "³  ! !  ³",
+	 "³      6³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³7      ³", "³ !   ! ³", "³ ! ! ! ³", "³ !   ! ³",
+	 "³      7³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³8      ³", "³ ! ! ! ³", "³ !   ! ³", "³ ! ! ! ³",
+	 "³      8³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³9      ³", "³ ! ! ! ³", "³ ! ! ! ³", "³ ! ! ! ³",
+	 "³      9³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³10 !   ³", "³ ! ! ! ³", "³ !   ! ³", "³ ! ! ! ³",
+	 "³   ! 10³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³A      ³", "³       ³", "³   !   ³", "³       ³",
+	 "³      A³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³J  !   ³", "³ ! ! ! ³", "³ !   ! ³", "³ ! ! ! ³",
+	 "³   !  J³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³Q  !   ³", "³ ! ! ! ³", "³ !   ! ³", "³ ! ! ! ³",
+	 "³   !  Q³", "ÀÄÄÄÄÄÄÄÙ"},
+	{"ÚÄÄÄÄÄÄÄ¿", "³K  !   ³", "³ ! ! ! ³", "³ !   ! ³", "³ ! ! ! ³",
+	 "³   !  K³", "ÀÄÄÄÄÄÄÄÙ"}
 };
 #endif
 
-char temp_buffer[15][150];		/* temporary buffer to store card images		*/
+char    temp_buffer[15][150];	/* temporary buffer to store card images                */
 
 
 /* return card value as char, return 0 for 10 */
-char card_value(int cardidx)
+char
+card_value (int cardidx)
 {
-  char ar[] = "234567890AJQK";
+	char    ar[] = "234567890AJQK";
 
-	return (ar[cardidx % 13]);		// its 12 and not 13 because C counts from 0 (!!!)
+	return (ar[cardidx % 13]);	// its 12 and not 13 because C counts from 0 (!!!)
 }
 
 /* return card sign as char */
-char card_sign(int cardidx)
+char
+card_sign (int cardidx)
 {
-  char ar[] = "\003\004\005\006";	/* card suits */
+	char    ar[] = "\003\004\005\006";	/* card suits */
 
-  return (ar[cardidx/13]);
+	return (ar[cardidx / 13]);
 }
 
 
 /* map a card row into internal buffer */
-void map_card_row(char *buf,
-		  int index,
-		  int row,
-		  int is_red,
-		  int suit)
+void
+map_card_row (char *buf, int index, int row, int is_red, int suit)
 {
-  int i;
-  char b[500];
-  char *s;
+	int     i;
+	char    b[500];
+	char   *s;
 
-  if(row==0) {
-    strcat(buf,msg_get(is_red?BJM_CARD_TOP_RED:BJM_CARD_TOP_BLACK));
-  } else if(row==6) {
-    strcat(buf,msg_get(is_red?BJM_CARD_BOTTOM_RED:BJM_CARD_BOTTOM_BLACK));
-  } else {
-    s=msg_get((is_red?BJM_CARD_L2R2:BJM_CARD_L2B2) + index*5 + row-1);
+	if (row == 0) {
+		strcat (buf,
+			msg_get (is_red ? BJM_CARD_TOP_RED :
+				 BJM_CARD_TOP_BLACK));
+	} else if (row == 6) {
+		strcat (buf,
+			msg_get (is_red ? BJM_CARD_BOTTOM_RED :
+				 BJM_CARD_BOTTOM_BLACK));
+	} else {
+		s = msg_get ((is_red ? BJM_CARD_L2R2 : BJM_CARD_L2B2) +
+			     index * 5 + row - 1);
 
-    for(i=0;i<strlen(s);i++) {
-      if(s[i]=='!') b[0]=suit; else b[0]=s[i];
-      b[1]='\0';
-      strcat(buf, b);
-    }
-  }
+		for (i = 0; i < strlen (s); i++) {
+			if (s[i] == '!')
+				b[0] = suit;
+			else
+				b[0] = s[i];
+			b[1] = '\0';
+			strcat (buf, b);
+		}
+	}
 }
 
 /* map all cards passed through array to the internal buffer, uses map_card_row() */
-void map_cards(int *array, int count)
+void
+map_cards (int *array, int count)
 {
-  int i, k, st, en;
+	int     i, k, st, en;
 
-  st = 0;
-  en = 7;
+	st = 0;
+	en = 7;
 
-  for(i=0;i<15;i++) strcpy(temp_buffer[i], "");
+	for (i = 0; i < 15; i++)
+		strcpy (temp_buffer[i], "");
 
-  for(i=0;i<count;i++) {
-    if(i>5) {st = 8; en = 16; strcpy(temp_buffer[7], " ");}
-		
-    for(k=st;k<en;k++)
-      map_card_row(temp_buffer[k], array[i] % 13, k-st,
-		   (card_sign(array[i]) <005), 
-		   (int)card_sign(array[i]));
-    
-  }
+	for (i = 0; i < count; i++) {
+		if (i > 5) {
+			st = 8;
+			en = 16;
+			strcpy (temp_buffer[7], " ");
+		}
+
+		for (k = st; k < en; k++)
+			map_card_row (temp_buffer[k], array[i] % 13, k - st,
+				      (card_sign (array[i]) < 005),
+				      (int) card_sign (array[i]));
+
+	}
 }
 
 /*
  * return a pointer to the internal card buffer, index represents the row
  * loop through 0 to 15 to display a maximum of 12 cards
  */
-char *buf_index(int index)
+char   *
+buf_index (int index)
 {
-	if(index<16) return temp_buffer[index];
-  return "";
-  
+	if (index < 16)
+		return temp_buffer[index];
+	return "";
+
 }
 
 
 /* use printf() to draw cards on the screen */
-void draw_cards(int *array, int count)
+void
+draw_cards (int *array, int count)
 {
-  int i;
+	int     i;
 
-	map_cards(array, count);
-	for(i=0;i<15;i++) printf("%s (%i)\n", buf_index(i), strlen(temp_buffer[i]));
+	map_cards (array, count);
+	for (i = 0; i < 15; i++)
+		printf ("%s (%i)\n", buf_index (i), strlen (temp_buffer[i]));
 }
 
+
+
+/* End of File */

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -50,10 +53,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -64,150 +65,180 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
-#include "mbk_offline.mail.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.mail.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 
 struct prefs prefs;
 
 
-void readprefs(struct prefs *prefs)
+void
+readprefs (struct prefs *prefs)
 {
-  if(loadprefs(progname,prefs)!=1){
-    bzero(prefs,sizeof(struct prefs));
-    prefs->flags=0;
-    if(defhdr)prefs->flags|=OMF_HEADER;
-    if(defatt)prefs->flags|=(defatt==1)?OMF_ATTYES:OMF_ATTASK;
-    if(defreq)prefs->flags|=(defreq==1)?OMF_REQYES:OMF_REQASK;
-    writeprefs(prefs);
-  }
-}
-
-
-void writeprefs(struct prefs *prefs)
-{
-  saveprefs(progname,sizeof(struct prefs),prefs);
+	if (loadprefs (progname, prefs) != 1) {
+		bzero (prefs, sizeof (struct prefs));
+		prefs->flags = 0;
+		if (defhdr)
+			prefs->flags |= OMF_HEADER;
+		if (defatt)
+			prefs->flags |=
+			    (defatt == 1) ? OMF_ATTYES : OMF_ATTASK;
+		if (defreq)
+			prefs->flags |=
+			    (defreq == 1) ? OMF_REQYES : OMF_REQASK;
+		writeprefs (prefs);
+	}
 }
 
 
 void
-setprefs()
+writeprefs (struct prefs *prefs)
 {
-  int i;
-
-  readprefs(&prefs);
-
-  strcpy(inp_buffer,msg_get(OMVTN+(prefs.flags&OMF_ATT)));
-  strcat(inp_buffer,"\n");
-  strcat(inp_buffer,msg_get(OMVTN+((prefs.flags&OMF_REQ)>>2)));
-  strcat(inp_buffer,"\n");
-  strcat(inp_buffer,prefs.flags&OMF_HEADER?"on":"off");
-  strcat(inp_buffer,"\nOK\nCANCEL\n");
-  
-  if(dialog_run("offline.mail",OMVT,OMLT,inp_buffer,MAXINPLEN)!=0){
-    error_log("Unable to run data entry subsystem");
-    return;
-  }
-
-  dialog_parse(inp_buffer);
-
-  if(sameas(margv[5],"OK")||sameas(margv[5],margv[3])){
-    for(i=0;i<6;i++){
-      char *s=margv[i];
-
-      if(i==0){
-	int i,j=-1;
-	for(i=0;i<3;i++)if(sameas(msg_get(OMVTN+i),s)){
-	  j=i;
-	  break;
-	}
-	if(j<0){
-	  error_fatal("Bad value \"%s\" for attachment inclusion.",s);
-	}
-	prefs.flags&=~OMF_ATT;
-	if(j)prefs.flags|=j==1?OMF_ATTYES:OMF_ATTASK;
-      } else if(i==1){
-	int i,j=-1;
-	for(i=0;i<3;i++)if(sameas(msg_get(OMVTN+i),s)){
-	  j=i;
-	  break;
-	}
-	if(j<0){
-	  error_fatal("Bad value \"%s\" for request inclusion.",s);
-	}
-	prefs.flags&=~OMF_REQ;
-	if(j)prefs.flags|=j==1?OMF_REQYES:OMF_REQASK;
-      } else if(i==2){
-	if(sameas("on",s))prefs.flags|=OMF_HEADER;
-	else prefs.flags&=~OMF_HEADER;
-      }
-    }
-
-    saveprefs(progname,sizeof(prefs),&prefs);
-    prompt(OMSOK);
-  } else {
-    prompt(OMSCAN);
-    return;
-  }
+	saveprefs (progname, sizeof (struct prefs), prefs);
 }
 
 
 void
-setup()
+setprefs ()
 {
-  int shownmenu=0;
-  char c;
+	int     i;
 
-  for(;;){
-    thisuseronl.flags&=~OLF_BUSY;
-    if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-      if(!shownmenu){
-	prompt(OMMENU);
-	shownmenu=2;
-      }
-    } else shownmenu=1;
-    if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
-      thisuseronl.input[0]=0;
-    } else {
-      if(!cnc_nxtcmd){
-	if(thisuseronl.flags&OLF_MMCONCAT){
-	  thisuseronl.flags&=~OLF_MMCONCAT;
-	  return;
+	readprefs (&prefs);
+
+	strcpy (inp_buffer, msg_get (OMVTN + (prefs.flags & OMF_ATT)));
+	strcat (inp_buffer, "\n");
+	strcat (inp_buffer, msg_get (OMVTN + ((prefs.flags & OMF_REQ) >> 2)));
+	strcat (inp_buffer, "\n");
+	strcat (inp_buffer, prefs.flags & OMF_HEADER ? "on" : "off");
+	strcat (inp_buffer, "\nOK\nCANCEL\n");
+
+	if (dialog_run ("offline.mail", OMVT, OMLT, inp_buffer, MAXINPLEN) !=
+	    0) {
+		error_log ("Unable to run data entry subsystem");
+		return;
 	}
-	if(shownmenu==1){
-	  prompt(OMSHORT);
-	} else shownmenu=1;
-	inp_get(0);
-	cnc_begin();
-      }
-    }
 
-    if((c=cnc_more())!=0){
-      cnc_chr();
-      switch (c) {
-      case 'S':
-	setprefs();
-	break;
-      case 'C':
-	setqsc();
-	break;
-      case 'X':
-	return;
-      case '?':
-	shownmenu=0;
-	break;
-      default:
-	prompt(OMERR,c);
-	cnc_end();
-	continue;
-      }
-    }
-    if(fmt_lastresult==PAUSE_QUIT)fmt_resetvpos(0);
-    cnc_end();
-  }
+	dialog_parse (inp_buffer);
+
+	if (sameas (margv[5], "OK") || sameas (margv[5], margv[3])) {
+		for (i = 0; i < 6; i++) {
+			char   *s = margv[i];
+
+			if (i == 0) {
+				int     i, j = -1;
+
+				for (i = 0; i < 3; i++)
+					if (sameas (msg_get (OMVTN + i), s)) {
+						j = i;
+						break;
+					}
+				if (j < 0) {
+					error_fatal
+					    ("Bad value \"%s\" for attachment inclusion.",
+					     s);
+				}
+				prefs.flags &= ~OMF_ATT;
+				if (j)
+					prefs.flags |=
+					    j == 1 ? OMF_ATTYES : OMF_ATTASK;
+			} else if (i == 1) {
+				int     i, j = -1;
+
+				for (i = 0; i < 3; i++)
+					if (sameas (msg_get (OMVTN + i), s)) {
+						j = i;
+						break;
+					}
+				if (j < 0) {
+					error_fatal
+					    ("Bad value \"%s\" for request inclusion.",
+					     s);
+				}
+				prefs.flags &= ~OMF_REQ;
+				if (j)
+					prefs.flags |=
+					    j == 1 ? OMF_REQYES : OMF_REQASK;
+			} else if (i == 2) {
+				if (sameas ("on", s))
+					prefs.flags |= OMF_HEADER;
+				else
+					prefs.flags &= ~OMF_HEADER;
+			}
+		}
+
+		saveprefs (progname, sizeof (prefs), &prefs);
+		prompt (OMSOK);
+	} else {
+		prompt (OMSCAN);
+		return;
+	}
 }
+
+
+void
+setup ()
+{
+	int     shownmenu = 0;
+	char    c;
+
+	for (;;) {
+		thisuseronl.flags &= ~OLF_BUSY;
+		if (!
+		    (thisuseronl.flags & OLF_MMCALLING &&
+		     thisuseronl.input[0])) {
+			if (!shownmenu) {
+				prompt (OMMENU);
+				shownmenu = 2;
+			}
+		} else
+			shownmenu = 1;
+		if (thisuseronl.flags & OLF_MMCALLING && thisuseronl.input[0]) {
+			thisuseronl.input[0] = 0;
+		} else {
+			if (!cnc_nxtcmd) {
+				if (thisuseronl.flags & OLF_MMCONCAT) {
+					thisuseronl.flags &= ~OLF_MMCONCAT;
+					return;
+				}
+				if (shownmenu == 1) {
+					prompt (OMSHORT);
+				} else
+					shownmenu = 1;
+				inp_get (0);
+				cnc_begin ();
+			}
+		}
+
+		if ((c = cnc_more ()) != 0) {
+			cnc_chr ();
+			switch (c) {
+			case 'S':
+				setprefs ();
+				break;
+			case 'C':
+				setqsc ();
+				break;
+			case 'X':
+				return;
+			case '?':
+				shownmenu = 0;
+				break;
+			default:
+				prompt (OMERR, c);
+				cnc_end ();
+				continue;
+			}
+		}
+		if (fmt_lastresult == PAUSE_QUIT)
+			fmt_resetvpos (0);
+		cnc_end ();
+	}
+}
+
+
+/* End of File */

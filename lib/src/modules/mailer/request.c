@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -47,10 +50,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -61,120 +62,138 @@ const char *__RCS=RCS_VER;
 #define WANT_UNISTD_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "typhoon.h"
-#include "offline.mail.h"
-#include "../../mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/typhoon.h>
+#include <megistos/offline.mail.h>
+#include <megistos/../../mailer.h>
 
 
 static int reqdbid;
 
 
 void
-openreqdb()
+openreqdb ()
 {
-  d_dbfpath(mkfname(MAILERREQDIR));
-  d_dbdpath(mkfname(MAILERREQDIR));
-  if(d_open("request","s")!=S_OKAY){
-    error_fatal("Unable to open QWK REQUEST database (db_status %d)",
-	  db_status);
-  }
-  d_dbget(&reqdbid);
+	d_dbfpath (mkfname (MAILERREQDIR));
+	d_dbdpath (mkfname (MAILERREQDIR));
+	if (d_open ("request", "s") != S_OKAY) {
+		error_fatal
+		    ("Unable to open QWK REQUEST database (db_status %d)",
+		     db_status);
+	}
+	d_dbget (&reqdbid);
 }
 
 
 int
-mkrequest(char *area, char *dosfname, char *fname,
-	  int msgno, int priority, int flags)
+mkrequest (char *area, char *dosfname, char *fname,
+	   int msgno, int priority, int flags)
 {
-  int olddb=-1, retval;
-  struct reqidx idx;
+	int     olddb = -1, retval;
+	struct reqidx idx;
 
-  bzero(&idx,sizeof(idx));
-  if(d_dbget(&olddb)!=S_OKAY)olddb=-1;
-  if(olddb!=reqdbid)d_dbset(reqdbid);
+	bzero (&idx, sizeof (idx));
+	if (d_dbget (&olddb) != S_OKAY)
+		olddb = -1;
+	if (olddb != reqdbid)
+		d_dbset (reqdbid);
 
-  if(d_keylast(REQNUM)!=S_OKAY)idx.reqnum=1;
-  else {
-    if(d_keyread(&idx.reqnum)!=S_OKAY){
-      error_fatal("Unable to read last key (db_status %d)",db_status);
-    }
-    idx.reqnum++;
-  }
+	if (d_keylast (REQNUM) != S_OKAY)
+		idx.reqnum = 1;
+	else {
+		if (d_keyread (&idx.reqnum) != S_OKAY) {
+			error_fatal ("Unable to read last key (db_status %d)",
+				     db_status);
+		}
+		idx.reqnum++;
+	}
 
-  strncpy(idx.userid,thisuseracc.userid,sizeof(idx.userid)-1);
-  strncpy(idx.reqarea,area,sizeof(idx.reqarea)-1);
-  strncpy(idx.dosfname,dosfname,sizeof(idx.dosfname)-1);
-  strncpy(idx.reqfname,fname,sizeof(idx.reqfname)-1);
-  idx.priority=priority;
-  idx.reqflags=flags;
-  idx.reqdate=today();
-  idx.msgno=msgno;
+	strncpy (idx.userid, thisuseracc.userid, sizeof (idx.userid) - 1);
+	strncpy (idx.reqarea, area, sizeof (idx.reqarea) - 1);
+	strncpy (idx.dosfname, dosfname, sizeof (idx.dosfname) - 1);
+	strncpy (idx.reqfname, fname, sizeof (idx.reqfname) - 1);
+	idx.priority = priority;
+	idx.reqflags = flags;
+	idx.reqdate = today ();
+	idx.msgno = msgno;
 
-  retval=d_fillnew(REQIDX,&idx)==S_OKAY;
-  if(olddb!=-1&&olddb!=reqdbid)d_dbset(olddb);
-  return retval;
+	retval = d_fillnew (REQIDX, &idx) == S_OKAY;
+	if (olddb != -1 && olddb != reqdbid)
+		d_dbset (olddb);
+	return retval;
 }
 
 
 int
-getfirstreq(struct reqidx *idx)
+getfirstreq (struct reqidx *idx)
 {
-  struct orderc o;
-  d_dbset(reqdbid);
-  strncpy(o.userid,thisuseracc.userid,sizeof(idx->userid)-1);
-  o.reqnum=0;
-  o.priority=0;
-  strcpy(o.reqarea,"\1");
+	struct orderc o;
 
-  if(d_keyfind(ORDERC,&o)!=S_OKAY){
-    if(d_keyprev(ORDERC))return 0;
-  }
-  if(d_recread(idx)!=S_OKAY){
-    if(db_status!=S_DELETED&&db_status!=S_NOTFOUND)
-      error_fatal("Unable to read request record, db_status=%d.",
-	    db_status);
-    return 0;
-  }
-  return sameas(idx->userid,thisuseracc.userid);
+	d_dbset (reqdbid);
+	strncpy (o.userid, thisuseracc.userid, sizeof (idx->userid) - 1);
+	o.reqnum = 0;
+	o.priority = 0;
+	strcpy (o.reqarea, "\1");
+
+	if (d_keyfind (ORDERC, &o) != S_OKAY) {
+		if (d_keyprev (ORDERC))
+			return 0;
+	}
+	if (d_recread (idx) != S_OKAY) {
+		if (db_status != S_DELETED && db_status != S_NOTFOUND)
+			error_fatal
+			    ("Unable to read request record, db_status=%d.",
+			     db_status);
+		return 0;
+	}
+	return sameas (idx->userid, thisuseracc.userid);
 }
 
 
 int
-getnextreq(struct reqidx *idx)
+getnextreq (struct reqidx *idx)
 {
-  int n=idx->reqnum;
-  d_dbset(reqdbid);
-  d_keyfind(REQNUM,&(idx->reqnum));
-  if(d_keynext(REQIDX)!=S_OKAY)return 0;
-  if(d_recread(idx)!=S_OKAY){
-    error_fatal("Unable to read request record, db_status=%d.",
-	  db_status);
-  }
-  if(n==idx->reqnum){
-    if(d_keynext(REQIDX)!=S_OKAY)return 0;
-    if(d_recread(idx)!=S_OKAY){
-      error_fatal("Unable to read request record, db_status=%d.",
-	    db_status);
-    }
-    if(n==idx->reqnum)error_fatal("Whoops, looping at request %d.",n);
-  }
-  return sameas(idx->userid,thisuseracc.userid);
+	int     n = idx->reqnum;
+
+	d_dbset (reqdbid);
+	d_keyfind (REQNUM, &(idx->reqnum));
+	if (d_keynext (REQIDX) != S_OKAY)
+		return 0;
+	if (d_recread (idx) != S_OKAY) {
+		error_fatal ("Unable to read request record, db_status=%d.",
+			     db_status);
+	}
+	if (n == idx->reqnum) {
+		if (d_keynext (REQIDX) != S_OKAY)
+			return 0;
+		if (d_recread (idx) != S_OKAY) {
+			error_fatal
+			    ("Unable to read request record, db_status=%d.",
+			     db_status);
+		}
+		if (n == idx->reqnum)
+			error_fatal ("Whoops, looping at request %d.", n);
+	}
+	return sameas (idx->userid, thisuseracc.userid);
 }
 
 
 int
-rmrequest(struct reqidx *idx)
+rmrequest (struct reqidx *idx)
 {
-  d_dbset(reqdbid);
-  if(d_keyfind(REQNUM,&(idx->reqnum))!=S_OKAY)return 0;
-  return d_delete()==S_OKAY;
+	d_dbset (reqdbid);
+	if (d_keyfind (REQNUM, &(idx->reqnum)) != S_OKAY)
+		return 0;
+	return d_delete () == S_OKAY;
 }
 
 
 int
-updrequest(struct reqidx *idx)
+updrequest (struct reqidx *idx)
 {
-  d_dbset(reqdbid);
-  return d_recwrite(idx)==S_OKAY;
+	d_dbset (reqdbid);
+	return d_recwrite (idx) == S_OKAY;
 }
+
+
+/* End of File */

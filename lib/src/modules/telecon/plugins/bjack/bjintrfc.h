@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -57,52 +60,55 @@
 
 #ifdef MEGISTOS_BBS
 
-#include "bbs.h"
-#include "telecon.h"
-#include "plugins.h"
+#include <megistos/bbs.h>
+#include <megistos/telecon.h>
+#include <megistos/plugins.h>
 
-#endif	/* MEGISTOS_BBS */
+#endif				/* MEGISTOS_BBS */
 
-#include "bjack.h"
+#include <megistos/bjack.h>
 
 
 /* blackjack message record */
 struct bj_message_r {
-	char userid[40];
-	char other_msg[2048];
-	char this_msg[2048];
+	char    userid[40];
+	char    other_msg[2048];
+	char    this_msg[2048];
 } bj_message;
 
-extern char temp_prompt[];		/* temporary store for prompts		*/
-extern char pfix_prompt[3][];		/* temporary store for pre/post-fixes	*/
-                     
+extern char temp_prompt[];	/* temporary store for prompts          */
+extern char pfix_prompt[3][];	/* temporary store for pre/post-fixes   */
+
 /* function prototypes */
 
 /* interface.c */
 
 	/* broadcast message to current and other users */
-void bj_broadcast_msg(int this_idx, int other_idx, char *userid, ...);
+void    bj_broadcast_msg (int this_idx, int other_idx, char *userid, ...);
 
 	/* return player credits */
-int bj_player_credits(struct bj_player *player);
+int     bj_player_credits (struct bj_player *player);
 
 	/* post credits to user */
-void bj_post_credits(struct bj_player *player, int credits);
+void    bj_post_credits (struct bj_player *player, int credits);
 
 	/* return player sex */
-int bj_player_sex(struct bj_player *player);
+int     bj_player_sex (struct bj_player *player);
 
 	/* return 1 if player cannot be charged */
-int bj_player_nocharge(struct bj_player *player);
+int     bj_player_nocharge (struct bj_player *player);
 
 	/* return >0 if command available, place command in text */
-int bj_get_cmd(char *userid, char *text);
+int     bj_get_cmd (char *userid, char *text);
 
 	/* return index'th prompt */
-char *bj_get_prompt(int index);
+char   *bj_get_prompt (int index);
 
 	/* return index'th prompt if value=0 otherwise return index+1'th */
-char *bj_get_pfix(int pidx, int index, int value);
+char   *bj_get_pfix (int pidx, int index, int value);
 
 
-#endif	/* __BJINTRFC_H */
+#endif				/* __BJINTRFC_H */
+
+
+/* End of File */

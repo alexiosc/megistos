@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:20  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,216 +72,241 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.graffiti.h"
-#include "../../mailer.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.graffiti.h>
+#include <megistos/../../mailer.h>
 #define NOCOLORS
-#include "../../../graffiti/graffiti.h"
-#include "mbk_offline.graffiti.h"
+#include <megistos/../../../graffiti/graffiti.h>
+#include <megistos/mbk_offline.graffiti.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __GRAFFITI_UNAMBIGUOUS__
-#include "mbk_graffiti.h"
+#include <megistos/mbk_graffiti.h>
 
 
 static char *
-zonk(char *s, int len)
+zonk (char *s, int len)
 {
-  int i;
-  for(i=len-1;i&&((s[i]==' ')||(s[i]==0));i--)s[i]=0;
-  for(i=0;s[i]==' ';i++);
-  return &s[i];
+	int     i;
+
+	for (i = len - 1; i && ((s[i] == ' ') || (s[i] == 0)); i--)
+		s[i] = 0;
+	for (i = 0; s[i] == ' '; i++);
+	return &s[i];
 }
 
 
 int
-checkfile()
+checkfile ()
 {
-  struct stat    buf;
-  FILE           *fp;
-  struct wallmsg header;
+	struct stat buf;
+	FILE   *fp;
+	struct wallmsg header;
 
-  if(stat(mkfname(WALLFILE),&buf)){
-    if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
-      error_log("Timed out waiting for lock %s",WALLLOCK);
-      return 0;
-    }
-    lock_place(WALLLOCK,"creating");
-    
-    if((fp=fopen(mkfname(WALLFILE),"w"))==NULL){
-      error_fatalsys("Unable to create file %s",mkfname(WALLFILE));
-    }
-    memset(&header,0,sizeof(header));
-    strcpy(header.userid,SYSOP);
-    sprintf(header.message,"%d",0);
-    fwrite(&header,sizeof(header),1,fp);
+	if (stat (mkfname (WALLFILE), &buf)) {
+		if ((lock_wait (WALLLOCK, 5)) == LKR_TIMEOUT) {
+			error_log ("Timed out waiting for lock %s", WALLLOCK);
+			return 0;
+		}
+		lock_place (WALLLOCK, "creating");
 
-    fclose(fp);
-    chmod(mkfname(WALLFILE),0666);
-    lock_rm(WALLLOCK);
-  }
-  return 1;
+		if ((fp = fopen (mkfname (WALLFILE), "w")) == NULL) {
+			error_fatalsys ("Unable to create file %s",
+					mkfname (WALLFILE));
+		}
+		memset (&header, 0, sizeof (header));
+		strcpy (header.userid, SYSOP);
+		sprintf (header.message, "%d", 0);
+		fwrite (&header, sizeof (header), 1, fp);
+
+		fclose (fp);
+		chmod (mkfname (WALLFILE), 0666);
+		lock_rm (WALLLOCK);
+	}
+	return 1;
 }
 
 
 int
-drawmessage(char *text)
+drawmessage (char *text)
 {
-  FILE           *fp, *out;
-  char           fname[256];
-  char           userid[24];
-  int            numlines=0, i;
-  struct wallmsg wallmsg;
+	FILE   *fp, *out;
+	char    fname[256];
+	char    userid[24];
+	int     numlines = 0, i;
+	struct wallmsg wallmsg;
 
-  if(!checkfile()){
-    error_fatal("Unable to ensure existence of graffiti wall file.");
-  }
+	if (!checkfile ()) {
+		error_fatal
+		    ("Unable to ensure existence of graffiti wall file.");
+	}
 
-  if((lock_wait(WALLLOCK,5))==LKR_TIMEOUT){
-    error_fatal("Timed out waiting for lock %s",WALLLOCK);
-  }
+	if ((lock_wait (WALLLOCK, 5)) == LKR_TIMEOUT) {
+		error_fatal ("Timed out waiting for lock %s", WALLLOCK);
+	}
 
-  lock_place(WALLLOCK,"checking");
-  
-  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
-    lock_rm(WALLLOCK);
-    error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
-  }
-  
-  if(!fread(&wallmsg,sizeof(wallmsg),1,fp)){
-    lock_rm(WALLLOCK);
-    error_fatalsys("Unable to read file %s",mkfname(WALLFILE));
-  }
-  
-  numlines=atoi(wallmsg.message);
-  strcpy(userid,wallmsg.userid);
-  if(!key_owns(&thisuseracc,ovrkey)
-     && sameas(wallmsg.userid,thisuseracc.userid) && numlines>=maxmsgs){
-    lock_rm(WALLLOCK);
-    return 0;
-  }
-  
-  fclose(fp);
-  lock_rm(WALLLOCK);
-  
-  lock_place(WALLLOCK,"writing");
+	lock_place (WALLLOCK, "checking");
 
-  if((fp=fopen(mkfname(WALLFILE),"r"))==NULL){
-    lock_rm(WALLLOCK);
-    error_fatalsys("Unable to open file %s",mkfname(WALLFILE));
-  }
-  
-  fread(&wallmsg,sizeof(wallmsg),1,fp);
+	if ((fp = fopen (mkfname (WALLFILE), "r")) == NULL) {
+		lock_rm (WALLLOCK);
+		error_fatalsys ("Unable to open file %s", mkfname (WALLFILE));
+	}
 
-  sprintf(fname,TMPDIR"/graffiti%05d",getpid());
-  if((out=fopen(fname,"w"))==NULL){
-    lock_rm(WALLLOCK);
-    error_fatalsys("Unable to create temporary file %s",fname);
-  }
-  if(sameas(thisuseracc.userid,userid))numlines++;
-  else numlines=1;
-  
-  memset(&wallmsg,0,sizeof(wallmsg));
-  strcpy(wallmsg.userid,thisuseracc.userid);
-  sprintf(wallmsg.message,"%d",numlines);
-  fwrite(&wallmsg,sizeof(wallmsg),1,out);
+	if (!fread (&wallmsg, sizeof (wallmsg), 1, fp)) {
+		lock_rm (WALLLOCK);
+		error_fatalsys ("Unable to read file %s", mkfname (WALLFILE));
+	}
 
-  strcpy(wallmsg.message,text);
-  fwrite(&wallmsg,sizeof(wallmsg),1,out);
+	numlines = atoi (wallmsg.message);
+	strcpy (userid, wallmsg.userid);
+	if (!key_owns (&thisuseracc, ovrkey)
+	    && sameas (wallmsg.userid, thisuseracc.userid) &&
+	    numlines >= maxmsgs) {
+		lock_rm (WALLLOCK);
+		return 0;
+	}
 
-  for(i=0;(i<(maxsize-1))&&(!feof(fp));){
-    if(fread(&wallmsg,sizeof(wallmsg),1,fp) && wallmsg.userid[0]){
-      i++;
-      fwrite(&wallmsg,sizeof(wallmsg),1,out);
-    }
-  }
-  fclose(out);
-  fclose(fp);
+	fclose (fp);
+	lock_rm (WALLLOCK);
 
-  if(fcopy(fname,mkfname(WALLFILE))){
-    lock_rm(WALLLOCK);
-    error_fatal("Unable to fcopy() %s to %s",fname,mkfname(WALLFILE));
-    return 0;
-  }
-  unlink(fname);
-  lock_rm(WALLLOCK);
-  return 1;
+	lock_place (WALLLOCK, "writing");
+
+	if ((fp = fopen (mkfname (WALLFILE), "r")) == NULL) {
+		lock_rm (WALLLOCK);
+		error_fatalsys ("Unable to open file %s", mkfname (WALLFILE));
+	}
+
+	fread (&wallmsg, sizeof (wallmsg), 1, fp);
+
+	sprintf (fname, TMPDIR "/graffiti%05d", getpid ());
+	if ((out = fopen (fname, "w")) == NULL) {
+		lock_rm (WALLLOCK);
+		error_fatalsys ("Unable to create temporary file %s", fname);
+	}
+	if (sameas (thisuseracc.userid, userid))
+		numlines++;
+	else
+		numlines = 1;
+
+	memset (&wallmsg, 0, sizeof (wallmsg));
+	strcpy (wallmsg.userid, thisuseracc.userid);
+	sprintf (wallmsg.message, "%d", numlines);
+	fwrite (&wallmsg, sizeof (wallmsg), 1, out);
+
+	strcpy (wallmsg.message, text);
+	fwrite (&wallmsg, sizeof (wallmsg), 1, out);
+
+	for (i = 0; (i < (maxsize - 1)) && (!feof (fp));) {
+		if (fread (&wallmsg, sizeof (wallmsg), 1, fp) &&
+		    wallmsg.userid[0]) {
+			i++;
+			fwrite (&wallmsg, sizeof (wallmsg), 1, out);
+		}
+	}
+	fclose (out);
+	fclose (fp);
+
+	if (fcopy (fname, mkfname (WALLFILE))) {
+		lock_rm (WALLLOCK);
+		error_fatal ("Unable to fcopy() %s to %s", fname,
+			     mkfname (WALLFILE));
+		return 0;
+	}
+	unlink (fname);
+	lock_rm (WALLLOCK);
+	return 1;
 }
 
 
 
 static int
-process(char *fname)
+process (char *fname)
 {
-  int numlines=0, numsuccessful=0;
+	int     numlines = 0, numsuccessful = 0;
 
-  FILE *fp=fopen(fname,"r");
-  if(fp==NULL){
-    error_fatalsys("Unable to open file %s",fname);
-  }
+	FILE   *fp = fopen (fname, "r");
 
-  prompt(ULWRH);
+	if (fp == NULL) {
+		error_fatalsys ("Unable to open file %s", fname);
+	}
 
-  while(!feof(fp)){
-    char line[1024], *cp;
-    if(!fgets(line,sizeof(line),fp))break;
-    if((cp=strchr(line,'\n'))!=NULL)*cp=0;
-    if((cp=strchr(line,'\r'))!=NULL)*cp=0;
-    cp=zonk(line,sizeof(line));
-    xlate_in(cp);
-    if(*cp==':'){
-      numlines++;
-      numsuccessful+=drawmessage(cp+1);
-    }
-  }
+	prompt (ULWRH);
 
-  fclose(fp);
+	while (!feof (fp)) {
+		char    line[1024], *cp;
 
-  if(!numlines){
-    prompt(ULWMT);
-    return 0;
-  } else if(numsuccessful==numlines){
-    char tmp[1024];
-    strcpy(tmp,msg_getunit(WRTSNG,numsuccessful));
-    prompt(ULNWR,tmp,numsuccessful,numlines,msg_getunit(LINSNG,numlines));
-    return 0;
-  } else {
-    char tmp[1024];
-    strcpy(tmp,msg_getunit(WRTSNG,numlines));
-    prompt(ULWRT,tmp,numlines,msg_getunit(LINSNG,numlines));
-  }
-  return 1;
+		if (!fgets (line, sizeof (line), fp))
+			break;
+		if ((cp = strchr (line, '\n')) != NULL)
+			*cp = 0;
+		if ((cp = strchr (line, '\r')) != NULL)
+			*cp = 0;
+		cp = zonk (line, sizeof (line));
+		xlate_in (cp);
+		if (*cp == ':') {
+			numlines++;
+			numsuccessful += drawmessage (cp + 1);
+		}
+	}
+
+	fclose (fp);
+
+	if (!numlines) {
+		prompt (ULWMT);
+		return 0;
+	} else if (numsuccessful == numlines) {
+		char    tmp[1024];
+
+		strcpy (tmp, msg_getunit (WRTSNG, numsuccessful));
+		prompt (ULNWR, tmp, numsuccessful, numlines,
+			msg_getunit (LINSNG, numlines));
+		return 0;
+	} else {
+		char    tmp[1024];
+
+		strcpy (tmp, msg_getunit (WRTSNG, numlines));
+		prompt (ULWRT, tmp, numlines, msg_getunit (LINSNG, numlines));
+	}
+	return 1;
 }
 
 
 int
-ogupload()
+ogupload ()
 {
-  struct reqidx idx;
-  int res, stop=0;
+	struct reqidx idx;
+	int     res, stop = 0;
 
-  openreqdb();
-  res=getfirstreq(&idx);
+	openreqdb ();
+	res = getfirstreq (&idx);
 
-  for(res=getfirstreq(&idx);res;res=getnextreq(&idx)){
-    if(idx.priority!=RQP_CTLMSG)continue;
+	for (res = getfirstreq (&idx); res; res = getnextreq (&idx)) {
+		if (idx.priority != RQP_CTLMSG)
+			continue;
 
-    if(!sameas(zonk(idx.reqfname,sizeof(idx.reqfname)),"WALL"))continue;
-  
-    stop=!process(idx.dosfname);
+		if (!sameas
+		    (zonk (idx.reqfname, sizeof (idx.reqfname)), "WALL"))
+			continue;
 
-    /* Remove the current request from the database */
+		stop = !process (idx.dosfname);
 
-    unlink(idx.dosfname);
-    if(!rmrequest(&idx)){
-      error_fatal("Unable to remove request %d from the database.",
-	    idx.reqnum);
-    }
+		/* Remove the current request from the database */
 
-    if(stop)break;
-  }
+		unlink (idx.dosfname);
+		if (!rmrequest (&idx)) {
+			error_fatal
+			    ("Unable to remove request %d from the database.",
+			     idx.reqnum);
+		}
 
-  return 0;
+		if (stop)
+			break;
+	}
+
+	return 0;
 }
+
+
+/* End of File */

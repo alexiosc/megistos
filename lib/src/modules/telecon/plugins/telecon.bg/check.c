@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:19  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:07  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -23,10 +26,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -66,54 +67,64 @@ const char *__RCS=RCS_VER;
 
 
 #include <stdio.h>
-#include "back.h"
+#include <megistos/back.h>
 
 
 
 void
-getmove () {
-  register int i, c;
+getmove ()
+{
+	register int i, c;
 
-  c = 0;
-  for (;;) {
-    i = checkmove(c);
-    
-    switch (i) {
-    case -1:
-      if (movokay(mvlim)) {
-	for (i = 0; i < mvlim; i++) if (h[i]) wrhit(g[i]);
-	nexturn();
-	if (*offopp == 15) cturn *= -2;
-	if (pnum) bflag = pnum;
-	return;
-      }
-      
-    case -4:
-    case 0:
-      wrboard();
-      if (i != 0 && i != -4) break;
+	c = 0;
+	for (;;) {
+		i = checkmove (c);
 
-      /* HERE: error: player must/can only make a certain number of moves */
-      
-      writel (*Colorptr);
-      if (i == -4) writel (" must make ");
-      else writel (" can only make ");
-      writec (mvlim+'0');
-      writel (" move");
-      if (mvlim > 1) writec ('s');
-      writec ('.');
-      writec ('\n');
-      break;
-      
-    case -3:
+		switch (i) {
+		case -1:
+			if (movokay (mvlim)) {
+				for (i = 0; i < mvlim; i++)
+					if (h[i])
+						wrhit (g[i]);
+				nexturn ();
+				if (*offopp == 15)
+					cturn *= -2;
+				if (pnum)
+					bflag = pnum;
+				return;
+			}
 
-      /* HERE: quitting, is this necessary now? */
+		case -4:
+		case 0:
+			wrboard ();
+			if (i != 0 && i != -4)
+				break;
 
-      if (quit()) return;
-    }
-    
-    proll ();
-  }
+			/* HERE: error: player must/can only make a certain number of moves */
+
+			writel (*Colorptr);
+			if (i == -4)
+				writel (" must make ");
+			else
+				writel (" can only make ");
+			writec (mvlim + '0');
+			writel (" move");
+			if (mvlim > 1)
+				writec ('s');
+			writec ('.');
+			writec ('\n');
+			break;
+
+		case -3:
+
+			/* HERE: quitting, is this necessary now? */
+
+			if (quit ())
+				return;
+		}
+
+		proll ();
+	}
 }
 
 
@@ -121,51 +132,55 @@ getmove () {
 int
 movokay (int mv)
 {
-  register int	i, m;
+	register int i, m;
 
-  if (d0) swap;
-  
-  /* HERE: printing errors */
+	if (d0)
+		swap;
 
-  for (i = 0; i < mv; i++) {
-    if (p[i] == g[i]) {
-      moverr (i);
-      writel ("Attempt to move to same location.\n");
-      return (0);
-    }
-    
-    if (cturn*(g[i]-p[i]) < 0) {
-      moverr (i);
-      writel ("Backwards move.\n");
-      return (0);
-    }
-    
-    if (abs(board[bar]) && p[i] != bar) {
-      moverr (i);
-      writel ("Men still on bar.\n");
-      return (0);
-    }
-    
-    if ((m = makmove(i))) {
-      moverr (i);
-      switch (m) {
-      case 1:
-	writel ("Move not rolled.\n");
-	break;
-	
-      case 2:
-	writel ("Bad starting position.\n");
-	break;
-	
-      case 3:
-	writel ("Destination occupied.\n");
-	break;
-	
-      case 4:
-	writel ("Can't remove men yet.\n");
-      }
-      return (0);
-    }
-  }
-  return (1);
+	/* HERE: printing errors */
+
+	for (i = 0; i < mv; i++) {
+		if (p[i] == g[i]) {
+			moverr (i);
+			writel ("Attempt to move to same location.\n");
+			return (0);
+		}
+
+		if (cturn * (g[i] - p[i]) < 0) {
+			moverr (i);
+			writel ("Backwards move.\n");
+			return (0);
+		}
+
+		if (abs (board[bar]) && p[i] != bar) {
+			moverr (i);
+			writel ("Men still on bar.\n");
+			return (0);
+		}
+
+		if ((m = makmove (i))) {
+			moverr (i);
+			switch (m) {
+			case 1:
+				writel ("Move not rolled.\n");
+				break;
+
+			case 2:
+				writel ("Bad starting position.\n");
+				break;
+
+			case 3:
+				writel ("Destination occupied.\n");
+				break;
+
+			case 4:
+				writel ("Can't remove men yet.\n");
+			}
+			return (0);
+		}
+	}
+	return (1);
 }
+
+
+/* End of File */

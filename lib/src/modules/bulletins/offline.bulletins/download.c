@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/12/25 08:26:21  alexios
+ * Ran through megistos-config --oh.
+ *
  * Revision 1.3  2001/04/22 14:49:06  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -54,10 +57,8 @@
  */
 
 
-#ifndef RCS_VER 
-#define RCS_VER "$Id$"
-const char *__RCS=RCS_VER;
-#endif
+static const char rcsinfo[] =
+    "$Id$";
 
 
 
@@ -71,218 +72,235 @@ const char *__RCS=RCS_VER;
 #define WANT_DIRENT_H 1
 #include <bbsinclude.h>
 
-#include "bbs.h"
-#include "offline.bulletins.h"
-#include "../../mailer.h"
-#include "mbk_offline.bulletins.h"
-#include "../../../bulletins/bulletins.h"
+#include <megistos/bbs.h>
+#include <megistos/offline.bulletins.h>
+#include <megistos/../../mailer.h>
+#include <megistos/mbk_offline.bulletins.h>
+#include <megistos/../../../bulletins/bulletins.h>
 
 #define __MAILER_UNAMBIGUOUS__
-#include "mbk_mailer.h"
+#include <megistos/mbk_mailer.h>
 
 #define __BULLETINS_UNAMBIGUOUS__
-#include "mbk_bulletins.h"
+#include <megistos/mbk_bulletins.h>
 
 
 static void
-appendfile(char *fname, FILE *out)
+appendfile (char *fname, FILE * out)
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen(fname,"r"))!=NULL){
-    while(!feof(fp)){
-      char line[MSGBUFSIZE];
-      int  num=fread(line,1,sizeof(line)-1,fp);
-      line[num]=0;
-      if(num)fwrite(line,num,1,out);
-    }
-    fclose(fp);
-  }
+	if ((fp = fopen (fname, "r")) != NULL) {
+		while (!feof (fp)) {
+			char    line[MSGBUFSIZE];
+			int     num = fread (line, 1, sizeof (line) - 1, fp);
+
+			line[num] = 0;
+			if (num)
+				fwrite (line, num, 1, out);
+		}
+		fclose (fp);
+	}
 }
 
 
 static int
-addtodoorid()
+addtodoorid ()
 {
-  FILE *fp;
+	FILE   *fp;
 
-  if((fp=fopen("door.id","a"))==NULL){
-    fclose(fp);
-    return 1;
-  }
-  fprintf(fp,"CONTROLTYPE = BLT-REQ\r\n");
-  fprintf(fp,"CONTROLTYPE = BLT-IDX\r\n");
-  fprintf(fp,"BLTIDXFILE = %s\r\n",bltidfn);
-  fclose(fp);
-  return 0;
+	if ((fp = fopen ("door.id", "a")) == NULL) {
+		fclose (fp);
+		return 1;
+	}
+	fprintf (fp, "CONTROLTYPE = BLT-REQ\r\n");
+	fprintf (fp, "CONTROLTYPE = BLT-IDX\r\n");
+	fprintf (fp, "BLTIDXFILE = %s\r\n", bltidfn);
+	fclose (fp);
+	return 0;
 }
 
 
-static int serial=0;
+static int serial = 0;
 
 
 static int
-process(char *area, char *name)
+process (char *area, char *name)
 {
-  struct bltidx idx;
-  char fname[256], lock[256], outname[256];
-  FILE *out;
-  int  oldansi;
-  
-  if(serial<9999){
-    sprintf(outname,"blt-%d",++serial);
-  } else {
-    ++serial;
-    sprintf(outname,"blt-04%d.%03d",serial%10000,serial/10000);
-  }
-  
-  if((out=fopen(outname,"w"))==NULL){
-    prompt(OBDLIO,area,name);
-    return 0;
-  }
+	struct bltidx idx;
+	char    fname[256], lock[256], outname[256];
+	FILE   *out;
+	int     oldansi;
 
-  if(!dbexists(area,name)){
-    prompt(OBDLUB,area,name);
-    return 0;
-  } else dbget(&idx);
+	if (serial < 9999) {
+		sprintf (outname, "blt-%d", ++serial);
+	} else {
+		++serial;
+		sprintf (outname, "blt-04%d.%03d", serial % 10000,
+			 serial / 10000);
+	}
 
-  oldansi=out_flags&OFL_ANSIENABLE;
-  out_setansiflag(0);
-  {
-    char buf[8192];
-    sprompt(buf,OBDLCR);
-    fputs(buf,out);
-  }
-  out_setansiflag(oldansi);
-  
-  strcpy(fname,mkfname(MSGSDIR"/%s/%s/%s",idx.area,MSGBLTDIR,idx.fname));
-  sprintf(lock,"%s-%s-%s-%s",
-	  BLTREADLOCK,thisuseracc.userid,idx.area,idx.fname);
-  lock_place(lock,"reading");
-  appendfile(fname,out);
-  lock_rm(lock);
-  unix2dos(outname,outname);
-  prompt(OBDLOK,area,name,outname);
+	if ((out = fopen (outname, "w")) == NULL) {
+		prompt (OBDLIO, area, name);
+		return 0;
+	}
 
-  return 0;
+	if (!dbexists (area, name)) {
+		prompt (OBDLUB, area, name);
+		return 0;
+	} else
+		dbget (&idx);
+
+	oldansi = out_flags & OFL_ANSIENABLE;
+	out_setansiflag (0);
+	{
+		char    buf[8192];
+
+		sprompt (buf, OBDLCR);
+		fputs (buf, out);
+	}
+	out_setansiflag (oldansi);
+
+	strcpy (fname,
+		mkfname (MSGSDIR "/%s/%s/%s", idx.area, MSGBLTDIR, idx.fname));
+	sprintf (lock, "%s-%s-%s-%s", BLTREADLOCK, thisuseracc.userid,
+		 idx.area, idx.fname);
+	lock_place (lock, "reading");
+	appendfile (fname, out);
+	lock_rm (lock);
+	unix2dos (outname, outname);
+	prompt (OBDLOK, area, name, outname);
+
+	return 0;
 }
 
 
 int
-mkindex()
+mkindex ()
 {
-  FILE *out;
-  struct bltidx blt;
-  char oldclub[16]={0}, buf[8192];
-  int i=0, skip=0;
-  int oldansi;
+	FILE   *out;
+	struct bltidx blt;
+	char    oldclub[16] = { 0 }, buf[8192];
+	int     i = 0, skip = 0;
+	int     oldansi;
 
-  prefs.flags&=~OBF_REQIDX;
-  writeprefs(&prefs);
+	prefs.flags &= ~OBF_REQIDX;
+	writeprefs (&prefs);
 
-  prompt(OBDL);
+	prompt (OBDL);
 
-  if(!dblistfirst()){
-    prompt(OBDLMT);
-    return 0;
-  } else prompt(OBDLMK);
+	if (!dblistfirst ()) {
+		prompt (OBDLMT);
+		return 0;
+	} else
+		prompt (OBDLMK);
 
-  if((out=fopen(bltidfn,"w"))==NULL){
-    error_fatalsys("Unable to create bulletin index %s",bltidfn);
-  }
+	if ((out = fopen (bltidfn, "w")) == NULL) {
+		error_fatalsys ("Unable to create bulletin index %s", bltidfn);
+	}
 
-  oldansi=out_flags&OFL_ANSIENABLE;
-  out_setansiflag(prefs.flags&OBF_ANSI);
+	oldansi = out_flags & OFL_ANSIENABLE;
+	out_setansiflag (prefs.flags & OBF_ANSI);
 
-  sprompt(buf,OBDLPR,strtime(now(),1),strdate(today()));
-  fputs(buf,out);
+	sprompt (buf, OBDLPR, strtime (now (), 1), strdate (today ()));
+	fputs (buf, out);
 
-  msg_set(bulletins_msg);
+	msg_set (bulletins_msg);
 
-  do{
-    dbget(&blt);
+	do {
+		dbget (&blt);
 
-    if(strcmp(oldclub,blt.area)){
-      if(oldclub[0]){
-	sprompt(buf,BULLETINS_LSTEND2);
-	fputs(buf,out);
-      }
-      if((skip=getclubax(&thisuseracc,blt.area)<CAX_READ)==0){
-	sprompt(buf,BULLETINS_BLTLSHD2,blt.area);
-	fputs(buf,out);
-	strcpy(oldclub,blt.area);
-      }
-    }
-    if(skip)continue;
+		if (strcmp (oldclub, blt.area)) {
+			if (oldclub[0]) {
+				sprompt (buf, BULLETINS_LSTEND2);
+				fputs (buf, out);
+			}
+			if ((skip =
+			     getclubax (&thisuseracc,
+					blt.area) < CAX_READ) == 0) {
+				sprompt (buf, BULLETINS_BLTLSHD2, blt.area);
+				fputs (buf, out);
+				strcpy (oldclub, blt.area);
+			}
+		}
+		if (skip)
+			continue;
 
-    i++;
-    sprompt(buf,BULLETINS_BLTLST2,
-	    blt.num,
-	    blt.fname,
-	    blt.author,
-	    blt.descr,
-	    blt.timesread);
-    fputs(buf,out);
-  }while(dblistnext());
+		i++;
+		sprompt (buf, BULLETINS_BLTLST2,
+			 blt.num,
+			 blt.fname, blt.author, blt.descr, blt.timesread);
+		fputs (buf, out);
+	} while (dblistnext ());
 
-  if(i){
-    sprompt(buf,BULLETINS_LSTEND2);
-    fputs(buf,out);
-  }
+	if (i) {
+		sprompt (buf, BULLETINS_LSTEND2);
+		fputs (buf, out);
+	}
 
-  msg_reset();
-  sprompt(buf,OBDLFT);
-  fputs(buf,out);
+	msg_reset ();
+	sprompt (buf, OBDLFT);
+	fputs (buf, out);
 
-  fclose(out);
-  unix2dos(bltidfn,bltidfn);
-  out_setansiflag(oldansi);
-  return 0;
+	fclose (out);
+	unix2dos (bltidfn, bltidfn);
+	out_setansiflag (oldansi);
+	return 0;
 }
 
 
 int
-obdownload()
+obdownload ()
 {
-  struct reqidx idx;
-  int res, stop=0;
-  int bltdb;
+	struct reqidx idx;
+	int     res, stop = 0;
+	int     bltdb;
 
-  if(!loadprefs(USERQWK,&userqwk)){
-    error_fatal("Unable to read user mailer preferences for %s",
-	  thisuseracc.userid);
-  }
+	if (!loadprefs (USERQWK, &userqwk)) {
+		error_fatal ("Unable to read user mailer preferences for %s",
+			     thisuseracc.userid);
+	}
 
-  readxlation();
-  xlationtable=(userqwk.flags&OMF_TR)>>OMF_SHIFT;
+	readxlation ();
+	xlationtable = (userqwk.flags & OMF_TR) >> OMF_SHIFT;
 
-  readprefs(&prefs);
-  dbopen();
-  d_dbget(&bltdb);
+	readprefs (&prefs);
+	dbopen ();
+	d_dbget (&bltdb);
 
-  if(addtodoorid())return 1;
-  if(prefs.flags&(OBF_INDEX|OBF_REQIDX))if(mkindex())return 1;
+	if (addtodoorid ())
+		return 1;
+	if (prefs.flags & (OBF_INDEX | OBF_REQIDX))
+		if (mkindex ())
+			return 1;
 
-  openreqdb();
-  res=getfirstreq(&idx);
+	openreqdb ();
+	res = getfirstreq (&idx);
 
-  for(res=getfirstreq(&idx);res;res=getnextreq(&idx)){
-    if(!(idx.reqflags&RQF_BULLETIN))continue;
-    if(!sameas(idx.dosfname,"BULLETIN"))continue;
-  
-    d_dbset(bltdb);
-    stop=!process(idx.reqarea,idx.reqfname);
+	for (res = getfirstreq (&idx); res; res = getnextreq (&idx)) {
+		if (!(idx.reqflags & RQF_BULLETIN))
+			continue;
+		if (!sameas (idx.dosfname, "BULLETIN"))
+			continue;
 
-    /* Remove the current request from the database */
+		d_dbset (bltdb);
+		stop = !process (idx.reqarea, idx.reqfname);
 
-    unlink(idx.dosfname);
-    if(!rmrequest(&idx)){
-      error_fatal("Unable to remove request %d from the database.",
-	    idx.reqnum);
-    }
+		/* Remove the current request from the database */
 
-    if(stop)break;
-  }
+		unlink (idx.dosfname);
+		if (!rmrequest (&idx)) {
+			error_fatal
+			    ("Unable to remove request %d from the database.",
+			     idx.reqnum);
+		}
 
-  return 0;
+		if (stop)
+			break;
+	}
+
+	return 0;
 }
+
+
+/* End of File */
