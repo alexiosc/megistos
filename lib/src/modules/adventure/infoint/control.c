@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:30  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,7 +60,7 @@ static const char rcsinfo[] =
  */
 
 #include <bbs.h>
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 static const char *v1_lookup_table[3] = {
 	"abcdefghijklmnopqrstuvwxyz",
@@ -341,9 +344,6 @@ unwind (zword_t value, zword_t new_fp)
 	fp = new_fp;
 	ret (value);
 }
-
-
-/* End of File */
 
 
 /* End of File */

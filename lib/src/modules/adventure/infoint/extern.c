@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:30  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,7 +60,7 @@ static const char rcsinfo[] =
  *
  */
 
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 /* Game header data */
 
@@ -140,9 +143,6 @@ char   *status_line = NULL;
 /* Character translation tables */
 
 char    lookup_table[3][26];
-
-
-/* End of File */
 
 
 /* End of File */

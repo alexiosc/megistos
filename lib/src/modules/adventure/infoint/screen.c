@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -58,7 +61,7 @@ static const char rcsinfo[] =
  */
 
 #include <bbs.h>
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 
 
@@ -620,9 +623,6 @@ set_colour_attribute (zword_t foreground, zword_t background)
 	flush_buffer (FALSE);
 	set_colours (foreground, background);
 }
-
-
-/* End of File */
 
 
 /* End of File */

@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,8 +59,8 @@ static const char rcsinfo[] =
  *
  */
 
-#include <bbs.h>
-#include <megistos/ztypes.h>
+#include <megistos/bbs.h>
+#include "ztypes.h"
 
 static int halt = FALSE;
 
@@ -481,9 +484,6 @@ interpret ()
 
 	return (interpreter_status);
 }
-
-
-/* End of File */
 
 
 /* End of File */

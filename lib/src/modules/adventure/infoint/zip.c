@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -86,10 +89,10 @@ static const char rcsinfo[] =
 
 
 #define WANT_TERMIOS_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
-#include <bbs.h>
-#include <megistos/ztypes.h>
+#include <megistos/bbs.h>
+#include "ztypes.h"
 
 
 
@@ -237,9 +240,6 @@ configure (zbyte_t min_version, zbyte_t max_version)
 
 	datap = NULL;
 }
-
-
-/* End of File */
 
 
 /* End of File */

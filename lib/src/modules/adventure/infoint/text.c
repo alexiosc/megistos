@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -59,7 +62,7 @@ static const char rcsinfo[] =
  */
 
 #include <bbs.h>
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 
 static int saved_formatting = ON;
@@ -1112,9 +1115,6 @@ encode (zword_t word_addr, zword_t word_length,
 	for (i = 0; i < 3; i++, dest_addr += 2)
 		set_word (dest_addr, word[i]);
 }
-
-
-/* End of File */
 
 
 /* End of File */

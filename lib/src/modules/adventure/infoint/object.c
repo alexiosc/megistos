@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -56,7 +59,7 @@ static const char rcsinfo[] =
  *
  */
 
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 #define PARENT 0
 #define NEXT 1
@@ -428,9 +431,6 @@ write_object (zword_t objp, int field, zword_t value)
 	}
 
 }
-
-
-/* End of File */
 
 
 /* End of File */

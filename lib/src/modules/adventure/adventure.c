@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:30  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,7 +60,7 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_adventure.h>
+#include "mbk_adventure.h"
 
 promptblock_t *msg;
 

@@ -33,6 +33,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -59,8 +62,8 @@ static const char rcsinfo[] =
 #define WANT_STAT_H 1
 #include <bbsinclude.h>
 #include <bbs.h>
-#include <megistos/ztypes.h>
-#include <megistos/mbk_adventure.h>
+#include "ztypes.h"
+#include "mbk_adventure.h"
 
 /* Static data */
 
@@ -1067,9 +1070,6 @@ playback_key (void)
 	return (c);
 
 }
-
-
-/* End of File */
 
 
 /* End of File */

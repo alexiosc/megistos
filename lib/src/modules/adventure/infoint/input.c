@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:16  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,7 +60,7 @@ static const char rcsinfo[] =
  *
  */
 
-#include <megistos/ztypes.h>
+#include "ztypes.h"
 
 /* Statically defined word separator list */
 
@@ -603,9 +606,6 @@ tokenise (int argc, zword_t * argv)
 
 	tokenise_line (argv[0], argv[1], argv[2], argv[3]);
 }
-
-
-/* End of File */
 
 
 /* End of File */

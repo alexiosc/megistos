@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/24 20:30:29  alexios
+ * Fixed #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -57,8 +60,8 @@ static const char rcsinfo[] =
  *
  */
 
-#include <bbs.h>
-#include <megistos/ztypes.h>
+#include <megistos/bbs.h>
+#include "ztypes.h"
 
 /* A cache entry */
 
@@ -422,9 +425,6 @@ update_cache (int page_number)
 	return (cachep);
 
 }
-
-
-/* End of File */
 
 
 /* End of File */
