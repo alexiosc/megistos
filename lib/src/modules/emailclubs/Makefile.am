@@ -3,6 +3,11 @@
 # $Id$
 #
 # $Log$
+# Revision 1.4  2003/12/27 12:50:31  alexios
+# Moved numerous objects from the program build to the library. Realised
+# that clubs needs to be compiled with -DCLUBS, and added declarations
+# to that effect.
+#
 # Revision 1.3  2003/12/25 18:04:44  alexios
 # Split off clubhdr into a separate convenience library, as it is used
 # by numerous other modules and programs throughout the system.
@@ -15,7 +20,7 @@
 # Initial revision.
 #
 
-LDFLAGS_EXTRA =
+SUBDIRS = . offline.mail
 
 PROGNAMES = email clubs
 
@@ -25,7 +30,16 @@ CLEANFILES    = ecdb.dbd ihavedb.dbd
 
 lib_LTLIBRARIES = libmegistos_clubhdr.la
 libmegistos_clubhdr_la_LDFLAGS = @LDFLAGS@ -version-info @SOVERSION@
-libmegistos_clubhdr_la_SOURCES = clubhdr.c
+libmegistos_clubhdr_la_SOURCES =		\
+	clubhdr.c				\
+	database.c				\
+	dbnum.c					\
+	dbto.c					\
+	dbfrom.c				\
+	dbsubj.c				\
+	funcs.c
+
+pkginclude_HEADERS = ecdb.h ihavedb.h
 
 COMMON =					\
 	clubfx.c				\
@@ -33,14 +47,8 @@ COMMON =					\
 	clubop.c				\
 	clubread.c				\
 	clubscan.c				\
-	database.c				\
-	dbfrom.c				\
-	dbnum.c					\
-	dbsubj.c				\
-	dbto.c					\
 	distlist.c				\
 	download.c				\
-	funcs.c					\
 	misc.c					\
 	modify.c				\
 	operations.c				\
@@ -74,5 +82,6 @@ include $(top_srcdir)/templates/typhoon
 
 email_LDADD = $(LDADD) libmegistos_clubhdr.la
 clubs_LDADD = $(LDADD) libmegistos_clubhdr.la
+clubs_CFLAGS = $(CFLAGS) -DCLUBS
 
 # End of file
