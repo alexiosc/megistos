@@ -26,6 +26,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.4  2003/12/20 18:19:26  alexios
+# Sorted the command line options.
+#
 # Revision 1.3  2003/12/20 10:20:29  alexios
 # Added code to generate Makefile.am files for existing source subtrees,
 # with the aid of templates. Added code to overhaul code by fixing
@@ -67,19 +70,19 @@ usage()
     cat <<EOF
 Usage: $0 [OPTIONS]
 Options (informational):
-    [--prefix]
-    [--exec-prefix]
-    [--version]
-    [--ldflags]
+    [--build-dir]
     [--cflags]
-    [--lib-dir]
     [--data-dir]
+    [--exec-prefix]
+    [--include-dir]
     [--instance-dir]
+    [--ldflags]
+    [--lib-dir]
+    [--prefix]
+    [--source-dir]
+    [--version]
     [--virgin-dir]
     [--virgin-src]
-    [--build-dir]
-    [--source-dir]
-    [--include-dir]
 
 Commands:
 
