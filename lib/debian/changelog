@@ -4,7 +4,7 @@ libmegistos (1.0.2) unstable; urgency=low
     compiler/linking options and directories for compiling further source
     code.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 15 Aug 2003 21:26:12 +0100
+ -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 15 Aug 2003 21:30:20 +0100
 
 libmegistos (1.0.1) unstable; urgency=low
 
