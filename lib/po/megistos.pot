@@ -7,6 +7,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/09/30 15:01:52  alexios
+# Renamed libmegistos to megistos.
+#
 # Revision 1.2  2003/09/29 21:38:17  alexios
 # Renamed src/ directory to lib/ to accommodate more source code in this
 # tree.
@@ -28,7 +31,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/bbsmod.c:660
+#: libmegistos/bbsmod.c:660
 #, c-format
 msgid ""
 "Megistos BBS\n"
@@ -43,12 +46,12 @@ msgid ""
 "\n"
 msgstr ""
 
-#: lib/bbsmod.c:667
+#: libmegistos/bbsmod.c:667
 #, c-format
 msgid "\t--%-20s %s\n"
 msgstr ""
 
-#: lib/bbsmod.c:685
+#: libmegistos/bbsmod.c:685
 #, c-format
 msgid ""
 "Syntax: %s command module_options\n"
@@ -56,47 +59,47 @@ msgid ""
 "Where command is one of:\n"
 msgstr ""
 
-#: lib/bbsmod.c:690
+#: libmegistos/bbsmod.c:690
 msgid "User login handler"
 msgstr ""
 
-#: lib/bbsmod.c:693
+#: libmegistos/bbsmod.c:693
 msgid "User-interactive handler"
 msgstr ""
 
-#: lib/bbsmod.c:696
+#: libmegistos/bbsmod.c:696
 msgid "User logout handler"
 msgstr ""
 
-#: lib/bbsmod.c:699
+#: libmegistos/bbsmod.c:699
 msgid "User hangup handler"
 msgstr ""
 
-#: lib/bbsmod.c:702
+#: libmegistos/bbsmod.c:702
 msgid "Cleanup handler"
 msgstr ""
 
-#: lib/bbsmod.c:705
+#: libmegistos/bbsmod.c:705
 msgid "User deletion handler"
 msgstr ""
 
-#: lib/bbsmod.c:707
+#: libmegistos/bbsmod.c:707
 msgid "You're reading it"
 msgstr ""
 
-#: lib/bbsmod.c:709
+#: libmegistos/bbsmod.c:709
 msgid "Issues installation script"
 msgstr ""
 
-#: lib/bbsmod.c:711
+#: libmegistos/bbsmod.c:711
 msgid "Issues uninstall script"
 msgstr ""
 
-#: lib/bbsmod.c:713
+#: libmegistos/bbsmod.c:713
 msgid "Module version and information"
 msgstr ""
 
-#: lib/errorprompts.h:112
+#: libmegistos/errorprompts.h:112
 msgid ""
 "[0;1;31;5mCaution: [0;1;31mA non-fatal error has interrupted this process.\n"
 "         Please notify the Sysop about the conditions\n"
@@ -104,7 +107,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: lib/errorprompts.h:135
+#: libmegistos/errorprompts.h:135
 msgid ""
 "[0;1;31;5mCAUTION: [0;1;31mA fatal error has interrupted this process.\n"
 "         Please notify the Sysop about the conditions\n"
