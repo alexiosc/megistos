@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.6  2003/12/23 08:18:44  alexios
+ * Removed rcsinfo from header file.
+ *
  * Revision 1.5  2003/12/22 18:19:06  alexios
  * Added more Bxxx bps control bits for those kernels that support
  * them. Values up to 4 Mbps (on FIR ports) are supported. No-one's ever
@@ -48,9 +51,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] = "$Id$";
 
 
 /* Define the default line discipline, unless already defined */

@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 08:20:11  alexios
+ * Removed rcsinfo from header file.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -53,11 +56,6 @@
  *
  *
  */
-
-
-static const char rcsinfo[] = "$Id$";
-
-
 
 
 void    sendmail ();
