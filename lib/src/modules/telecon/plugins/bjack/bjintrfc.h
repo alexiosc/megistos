@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -61,12 +64,12 @@
 #ifdef MEGISTOS_BBS
 
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/plugins.h>
+#include <telecon.h>
+#include <teleconplugins.h>
 
 #endif				/* MEGISTOS_BBS */
 
-#include <megistos/bjack.h>
+#include "bjack.h"
 
 
 /* blackjack message record */

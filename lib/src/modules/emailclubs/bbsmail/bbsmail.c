@@ -53,6 +53,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/23 23:20:23  alexios
  * Ran through megistos-config --oh.
  *
@@ -100,7 +103,7 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/bbsmail.h>
+#include "bbsmail.h"
 
 #define __SYSVAR_UNAMBIGUOUS__ 1
 #include <megistos/mbk_sysvar.h>

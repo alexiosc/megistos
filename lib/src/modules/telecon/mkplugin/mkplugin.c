@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:08  alexios
  * Ran through megistos-config --oh.
  *
@@ -59,9 +62,6 @@ static const char rcsinfo[] =
 
 
 
-#define __MKPLUGIN__
-
-
 #define WANT_STDLIB_H 1
 #define WANT_STDIO_H 1
 #define WANT_CTYPE_H 1
@@ -71,8 +71,8 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/plugins.h>
+#include <telecon.h>
+#include <teleconplugins.h>
 
 
 struct plugin *plugins = NULL;

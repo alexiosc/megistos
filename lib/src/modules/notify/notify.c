@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:09  alexios
  * Ran through megistos-config --oh.
  *
@@ -67,7 +70,7 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_notify.h>
+#include "mbk_notify.h"
 
 
 #define NOTIFYDIR mkfname(BBSDATADIR"/notify")

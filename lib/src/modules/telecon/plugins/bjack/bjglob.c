@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -75,9 +78,9 @@
 #include <time.h>
 #include <stdio.h>
 
-#include <megistos/bjconf.h>
-#include <megistos/bjack.h>
-#include <megistos/bjintrfc.h>
+#include "bjconf.h"
+#include "bjack.h"
+#include "bjintrfc.h"
 
 
 static const char rcsinfo[] =

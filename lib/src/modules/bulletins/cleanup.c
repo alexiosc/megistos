@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:40  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:15  alexios
  * Ran through megistos-config --oh.
  *
@@ -70,10 +73,10 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_bulletins.h>
-#include <megistos/bltidx.h>
-#include <megistos/bulletins.h>
-#include <megistos/typhoon.h>
+#include "mbk_bulletins.h"
+#include "bltidx.h"
+#include "bulletins.h"
+#include <typhoon.h>
 
 
 static void

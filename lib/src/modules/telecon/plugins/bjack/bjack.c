@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -76,28 +79,23 @@ static const char rcsinfo[] =
 
 #ifdef MEGISTOS_BBS
 
-#define __TELEPLUGIN__
 #include <megistos/bbs.h>
-#include <megistos/telecon.h>
-#include <megistos/plugins.h>
+#include <telecon.h>
+#include <teleconplugins.h>
 
 #endif				/* MEGISTOS_BBS */
 
-#include <megistos/bjver.h>
-#include <megistos/bjconf.h>
-#include <megistos/bjack.h>
-#include <megistos/bjintrfc.h>
+#include "bjver.h"
+#include "bjconf.h"
+#include "bjack.h"
+#include "bjintrfc.h"
 
-
-
-static const char rcsinfo[] =
-    "$Id$";
 
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-#include <megistos/mbk_bjack.h>
+#include "mbk_bjack.h"
 #endif
 
 #else

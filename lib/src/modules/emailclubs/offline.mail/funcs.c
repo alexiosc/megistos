@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:34:06  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -65,15 +68,15 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.mail.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.mail.h>
+#include "offline.mail.h"
+#include <mailerplugins.h>
+#include "mbk_offline.mail.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __EMAILCLUBS_UNAMBIGUOUS__
-#include <megistos/mbk_emailclubs.h>
+#include <mbk/mbk_emailclubs.h>
 
 
 static int oldverticalformat;
@@ -210,6 +213,7 @@ qwkdate (int date)
 	dt.tm_mday = tdday (date);
 	dt.tm_mon = tdmonth (date);
 	dt.tm_year = tdyear (date);
+	/* Two-digit year intentional -- unfortunately */
 	strftime (buff, 32, "%m-%d-%y", &dt);
 	return buff;
 }

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:40  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:21  alexios
  * Ran through megistos-config --oh.
  *
@@ -73,16 +76,16 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.bulletins.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.bulletins.h>
-#include <megistos/../../../bulletins/bulletins.h>
+#include "offline.bulletins.h"
+#include <mailerplugins.h>
+#include "mbk_offline.bulletins.h"
+#include "../bulletins/bulletins.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __BULLETINS_UNAMBIGUOUS__
-#include <megistos/mbk_bulletins.h>
+#include "../mbk_bulletins.h"
 
 
 static void

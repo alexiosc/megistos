@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/24 20:12:08  alexios
  * Ran through megistos-config --oh.
  *
@@ -64,11 +67,6 @@
 #define _TELECON_H
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-
 #define WANT_STDLIB_H 1
 #define WANT_STDIO_H 1
 #define WANT_CTYPE_H 1
@@ -81,7 +79,7 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/mbk_telecon.h>
+#include "mbk_telecon.h"
 
 
 /*                   123456789012345678901234567890 */

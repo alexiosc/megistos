@@ -29,6 +29,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -89,20 +92,20 @@
 #include <time.h>
 
 
-#include <megistos/bjconf.h>
-#include <megistos/bjack.h>
-#include <megistos/bjintrfc.h>
+#include "bjconf.h"
+#include "bjack.h"
+#include "bjintrfc.h"
 
-#include <megistos/wdog.h>
+#include "wdog.h"
 
 #ifdef BBSPROMPTS
 
 #ifdef MEGISTOS_BBS
-#include <megistos/mbk_bjack.h>
+#include "mbk_bjack.h"
 #endif
 
 #else
-#include <megistos/bjmsg.h>
+#include "bjmsg.h"
 
 #endif				/* BBSPROMPTS */
 

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,15 +69,15 @@ static const char rcsinfo[] =
 #include <bbsinclude.h>
 
 #include <megistos/bbs.h>
-#include <megistos/offline.graffiti.h>
-#include <megistos/../../mailer.h>
-#include <megistos/mbk_offline.graffiti.h>
+#include "offline.graffiti.h"
+#include <mailerplugins.h>
+#include "mbk_offline.graffiti.h"
 
 #define __MAILER_UNAMBIGUOUS__
-#include <megistos/mbk_mailer.h>
+#include <mbk/mbk_mailer.h>
 
 #define __GRAFFITI_UNAMBIGUOUS__
-#include <megistos/mbk_graffiti.h>
+#include "../mbk_graffiti.h"
 
 
 struct prefs prefs;

@@ -13,6 +13,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -66,7 +69,7 @@ static const char rcsinfo[] =
 
 
 
-#include <megistos/back.h>
+#include "back.h"
 
 
 

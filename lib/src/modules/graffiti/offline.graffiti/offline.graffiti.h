@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:39  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:20  alexios
  * Ran through megistos-config --oh.
  *
@@ -44,13 +47,8 @@
  */
 
 
-static const char rcsinfo[] =
-    "$Id$";
-
-
-#include <megistos/typhoon.h>
-#include <megistos/../offline.mail/request.h>
-#include <megistos/../offline.mail/req.h>
+#include <libtyphoon/typhoon.h>
+#include <mailerplugins.h>
 
 
 /* offline.news.c */

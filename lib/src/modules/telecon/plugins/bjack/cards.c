@@ -36,6 +36,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:29:38  alexios
+ * Adjusted #includes.
+ *
  * Revision 1.4  2003/12/25 08:26:19  alexios
  * Ran through megistos-config --oh.
  *
@@ -52,11 +55,11 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <megistos/cards.h>
+#include "cards.h"
 
 #ifdef MEGISTOS_BBS
 #include <megistos/bbs.h>
-#include <megistos/mbk_bjack.h>
+#include "mbk_bjack.h"
 #endif
 
 
