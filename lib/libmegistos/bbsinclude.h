@@ -26,6 +26,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.10  2003/12/24 18:38:00  alexios
+ * Fixed #includes; fixed conditional inclusion of curses and friends.
+ *
  * Revision 1.9  2003/12/19 13:23:29  alexios
  * Updated include directives; updated some of the directory #defines.
  *
@@ -51,7 +54,7 @@
 
 /* Start by loading up autoconf definitions */
 
-#include <megistos/bbsconfig.h>
+#include <bbsconfig.h>
 
 
 /* Always include standard string/memory headers
@@ -212,9 +215,9 @@
 #  elif defined(HAVE_LIBCURSES)
 #    ifdef HAVE_CURSES_H
 #      include <curses.h>
-#    elif defined(HAVE_CURSES/CURSES_H)
+#    elif defined(HAVE_CURSES_CURSES_H)
 #      include <curses/curses.h>
-#    elif defined(HAVE_NCURSES/CURSES_H)
+#    elif defined(HAVE_NCURSES_CURSES_H)
 #      include <ncurses/curses.h>
 #    endif
 #  endif
