@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/23 07:20:28  alexios
+ * Fixed last #include issues.
+ *
  * Revision 1.4  2003/12/22 17:23:36  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -91,7 +94,7 @@ static const char rcsinfo[] = "$Id$";
 #define I_AM_MENUMAN
 #include <megistos/bbs.h>
 #include <megistos/menuman.h>
-#include <megistos/mbk_menuman.h>
+#include <mbk/mbk_menuman.h>
 
 
 promptblock_t *msg;
