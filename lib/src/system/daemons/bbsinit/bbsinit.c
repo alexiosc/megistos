@@ -34,6 +34,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/22 16:18:54  alexios
+ * Beautified code with megistos-config --oh. Fixed #includes and rcsinfo.
+ *
  * Revision 1.4  2003/09/30 14:58:59  alexios
  * Brought over to new build structure.
  *
@@ -50,11 +53,7 @@
  */
 
 
-#ifndef RCS_VER
-#  define RCS_VER "$Id$"
-const char *__RCS = RCS_VER;
-#endif
-
+static const char rcsinit[] = "$Id$";
 
 
 #define DEBUG
@@ -68,9 +67,8 @@ const char *__RCS = RCS_VER;
 #define WANT_UNISTD_H 1
 #define WANT_FCNTL_H 1
 #define WANT_SYS_STAT_H 1
-#include <bbsinclude.h>
-
-#include "bbs.h"
+#include <megistos/bbsinclude.h>
+#include <megistos/bbs.h>
 
 
 int     bbsuid, bbsgid;
@@ -118,8 +116,7 @@ struct daemon {
 #define d(x,y,z) {x,BINDIR"/"x,BBSETCDIR"/"x".pid",y,z}
 
 struct daemon daemons[] = {
-	{"rpc.metabbs", BINDIR "/rpc.metabbs", BBSETCDIR "/rpc.metabbs.pid", 0,
-	 0},
+	{"rpc.metabbs", BINDIR "/rpc.metabbs", BBSETCDIR "/rpc.metabbs.pid", 0, 0},
 	{"bbslockd", BINDIR "/bbslockd", BBSETCDIR "/bbslockd.pid", 0, 0},
 	{"bbsd", BINDIR "/bbsd", BBSETCDIR "/bbsd.pid", 1, 0},
 	{"statd", BINDIR "/statd", BBSETCDIR "/statd.pid", 0, 0},
