@@ -30,9 +30,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/20 20:12:39  alexios
+ * Fixed minor but annoying bug where BBSPREFIX wasn't always set.
  *
  * Revision 1.11  1999/08/13 17:04:25  alexios
  * Numerous MetaBBS-related fixes. Starting in this version,
@@ -223,11 +222,17 @@ call_metabbs_client(int mode)
     if(setansi)strcat(parm,"a");
     if(setxlt)strcat(parm,"x");
 
-    execl(METABBSBIN,METABBSBIN,parm,(mode==METAB4?"--addlocal":" "),NULL);
+    execl(mkfname(METABBSBIN),
+	  METABBSBIN,parm,(mode==METAB4?"--addlocal":" "),NULL);
 
     /* Oops, ececl() failed. Try system() as our last resort. */
 
-    exit(system("exec "METABBSBIN));
+    {
+      char cmd[2048];
+      strcpy(cmd,"exec ");
+      strcat(cmd,mkfname(METABBSBIN));
+      exit(system(cmd));
+    }
   }
 
 
@@ -272,11 +277,16 @@ call_metabbs_server()
 
   /* Now invoke the client */
 
-  execl(METABBSDBIN,METABBSDBIN,NULL);
+  execl(mkfname(METABBSDBIN),METABBSDBIN,NULL);
   
   /* Oops, execl() failed. Try system() as our last resort. */
-  
-  exit(system("exec "METABBSDBIN));
+
+  {
+    char cmd[2048];
+    strcpy(cmd,"exec ");
+    strcat(cmd,mkfname(METABBSDBIN));
+    exit(system(cmd));
+  }
 
   exit(0);
 #endif
@@ -320,7 +330,7 @@ writeonline(char status)
   FILE *fp;
   char fname[256], ttyname[256];
 
-  sprintf(fname,"%s/%s",ONLINEDIR,userid);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),userid);
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Unable to create on-line info for %s.",userid);
   }
@@ -389,16 +399,16 @@ writeonline(char status)
   }
   fclose(fp);
   
-  sprintf(ttyname,"%s/.%s",ONLINEDIR,tty);
+  sprintf(ttyname,"%s/.%s",mkfname(ONLINEDIR),tty);
   if((fp=fopen(ttyname,"w"))!=NULL){
     fprintf(fp,"%s\n",fname);
   }
   fclose(fp);
-  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,userid);
+  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),userid);
   chown(fname,uid,gid);
-  sprintf(fname,"%s/.%s",ONLINEDIR,tty);
+  sprintf(fname,"%s/.%s",mkfname(ONLINEDIR),tty);
   chown(fname,uid,gid);
-  sprintf(fname,"%s/%s",ONLINEDIR,userid);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),userid);
   chown(fname,uid,gid);
 }
 
@@ -434,7 +444,7 @@ notifybbsd()
 {
   FILE *fp;
   
-  if((fp=fopen(BBSDPIPEFILE,"w"))==NULL)return;
+  if((fp=fopen(mkfname(BBSDPIPEFILE),"w"))==NULL)return;
   fprintf(fp,"connect %s %s\n",tty,user.userid);
   fclose(fp);
 }
@@ -447,12 +457,12 @@ waitshmid(char *user)
   char fname[256],userf[256];
   struct stat buf;
 
-  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,user);
+  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),user);
   for(i=0;i<20;i++){
     usleep(100000);
     if(!stat(fname,&buf))return;
   }
-  sprintf(userf,"%s/%s",ONLINEDIR,user);
+  sprintf(userf,"%s/%s",mkfname(ONLINEDIR),user);
   unlink(userf);
   error_fatal("Timed out waiting for bbsd file %s",fname);
 }
@@ -463,7 +473,7 @@ void storepid()
   FILE *fp;
   char fname[256];
   
-  sprintf(fname,"%s/.pid-%s",CHANDEFDIR,tty);
+  sprintf(fname,"%s/.pid-%s",mkfname(CHANDEFDIR),tty);
   
   if((fp=fopen(fname,"w"))==NULL){
     error_fatalsys("Cannot open PID file %s for writing",fname);
@@ -536,8 +546,8 @@ init()
 
   strcpy(tty,getenv("CHANNEL"));
   strcpy(baudrate,getenv("BAUD"));
-  setenv("PREFIX",BBSDIR,1);
-  setenv("BINDIR",BINDIR,1);
+  setenv("PREFIX",mkfname(""),1);
+  setenv("BINDIR",mkfname(BINDIR),1);
   setenv("CHANNEL",tty,1);
   setenv("BAUD",baudrate,1);
 
@@ -550,7 +560,7 @@ init()
 
   if(chan_getnum(tty)<0){
     error_fatal("%s has not been registered in %s",
-	  tty,CHANDEFFILE);
+	  tty,mkfname(CHANDEFFILE));
   }
 
   msg=msg_open("login");
@@ -561,7 +571,7 @@ init()
   metab4=msg_bool(METAB4);
   metalg=msg_bool(METALG);
 
-  sprintf(fname,"%s/.%s",ONLINEDIR,tty);
+  sprintf(fname,"%s/.%s",mkfname(ONLINEDIR),tty);
   if((fp=fopen(fname,"r"))!=NULL){
     char onlrec[256];
     if(fscanf(fp,"%s",onlrec)==1)unlink(onlrec);
@@ -578,8 +588,8 @@ idler()
   char fname[256];
   fclose(stdout);
   fclose(stdin);
-  sprintf(fname,"%s/.pid-%s",CHANDEFDIR,tty);
-  execl(IDLERBIN,"idler",">",fname,"2>",fname,NULL);
+  sprintf(fname,"%s/.pid-%s",mkfname(CHANDEFDIR),tty);
+  execl(mkfname(IDLERBIN),"idler",">",fname,"2>",fname,NULL);
 }
 
 
@@ -587,7 +597,7 @@ void
 showttyinfo()
 {
   char fname[256];
-  sprintf(fname,TTYINFOFILE,tty);
+  sprintf(fname,mkfname(TTYINFOFILE),tty);
   out_printfile(fname);
 }
 
@@ -715,7 +725,7 @@ askxlation()
      default */
 
   for(i=0;i<NUMXLATIONS;i++){
-    sprintf(fname,XLATIONDIR"/"XLATIONSRC,i);
+    strcpy(fname,mkfname(XLATIONDIR"/"XLATIONSRC,i));
     xltmap[i]=(stat(fname,&st)==0);
     if(xltmap[i]&&def<0)def=i;
   }
@@ -972,7 +982,7 @@ authenticate()
     if((!strikes && LOCALLINE) || !givenprompt){
       givenprompt=1;
       prompt(chan_last->flags&TTF_TELNET?THELLO:HELLO);
-      out_printfile(LOGINMSGFILE);
+      out_printfile(mkfname(LOGINMSGFILE));
       showttyinfo();
     }
 
@@ -1070,7 +1080,7 @@ authenticate()
 	if(setlang)strcat(parm,"l");
 	if(setansi)strcat(parm,"a");
 	if(setxlt)strcat(parm,"x");
-	sprintf(command,"%s %s",SIGNUPBIN,parm);
+	sprintf(command,"%s %s",mkfname(SIGNUPBIN),parm);
 	system(command);
 	{
 	  FILE *fp;
@@ -1137,7 +1147,7 @@ authenticate()
       }
     }
 
-    sprintf(filename,"%s/%s",USRDIR,userid);
+    sprintf(filename,"%s/%s",mkfname(USRDIR),userid);
     if((fp=fopen(filename,"r"))==NULL){
       error_fatal("Failed to open user account %s.",filename,NULL);
     }
@@ -1264,7 +1274,7 @@ authenticate()
 
 	if((!getuid())||(!getgid())){
 	  char fname[256];
-	  sprintf(fname,"%s/.shmid-%s",ONLINEDIR,userid);
+	  sprintf(fname,"%s/.shmid-%s",mkfname(ONLINEDIR),userid);
 	  chown(fname,bbsuid,bbsgid);
 	}
 
@@ -1288,8 +1298,14 @@ authenticate()
 	  if(!stat(pass.pw_dir,&st)) setenv("HOME",pass.pw_dir,1);
 	  else setenv("HOME","/tmp",1);
 	}
-/*	if(pass.pw_uid) setenv("PATH", _PATH_DEFPATH":"BINDIR,1);
+/*
+  
+  NB: mkfname() must be added to Megistos DIRs here.
+
+	if(pass.pw_uid) setenv("PATH", _PATH_DEFPATH":"BINDIR, 1);
 	else setenv("PATH", _PATH_DEFPATH_ROOT":"BINDIR, 1); */
+
+
 	setenv("SHELL",pass.pw_shell,1);
 	sprintf(tmp,"%s/%s",_PATH_MAILDIR,userid);
 	setenv("MAIL",tmp,0);
@@ -1340,8 +1356,8 @@ authenticate()
 
 	fflush(stdout);
 
-	execl("/bin/sh","sh","-c",LOGINSCRIPT,NULL);
-	error_fatal("Cannot execute %s",LOGINSCRIPT);
+	execl("/bin/sh","sh","-c",mkfname(LOGINSCRIPT),NULL);
+	error_fatal("Cannot execute %s",mkfname(LOGINSCRIPT));
       } else {
 	prompt(PSWNOG,NULL);
 	strikes++;

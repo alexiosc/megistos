@@ -45,9 +45,8 @@
  * $Id$
  *
  * $Log$
- * Revision 1.2  2001/04/16 21:56:33  alexios
- * Completed 0.99.2 API, dragged all source code to that level (not as easy as
- * it sounds).
+ * Revision 1.3  2001/04/20 20:12:39  alexios
+ * Fixed minor but annoying bug where BBSPREFIX wasn't always set.
  *
  * Revision 1.11  2000/01/06 11:44:46  alexios
  * Slight corrections to one comment. Reduced the buffer size from
@@ -186,7 +185,7 @@ storepid()
   FILE *fp;
   char fname[256];
   
-  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  sprintf(fname,"%s/emud-%s.pid",mkfname(BBSETCDIR),tty);
   if((fp=fopen(fname,"w"))==NULL)return;
   fprintf(fp,"%d",getpid());
   fclose(fp);
@@ -200,7 +199,7 @@ notifybbsd()
 {
   FILE *fp;
   
-  if((fp=fopen(BBSDPIPEFILE,"w"))==NULL)return;
+  if((fp=fopen(mkfname(BBSDPIPEFILE),"w"))==NULL)return;
   fprintf(fp,"getty %s %d\n",tty,getpid());
   fclose(fp);
 }
@@ -220,10 +219,23 @@ void errorf (char *fmt, ...)
 
 char *leafname (char *path)
 {
+#undef HAVE_GETPT
+#ifndef HAVE_GETPT
+
   int i = 0, j;
-	
+
   for (j = 0; path[j]; j++) if (path[j] == '/') i = j + 1;
   return (path + i);
+
+#else
+
+#error "This won't work, please fix lots of things first!"
+
+  char *devdir=DEVDIR"/";
+  
+  if(!strncmp(path,devdir,strlen(devdir))) return path+strlen(devdir);
+
+#endif /* HAVE_GETPT */
 }
 
 
@@ -297,9 +309,9 @@ makeshm(char *tty)
 
   /* Create shared memory */
 
-  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  sprintf(fname,"%s/emud-%s.pid",mkfname(BBSETCDIR),tty);
   if((shmid=shmget(ftok(fname,'E'),16384,IPC_CREAT|IPC_EXCL|0660))==-1)return;
-  sprintf(fname,"%s/.shmid-%s",BBSETCDIR,tty);
+  sprintf(fname,"%s/.shmid-%s",mkfname(BBSETCDIR),tty);
 
   /* Write shared memory ID to disk */
 
@@ -339,7 +351,7 @@ makeshm(char *tty)
   /* Fix file permissions */
 
   chown(fname,bbsuid,bbsgid);
-  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  sprintf(fname,"%s/emud-%s.pid",mkfname(BBSETCDIR),tty);
   chown(fname,bbsuid,bbsgid);
   chmod(fname,0444);
 }
@@ -355,12 +367,12 @@ gracefulexit()
   channel_getstatus(tty,&status);
   mod_init(INI_OUTPUT|INI_SYSVARS|INI_TTYNUM);
 
-  sprintf(fname,"%s/%s",ONLINEDIR,status.user);
+  sprintf(fname,"%s/%s",mkfname(ONLINEDIR),status.user);
   unlink(fname);
-  sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,tty);
+  sprintf(fname,"%s/[SIGNUP-%s]",mkfname(ONLINEDIR),tty);
   unlink(fname);
 
-  sprintf(fname,"%s/_%s",ONLINEDIR,status.user);
+  sprintf(fname,"%s/_%s",mkfname(ONLINEDIR),status.user);
   close(creat(fname,0660));
 
   status.baud=0;
@@ -378,6 +390,9 @@ gracefulexit()
 
 int find_ptyxx (char *ptyname)
 {
+
+#ifndef HAVE_GETPT
+
   int fd, i, j;
   static char *s1 = "srpq", *s2 = "fedcba9876543210";
   
@@ -399,6 +414,17 @@ int find_ptyxx (char *ptyname)
   }
   
   return (-1);
+
+#else
+
+  int fd=getpt();
+
+  if(fd>=0) soup
+
+  return fd;
+
+#endif /* HAVE_GETPT */
+
 }
 
 /* find & open a pty (tty) to be used by pty-client */
@@ -481,10 +507,10 @@ makepipe()
   char fname[256];
   char command[256];
 
-  sprintf(fname,"%s/.injoth-%s",ONLINEDIR,tty);
+  sprintf(fname,"%s/.injoth-%s",mkfname(ONLINEDIR),tty);
   unlink(fname);
 
-  sprintf(fname,"%s/.emu-%s",EMUFIFODIR,tty);
+  sprintf(fname,"%s/.emu-%s",mkfname(EMUFIFODIR),tty);
   if(!stat(fname,&s))return;
   sprintf(command,"mkfifo -m 660 %s; chown bbs.bbs %s",fname,fname);
   system(command);
@@ -495,17 +521,17 @@ void
 readxlation()
 {
   FILE *fp;
-  if((fp=fopen(XLATIONFILE,"r"))==NULL){
+  if((fp=fopen(mkfname(XLATIONFILE),"r"))==NULL){
     int i=errno;
-    errorf("unable to open %s (errno=%d)\n",XLATIONFILE,i);
+    errorf("unable to open %s (errno=%d)\n",mkfname(XLATIONFILE),i);
   }
   if(fread(xlation,sizeof(xlation),1,fp)!=1){
     int i=errno;
-    errorf("unable to read %s (errno=%d)\n",XLATIONFILE,i);
+    errorf("unable to read %s (errno=%d)\n",mkfname(XLATIONFILE),i);
   }
   if(fread(kbdxlation,sizeof(kbdxlation),1,fp)!=1){
     int i=errno;
-    errorf("unable to read %s (errno=%d)\n",XLATIONFILE,i);
+    errorf("unable to read %s (errno=%d)\n",mkfname(XLATIONFILE),i);
   }
   fclose(fp);
 }
@@ -595,10 +621,12 @@ relogon:
   if(fork_pty(&ptyfd, ptynam)==0){
 
     /* exec the real pty-client program */
-		
-    execl (BINDIR"/bbslogin",BINDIR"/bbslogin","-",NULL);
+
+    setenv("BBSPREFIX",mkfname(""),1);
+    setenv("PREFIX",mkfname(""),1);
+    execl (mkfname(BINDIR"/bbslogin"),"bbslogin","-",NULL);
       
-    errorf ("can't exec /bbs/bin/bbslogin\n");
+    errorf ("can't exec bbslogin\n");
   }
   
   notifybbsd();
@@ -613,13 +641,13 @@ relogon:
 
   /* open snoop-device and put it into raw mode */
 		
-  sprintf(fname,"%s/.emu-%s",BBSETCDIR,tty);
+  sprintf(fname,"%s/.emu-%s",mkfname(BBSETCDIR),tty);
   if((emuin=open(fname,O_RDONLY|O_NDELAY))<0)
     errorf ("can't open inp_buffer emulation FIFO %s\n", fname);
   
   fdmax = max(fdmax, emuin);
 
-  sprintf(relogfn,"%s/.relogon-%s",ONLINEDIR,tty);
+  sprintf(relogfn,"%s/.relogon-%s",mkfname(ONLINEDIR),tty);
 	
   while (1) {
     if(!stat(relogfn,&st)){
@@ -700,7 +728,7 @@ relogon:
 	fprintf(stderr,"[closing]");
 #endif
 	close(emuin);
-	sprintf(fname,"%s/.emu-%s",BBSETCDIR,tty);
+	sprintf(fname,"%s/.emu-%s",mkfname(BBSETCDIR),tty);
 	if((emuin=open(fname,O_RDONLY|O_NDELAY))<0)
 	  errorf ("can't open inp_buffer emulation FIFO %s\n", fname);
 	fdmax = max(fdmax, emuin);
