@@ -169,3 +169,166 @@ LOGIN4 { ¡˜  } T Login message, connective (and)
 
 LOGIN5 {.!)
 [0;1m} T Login message, terminator (period and footer)
+
+
+
+LANG {}
+
+NOENTRY {[0;1;31m
+!JSory, you don't have access to this area.!)
+[0;1;31m} T User has no access to this module
+
+
+MENU {[2J[0m[47;1;37m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;30;47m¿ [40m
+[47;1;37m ³  [0;47;30m  Notify     [0;47;30m³ [40m
+[47;1;37m ³  [0;47;30mÄÄÄÄÄÄÄÄÄÄÄ  [0;47;30m³ [40m
+[47;1;37m ³  [0;31;47mH[30melp         [30m³ [40m
+[47;1;37m ³  [0;31;47mL[30mist users   [30m³ [40m
+[47;1;37m ³  [0;31;47mA[30mdd user     [30m³ [40m
+[47;1;37m ³  [0;31;47mD[30melete user  [30m³ [40m
+[47;1;37m ³               [0;47;30m³ [40m
+[47;1;37m ³ [0;30;47me[31mX[30mit          [30m³ [40m
+[47;1;37m À[0;30;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+
+Automated notification of user connections (Notify)
+Please enter your choice: [0m} T Notify menu
+
+
+SHMENU {[0;1m
+Automated notification of user connections (Notify)
+!WEnter your choice ([33mH[37m,[33mL[37m,[33mA[37m,[33mD[37m,[33mX[37m to exit, or [33m?[37m for the menu): !)[0m} T Notify short menu
+
+
+ERRSEL {[0;1;31m
+!WSorry, there's no option "%c".!)
+[0;1m} T Invalid option selection
+
+
+LEAVE {[0;1m
+!WLeaving Notify.!)
+[0m} T Exiting to main menu
+
+
+HELP {[0;1m
+!J
+This facility notifies you when your friends connect to @BBS@.
+You can list up to [32m%d[37m users and the BBS will let you know when then login.
+Also, the BBS will automatically tell you which of the listed users are online
+as soon as you login.!)
+
+!JNotify is very easy to use. The [[33mA[37m]dd
+command adds a user to your list. [[33mD[37m]elete 
+removes users from your list, and [[33mL[37m]ist
+prints out the list.!)
+
+!JAny changes you make are saved and put in effect immediately after you exit this menu.!)
+[0;1m} T Notify, help
+
+
+ADDLIM {[0;1;31m
+!JYour list already contains the maximum of [37m%d[31m users.
+You need to delete a user before you can add this one.!)
+[0;1m} T Add user, limit reached, can't add more users.
+
+
+ADDLM2 {[0;1;31m
+!JYou have [37m%d[31m users in your list. The maximum number of
+users allowed is [37m%d[31m (the system operator
+must have reduced the size limit). To add new users to your list,
+you must first delete enough users to satisfy the limit.!)
+[0;1m} T Add user, max number of users changed, too many users in list.
+
+
+ADDASK {[0;1m
+!WEnter a user ID to add to the list:!) [0m} T Add user, asking for ID
+
+
+ADDHUH {[0;1;31m
+!JYou don't REALLY need to be notified when YOU connect to the BBS, do you?!)
+[0;1m} T Won't add own username to list
+
+
+ADDERR {[0;1;31m
+!JSorry, there's no user "[37m%s[31m".!)
+[0;1m} T Add user, user ID does not exist
+
+
+ADDEXS {[0;1;31m
+!JUser "[37m%s[31m" is already on your list.!)
+[0;1m} T add user, user ID is already on the list
+
+
+ADDOK {[0;1;32m
+!J%s[37m%s[32m was added to your list.!)
+[0;1m} T Add user, all is well
+
+
+ADDSEXM {} T Add user, male definite article
+ADDSEXF {} T Add user, female definite article
+
+
+NOUSERS {[0;1;31m
+!JYour list is empty.!)
+[0;1m} T No users in the list
+
+
+DELASK {[0;1m
+!WEnter a user ID to remove from the list:!) [0m} T Delete user, asking for ID
+
+
+DELERR {[0;1;31m
+!JSorry, "[37m%s[31m" isn't on your list.!)
+[0;1m} T Delete user, user ID does isn't on the list
+
+
+DELOK {[0;1;32m
+!J[37m%s[32m was removed from your list.!)
+[0;1m} T Add user, all is well
+
+
+LISTHD {[0;1;32m
+Auto-notification list:
+[0;1m
+!FÄ
+} T List users, header
+
+
+LISTU {%s
+} T List one single user
+
+
+LISTFT {[0;1m!FÄ
+
+[32mUsers on your list: [37m%d[32m.
+[0;1m} T List users, footer
+
+
+INJMSG {[0;1;35m***
+!J%s[37m%s[35m just logged on!!)
+[0;1m} T Injoth notification message
+
+
+SEXM {} T Male definite article
+SEXF {} T Female definite article
+
+
+LOGIN1 {[0;1;35m
+!JNotify: %s} T Login message, part 1
+
+CONM {} T 'connected', male form
+
+CONF {} T 'connected', female form
+
+CONP {} T 'connected', plural form
+
+LOGIN2 {%s [37m%s[35m} T Login message, user name.
+
+LOGIN3 {, } T Login message, connective (comma)
+
+LOGIN4 { and } T Login message, connective (and)
+
+LOGIN5 { already online.!)
+[0;1m} T Login message, terminator (period and footer)
+
+
+LANGEND {}
