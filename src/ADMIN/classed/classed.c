@@ -30,6 +30,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2001/10/03 18:05:40  alexios
+ * Rectified ancient, far too naive API invocations.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -138,24 +141,23 @@ listclasschanges()
   int i;
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
-  prompt(CCHLHDR,NULL);
+  prompt(CCHLHDR);
   for(i=0;i<numclasses;i++){
     char s1[16]={0}, s2[16]={0};
-
-    if(classes[i].nadays!=-1)sprintf(s1,"%d",classes[i].nadays);
-    if(classes[i].ardays!=-1)sprintf(s2,"%d",classes[i].ardays);
-
-    sprintf(out_buffer,msg_get(CCHLTAB),classes[i].name,
-	    AVONLY(classes[i].notaround),s1,
-	    AVONLY(classes[i].around),s2,
-	    AVONLY(classes[i].nocreds),
-	    AVONLY(classes[i].credpost));
-    print(out_buffer,NULL);
+    
+    if(classes[i].nadays!=-1)snprintf(s1,sizeof(s1),"%d",classes[i].nadays);
+    if(classes[i].ardays!=-1)snprintf(s2,sizeof(s1),"%d",classes[i].ardays);
+    
+    prompt(CCHLTAB,classes[i].name,
+	   AVONLY(classes[i].notaround),s1,
+	   AVONLY(classes[i].around),s2,
+	   AVONLY(classes[i].nocreds),
+	   AVONLY(classes[i].credpost));
   }
-  prompt(CCHLFTR,NULL);
+  prompt(CCHLFTR);
 }
 
 
@@ -165,28 +167,27 @@ listclasses()
   int i;
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
-  prompt(CLSLHDR,NULL);
+  prompt(CLSLHDR);
   for(i=0;i<numclasses;i++){
     char s1[16]={0}, s2[16]={0};
 
-    if(classes[i].limpercall!=-1)sprintf(s1,"%d",classes[i].limpercall);
-    if(classes[i].limperday!=-1)sprintf(s2,"%d",classes[i].limperday);
+    if(classes[i].limpercall!=-1)snprintf(s1,sizeof(s1),"%d",classes[i].limpercall);
+    if(classes[i].limperday!=-1)snprintf(s2,sizeof(s2),"%d",classes[i].limperday);
 
-    sprintf(out_buffer,msg_get(CLSLTAB),classes[i].name,
-	    s1,s2,
-	    classes[i].crdperday,
-	    classes[i].crdperweek,
-	    classes[i].crdpermonth,
-	    classes[i].flags&CLF_NOCHRGE?'X':'-',
-	    classes[i].flags&CLF_LINUX?'X':'-',
-	    classes[i].flags&CLF_LOCKOUT?'X':'-',
-	    classes[i].flags&CLF_CRDXFER?'X':'-');
-    print(out_buffer,NULL);
+    prompt(CLSLTAB,classes[i].name,
+	   s1,s2,
+	   classes[i].crdperday,
+	   classes[i].crdperweek,
+	   classes[i].crdpermonth,
+	   classes[i].flags&CLF_NOCHRGE?'X':'-',
+	   classes[i].flags&CLF_LINUX?'X':'-',
+	   classes[i].flags&CLF_LOCKOUT?'X':'-',
+	   classes[i].flags&CLF_CRDXFER?'X':'-');
   }
-  prompt(CLSLFTR,NULL);
+  prompt(CLSLFTR);
 }
 
 
@@ -201,11 +202,8 @@ int  msg,existing,err,def;
     memset(newclass,0,10);
     if(cnc_more())strncpy(newclass,cnc_word(),10);
     else {
-      prompt(msg,NULL);
-      if(def){
-	sprintf(out_buffer,msg_get(DEFSTR),defval);
-	print(out_buffer,NULL);
-      }
+      prompt(msg);
+      if(def) prompt(DEFSTR,defval);
       inp_get(0);
       if(margc)strncpy(newclass,margv[0],10);
       else if(def && !inp_reprompt()){
@@ -234,16 +232,14 @@ int  msg,existing,err,def;
 	if(existing) ok=1;
 	else {
 	  cnc_end();
-	  sprintf(out_buffer,msg_get(err),newclass);
-	  print(out_buffer,NULL);
+	  prompt(err,newclass);
 	  ok=0;
 	  break;
 	}
       }
     }
     if(existing && !ok){
-      sprintf(out_buffer,msg_get(err),newclass);
-      print(out_buffer,NULL);
+      prompt(err,newclass);
       cnc_end();
     }
   }
@@ -261,7 +257,7 @@ keyed(bbskey_t *k)
   char c;
 
   memcpy(keys,k,KEYLENGTH*sizeof(bbskey_t));
-  prompt(KEYPRO,NULL);
+  prompt(KEYPRO);
   for(;;){
     if(!shown){
       char s1[65]={0},s2[65]={0};
@@ -271,7 +267,7 @@ keyed(bbskey_t *k)
 	s1[i]=(keys[i/32]&(1<<(i%32)))?'X':'-';
 	s2[i]=(keys[(i+64)/32]&(1<<((i+64)%32)))?'X':'-';
       }
-      prompt(KEYED,s1,s2,NULL);
+      prompt(KEYED,s1,s2);
       shown=1;
     }
     
@@ -281,7 +277,7 @@ keyed(bbskey_t *k)
 	if(toupper(c)=='X')return 0;
 	key=cnc_int();
       } else {
-	prompt(KEYASK,NULL);
+	prompt(KEYASK);
 	inp_get(0);
 	key=atoi(margv[0]);
 	if(!margc || inp_reprompt()){
@@ -311,14 +307,14 @@ keyed(bbskey_t *k)
       }
       if(key<1 || key>128){
 	cnc_end();
-	prompt(NUMERR,1,128,NULL);
+	prompt(NUMERR,1,128);
       }else break;
     }
     
     if(key>=1 && key<=128){
       key--;
       keys[key/32]^=(1<<(key%32));
-      prompt(KEYON+((keys[key/32]&(1<<(key%32)))==0),key+1,NULL);
+      prompt(KEYON+((keys[key/32]&(1<<(key%32)))==0),key+1);
     }
   }
 }
@@ -332,8 +328,7 @@ addclass()
   int i;
 
   if(numclasses>=MAXCLASS){
-    sprintf(out_buffer,msg_get(TOOMANY),MAXCLASS);
-    print(out_buffer,NULL);
+    prompt(TOOMANY,MAXCLASS);
     return 0;
   }
   if(!getclassname(name,ADDCNAME,0,ALRDYEX,0,0))return 0;
@@ -384,7 +379,7 @@ delclass()
   int i;
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
   if(!getclassname(name,DELCNAME,1,UNKCLSS,0,0))return;
@@ -396,7 +391,7 @@ delclass()
     memmove(&classes[i],&classes[i+1],sizeof(classrec_t)*(numclasses-(i+1)));
   }
   numclasses--;
-  prompt(DELWARN,NULL);
+  prompt(DELWARN);
 }
 
 
@@ -405,14 +400,14 @@ listkeys(bbskey_t *keys){
   bbskey_t j;
   int i,first=-1,count=0;
 
-  prompt(VIEWKY,NULL);
+  prompt(VIEWKY);
   for(i=0;i<(32*KEYLENGTH);i++){
     j=keys[i/32]&(1<<(i%32));
     count+=j;
     if(!j){
       if(first!=-1){
-	if(first<(i-1))prompt(VIEWKY2,first+1,i,NULL);
-	if(first==(i-1))prompt(VIEWKY1,first+1,NULL);
+	if(first<(i-1))prompt(VIEWKY2,first+1,i);
+	if(first==(i-1))prompt(VIEWKY1,first+1);
 	first=-1;
       }
     }else{
@@ -420,11 +415,11 @@ listkeys(bbskey_t *keys){
     }
   }
   if(first!=-1){
-    if(first<(i-1))prompt(VIEWKY2,first+1,i,NULL);
-    if(first==(i-1))prompt(VIEWKY1,first+1,NULL);
+    if(first<(i-1))prompt(VIEWKY2,first+1,i);
+    if(first==(i-1))prompt(VIEWKY1,first+1);
   }
-  if(!count)prompt(VIEWKY0,NULL);
-  else prompt(VIEWKYE,NULL);
+  if(!count)prompt(VIEWKY0);
+  else prompt(VIEWKYE);
 }
        
 
@@ -435,54 +430,45 @@ viewclass()
   int i;
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
   if(!getclassname(name,VEWCNAME,1,UNKCLSS,0,0))return;
   
   for(i=0;i<numclasses;i++)if(sameas(name,classes[i].name))break;
 
-  sprintf(out_buffer,msg_get(VIEWC1),classes[i].name);
-  print(out_buffer,NULL);
+  propmt(VIEWC1,classes[i].name);
   if(classes[i].nadays>=0){
-    sprintf(out_buffer,msg_get(VIEWC2),classes[i].nadays,
-	    msg_getunit(DAYSNG,classes[i].nadays),
-	    classes[i].notaround);
-    print(out_buffer,NULL);
+    prompt(VIEWC2,classes[i].nadays,
+	   msg_getunit(DAYSNG,classes[i].nadays),
+	   classes[i].notaround);
   }
   if(classes[i].ardays>=0){
-    sprintf(out_buffer,msg_get(VIEWC3),classes[i].ardays,
-	    msg_getunit(DAYSNG,classes[i].ardays),
-	    classes[i].around);
-    print(out_buffer,NULL);
+    prompt(VIEWC3,classes[i].ardays,
+	   msg_getunit(DAYSNG,classes[i].ardays),
+	   classes[i].around);
   }
   prompt(VIEWC4A,classes[i].nocreds);
   prompt(VIEWC4C,classes[i].credpost);
-  sprintf(out_buffer,msg_get(VIEWC5),classes[i].limpercall,
-	  msg_getunit(MINSNG,classes[i].limpercall));
-  print(out_buffer,NULL);
+  prompt(VIEWC5,
+	 classes[i].limpercall,msg_getunit(MINSNG,classes[i].limpercall));
+  prompt(VIEWC6,
+	 classes[i].limperday,msg_getunit(MINSNG,classes[i].limperday));
+  prompt(VIEWC7,
+	 classes[i].crdperday,msg_getunit(CRDSNG,classes[i].crdperday));
+  prompt(VIEWC7A,
+	 classes[i].crdperweek,msg_getunit(CRDSNG,classes[i].crdperweek));
+  propmt(VIEWC7B,classes[i].crdpermonth,
+	 msg_getunit(CRDSNG,classes[i].crdpermonth));
 
-  sprintf(out_buffer,msg_get(VIEWC6),classes[i].limperday,
-	  msg_getunit(MINSNG,classes[i].limperday));
-  print(out_buffer,NULL);
-  sprintf(out_buffer,msg_get(VIEWC7),classes[i].crdperday,
-	  msg_getunit(CRDSNG,classes[i].crdperday));
-  print(out_buffer,NULL);
-  sprintf(out_buffer,msg_get(VIEWC7A),classes[i].crdperweek,
-	  msg_getunit(CRDSNG,classes[i].crdperweek));
-  print(out_buffer,NULL);
-  sprintf(out_buffer,msg_get(VIEWC7B),classes[i].crdpermonth,
-	  msg_getunit(CRDSNG,classes[i].crdpermonth));
-  print(out_buffer,NULL);
-
-  if(classes[i].flags&CLF_NOCHRGE)prompt(VIEWC8,NULL);
-  if(classes[i].flags&CLF_LINUX)prompt(VIEWC9,NULL);
-  if(classes[i].flags&CLF_LOCKOUT)prompt(VIEWC10,NULL);
-  if(classes[i].flags&CLF_CRDXFER)prompt(VIEWC11,NULL);
+  if(classes[i].flags&CLF_NOCHRGE)prompt(VIEWC8);
+  if(classes[i].flags&CLF_LINUX)prompt(VIEWC9);
+  if(classes[i].flags&CLF_LOCKOUT)prompt(VIEWC10);
+  if(classes[i].flags&CLF_CRDXFER)prompt(VIEWC11);
 
   listkeys(classes[i].keys);
 
-  prompt(VIEWCEND,NULL);
+  prompt(VIEWCEND);
 }
        
 
@@ -494,7 +480,7 @@ editclass()
   int i;
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
   if(!getclassname(name,EDTCNAME,1,UNKCLSS,0,0))return;
@@ -549,13 +535,13 @@ moveclass()
   char source[10], target[10];
 
   if(!numclasses){
-    prompt(NOCLSES,NULL);
+    prompt(NOCLSES);
     return;
   }
   if(!getclassname(source,MOVSRC,-1,UNKCLSS,0,0))return;
   if(!getclassname(target,MOVTRG,1,UNKCLSS,0,0))return;
   if(sameas(source,target)){
-    prompt(NSAMCLS,NULL);
+    prompt(NSAMCLS);
     return;
   } else {
     DIR           *dp;
@@ -610,7 +596,7 @@ mainmenu()
   char c;
 
   if(!(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0])){
-    prompt(MENU,NULL);
+    prompt(MENU);
   }
   for(;;){
     if(thisuseronl.flags&OLF_MMCALLING && thisuseronl.input[0]){
@@ -622,7 +608,7 @@ mainmenu()
 	  saveclasses();
 	  exit(0);
 	}
-	prompt(SHMENU,NULL);
+	prompt(SHMENU);
 	inp_get(0);
 	cnc_begin();
       }
@@ -660,12 +646,11 @@ mainmenu()
 	  confirmquit();
 	  break;
 	case '?':
-	  prompt(MENU,NULL);
+	  prompt(MENU);
 	  cnc_end();
 	  break;
 	default:
-	  sprintf(out_buffer,msg_get(ERRSEL),c);
-	  print(out_buffer,NULL);
+	  prompt(ERRSEL,c);
 	}
 	cnc_end();
       } else {
