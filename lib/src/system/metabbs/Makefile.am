@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/23 08:20:57  alexios
+# One minor fix.
+#
 # Revision 1.1  2003/12/22 22:35:19  alexios
 # Initial revision.
 #
@@ -28,8 +31,8 @@ rpc_metabbs_SOURCES = \
 
 EXTRA_DIST = metaservices.x
 
-metaservices.h metaservices_clnt.h metaservices_svc.c metaservices_xdr.c: metaservices.x
-	rpcgen $@
+metaservices.h metaservices_clnt.c metaservices_svc.c metaservices_xdr.c: metaservices.x
+	rpcgen $<
 
 include $(top_srcdir)/templates/daemon
 
