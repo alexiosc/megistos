@@ -26,6 +26,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/22 18:19:06  alexios
+ * Added more Bxxx bps control bits for those kernels that support
+ * them. Values up to 4 Mbps (on FIR ports) are supported. No-one's ever
+ * going to use them, but who cares?
+ *
  * Revision 1.4  2003/12/22 17:23:37  alexios
  * Ran through megistos-config --oh to beautify source.
  *
@@ -46,15 +51,12 @@
  */
 
 
-static const char rcsinfo[] = "$Id$";
-
-
 #ifndef __BBSGETTY_H
 #define __BBSGETTY_H
 
 
 #define WANT_TERMIOS_H 1
-#include <bbsinclude.h>
+#include <megistos/bbsinclude.h>
 
 
 /* UUCP tty lock */
@@ -119,6 +121,7 @@ static struct speedtab speedtab[] = {
 	{B2400, 2400, "2400"},
 	{B4800, 4800, "4800"},
 	{B9600, 9600, "9600"},
+
 #ifdef  B19200
 	{B19200, 19200, "19200"},
 #endif
@@ -137,6 +140,51 @@ static struct speedtab speedtab[] = {
 #ifdef  B460800
 	{B460800, 460800, "460800"},
 #endif
+
+#ifdef  B500000
+	{B500000, 500000, "500000"},
+#endif
+
+#ifdef  B576000
+	{B576000, 576000, "576000"},
+#endif
+
+#ifdef  B921600
+	{B921600, 921600, "921600"},
+#endif
+
+#ifdef  B1000000
+	{B1000000, 1000000, "1000000"},
+#endif
+
+#ifdef  B1152000
+	{B1152000, 1152000, "1152000"},
+#endif
+
+#ifdef  B1500000
+	{B1500000, 1500000, "1500000"},
+#endif
+
+#ifdef  B2000000
+	{B2000000, 2000000, "2000000"},
+#endif
+
+#ifdef  B2500000
+	{B2500000, 2500000, "2500000"},
+#endif
+
+#ifdef  B3000000
+	{B3000000, 3000000, "3000000"},
+#endif
+
+#ifdef  B3500000
+	{B3500000, 3500000, "3500000"},
+#endif
+
+#ifdef  B4000000
+	{B4000000, 4000000, "4000000"},
+#endif
+
 	{0, 0, ""}
 };
 #endif				/* OPENTTY_C */
