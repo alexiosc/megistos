@@ -28,6 +28,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/12/27 12:39:05  alexios
+ * Adjusted #includes. Removed extraneous rcsinfo. Renamed to
+ * teleconplugins.h from plugins.h
+ *
  * Revision 1.4  2003/12/24 20:12:08  alexios
  * Ran through megistos-config --oh.
  *
@@ -44,14 +48,8 @@
  */
 
 
-#ifndef _PLUGINS_H
-#define _PLUGINS_H
-
-
-static const char rcsinfo[] =
-    "$Id$";
-
-
+#ifndef _TELECONPLUGINS_H
+#define _TELECONPLUGINS_H
 
 
 struct plugin {
@@ -81,7 +79,6 @@ struct pluginmsg {
 
 
 #ifdef __TELEPLUGIN__
-
 
 extern char *keyword, *channel, *userid;
 extern int qid;
