@@ -35,6 +35,10 @@ Here is the proposed directory structure, assuming a prefix of /usr:
 	Configuration for BBS $BBSCODE (symlinked from
 	/var/lib/megistos/$BBSCODE/etc) (L)
 
+/usr/bin:
+
+	BBS Binaries needed globally (such as megistos-config etc) (AD,NW).
+
 /usr/lib:
 
 	Megistos shared and static libraries (libmegistos) (AD,NW).
@@ -112,6 +116,9 @@ CVS information and emacs stuff follows
 $Id$
 
 $Log$
+Revision 1.3  2003/12/14 21:01:33  alexios
+Added /usr/bin.
+
 Revision 1.2  2003/12/14 20:59:37  alexios
 Spellcheck.
 
