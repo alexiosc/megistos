@@ -2,5 +2,5 @@
 .libs
 Makefile
 Makefile.in
-adventure
+infoint
 mbk_adventure.h
