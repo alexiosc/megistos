@@ -50,6 +50,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  2003/08/15 18:17:17  alexios
+ * Switched from including bbsconfig.defs.h to bbsconfig.h.
+ *
  * Revision 1.3  2001/04/22 14:49:04  alexios
  * Merged in leftover 0.99.2 changes and additional bug fixes.
  *
@@ -113,7 +116,7 @@
 #define CONFIG_H
 
 
-#include <bbsconfig.defs.h>
+#include <bbsconfig.h>
 #define WANT_SIGNAL_H 1
 #include <bbsinclude.h>
 
