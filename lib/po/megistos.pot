@@ -7,6 +7,9 @@
 # $Id$
 #
 # $Log$
+# Revision 2.1  2004/09/13 19:55:34  alexios
+# Changed email addresses.
+#
 # Revision 2.0  2004/09/13 19:44:40  alexios
 # Stepped version to recover CVS repository after near-catastrophic disk
 # crash.
@@ -26,7 +29,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: megistos@vennea.demon.co.uk\n"
+"Report-Msgid-Bugs-To: megistos@bedroomlan.org\n"
 "POT-Creation-Date: 2003-09-28 13:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"

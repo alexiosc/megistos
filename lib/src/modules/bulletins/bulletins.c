@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/09/13 19:55:34  alexios
+ * Changed email addresses.
+ *
  * Revision 2.0  2004/09/13 19:44:50  alexios
  * Stepped version to recover CVS repository after near-catastrophic disk
  * crash.
@@ -289,7 +292,7 @@ handler_run (int argc, char *argv[])
 mod_info_t mod_info_bulletins = {
 	"bulletins",
 	"Bulletin reader",
-	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Alexios Chouchoulas <alexios@bedroomlan.org>",
 	"Permanent archive of interesting club articles et al",
 	RCS_VER,
 	"1.0",

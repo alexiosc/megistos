@@ -13,14 +13,14 @@ megistos (1.0.11) unstable; urgency=medium
   * Added protocol-script template to accommodate protocols built as
     scripts.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Tue, 24 Aug 2004 09:36:31 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Tue, 24 Aug 2004 09:36:31 +0100
 
 megistos (1.0.10) unstable; urgency=low
 
   * Closed SF bug 957531: changing club access levels for certain users
     causes the emailclubs module to crash.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Thu, 15 Jul 2004 15:56:43 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Thu, 15 Jul 2004 15:56:43 +0100
 
 megistos (1.0.9) unstable; urgency=medium
 
@@ -30,7 +30,7 @@ megistos (1.0.9) unstable; urgency=medium
   * Worked around TERMIOS issue with vised: NL/CR translations not set properly.
   * Worked around identical TERMIOS issue with bbsdialog (field help).
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat, 22 May 2004 20:23:16 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Sat, 22 May 2004 20:23:16 +0100
 
 megistos (1.0.8-1) unstable; urgency=high
 
@@ -40,7 +40,7 @@ megistos (1.0.8-1) unstable; urgency=high
   * Closed SF bug 957526: remote sysop command 'emulate' not working due
     to permissions problem in ${instance}/etc/.emu-*.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat, 22 May 2004 00:55:25 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Sat, 22 May 2004 00:55:25 +0100
 
 megistos (1.0.8) unstable; urgency=high
 
@@ -58,7 +58,7 @@ megistos (1.0.8) unstable; urgency=high
     being idiotically executed by running system(3) with appropriate
     command strings.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 21 May 2004 21:28:13 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Fri, 21 May 2004 21:28:13 +0100
 
 megistos (1.0.7) unstable; urgency=high
 
@@ -71,7 +71,7 @@ megistos (1.0.7) unstable; urgency=high
     into the Menuman data structures and messed up the user's location when
     they were editing their registry entry).
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Mon, 17 May 2004 15:38:05 +0300
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Mon, 17 May 2004 15:38:05 +0300
 
 megistos (1.0.6) unstable; urgency=low
 
@@ -79,7 +79,7 @@ megistos (1.0.6) unstable; urgency=low
     impossible to save replies to club messages because the command line
     was mangled.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Thu, 13 May 2004 18:21:56 +0300
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Thu, 13 May 2004 18:21:56 +0300
 
 megistos (1.0.5) unstable; urgency=high
 
@@ -89,7 +89,7 @@ megistos (1.0.5) unstable; urgency=high
     questions have already been asked by bbslogin prior to displaying the
     login prompt.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Wed,  5 May 2004 12:22:59 +0300
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Wed,  5 May 2004 12:22:59 +0300
 
 megistos (1.0.4) unstable; urgency=critical
 
@@ -97,7 +97,7 @@ megistos (1.0.4) unstable; urgency=critical
     prompt block indexes when accessing the last message in a block.
   * Fixed CVS tree structure and tagged.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Mon,  3 May 2004 09:07:29 +0300
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Mon,  3 May 2004 09:07:29 +0300
 
 megistos (1.0.3) unstable; urgency=critical
 
@@ -110,7 +110,7 @@ megistos (1.0.3) unstable; urgency=critical
     load 8191 bytes from a prompt block regardless of the size
     requested. D'oh!
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sun,  2 May 2004 14:34:07 +0300
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Sun,  2 May 2004 14:34:07 +0300
 
 megistos (1.0.2) unstable; urgency=low
 
@@ -178,11 +178,11 @@ megistos (1.0.2) unstable; urgency=low
   * Bug fix: removed mod_done() call from src/modules/telecon/plugins.c
     that would mangle TERMIOS when a plugins was called.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Sat,  7 Feb 2004 11:05:06 +0000
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Sat,  7 Feb 2004 11:05:06 +0000
 
 megistos (1.0.1) unstable; urgency=low
 
   * Initial debianised revision.
 
- -- Alexios Chouchoulas <alexios@vennea.demon.co.uk>  Fri, 15 Aug 2003 19:21:47 +0100
+ -- Alexios Chouchoulas <alexios@bedroomlan.org>  Fri, 15 Aug 2003 19:21:47 +0100
 

@@ -40,7 +40,7 @@ EMAIL {} S 80 Official BBS (or Sysop's) Email address
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access.
@@ -61,7 +61,7 @@ ALLOW {} S 256 MetaBBS clients allowed to connect
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -197,7 +197,7 @@ SYS1ADV {} T Non-Megistos System #1: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -218,7 +218,7 @@ SYS1ALW {} S 256 Non-Megistos System #1: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -333,7 +333,7 @@ SYS2ADV {} T Non-Megistos System #2: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -354,7 +354,7 @@ SYS2ALW {} S 256 Non-Megistos System #2: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -468,7 +468,7 @@ SYS3ADV {} T Non-Megistos System #3: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -489,7 +489,7 @@ SYS3ALW {} S 256 Non-Megistos System #3: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -603,7 +603,7 @@ SYS4ADV {} T Non-Megistos System #4: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -624,7 +624,7 @@ SYS4ALW {} S 256 Non-Megistos System #4: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -738,7 +738,7 @@ SYS5ADV {} T Non-Megistos System #5: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -759,7 +759,7 @@ SYS5ALW {} S 256 Non-Megistos System #5: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -873,7 +873,7 @@ SYS6ADV {} T Non-Megistos System #6: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -894,7 +894,7 @@ SYS6ALW {} S 256 Non-Megistos System #6: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -1008,7 +1008,7 @@ SYS7ADV {} T Non-Megistos System #7: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -1029,7 +1029,7 @@ SYS7ALW {} S 256 Non-Megistos System #7: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -1143,7 +1143,7 @@ SYS8ADV {} T Non-Megistos System #8: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -1164,7 +1164,7 @@ SYS8ALW {} S 256 Non-Megistos System #8: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.
@@ -1278,7 +1278,7 @@ SYS9ADV {} T Non-Megistos System #9: detailed description (<8192 bytes)
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you wish to allow *everyone* access. There's no
@@ -1299,7 +1299,7 @@ SYS9ALW {} S 256 Non-Megistos System #9: hosts/BBSs allowed connections
  10.159.34.3 or bbs.soup.com), or BBS addresses (each host may run more than
  one BBS, that's why we need MetaBBS in the first place). BBS addresses are
  host addresses followed by a slash and a BBS codename (e.g
- 10.159.34.3/CRAZY or vennea.demon.co.uk/MEGISTOS).
+ 10.159.34.3/CRAZY or bedroomlan.org/MEGISTOS).
  For a BBS to connect, it must pass both the ALLOW and DENY filters.
 
  Leave this field empty if you don't want to disallow access to anyone.

@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/09/13 19:55:34  alexios
+ * Changed email addresses.
+ *
  * Revision 2.0  2004/09/13 19:44:45  alexios
  * Stepped version to recover CVS repository after near-catastrophic disk
  * crash.
@@ -980,7 +983,7 @@ handler_userdel (int argc, char **argv)
 mod_info_t mod_info_account = {
 	"account",
 	"User Account Manager",
-	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Alexios Chouchoulas <alexios@bedroomlan.org>",
 	"Shows and edits user's account and global preferences.",
 	RCS_VER,
 	"1.0",

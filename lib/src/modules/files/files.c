@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/09/13 19:55:34  alexios
+ * Changed email addresses.
+ *
  * Revision 2.0  2004/09/13 19:44:51  alexios
  * Stepped version to recover CVS repository after near-catastrophic disk
  * crash.
@@ -380,7 +383,7 @@ handler_cleanup (int argc, char **argv)
 mod_info_t mod_info_files = {
 	"files",
 	"File Library",
-	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Alexios Chouchoulas <alexios@bedroomlan.org>",
 	"Archives files thematically, allowing uploads, downloads et cetera.",
 	RCS_VER,
 	"1.0",

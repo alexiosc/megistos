@@ -1,11 +1,14 @@
 # Greek translations for libmegistos package.
 # Copyright (C) 2003 Alexios Chouchoulas
 # This file is distributed under the same license as the libmegistos package.
-# Alexios Chouchoulas <alexios@vennea.demon.co.uk>, 2003.
+# Alexios Chouchoulas <alexios@bedroomlan.org>, 2003.
 #
 # $Id$
 #
 # $Log$
+# Revision 2.1  2004/09/13 19:55:34  alexios
+# Changed email addresses.
+#
 # Revision 2.0  2004/09/13 19:44:40  alexios
 # Stepped version to recover CVS repository after near-catastrophic disk
 # crash.
@@ -24,10 +27,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: libmegistos\n"
-"Report-Msgid-Bugs-To: megistos@vennea.demon.co.uk\n"
+"Report-Msgid-Bugs-To: megistos@bedroomlan.org\n"
 "POT-Creation-Date: 2003-09-30 14:05+0100\n"
 "PO-Revision-Date: 2003-09-28 13:16+0100\n"
-"Last-Translator: Alexios Chouchoulas <alexios@vennea.demon.co.uk>\n"
+"Last-Translator: Alexios Chouchoulas <alexios@bedroomlan.org>\n"
 "Language-Team: Greek\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

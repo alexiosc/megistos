@@ -42,6 +42,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/09/13 19:55:34  alexios
+ * Changed email addresses.
+ *
  * Revision 2.0  2004/09/13 19:44:50  alexios
  * Stepped version to recover CVS repository after near-catastrophic disk
  * crash.
@@ -314,7 +317,7 @@ handler_cleanup (int argc, char **argv)
 mod_info_t mod_info_cookie = {
 	"cookie",
 	"Cookie",
-	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Alexios Chouchoulas <alexios@bedroomlan.org>",
 	"Shows random quotes a la fortune(1) at logout and when /cookie is issued.",
 	RCS_VER,
 	"2.0",

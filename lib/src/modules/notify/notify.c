@@ -28,6 +28,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 2.1  2004/09/13 19:55:34  alexios
+ * Changed email addresses.
+ *
  * Revision 2.0  2004/09/13 19:44:52  alexios
  * Stepped version to recover CVS repository after near-catastrophic disk
  * crash.
@@ -512,7 +515,7 @@ handler_login (int argc, char **argv)
 mod_info_t mod_info_notify = {
 	"notify",
 	"User login notification",
-	"Alexios Chouchoulas <alexios@vennea.demon.co.uk>",
+	"Alexios Chouchoulas <alexios@bedroomlan.org>",
 	"Notifies users when their friends log in (or are already logged in).",
 	RCS_VER,
 	"1.0",

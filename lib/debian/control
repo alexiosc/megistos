@@ -1,7 +1,7 @@
 Source: megistos
 Section: devel
 Priority: optional
-Maintainer: Alexios Chouchoulas (Megistos Project) <megistos@vennea.demon.co.uk>
+Maintainer: Alexios Chouchoulas (Megistos Project) <megistos@bedroomlan.org>
 Build-Depends: debhelper (>> 3.0.0), autoconf (>= 2.50), automake1.6 (>= 1.6.3), libtool (<< 1.6.0), libtyphoon-dev (>= 1.10.3-2), libncurses4-dev | libncurses5-dev | libncursesw5-dev, gettext, gcc (>= 3.2.0)
 Standards-Version: 3.5.2
 
