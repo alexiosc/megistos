@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/23 23:21:20  alexios
+# Minor simplifications.
+#
 # Revision 1.1  2003/12/23 08:33:32  alexios
 # Initial revision.
 #
@@ -20,7 +23,7 @@ bbsmail_SOURCES = \
 	netmail.c \
 	resolve.c \
 	test.c \
-	utils.c \
+	utils.c
 
 include $(top_srcdir)/templates/module
 

@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/23 23:21:20  alexios
+# Minor simplifications.
+#
 # Revision 1.1  2003/12/23 08:33:32  alexios
 # Initial revision.
 #
@@ -16,7 +19,7 @@ netclub_SOURCES = \
 	list.c \
 	netclub.c \
 	netclub.h \
-	report.c \
+	report.c
 
 include $(top_srcdir)/templates/module
 
