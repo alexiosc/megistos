@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/29 07:54:09  alexios
+# Included the typhoon template. It's necessary to link against clubhdr.
+#
 # Revision 1.2  2003/12/25 18:10:07  alexios
 # Split off much of the telecon functionality into a shared/convenience
 # library to be used by teleconference plugins (and, of course, this
@@ -48,6 +51,7 @@ telecon_SOURCES = \
 	telecon.c
 
 include $(top_srcdir)/templates/module
+include $(top_srcdir)/templates/typhoon
 include $(top_srcdir)/templates/clubhdr
 
 CFLAGS += -I../emailclubs
