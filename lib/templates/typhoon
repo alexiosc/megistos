@@ -1,0 +1,12 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# $Log$
+# Revision 1.1  2003/12/25 08:22:16  alexios
+# Initial revision.
+#
+
+TYPHOON_IF_NEEDED = @TYPHOON_LIBS@
+
+# End of file.
