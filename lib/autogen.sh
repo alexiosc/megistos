@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/09/30 15:11:05  alexios
+# Added call to libtoolize to install libltdl.
+#
 # Revision 1.2  2003/09/28 13:14:56  alexios
 # Added autopoint support and generalised for arbitrary versions of GNU
 # automake and autoconf.
@@ -18,9 +21,15 @@ amver=-1.6
 # Autoconf version. No dash here.
 acver=2.50
 
+echo Copying ltdl.
+libtoolize --copy --ltdl
+cat <<EOF
 
-echo We will use GNU automake $amver and GNU autoconf $acver. Change $0
-echo to select different versions.
+Warnings about not existing files above are acceptable.
+
+We will now use GNU automake$amver and GNU autoconf$acver. Change $0
+to select different versions.
+EOF
 
 (automake${amver} --version) < /dev/null > /dev/null 2>&1 || {
 	echo;
