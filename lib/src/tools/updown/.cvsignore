@@ -1,4 +1,7 @@
 .deps
+.libs
 Makefile
 Makefile.in
+mbk_archivers.h
+mbk_updown.h
 updown
