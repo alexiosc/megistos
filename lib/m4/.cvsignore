@@ -1,2 +1,3 @@
 Makefile
 lib-prefix.m4
+Makefile.in
