@@ -1,6 +1,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/12/25 18:19:20  alexios
+# Added events subdirectory.
+#
 # Revision 1.2  2003/12/23 06:44:22  alexios
 # Added conditional compilation of MetaBBS components.
 #
@@ -19,6 +22,7 @@ SUBDIRS = \
 	bbslogin \
 	bbslogout \
 	daemons \
+	events \
 	menuman \
 	$(METABBS)
 	protocols \
