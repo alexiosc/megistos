@@ -1,0 +1,124 @@
+#!/bin/sh
+# This file starts the BBS up, running daemons and things
+
+
+# Uncomment this for debugging (very verbose)
+#set -x
+
+nofixup=$1
+
+
+# Find out what our directory prefix is
+prefix=$0
+basename=`basename $prefix`
+prefix=`echo $prefix|sed 's/\/etc\/'$basename'$//'`
+prefix=`(((echo $prefix|grep ^/)&&echo $prefix)||echo $PWD/$prefix)`
+prefix=`echo $prefix|sed 's/\/'$basename'$//'`
+prefix=`(cd $prefix;pwd) 2>/dev/null|sed 's/\/\+etc\/*$//'`
+
+
+# Change to the prefix directory
+cd ${prefix}
+
+
+# Export the prefix and bin directories to our descendants
+declare -xr prefix
+declare -xr PREFIX=$prefix
+declare -xr BINDIR=${prefix}/bin
+
+
+# Make sure people can read our own magic file
+declare -x MAGIC=${prefix}/etc/magic:/etc/magic:/usr/lib/magic
+
+
+# Make sure we're the superuser
+if [ `whoami` != root ]; then
+	echo Only the superuser may execute this script.
+	exit
+fi
+
+
+# Be nice and verbose
+echo Starting Megistos BBS under ${prefix}
+
+
+# Set the PATHs and library paths
+export PATH=/bin:/usr/local/bin:/usr/bin:/bin:${prefix}/bin:
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${prefix}/lib
+
+
+# If we're restarting the system, kill every binary remaining
+
+echo Sending any running BBS processes the TERM signal...
+killall bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+sleep 3
+echo Sending any running BBS processes the KILL signal...
+killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+killall -9 bbsinit bbsd statd bbslockd bbslogin bbsgetty emud msgd rpc.metabbs >&/dev/null
+
+
+# Lock the system variables files/shared memory block
+echo 1 >${prefix}/lock/LCK..sysvarshm
+
+# Clean up ${prefix}/data/usr
+echo Cleaning up temporary files under ${prefix}
+(
+    rm -f ${prefix}/data/usr/.[0-9]*
+
+# Clean up ${prefix}/etc/online
+    rm -f ${prefix}/etc/online/* \
+	${prefix}/etc/online/.[A-z]* \
+	${prefix}/etc/.* \
+
+# Clean up ${prefix}/lock
+    rm -f ${prefix}/lock/* \
+	${prefix}/lock/.*
+
+# Clean up ${prefix}/etc
+    rm -f ${prefix}/etc/*pid \
+	${prefix}/etc/register* \
+	${prefix}/etc/.emu* \
+	${prefix}/etc/.shmid* \
+	${prefix}/etc/sysvar-shm \
+	${prefix}/etc/sysvar.[0-9]*
+
+# Clean up ${prefix}/channel.defs (this should start all lines in the
+# NORMAL state)
+    rm -f ${prefix}/etc/channel.defs/.pid-* \
+	${prefix}/etc/channel.defs/.status-*
+
+# Clean up ${prefix}/data/telecon
+    rm -rf ${prefix}/data/telecon/[A-Z_]*
+
+# Clean up our files from /tmp
+#find /tmp -group bbs -maxdepth 1 -exec \rm -rf \{\} \;
+) >&/dev/null
+
+
+echo -n "Starting BBS INIT daemon from ${prefix}: "
+
+${prefix}/bin/bbsinit
+echo -n "bbsinit "
+
+#${prefix}/bin/bbslockd
+#echo -n "bbslockd "
+
+#${prefix}/bin/bbsd
+#echo -n "bbsd "
+
+#${prefix}/bin/statd
+#echo -n "statd "
+
+#if [ .$nofixup != .nofixup ]; then
+#    ${prefix}/bin/msgd
+#    echo -n "msgd "
+#else
+#    echo -n "msgd (already running)"
+#fi
+
+echo
+
+
+# End of BBS initialisation
+echo End of BBS initialisation.

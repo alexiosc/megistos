@@ -1,0 +1,1835 @@
+LEVEL2 {}
+
+UNIXSH {/bin/bash -login} S 30 Full name of shell?
+
+SXFDESC {Remote Sysop transfer request} S 50 File upload description
+
+KEYCHU {Key required to show users' names in channel listings: 128} N 0 129
+
+KYDNAM {Key required to show NAME field in DETAIL INFO: 0} N 0 129
+
+KYDCOM {Key required to show COMPANY field in DETAIL INFO: 0} N 0 129
+
+KYDADR {Key required to show ADDRESS field in DETAIL INFO: 0} N 0 129
+
+KYDPHO {Key required to show PHONE field in DETAIL INFO: 0} N 0 129
+
+KYDAGE {Key required to show AGE field in DETAIL INFO: 0} N 0 129
+
+KYDSEX {Key required to show SEX field in DETAIL INFO: 0} N 0 129
+
+KYDPSS {Key required to show PASSWORD field in DETAIL INFO: 129} N 0 129
+
+HIDEPASS {Hide passwords from DETAIL VIEW, regardless of key? NO} B
+
+DFWARN {Free disk space needs attention at what capacity percentage? 75} N 0 100
+
+DFCRIT {Free disk space is critical at what capacity percentage? 90} N 0 100
+
+PGSTMO {Sysop page notification stays blinking for how long (mins)? 5} N 1 9999
+
+
+LEVEL3 {}
+
+
+
+
+NARSOP {[0;1;31m
+СмЪЪдщгЮ, ЫЬд тоЬлЬ зицйЩШйЮ йЬ Шмлу лЮд ЬзавжЪу.
+[0;1m
+} T You don't have access to this service
+
+
+EXITRS {[0;1m
+ДежЫжк Шзц лак ЬзавжЪтк оЬаиайлщд...
+} T Remote Sysop exit to main menu
+
+
+RSHDR {[0;1;33m!ZО йЬЩШйгцк цврд лрд ХиЮйлщд ЬхдШа Ю Шиоу лрд ЬбвЬблщд лЮк @BBS@.
+ 
+} T Remote Sysop menu header
+
+
+RSCOM01 {[31m%sCHANGE . . Change/view channel status  ДгнсдайЮ/ШввШЪу бШлсйлШйЮк бШдШващд
+} T Remote sysop command description
+
+
+RSCOM02 {[31m%sEMULATE  . Inspect a channel  . . . . . . . . . . . .  ПШиШлуиЮйЮ бШдШважч
+} T Remote sysop command description
+
+
+RSCOM03 {[31m%sMONITOR  . Inspect channel input  . . . . . .  ПШиШлуиЮйЮ ЬайцЫжм бШдШващд
+} T Remote sysop command description
+
+
+RSCOM04 {[31m%sSEND . . . Send a message to user(s)  . .  Азжйлжву гЮдчгШлжк йЬ оиуйлЮ/Ьк
+} T Remote sysop command description
+
+
+RSCOM05 {[32m%sDELETE . . Delete a user's account  . . . . .  ГаШЪиШну вжЪШиаШйгжч оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM06 {[32m%sDETAIL . . Get info about user  . . . . . .  ПвЮижнжихЬк ЪаШ бсзжаж оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM07 {[32m%sEXEMPT . . (Un)protect user from deletion . . . . (ЛЮ)-ЫаШЪиспагжк оиуйлЮк
+} T Remote sysop command description
+
+
+RSCOM08 {[32m%sHANGUP . . Disconnect a user  . . . . . . . . . . . . .  АзжйчдЫЬйЮ оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM09 {[32m%sPOST . . . Give credits to a user . . . . . . .  АзцЫжйЮ гждсЫрд йЬ оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM10 {[32m%sSEARCH . . Search user database . . . . ДиЬмдШ лЮк ЩсйЮк ЫЬЫжгтдрд оиЮйлщд
+} T Remote sysop command description
+
+
+RSCOM11 {[32m%sSUSPEND  . Toggle user's lockout flag . АввШЪу ЫабШащгШлжк йчдЫЬйЮк оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM12 {[33m%sAUDIT  . . Inspect system log file  . . ДзаЯЬщиЮйЮ лрд logs лжм ймйлугШлжк
+} T Remote sysop command description
+
+
+RSCOM13 {[33m%sCLEANUP  . Inspect cleanup log file . . .  ДзаЯЬщиЮйЮ лрд logs лжм cleanup
+} T Remote sysop command description
+
+
+RSCOM14 {[33m%sEVENT  . . Schedule and cancel events . . ПижЪиШггШлайгцк ЬаЫабщд ЬиЪШйащд
+} T Remote sysop command description
+
+
+RSCOM15 {[33m%sFILTAUD  . Search the Audit Trail . . . . . . . . . Цсеагж лжм Audit Trail
+} T Remote sysop command description
+
+
+RSCOM16 {[33m%sLOGON  . . Change login message . . . . . . .  АввШЪу ЬайШЪрЪабжч бЬагтджм
+} T Remote sysop command description
+
+
+RSCOM17 {[33m%sSECURITY . Security logs  . . . . . . . .  ДзаЯЬщиЮйЮ ШйнШвЬхШк ймйлугШлжк
+} T Remote sysop command description
+
+
+RSCOM18 {[33m%sSIGNUPS  . View recent signups  . . . . . .  ДзаЯЬщиЮйЮ зицйнШлрд ЬЪЪиШнщд
+} T Remote sysop command description
+
+
+RSCOM19 {[34m%sAGESTATS . System demographics  . . . . .  ГЮгжЪиШнабс йлжаоЬхШ ймйлугШлжк
+} T Remote sysop command description
+
+
+RSCOM20 {[34m%sCLSSTATS . Class statistics . . . . . . СлШлайлабс йлжаоЬхШ ЪаШ лШ classes
+} T Remote sysop command description
+
+
+RSCOM21 {[34m%sGENSTATS . Generic statistics . . . . . .  ВЬдабЬмгтдШ йлШлайлабс йлжаоЬхШ
+} T Remote sysop command description
+
+
+RSCOM22 {[34m%sLINSTATS . Linux statistics . . . . . . СлШлайлабс вЬалжмиЪабжч ймйлугШлжк
+} T Remote sysop command description
+
+
+RSCOM23 {[34m%sMODSTATS . Module statistics  . . . . . СлШлайлабс йлжаоЬхШ ЪаШ лШ modules
+} T Remote sysop command description
+
+
+RSCOM24 {[34m%sSYSTATS  . System statistics  . . . . . . . . . ВЬдабс йлШлайлабс йлжаоЬхШ
+} T Remote sysop command description
+
+
+RSCOM25 {[34m%sTOP  . . . User TOP lists . . . . . . . . . . .  Пжйжлабу бШлслШеЮ оиЮйлщд
+} T Remote sysop command description
+
+
+RSCOM26 {[35m%sCLASSED  . Class Editor . . . . . . . . . . . . . .  ХЬаиайгцк лрд classes
+} T Remote sysop command description
+
+
+RSCOM27 {[35m%sKEYS . . . Edit user's key list . . АввШЪу лЮк вхйлШк бвЬаЫащд Ьдцк оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM28 {[35m%sUSERCLASS  Change a user's class  . . . . . . АввШЪу лжм class Ьдцк оиуйлЮ
+} T Remote sysop command description
+
+
+RSCOM29 {[36m%sCOPY . . . Copy a file  . . . . . . . . . . . . . . . .  АдлаЪиШну ШиоЬхжм
+} T Remote sysop command description
+
+
+RSCOM30 {[36m%sDIR  . . . File directory . . . . . . . . . . . . . . .  ЙШлсвжЪжк ШиоЬхрд
+} T Remote sysop command description
+
+
+RSCOM31 {[36m%sEDITOR . . Invoke the editor  . . . . . . . . .  ЙвуйЮ лжм editor бЬагтджм
+} T Remote sysop command description
+
+
+RSCOM32 {[36m%sREN  . . . Rename or move a file  . . . . ЛЬлжджгШйхШ у гЬлШбхдЮйЮ ШиоЬхжм
+} T Remote sysop command description
+
+
+RSCOM33 {[36m%sRM . . . . Delete a file  . . . . . . . . . . . . . . . . ГаШЪиШну ШиоЬхжм
+} T Remote sysop command description
+
+
+RSCOM34 {[36m%sRUN  . . . Execute a Unix command . . . . . . . . .  ДблтвЬйЮ Ьдлжвук Unix
+} T Remote sysop command description
+
+
+RSCOM35 {[36m%sSHELL  . . Jump to a Unix shell . . . . .  Пижйриаду тежЫжк йлж Unix shell
+} T Remote sysop command description
+
+
+RSCOM36 {[36m%sTRANSFER . Upload/download files  . . . . . . . . .  Азжйлжву/вупЮ ШиоЬхрд
+} T Remote sysop command description
+
+
+RSCOM37 {[36m%sTYPE . . . Display a text file  . . . . . . ДгнсдайЮ Ьдцк ШиоЬхжм бЬагтджм
+} T Remote sysop command description
+
+
+RSCOM38 {[37m%sGDET  . .  Global DETAIL (/L)  . . . . . . . . . . . . . . . . . Ддлжву /L
+} T Remote sysop command description
+
+
+RSCOM39 {[37m%sINVIS . .  Invisible Sysop (/invis)  . . . . .  АциШлжк оЬаиайлук (/invis)
+} T Remote sysop command description
+
+
+RSCOM40 {[37m%sPAGEAUDIT  Global Audit Notification . . ДаЫжзжхЮйЮ ЪаШ Audit бШлШориуйЬак
+} T Remote sysop command description
+
+
+RSCOM41 {[37m%sSYSOP  . . System Operator privileges . . . . ПиждцгаШ оЬаиайлу ймйлугШлжк
+} T Remote sysop command description
+
+
+OPTSEP {
+} T Remote Sysop menu option separator
+
+
+OPTON {=> } T Remote Sysop menu option enabled
+
+
+OPTOFF {   } T Remote Sysop menu option disabled
+
+
+RSSMNU {[1;37m
+ДПИКОВДС ХДИРИСТЧМ
+ГщйлЬ лЮд Ьдлжву йШк (у ? ЪаШ menu): [0m} T Remote Sysop short prompt
+
+
+ERRCOM {[0;1;31m
+Амлу Ю Ьдлжву ЫЬд мзсиоЬа. АбцгШ дШ лж гсЯЬак лж гЬджч;;; 8-)
+[0;1m} T Remote Sysop generic invalid option
+
+
+MORCHR {[0;1;31m
+Тж "%s" лШаиасЭЬа йЬ зсдр Шзц гхШ Ьдлжву...
+} T Remote Sysop need more characters to distinguish commands
+
+
+NUMERR {[0;1;31m
+ПШиШбШвщ ЫщйлЬ тдШд ШиаЯгц Шзц %d рк %d.
+[0;1m} T Remote Sysop generic numeric error
+
+
+UNKUID {[0;1;31m
+Тйб лйб лйб... ГЬд мзсиоЬа оиуйлЮк "%s".
+[0;1m} T Generic error: no such user
+
+
+NOAXES {[0;1;31m
+СмЪЪдщгЮ, ЫЬд тоЬлЬ зицйЩШйЮ йлЮд ЬзавжЪу %s.
+[0;1m
+} T Remote Sysop no access to that option
+
+
+EXECERR {[0;1;31m
+ГЬд гзциЬйЬ дШ ЬблЬвЬйлЬх Ю Ьдлжву йШк...
+[0;1m} T Couldn't exec external program
+
+
+CRDSING {} T "Credit" singular form
+CRDPLUR {s} T "Credits" plural form
+
+MSCACC {жд} T Male user accusative
+FEMACC {Юд} T Female user accusative
+
+
+NOTIFIED {[0;1;32m
+Тж гтвжк %s ЬхдШа ймдЫЬЫЬгтдж бШа ЬаЫжзжауЯЮбЬ.
+} T User on-line and notifed
+
+
+
+
+RSCHANGEWHT {[0;1m
+!WЛЬ зжаж бШдсва ЯШ зШхежмгЬ, ШнЬдлабц; ГщйЬ ШиаЯгц бШдШважч,
+цджгШ unix tty (зо ttyS1), ALL у * ЪаШ цвШ лШ бШдсваШ, у ? ЪаШ бШлсвжЪж:!) [0m} T Change channel status: Which one?
+
+
+RSCHANGEERR {[0;1;31m
+УзсиоЬа бсзжажк оиуйлЮк й'Шмлу лЮд ЪиШггу. АзжймдЫтйлЬ лжд бШа еШдШзижйзШЯуйлЬ.
+[0;1m} T Change channel status: There's a user in that channel
+
+
+RSCHANGELMN {[0;1;37m
+ПжаШ ЬхдШа Ю дтШ бШлсйлШйЮ;
+
+[37mR[32mESET (NORMAL) . . . . . . . . . . . ЙШдждабу, Ю ЪиШггу ЫтоЬлШа оиуйлЬк.
+[37mB[32mUSY-OUT  . . . . . . . . ЙШлтЩШйгШ Шбжмйлабжч, Ю ЪиШггу гавсЬа ймдЬощк.
+[37mN[32mO-ANSWER  . . . . . . . . . . . . . Ж ЪиШггу ЫЬд ШзШдлсЬа йлак бвуйЬак.
+[37mO[32mFF-LINE . . Ж ЪиШггу ШзШдлсЬа, лмзщдЬа тдШ йчдлжгж гудмгШ, бШа бвЬхдЬа.
+[0;1m} T Change channel status: Long menu
+
+RSCHANGESMN {[0;1m
+ГщйлЬ лЮд ЬзавжЪу йШк ([33mR[37m,[33mB[37m,[33mN[37m,[33mO[37m, ? ЪаШ гЬджч, у X ЪаШ тежЫж): [0m} T Change channel status: Short menu
+
+
+RSCHANGEBAD {[0;1;31m
+КмзсгШа, Шмлу Ю ЬзавжЪу ЫЬд ЬхдШа ЫмдШлу.
+[0;1m} T Change channel status: Wrong selection
+
+
+RSCHANGEOK {[0;1;32m
+!JЙШвщк, Ю ШввШЪу бШлсйлШйЮк ЭЮлуЯЮбЬ Шзц лж йчйлЮгШ бШа имЯгхЭЬлШа.!)
+} T Change channel status: Done, submitting new status
+ 
+
+
+RSEMUWHO {[0;1m
+!WПжажд ЯШ ЬгжмвсиЬак зсва, йлмЪЬит йчйжзШ;
+ГщйЬ ШиаЯгц бШдШважч, цджгШ unix tty (зо ttyS1), пЬмЫщдмгж, у ? ЪаШ бШлсвжЪж:!) [0m} T Emulate channel: Which one?
+
+
+RSEMUSLF {[0;1;31m
+ГЬд тоЬа бШа зжвч дцЮгШ дШ бсдЬак emulate лжд ЬШмлц йжм!
+[0;1m} T Emulate channel: can't emulate self
+
+
+RSEMUHAHA {[0;1;31m
+!JД, цоа! Та йжм ЬхдШа Шмлжх жа йлШвадабжх. ПижйзШЯЬхк дШ ЬгжмвсиЬак
+бсзжажд зжм йЬ ЬгжмвсиЬа уЫЮ. О Ьгжмвсирд лжм Ьгжмвсиждлжк. :-)!)
+[0;1m} T Emulate channel: attempt to establish circular emulation
+
+
+RSEMUNUS {[0;1;31m
+!JХгг... Шмлц лж бШдсва ЫЬд ЬхдШа ЫШагждайгтдж Шзц лжд emulation daemon
+(emud), ба тлйа ЫЬд гзжиЬхк дШ лж бсдЬак emulate. ПижйзШЯЬхк гсввжд дШ
+emulсиЬак тдШ ШЫиШдтк йЬаиаШбц бШдсва.!)
+[0;1m} T Emulate channel: can't emulate 'emud'-less channel
+
+
+RSEMUGO {
+[0;47;30m[K Emulating... [1;33mCtrl-Q[0;47;30m = тежЫжк, [1;33mCtrl-C[0;47;30m = SYSOP CHAT, [1;33mCtrl-Z[0;47;30m = HANGUP !F-
+[0;1m[K} T Emulate channel: beginning emulation
+
+
+RSEMUEND {
+[0;47;30m[K Ттвжк Emulation !F-
+[0;1m[K} T Emulate channel: end of emulation
+
+
+RSEMUHUP {
+[0;1;45;37m[K О оиуйлЮк ШзжймдЫтЯЮбЬ.
+[0;1m[K} T Emulate channel: user zapped out
+
+
+RSEMUNOE {
+!J[0;1mО оиуйлЮк ШзжймдЫтЯЮбЬ (у литоЬа бсла зжм ЫЬд ЫтоЬлШа
+emulation).!)
+[0;1m} T Emulate channel: user disconnected.
+
+
+RSEMUCHT {[0;1m
+!W[0;1;33;5m██[0;1;33m  ПижЬаЫжзжхЮйЮ: !iО оиуйлЮк тоЬа ЬЪбШлШвЮнЯЬх йлж
+sysop chat mode, Шз'цзжм ЫЬд гзжиЬх дШ ЩЪЬа орихк лЮ ЩжуЯЬас йШк.!)
+!0l[0;1m} T Emulate channel: user abandoned in sysop chat mode
+
+
+RSMONITORHDR {[0;1m[2J
+ЙАМАКИ      ЙДИЛДМО
+!F-
+[0m} T Monitor Channel: Header
+
+
+RSMONITORTAB {[0m[0;1;33m%-12s[0m!i!W%s!)
+!0l!1r} T Monitor Channel: Table line
+
+
+RSMONITOREND {[0;1m!F-
+
+[0;1mТтвжк зШиШбжвжчЯЮйЮк бШдШващд.
+
+} T Monitor Channel: End of monitoring
+
+
+RSMONITORERR {[0;1;31m
+!JКсЯжк бШлс лЮд ЫасибЬаШ лЮк зШиШбжвжчЯЮйЮк лрд бШдШващд!!)
+[0;1m} T Monitor Channel: Error occured
+
+
+
+
+RSSENDWHO {[0;1m
+!WСЬ зжажд ЯШ йлЬхвжмгЬ ймйжзабц гудмгШ;
+ГщйЬ ШиаЯгц бШдШважч, цджгШ unix tty (зо ttyS1), пЬмЫщдмгж,
+[33mall[37m ЪаШ Шзжйлжву зижк цвжмк,
+у ? ЪаШ бШлсвжЪж:!) [0m} T Send message to channel: Which one?
+
+
+RSSENDR {[0;1;31m
+Амлц лж бШдсва ЫЬд тоЬа оиуйлЮ, оШиалргтдЬ.
+[0;1m} T Send message to channel: no user in that channel
+
+
+RSSENDD {[0;1;31m
+!JКмзсгШа, ж оиуйлЮк ШзжймдЫтЯЮбЬ цйж ймдлсйШлЬ лж бЬхгЬдж лжм
+гЮдчгШлжк.!)
+[0;1m} T Send message to channel: user disconnected
+
+
+RSSEND1 {[0;1;32m
+ДдлсеЬа, лж гудмгШ йлсвЯЮбЬ йлж бШдсва [37m%x[32m.
+[0;1m} T Send message to channel: message sent to one channel
+
+
+RSSENDX {[0;1;31m
+!WКмзсгШа, лж гтвжк [37m%s[31m ЫЬд гзжиЬх дШ ЬджовЮЯЬх.!)
+[0;1m} T Send message to channel: message not send, user was BUSY
+
+
+RSSEND2 {[0;1;32m
+!JДдлсеЬа, лж гудмгШ йлсвЯЮбЬ зижк [32mцвжмк[37m.!)
+[0;1m} T Send message to channel: message sent to all users
+
+
+RSSEND2A {[0;1;33m
+!JТж гудмгШ ЫЬд гзциЬйЬ дШ йлШвЬх зижк [32mцвжмк[37m.!)
+[0;1m} T Send message to channel: couldn't send to ALL users
+
+
+RSSEND2B {[0;1;31m
+!JКмзсгШа, лж гудмгШ ЫЬд гзциЬйЬ дШ йлШвЬх зижк бШдтдШ оиуйлЮ.!)
+[0;1m} T Send message to channel: couldn't send to ANY users
+
+
+RSSENDCAN {[0;1;31m
+Ж Шзжйлжву лжм гЮдчгШлжк ШбмищЯЮбЬ.
+[0;1m } T Send message to channel: canceled
+
+
+RSSENDINH {[0m
+
+
+
+[36;5m██  [0;1mАПО ТОМ ХДИРИСТЖ СУСТЖЛАТОС:
+
+} T Send message to channel: message header
+
+
+
+
+RSDELETEWHO {
+!W[0;1;31;5m██[0;1;31m  ПРОСОХЖ: !iО оиуйлЮк зжм ЯШ жджгсйЬлЬ ЯШ
+ЫаШЪиШнЬх. ЗШ лжм ШнШаиЬЯЬх лж ЫабШхргШ зицйЩШйЮк гтоиа лж ЬзцгЬдж cleanup,
+жзцлЬ бШа ЯШ ЫаШЪиШнЬх ШдЬзайлиЬзлх ж вжЪШиаШйгцк лжм. Лтоиа лцлЬ, гзжиЬхлЬ
+дШ ШдШаитйЬлЬ лЮд ЫаШЪиШну лжм гЬ лЮд хЫаШ Ьдлжву (DELETE).!)
+!0l[0;1m
+!WЛЬ зжаШджч лШ ШхгШлШ ЯШ вЬищйжмгЬ лЮд бждйцвШ, ШнЬдлабц; !)[0m} T Delete a user: who?
+
+
+RSDELETEERR {
+!J[0;1;31mТж пЬмЫщдмгж [37m%s[31m ЬхдШа зижйлШлЬмгтдж. ГДМ гзжиЬх дШ
+ЫаШЪиШнЬх.!)
+[0;1m} T Delete a user: user is exempt
+
+
+RSDELETEOK {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m йЮгЬащЯЮбЬ ЪаШ ЫаШЪиШну. Ад
+ЯтвЬлЬ дШ сиЬлЬ лЮд ЫаШЪиШну лжм, оиЮйагжзжауйлЬ лЮд хЫаШ Ьдлжву ЛДХРИ ТО
+ДРХОЛДМО CLEANUP.!)
+[0;1m} T Delete a user: ok
+
+
+RSDELETEUNDO {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m ГДМ ЯШ ЫаШЪиШнЬх йлж ЬиоцгЬдж
+cleanup.!)
+[0;1m} T Delete a user: undeleted
+
+
+
+RSDETAILWHO {[0;1m
+!WГщйлЬ лж пЬмЫщдмгж зжм ЯтвЬлЬ дШ ЫЬхлЬ: !)[0m} T Datailed info: About whom?
+
+
+RSDETAILNAX {<ГЬд ЬгнШдхЭЬлШа>} T Detailed info: field contents withheld
+
+RSDETAILSUSP {[31m■SUSPENDED■} T Detailed info: 'suspended' string
+
+RSDETAILXMPT {[32m■EXEMPT■} T Detailed info: 'exempt' string
+
+RSDETAILDEL {[31m■DELETED■} T Detailed info: 'deleted' string
+
+RSDETAILOP {[32m■OPERATOR■} T Detailed info: 'operator' string
+
+RSDETAILM {АдЫиШк} T Detailed info: 'male' string
+RSDETAILF {ВмдШхбШ} T Detailed info: 'female' string
+
+RSDETAILS1 {IBM PC у ймгЩШлцк} T Detailed info: system #1
+RSDETAILS2 {Apple Macintosh} T Detailed info: system #2
+RSDETAILS3 {Apple II/II+/IIe, бвз} T Detailed info: system #3
+RSDETAILS4 {Amiga} T Detailed info: system #4
+RSDETAILS5 {Atari} T Detailed info: system #5
+RSDETAILS6 {Archimedes} T Detailed info: system #6
+RSDETAILS7 {Amstrad CPC 464/664/6128} T Detailed info: system #7
+RSDETAILS8 {АЪдрйлж} T Detailed info: system #8
+RSDETAILS9 {} T Detailed info: system #9
+
+RSDETAILNST {(орихк зШчйЬак)} T Detailed info: 'non-stop' string
+
+RSDETAILL1 {ДввЮдабс} T Detailed info: language #1
+RSDETAILL2 {АЪЪвабс} T Detailed info: language #2
+RSDETAILL3 {} T Detailed info: language #3
+RSDETAILL4 {} T Detailed info: language #4
+RSDETAILL5 {} T Detailed info: language #5
+RSDETAILL6 {} T Detailed info: language #6
+RSDETAILL7 {} T Detailed info: language #7
+RSDETAILL8 {} T Detailed info: language #8
+RSDETAILL9 {} T Detailed info: language #9
+RSDETAILL0 {} T Detailed info: language #10
+
+
+RSDETAIL {[0;1m
+[0;36m██  [1mСлжаоЬхШ лжм пЬмЫрдчгжм %s  [46m[K[0;1m
+
+[32mГЮгажмиЪуЯЮбЬ . . . .  [37m%-9s  %s %s
+[32mТЬвЬмлШхШ йчдЫЬйЮ  . . [37m%-9s  %s %s
+
+[32mОджгШлЬзщдмгж . . . .  [37m%s
+[32mДлШаиЬхШ . . . . . . . [37m%s
+[32mГаЬчЯмдйЮ (1/2) . . .  [37m%s
+[32mГаЬчЯмдйЮ (2/2)  . . . [37m%s
+[32mТЮвтнрдж  . . . . . .  [37m%s
+[32mЖвабхШ . . . . . . . . [37m%s
+[32mФчвж  . . . . . . . .  [37m%s
+[32mУзжвжЪайлук  . . . . . [37m%s
+[32mГаШйлсйЬак жЯцдЮк . .  [37m%d x %d %s
+[32mВвщййШ . . . . . . . . [37m%s
+[32mClass . . . . . . . .  [37m%s
+[32mСчдЯЮгШ  . . . . . . . [37m%s
+[32mЛждсЫЬк . . . . . . .  [37m%d (%d PAID рк лщиШ)
+
+[46m[K[0;1m
+} T Detailed info: template
+
+
+
+RSEXEMPTWHO {[0;1m
+!WПжажд оиуйлЮ ЯтвЬлЬ дШ зижйлЬлЬчйЬлЬ Шзц ЫаШЪиШну; !)[0m} T Exempt a user: who?
+
+
+RSEXEMPTERR {[0;1;31m
+!WО Sysop ЬхдШа зсдлШ зижйлШлЬмгтджк Шзц ЫаШЪиШну.!)
+[0;1m} T Exempt a user: can't unexempt sysop.
+
+
+RSEXEMPTOK {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m ЬхдШа звтжд гЮ ЫаШЪиспагж.!)
+[0;1m} T Exempt a user: ok
+
+
+RSEXEMPTUNDO {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m ГДМ ЬхдШа заШ зижйлШлЬмгтдж
+Шзц ЫаШЪиШнтк.!)
+[0;1m} T Exempt a user: unexempted
+
+
+
+
+RSSUSPWHO {[0;1m
+!WЛжажк ЯШ бсджмгЬ (un)suspend; !)[0m} T Suspend a user: who?
+
+
+RSSUSPERR {
+!J[0;1;31mТж пЬмЫщдмгж [37m%s[31m ЬхдШа зижйлШлЬмгтдж. ГДМ гзжиЬх дШ
+ЪхдЬа suspend.!)
+[0;1m} T Suspend a user: user is exempt
+
+
+RSSUSPOK {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m ЫЬд ЯШ гзжиЬх звтжд дШ
+ймдЫЬЯЬх йлЮд ЩсйЮ.!)
+[0;1m} T Suspend a user: ok
+
+
+RSSUSPUNDO {
+!J[0;1;32mДдлсеЬа, лж пЬмЫщдмгж [37m%s[32m гзжиЬх дШ гзЬа бШа зсва йлЮд
+ЩсйЮ.!)
+[0;1m} T Suspend a user: unsuspended
+
+
+
+
+RSPOSTWHO {[0;1m
+СЬ зжажд оиуйлЮ ЯШ ЫщйжмгЬ credits; [0m} T Post credits: To whom?
+
+
+RSPOSTAMT {[0;1m              ПцйШ credits дШ Ыщйр; [0m} T Post credits: How many?
+
+
+RSPOSTFOP {[0;1m  ТШ credits ЬхдШа (F)ree у (P)aid; [0m} T Post credits: Free or Paid?
+
+
+RSPOSTERR {[0;1;31m
+ПШиШбШвщ ЫщйлЬ F ЪаШ FREE credits у P ЪаШ PAID credits.
+[0;1m} T Post credits: Please enter F or P
+
+
+RSPOSTCNF {[0;1;32m
+!WПицбЬалШа дШ ЫщйЬлЬ %d %s credit%s йл%s %s. МШ зижориуйр;!)[0m } T Post credits: Do you confirm?
+
+
+RSPOSTDEL {[0;1;31m
+!JФлжм! Ойж Ьйч тзШаЭЬк гЬ лШ spells йжм, бсзжажк тйЩЮйЬ лжд оиуйлЮ.!)
+
+!JСхЪжмиШ ЫЬд бсдЬа звШбхлйЬк ж ЛзвсЯиШк;;;!)
+[0;1m} T Post credits: User has been deleted
+
+
+RSPOSTNOT1 {[0;1;32m
+***
+О ХЬаиайлук СмйлугШлжк гцвак йШк зижйтнЬиЬ [37m%d credit%s ЫриЬсд оиуйЮк[32m.
+} T Post credits: User notification, free credits
+
+
+RSPOSTNOT2 {[0;1;32m
+***
+О ХЬаиайлук СмйлугШлжк гцвак йШк тЫрйЬ [37m%d credit%s[32m зжм тоЬлЬ ШЪжисйЬа.
+} T Post credits: User notification, paid credits
+
+
+RSPOSTNOT3 {[0;1;32m
+***
+О ХЬаиайлук СмйлугШлжк гцвак йШк тЫрйЬ [37m%d credit%s[32m зжм тоЬлЬ
+ШЪжисйЬа. ЛЬлШнЬиЯубШлЬ ШмлцгШлШ йлж class [37m%s[32m. ГщйлЬ [33mAV[32m
+Шзц лж бЬдлиабц гЬджч ЪаШ дШ ЫЬхлЬ ла сввШеЬ йлжд вжЪШиаШйгц йШк.!)
+} T Post credits: User notification, paid credits with class change
+
+
+RSPOSTOK {[0;1;32m
+Ж гЬлШнжис тЪадЬ.
+[0;1m} T Post credits: Transfer ok.
+
+
+
+RSPOSTOK2 {[0;1;32m
+Ж гЬлШнжис тЪадЬ. О оиуйлЮк гЬлШнтиЯЮбЬ ШмлцгШлШ йлж class [37m%s[32m.
+[0;1m} T Post credits: Transfer ok with class change
+
+
+
+RSHANGUPWHO {[0;1m
+!WПжажд ЯШ зЬлсежмгЬ, ШнЬдлабц;
+ГщйЬ ШиаЯгц бШдШважч, цджгШ unix tty (зо ttyS1), пЬмЫщдмгж, у ? ЪаШ бШлсвжЪж:!) [0m} T Hangup User: Who?
+
+
+RSHANGUPERR {[0;1;31m
+ГЬд мзсиоЬа оиуйлЮк й'Шмлц лж бШдсва... еШдШзижйзсЯЮйЬ.
+[0;1m} T Hangup User: No user in that channel.
+
+
+RSHANGUPOK {[0;1;32m
+ДдлсеЬа, ж оиуйлЮк ШзжймдЫтЯЮбЬ.
+[0;1m} T Hangup User: User kicked out.
+
+
+RSSRCHVT {[0;30;47m ┌───────────────────── [34mДиЬмдШ ЩсйЮк ЫЬЫжгтдрд оиЮйлщд[0;30;47m ─────────────────────[0;1;37;47m┐ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ЦЬмЫщдмгж . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             │ [0m
+[30;47m │  СчдЯЮгШ  . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@15;15;2s[47;37m                     │ [0m
+[30;47m │  ОджгШлЬзщдмгж . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      │ [0m
+[30;47m │  ДлШаиЬхШ . . . . . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      │ [0m
+[30;47m │  ГаЬчЯмдйЮ (1/2) . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      │ [0m
+[30;47m │  ГаЬчЯмдйЮ (2/2)  . . . . .  [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@30;30;0s[47;37m      │ [0m
+[30;47m │  ТЮвтнрдж  . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>|IN"l [47m  [1;44;37m@23;23;0s[47;37m             │ [0m
+[30;47m │  УзжвжЪайлук  . . . . . . .  [0;30;46m @2;" |="l [47m  [0;30;46m @14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|АЪдрйлж"l [1;47;37m                      │ [0m
+[30;47m │  ЖвабхШ  . . . . . . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@2;0;99;0n[47;37m                                  │ [0m
+[30;47m │  Фчвж . . . . . . . . . . .  [0;30;46m @2;" |="l [47m  [46m @7;"АдЫиШк|ВмдШхбШ"l [1;47;37m                             │ [0m
+[30;47m │  Credits ЫаШЯтйагШ лщиШ  . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           │ [0m
+[30;47m │  PAID credits рк лщиШ . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@9;0;999999999;0n[47;37m                           │ [0m
+[30;47m │  Class . . . . . . . . . . . [0;30;46m @2;" |="l [47m  [1;44;37m@9;9;1s[47;37m                           │ [0m
+[30;47m │  ЖгЬижгЮдхШ ЬЪЪиШнук  . . .  [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  │ [0m
+[30;47m │  ТЬвЬмлШхШ йчдЫЬйЮ . . . . . [0;30;46m @2;" |<|<=|=|>=|>"l [47m  [1;44;37m@10;10;4s[0;30;47m            (dd/mm/yyyy)[1;37m  │ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ' '=don't-care  'IN'=зЬиатоЬа                                           [0;1;47;37m│ [0m
+[30;47m │                                  [0;1;42;33m@14;"OK"b[0;47;30m▄    [0;1;41;33m@14;"Cancel"b[0;47;30m▄  [0;1;47;37m│ [0m
+[30;47m │  Ctrl-R: БжуЯЬаШ                  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀     ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  [0;1;47;37m│ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m} T Search: visual template
+
+
+RSSRCHM {АдЫиШк} T String for 'male' in edit templates
+RSSRCHF {ВмдШхбШ} T String for 'female' in edit templates
+
+RSSRCHS1 {IBM compatible} T String for system type #1 in edit templates
+RSSRCHS2 {Apple Mac} T String for system type #2 in edit templates
+RSSRCHS3 {Old Apple} T String for system type #3 in edit templates
+RSSRCHS4 {Amiga} T String for system type #4 in edit templates
+RSSRCHS5 {Atari} T String for system type #5 in edit templates
+RSSRCHS6 {Archimedes} T String for system type #6 in edit templates
+RSSRCHS7 {Amstrad CPC} T String for system type #7 in edit templates
+RSSRCHS8 {АЪдрйлж} T String for system type #8 (unknown) in edit templates
+
+
+RSSRCHLT {[2J[0;30;47m ┌──────────────────────────────────────────────────────────────────────────[0;1;37;47m┐ [0m
+[30;47m │ ДиЬмдШ ЩсйЮк ЫЬЫжгтдрд оиЮйлщд                                           [0;1;47;37m│ [0m
+[30;47m │ ──────────────────────────────────────────────────────────────────────── [0;1;47;37m│ [0m
+[30;47m │ ЦЬмЫщдмгж . . . . . . . . . [31m 1[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 2[30m. [34m@23;23;0s[1;47;37m          │ [0m
+[30;47m │ СчдЯЮгШ  . . . . . . . . .  [31m 3[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 4[30m. [34m@15;15;2s[1;47;37m                  │ [0m
+[30;47m │ ОджгШлЬзщдмгж . . . . . . . [31m 5[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 6[30m. [34m@30;30;0s[1;47;37m   │ [0m
+[30;47m │ ДлШаиЬхШ . . . . . . . . .  [31m 7[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m 8[30m. [34m@30;30;0s[1;47;37m   │ [0m
+[30;47m │ ГаЬчЯмдйЮ (1/2) . . . . . . [31m 9[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m10[30m. [34m@30;30;0s[1;47;37m   │ [0m
+[30;47m │ ГаЬчЯмдйЮ (2/2)  . . . . .  [31m11[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m12[30m. [34m@30;30;0s[1;47;37m   │ [0m
+[30;47m │ ТЮвтнрдж  . . . . . . . . . [31m13[30m. [34m@2;" |<|<=|=|>=|>|IN"l  [31m14[30m. [34m@23;23;0s[1;47;37m          │ [0m
+[30;47m │ УзжвжЪайлук  . . . . . . .  [31m15[30m. [34m@2;" |="l  [31m16[30m. [34m@14;"IBM compatible|Apple Mac|Old Apple|Amiga|Atari|Archimedes|Amstrad CPC|АЪдрйлж"l[1;47;37m                   │ [0m
+[30;47m │ ЖвабхШ  . . . . . . . . . . [31m17[30m. [34m@2;" |<|<=|=|>=|>"l  [31m18[30m. [34m@2;0;99;0n[1;47;37m                               │ [0m
+[30;47m │ Фчвж . . . . . . . . . . .  [31m19[30m. [34m@2;" |="l  [31m20[30m. [34m@7;"АдЫиШк|ВмдШхбШ"l[1;47;37m                          │ [0m
+[30;47m │ Credits ЫаШЯтйагШ лщиШ  . . [31m21[30m. [34m@2;" |<|<=|=|>=|>"l  [31m22[30m. [34m@9;0;999999999;0n[1;47;37m                        │ [0m
+[30;47m │ PAID credits рк лщиШ . . .  [31m23[30m. [34m@2;" |<|<=|=|>=|>"l  [31m24[30m. [34m@9;0;999999999;0n[1;47;37m                        │ [0m
+[30;47m │ Class . . . . . . . . . . . [31m25[30m. [34m@2;" |="l  [31m26[30m. [34m@9;9;1s[1;47;37m                        │ [0m
+[30;47m │ ЖгЬижгЮдхШ ЬЪЪиШнук  . . .  [31m27[30m. [34m@2;" |<|<=|=|>=|>"l  [31m28[30m. [34m@10;10;4s[1;37;47m                       │ [0m
+[30;47m │ ТЬвЬмлШхШ йчдЫЬйЮ . . . . . [31m29[30m. [34m@2;" |<|<=|=|>=|>"l  [31m30[30m. [34m@10;10;4s[1;37;47m                       │ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m} T Search: Linear template
+
+
+RSSRCH1 {} T Search: help for field #1
+RSSRCH2 {} T Search: help for field #2
+RSSRCH3 {} T Search: help for field #3
+RSSRCH4 {} T Search: help for field #4
+RSSRCH5 {} T Search: help for field #5
+RSSRCH6 {} T Search: help for field #6
+RSSRCH7 {} T Search: help for field #7
+RSSRCH8 {} T Search: help for field #8
+RSSRCH9 {} T Search: help for field #9
+RSSRCH10 {} T Search: help for field #10
+RSSRCH11 {} T Search: help for field #11
+RSSRCH12 {} T Search: help for field #12
+RSSRCH13 {} T Search: help for field #13
+RSSRCH14 {} T Search: help for field #14
+RSSRCH15 {} T Search: help for field #15
+RSSRCH16 {} T Search: help for field #16
+RSSRCH17 {} T Search: help for field #17
+RSSRCH18 {} T Search: help for field #18
+RSSRCH19 {} T Search: help for field #19
+RSSRCH20 {} T Search: help for field #20
+RSSRCH21 {} T Search: help for field #21
+RSSRCH22 {} T Search: help for field #22
+RSSRCH23 {} T Search: help for field #23
+RSSRCH24 {} T Search: help for field #24
+RSSRCH25 {} T Search: help for field #25
+RSSRCH26 {} T Search: help for field #26
+RSSRCH27 {} T Search: help for field #27
+RSSRCH28 {} T Search: help for field #28
+RSSRCH29 {} T Search: help for field #29
+RSSRCH30 {} T Search: help for field #30
+
+
+RSSRCHC {[0;1;31m
+Ж ЫаШЫабШйхШ ШбмищЯЮбЬ.
+[0;1m} T Search: canceled
+
+
+RSSRCHR {[0;1;31m
+!WГЬд тоЬа дцЮгШ дШ псежмгЬ йлЮд ЩсйЮ ЫЬЫжгтдрд Шд ЫЬд жихйЬлЬ
+лжмвсоайлжд тдШ биалуиаж. :-) !)
+[0;1m} T Search: no query
+
+
+RSSRCHB {[0;1m
+(ПатйлЬ [33mEnter[37m ЪаШ лЬигШлайгц лЮк тиЬмдШк)
+
+ХиуйлЬк зжм ЩитЯЮбШд:
+
+ЦДУГЧМУЛО    ПРАВЛАТИЙО ОМОЛА
+!F-
+[0m} T Search: header
+
+
+RSSRCHL {%-13s%s
+} T Search: found user
+
+
+RSCLASSWHO {[0;1m
+Пжажд оиуйлЮ ЯтвЬак дШ гЬлШбадуйЬак йЬ сввж class; [0m} T Change User's Class: Whose?
+
+
+RSCLASSREP {[0;1;32m
+ХиуйлЮк . . . . . . . . [37m%s[32m
+Титожд class  . . . . . [37m%s
+[0;1m} T Change User's Class: Current class report
+
+
+RSCLASSCLS {[0;1m
+СЬ зжаж class дШ гЬлШнЬиЯЬх ж оиуйлЮк; (? ЪаШ бШлсвжЪж) [0m} T Change User's Class: Which class?
+
+
+RSCLASSERR {[0;1;31m
+Тйб лйб лйб... ЫЬд мзсиоЬа Шмлц лж class. ГщйЬ ? ЪаШ бШлсвжЪж.
+[0;1m} T Change User's Class: Class does not exist
+
+
+RSCLASSDEL {[0;1;31m
+!JФлжм! Ойж Ьйч сввШЭЬк лж class, бсзжажк тйЩЮйЬ лжд оиуйлЮ.
+Ж ШввШЪу class ЫЬд айочЬа звтжд.!)
+
+!JСхЪжмиШ ЫЬд бсдЬа звШбхлйЬк ж ЛзвсЯиШк;;;!)
+[0;1m} T Change Class: User has been deleted
+
+
+RSCLASSNOT {[0;1;32m
+***
+!JО ХЬаиайлук СмйлугШлжк гцвак йШк гЬлтнЬиЬ йлж class [37m%s[32m. ГщйлЬ
+[33mAV[32m Шзц лж бЬдлиабц гЬджч ЪаШ дШ
+ЫЬхлЬ ла сввШеЬ йлжд вжЪШиаШйгц йШк.!)
+[0;1m} T Change Class: User notification
+
+
+RSCLASSOK {[0;1;32m
+ДдлсеЬа, Ю ШввШЪу тЪадЬ гЬ ЬзалмохШ.
+
+[0;1m} T Change Class: Finished successfully
+
+
+
+
+
+RSKEYSWHO {[0;1m
+ЛЬ зжажд оиуйлЮ ЯШ зШхеЬак зсва, ШнЬдлабц; [0m} T Change User's Keys: Whose?
+
+
+RSKEYSSYS {[0;1;31m
+Ооа, ГДМ ЯШ зШхеЬак гЬ лШ бвЬаЫас лжм йчйжзШ. Амлцк лШ тоЬа цвШ гждхгрк.
+
+[0;1m} T Change User's Keys: Won't change Sysop's keys
+
+
+RSKEYSTAB {[0;1;32m
+╔═╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤╤═╗
+║ 0   │    1    │    2    │    3    │    4    │    5    │    6   6 ║
+║ 12 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 ║
+║ [37m%s[32m ║
+╠═╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪╪═╣
+║ │         │         │         │    1    │    1    │    1    │  1 ║
+║ 6    7    │    8    │    9    │    0    │    1    │    2    │  2 ║
+║ 56 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 0 2 4 6 8 ║
+║ [37m%s[32m ║
+╚═╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧╧═╝
+[0;1m} T Change User's Keys: Key Editor Template
+
+
+RSKEYSASK {
+[0;1m!WГщйлЬ лжд ШиаЯгц лжм бвЬаЫажч (1-128, ? ЪаШ ЬгнсдайЮ бвЬаЫащд, 
+ON=цвШ, OFF=бШдтдШ, OK ЪаШ лтвжк, X ЪаШ ШбчирйЮ): !)[0m} T Change User's Keys: Key Editor, enter key
+
+
+RSKEYSON {[0;1;32m
+Тж бвЬаЫх %d зижйлтЯЮбЬ йлж йчджвж.
+[0;1m} T Change User's Keys: Key Editor, added key
+
+
+RSKEYSOFF {[0;1;32m
+Тж бвЬаЫх %d ШнШаитЯЮбЬ Шзц лж йчджвж.
+[0;1m} T Change User's Keys: Key Editor, deleted key
+
+
+RSKEYSDEL {[0;1;31m
+!JФлжм! Ойж Ьйч тзШаЭЬк гЬ лШ бвЬаЫас, бсзжажк тйЩЮйЬ лжд оиуйлЮ.
+Ж ШввШЪу ЫЬд айочЬа звтжд.!)
+[0;1m} T Change User's Keys: User has been deleted
+
+
+RSKEYSOK {[0;1;32m
+ДдлсеЬа, Ю ШввШЪу тЪадЬ гЬ ЬзалмохШ.
+
+[0;1m} T Change User's Keys: Finished successfully
+
+
+
+
+RSTYPEASK {[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[0;1mОб, лщиШ, зжаж ШиоЬхж ЯтвЬак дШ ЫЬак; [0m} T Type file: What file?
+
+
+RSTYPEERR {[0;1;31m
+!JТж ШиоЬхж %s ЫЬд ЩитЯЮбЬ у ЫЬд гзжиЬх дШ ШджаоЯЬх.!)
+
+[0;1m} T Type file: File not found
+
+
+
+
+RSCOPYSRC {[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[0;1mОб, лщиШ, зжаж ШиоЬхж ЯтвЬак дШ ШдлаЪиспЬак; [0m} T Copy file: Enter source file
+
+
+RSCOPYTRG {
+[0;1mЙШа зжч ЯтвЬак дШ лж ШдлаЪиспЬак;            [0m} T Copy file: Enter destination
+
+
+RSCOPYERR {[0;1;31m
+!JЖ ШдлаЪиШну йлШгслЮйЬ вцЪр всЯжмк.!)
+
+[0;1m} T Copy file: cp returned error
+
+
+RSCOPYOK {[0;1;31m
+!JЖ ШдлаЪиШну лтвЬарйЬ Ьзалмощк.!)
+
+[0;1m} T Copy file: ok!
+
+
+
+
+RSRENSRC {[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[0;1mОб, лщиШ, зжаж ШиоЬхж ЯтвЬак дШ гЬлжджгсйЬак; [0m} T Rename/move file: Enter file
+
+
+RSRENTRG {
+[0;1mЙШа зжаж ЬхдШа лж бШаджчиаж цджгс лжм;        [0m} T Rename/move file: Enter new name/dir
+
+
+RSRENERR {[0;1;31m
+!JЖ ЫаШЫабШйхШ йлШгслЮйЬ вцЪр всЯжмк.!)
+
+[0;1m} T Rename/move file: mv returned error
+
+
+RSRENOK {[0;1;31m
+!JЖ ЫаШЫабШйхШ лтвЬарйЬ Ьзалмощк.!)
+
+[0;1m} T Rename/move file: ok!
+
+
+
+
+RSDIRASK {[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[0;1mОб, лщиШ, зжаж directory/ШиоЬхж ЯтвЬак дШ бсдЬак DIR; [0m} T DIR: what directory?
+
+
+RSDIRERR {[0;1;31m
+!JТж %s ЫЬд ЩитЯЮбЬ у ЫЬд гзжиЬх дШ ШджаоЯЬх.!)
+
+[0;1m} T DIR: can't open directory/file
+
+
+
+
+RSDELASK {
+!W[0;1;31;5mПРОСОХЖ: !i[0;1;31mПицбЬалШа дШ ЫаШЪиспЬлЬ тдШ
+ШиоЬхж. [5mГДМ[0;1;31m ЯШ мзсиеЬа сввЮ ЬищлЮйЮ, бШа лж ШиоЬхж
+[5mГДМ[0;1;31m гзжиЬх дШ ШдШблЮЯЬх гЬ бШдтдШ лицзж. ПижйтелЬ ла бсдЬлЬ.!)
+!0l
+[0;1mПжаж ШиоЬхж ЯтвЬлЬ дШ ЫаШЪиспЬлЬ; [0m} T DEL: what file?
+
+
+RSDELERR {[0;1;31m
+!JТж %s ЫЬд ЩитЯЮбЬ у ЫЬд гзжиЬх дШ ЫаШЪиШнЬх.!)
+
+[0;1m} T DEL: can't remove directory/file
+
+
+
+
+RSSYSASK {[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[0;1mОб, лщиШ, зжаШ Ьдлжву ЯтвЬак дШ литеЬак; [0m} T SYS: Enter command to run
+
+
+
+RSXFERDIR {[0;1m
+ПжаШ ЬхдШа Ю ЫаЬчЯмдйЮ лЮк гЬлШнжиск ШиоЬхрд;
+
+[33mU[37m . . . АдЬЩсЭжмгЬ оиуйагж ШиоЬхж (зо дтж "ЩЬвларгтдж" kernel)
+[33mD[37m  . .  ЙШлЬЩсЭжмгЬ ШзШиШхлЮлШ utilities (cindy???.gif)
+} T Transfer files: Up or down?
+
+
+RSXFERSHRT {
+[0;1mПШиШбШвщ ЫщйлЬ лЮд ЬзавжЪу йШк (ЬЪщ дхзлр лШк virtual оЬхиШк гжм): [0m} T Transfer files: Up or down, short menu
+
+
+RSXFERRSEL {[0;1;31m
+ПШиШбШвщ ЫщйлЬ [33mU[31m, [33mD[31m, [33m?[31m ЪаШ лж гЬджч, у [33mX[31m ЪаШ тежЫж.
+[0;1m} T Transfer files: Wrong selection
+
+
+RSXFERWHD {
+[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)[37m
+
+!WПжаж ШиоЬхж ЯтвЬлЬ дШ всЩЬлЬ; ПШиШбШвщ ЫщйлЬ лж цджгШ лжм ШиоЬхжм
+(wildcards ЬзалитзждлШа):!) [0m} T Transfer files: Enter filename
+
+
+RSXFERERR {[0;1;31m
+!JТж %s ЫЬд ЩитЯЮбЬ у ЫЬд гзжиЬх дШ ШджаоЯЬх.!)
+
+[0;1m} T Transfer files: Can't open file
+
+
+RSXFERWHU {
+[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)
+
+[32mАиоЬхШ зжм йлЬхвШлЬ: [37m%d
+
+!WСЬ зжаж directory дШ лШ йлЬхвжмгЬ;!) [0m} T Transfer files: Enter directory
+
+
+RSXFERER2 {[0;1;31m
+!JТж %s ЫЬд ЬхдШа directory! Тйб лйб лйб...!)
+
+[0;1m} T Transfer files: File is not a directory
+
+
+RSXFERER3 {[0;1;31m
+!JАбчирйЮ гЬлШнжиск.!)
+
+[0;1m} T Transfer files: transfer aborted.
+
+
+
+RSEDITWHF {
+[0;1;32m!WЗмгхЭр цла йлж linux ЪиснжмгЬ лШ directories гЬ '/' бШа цоа гЬ '\'! :-)!)[37m
+
+!WПжаж ШиоЬхж ЯтвЬлЬ дШ нтиЬлЬ йлжд editor; ПШиШбШвщ ЫщйлЬ лж цджгШ лжм ШиоЬхжм:!) [0m} T Edit a file: Enter filename
+
+
+RSEDITERR {[0;1;31m
+!JТж %s ЫЬд ЩитЯЮбЬ у ЫЬд гзжиЬх дШ ШджаоЯЬх.!)
+
+[0;1m} T Edit a file: Can't open file
+
+
+
+
+
+
+
+RSAUDIT1 {[0;1m
+ДгнсдайЮ лжм Audit Trail.
+
+!WЗтвЬлЬ дШ ЫЬхлЬ лж Audit Trail Шзц лЮд Шиоу ([[33mB[37m]eginning) у лж лтвжк
+([[33mE[37m]nd);!)[0m } T Audit: Beginning or end?
+
+
+RSAUDITR {[0;1;31m
+!WГЬд мзсиоЬа Шмлу Ю ЬзавжЪу.!)
+[0m} T Audit: No such option
+
+
+RSAUDIT2 {[0;1;32m
+
+(затйлЬ Enter ЪаШ ЫаШбжзу лЮк ЬгнсдайЮк)
+
+AUDIT TRAIL
+!F-
+[0m} T Audit: Listing audit trail
+
+
+RSAUDITI {!W[0;1m%s!)
+!26l!W[0m%s!)
+!0l} T Audit: single audit entry, informational
+
+
+RSAUDITC {!W[0;1;33m%s!)
+!26l!W[0m%s!)
+!0l} T Audit: single audit entry, cautionary
+
+
+RSAUDITE {!W[0;1;31m%s!)
+!26l!W[0m%s!)
+!0l} T Audit: single audit entry, emergency
+
+
+RSAUDIT3 {!0l[0;1;31m
+
+!WЖ ЫаШЫабШйхШ лЬигШлхйлЮбЬ зицриШ.!)
+[0;1m} T Audit: Listing terminated
+
+
+
+
+RSCLEANUP1 {[0;1m
+ДгнсдайЮ лжм Cleanup Audit Trail.
+
+!WЗтвЬлЬ дШ ЫЬхлЬ лж Cleanup Audit Trail Шзц лЮд Шиоу ([[33mB[37m]eginning) у лж лтвжк
+([[33mE[37m]nd);!)[0m } T Audit: Beginning or end?
+
+
+RSCLEANUPR {[0;1;31m
+!WГЬд мзсиоЬа Шмлу Ю ЬзавжЪу.!)
+[0m} T Audit: No such option
+
+
+RSCLEANUP2 {[0;1;32m
+
+(затйлЬ Enter ЪаШ ЫаШбжзу лЮк ЬгнсдайЮк)
+
+CLEANUP AUDIT TRAIL
+!F-
+[0m} T Audit: Listing audit trail
+
+
+RSCLEANUP3 {[0;1;31m
+
+!WЖ ЫаШЫабШйхШ лЬигШлхйлЮбЬ зицриШ.!)
+[0;1m} T Audit: Listing terminated
+
+
+
+RSLOGONH {[0;1m
+
+АввШЪу бЬагтджм ЬайцЫжм (logon message).
+
+!JУзсиожмд Ычж ЬхЫЮ бЬагтдрд: лж ЪЬдабц, зжм ЬгнШдхЭЬлШа йЬ цвШ лШ бШдсваШ,
+бШа лж ЬаЫабц, зжм ЬгнШдхЭЬлШа гцдж йЬ тдШ бШдсва. ЙсЯЬ бШдсва гзжиЬх дШ
+тоЬа лж Ыабц лжм бЬхгЬдж, зжм ЬгнШдхЭЬлШа ЛАЕИ гЬ лж ЪЬдабц бЬхгЬдж Шгтйрк
+зиад ж оиуйлЮк ЫщйЬа лж пЬмЫщдмгц лжм.!)
+[0;1m} T Logon message: help
+
+
+RSLOGONP {[0;1m
+!WПжаж ШиоЬхж ЯтвЬлЬ дШ ШввсеЬлЬ; ГщйлЬ [33m*[37m ЪаШ лж ЪЬдабц гудмгШ, у
+ШиаЯгц бШдШважч/unix tty ЪаШ дШ ШввсеЬлЬ лж бЬхгЬдж гцдж Ьдцк бШдШважч, у
+[33m?[37m ЪаШ бШлсвжЪж мзШиоцдлрд гЮдмгслрд:!) [0m} T Logon message: prompt
+
+
+RSLOGONL1 {[0;1m
+ЙШлсвжЪжк уЫЮ мзШиоцдлрд бЬагтдрд ЬайцЫжм
+
+ ЙШдсва  ЛтЪЬЯжк
+-----------------
+[0m} T Logon message: message list header
+
+
+RSLOGONL2A {    *     %5d
+} T Logon message: message list, global message
+
+
+RSLOGONL2B {   %02x     %5d
+} T Logon message: message list
+
+
+RSLOGONL3 {[0;1m-----------------
+
+} T Logon message: message list footer
+
+
+RSLOGOND {[0;1m
+!WАмлц лж бЬхгЬдж ЬайцЫжм мзсиоЬа уЫЮ. ЗтвЬлЬ дШ лж ШввсеЬлЬ, у дШ лж ЫаШЪиспЬлЬ;
+ГщйлЬ [[33mD[37m]elete=ЫаШЪиШну, у [[33mE[37m]dit=ШввШЪу: [Enter=Edit]!) [0m} T Logon message: delete or edit?
+
+
+RSLOGONDR {[0;1;31m
+Амлу Ю ЬзавжЪуЫ ЫЬд мзсиоЬа.
+[0;1m} T Logon message: invalid selection
+
+
+RSLOGONDD {[0;1;32m
+ЙШвщк, лж бЬхгЬдж ЬайцЫжм ЫаЬЪиснЮ.
+[0;1m} T Logon message: logon message deleted
+
+
+
+
+RSCLSSTR {[0;1;31m
+!JКмзсгШа, ЫЬд нШхдЬлШа дШ мзсиоЬа лж ШиоЬхж йлШлайлабщд ЪаШ лШ classes.
+Ийрк дШ ЫЮгажмиЪЬхлШа Шмлу лЮд йлаЪгу, у дШ гЮд тоЬа ЫЮгажмиЪЮЯЬх ШбцгШ.!)
+[0;1m} T Class statistics: error
+
+
+RSCLSST1 {[0;1m
+┌───────────┬─────────┬─────────┬─────────┐
+│ Class     │ ХиуйлЬк │ Credits │ КЬзлс   │
+├───────────┼─────────┼─────────┼─────────┤
+} T Class statistics: table header
+
+
+RSCLSST2 {[0;1m│ [32m%-9s[37m │ [33m%7d[37m │ [33m%7d[37m │ [33m%7d[37m │
+} T Class statistics: table line
+
+
+RSCLSST3 {[0;1m└───────────┴─────────┴─────────┴─────────┘
+
+(ЬгнШдхЭждлШа гцдж classes йлШ жзжхШ тоЬа бШлШдШврЯЬх оицджк)
+[0;1m
+} T Class statistics: table footer
+
+
+
+
+RSMODSTR {[0;1;31m
+!JКмзсгШа, ЫЬд нШхдЬлШа дШ мзсиоЬа лж ШиоЬхж йлШлайлабщд ЪаШ лШ classes.
+Ийрк дШ ЫЮгажмиЪЬхлШа Шмлу лЮд йлаЪгу, у дШ гЮд тоЬа ЫЮгажмиЪЮЯЬх ШбцгШ.!)
+[0;1m} T Module statistics: error
+
+
+RSMODST1 {[0;1m
+┌────────────────────────────────────────────┬───────────────┬───────────────┐
+│ ОджгШ module                               │ Credits     %% │ КЬзлс       %% │
+├────────────────────────────────────────────┼───────────────┼───────────────┤
+} T Class statistics: table header
+
+
+RSMODST2 {[0;1m│ [32m%-43s[37m│ [33m%7d %5.1f[37m │ [33m%7d %5.1f [37m│
+} T Module statistics: table line
+
+
+RSMODST3 {[0;1m└────────────────────────────────────────────┴───────────────┴───────────────┘
+[0;1m
+} T Module statistics: table footer
+
+
+
+RSSYSTATS {[0;1m
+
+[32mОджгШ ймйлугШлжк . . . . . . [37m@BBS@
+[32mДбЫжйЮ зижЪисггШлжк . . . .  [37m@VERSION@
+[32mАиаЯгцк бШдШващд . . . . . . [37m%d
+
+[32mДожмд ЫрЯЬх ймджвабс  . . .  [37m%7d [32mcredit(s)
+[32mАз'Шмлс, PAID ЬхдШа  . . . . [37m%7d [32mcredit(s)
+[32mСмджвабцк on-line оицджк  .  [37m%7d [32mвЬзлс
+[32mСмдЫтйЬак  . . . . . . . . . [37m%7d
+
+[32mUploads . . . . . . . . . .  [37m%7d [32mШиоЬхШ   [37m%7d [32mkbytes
+[32mDownloads  . . . . . . . . . [37m%7d [32mШиоЬхШ   [37m%7d [32mkbytes
+
+[32mЛЮдчгШлШ йЬ clubs . . . . .  [37m%7d[32m ймджвабс, [37m%7d[32m мзсиождлШ
+[32mЛЮдчгШлШ email . . . . . . . [37m%7d[32m ймджвабс, [37m%7d[32m мзсиождлШ
+[32mЛЮдчгШлШ net-mail . . . . .  [37m%7d[32m ЬеЬиоцгЬдШ
+[32mЛЮдчгШлШ net-mail  . . . . . [37m%7d[32m ЬайЬиоцгЬдШ
+
+[0;1m} T System statistics
+
+
+
+RSLINST1 {[0;1m
+[32mОджгШ гЮоШдугШлжк  . . . [37m%s
+[32m!WДбЫжйЮ вЬалжмиЪабжч . .  [37m!i%s!)
+[32m!0lДзЬеЬиЪШйлук  . . . . .  [37m%s %s (%s BogoMips)
+[32mUptime . . . . . . . . . [37m%02d:%02d:%02d
+[32mФцилжк ймйлугШлжк . . .  [37m%s
+
+┌───────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+│ ЛМЖЛЖ │  Total  │   Used  │   Free  │ Shared  │ Buffers │  Cache  │
+├───────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ RAM   │  [32m%5d  [37m│  [32m%5d  [37m│  [33m%5d  [37m│  [32m%5d  [37m│  [32m%5d  [37m│  [32m%5d  [37m│
+│ Swap  │  [32m%5d  [37m│  [32m%5d  [37m│  [33m%5d  [37m├─────────┴─────────┴─────────┘
+└───────┴─────────┴─────────┴─────────┘
+[0;1m} T Linux statistics 1
+
+
+RSLINSTW {[0;1;32;5m[s!JПШиШбШвщ зЬиагтдЬлЬ...!)[0;1m} T Linux statistics, please wait
+
+
+RSLINST2 {[0;1m[u[K[0;1m
+┌─────────────────┬──────────┬──────────┬──────────┬──────────────────────────┐
+│ Гхйбжк          │ Size (K) │ Used (K) │ Free (K) │ Mounted on               │
+├─────────────────┼──────────┼──────────┼──────────┼──────────────────────────┤
+} T Linux statistics 2
+
+
+RSLINST3 {│ %s%-16s[37m│ %s%8d [37m│ %s%8d [37m│ %s%8d [0;1m│ %s%-25s[37m│
+} T Linux statistics 3
+
+RSLINST4 {├─────────────────┼──────────┼──────────┼──────────┼──────────────────────────┤
+│ Счджвж          │ [32m%8d [37m│ [32m%8d [37m│ [32m%8d [0;1m│                          │
+├─────────────────┴──────────┴──────────┴──────────┴──────────────┬───────────┘
+│ [32m██  [37mОвШ бШвс    [33m██  [37mЙШаицк ЪаШ бШЯсиайгШ    [31m██  [37mО ГИСЙОС ВДЛИСД │
+└─────────────────────────────────────────────────────────────────┘
+[0;1m} T Linux statistics 4
+
+
+RSLINST5 {[32m} T Linux statistics 5 (disk free space is ok)
+
+RSLINST6 {[33m} T Linux statistics 6 (disk free space needs attention)
+
+RSLINST7 {[31m} T Linux statistics 7 (disk free space is critical)
+
+
+RSGENST1 {[0;1;32m
+!JАмлу Ю Ьдлжву зШитоЬа гаШ гЬЪсвЮ йЬаис йлШлайлабщд йлжаоЬхрд
+ЪаШ ЫаснжиШ лгугШлШ лЮк ЩсйЮк. ЗШ оиЬаШйлЬх дШ жихйЬлЬ зжаШ йлжаоЬхШ
+ЯтвЬлЬ дШ ЫЬхлЬ, бШа гЬ зжаШ гжину.!)
+
+[37m!WДищлЮйЮ 1 Шзц 4: ЗтвЬлЬ дШ ЫЬхлЬ йчджвШ у гтйжмк цижмк;
+ГщйлЬ [[33mT[37m]otal=Счджвж, [[33mA[37m]verage=Лтйжк цижк, у [33mX[37m ЪаШ тежЫж:!) [0m} T Generic statistics 1
+
+
+RSGENST2 {[0;1m
+!WДищлЮйЮ 2 Шзц 4: ЗтвЬлЬ Ю ШдсвмйЮ дШ ЪхдЬа зсдр йЬ!)
+
+  [33mC[37m. ЙШлШдсврйЮ Credits
+  [33mM[37m. КЬзлс (Minutes) on-line
+  [33mL[37m. АиаЯгц бвуйЬрд (CaLls)
+
+!WГщйлЬ лЮд ЬзавжЪу йШк ([33mC[37m,[33mM[37m,[33mL[37m, у [33mX[37m ЪаШ лЮд зижЮЪжчгЬдЮ ЬищлЮйЮ:!) [0m} T Generic statistics 2
+
+
+RSGENST3 {[0;1m
+!WДищлЮйЮ 3 Шзц 4: Та ЬхЫжмк йлШлайлабу ЯтвЬлЬ;!)
+
+  [33mB[37m. BaudStats . . . . . . . . . ТШочлЮлЬк йчдЫЬйЮк
+  [33mC[37m. ClassStats . . . . . . . . ЙвсйЬак оиЮйлщд (*)
+  [33mD[37m. DayStats  . . . . . . . .  ЖгЬиуйаШ бхдЮйЮ (*)
+  [33mM[37m. ModStats . . .  СлШлайлабтк ЪаШ лШ modules (*)
+  [33mT[37m. TTYstats  . . . . . . . . . . . ХиуйЮ бШдШващд
+
+!W(*) !iГЬд мзжйлЮихЭЬлШа ШдсвмйЮ ШиаЯгжч бвуйЬрд (Щв. зижЮЪжчгЬдЮ ЬищлЮйЮ).!)[B
+!0l
+!WГщйлЬ лЮд ЬзавжЪу йШк ([33mB[37m,[33mC[37m,[33mD[37m,[33mM[37m,[33mT[37m,
+у [33mX[37m ЪаШ лЮд зижЮЪжчгЬдЮ ЬищлЮйЮ:!) [0m} T Generic statistics 3
+
+
+RSGENSTR {[0;1;31m
+!JДоЬлЬ ЭЮлуйЬа ШдсвмйЮ ШиаЯгжч бвуйЬрд, бШа лж ЬхЫжк йлШлайлабук зжм гцвак ЫаШвтеШлЬ
+ЫЬд лж мзжйлЮихЭЬа Шмлц. ЙШа йлж бслр бслр, Шд ЫЬд йжм Шибжчд бсзжм 120 ЫаШнжиЬлабс
+ЪиШнугШлШ бШа ЯтвЬак ба сввШ, дШ зШк дШ лШ нласеЬак гцджк йжм. :-) !)
+[0;1m} T Generic statistics, impossible combination
+
+
+RSGENST4 {[0;1m
+!WДищлЮйЮ 4 Шзц 4: Та оиждабц зЬиажиайгц дШ ЯтйжмгЬ;!)
+
+  [33mD[37m. Day . . . . . . . . . . Лцдж йЮгЬиадс йлШлайлабс йлжаоЬхШ
+  [33mM[37m. Month  . . . . . . . . . . СлШлайлабу Шмлжч лжм гудШ гцдж
+  [33mY[37m. Year  . . . . . . . . . . СлШлайлабу Шмлжч лжм тлжмк гцдж
+  [33mE[37m. Ever . .  ЙШдтдШк оиждабцк зЬиажиайгцк, ймджвабс йлжаоЬхШ
+
+!WГщйлЬ лЮд ЬзавжЪу йШк ([33mD[37m,[33mM[37m,[33mY[37m,[33mE[37m,
+у [33mX[37m ЪаШ лЮд зижЮЪжчгЬдЮ ЬищлЮйЮ:!) [0m} T Generic statistics 4
+
+
+
+
+RSTOPSM {[0;1m
+[32mПжаж TOP-30 ЯтвЬлЬ дШ ЫЬхлЬ;
+
+[33mA[37m  . . . . . . . . . . . . . . . . . АиаЯгцк ймдЫтйЬрд
+[33mB[37m . . . . . . . . . . . . . . . . . ПШвацлЬиШ accounts
+[33mC[37m  . . . . . . . . . . . . . . . . . . АиаЯгцк credits
+[33mD[37m . . . . . . . . . . . . . . . . АиаЯгцк paid credits
+[33mE[37m  . . . . . . . .  АиаЯгцк credits зжм тожмд ежЫЬмлЬх
+[33mF[37m . . . . . . . . . . . . . . . . . . . Хицджк on-line
+[33mG[37m  . . . . . . . . АиаЯгцк гЮдмгслрд зжм тожмд ЪиШнлЬх
+[33mH[37m . . . . . . Оа бШвчлЬижа uploaders (ШиаЯгцк ШиоЬхрд)
+[33mI[37m  . . . . . .  Оа бШвчлЬижа uploaders (ШиаЯгцк bytes)
+[33mJ[37m . . .  Оа бШвчлЬижа(;) downloaders (ШиаЯгцк ШиоЬхрд)
+[33mK[37m  . . . . Оа бШвчлЬижа(;) downloaders (ШиаЯгцк bytes)
+[33mL[37m . . . . . . . .  ТШ clubs гЬ лШ зЬиаййцлЬиШ гЮдчгШлШ
+[33mM[37m  . . . . . . . . . ТШ clubs гЬ лШ зЬиаййцлЬиШ ШиоЬхШ
+[33mN[37m . . . . . . . . . . ТШ clubs гЬ лШ зЬиаййцлЬиШ сиЯиШ
+[33mO[37m  . ТШ clubs гЬ лак зЬиаййцлЬиЬк ШдШЪдщйЬак гЮдмгслрд
+[33mP[37m . . . .  ТШ clubs гЬ лак зЬиаййцлЬиЬк вупЬак ШиоЬхрд
+[0;1m} T TOP-Ns, long menu
+
+
+RSTOPSS {[0;1m
+!WГщйлЬ лЮд ЬзавжЪу йШк ([33mA[37m-[33mP[37m, у [33mX[37m ЪаШ тежЫж)!) [0m} T TOP-Ns, short menu
+
+RSTOPSTA {АиаЯгцк ймдЫтйЬрд} T TOP-Ns, chart title 1
+RSTOPSTB {ПШвацлЬиШ accounts} T TOP-Ns, chart title 2
+RSTOPSTC {АиаЯгцк credits} T TOP-Ns, chart title 3
+RSTOPSTD {АиаЯгцк paid credits} T TOP-Ns, chart title 4
+RSTOPSTE {АиаЯгцк credits зжм тожмд ежЫЬмлЬх} T TOP-Ns, chart title 5
+RSTOPSTF {Хицджк on-line} T TOP-Ns, chart title 6
+RSTOPSTG {АиаЯгцк гЮдмгслрд зжм тожмд ЪиШнлЬх} T TOP-Ns, chart title 7
+RSTOPSTH {Оа бШвчлЬижа uploaders (ШиаЯгцк ШиоЬхрд)} T TOP-Ns, chart title 8
+RSTOPSTI {Оа бШвчлЬижа uploaders (ШиаЯгцк bytes)} T TOP-Ns, chart title 9
+RSTOPSTJ {Оа бШвчлЬижа(;) downloaders (ШиаЯгцк ШиоЬхрд)} T TOP-Ns, chart title 10
+RSTOPSTK {Оа бШвчлЬижа(;) downloaders (ШиаЯгцк bytes)} T TOP-Ns, chart title 11
+RSTOPSTL {ТШ clubs гЬ лШ зЬиаййцлЬиШ гЮдчгШлШ} T TOP-Ns, chart title 12
+RSTOPSTM {ТШ clubs гЬ лШ зЬиаййцлЬиШ ШиоЬхШ} T TOP-Ns, chart title 13
+RSTOPSTN {ТШ clubs гЬ лШ зЬиаййцлЬиШ сиЯиШ} T TOP-Ns, chart title 14
+RSTOPSTO {ТШ clubs гЬ лак зЬиаййцлЬиЬк ШдШЪдщйЬак гЮдмгслрд} T TOP-Ns, chart title 15
+RSTOPSTP {ТШ clubs гЬ лак зЬиаййцлЬиЬк вупЬак ШиоЬхрд} T TOP-Ns, chart title 16
+
+
+RSTOPS1 {
+
+[0;30;47m ┌──────────────────────────────────────────────────────[0;1;37;47m┐ [0m
+[0;30;47m │  %-50s  [1;37m│ [0m
+[0;30;47m │  ──────────────────────────────────────────────────  [1;37m│ [0m
+} T TOP-Ns, top of chart
+
+
+RSTOPS2 {[0;30;47m │  %02d. %11s  %-33s  [1;37m│ [0m
+} T TOP-Ns, chart entry
+
+
+RSTOPS3 {[0;30;47m └[0;1;37;47m──────────────────────────────────────────────────────┘ [0;1m
+
+} T TOP-Ns, chart bottom
+
+
+
+
+RSGDET {[0;1;32m
+!JЖ чзШиеЮ Шмлук лЮк Ьдлжвук Шзвс йЮгШхдЬа цла тоЬлЬ лЮд Ьдлжву /L
+(global detail). ГщйлЬ [33m/L <пЬмЫщдмгж>[32m Шз'жзжмЫузжлЬ гтйШ йлЮд ЩсйЮ
+ЪаШ дШ зсиЬлЬ звЮижнжихЬк ЪаШ лж пЬмЫщдмгж Шмлц.!)
+[0;1m} T Global Detail:[A information
+
+
+
+
+RSSYSOPWHO {[0;1m
+Пжажд бШбжгжхиЮ ЯШ бШлШиШйлЬхк гЬ ймйжзабс зиждцгаШ, ШнЬдлабц; [0m} T Change Sysop Permissions: Whose?
+
+
+RSSYSOPNSY {[0;1;31m
+!JД жоа дШ бсджмгЬ бШа йчйжзШ цзжажд бШа цзжажд. Амлс лШ бШдждхЭЬа ж гЬЪсвжк...!)
+
+!J(Амлу Ю Ьдлжву ЫхдЬа зиждцгаШ йЬ бсзжажд, Шд ЬблЬвЬйлЬх Шзц лжд Sysop. Авващк,
+йШк ЫЬходЬа цла тоЬлЬ зиждцгаШ оЬаиайлу ймйлугШлжк.!)
+
+[0;1m} T Remote Sysop can't make person a Sysop
+
+
+RSSYSOPHDR {[0;1mАввШЪу зицйЩШйЮк лжм %s... (лжд сгжаиж)
+
+} T Change Sysop Permissions: Menu header
+
+
+RSSYSOPMNU {[0;1m
+!WДзавжЪу ЪаШ ШввШЪу, ON=цвШ, OFF=бШдтдШ, X ЪаШ тежЫж, у ?: !)[0m} T Change Sysop Permissions: Menu prompt
+
+
+RSSYSOPON {[0;1m
+Ж Ьдлжву %s зижйлтЯЮбЬ йлж йчджвж.
+} T Change Sysop Permissions: Option turned on
+
+
+RSSYSOPOFF {[0;1m
+Ж Ьдлжву %s ШнШаитЯЮбЬ Шзц лж йчджвж.
+} T Change Sysop Permissions: Option turned off
+
+
+RSSYSOPSOP {[0;1;31m
+!JТа ШдШйнсвЬаЬк ЬхдШа Шмлтк, ШнЬдлабц; ДхйШа ж бждйжватиЮк, бШа ж бждйжватиЮк
+тоЬа зицйЩШйЮ зсдлШ бШа зШдлжч. ГЬд гзжиЬхк дШ ШввсеЬак лЮд зицйЩШйу йжм.!)
+
+[0;1m} T Change Sysop Permissions: Can't change Sysop's access
+
+
+RSSYSOPUPD {[0;1;32m
+АдлЬ, сввжк тдШк йлж Club лрд ЗЬщд...
+} T Change Sysop Permissions: User's permissions updated
+
+
+RSSYSOPDEL {[0;1;31m
+!JТЮд зслЮйЬк сйоЮгШ, гсйлжис гжм... ЙШЯщк тЫадЬк зиждцгаШ йлж Ячг--,
+ЬЬЬ, Ьдджщ йлжд оиуйлЮ, бсзжажк лжд тйЩЮйЬ. Ж зицйЩШйЮ зжм лжм тЫрйЬк ЫЬд
+айочЬа звЬцд.!)
+
+!JСмгЩжмву: бжхлШ бШвс гузрк ЬхдШа йлЮд ЩсйЮ ж БШЪЪтвЮк...!)
+[0;1m} T Change Sysop Permissions: User has been deleted
+
+
+RSSYSOPNOT {[0;1;32m
+***
+!JО ХЬаиайлук СмйлугШлжк гцвак сввШеЬ лак ЬаЫабтк зижйЩсйЬак йШк.
+ДвслЬ йЬ ЬзШну гШЭх лжм ЪаШ дШ гсЯЬлЬ зжаШ ШбиаЩщк улШд Ю ШввШЪу.!)	
+[0;1m} T Change Sysop Permissions: User notification
+
+
+
+
+
+
+CLSLSTHDR {[0;1;32m
+УзсиождлШ classes:
+
+!W} T List of classes: Header
+
+CLSLSTTAB {%-20s} T List of classes: Tabulation
+
+CLSLSTEND {!)
+[0;1m} T List of classes: Footer
+
+
+GCHANBCH {[0;1;31m
+!WТйб лйб лйб... зсва зШхЭжмгЬ; ГЬд мзсиоЬа лтлжаж бШдсва, оШиалргтдЬ!!)
+[0;1m} T Get channel: bad channel number
+
+
+GCHANBDV {[0;1;31m
+!WДг ЩтЩШаШ, сдлЬ дШ ЫщйЬак йрйлс лж tty... :-)
+ГЬд гзжищ дШ Шджхер Шмлц лж tty. СхЪжмиШ лж тЫрйЬк йлЮд гжину tty*;
+Тж жчдао зижйтоЬа лШ бЬнШвШхШ бШа лШ габис ЪисггШлШ. Дйч;!)
+[0;1m} T Get channel: bad device name
+
+
+GCHANBID {[0;1;31m
+!WАлчоЮйЬк, дЬШит йчйжзШ. Амлц лж слжгж ЫЬд ЬхдШа ймЫЬЫЬгтдж.
+Йа Шд ЫЬд гЬ зайлЬчЬак, бсдЬ тдШ /#. :-)!)
+[0;1m} T Get channel: bad user ID
+
+
+GCHANHUH {[0;1;31m
+!WГЬд бШлШвШЩШхдр лЮд втеЮ "%s". Ад ЬхдШа цджгШ оиуйлЮ, Шмлцк ж оиуйлЮк
+ЫЬд мзсиоЬа йлЮд ЩсйЮ. Авващк, бсдШлЬ гсввжд бсзжаж всЯжк.!)
+[0;1m} T Get channel: can't figure out what input is
+
+
+CHNLSTHDR {[0m
+┌────┬────────┬───────────────────────────────────────────┐
+│ [1;33m##[0m │  [1;33mBAUD[0m  │ [1;33mХРЖСТЖС (ЙАТАСТАСЖ ВРАЛЛЖС)[0m               │
+├────┼────────┼───────────────────────────────────────────┤
+} T Channel list: header
+
+CHNLSTTBQ {[0m│ [1;32m%02x[0m │        │ [0;37mПижйриадс ШдЬдЬиЪу ЪиШггу (LOGOUT)       [0m │
+} T Channel list: line, QUIT state
+
+CHNLSTTBI {[0m│ [1;32m%02x[0m │        │ [0;1;33mReset modem йлЮд бШлсйлШйЮ %-14s[0m │
+} T Channel list: line, INIT state
+
+CHNLSTTBR {[0m│ [1;32m%02x[0m │        │ [0;1;34mДайЬиоцгЬдЮ лЮвЬнрдабу бвуйЮ (RING)      [0m │
+} T Channel list: line, RING state
+
+CHNLSTTBA {[0m│ [1;32m%02x[0m │        │ [0;1;36mАзШдлщ йЬ ЬайЬиоцгЬдЮ бвуйЮ (ANSWER)     [0m │
+} T Channel list: line, ANSWER state
+
+CHNLSTTBM {[0m│ [1;32m%02x[0m │ [1;32m%6s[0m │ [0;1;32mMetaBBS: %-32.32s[0m │
+} T Channel list: line, METABBS state
+
+CHNLSTTBL {[0m│ [1;32m%02x[0m │ [1;32m%6s[0m │ [0;1;37mСчдЫЬйЮ гЬ лЮд ЩсйЮ (LOGIN)              [0m │
+} T Channel list: line, LOGIN state
+
+CHNLSTTBG {[0m│ [1;32m%02x[0m │        │ [0;1;37mСчдЫЬйЮ дтжм оиуйлЮ (RELOGON)            [0m │
+} T Channel list: line, RELOG state
+
+CHNLSTTBU {[0m│ [1;32m%02x[0m │ [1;32m%6s[0m │ [0;1m%-31.31s%-10s[0m │
+} T Channel list: line, USER state
+
+CHNLSTPGS {[32;5m(/p sysop)} T Channel list: list, USER state, used has paged the Sysop
+
+CHNLSTTBU2 {[0m│ [1;32m%02x[0m │ [1;32m%6s[0m │ [0;1mЖ ЪиШггу ЬхдШа бШлЬавЮггтдЮ.             [0m │
+} T Channel list: line, USER state (unnamed)
+
+CHNLSTTBO {[0m│ [1;32m%02x[0m │        │ [0;1;32mЙШлсйлШйЮ ЪиШггук: %-22s[0m │
+} T Channel list: line, OK state
+
+CHNLSTTBF {[0m│ [1;32m%02x[0m │        │ [0;1;31;5mАзжлмохШ лжм reset! ЙШлсйлШйЮ: %-10s[0m │
+} T Channel list: line, FAIL state
+
+CHNLSTTBE {[0m│ [1;32m%02x[0m │        │ Пижйриадс сЪдрйлЮ бШлсйлШйЮ               │
+} T Channel list: line, error reading line state
+
+CHNLSTFTR {[0m└────┴────────┴───────────────────────────────────────────┘
+[0;1m} T Channel list: footer
+
+
+
+
+
+
+
+RSAPGVT {[0;30;47m ┌───────────────────── [34mФхвлиж бШлШориуйЬрд Audit Trail[0;30;47m ────────────────────[0;1;37;47m┐ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДЫщ гзжиЬхлЬ  дШ ЬвтЪеЬлЬ зжаШ  ЬхЫЮ бШлШориуйЬрд  лжм audit  trail ЯШ  [0;1;47;37m│ [0m
+[30;47m │  йШк  ЫЬходЬа лж йчйлЮгШ.  Ж йжЩШицлЮлШ  бШлШориуйЬрд гзжиЬх дШ ШввсеЬа  [0;1;47;37m│ [0m
+[30;47m │  бШа гЬ лЮд Ьдлжву /audit. ГщйлЬ Ctrl-O йЬ бсзжаж зЬЫхж ЪаШ ЩжуЯЬаШ.     [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДгнсдайЮ . . . . . . . . [0;30;46m @23;"ЙШггхШ бШлШощиЮйЮ|ДзЬхЪжмйЬк бШлШориуйЬак|ДзЬхЪжмйЬк & СЮгШдлабтк|ОвЬк жа бШлШориуйЬак"l [0;30;47m  (space ЪаШ ШввШЪу)  [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДхЫЮ бШлШориуйЬрд зжм ЯтвЬлЬ дШ ЩвтзЬлЬ:            (space ЪаШ ШввШЪу)  [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ХиЬщйЬак/СлШлайлабс/КжЪайлабтк бШлШориуйЬак . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДаЫабтк лШблабтк ЫаЬиЪШйхЬк (cleanup, events)  . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ЙШлШориуйЬак оЬаиайгжч ймйлугШлжк . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  АйнсвЬаШ ймйлугШлжк, оиЮйлщд бШа ШиоЬхрд . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ЛЬлШнжитк/ШдШЪдщйЬак ШиоЬхрд  . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ЙхдЮйЮ оиЮйлщд (ймдЫтйЬак, ШзжймдЫтйЬак, бвз)  . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  АввЬк бШлШориуйЬак  . . . . . . . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  Пижйжоу: жа ШввШЪтк айочжмд ЪаШ ОКДС лак гЬлтзЬалШ ймдЫтйЬак йШк.       [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │                                  [0;1;42;33m@14;"OK"b[0;47;30m▄    [0;1;41;33m@14;"Cancel"b[0;47;30m▄  [0;1;47;37m│ [0m
+[30;47m │  Ctrl-R: БжуЯЬаШ                  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀     ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  [0;1;47;37m│ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m} T Audit paging: visual template
+
+
+SEVO {ЙШггхШ бШлШощиЮйЮ} T Filtering: show nothing (off)
+SEVE {ДзЬхЪжмйЬк бШлШориуйЬак} T Filtering: show emergency entries only
+SEVC {ДзЬхЪжмйЬк & СЮгШдлабтк} T Filtering: show emergency and cautionary
+SEVI {ОвЬк жа бШлШориуйЬак} T Filtering: show everything
+
+
+
+RSAPGLT {[2J[0;30;47m ┌──────────────────────────────────────────────────────────────────────────[0;1;37;47m┐ [0m
+[30;47m │ Фхвлиж бШлШориуйЬрд Audit Trail                                          [0;1;47;37m│ [0m
+[30;47m │ ──────────────────────────────────────────────────────────────────────── [0;1;47;37m│ [0m
+[30;47m │ ДЫщ гзжиЬхлЬ дШ  ЬвтЪеЬлЬ зжаШ ЬхЫЮ бШлШориуйЬрд лжм  audit trail ЯШ йШк [0;1;47;37m│ [0m
+[30;47m │ ЫЬходЬа лж йчйлЮгШ.  Ж йжЩШицлЮлШ  бШлШориуйЬрд гзжиЬх дШ ШввсеЬа бШа гЬ [0;1;47;37m│ [0m
+[30;47m │ лЮд Ьдлжву /audit.                                                       [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m1[30m. ДгнсдайЮ . . . . . . . . . . . . . . . . . .  [34m@23;"ЙШггхШ бШлШощиЮйЮ|ДзЬхЪжмйЬк бШлШориуйЬак|ДзЬхЪжмйЬк & СЮгШдлабтк|ОвЬк жа бШлШориуйЬак"l [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m2[30m. ХиЬщйЬак/СлШлайлабс/КжЪайлабтк бШлШориуйЬак . . . . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m3[30m. ДаЫабтк лШблабтк ЫаЬиЪШйхЬк (cleanup, events)  . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m4[30m. ЙШлШориуйЬак оЬаиайгжч ймйлугШлжк . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m5[30m. АйнсвЬаШ ймйлугШлжк, оиЮйлщд бШа ШиоЬхрд . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m6[30m. ЛЬлШнжитк/ШдШЪдщйЬак ШиоЬхрд  . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m7[30m. ЙхдЮйЮ оиЮйлщд (ймдЫтйЬак, ШзжймдЫтйЬак, бвз)  . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m8[30m. АввЬк бШлШориуйЬак  . . . . . . . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  Пижйжоу: жа ШввШЪтк айочжмд ЪаШ ОКДС лак гЬлтзЬалШ ймдЫтйЬак йШк.       [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m
+} T Audit paging: Linear template
+
+
+RSAPGH0 {[0;1m
+!JОа бШлШориуйЬак лжм Audit Trail орихЭждлШа йЬ лиЬак гЬЪсвЬк бШлЮЪжихЬк
+йжЩШицлЮлШк. Оа звЮижнжиаШбтк бШлШориуйЬак ЬхдШа жа заж бжадтк. ЙШлШорижчд
+нмйажвжЪабтк ЫаЬиЪШйхЬк. Оа йЮгШдлабтк бШлШориуйЬак ЬгнШдхЭждлШа йЬ бцббадж
+оищгШ. ОджгсЭждлШа йЮгШдлабтк ЪаШлх гзжиЬх дШ ЫЮвщджмд бШлШйлсйЬак зжм
+ШзШалжчд лЮд зижйжоу йШк (цзрк ЬЪЪиШнтк дтрд оиЮйлщд, hack tries бвз). Ттвжк,
+жа ЬзЬхЪжмйЬк бШлШориуйЬак ЬхдШа жа заж йзсдаЬк бШа ЫЮвщджмд йжЩШис зижЩвугШлШ
+йлЮ ЩсйЮ. ПсдлжлЬ зитзЬа дШ лжмк ЫхдЬлШа Ю ШзШиШхлЮлЮ зижйжоу. ДЫщ гзжиЬхлЬ дШ
+жихйЬлЬ лж бШлщнва йжЩШицлЮлШк лрд бШлШориуйЬрд зжм ЯШ ЩвтзЬлЬ Шдс зсйШ
+йлаЪгу.!)
+} T Audit paging: field help 0
+
+RSAPGH1 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснЬлШа бсла зжм тоЬа дШ бсдЬа гЬ оиЬщйЬак credits,
+йлШлайлабтк бШлШориуйЬак бШа ЪЬдабщк вжЪайлабтк бШлШориуйЬак.!)
+[0;1m} T Audit paging: field help 1
+
+
+RSAPGH2 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснЬлШа бсла зжм тоЬа дШ бсдЬа гЬ лак лШблабтк ЫаЬиЪШйхЬк
+лЮк ЩсйЮк (зо cleanup).!)
+[0;1m} T Audit paging: field help 2
+
+
+RSAPGH3 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснЬлШа Ю ЬблтвЬйЮ бсзжаШк Ьдлжвук оЬаиайлу ймйлугШлжк у
+зШицгжаШ ЬдтиЪЬаШ.!)
+[0;1m} T Audit paging: field help 3
+
+
+RSAPGH4 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснЬлШа бсла зжм тоЬа дШ бсдЬа гЬ лЮд ШйнсвЬаШ лжм
+ймйлугШлжк: зижйзсЯЬаЬк йзШйхгШлжк вжЪШиаШйгщд бвз.!)
+[0;1m} T Audit paging: field help 4
+
+
+RSAPGH5 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснждлШа гЬлШнжитк ШиоЬхрд, ШдШЪдщйЬак ШиоЬхрд у зШицгжаЬк
+ЬдтиЪЬаЬк.!)
+[0;1m} T Audit paging: field help 5
+
+
+RSAPGH6 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснждлШа ймдЫтйЬак бШа ШзжймдЫтйЬак оиЮйлщд (бШа йоЬлабтк
+бШлШориуйЬак).!)
+[0;1m} T Audit paging: field help 6
+
+
+RSAPGH7 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ йШк ЬаЫжзжаЬх бсЯЬ
+нжис зжм ЯШ бШлШЪиснЬлШа бсзжаШ ЬдтиЪЬаШ зжм ЫЬд ШдубЬа йлак сввЬк
+бШлЮЪжихЬк бШлШориуйЬрд.!)
+[0;1m} T Audit paging: field help 7
+
+
+RSAPGCAN {[0;1;31m
+Оа ШввШЪтк йШк гШлШащЯЮбШд.
+[0;1m} T Audit paging: filtering changes aborted
+
+
+RSAPGOK {[0;1;32m
+ДдлсеЬа, лж нхвлиж лрд бШлШориуйЬрд имЯгхйлЮбЬ.
+[0;1m} T Audit paging: filtering changes set
+
+
+
+RSFLTVT {[0;30;47m ┌───────────────────────── [34mДиЬмдШ лжм Audit Trail[0;30;47m ─────────────────────────[0;1;37;47m┐ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДиЬмдШ ЪаШ . . . [1;44;37m@80;51;0s[0;1;47;37m  [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДиЬмдШ звЮижнжиаШбщд бШлШориуйЬрд . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ йЮгШдлабщд бШлШориуйЬрд . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ ЬзЬхЪжмйрд бШлШориуйЬрд  . . . . . . . . . . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДиЬмдШ оиЬщйЬрд/йлШлайлабщд/вжЪайлабщд бШлШориуйЬрд  . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ ЬаЫабщд лШблабщд ЫаЬиЪШйащд (cleanup, events)  . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ ЙШлШориуйЬрд оЬаиайгжч ймйлугШлжк . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ АйнсвЬаШк ймйлугШлжк, оиЮйлщд бШа ШиоЬхрд  . . . . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ ЛЬлШнжищд/ШдШЪдщйЬрд ШиоЬхрд  . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ ЙадуйЬрд оиЮйлщд (ймдЫтйЬрд, ШзжймдЫтйЬрд, бвз)  . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │  ДиЬмдШ Авврд бШлШориуйЬрд  . . . . . . . . . . . . . . . . . . . [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │  ДгнсдайЮ Шзц лж лтвжк (дтЬк бШлШориуйЬак) зижк лЮд Шиоу . . . .  [0;30;46m [@"X "t] [0;1;47;37m  │ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │                                  [0;1;42;33m@14;"OK"b[0;47;30m▄    [0;1;41;33m@14;"Cancel"b[0;47;30m▄  [0;1;47;37m│ [0m
+[30;47m │  Ctrl-R: БжуЯЬаШ                  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀     ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  [0;1;47;37m│ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m} T Audit search: visual template
+
+
+
+RSFLTLT {[2J[0;30;47m ┌──────────────────────────────────────────────────────────────────────────[0;1;37;47m┐ [0m
+[30;47m │ ДиЬмдШ лжм Audit Trail                                                   [0;1;47;37m│ [0m
+[30;47m │ ──────────────────────────────────────────────────────────────────────── [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m1[30m.  ДиЬмдШ ЪаШ . . . [34m@80;51;0s [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m2[30m.  ДиЬмдШ звЮижнжиаШбщд бШлШориуйЬрд . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m3[30m.  ДиЬмдШ йЮгШдлабщд бШлШориуйЬрд . . . . . . . . . . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m4[30m.  ДиЬмдШ ЬзЬхЪжмйрд бШлШориуйЬрд  . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m5[30m.  ДиЬмдШ ХиЬщйЬрд/СлШлайлабщд/КжЪайлабщд бШлШориуйЬрд . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m6[30m.  ДиЬмдШ ДаЫабщд лШблабщд ЫаЬиЪШйащд (cleanup, events) . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m7[30m.  ДиЬмдШ ЙШлШориуйЬрд оЬаиайгжч ймйлугШлжк  . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m8[30m.  ДиЬмдШ АйнсвЬаШк ймйлугШлжк, оиЮйлщд бШа ШиоЬхрд . . . . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m9[30m.  ДиЬмдШ ЛЬлШнжищд/ШдШЪдщйЬрд ШиоЬхрд . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m10[30m. ДиЬмдШ ЙхдЮйЮк оиЮйлщд (ймдЫтйЬак, ШзжймдЫтйЬак, бвз)  . . . . . [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │ [31m11[30m. ДиЬмдШ Авврд бШлШориуйЬрд . . . . . . . . . . . . . . . . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m │ [31m12[30m. ДгнсдайЮ Шзц лж лтвжк (дтЬк бШлШориуйЬак) зижк лЮд Шиоу . . . .  [34m@"X "t [0;1;47;37m│ [0m
+[30;47m │                                                                          [0;1;47;37m│ [0m
+[30;47m └[0;1;37;47m──────────────────────────────────────────────────────────────────────────┘ [0m
+} T Audit search: linear template
+
+
+RSFLT1 {[0;1m
+!JДЫщ гзжиЬхлЬ дШ ЫщйЬлЬ гхШ втеЮ у нисйЮ бвЬаЫх лЮд жзжхШ ЯШ псежмгЬ йлж 
+Audit Trail. Ад ШнуйЬлЬ Шмлц лж зЬЫхж бЬдц, цвЬк жа бШлШориуйЬак лжм Audit
+Trail ЯШ ЬгнШдайлжчд (Шнжч навлиШиайлжчд бШа Шзц лак имЯгхйЬак лрд мзцвжазрд
+зЬЫхрд!).
+[0;1m} T Audit search: field help 1
+
+
+RSFLT2 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлу лЮд ЬзавжЪу, лж йчйлЮгШ ЯШ псеЬа ЪаШ звЮижнжиаШбтк бШлШориуйЬак.
+ЛзжиЬхлЬ дШ ЬгнШдхйЬлЬ ба сввЬк бШлШориуйЬак ЬдЬиЪжзжащдлШк лШ ШдлхйлжаоШ зЬЫхШ.!)
+[0;1m} T Audit search: field help 2
+
+
+RSFLT3 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлу лЮд ЬзавжЪу, лж йчйлЮгШ ЯШ псеЬа ЪаШ йЮгШдлабтк бШлШориуйЬак.
+ЛзжиЬхлЬ дШ ЬгнШдхйЬлЬ ба сввЬк бШлШориуйЬак ЬдЬиЪжзжащдлШк лШ ШдлхйлжаоШ зЬЫхШ.!)
+[0;1m} T Audit search: field help 3
+
+
+RSFLT4 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлу лЮд ЬзавжЪу, лж йчйлЮгШ ЯЬ псеЬа ЪаШ ЬзЬхЪжмйЬк бШлШориуйЬак.
+ЛзжиЬхлЬ дШ ЬгнШдхйЬлЬ ба сввЬк бШлШориуйЬак ЬдЬиЪжзжащдлШк лШ ШдлхйлжаоШ зЬЫхШ.!)
+[0;1m} T Audit search: field help 4
+
+RSFLTH5 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ оиЬщйЬак credits,
+йлШлайлабтк бШлШориуйЬак бШа ЪЬдабщк вжЪайлабтк бШлШориуйЬак.!)
+[0;1m} T Audit paging: field help 5
+
+
+RSFLTH6 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ лак лШблабтк ЫаЬиЪШйхЬк
+лЮк ЩсйЮк (зо cleanup).!)
+[0;1m} T Audit paging: field help 6
+
+
+RSFLTH7 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ лЮд ЬблтвЬйЮ Ьдлжвщд оЬаиайлу ймйлугШлжк у
+зШицгжаЬк ЬдтиЪЬаЬк.!)
+[0;1m} T Audit paging: field help 7
+
+
+RSFLTH8 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ лЮд ШйнсвЬаШ лжм
+ймйлугШлжк: зижйзсЯЬаЬк йзШйхгШлжк вжЪШиаШйгщд бвз.!)
+[0;1m} T Audit paging: field help 8
+
+
+RSFLTH9 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ 
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ гЬлШнжитк ШиоЬхрд, ШдШЪдщйЬак ШиоЬхрд у зШицгжаЬк
+ЬдтиЪЬаЬк.!)
+[0;1m} T Audit paging: field help 9
+
+
+RSFLTH10 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа ЪаШ
+бШлШориуйЬак зжм тожмд дШ бсджмд гЬ ймдЫтйЬак бШа ШзжймдЫтйЬак оиЮйлщд.!)
+[0;1m} T Audit paging: field help 10
+
+
+RSFLTH11 {[0;1m
+!JДдЬиЪжзжащдлШк Шмлц лж ЬхЫжк бШлШощиЮйЮк, лж йчйлЮгШ ЯШ псеЬа
+ЪаШ бШлШориуйЬак зжм ЫЬд Шдубжмд йлак мзцвжазЬк бШлЮЪжихЬк.!)
+[0;1m} T Audit paging: field help 11
+
+
+
+RSFLTH12 {[0;1m
+!JЛЬ Шмлу лЮд ЬзавжЪу ЬдЬиЪу, жа бШлШориуйЬак йШк зШижмйасЭждлШа гЬ ШдлхйлижнЮ оиждабу йЬаис: жа заж зицйнШлЬк
+ЬгнШдхЭждлШа зищлЬк. Амлу ЬхдШа бШа Ю заж зиШблабу вЬалжмиЪхШ бШлс бШдцдШ.!)
+[0;1m} T Audit paging: field help 12
+
+
+
+
+
+
+
+
+
+
+
+AUDSRCH {[0;1;32m
+ДиЬмдШ лжм Audit Trail...
+!F─
+[0;1m} T Searching Audit Trail
+
+
+AUDSEND {!0l[0;1;32m!F─
+
+Ттвжк тиЬмдШк.
+[0;1m} T Searching Audit Trail, end of search
+
+
+AUDNF {[0;1;31m
+!JСмЪЪдщгЮ, ЫЬд ЩитЯЮбЬ лхзжлШ йоЬлабц.!)
+[0;1m} T Searching Audit Trail, nothing found
+
+
+AUDSCAN {[0;1;31m!0l
+Ж тиЬмдШ лЬигШлхйлЮбЬ.
+[0;1m} T Audit Trail search terminated.

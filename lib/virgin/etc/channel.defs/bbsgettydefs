@@ -1,0 +1,44 @@
+# This was shamelessly stolen from my TurboLinux setup.
+# Flamage >/dev/null, I also run a very cute and hackish Slackware
+# setup.  -- Alexios
+#
+# This file contains the definitions for the LINETYPES used in bbsgetty.
+# Chances are you wouldn't have to change these.
+#
+# We include one setup for each possible communications speed. Speeds
+# followed by an 'L' are traditionally locked speeds. bbsgetty uses the
+# LOCK=YES command for this (in bbsgetty.* files), so this doesn't really
+# make a difference here.
+
+# Virtual Console entry
+VC# B9600 SANE CLOCAL # B9600 SANE -ISTRIP CLOCAL #@S login: #VC
+
+# 38400 fixed baud Dumb Terminal entry
+DT38400# B38400 CS8 CLOCAL CRTSCTS # B38400 SANE -ISTRIP CLOCAL CRTSCTS #@S login: #DT38400
+
+# 19200 fixed baud Dumb Terminal entry
+DT19200# B19200 CS8 CLOCAL # B19200 SANE -ISTRIP CLOCAL #@S login: #DT19200
+
+# 9600 baud Dumb Terminal entry
+DT9600# B9600 CS8 CLOCAL # B9600 SANE -ISTRIP CLOCAL #@S login: #DT9600
+
+# 38400 fixed-baud modem entry
+F38400# B38400 CS8 # B38400 SANE -ISTRIP HUPCL #@S login: #F38400
+
+# 19200 fixed-baud modem entry
+F19200# B19200 CS8 # B19200 SANE -ISTRIP HUPCL #@S login: #F19200
+
+# 9600 fixed-baud modem entry
+F9600# B9600 CS8 # B9600 SANE -ISTRIP HUPCL #@S login: #F9600
+
+# 38400 autobauding Modem entry with hard flow control
+38400# B38400 CS8 CRTSCTS # B38400 SANE -ISTRIP HUPCL CRTSCTS #@S login: #9600
+
+9600# B9600 CS8 CRTSCTS # B9600 SANE -ISTRIP HUPCL CRTSCTS #@S login: #2400
+
+2400# B2400 CS8 CRTSCTS # B2400 SANE -ISTRIP HUPCL CRTSCTS #@S login: #1200
+
+1200# B1200 CS8 CRTSCTS # B1200 SANE -ISTRIP HUPCL CRTSCTS #@S login: #300
+
+300# B300 CS8 CRTSCTS # B300 SANE -ISTRIP HUPCL CRTSCTS #@S login: #38400
+

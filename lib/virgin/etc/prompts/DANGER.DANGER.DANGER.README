@@ -1,0 +1,14 @@
+Script RELINK:
+
+This script will re-make symlinks to all your .msg files under /usr/local/bbs.
+
+WARNING!!! IT WILL DO THIS BY FIRST *REMOVING* ALL .msg FILES THAT
+           ARE SYMLINKS TO OTHER FILES.
+
+           DO *NOT* STORE other files in this directory. Instead use
+           RELINK (or, better, make depend) to do the job automatically.
+
+RELINK is called by make using the respective Makefile (target dep or
+depend).
+
+

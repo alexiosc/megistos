@@ -1,0 +1,98 @@
+This directory contains various translation tables which you can choose.
+BBS translation tables have filenames like:
+
+xlation.0
+xlation.1
+:  :  :
+xlation.9
+
+and
+
+kbdxlation.0
+kbdxlation.1
+:  :  :  :
+kbdxlation.9
+
+There can be up to ten translation tables installed, numbered arbitrarily
+within the range [0,9]. The number control which key will be assigned to
+that table when the user is asked to select a translation mode. So you may
+not want to use 0 unless you're forced to (i.e. you already have nine other
+tables).
+
+To use one of the ready made ones, read on:
+
+Your BBS uses one character set internally; your users may use different
+ones (that's why we need translation, anyway). The translation tables are
+named thusly:
+
+BBS.charset--to--user.charset
+
+For example, if your BBS runs on the Latin-1 charset internally and some
+users are expected to use the IBM PC extended character set (code page 437),
+then you use translation table LATIN-1.ISO-8859-1--to--437.PC (ISO-8859-1 is
+the official name of Latin-1).
+
+Since some users will have exactly the same charset as you, you'll have to
+install 1--to--1, the trivial translation table (no translation whatsoever).
+
+Also, since some users will have no compatible character set (or use 7-bit
+ASCII), you'll also have to install one of the *--to--US-ASCII tables.
+
+1--to--1 gives the best capabilities but the least compatibility.
+*--to--US-ASCII gives the least capabilities but absolute compatibility
+(unless you're using EBCDIC, in which case write your OWN bloody
+decrypt^H^H^H^H^H^H^Htranslation table). They're the ends of the spectrum.
+Always include both of them if you want to cover all cases.
+
+
+THE KEYBOARD TRANSLATION TABLES
+-------------------------------
+
+If you expect the user to issue non-ASCII characters, you should create
+files kbdxlation.[0-9]. These translation tables are for converting what the
+user types into the BBS's internal character set.
+
+The BBS cannot determine this from the BBS->USER translation table
+(xlation.[0-9]), because the mapping is not one-to-one(? my math is failing
+me currently), hence the inverse mapping is not a function. In other words,
+we lack information to generate this automatically.
+
+So, to accept non-ASCII characters from users and translate them into the
+system's internal encoding, you should create kbdxlation tables as well.
+Have a look at the next section about how to do this. Each translation table
+list reasonable choices for its reverse mappings as a comment.
+
+If a kbdxlation table does not exist, no input translation takes place (i.e.
+one-to-one mapping). So, if you have xlation.3 but no kbdxlation.3, the
+system will assume it doesn't need to translate input characters in xlation
+type 3.
+
+
+INSTALLING TRANSLATION TABLES
+-----------------------------
+
+A practical idea is to just make links to them. For example,
+
+$ ln -s 1--to--1 xlation.1
+$ ln -s LATIN-1.ISO-8859-1--to--437.PC xlation.2
+$ ln -s LATIN-1.ISO-8859-1--to--US-ASCII xlation.3
+
+This would allow everybody to use your BBS, regardless of their character
+set (US-ASCII xlation is there -- not the best solution, but it's there).
+
+Once the links have been formed, run ../../bin/mkxlation to parse the tables
+in and form the binary version. Any errors will be identified at this point.
+
+If errors ARE identified, check these things:
+
+  * You're using the hash (#) symbol as a character to translate another
+    into. The parser is treating it as a comment. Change '#' for '23' (its
+    ASCII code in hex).
+  * You're specifying an ASCII code in hex, but you're not using both
+    digits (eg '0'). This is WRONG -- the parser will think what you mean is
+    the CHARACTER '0', with ASCII code 0x30 (48). Pad with an extra zero.
+  * You're using a white-space character as a character to translate another
+    into. The parser treats it as white space. Use the ASCII code instead
+    (i.e. 20 for space, 0a for newline (\n), 09 for tab (\t), etc).
+
+Dat's all.

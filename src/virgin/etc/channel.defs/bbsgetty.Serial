@@ -1,0 +1,33 @@
+# Config file for 14.4k Zoom modem
+
+# Specify /usr/local/bbs/channel.defs/gettydefs line type
+INITIAL=B115200 CS8 HUPCL -ISTRIP
+FINAL=B115200 CS8 HUPCL -ISTRIP
+
+# modem init string
+INIT="" ""
+#"\r\r<Enter>? to login\r\r" OK
+
+# modem busy-out string
+#BUSYOUT="" \r\rThis line is now busy-out.\r
+
+# Waitfor string. (RING detector)
+#WAITFOR=""
+
+# Connect string (CONNECT xxx detector)
+#CONNECT="" ATA\r\n CONNECT\s\A
+
+# Don't set the baud rate, assume the modem is locked
+LOCK=YES
+
+# Delay between connection and presentation of the login screen.
+DELAY=1
+
+# Hangup the line upon startup
+HANGUP=YES
+
+# Wait for a character before doing anything
+WAITCHAR=NO
+
+# Debugging information
+# DEBUG=0377

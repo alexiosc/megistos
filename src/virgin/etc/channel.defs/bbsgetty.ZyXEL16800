@@ -1,0 +1,32 @@
+# Config file for ZyXEL U-1496E 16800 bps modems
+
+# Specify /usr/local/bbs/channel.defs/gettydefs line type
+INITIAL=B38400 CS8 HUPCL -ISTRIP
+FINAL=B38400 CS8 HUPCL -ISTRIP
+
+# modem init string
+INIT="" \r\rATZ\r OK ATE0S2=255\sM0&N0X7\sS0=0\r OK
+
+# modem busy-out string
+BUSYOUT="" \r\rATH1\r OK
+
+# Waitfor string. (RING detector)
+WAITFOR=RING
+
+# Connect string (CONNECT xxx detector)
+CONNECT="" ATA\r\n CONNECT\s\A
+
+# Don't set the baud rate, assume the modem is locked
+LOCK=YES
+
+# Delay between connection and presentation of the login screen.
+DELAY=1
+
+# Hangup the line upon startup
+HANGUP=YES
+
+# Wait for a character before doing anything
+#WAITCHAR=YES
+
+# Debugging information
+#DEBUG=0377

@@ -1,0 +1,36 @@
+Begin3
+Title:           Megistos BBS (configuration/message blocks)
+Version:         @major.@minor
+Entered-date:    @date
+Description:     Megistos is a BBS for Linux. It is indended for large
+                 systems with high standards and unusual requirements.
+                 It was made to look and feel a bit like the excellent
+                 Major BBS [(C) Galacticomm]. The main aims of the
+                 System are user friendliness, internationalisation and
+                 networking.
+
+                 This is BETA software. If it works for you, fair enough.
+                 If not, sorry. Please mail the author with bug reports,
+                 but don't expect a fix by the morning after. There is
+                 precious little documentation for Megistos to date, but
+                 we're working on it. For the time being the system is
+                 a hack, hence intended for hackers. If you don't read
+                 the comments in configuration files and won't stoop to
+                 reading the source every now and then, you WILL have
+                 trouble getting this to run. You've been warned.
+
+                 This package contains the configuration and message
+                 block files. You'll want to customise those, so we
+                 don't distribute them with other packages in case the
+                 distribution files accidentally overwite your own,
+                 carefully customised ones. Be aware: the format of those
+                 files WILL change soon. There'll probably be a converter
+                 to bring you up to date, though.
+
+Keywords:        megistos bbs major
+Author:          megistos@vennea.demon.co.uk (Alexios Chouchoulas)
+Platform: 
+Primary-site:    http://www.vennea.demon.co.uk/megistos/
+Copying-policy:  GPL
+Platform:        Linux-x86 RH6
+End

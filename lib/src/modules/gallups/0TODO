@@ -1,0 +1,16 @@
+
+o	Complete the About option.
+		Give information about security features.
+
+o	Finish the prompts
+
+o	Strict and extra checking when answering in a quiz gallup
+When completing a quiz, lock the userid. Every question the user
+enters, will be logged. If line hangs up, the result file remains, until the
+user selects to re-complete the quiz. In this situation, answers to the
+questions a retrieved. The user is prompted either to enter the answer to
+the last question, or answer the next question (if avilable). [the action
+taken is determined in script compile time, by the script author] If the
+quiz is timed, then time is also saved and 
+
+o	Add expiration date/time to the gallups

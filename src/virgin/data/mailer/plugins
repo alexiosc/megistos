@@ -1,0 +1,50 @@
+# Mailer plugin definition file
+#
+# Format:
+#
+#    plugin <name, max 31 bytes>
+#    descr  <description for language 1, max 63 bytes>
+#    descr  <description for language 2>
+#    . . .
+#    descr  <description for language n>
+#    flags  <flags>
+#    end
+#
+#    FLAGS: S = Plugin has setup part
+#           U = Plugin has upload part
+#           D = Plugin has download part
+#           R = Plugin is the (or a) request manager and should
+#               be run a second time, after processing an uploaded
+#               package.
+
+# offline.mail is a special plugin in that it's required by every
+# other plugin. It should never be disabled and should always be the
+# first one to run. It's also the request manager, i.e. it has the
+# authority to add requests to the request DB for other plugins to
+# read and process. When uploading, it's called twice (one at the
+# beginning of the processing; one at the end) to clear out any
+# remaining unsatisfied requests.
+
+plugin	offline.mail
+descr	†¢œ¡«¨¦¤ ¡æ «˜®¬›¨¦£œå¦ ¡˜  Clubs
+descr	Electronic mail and Clubs
+flags	SUDR
+end
+
+plugin	offline.bulletins
+descr	€¤˜š¤à©«ã¨ ¦ á¨Ÿ¨à¤
+descr   Off-line Bulletins   
+flags	SUD
+end
+
+plugin	offline.news
+descr	’œ¢œ¬«˜å˜ ¤â˜
+descr   News
+flags	SD
+end
+
+plugin	offline.graffiti
+descr	’¦å®¦ª š ˜ š¨á¯ £¦
+descr   Graffiti Wall
+flags	SUD
+end

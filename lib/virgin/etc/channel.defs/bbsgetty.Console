@@ -1,0 +1,11 @@
+# Config file for a channel on the system console
+
+# Specify /usr/local/bbs/channel.defs/gettydefs line type
+INITIAL=B460800 CS8 HUPCL OPOST ONLCR -ISTRIP
+FINAL=B460800 CS8 HUPCL OPOST ONLCR -ISTRIP
+
+# Debugging information
+#DEBUG=0377
+
+# Enable greek keyboard for the console
+PRECONNECT=/usr/local/sbin/gren 437G >&/dev/null; echo -ne '\033[?24;0;0c'

@@ -1,0 +1,48 @@
+# This is a Megistos translation table.  Anything to the *RIGHT* of the first
+# hash (#) character in a line is a comment. 256 translations are given, one
+# for each of the possible character values. The format of the file is:
+#
+#
+# translation_for_character_000
+# translation_for_character_001
+# : : :
+# translation_for_character_255
+#
+# translation_for_character may be either:
+#    * a hexadecimal value in the form xx (00 to ff). ALWAYS specify
+#      both digits. Pad with 0 if necessary.
+#    * a character value EXCEPT white space (tabs, newlines, spaces) and the
+#      backslash (\). ALWAYS specify single characters (obviously).
+#
+# In order to specify white space, specify the character's hexadecimal ASCII
+# code. To specify the hash (#), use its hexadecimal ASCII value (23).
+#
+# White space is ignored, but we've organised the translation table as a
+# 16x16 matrix for obvious reasons.
+#
+# To leave a character untranslated, specify \000. Obviously, \000 is always
+# untranslated (why would you want to translate THAT?).
+
+
+# PURPOSE: 437G/737 DOS Greek to ELOT-928/ISO-8859-7 standard Greek
+#
+# KBDXLATION: ELOT928.ISO-8859-7--to--437G.737
+
+#   0  1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+#  --------------------------------------------------------------
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 0
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 1
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 2
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 3
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 4
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 5
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 6
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 7
+   c1  c2  c3  c4  c5  c6  c7  c8  c9  ca  cb  cc  cd  ce  cf  d0	# 8
+   d1  d3  d4  d5  d6  d7  d8  d9  e1  e2  e3  e4  e5  e6  e7  e8	# 9
+   e9  ea  eb  ec  ed  ee  ef  f0  f1  f3  f2  f4  f5  f6  f7  f8	# A 
+    :   /   I   |   +   +   +   +   +   +   |   +   +   +   +   +	# B
+    +   +   +   +   -   +   +   +   +   +   +   +   +   -   +   +	# C
+    +   +   +   +   +   +   +   +   +   +   +   8   o  20  20   "	# D
+   f9  dc  dd  de  fa  df  fc  fd  fb  fe  a2  b8  b9  ba  bc  be	# E
+   bf  b1   ?   ?   f   f   :   ~  b0  b7  b7   ?   ?  b2   *  20	# F

@@ -1,0 +1,1023 @@
+#!/usr/local/bbs/bin/mkaction
+#
+# MEGISTOS BBS ACTION VERB DEFINITION FILE
+#
+# FORMAT DESCRIPTION AND INSTRUCTIONS
+#
+# All lines beginning with '#' are comments.
+#
+# verb <type> <action-name>  (begins fresh definition)
+# user <user-message>        (all types; optional but recommended)
+# simple <simple-message>    (S, D and A type actions only)
+# other <other-message>      (O and D type actions only)
+# all <all-message>          (O or D type actions only)
+# target <target-message>    (O and D type actions only)
+# secret <secret-message>    (O or D type actions only)
+# adverb <adverb-message>    (A type actions only)
+# generic <generic-message>  (G type actions only)
+# access <user-ID> ...       (optional)
+# key <key-number>           (optional)
+#
+# <type>: the type of the action verb. The following types are supported:
+#
+#         S = Simple. The action consists of a simple message sent to all
+#             users in the channel. Examples are 'faint', 'giggle', 'hide':
+#             verbs that don't need another user as an object. Only
+#             <user-message>, and <simple-message> need to be specified.
+#             <user-message> is sent to the user who performed the action;
+#             <simple-message> is is sent to all others in the channel.
+#
+#         O = Object. The action needs a user as an object. Alternatively,
+#             'all' or 'everyone' may be specified, in which case the
+#             action is directed to all users. 'Secretly' may be asserted
+#             instead of 'all' or 'everyone'; the action will then be sent to
+#             the object user ONLY. <user-message> is sent to the user who
+#             performed the action. <other-message> is broadcast to the
+#             channel if the object of the action is another user. The object/
+#             target user gets a special version of the message, residing in
+#             <target-message>. If the object is 'all' or 'everyone',
+#             <all-message> is broadcast instead. Finally, if the 'secretly'
+#             option is used, nothing is broadcast to the channel, and the
+#             object user receives <secret-message> instead of
+#             <target-message>. Examples of this action type are 'admire',
+#             'handshake', 'hit' and 'kick': verbs that NEED an object.
+#
+#         D = Double. This is a combination of Simple and Object type
+#             actions. If the action is specified without an object,
+#             <simple-message> is broadcast to the users. If an object IS
+#             specified, the action works just like an O type action and
+#             needs the same strings. Examples of this action type are
+#             'bow', 'clap' and 'curse': verbs with optional objects.
+#
+#         A = Adverb. This is used to qualify what a user says. Examples of
+#             this type are 'ask', 'beg', 'chant', 'cheer' and 'yell': verbs
+#             that are used to add a quality to what a user says, but may
+#             also be used by themselves. To achieve this, <simple-message>
+#             is broadcast to all users if nothing follows the action. If
+#             the user writes something like 'yell BE QUIET!', the user's
+#             message ('BE QUIET!') is broadcast to the users as usual,
+#             but following the contents of <adverb-message>. Note that in
+#             this case, the 'user' string isn't broadcast to the performer
+#             of the action -- the hard-wired message is always used. Our
+#             example might be broadcast as 'Sysop [yelling]: BE QUIET!',
+#             where <adverb-message> is '[yelling]'.
+#
+#         G = Generic (k.o.g.a. style). This is the most generic verb style
+#             of all. This message only uses the optional
+#             <user-message> and <generic-message> which is printed
+#             before the rest of the action is shown. For example,
+#             using standard Megistos substitution variables, we could
+#             define the famous KOGA action's <generic-message> as
+#             simply '@USERID@' (English version). Then, when the user
+#             writes 'KOGA just sits here and watches.', the system
+#             will print the two strings together (doing variable
+#             substitutions as usual), and end up with a line like
+#             this: 'Sysop just sits here and watches.'. This is a
+#             very powerful sort of action. Using the 'access' field is
+#             recommended to control who is allowed to use actions of
+#             this type.
+#
+# <action-name>: the string used to kick off this action. Only single
+#                words are allowed (i.e. no white space). Try not to
+#                make the name of the action conflict with any other
+#                teleconference commands (e.g. CHAT), or you'll have
+#                an inaccessible action verb.
+#
+# <user-message>: this message is sent to the user who issued the
+#                 action as an acknowledgement. It is not obligatory to
+#                 include it, but is strongly recommended for action
+#                 types S, O, D (hmm... just realised what the types
+#                 spell out :-) ). If it's not specified, a fall-back
+#                 hard-wired message will be used instead. You can
+#                 have more than one 'user' keywords in a single verb
+#                 definition. Each line defines the user message for
+#                 a different language (the first one defines it for
+#                 language #1, the second for #2, etc). You should
+#                 have one 'user' line for each supported language.
+#                 If you don't, the last defined one is used (e.g.
+#                 if a message isn't defined for language #3, we'll
+#                 use the one for language #2; if THAT isn't defined,
+#                 we'll use language #1. If that isn't defined either,
+#                 we'll fallback to the hard-wired message mentioned
+#                 earlier).
+#
+# <simple-message>: This is REQUIRED by and ONLY ALLOWED with types S,
+#                   D and A. See the explanation of each type for
+#                   details on how this message is used. You may have
+#                   multiple 'simple' keywords in the definition to
+#                   allow the definition of multilingual actions. See
+#                   <user-message> for the operation of the multi-
+#                   lingual feature of the definitions.
+#
+# <other-message>: This is REQUIRED by and ONLY ALLOWED with types O
+#                  and D. Same as before for multiple language support.
+#
+# <all-message>: This is REQUIRED by and ONLY ALLOWED with types O
+#                and D. Same as before for multiple language support.
+#
+# <target-message>: This is REQUIRED by and ONLY ALLOWED with types O
+#                   and D. Same as before for multiple language support.
+#
+# <secret-message>: This is REQUIRED by and ONLY ALLOWED with types O
+#                   and D. Same as before for multiple language support.
+#
+# <adverb-message>: This is REQUIRED by and ONLY ALLOWED with type A.
+#                   Same as before for multiple language support.
+#
+# <generic-message>: This is REQUIRED by and ONLY ALLOWED with type G.
+#                    Same as before for multiple language support.
+#
+# <user-ID>: This restricts the use of this action to the users whose
+#            user IDs are listed (separated by spaces) here. You may
+#            use multiple 'access' keywords if one line isn't enough
+#            to list all user IDs, but if that is the case I suggest
+#            using a KEY to lock the action and giving that key to
+#            those users who should have the action.
+#
+# <key-number>: Specify a number from 0 to 129 here. This will lock the
+#               action, only allowing users with the specified key to
+#               use it. Key 0 means 'unlocked' (this is the default case,
+#               so your 'key' line is redundant!). Keys 1-128 are the
+#               usual 128 Megistos BBS keys. Key 129 is possessed by the
+#               user ID 'Sysop' alone. If both KEY and ACCESS are specified,
+#               the system performs an AND action to check if someone has
+#               access to an action. Privileged users automatically have
+#               access to all actions.
+#
+# There, that's it with the format. I mentioned substitution variables
+# before. The following substitution variables will be used (most, marked
+# with (*) are for non-English languages):
+#
+# @USERID@     The userID of the user performing the action
+# @USRCOL@     This user's teleconference colour
+# @ARTNOM@     Nominative article for this user's sex (*)
+# @ARTGEN@     Genitive article for this user's sex (*)
+# @ARTDAT@     Dative article for this user's sex (*)
+# @ARTACC@     Accusative article for this user's sex (*)
+# @OTHUID@     The userID of the object/target-user
+# @OTHCOL@     That user's teleconference colour
+# @OTHNOM@     Nominative article for that user's sex (*)
+# @OTHGEN@     Genitive article for that user's sex (*)
+# @OTHDAT@     Dative article for that user's sex (*)
+# @OTHACC@     Accusative article for that user's sex (*)
+#
+# Grammar explanations (again, most of these variables aren't
+# used for English where such things as articles aren't (mostly)
+# dependent on the gender of the noun).
+#
+# Nominative is used with the object of the sentence.
+# Genitive is used when referring to something belonging to someone
+# (e.g. German Genitiv, Greek Geniki). Dative is used when, e.g.
+# attributing something to someone (not very usual -- used in
+# German as Dativ, in ancient Greek as Dotike). Accusative is
+# generously used when we're talking about an object, transferring
+# action TO someone (German Akkusativ, Greek Aitiatike). 
+#
+# Those should be enough to define even the most exotic action.
+# You can also use the rest of the Megistos BBS actions if you
+# want to leave the exotic and move on to the downright strange. :-)
+
+
+#
+# EXAMPLES
+# --------------------------------------------------------------
+#
+
+
+# Here's ADMIRE, an example of a type O action. Two languages.
+#
+# Some lines are too long -- DON'T BREAK THEM! :-)
+
+verb O admire
+  user   ...ЙШлШзвЮблабц!
+  user   ...Amazing!
+
+  other  @ARTNOM@ @USERID@ ЯШмгсЭЬа ШзЬиациайлШ @OTHACC@ @OTHUID@.
+  other  @USERID@ is admiring @OTHUID@ endlessly.
+
+  all    @ARTNOM@ @USERID@ йШк ЯШмгсЭЬа цвжмк ШзЬиациайлШ.
+  all    @USERID@ is admiring everyone endlessly.
+
+  target @ARTNOM@ @USERID@ йШк ЯШмгсЭЬа ШзЬиациайлШ.
+  target @USERID@ is admiring you endlessly.
+
+  secret @ARTNOM@ @USERID@ йШк ЯШмгсЭЬа ШзЬиациайлШ, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is admiring you endlessly in secret.
+
+# End of verb definition
+
+
+# BLUSH, a type S action. Again, two languages. Damn, making
+# actions in English is so easy. Must be the grammar. :-)
+
+verb S blush
+  user   ...Та длижзу!
+  user   ...I'm so ashamed!
+
+  simple @ARTNOM@ @USERID@ бжббхдЮйЬ Шзц лЮ длижзу @ARTGEN@.
+  simple @USERID@ is blushing.
+
+# End of verb definition
+
+
+# BLESS, a type D action. As D actions go, it's a biggie.
+
+verb D bless
+  user   ...Так ЬмвжЪхЬк йШк!
+  user   ...Bless you!
+
+  simple @ARTNOM@ @USERID@ ЬмвжЪсЬа лШ ЪтдаШ @ARTGEN@.
+  simple @USERID@ is blessing @ARTGEN@ beard.
+
+  other  @ARTNOM@ @USERID@ ЬмвжЪЬх @OTHACC@ @OTHUID@.
+  other  @USERID@ is blessing @OTHUID@.
+
+  all    @ARTNOM@ @USERID@ йШк ЬмвжЪЬх цвжмк.
+  all    @USERID@ is blessing everyone.
+
+  target @ARTNOM@ @USERID@ йШк ЬмвжЪЬх.
+  target @USERID@ is blessing you.
+
+  secret @ARTNOM@ @USERID@ йШк ЬмвжЪЬх бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is blessing you secretly.
+
+# End of verb definition
+
+
+# ASK, type A.
+
+verb A ask
+  user   ...Та ЯтвЬлЬ дШ ирлуйЬлЬ;
+  user   ...What do you want to ask?
+
+  simple @ARTNOM@ @USERID@ зижйзШЯЬх дШ ирлуйЬа бсла.
+  simple @USERID@ is trying to ask something.
+
+  adverb ирлсЬа
+  adverb asks
+
+# End of verb definition
+
+
+# Finally, KOGA (Kick Off Generic Action -- formerly the only such
+# action of its kind and a kludgy MajorBBS hack), defined in all
+# its generic glory.
+
+verb G koga
+  # no user strings, let the fall-back message be sent.
+
+  generic @ARTNOM@ @USERID@
+  generic @USERID@
+
+#  access Morgul Xenios	# No point in having both key and access list
+#  access Sysop
+#  key 2		# KOGA is usually locked
+
+# End of verb definition
+
+
+
+verb S burp
+  user ...ЛаШ йцЫШ!
+  user ...Burp!
+
+  simple @ARTNOM@ @USERID@ нШхдЬлШа дШ тоЬа зЬзлабс зижЩвугШлШ.
+  simple @USERID@ seems to have trouble digesting.
+
+
+verb S deaf
+  user ...ЙжмнсЯЮбШ!
+  user ...I'm deaf!
+
+  simple @ARTNOM@ @USERID@ бжмнсЯЮбЬ!
+  simple @USERID@ just went deaf!
+
+
+verb S dream
+  user ...ОдЬаиШ Ъвмбс!
+  user ...Sweet dreams!
+
+  simple @ARTNOM@ @USERID@ ждЬаижзжвЬх.
+  simple @USERID@ is dreaming.
+
+
+verb S faint
+  user ...АШШШ, осджгШа!
+  user ...Blacking out!
+
+  simple @ARTNOM@ @USERID@ вазжЯчгЮйЬ.
+  simple @USERID@ has fainted.
+
+
+verb A beg
+  user ...ВаШ ла ЯтвЬлЬ дШ ЬбвазШиуйЬлЬ;
+  user ...What do you want to beg for?
+
+  simple @ARTNOM@ @USERID@ зижйзШЯЬх дШ ЬбвазШиуйЬа ЪаШ бсла.
+  simple @USERID@ is trying to beg for something.
+
+  adverb ЬбвазШиЬх
+  adverb begs
+
+
+verb A chant
+  user ...Та гцджлждЮ пШвгрЫхШ!
+  user ...What a dull chant!
+
+  simple @ARTNOM@ @USERID@ псввЬа гждцлждШ.
+  simple @USERID@ is chanting dully.
+
+  adverb птвдЬа гждцлждШ
+  adverb chants dully
+
+
+verb A cheer 
+  user ...Йвсз-бвсз-бвсз! ЛзисЩж! Еулр!
+  user ...Clap-clap-clap! Bravo! Hooray!
+
+  simple @ARTNOM@ @USERID@ ЬзЬмнЮгЬх ЫмдШлс!
+  simple @USERID@ is cheering loudly!
+
+  adverb ЬзЬмнЮгЬх ЫмдШлс
+  adverb cheers loudly
+
+
+verb A cough
+  user ...Вбжчо, Ъбжчо!
+  user ...Cough, cough!
+
+  simple @ARTNOM@ @USERID@ ЩуоЬа.
+  simple @USERID@ is coughing.
+
+  adverb ЩуоЬа
+  adverb coughs
+
+
+verb O apologise
+  user ...СмЪЪдщгЮ!
+  user ...Sorry!
+
+  other @ARTNOM@ @USERID@ ЭЮлсЬа ймЪЪдщгЮ Шзц @OTHACC@ @OTHUID@.
+  other @USERID apologises to @OTHUID@.
+
+  target @ARTNOM@ @USERID@ йШк ЭЮлсЬа ймЪЪдщгЮ.
+  target @USERID@ apologises to you.
+
+  all @ARTNOM@ @USERID@ ЭЮлсЬа ймЪЪдщгЮ Шзц цвжмк.
+  all @USERID apologises to everyone.
+
+  secret @ARTNOM@ @USERID@ йШк ЭЮлсЬа ймЪЪдщгЮ бимнс Шзц лжмк сввжмк.
+  secret @USERID@ apologises to you in secret.
+
+
+verb D bow
+  user ...Та ЬмвмЪайхШ!
+  user ...How dexterous!
+
+  simple @ARTNOM@ @USERID@ мзжбвхдЬлШа.
+  simple @USERID@ bows.
+
+  other @ARTNOM@ @USERID@ мзжбвхдЬлШа й@OTHACC@ @OTHUID@.
+  other @USERID@ bows to @OTHUID@.
+
+  all @ARTNOM@ @USERID@ мзжбвхдЬлШа йЬ цвжмк.
+  all @USERID@ bows to everyone.
+
+  target @ARTNOM@ @USERID@ мзжбвхдЬлШа й' Ьйск.
+  target @USERID@ bows to you.
+
+  secret @ARTNOM@ @USERID@ мзжбвхдЬлШа й' Ьйск бимнс Шзц лжмк сввжмк.
+  secret @USERID@ bows to you in secret.
+
+
+verb O caress
+  user ...Лггггггггг.
+  user ...Mmmmmmmmmm.
+
+  other @ARTNOM@ @USERID@ оШаЫЬчЬа ШзШвс @OTHACC@ @OTHUID@ гЬ гаШ йзхЯШ йлШ гслаШ @ARTGEN@.
+  other @USERID@ is softly caressing @OTHUID@ with a spark in @ARTGEN@ eyes.
+
+  target @ARTNOM@ @USERID@ йШк оШаЫЬчЬа ШзШвс гЬ гаШ йзхЯШ йлШ гслаШ @ARTGEN@.
+  target @USERID@ is softly caressing you with a spark in @ARTGEN@ eyes.
+
+  all @ARTNOM@ @USERID@ йШк оШаЫЬчЬа ШзШвс цвжмк гЬ гаШ йзхЯШ йлШ гслаШ @ARTGEN@.
+  all @USERID@ is softly caressing everyone with a spark in @ARTGEN@ eyes.
+
+  secret @ARTNOM@ @USERID@ йШк оШаЫЬчЬа ШзШвс гЬ гаШ йзхЯШ йлШ гслаШ @ARTGEN@, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is softly and secretly caressing you with a spark in @ARTGEN@ eyes.
+
+
+verb D clap
+  user ...Йвсз, бвсз!
+  user ...Clap, clap!
+
+  simple @ARTNOM@ @USERID@ оЬаижбижлс ЫмдШлс!
+  simple @USERID@ is clapping @ARTGEN@ hands loudly!
+
+  other @ARTNOM@ @USERID@ оЬаижбижлс гЬ ЯШмгШйгц @ARTACC@ @OTHUID@.
+  other @USERID@ is clapping @ARTGEN@ hands in admiration of @OTHUID@.
+
+  all @ARTNOM@ @USERID@ йШк оЬаижбижлс цвжмк гЬ ЯШмгШйгц.
+  all @USERID@ is clapping @ARTGEN@ hands in admiration of everyone.
+
+  target @ARTNOM@ @USERID@ йШк оЬаижбижлс гЬ ЯШмгШйгц.
+  target @USERID@ is clapping @ARTGEN@ hands in admiration of you.
+
+  secret @ARTNOM@ @USERID@ йШк оЬаижбижлс гЬ ЯШмгШйгц, бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is secretly clapping @ARTGEN@ hands in admiration of you.
+
+
+verb O comfort
+  user ...Чрр, Та ЬмЪЬдабц Шзц гтижмк йШк.
+  user ...Oh, how nice of you.
+
+  other @ARTNOM@ @USERID@ ШдШбжмнхЭЬа @OTHACC@ @OTHUID@ бШа ЫЬходЬа лЮд ймгзсЯЬас @ARTGEN@.
+  other @USERID@ is comforting @OTHUID@ and offering his sympathy.
+
+  all @ARTNOM@ @USERID@ йШк ШдШбжмнхЭЬа цвжмк бШа ЫЬходЬа лЮд ймгзсЯЬас @ARTGEN@.
+  all @USERID@ is comforting everyone and offering his sympathy.
+
+  target @ARTNOM@ @USERID@ йШк ШдШбжмнхЭЬа бШа ЫЬходЬа лЮд ймгзсЯЬас @ARTGEN@.
+  target @USERID@ is comforting you and offering his sympathy.
+
+  secret @ARTNOM@ @USERID@ йШк ШдШбжмнхЭЬа бимнс Шзц лжмк сввжмк бШа ЫЬходЬа лЮд ймгзсЯЬас @ARTGEN@.
+  secret @USERID@ is secretly comforting you and offering his sympathy.
+
+
+verb D cry
+  user ...ЙШЮгтдж зШаЫсба!
+  user ...Poor you!
+
+  simple @ARTNOM@ @USERID@ тоЬа звШдлсеЬа йлж бвсгШ.
+  simple @USERID@ is crying @ARTGEN@ heart out.
+
+  other @ARTNOM@ @USERID@ бвШхЬа ЪаШ @OTHACC@ @OTHUID@.
+  other @USERID@ is crying for @OTHUID@.
+
+  all @ARTNOM@ @USERID@ бвШхЬа ЪаШ цвжмк.
+  all @USERID@ is crying for everyone.
+
+  target @ARTNOM@ @USERID@ бвШхЬа ЪаШ Ьйск.
+  target @USERID@ is crying for you.
+
+  secret @ARTNOM@ @USERID@ бвШхЬа ЪаШ Ьйск бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is crying for you secretly.
+
+
+verb D curse
+  user ...Ж бШлсиШ лрд ЯЬщд!
+  user ...Curse of the gods!
+
+  simple @ARTNOM@ @USERID@ бШлШиатлШа ЯЬжчк бШа ЫШхгждЬк.
+  simple @USERID@ is cursing at the universe in general.
+
+  other @ARTNOM@ @USERID@ бШлШиатлШа @OTHACC@ @OTHUID@.
+  other @USERID@ is cursing @OTHUID@.
+
+  all @ARTNOM@ @USERID@ ЬблжеЬчЬа ШиоШхЬк АаЪмзлаШбтк бШлсиЬк йЬ цвжмк.
+  all @USERID@ is flinging ancient Egyptian curses at everyone.
+
+  target @ARTNOM@ @USERID@ йШк бШлШиатлШа.
+  target @USERID@ is cursing you.
+
+  secret @ARTNOM@ @USERID@ йШк бШлШиатлШа бимнс Шзц лжмк сввжмк.
+  secret @USERID@ is cursing you secretly.
+
+
+verb D lakkos
+  user ...Та нихбЮ... КжмбШдабсбаШ бжблШхЮв...
+  user ...Oh horrors... Assorted sausages...
+  
+  simple @ARTNOM@ @USERID@ еЬйбЬзсЭЬа лж Ксббж гЬ лжмк ЛзвсЯиЬк. Оа ЛзвсЯиЬк тожмд дШ нсдЬ вжмбШдабсбаШ ЬЫщ бШа Ымж гудЬк.
+  simple @USERID@ is uncovering the Blatrhas Pit. The Blathras beasts haven't had any sausages for two months.
+
+  other Ч нихбЮ! @ARTNOM@ @USERID@ гцвак зтлШеЬ @OTHACC@ @OTHUID@ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк.
+  other Oh horrors! @USERID@ just threw @OTHUID@ into the Blathras Pit.
+
+  all @ARTNOM@ @USERID@ йШк зЬлсЬа цвжмк йлж Ксббж гЬ лжмк ЛзвсЯиЬк. ХШис зжм ЯШ бсджмд жа ЛзвсЯиЬк...
+  all @USERID@ throws you all into the Blathras Pit. And boy they'll be happy...  
+
+  target Та ниаблу лчоЮ. @ARTNOM@ @USERID@ гцвак йШк зтлШеЬ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк.
+  target What a horrible fate. @USERID@ just threw you into the Blathras Pit.
+
+  secret Та ниаблу лчоЮ. @ARTNOM@ @USERID@ гцвак йШк зтлШеЬ йлжд Ксббж гЬ лжмк ЛзвсЯиЬк орихк дШ лж бШлШвсЩЬа бШдтдШк.
+  secret What a horrible fate. @USERID@ just threw you into the Blathras Pit without anyone noticing.
+
+  key 128
+
+  
+verb D dance
+  user ...ЧиШхЬк наЪжчиЬк!
+
+  simple @ARTNOM@ @USERID@ ожиЬчЬа тдШ ЪиуЪжиж имЯгц!
+ 
+  other @ARTNOM@ @USERID@ ожиЬчЬа гЬ @OTHACC@ @OTHUID@.
+
+  target @ARTNOM@ @USERID@ ожиЬчЬа гШЭх йШк.
+
+  all @ARTNOM@ @USERID@ ожиЬчЬа гЬ цвжмк.
+
+  secret @ARTNOM@ @USERID@ ожиЬчЬа гШЭх йШк бимнс Шзц лжмк сввжмк.
+
+
+verb A demand
+  user ...ЖймохШ зШиШбШвщ!
+
+  simple  @ARTNOM@ @USERID@ ШзШалЬх лЮд зижйжоу йШк!
+  
+  adverb <гЬ ШзШалЮлабц лцдж>
+
+
+verb D frown
+  user ...Пр зр бШлйжчнаШйгШ!
+
+  simple @ARTNOM@ @USERID@ бШлйжчнаШйЬ.
+
+  other @ARTNOM@ @USERID@ бжалсЭЬа @OTHACC@ @OTHUID@ гЬ бШлйжмнаШйгтдж чнжк.
+
+  target @ARTNOM@ @USERID@ йШк бжалсЭЬа гЬ бШлйжмнаШйгтдж чнжк.
+
+  all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк гЬ бШлйжмнаШйгтдж чнжк.
+
+  secret @ARTNOM@ @USERID@ йШк бжалсЭЬа гЬ бШлйжмнаШйгтдж чнжк бимнс Шзц лжмк сввжмк.
+
+
+verb S giggle
+  user ...Ха оа оа!
+
+  simple @ARTNOM@ @USERID@ оШоШдхЭЬа мйлЬиабс.
+
+
+verb D glare
+  user ...Та сЪиаж ЩвтггШ!
+
+  other @ARTNOM@ @USERID@ бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк.
+
+  target @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк.
+
+  secret @ARTNOM@ @USERID@ йШк бжалсЭЬа @OTHACC@ @OTHUID@ гЬ сЪиаж чнжк, бимнс Шзц лжмк сввжмк.
+
+  simple @ARTNOM@ @USERID@ ШЪиажбжалсЭЬа Ъчир @ARTGEN@.
+
+  all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк гЬ сЪиаж чнжк.
+
+
+
+verb A groan
+  user ...Чо!
+
+  simple @ARTNOM@ @USERID@ ЩжЪЪсЬа!
+
+  adverb <ЩжЪЪщдлШк>
+
+
+verb O handshake
+  user ...ЗЬигу оЬаиШпхШ!
+
+  other @ARTNOM@ @USERID@ оШаиЬлсЬа @OTHACC@ @OTHUID@ ЫаШ оЬаиШпхШк.
+
+  target @ARTNOM@ @USERID@ йШк оШаиЬлсЬа ЫаШ оЬаиШпхШк.
+
+  all @ARTNOM@ @USERID@ йШк оШаиЬлсЬа цвжмк ЫаШ оЬаиШпхШк.
+
+  secret @ARTNOM@ @USERID@ йШк оШаиЬлсЬа ЫаШ оЬаиШпхШк, бимнс Шзц лжмк сввжмк.
+
+
+  
+verb S hide
+  user ...ЧиШхШ бимпщдШ!
+
+  simple @ARTNOM@ @USERID@ бичЩЬлШа зхйр Шзц лж Ысблмвц @ARTGEN@.
+
+
+verb O hit
+  user ...БШислЬ ШвчзЮлШ!
+  
+  other @ARTNOM@ @USERID@ олмзсЬа @OTHACC@ @OTHUID@ ШвчзЮлШ.
+
+  target @ARTNOM@ @USERID@ йШк олмзсЬа ШвчзЮлШ.
+
+  secret @ARTNOM@ @USERID@ йШк олмзсЬа ШвчзЮлШ, бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ йШк олмзсЬа цвжмк ШвчзЮлШ.
+  
+
+verb O hug
+  user  ...Та ЯЬигу ШЪбШвас!
+
+  other @ARTNOM@ @USERID@ ШЪбШвасЭЬа @OTHACC@ @OTHUID@ йнаолс!
+
+  target @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа йнаолс!
+
+  all @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа цвжмк йнаолс!
+
+  secret @ARTNOM@ @USERID@ йШк ШЪбШвасЭЬа йнаолс, бимнс Шзц лжмк сввжмк.
+
+
+verb A hum
+  user ...Хггггггггггг!
+
+  simple @ARTNOM@ @USERID@ гжмигжмихЭЬа гаШ гЬврЫхШ!
+
+  adverb <йаЪжлиШЪжмЫщдлШк>
+
+
+verb O kick
+  user ...Пр зр ЩаШацлЮлШ!
+
+  other @ARTNOM@ @USERID@ бврлйсЬа ЩхШаШ @OTHACC@ @OTHUID@.
+
+  target @ARTNOM@ @USERID@ йШк бврлйсЬа ЩхШаШ.
+
+  all @ARTNOM@ @USERID@ йШк бврлйсЬа цвжмк ЩхШаШ.
+
+  secret @ARTNOM@ @USERID@ йШк бврлйсЬа бимнс Шзц лжмк сввжмк.
+
+
+verb O kiss
+  user ...ЛШлк-гжмлк!
+
+  other @ARTNOM@ @USERID@ нхвЮйЬ @OTHACC@ @OTHUID@ йлж гсЪжмвж!
+
+  target @ARTNOM@ @USERID@ йШк нхвЮйЬ йлж гсЪжмвж.
+
+  secret @ARTNOM@ @USERID@ йШк нхвЮйЬ йлж гсЪжмвж бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ йШк навсЬа цвжмк йлж гсЪжмвж.
+
+
+verb D laugh
+  user ...ХШи оШи оШи!
+
+  simple @ARTNOM@ @USERID@ тйбШйЬ йлШ ЪтваШ!
+
+  other @ARTNOM@ @USERID@ ЪЬвсЬа гЬ @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ ЪЬвсЬа гШЭх йШк!
+
+  all @ARTNOM@ @USERID@ ЪЬвсЬа гЬ цвжмк йШк!
+
+  secret @ARTNOM@ @USERID@ ЪЬвсЬа гШЭх йШк, бимнс Шзц лжмк сввжмк!
+
+
+verb D look
+  user ...БвтзЬлЬ лхзжлШ ЬдЫаШнтижд;
+
+  other @ARTNOM@ @USERID@ бжалсЭЬа зЬихЬиЪШ @OTHACC@ @OTHUID@.
+
+  simple @ARTNOM@ @USERID@ псодЬа дШ ЫЬа бсла ЬдЫаШнтижд Ъчир @ARTGEN@.
+
+  target @ARTNOM@ @USERID@ йШк бжалсЭЬа зЬихЬиЪШ.
+
+  secret @ARTNOM@ @USERID@ йШк бжалсЭЬа зЬихЬиЪШ, бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ йШк бжалсЭЬа цвжмк зЬихЬиЪШ.
+
+
+verb O massage
+  user ...ТШ отиаШ йШк бсджмд ЯШчгШлШ!
+
+  other @ARTNOM@ @USERID@ оШвШищдЬа @OTHACC@ @OTHUID@ бсдждлШк @OTHGEN@ гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+
+  target @ARTNOM@ @USERID@ йШк оШвШищдЬа бсдждлШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+
+  secret @ARTNOM@ @USERID@ йШк оШвШищдЬа бимнс Шзц лжмк сввжмк, бсдждлск йШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+
+  all @ARTNOM@ @USERID@ йШк оШвШищдЬа цвжмк бсдждлск йШк гШйсЭ гЬ лШ гШЪабс @ARTGEN@ отиаШ!
+
+
+verb A moan
+  user ...СЪбижмгн!
+
+  simple @ARTNOM@ @USERID@ ЪбиадасЭЬа!
+
+  adverb <ЪбиадасЭждлШк>
+
+
+verb D nod
+  user ...Об, йчгнрджа.
+
+  simple @ARTNOM@ @USERID@ бжмдсЬа лж бЬнсва @ARTGEN@ ймгнрдцдлШк.
+
+  other @ARTNOM@ @USERID@ ймгнрдЬх гЬ @OTHACC@ @OTHUID@ бжмдщдлШк лж бЬнсва @ARTGEN@.
+
+  target @ARTNOM@ @USERID@ ймгнрдЬх гШЭх йШк бжмдщдлШк лж бЬнсва @ARTGEN@.
+
+  secret @ARTNOM@ @USERID@ ймгнрдЬх гШЭх йШк бимнс Шзц лжмк сввжмк, бжмдщдлШк лж бЬнсва @ARTGEN@.
+
+  all @ARTNOM@ @USERID@ ймгнрдЬх гЬ цвжмк, бжмдщдлШк лж бЬнсва @ARTGEN@.
+
+
+verb O notice
+  user ...Та зШиШлЮиЮлабцлЮлШ!
+
+  other @ARTNOM@ @USERID@ гцвак зицйЬеЬ @OTHACC@ @OTHUID@.
+
+  target @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ.
+
+  secret @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ, Шввс бШлснЬиЬ дШ лж бичпЬа Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ гцвак йШк зицйЬеЬ цвжмк. 
+
+
+verb O nudge
+  user ...Вбжмз Ъбжмз (йбжчдлЮгШ).
+
+  other @ARTNOM@ @USERID@ йбжмдлсЬа @OTHACC@ @OTHUID@ ЫЬходждлШк бсла.
+
+  target @ARTNOM@ @USERID@ йШк йбжмдлсЬа ЫЬходждлШк бсла.
+
+  secret @ARTNOM@ @USERID@ йШк йбжмдлсЬа бимнс Шзц лжмк сввжмк, ЫЬходждлШк бсла.
+
+  all @ARTNOM@ @USERID@ йШк йбжмдлсЬа цвжмк, ЫЬходждлШк бсла.
+
+
+verb A order
+  user ...Та ЯтвЬлЬ дШ зШиШЪЪЬхвЬлЬ;
+
+  simple @ARTNOM@ @USERID@ йбтнлЬлШа ла ЯШ зШиШЪЪЬхвЬа!
+
+  adverb <зШиШЪЪтвдждлШк>
+
+
+verb O pinch
+  user ...Ажмлк!
+
+  other @ARTNOM@ @USERID@ гцвак лйхгзЮйЬ @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ гцвак йШк лйхгзЮйЬ!
+
+  secret @ARTNOM@ @USERID@ гцвак йШк лйхгзЮйЬ бимнс Шзц лжмк сввжмк!
+
+  all @ARTNOM@ @USERID@ йШк лйагзсЬа цвжмк!
+
+
+verb S ponder
+  user ...ОзжхШк навжйжнабск ЬбвсгпЬак!
+
+  simple @ARTNOM@ @USERID@ ймввжЪслШа лЮ ЕрЮ, лж СчгзШд бШа лШ зсдлШ (оггг 42).
+
+
+verb S pray
+  user ...Агуд!
+ 
+  simple @ARTNOM@ @USERID@ зижйЬчоЬлШа гЬ ЯиЮйбЬмлабу бШлсдмеЮ.
+
+
+verb O punch
+  user ...МШ тдШ зЬайлабц ЬзаоЬхиЮгШ!
+
+  other @ARTNOM@ @USERID@ гцвак ЩсиЬйЬ гаШ гзжмдас й@ARTNOM@ @USERID@!
+
+  target @ARTNOM@ @USERID@ гцвак йШк ЩсиЬйЬ гаШ гзжмдас.
+
+  secret ARTNOM@ @USERID@ гцвак йШк ЩсиЬйЬ гаШ гзжмдас, бШлШнтидждлШк дШ гЮд @OTHACC@ зижйтеЬа бШдЬхк.
+
+  all @ARTNOM@ @USERID@ ЩШисЬа гзжмдатк йЬ цвжмк (гЮд йзищодЬйлЬ, цвжа ЯШ зсиЬлЬ).
+
+
+verb O question
+  user ...ЛЮд еЬосйЬлЬ лЮ всгзШ!
+
+  other @ARTNOM@ @USERID@ ШдШбихдЬа @OTHACC@ @OTHUID@ гЬ гЬйШардабтк гЬЯцЫжмк!
+
+  target @ARTNOM@ @USERID@ йШк ШдШбихдЬа гЬ гЬйШардабтк гЬЯцЫжмк!
+
+  secret @ARTNOM@ @USERID@ йШк ШдШбихдЬа гЬ гЬйШардабтк гЬЯцЫжмк, бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ йШк ШдШбихдЬа цвжмк гЬ гЬйШардабтк гЬЯцЫжмк!
+
+
+verb A request
+  user ...Та ЯтвЬлЬ дШ ЭЮлуйЬлЬ;
+
+  simple @ARTNOM@ @USERID@ зижйзШЯЬх дШ ЭЮлуйЬа бсла.
+
+  adverb <ЭЮлщдлШк>
+
+
+verb S shiver
+  user ...Лзииии!
+
+  simple @ARTNOM@ @USERID@ литгЬа.
+
+
+verb O shoot
+  user ...ЛзШг!
+
+  other @ARTNOM@ @USERID@ змижЩцвЮйЬ @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ гцвак йШк змижЩцвЮйЬ!
+
+  secret @ARTNOM@ @USERID@ гцвак йШк змижЩцвЮйЬ. ПЬиатиЪрк бШдЬхк ЫЬд лжд зицйЬеЬ.
+
+  all @ARTNOM@ @USERID@ йШк змижЩжвЬх цвжмк!
+
+
+verb A shout
+  user ...ЛЮ нрдсЭЬлЬ лцйж ЫмдШлс!
+
+  simple @ARTNOM@ @USERID@ нрдсЭЬа гЬ цвЮ @ARTGEN@ лЮ ЫчдШгЮ!
+
+  adverb <нрдсЭждлШк>
+
+
+verb D shrug
+  user ...Чо ШЫЬинт!
+
+  simple @ARTNOM@ @USERID@ йЮбщдЬа ШЫаснжиШ лжмк щгжмк @ARTGEN@.
+
+  target @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ Ьйск.
+ 
+  other @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ @OTHACC@ @OTHUID@.
+
+  secret @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ Ьйск йЮбщдждлШк лжмк щгжмк @ARTGEN@ бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ ШЫаШнжиЬх ЪаШ цвжмк.
+
+
+verb A sigh
+  user ...АШШШШо!
+
+  simple @ARTNOM@ @USERID@ ШдШйлЬдсЭЬа.
+
+  adverb <ШдШйлЬдсЭждлШк>
+
+
+verb A sing
+  user ...ТиШ вШ ва вШиажг!
+
+  simple @ARTNOM@ @USERID@ лиШЪжмЫсЬа (вхЪж нсвлйШ).
+
+  adverb <лиШЪжмЫщдлШк>
+
+
+verb O slap
+  user ...Пан зШн зан!
+
+  other @ARTNOM@ @USERID@ оШйлжмбхЭЬа ЫмдШлс @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа ЫмдШлс!
+
+  all @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа ЫмдШлс цвжмк!
+
+  secret @ARTNOM@ @USERID@ йШк оШйлжмбхЭЬа орихк дШ лж бШлШвсЩЬа бШдЬхк.
+
+
+verb O slay
+  user ...Пр зр ШхгШлШ!
+
+  other @ARTNOM@ @USERID@ йнШЪасЭЬа @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ гцвак йШк тйнШеЬ!
+
+  secret @ARTNOM@ @USERID@ йШк тйнШеЬ бимнс Шзц лжмк сввжмк!
+
+  all @ARTNOM@ @USERID@ йШк йнсЭЬа цвжмк!
+
+
+
+verb O smack
+  user ...СгШб!
+
+  other @ARTNOM@ @USERID@ гцвак нхвЮйЬ @OTHACC@ @OTHUID@ йлж йлцгШ!
+
+  target @ARTNOM@ @USERID@ гцвак йШк нхвЮйЬ йлж йлцгШ!
+
+  secret @ARTNOM@ @USERID@ гцвак йШк нхвЮйЬ йлж йлцгШ бимнс Шзц лжмк сввжмк!
+
+  all @ARTNOM@ @USERID@ йШк навсЬа цвжмк йлж йлцгШ!
+
+
+verb A smile
+  user ...Та цгжинж оШгцЪЬвж!
+
+  simple @ARTNOM@ @USERID@ оШгжЪЬвсЬа.
+
+  adverb <оШгжЪЬвщдлШк>
+
+
+verb S sneeze
+  user ...ВЬхлйЬк!
+
+  simple @ARTNOM@ @USERID@ нлШидхйлЮбЬ!
+
+
+verb S sniff
+  user ...Сдан, йдан.
+
+  simple @ARTNOM@ @USERID@ гмихЭЬа лж ощиж Ъчир лжм.
+
+
+verb S strip
+  user ...You can leave your hat on!
+
+  simple @ARTNOM@ @USERID@ ЪЫчдЬлШа ШайЯЮйаШбс.
+
+
+verb O tease
+  user ...ПЬаиШолуиа!
+
+  other @ARTNOM@ @USERID@ зЬаисЭЬа @OTHACC@ @OTHUID@.
+
+  target @ARTNOM@ @USERID@ йШк зЬаисЭЬа.
+
+  secret @ARTNOM@ @USERID@ йШк зЬаисЭЬа бимнс Шзц лжмк Шввжмк.
+
+  all @ARTNOM@ @USERID@ йШк зЬаисЭЬа цвжмк.
+
+
+verb A think
+  user ...СбтнлжгШа сиШ мзсиор.
+
+  simple @ARTNOM@ @USERID@ тоЬа ЩмЯайлЬх йлак йбтпЬак @ARTGEN@.
+
+  adverb <ЬбнисЭждлШк ЫмдШлс лЮ йбтпЮ>
+
+
+verb O tickle
+  user ...Вбва Ъбва Ъбва!
+
+  other @ARTNOM@ @USERID@ ЪШиЪШвсЬа @OTHACC@ @OTHUID@ йлШ звЬмис!
+
+  target @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа йлШ звЬмис!
+
+  secret @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа йлШ звЬмис бимнс Шзц лжмк сввжмк!
+
+  all @ARTNOM@ @USERID@ йШк ЪШиЪШвсЬа цвжмк йлШ звЬмис!
+
+
+verb S wait
+  user ...КтлЬ дШ ШиЪуйЬа;
+
+  simple @ARTNOM@ @USERID@ зЬиагтдЬа мзжгждЬлабс...
+
+
+verb D wave
+  user ...Важчожм!
+
+  simple @ARTNOM@ @USERID@ оШаиЬлсЬа.
+
+  other @ARTNOM@ @USERID@ оШаиЬлсЬа @OTHACC@ @OTHUID@.
+ 
+  target @ARTNOM@ @USERID@ йШк оШаиЬлсЬа.
+
+  secret @ARTNOM@ @USERID@ йШк оШаиЬлсЬа бимнс Шзц лжмк сввжмк.
+
+  all @ARTNOM@ @USERID@ йШк оШаиЬлсЬа цвжмк.
+
+
+verb O whip
+  user ...АвчзЮлШ!
+
+  other @ARTNOM@ @USERID@ гШйлаЪщдЬа ШвчзЮлШ @OTHACC@ @OTHUID@ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк).
+
+  target @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа ШвчзЮлШ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк).
+
+  secret @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа ШвчзЮлШ (гЬ лж гШйлхЪаo гЬ лак 9 жмитк), Шввс орихк дШ лж зижйтеЬа бШдЬхк.
+
+  all @ARTNOM@ @USERID@ йШк гШйлаЪщдЬа цвжмк ШвчзЮлШ (гЬ лж гШйлхЪаж гЬ лак 9 жмитк).
+
+
+verb D whistle
+  user ...Фжмал нажм!
+  
+  simple @ARTNOM@ @USERID@ йнмихЭЬа гаШ гЬврЫхШ.
+
+  other @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк ЩвтзЬа @OTHACC@ @OTHUID@.
+
+  target @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк йШк ЩвтзЬа.
+
+  all @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк ЩвтзЬа цвжмк йШк.
+
+  secret @ARTNOM@ @USERID@ йнмихЭЬа (гЬ мзжджжчгЬдШ) бШЯщк йШк ЩвтзЬа, орихк дШ лжд ШбжчйЬа бШдЬхк сввжк.
+
+
+verb D wink
+  user ...ПждЮижчвабж!
+
+  simple @ARTNOM@ @USERID@ бвЬхдЬа лж гсла @ARTGEN@ зждЮис!
+
+  other @ARTNOM@ @USERID@ тбвЬайЬ лж гсла тождлШк зждЮитк йбтпЬак ЪаШ @OTHACC@ @OTHUID@!
+
+  target @ARTNOM@ @USERID@ йШк тбвЬайЬ лж гсла тождлШк зждЮитк йбтпЬак!
+
+  all @ARTNOM@ @USERID@ бвЬхдЬа лж гсла йЬ цвжмк тождлШк зждЮитк йбтпЬак!
+
+  secret @ARTNOM@ @USERID@ йШк бвЬхдЬа лж гсла тождлШк зждЮитк йбтпЬак, бимнс Шзц лжмк сввжмк!
+
+
+verb A yawn
+  user ...ЧиШ ЪаШ чздж!
+
+  simple @ARTNOM@ @USERID@ оШйгжмиатлШа.
+
+  adverb <гЬ бжагайгтдж чнжк>
+
+
+verb A yell
+  user ...Пр зр нрду!
+
+  simple @ARTNOM@ @USERID@ еЬвШимЪЪасЭЬлШа!
+
+  adverb <жмивасЭждлШк>

@@ -1,0 +1,1062 @@
+Reading files...
+10887 bytes read
+Parsing...
+Sorting entries...
+Resolving references...
+\documentclass{article}
+\usepackage{docxx}
+\begin{document}
+\pagebreak
+\sloppy
+\cxxTitle{}
+        {audit}
+        {}
+        {Audit-related definitions ($<$KBD$>$INCLUDE/audit.h$<$/KBD$>$) }
+        {}
+\begin{cxxContents}
+\cxxContentsEntry{1}{SOUPITSES }{}
+\cxxContentsEntry{2}{AUDIT\_H}{}
+\cxxContentsEntry{3}{Audit type/severity flag definitions }{}
+\cxxContentsEntry{4}{AUS\_HACKTRY}{}
+\cxxContentsEntry{5}{AUS\_UNKUSER}{}
+\cxxContentsEntry{6}{AUS\_DUPUSER}{}
+\cxxContentsEntry{7}{AUS\_LOGIN}{}
+\cxxContentsEntry{8}{AUS\_RELOGON}{}
+\cxxContentsEntry{9}{AUS\_LOGOUT}{}
+\cxxContentsEntry{10}{AUS\_SIGNUP}{}
+\cxxContentsEntry{11}{AUS\_DISCON}{}
+\cxxContentsEntry{12}{AUS\_TIMEOUT}{}
+\cxxContentsEntry{13}{AUS\_CREDHUP}{}
+\cxxContentsEntry{14}{AUS\_TIMEHUP}{}
+\cxxContentsEntry{15}{AUS\_KICKED}{}
+\cxxContentsEntry{16}{AUS\_EVSPAWN}{}
+\cxxContentsEntry{17}{AUS\_EVEND}{}
+\cxxContentsEntry{18}{AUS\_CRDPOST}{}
+\cxxContentsEntry{19}{AUS\_NEWCLSS}{}
+\cxxContentsEntry{20}{AUS\_USERDEL}{}
+\cxxContentsEntry{21}{AUS\_RSMDEL}{}
+\cxxContentsEntry{22}{AUS\_RSMUDEL}{}
+\cxxContentsEntry{23}{AUS\_RSSUSP}{}
+\cxxContentsEntry{24}{AUS\_RSUSUSP}{}
+\cxxContentsEntry{25}{AUS\_RSXMPT}{}
+\cxxContentsEntry{26}{AUS\_RSUXMPT}{}
+\cxxContentsEntry{27}{AUS\_ESUPLS}{}
+\cxxContentsEntry{28}{AUS\_ESDNLS}{}
+\cxxContentsEntry{29}{AUS\_ESUPLF}{}
+\cxxContentsEntry{30}{AUS\_ESDNLF}{}
+\cxxContentsEntry{31}{AUS\_BLTINS}{}
+\cxxContentsEntry{32}{AUS\_BLTDEL}{}
+\cxxContentsEntry{33}{AUS\_BLTEDT}{}
+\cxxContentsEntry{34}{AUS\_BLTRD}{}
+\cxxContentsEntry{35}{AUS\_BLTDNL}{}
+\cxxContentsEntry{36}{AUS\_QWKDNL}{}
+\cxxContentsEntry{37}{AUS\_QWKUPL}{}
+\cxxContentsEntry{38}{AUS\_ERROR}{}
+\cxxContentsEntry{39}{AUS\_FATAL}{}
+\cxxContentsEntry{40}{AUD\_HACKTRY}{}
+\cxxContentsEntry{41}{AUD\_UNKUSER}{}
+\cxxContentsEntry{42}{AUD\_DUPUSER}{}
+\cxxContentsEntry{43}{AUD\_LOGIN}{}
+\cxxContentsEntry{44}{AUD\_RELOGON}{}
+\cxxContentsEntry{45}{AUD\_LOGOUT}{}
+\cxxContentsEntry{46}{AUD\_SIGNUP}{}
+\cxxContentsEntry{47}{AUD\_DISCON}{}
+\cxxContentsEntry{48}{AUD\_TIMEOUT}{}
+\cxxContentsEntry{49}{AUD\_CREDHUP}{}
+\cxxContentsEntry{50}{AUD\_TIMEHUP}{}
+\cxxContentsEntry{51}{AUD\_KICKED}{}
+\cxxContentsEntry{52}{AUD\_EVSPAWN}{}
+\cxxContentsEntry{53}{AUD\_EVEND}{}
+\cxxContentsEntry{54}{AUD\_CRDPOST}{}
+\cxxContentsEntry{55}{AUD\_NEWCLSS}{}
+\cxxContentsEntry{56}{AUD\_USERDEL}{}
+\cxxContentsEntry{57}{AUD\_RSMDEL}{}
+\cxxContentsEntry{58}{AUD\_RSMUDEL}{}
+\cxxContentsEntry{59}{AUD\_RSSUSP}{}
+\cxxContentsEntry{60}{AUD\_RSUSUSP}{}
+\cxxContentsEntry{61}{AUD\_RSXMPT}{}
+\cxxContentsEntry{62}{AUD\_RSUXMPT}{}
+\cxxContentsEntry{63}{AUD\_ESUPLS}{}
+\cxxContentsEntry{64}{AUD\_ESDNLS}{}
+\cxxContentsEntry{65}{AUD\_ESUPLF}{}
+\cxxContentsEntry{66}{AUD\_ESDNLF}{}
+\cxxContentsEntry{67}{AUT\_UNKUSER}{}
+\cxxContentsEntry{68}{AUT\_DUPUSER}{}
+\cxxContentsEntry{69}{AUT\_LOGIN}{}
+\cxxContentsEntry{70}{AUT\_RELOGON}{}
+\cxxContentsEntry{71}{AUT\_LOGOUT}{}
+\cxxContentsEntry{72}{AUT\_SIGNUP}{}
+\cxxContentsEntry{73}{AUT\_DISCON}{}
+\cxxContentsEntry{74}{AUT\_TIMEOUT}{}
+\cxxContentsEntry{75}{AUT\_CREDHUP}{}
+\cxxContentsEntry{76}{AUT\_TIMEHUP}{}
+\cxxContentsEntry{77}{AUT\_KICKED}{}
+\cxxContentsEntry{78}{AUT\_EVSPAWN}{}
+\cxxContentsEntry{79}{AUT\_EVEND}{}
+\cxxContentsEntry{80}{AUT\_CRDPOST}{}
+\cxxContentsEntry{81}{AUT\_NEWCLSS}{}
+\cxxContentsEntry{82}{AUT\_USERDEL}{}
+\cxxContentsEntry{83}{AUT\_RSMDEL}{}
+\cxxContentsEntry{84}{AUT\_RSMUDEL}{}
+\cxxContentsEntry{85}{AUT\_RSSUSP}{}
+\cxxContentsEntry{86}{AUT\_RSUSUSP}{}
+\cxxContentsEntry{87}{AUT\_RSXMPT}{}
+\cxxContentsEntry{88}{AUT\_RSUXMPT}{}
+\cxxContentsEntry{89}{AUT\_ESUPLS}{}
+\cxxContentsEntry{90}{AUT\_ESDNLS}{}
+\cxxContentsEntry{91}{AUT\_ESUPLF}{}
+\cxxContentsEntry{92}{AUT\_ESDNLF}{}
+\cxxContentsEntry{93}{AUT\_BLTINS}{}
+\cxxContentsEntry{94}{AUT\_BLTDEL}{}
+\cxxContentsEntry{95}{AUT\_BLTEDT}{}
+\cxxContentsEntry{96}{AUT\_BLTRD}{}
+\cxxContentsEntry{97}{AUT\_BLTDNL}{}
+\cxxContentsEntry{98}{AUT\_QWKDNL}{}
+\cxxContentsEntry{99}{AUT\_QWKUPL}{}
+\cxxContentsEntry{100}{AUT\_ERROR}{}
+\cxxContentsEntry{101}{AUT\_FATAL}{}
+\cxxContentsEntry{102}{auditfile}{}
+\cxxContentsEntry{103}{AUDIT}{}
+\cxxContentsEntry{104}{audit}{}
+\cxxContentsEntry{105}{setauditfile}{}
+\cxxContentsEntry{106}{resetauditfile}{}
+\end{cxxContents}
+\clearpage\pagebreak
+\begin{cxxdoc}
+
+This header file provides functionality needed to use Megistos logging
+facilities. The system logs a variety of information:
+
+\begin{itemize}
+
+\item	 Date,
+\item	 Time,
+\item	 BBS channel (or daemon/service name, where a channel isn't available),
+\item	 Message flags, giving the type and severity of the log entry,
+\item	 Entry summary (typically a canned string), and
+\item	 Detailed entry text.
+\end{itemize}
+
+
+The default log file set up by the BBS library is the Audit Trail (Major
+users should be at home with the name). The API defined here allows you to
+switch to other files.
+
+In addition to the API, this include file predefines most of the entries
+that are most widely used by the standard modules.
+
+\end{cxxdoc}
+\begin{cxxentry}
+{\#define}
+        {SOUPITSES }
+        {}
+        {}
+        {1}
+\end{cxxentry}
+\begin{cxxmacro}
+{\#define}
+        {AUDIT\_H}
+        {}
+        {}
+        {2}
+\end{cxxmacro}
+\begin{cxxentry}
+{}
+        {Audit type/severity flag definitions }
+        {}
+        {}
+        {3}
+\begin{cxxnames}
+\cxxitem{\#define}
+        {AUF\_SECURITY}
+        {}
+        {This is a test..... }
+        {3.1}
+\cxxitem{\#define}
+        {AUF\_ACCOUNTING}
+        {}
+        {}
+        {3.2}
+\cxxitem{\#define}
+        {AUF\_TRANSFER}
+        {}
+        {}
+        {3.3}
+\cxxitem{\#define}
+        {AUF\_EVENT}
+        {}
+        {}
+        {3.4}
+\cxxitem{\#define}
+        {AUF\_OPERATION}
+        {}
+        {}
+        {3.5}
+\cxxitem{\#define}
+        {AUF\_USERLOG}
+        {}
+        {}
+        {3.6}
+\cxxitem{\#define}
+        {AUF\_OTHER}
+        {}
+        {}
+        {3.7}
+\cxxitem{\#define}
+        {AUF\_INFO}
+        {}
+        {}
+        {3.8}
+\cxxitem{\#define}
+        {AUF\_CAUTION}
+        {}
+        {}
+        {3.9}
+\cxxitem{\#define}
+        {AUF\_EMERGENCY}
+        {}
+        {}
+        {3.10}
+\cxxitem{\#define}
+        {AUF\_SEVERITY}
+        {(AUF\_INFO|AUF\_CAUTION|AUF\_EMERGENCY)}
+        {}
+        {3.11}
+\cxxitem{\#define}
+        {AUF\_SEVSHIFT}
+        {}
+        {}
+        {3.12}
+\cxxitem{\#define}
+        {GETSEVERITY}
+        {(f)}
+        {}
+        {3.13}
+\end{cxxnames}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_SECURITY}
+        {}
+        {This is a test..... }
+        {3.1}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_ACCOUNTING}
+        {}
+        {}
+        {3.2}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_TRANSFER}
+        {}
+        {}
+        {3.3}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_EVENT}
+        {}
+        {}
+        {3.4}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_OPERATION}
+        {}
+        {}
+        {3.5}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_USERLOG}
+        {}
+        {}
+        {3.6}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_OTHER}
+        {}
+        {}
+        {3.7}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_INFO}
+        {}
+        {}
+        {3.8}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_CAUTION}
+        {}
+        {}
+        {3.9}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_EMERGENCY}
+        {}
+        {}
+        {3.10}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_SEVERITY}
+        {(AUF\_INFO|AUF\_CAUTION|AUF\_EMERGENCY)}
+        {}
+        {3.11}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUF\_SEVSHIFT}
+        {}
+        {}
+        {3.12}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {GETSEVERITY}
+        {(f)}
+        {}
+        {3.13}
+\end{cxxmacro}
+\end{cxxentry}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_HACKTRY}
+        {}
+        {}
+        {4}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_UNKUSER}
+        {}
+        {}
+        {5}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_DUPUSER}
+        {}
+        {}
+        {6}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_LOGIN}
+        {}
+        {}
+        {7}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RELOGON}
+        {}
+        {}
+        {8}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_LOGOUT}
+        {}
+        {}
+        {9}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_SIGNUP}
+        {}
+        {}
+        {10}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_DISCON}
+        {}
+        {}
+        {11}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_TIMEOUT}
+        {(TIMEOUT)}
+        {}
+        {12}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_CREDHUP}
+        {(NO\ CREDITS)}
+        {}
+        {13}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_TIMEHUP}
+        {(TIME\ LIMIT)}
+        {}
+        {14}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_KICKED}
+        {}
+        {}
+        {15}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_EVSPAWN}
+        {}
+        {}
+        {16}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_EVEND}
+        {}
+        {}
+        {17}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_CRDPOST}
+        {}
+        {}
+        {18}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_NEWCLSS}
+        {}
+        {}
+        {19}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_USERDEL}
+        {}
+        {}
+        {20}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSMDEL}
+        {}
+        {}
+        {21}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSMUDEL}
+        {}
+        {}
+        {22}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSSUSP}
+        {}
+        {}
+        {23}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSUSUSP}
+        {}
+        {}
+        {24}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSXMPT}
+        {}
+        {}
+        {25}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_RSUXMPT}
+        {}
+        {}
+        {26}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_ESUPLS}
+        {}
+        {}
+        {27}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_ESDNLS}
+        {}
+        {}
+        {28}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_ESUPLF}
+        {}
+        {}
+        {29}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_ESDNLF}
+        {}
+        {}
+        {30}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_BLTINS}
+        {}
+        {}
+        {31}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_BLTDEL}
+        {}
+        {}
+        {32}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_BLTEDT}
+        {}
+        {}
+        {33}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_BLTRD}
+        {}
+        {}
+        {34}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_BLTDNL}
+        {}
+        {}
+        {35}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_QWKDNL}
+        {}
+        {}
+        {36}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_QWKUPL}
+        {}
+        {}
+        {37}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_ERROR}
+        {}
+        {}
+        {38}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUS\_FATAL}
+        {}
+        {}
+        {39}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_HACKTRY}
+        {}
+        {}
+        {40}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_UNKUSER}
+        {}
+        {}
+        {41}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_DUPUSER}
+        {}
+        {}
+        {42}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_LOGIN}
+        {}
+        {}
+        {43}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RELOGON}
+        {}
+        {}
+        {44}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_LOGOUT}
+        {}
+        {}
+        {45}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_SIGNUP}
+        {}
+        {}
+        {46}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_DISCON}
+        {}
+        {}
+        {47}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_TIMEOUT}
+        {}
+        {}
+        {48}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_CREDHUP}
+        {}
+        {}
+        {49}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_TIMEHUP}
+        {}
+        {}
+        {50}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_KICKED}
+        {}
+        {}
+        {51}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_EVSPAWN}
+        {}
+        {}
+        {52}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_EVEND}
+        {(exit\ code\ \%d)}
+        {}
+        {53}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_CRDPOST}
+        {(s)}
+        {}
+        {54}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_NEWCLSS}
+        {}
+        {}
+        {55}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_USERDEL}
+        {}
+        {}
+        {56}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSMDEL}
+        {}
+        {}
+        {57}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSMUDEL}
+        {}
+        {}
+        {58}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSSUSP}
+        {}
+        {}
+        {59}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSUSUSP}
+        {}
+        {}
+        {60}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSXMPT}
+        {}
+        {}
+        {61}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_RSUXMPT}
+        {}
+        {}
+        {62}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_ESUPLS}
+        {}
+        {}
+        {63}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_ESDNLS}
+        {}
+        {}
+        {64}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_ESUPLF}
+        {}
+        {}
+        {65}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUD\_ESDNLF}
+        {(-\ \%s/\%d.ATT"
+\#define\ AUD\_BLTINS\ \ "\%s\ added\ \%s\ to\ /\%s"
+\#define\ AUD\_BLTDEL\ \ "\%s\ deleted\ \%s\ from\ /\%s"
+\#define\ AUD\_BLTEDT\ \ "\%s\ edited\ \%s\ in\ /\%s"
+\#define\ AUD\_BLTRD\ \ \ "\%s\ read\ \%s\ in\ /\%s"
+\#define\ AUD\_BLTDNL\ \ "\%s\ downloaded\ \%s\ in\ /\%s"
+\#define\ AUD\_QWKDNL\ \ "\%s\ \<-\ QWK,\ \%d\ bytes"
+\#define\ AUD\_QWKUPL\ \ "\%s\ -\>\ QWK"
+\#define\ AUD\_ERROR\ \ \ "Please\ see\ bbs/log/errors\ for\ details"
+\#define\ AUD\_FATAL\ \ \ "CHECK\ bbs/log/errors\ NOW!"
+
+
+\#define\ AUT\_HACKTRY\ (AUF\_SECURITY|AUF\_USERLOG|AUF\_CAUTION)}
+        {}
+        {66}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_UNKUSER}
+        {(AUF\_SECURITY|AUF\_USERLOG|AUF\_CAUTION)}
+        {}
+        {67}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_DUPUSER}
+        {(AUF\_SECURITY|AUF\_USERLOG|AUF\_CAUTION)}
+        {}
+        {68}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_LOGIN}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {69}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RELOGON}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {70}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_LOGOUT}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {71}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_SIGNUP}
+        {(AUF\_SECURITY|AUF\_USERLOG|AUF\_CAUTION)}
+        {}
+        {72}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_DISCON}
+        {(AUF\_USERLOG|AUF\_CAUTION)}
+        {}
+        {73}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_TIMEOUT}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {74}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_CREDHUP}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {75}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_TIMEHUP}
+        {(AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {76}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_KICKED}
+        {(AUF\_OPERATION|AUF\_USERLOG|AUF\_INFO)}
+        {}
+        {77}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_EVSPAWN}
+        {(AUF\_EVENT|AUF\_INFO)}
+        {}
+        {78}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_EVEND}
+        {(AUF\_EVENT|AUF\_INFO)}
+        {}
+        {79}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_CRDPOST}
+        {(AUF\_ACCOUNTING|AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {80}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_NEWCLSS}
+        {(AUF\_ACCOUNTING|AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {81}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_USERDEL}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_EVENT|AUF\_USERLOG|AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {82}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSMDEL}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {83}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSMUDEL}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {84}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSSUSP}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {85}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSUSUSP}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {86}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSXMPT}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {87}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_RSUXMPT}
+        {(AUF\_SECURITY|AUF\_ACCOUNTING|AUF\_USERLOG|AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {88}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_ESUPLS}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {89}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_ESDNLS}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {90}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_ESUPLF}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {91}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_ESDNLF}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {92}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_BLTINS}
+        {(AUF\_TRANSFER|AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {93}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_BLTDEL}
+        {(AUF\_OPERATION|AUF\_CAUTION)}
+        {}
+        {94}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_BLTEDT}
+        {(AUF\_OPERATION|AUF\_INFO)}
+        {}
+        {95}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_BLTRD}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {96}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_BLTDNL}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {97}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_QWKDNL}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {98}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_QWKUPL}
+        {(AUF\_TRANSFER|AUF\_INFO)}
+        {}
+        {99}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_ERROR}
+        {(AUF\_OTHER|AUF\_EMERGENCY)}
+        {}
+        {100}
+\end{cxxmacro}
+\begin{cxxmacro}
+{\#define}
+        {AUT\_FATAL}
+        {(AUF\_OTHER|AUF\_EMERGENCY)}
+        {}
+        {101}
+\end{cxxmacro}
+\begin{cxxvariable}
+{extern\ char}
+        {auditfile}
+        {[256]}
+        {}
+        {102}
+\end{cxxvariable}
+\begin{cxxmacro}
+{\#define}
+        {AUDIT}
+        {(x)}
+        {}
+        {103}
+\end{cxxmacro}
+\begin{cxxfunction}
+{int}
+        {audit}
+        {(char\ *channel,\ int\ flags,\ char\ *summary,\ char\ *format,\ ...)}
+        {}
+        {104}
+\end{cxxfunction}
+\begin{cxxfunction}
+{void}
+        {setauditfile}
+        {(char\ *s)}
+        {}
+        {105}
+\end{cxxfunction}
+\begin{cxxfunction}
+{void}
+        {resetauditfile}
+        {()}
+        {}
+        {106}
+\end{cxxfunction}
+\end{document}
+Done.

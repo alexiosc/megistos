@@ -1,0 +1,26 @@
+/*****************************************************************************\
+ **                                                                         **
+ **  FILE:     emud (orig. ttysnoops)                                       **
+ **  AUTHORS:  Alexios (hack only)                                          **
+ **  REVISION: B, February 95                                               **
+ **  PURPOSE:  The new emulation daemon                                     **
+ **  NOTES:    This is a hack based on ttysnoop 0.12 alpha by Carl          **
+ **            Declerck. Copyrights etc belong to the author.               **
+ **                                                                         **
+ **            Emud uses a pseudo-tty to emulate a user session. It must    **
+ **            be run by the super-user, for obvious reasons of security.   **
+ **            Once it forks, it spawns bbslogin. Hence it's execl()'d by   **
+ **            bbsgetty to handle the line once a connection is made.       **
+ **                                                                         **
+ **            All the output sent to the user is logged in                 **
+ **            /bbs/etc/.log-tty*. A FIFO (/bbs/etc/.emu-tty*) is provided  **
+ **            for emulating the user's input (writing to the FIFO has the  **
+ **            same effect as the user typing at their keyboard). The PID   **
+ **            of the daemon is stored in /bbs/etc/.emud-tty*.pid.          **
+ **                                                                         **
+ **            Environment variables passed on: CHANNEL contains the tty    **
+ **            where the user logged from (without the "/dev/" string).     **
+ **            EMUINP contains the pseudo-tty used by the daemon. EMUINP    **
+ **            is also the controlling tty of all subsequent processes.     **
+ **                                                                         **
+\*****************************************************************************/

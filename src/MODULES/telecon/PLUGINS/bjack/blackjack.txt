@@ -1,0 +1,60 @@
+The command interface will be :
+
+The prefix command will be  <bj>.
+
+This informs the program to pass the text that follows to the Black Jack
+command parser.
+
+commands:
+	<on>		: player joins the next blackjack game
+	<off>		: player quits from playing blackjack
+
+bets:
+	<bet #>		: player bets # credits
+	<raise #>	: player raises the bet for # credits
+	<call>		: player "sees" the bet
+	<fold>		: player quits from current game
+	<pot>		: display current bets
+	
+cards:
+	<hit>		: player gets a card
+	<stay>		: player does not take any other card
+	<hand>		: player sees what cards are in hand
+	
+misc:
+	<turn>		: whose turn is current
+	<help>		: display help
+	<scan>		: display other players
+	
+		
+	
+The following is from Major 6  BlackJack game
+
+:bj help
+ПЬидщдлШк лж нчвШбШ лЮк зцилШк йлж ЩсЯжк бШа ШджхЪждлск лЮд гзШхдЬлЬ йлж
+гмйлабц ЫргШласба зжм ЬхдШа ЪЬгслж бцйгж, бШзджчк бШа зисйадШ лиШзтЭаШ...
+"ЖиЯЬ Ю щиШ ЪаШ дШ бЬиЫхйжмгЬ вхЪШ вЬнлс" йбтнлЬйлЬ, бШа звЮйасЭЬлЬ тдШ
+Шзц Шмлс. РрлщдлШк ла зШаодхЫа тоЬа йлирЯЬх йлж лиШзтЭа, Ю ШзсдлЮйЮ ЬхдШа:
+                             Blackjack
+                             
+                             Тж Blackjack ЬхдШа лж Ъдрйлц 21, йлж жзжхж жа
+зШхблЬк ймдШЪрдхЭждлШа гЬлШеч
+лжмк ЪаШ дШ бЬиЫхйжмд лШ вЬнлс зжм тожмд зждлШиайлЬх Шзц цвжмк лжмк зШхблЬк.
+Оа сййжа гЬлисдЬ ЪаШ 1 у 11, бШа ж зШхблЮк ж жзжхжк ЩихйбЬлШа зац бждлс йлж
+21 орихк дШ бШЬх (лж еЬзЬисйЬа) бЬиЫхЭЬа лж зШаодхЫа. СЬ зЬихзлрйЮ айжзШвхШк
+лШ вЬнлс гжаисЭждлШа йлжмк дабЮлтк.
+Тж зШаодхЫа ШиохЭЬа цлШд ЫЮвщйЬа ймггЬлжоу абШдцк ШиаЯгцк зШаблщд.
+
+"bj on" ...... ГуврйЮ ймггЬлжоук
+"bj off" ..... БЪШхдЬлЬ Шзц лж зШаодхЫа
+
+"bj hand" .... ДгнсдайЮ лрд оШилащд "bj stay" ..... ЛтдЬлЬ гЬ лШ оШилас йШк
+"bj fold" .... ПслЬ зсййж           "bj turn" ..... ПжаШджч ЬхдШа Ю йЬаис
+"bj scan" .... ДгнсдайЮ лрд зШаблщд "bj pot" ...... ДгнсдайЮ зждлШиайгслрд
+"bj bet #" ... ПждлсиЬлЬ            "bj call" ..... "БвтзЬлЬ" лж зждлсиайгШ
+"bj help"..... ДгнсдайЮ ЩжЮЯЬхШк    "bj raise #" .. АдЬЩсЭЬлЬ лж зждлсиайгШ
+"bj hit" ..... ПШхидЬлЬ ба'сввж оШилх
+:
+
+
+	

@@ -1,0 +1,80 @@
+include ../../CONFIG/Make.config
+
+BINARY		= files
+CONVBINARY	= $(BINDIR)/libcnv
+LIBS 	       += -ltyphoon -lm
+CFILES		= $(shell echo *.c)
+AFILES		= ../clubs/clubhdr.o
+
+DBDDIR		= $(BBSDATA)/files/.DB
+
+DBBASE1		= dblib
+DDLNAME1	= $(DBBASE1).ddl
+HNAME1		= $(DBBASE1).h
+HTARGET1	= $(HNAME1)
+DBDNAME1	= $(DBBASE1).dbd
+DBDTARGET1	= $(DBDDIR)/$(DBDNAME1)
+
+DBBASE2		= dbfile
+DDLNAME2	= $(DBBASE2).ddl
+HNAME2		= $(DBBASE2).h
+HTARGET2	= $(HNAME2)
+DBDNAME2	= $(DBBASE2).dbd
+DBDTARGET2	= $(DBDDIR)/$(DBDNAME2)
+
+DBBASE3		= dbkey
+DDLNAME3	= $(DBBASE3).ddl
+HNAME3		= $(DBBASE3).h
+HTARGET3	= $(HNAME3)
+DBDNAME3	= $(DBBASE3).dbd
+DBDTARGET3	= $(DBDDIR)/$(DBDNAME3)
+
+all:		$(TARGET) \
+		$(DBDTARGET1) $(HTARGET1) $(HNAME1) \
+		$(DBDTARGET2) $(HTARGET2) $(HNAME2) \
+		$(DBDTARGET3) $(HTARGET3) $(HNAME3)
+
+$(TARGET):	$(OFILES) $(AFILES)
+		$(LD) $(OFILES) $(AFILES) -o $(BINARY) $(DEFINES) $(CFLAGS) $(LIBS)
+		$(STRIP) $(BINARY)
+		$(CHMOD) $(ACCESS) $(BINARY)
+		$(CHOWN) $(OWNER).$(GROUP) $(BINARY)
+		$(LN) $(BINARY) $(CONVBINARY)
+		$(MV) $(BINARY) $(BINDIR)/$(BINARY)
+		$(BINDIR)/$(BINARY) --install >.tmpinst
+		. .tmpinst
+		$(RM) .tmpinst
+
+$(HNAME1) $(DBDTARGET1) $(DBDNAME1): $(DDLNAME1)
+		$(DDLP) $(DDLNAME1)
+		$(CP) $(DBDNAME1) $(DBDTARGET1)
+		$(CHOWN) $(DBDOWNER) $(DBDTARGET1)
+		$(CHMOD) $(DBDACCESS) $(DBDTARGET1)
+
+$(HNAME2) $(DBDTARGET2) $(DBDNAME2): $(DDLNAME2)
+		$(DDLP) $(DDLNAME2)
+		$(CP) $(DBDNAME2) $(DBDTARGET2)
+		$(CHOWN) $(DBDOWNER) $(DBDTARGET2)
+		$(CHMOD) $(DBDACCESS) $(DBDTARGET2)
+
+$(HNAME3) $(DBDTARGET3) $(DBDNAME3): $(DDLNAME3)
+		$(DDLP) $(DDLNAME3)
+		$(CP) $(DBDNAME3) $(DBDTARGET3)
+		$(CHOWN) $(DBDOWNER) $(DBDTARGET3)
+		$(CHMOD) $(DBDACCESS) $(DBDTARGET3)
+
+.depend\
+depend dep:
+		$(DDLP) $(DDLNAME1)
+		$(DDLP) $(DDLNAME2)
+		$(DDLP) $(DDLNAME3)
+		$(CPP) -M *.c > .tmpdepend
+		$(MV) .tmpdepend .depend
+		$(RM) $(HNAME1) $(HNAME2) $(HNAME3)
+
+clean:	
+		$(RM) $(OFILES) *.dbd
+
+include .depend
+
+include $(CONFIGDIR)/Make.RCS

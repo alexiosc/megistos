@@ -1,0 +1,292 @@
+# This is the BBS file transfer protocol definition file.
+#
+# Lines beginning with '#' are comments
+# Blank lines are ignored
+# A protocol entry is a stanza of information.
+# A protocol entry must end with an 'end' directive
+#
+# Mandatory Directives are as follows:
+#
+# name ...       Sets the menu name of the protocol.
+# select ...     Menu select string for the protocol (case independent)
+# prog ...       Shell command that runs the protocol. The following environ-
+#                ment variables exist:
+#		   $PREFIX  : BBS prefix (read-only)
+#                  $BINDIR  : BBS binary directory (read-only)
+#                  $USERID  : User name of the user invoking the protocol
+#                  $CHANNEL : Filename of the device we're on (eg dev/ttyS0)
+#                  $BAUD    : Baud rate of the channel
+# end            Ends the protocol definition. MUST be the last directive of
+#                each protocol definition stanza.
+#
+# Optional Directives are as follows:
+#
+# bin {yes|no}   Controls whether the protocol is binary or 7-bit ASCII.
+#                Non-binary protocols must only use normal ASCII characters.
+#                For binary ones, automatic translation is switched off so
+#                as to not mangle the communication. If your protocol
+#                typically prints to the screen (eg an ASCII upload/download
+#                protocol), declare it as non-binary. Otherwise, if we're
+#                talking about a binary protocol like Z-Modem, bin yes must
+#                be stated. (default: no)
+# dir {up|down}  Set transfer direction (FROM THE REMOTE USER'S POINT OF
+#                VIEW: up means user->BBS, down means BBS->user)
+#                (default: down)
+# break ...      Key combination that stops the transfer (default: "Ctrl-C")
+# batch {yes|no} Controls whether the protocol is a batch protocol or not,
+#                i.e. whether one invocation can transfer more than one
+#                file (default: no)
+# needn {yes|no} Protocol needs/doesn't need file names. (default: yes)
+#                NOT IMPLEMENTED FOR DOWNLOAD PROTOCOLS.
+
+
+# UPLOAD PROTOCOLS
+
+
+name ASCII upload
+	select A
+	dir up
+	prog $BINDIR/asciiupload >
+	break Ctrl-C
+	batch yes
+	needn yes
+end
+
+name Editor
+	select E
+	dir up
+	prog $BINDIR/editupload
+	break X/Ctrl-C
+	batch no
+	needn yes
+end
+
+name Kermit
+	select K
+	dir up
+	prog $BINDIR/kermit -r -l /dev/$CHANNEL
+	break Ctrl-C
+	batch yes
+	bin yes
+	needn no
+end
+
+name XModem
+	select M
+	dir up
+	prog $BINDIR/rx 2>/dev/null
+	break Ctrl-X
+	batch no
+	bin yes
+	needn yes
+end
+
+name YModem
+	select Y
+	dir up
+	prog $BINDIR/rb 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem
+	select Z
+	dir up
+	prog $BINDIR/rz 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (Recover)
+	select ZR
+	dir up
+	prog $BINDIR/rz -r 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (With Compression)
+	select ZZ
+	dir up
+	prog $BINDIR/rz -Z 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Uudecode
+	select U
+	dir up
+	prog uudecode >
+	break Ctrl-C
+	batch no
+	needn yes
+	bin no
+end
+
+
+
+
+
+
+
+
+
+
+
+# DOWNLOAD PROTOCOLS
+
+
+name ASCII download
+	select A
+	dir down
+	prog $BINDIR/cat-and-remove
+	break Ctrl-C
+	batch no
+	needn yes
+end
+
+name List/Browse File
+	select L
+	dir down
+	prog $BINDIR/view-and-remove
+	break Q
+	batch no
+	needn yes
+end
+
+name Attach to E-Mail
+	select E
+	dir down
+	prog $BINDIR/attach-to-email
+	break Ctrl-C
+	batch no
+	needn yes
+end
+
+name Kermit
+	select K
+	dir down
+	prog $BINDIR/kermit -l /dev/$CHANNEL -s
+	break Ctrl-C
+	batch yes
+	bin yes
+	needn no
+end
+
+name XModem
+	select M
+	dir down
+	prog $BINDIR/sx -u 2>/dev/null
+	break Ctrl-X
+	batch no
+	bin yes
+	needn yes
+end
+
+name YModem
+	select Y
+	dir down
+	prog $BINDIR/sb -u 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name YModem-1k
+	select 1
+	dir down
+	prog $BINDIR/sb -u -k 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem
+	select Z
+	dir down
+	prog $BINDIR/sz -u -w512 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (512 byte window)
+	select Z5
+	dir down
+	prog $BINDIR/sz -u -w512 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (1k window)
+	select Z1
+	dir down
+	prog $BINDIR/sz -u -w1024 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (2k window)
+	select Z2
+	dir down
+	prog $BINDIR/sz -u -w2048 2>/dev/null
+	break Ctrl-X
+	batch yes
+	bin yes
+	needn no
+end
+
+name Z-Modem (4k window)
+	select Z4
+	dir down
+	prog $BINDIR/sz -u -w4096 2>/dev/null
+	break Ctrl-X
+	batch yes
+	needn no
+	bin yes
+end
+
+name Z-Modem (Resume)
+	select ZR
+	dir down
+	prog $BINDIR/sz -u -r 2>/dev/null
+	break Ctrl-X
+	batch yes
+	needn no
+	bin yes
+end
+
+name Z-Modem (With Compression)
+	select ZZ
+	dir down
+	prog $BINDIR/sz -u -Z 2>/dev/null
+	break Ctrl-X
+	batch yes
+	needn no
+	bin yes
+end
+
+name Uuencode
+	select U
+	dir down
+	prog $BINDIR/uuencode-and-remove
+	break Ctrl-C
+	batch yes
+	needn yes
+	bin no
+end

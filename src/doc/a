@@ -1,0 +1,32 @@
+#!/bin/sh
+set +x
+>audit.h
+
+files=`grep -l @name /usr/local/bbs/src/INCLUDE/*.h`
+#files=`grep -l . /usr/local/bbs/src/INCLUDE/*.h`
+#echo $files|tr '\040' '\012'
+
+\rm -rf .src
+mkdir .src
+for a in $files; do
+    echo $a
+    perl <$a -pe 's/^(.+)\/\*\*(.*)\*\//\/**\@memo $2*\/\n$1/g' >.src/`basename $a`
+done
+
+#ARGS="-ASvQ"
+#ARGS=-H
+ARGS="-vfFMw -d .."
+\rm *.class *.html
+cd .src
+doc++ $ARGS *
+cd ..
+chmod a+r *
+\rm -rf .src
+
+echo Post-processing HTML...
+
+for a in *.html; do
+	echo $a
+	(grep -v '[a-z]\.h::[a-zA-Z]' $a | sed >${a}~ 's/&nbsp;/ /g') &&
+	mv -f ${a}~ $a
+done

@@ -1,0 +1,1 @@
+gcc -I /usr/local/bbs/src/include -I /usr/local/bbs/src/include/mbk -L /usr/local/bbs/lib xfertest.c -lbbs -O6 -o xfertest 
