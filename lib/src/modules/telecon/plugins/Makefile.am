@@ -3,14 +3,17 @@
 # $Id$
 #
 # $Log$
+# Revision 1.2  2003/12/27 12:59:40  alexios
+# Removed telecon.bg from the build. It's incomplete anyway.
+#
 # Revision 1.1  2003/12/25 08:24:06  alexios
 # Initial revision.
 #
 
-PROGNAMES = plugins
+SUBDIRS = \
+	bjack \
+	telecon.test
 
-plugins_SOURCES = \
-
-include $(top_srcdir)/templates/mailerplugin
+#	telecon.bg \
 
 # End of file
