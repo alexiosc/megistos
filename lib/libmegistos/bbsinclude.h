@@ -26,13 +26,16 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.5  2003/08/15 18:23:17  alexios
+ * Fixed syntax error (d'oh!).
+ *
  * Revision 1.4  2003/08/15 18:11:49  alexios
  * Added a banner.
  *
  */
 
 
-static const char rcsid [] = "$Id$;
+static const char rcsid [] = "$Id$";
 
 
 /* Start by loading up autoconf definitions */
