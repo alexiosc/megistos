@@ -1,3 +1,10 @@
 .deps
-Makefile.in
+.libs
 Makefile
+Makefile.in
+mbk_files.h
+*dbd
+dbfile.h
+dbkey.h
+dblib.h
+files
