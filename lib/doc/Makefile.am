@@ -3,6 +3,12 @@
 # $Id$
 #
 # $Log$
+# Revision 1.3  2003/09/30 15:24:17  alexios
+# Hacked dependencies to exclude version.h, which is regenerated every
+# build. This caused the API documentation to rebuild every time the
+# system is recompiled, regardless of whether the rest of the source has
+# changed.
+#
 # Revision 1.2  2003/09/29 21:37:49  alexios
 # Renamed src/ directory to lib/ to accommodate more source code in this
 # tree.
@@ -17,5 +23,5 @@ DISTCLEANFILES = warnings.log
 
 noinst_DATA = doc-stamp
 
-doc-stamp:	Doxyfile ../lib/*.[ch]
+doc-stamp:	Doxyfile $(shell ls ../lib/*.[ch] | fgrep -v version.h)
 		$(DOXYGEN) Doxyfile && touch doc-stamp
