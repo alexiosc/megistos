@@ -1,7 +1,0 @@
-.deps
-Makefile
-Makefile.in
-metaservices.h
-metaservices_clnt.c
-metaservices_svc.c
-metaservices_xdr.c

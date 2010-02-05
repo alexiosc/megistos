@@ -1,6 +1,0 @@
-.deps
-.libs
-Makefile
-Makefile.in
-gcs_builtin.lo
-libgcs10_builtin.la

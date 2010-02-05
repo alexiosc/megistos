@@ -1,8 +1,0 @@
-.deps
-.libs
-Makefile
-Makefile.in
-bbslockd
-bbslockd.c-oh
-bbslockd.h-oh
-requests.c-oh

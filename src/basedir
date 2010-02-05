@@ -1,2 +1,0 @@
-#!/bin/sh
-pwd|sed 's/\/src$//'|tr -s /

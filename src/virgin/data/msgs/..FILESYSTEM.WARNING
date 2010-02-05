@@ -1,7 +1,0 @@
-(a) Files under this directory are usually small. For best results, mount a
-    filesystem with smaller block sizes than ext2 FS. (eg 512 bytes -- minix
-    FS with 30 byte filenames).
-
-(b) Hard links are formed under this directory. Please keep all
-    subdirectories in the same filesystem or the system will fail in various
-    ways.

@@ -1,1 +1,0 @@
--kr -ts8 -i8 -pcs -cs -bs -saf -sai -saw -psl -brs -l79 -nbbo -hnl -bad -di8 -ppi2
