@@ -1,0 +1,34 @@
+.TH "idx_t" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+idx_t \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <prompts.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBuint32\fP \fBoffset\fP"
+.br
+.RI "\fIOffset to the prompt string. \fP"
+.ti -1c
+.RI "char \fBid\fP [28]"
+.br
+.RI "\fIString ID of the prompt. \fP"
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "char \fBidx_t::id\fP[28]"
+.PP
+String ID of the prompt. Definition at line 114 of file prompts.h.
+.SS "\fBuint32\fP \fBidx_t::offset\fP"
+.PP
+Offset to the prompt string. Definition at line 113 of file prompts.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

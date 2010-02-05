@@ -1,0 +1,393 @@
+.TH "useracc_t" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+useracc_t \- User account structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <useracc.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBuserid\fP [24]"
+.br
+.RI "\fIUser ID. \fP"
+.ti -1c
+.RI "char \fBpasswd\fP [16]"
+.br
+.RI "\fIPassword. \fP"
+.ti -1c
+.RI "char \fBusername\fP [32]"
+.br
+.RI "\fIReal name. \fP"
+.ti -1c
+.RI "char \fBcompany\fP [32]"
+.br
+.RI "\fIUser's company. \fP"
+.ti -1c
+.RI "char \fBaddress1\fP [32]"
+.br
+.RI "\fIAddress, line 1 of 2. \fP"
+.ti -1c
+.RI "char \fBaddress2\fP [32]"
+.br
+.RI "\fIAddress, line 2 of 2. \fP"
+.ti -1c
+.RI "char \fBphone\fP [24]"
+.br
+.RI "\fIPhone number. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBprefs\fP"
+.br
+.RI "\fIPreference flags (\fCUPF_x\fP flags). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIGeneral flags (\fCUFL_x\fP flags). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBsysaxs\fP [3]"
+.br
+.RI "\fISysop flags (\fCUSY_x\fP constants). \fP"
+.ti -1c
+.RI "\fBuint8\fP \fBage\fP"
+.br
+.RI "\fIAge in years. \fP"
+.ti -1c
+.RI "char \fBsex\fP"
+.br
+.RI "\fISex (\fCUSX_x\fP constants). \fP"
+.ti -1c
+.RI "\fBuint8\fP \fBsystem\fP"
+.br
+.RI "\fIUser's computer system type. \fP"
+.ti -1c
+.RI "\fBuint8\fP \fBlanguage\fP"
+.br
+.RI "\fILanguage preferred. \fP"
+.ti -1c
+.RI "\fBuint8\fP \fBscnwidth\fP"
+.br
+.RI "\fIScreen width (columns, usually 80). \fP"
+.ti -1c
+.RI "\fBuint8\fP \fBscnheight\fP"
+.br
+.RI "\fIScreen height (rows, usually 24). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBdatecre\fP"
+.br
+.RI "\fIDate user signed up. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBdatelast\fP"
+.br
+.RI "\fIDate last logged on. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBpassexp\fP"
+.br
+.RI "\fIDays till password expires. \fP"
+.ti -1c
+.RI "char \fBtempclss\fP [10]"
+.br
+.RI "\fIPrevious Class. \fP"
+.ti -1c
+.RI "char \fBcurclss\fP [10]"
+.br
+.RI "\fICurrent Class. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtimetdy\fP"
+.br
+.RI "\fITime spent today. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBclassdays\fP"
+.br
+.RI "\fIDays spent in current class. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcredits\fP"
+.br
+.RI "\fICredits left. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtotcreds\fP"
+.br
+.RI "\fITotal credits received ever. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtotpaid\fP"
+.br
+.RI "\fITotal paid credits received ever. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeys\fP [KEYLENGTH]"
+.br
+.RI "\fIPersonal keyring array. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBtimever\fP"
+.br
+.RI "\fITotal online time spent ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcredsever\fP"
+.br
+.RI "\fITotal credits spent ever. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBpagetime\fP"
+.br
+.RI "\fITime between allowing pages. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBpagestate\fP"
+.br
+.RI "\fIPage prefs (\fCPGS_x\fP flags). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBfilesdnl\fP"
+.br
+.RI "\fITotal number of files downloaded. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBbytesdnl\fP"
+.br
+.RI "\fINumber of bytes downloaded. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBfilesupl\fP"
+.br
+.RI "\fINumber of files uploaded. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBbytesupl\fP"
+.br
+.RI "\fINumber of bytes downloaded. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmsgswritten\fP"
+.br
+.RI "\fINumber of messages written. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBconnections\fP"
+.br
+.RI "\fINumber of connections. \fP"
+.ti -1c
+.RI "char \fBlastclub\fP [16]"
+.br
+.RI "\fILast club visited. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBauditfiltering\fP"
+.br
+.RI "\fIFlag mask for showing audit paging. \fP"
+.ti -1c
+.RI "char \fBdummy\fP [1020-348]"
+.br
+.RI "\fIScratch space. \fP"
+.ti -1c
+.RI "char \fBmagic\fP [4]"
+.br
+.RI "\fIMagic number (\fCUSR_MAGIC\fP). \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User account structure. 
+
+This is the permanent user account record. It holds a user's particulars, along with additional preferences, access levels, statistics and state information. This is a pretty long structure. Here's a length description of the fields. I've grouped similar fields together to make the description a bit more readable:
+.PP
+.IP "\(bu" 2
+\fCuserid\fP, \fCpasswd\fP, \fCusername\fP, \fCcompany\fP, \fCaddress1\fP, \fCaddress2\fP, \fCphone\fP, \fCage\fP, \fCsex\fP. The user's particulars. Things that we need to know for billing, et cetera: the user's user ID (their handle within the system), their password, full name, company name (if any), address (two lines), contact phone number, age (in years) and sex (`yes, please' isn't an option --- see the \fCUSX_x\fP constants).
+.PP
+.PP
+.IP "\(bu" 2
+\fCprefs\fP, \fCflags\fP. A set of preferences and flags respectively, comprising of \fCUPF_x\fP flags and \fCUFL_x\fP flags respectively (the flags are ORred together).
+.PP
+.PP
+.IP "\(bu" 2
+\fCsysaxs\fP. An array of flags, each of which corresponds to one operator command or privilege. Have a look at the \fCUSY_x\fP flags for a full description.
+.PP
+.PP
+.IP "\(bu" 2
+\fCsystem\fP. The user's system, for statistics.
+.PP
+.PP
+.IP "\(bu" 2
+\fClanguage\fP. The user's preferred language number.
+.PP
+.PP
+.IP "\(bu" 2
+\fCscnwidth\fP, \fCscnheight\fP. User's preferred screen resolution (columns, rows respectively).
+.PP
+.PP
+.IP "\(bu" 2
+\fCdatecre\fP, \fCdatelast\fP. The date (and time, under the new API) of the account's creation and last login.
+.PP
+.PP
+.IP "\(bu" 2
+\fCpassexp\fP. Counts the days until the user's password expires. Set to zero to denote that the user's password will \fInot\fP expire.
+.PP
+.PP
+.IP "\(bu" 2
+\fCtempclss\fP, \fCcurclss\fP. The user's temporary class and permanent class. User classes are a way of managing user accounts with subscriptions, freebies, et cetera. The temporary class is where a user is placed when they run out of credits. The user stays in this class for the remainder of the day, until the daily cleanup either moves them to a new class or back to their original one.
+.PP
+.PP
+.IP "\(bu" 2
+\fCtimetdy\fP. User's total connection time for today (i.e. after the last cleanup).
+.PP
+.PP
+.IP "\(bu" 2
+\fCclassdays\fP. Number of days since the user was moved to their current permanent class.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcredits\fP. Credits left.
+.PP
+.PP
+.IP "\(bu" 2
+\fCtotcreds\fP, totpaid. Respectively, the total number of credits debited to this account, ever, and the total number of \fIpaid\fP credits debited to this account. The number of free credits debited to the account is equal to \fCtotcreds-totpaid\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeys\fP. The user's personal keyring.
+.PP
+.PP
+.IP "\(bu" 2
+\fCtimever\fP, credsever. The total time the user has spent online, and the total number of credits spent ever.
+.PP
+.PP
+.IP "\(bu" 2
+\fCpagetime\fP, pagestate. The time (in minutes) that must pass between pages to this user. This is done so as not to annoy the user. Not many people use it, at least on our systems. The page state restricts paging to the user in a small range of ways, listed as the \fCPGS_x\fP constants.
+.PP
+.PP
+.IP "\(bu" 2
+\fCfilesdnl\fP, \fCbytesdnl\fP, \fCfilesupl\fP, \fCbytesupl\fP, \fCmsgswritten\fP, \fCconnections\fP. Respectively the number of files downloaded by the user, the grand total of bytes downloaded, files and bytes uploaded, total number of messages written and total number of connections made ever. These are used for statistical purposes.
+.PP
+.PP
+.IP "\(bu" 2
+\fClastclub\fP. The last club accessed by the user. This is remembered in between sessions.
+.PP
+.PP
+.IP "\(bu" 2
+\fCauditfiltering\fP. Flags used to decide which audit trail entries (if any) are to be paged to the user. Uses the \fCAUX_x\fP flags, the same ones used by the audit trail functions to flag different severities and types of entries. 
+.PP
+
+.PP
+Definition at line 223 of file useracc.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBuseracc_t::address1\fP[32]"
+.PP
+Address, line 1 of 2. Definition at line 228 of file useracc.h.
+.SS "char \fBuseracc_t::address2\fP[32]"
+.PP
+Address, line 2 of 2. Definition at line 229 of file useracc.h.
+.SS "\fBuint8\fP \fBuseracc_t::age\fP"
+.PP
+Age in years. Definition at line 234 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::auditfiltering\fP"
+.PP
+Flag mask for showing audit paging. Definition at line 262 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::bytesdnl\fP"
+.PP
+Number of bytes downloaded. Definition at line 256 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::bytesupl\fP"
+.PP
+Number of bytes downloaded. Definition at line 258 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::classdays\fP"
+.PP
+Days spent in current class. Definition at line 246 of file useracc.h.
+.SS "char \fBuseracc_t::company\fP[32]"
+.PP
+User's company. Definition at line 227 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::connections\fP"
+.PP
+Number of connections. Definition at line 260 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::credits\fP"
+.PP
+Credits left. Definition at line 247 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::credsever\fP"
+.PP
+Total credits spent ever. Definition at line 252 of file useracc.h.
+.SS "char \fBuseracc_t::curclss\fP[10]"
+.PP
+Current Class. Definition at line 244 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::datecre\fP"
+.PP
+Date user signed up. Definition at line 240 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::datelast\fP"
+.PP
+Date last logged on. Definition at line 241 of file useracc.h.
+.SS "char \fBuseracc_t::dummy\fP[1020-348]"
+.PP
+Scratch space. Definition at line 264 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::filesdnl\fP"
+.PP
+Total number of files downloaded. Definition at line 255 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::filesupl\fP"
+.PP
+Number of files uploaded. Definition at line 257 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::flags\fP"
+.PP
+General flags (\fCUFL_x\fP flags). Definition at line 232 of file useracc.h.
+.SS "\fBbbskey_t\fP \fBuseracc_t::keys\fP[KEYLENGTH]"
+.PP
+Personal keyring array. Definition at line 250 of file useracc.h.
+.SS "\fBuint8\fP \fBuseracc_t::language\fP"
+.PP
+Language preferred. Definition at line 237 of file useracc.h.
+.SS "char \fBuseracc_t::lastclub\fP[16]"
+.PP
+Last club visited. Definition at line 261 of file useracc.h.
+.SS "char \fBuseracc_t::magic\fP[4]"
+.PP
+Magic number (\fCUSR_MAGIC\fP). Definition at line 265 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::msgswritten\fP"
+.PP
+Number of messages written. Definition at line 259 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::pagestate\fP"
+.PP
+Page prefs (\fCPGS_x\fP flags). Definition at line 254 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::pagetime\fP"
+.PP
+Time between allowing pages. Definition at line 253 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::passexp\fP"
+.PP
+Days till password expires. Definition at line 242 of file useracc.h.
+.SS "char \fBuseracc_t::passwd\fP[16]"
+.PP
+Password. Definition at line 225 of file useracc.h.
+.SS "char \fBuseracc_t::phone\fP[24]"
+.PP
+Phone number. Definition at line 230 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::prefs\fP"
+.PP
+Preference flags (\fCUPF_x\fP flags). Definition at line 231 of file useracc.h.
+.SS "\fBuint8\fP \fBuseracc_t::scnheight\fP"
+.PP
+Screen height (rows, usually 24). Definition at line 239 of file useracc.h.
+.SS "\fBuint8\fP \fBuseracc_t::scnwidth\fP"
+.PP
+Screen width (columns, usually 80). Definition at line 238 of file useracc.h.
+.SS "char \fBuseracc_t::sex\fP"
+.PP
+Sex (\fCUSX_x\fP constants). Definition at line 235 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::sysaxs\fP[ 3]"
+.PP
+Sysop flags (\fCUSY_x\fP constants). Definition at line 233 of file useracc.h.
+.SS "\fBuint8\fP \fBuseracc_t::system\fP"
+.PP
+User's computer system type. Definition at line 236 of file useracc.h.
+.SS "char \fBuseracc_t::tempclss\fP[10]"
+.PP
+Previous Class. Definition at line 243 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::timetdy\fP"
+.PP
+Time spent today. Definition at line 245 of file useracc.h.
+.SS "\fBuint32\fP \fBuseracc_t::timever\fP"
+.PP
+Total online time spent ever. Definition at line 251 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::totcreds\fP"
+.PP
+Total credits received ever. Definition at line 248 of file useracc.h.
+.SS "\fBint32\fP \fBuseracc_t::totpaid\fP"
+.PP
+Total paid credits received ever. Definition at line 249 of file useracc.h.
+.SS "char \fBuseracc_t::userid\fP[24]"
+.PP
+User ID. Definition at line 224 of file useracc.h.
+.SS "char \fBuseracc_t::username\fP[32]"
+.PP
+Real name. Definition at line 226 of file useracc.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

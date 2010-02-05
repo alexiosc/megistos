@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+# megistos
+#		This shell script takes care of starting and stopping
+#               Megistos BBS instances.
+#
+# chkconfig: 2345 60 20
+# description: Megistos is a international, traditional BBS system. This service
+#              runs any bulletin boards installed on your system.
+#
+
+test $DEBIAN_SCRIPT_DEBUG && set -v -x
+
+PREFIX=/usr
+ADMIN=$PREFIX/bin/megistos-admin
+CONFIG=$PREFIX/bin/megistos-config
+
+[ -x $PREFIX/lib/megistos/bin/daemons/bbsinit ] || exit 0
+[ -x $ADMIN ] || exit 0
+[ -x $CONFIG ] || exit 0
+
+# What is this?
+DESC="Megistos BBS"
+
+
+
+# $Id: megistos.init,v 2.0 2004/09/13 19:44:28 alexios Exp $
+#
+# $Log: megistos.init,v $
+# Revision 2.0  2004/09/13 19:44:28  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2004/02/29 23:46:10  alexios
+# Changed order of operations in restart (used to be start, stop --
+# stupid).
+#
+# Revision 1.1  2004/02/29 16:40:18  alexios
+# Initial revision.
+#
+
+
+megistos_ctl0 ()
+{
+    mode=$1
+    instance=$2
+    echo -n " $instance"
+    log=/tmp/megistos-$instance
+    if $ADMIN $mode $instance >& $log; then
+	rm $log
+    else
+	echo ', FAILED!'
+	cat $log
+	rm $log
+    fi
+}
+
+
+megistos_ctl ()
+{
+    mode=$1
+    print=$2
+    shift
+    shift
+    instances="$*"
+
+    if [ x$instances = x ]; then
+	echo -n "$print all BBS instances:"
+	for a in `$CONFIG --instance-dir`/*; do
+	    [ -d $a ] && megistos_ctl0 $mode `basename $a`
+	done
+    else
+	echo -n "$print BBS instances:"
+	for a in $instances; do
+	    if [ -d `$CONFIG --instance-dir`/$a ]; then
+		megistos_ctl0 $mode `basename $a`
+	    else
+		echo " $a NOT FOUND"
+	    fi
+	done
+    fi
+    echo "."
+}
+
+
+case "$1" in
+    start)
+	shift
+	megistos_ctl start Starting "$*"
+	;;
+    stop)
+	shift
+	megistos_ctl stop Stopping "$*"
+	;;
+    restart)
+	shift
+	megistos_ctl stop Stopping "$*"
+	megistos_ctl start Starting "$*"
+	;;
+    *)
+	echo "Usage: /etc/init.d/megistos {start|stop|restart} [bbscode ...]"
+	exit 1
+esac
+
+
+
+
+exit 0
+
+# End of file.

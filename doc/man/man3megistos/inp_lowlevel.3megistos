@@ -1,0 +1,281 @@
+.TH "Low-Level Input Functionality" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Low-Level Input Functionality \- You should generally not need to mess around with these.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBinp_init\fP ()"
+.br
+.RI "\fIInitialise input subsystem. \fP"
+.ti -1c
+.RI "void \fBinp_done\fP ()"
+.br
+.RI "\fIShutdown input system. \fP"
+.ti -1c
+.RI "int \fBinp_acceptinjoth\fP ()"
+.br
+.RI "\fIDisplay any queued injected messages. \fP"
+.ti -1c
+.RI "void \fBinp_setmonitorid\fP (char *tty_or_uid)"
+.br
+.RI "\fISet tty or username for monitoring. \fP"
+.ti -1c
+.RI "void \fBinp_monitor\fP ()"
+.br
+.RI "\fIMonitor a line. \fP"
+.ti -1c
+.RI "void \fBinp_readstring\fP (int maxlen)"
+.br
+.RI "\fILow-level input function. \fP"
+.ti -1c
+.RI "int \fBinp_reprompt\fP ()"
+.br
+.RI "\fICheck if a reprompt is necessary. \fP"
+.ti -1c
+.RI "void \fBinp_nonblock\fP ()"
+.br
+.RI "\fISet non-blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_block\fP ()"
+.br
+.RI "\fISet blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_resetblocking\fP ()"
+.br
+.RI "\fIRevert to previous blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_setidle\fP (int t)"
+.br
+.RI "\fISet user inactivity timeout. \fP"
+.ti -1c
+.RI "void \fBinp_resetidle\fP ()"
+.br
+.RI "\fIReset user inactivity timer. \fP"
+.ti -1c
+.RI "int \fBinp_isX\fP (char *s)"
+.br
+.RI "\fICheck for the eXit command. \fP"
+.ti -1c
+.RI "void \fBinp_timeout\fP (int msec, int intrusive)"
+.br
+.RI "\fISet user input timeout. \fP"
+.ti -1c
+.RI "void \fBinp_cancel\fP ()"
+.br
+.RI "\fIAbort pending user input. \fP"
+.ti -1c
+.RI "void \fBinp_setflags\fP (\fBuint32\fP f)"
+.br
+.RI "\fISet input flags. \fP"
+.ti -1c
+.RI "void \fBinp_clearflags\fP (\fBuint32\fP f)"
+.br
+.RI "\fISet input flags. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+You should generally not need to mess around with these. Use the mid- or high-level functions instead. They will make your life much easier. Functionality of this level is provided for the advanced author who needs to add features not present in the mid- or high-level functions. 
+.SH "Function Documentation"
+.PP 
+.SS "int inp_acceptinjoth ()"
+.PP
+Display any queued injected messages. In implementing low-level input functions (i.e. those that wait for individual keystrokes from the user), you should call this function while waiting for user input.
+.PP
+If you won't be accepting injected messages, you had better flag this in the user's online structure so that other users know that injected messages aren't presented to this user. Hell hath no fury like a user ignored.
+.PP
+\fBReturns:\fP
+.RS 4
+One if one or more injected messages were shown to the user. Zero if nothing was sent to the user. 
+.RE
+.PP
+
+.SS "void inp_block ()"
+.PP
+Set blocking mode. Puts the terminal into blocking mode, the default, sane condition. In this mode, read operations block the caller until data is available.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_nonblock()\fP, \fBinp_resetblocking()\fP. 
+.RE
+.PP
+
+.SS "void inp_cancel ()"
+.PP
+Abort pending user input. This function is for use by signal handlers in conjunction with \fBinp_timeout()\fP. It causes \fBinp_readstring()\fP to exit, setting \fBINF_TIMEOUT\fP.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_timeout()\fP, \fBinp_readstring\fP. 
+.RE
+.PP
+
+.SS "void inp_clearflags (\fBuint32\fP f)"
+.PP
+Set input flags. Clears a number of input flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIf\fP a number of \fCINF_x\fP flags ORred together.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_setflags()\fP. 
+.RE
+.PP
+
+.SS "void inp_done ()"
+.PP
+Shutdown input system. Don't call this yourself, \fBmod_done()\fP and \fBmod_end()\fP do it for you. 
+.SS "void inp_init ()"
+.PP
+Initialise input subsystem. Prepares for user input by tweaking terminal, setting variables to a sane status, et cetera. Don't call this, \fBmod_init()\fP does it for you when you request \fBINI_INPUT\fP or \fBINI_ALL\fP. 
+.SS "int inp_isX (char * s)"
+.PP
+Check for the eXit command. This simple function checks if the given string contains the exit command (X).
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP a string to test.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Non-zero if \fCs\fP was the exit command, zero otherwise. 
+.RE
+.PP
+
+.SS "void inp_monitor ()"
+.PP
+Monitor a line. Writes the current value of \fBinp_buffer\fP to the monitor structure. Passwords are protected. Do not call this yourself, unless you're building a low-level input function (one that waits for individual keystrokes from the user). 
+.SS "void inp_nonblock ()"
+.PP
+Set non-blocking mode. Puts the terminal into non-blocking mode. In this mode, read operations return immediately, regardless of whether there is data to be read or not. This is absolutely useless (dangerous, actually) for most conventional input operations, but it allows you to set up for real-time operations, like key combinations to break out of lists (recommended as a second means of stopping \fIlong\fP lists in case the user was stupid enough to disable paging or choose a non-stop listing), or for MUDs.
+.PP
+\fBWarning:\fP
+.RS 4
+Don't forget to set blocking mode as soon as you're done! Failure to do so may cause nasty behaviour.
+.PP
+The low-level line input operations always switch you back to blocking mode on termination.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_nonblock()\fP, \fBinp_resetblocking()\fP. 
+.RE
+.PP
+
+.SS "void inp_readstring (int maxlen)"
+.PP
+Low-level input function. Reads a string of a certain maximum length into \fBinp_buffer\fP. Does nothing else. The input length can be limited to an arbitrary number of characters, in which case the function will interactively block input until characters are deleted, making the length limitation plain to the user.
+.PP
+You should not call this function directly. Use \fBinp_get()\fP instead. If you need raw strings, not margc/margv-style parsing, use \fBinp_raw()\fP immediately afterwards.
+.PP
+The function waits for user input. If the user has entered nothing (or has deleted everything), \fBinp_acceptinjoth()\fP is called periodically to present any waiting injected messages. If any are shown, the function exits, setting \fBINF_REPROMPT\fP, so that the caller can re-issue the last prompt.
+.PP
+If a timeout set with \fBinp_timeout()\fP expires, the function issues a last call to \fBinp_acceptinjoth()\fP, sets the \fBINF_TIMEOUT\fP flag, and exits.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImaxlen\fP the maximum number of characters to allow. Don't set this too low unless absolutely necessary. Even if you only need a single-character string, it's better to check the length and rebuff the user than to do this. You must \fIalways\fP allow the user to enter long global commands. \fIDO NOT SET THIS ARGUMENT TO VALUES GREATER THAN \fCMAXINPLEN-1.\fP\fP
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fI \fBinp_get()\fP. \fP
+.RE
+.PP
+
+.SS "int inp_reprompt ()"
+.PP
+Check if a reprompt is necessary. \fBReturns:\fP
+.RS 4
+Non-zero if the \fBINF_REPROMPT\fP flag is set. 
+.RE
+.PP
+
+.SS "void inp_resetblocking ()"
+.PP
+Revert to previous blocking mode. Takes you back to the previously active blocking mode. Every time you call \fBinp_block()\fP or \fBinp_nonblock()\fP, the previous state of the terminal is saved internally. You can use this function to revert to it.
+.PP
+Although I doubt the usefulness of this function, it might come in handy.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_nonblock()\fP, \fBinp_resetblocking()\fP. 
+.RE
+.PP
+
+.SS "void inp_resetidle ()"
+.PP
+Reset user inactivity timer. This is called every time user input is received, to reset the inactivity timeout.
+.PP
+There are very few cases when you need to do this.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_setidle()\fP 
+.RE
+.PP
+
+.SS "void inp_setflags (\fBuint32\fP f)"
+.PP
+Set input flags. Sets a number of input flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIf\fP a number of \fCINF_x\fP flags ORred together.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_clearflags()\fP. 
+.RE
+.PP
+
+.SS "void inp_setidle (int t)"
+.PP
+Set user inactivity timeout. Not to be confused with input timeouts arranged by \fBinp_timeout()\fP. This function sets the user inactivity timeout for the current user. When the timeout counter reaches approximately 60 seconds, the \fCbbsd\fP daemon lets the user know that they will be kicked out in a minute. If the counter reaches zero, the user is kicked out of the system so as not to consume credits and possibly busy BBS channels. In the meantime, any single character input by the user resets the timer to the value specified here.
+.PP
+Idle timeouts are imposed on all users except those with the Master Key (i.e. Sysops). Certain conditions may force timeouts even on Sysops (like logging in over telnet in Megistos 0.98 and 0.99 -- this may change in the future).
+.PP
+There is absolutely no reason why you should change this.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIt\fP the inactivity time in seconds.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_resetidle()\fP. 
+.RE
+.PP
+
+.SS "void inp_setmonitorid (char * tty_or_uid)"
+.PP
+Set tty or username for monitoring. You can do this yourself, but \fIdon't\fP. It's set by \fBinp_init()\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty_or_uid\fP a user ID or UNIX tty name shown to any monitoring sysops. 
+.RE
+.PP
+
+.SS "void inp_timeout (int msec, int intrusive)"
+.PP
+Set user input timeout. This one allows getinput() to timeout for some reason or other. Not recommended as it doesn't fit in with the entire BBS philosophy, but there are applications (like MUDs or the \fIadventure\fP module) where this is needed.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImsec\fP the number of milliseconds (ms) after which to terminate (this is accurate to \fIat most\fP 10 ms, the delay between checks for new keyboard input).
+.br
+\fIintrusive\fP supply a non-zero value for \fCintrusive\fP to cause getinput() to terminate even if the user has started typing something. The default behaviour, \fCintrusive=0\fP is to only timeout if the user is 100% idle (empty input line). Intrusive mode is not recommended, as it interrupts the user --- the system should \fInever\fP interrupt the user unless there's a very, very good reason.
+.RE
+.PP
+Upon timeout, global variables ::inptimeout_msec and ::inptimeout_intrusive are reset to \fC0\fP. This is the official method of checking whether getinput() has timed out. Variable ::inptimeout_msec is used as a counter by inputstring(). This means you have to call setinputtimeout() before every call to getinput() that needs a timeout. 

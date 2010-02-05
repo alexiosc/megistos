@@ -1,0 +1,126 @@
+.TH "Reading data from the user" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Reading data from the user \- Here you can find low-, medium- and high-level functions to acquire and validate input from the user.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBInput option flags (INF_x)\fP"
+.br
+.RI "\fIInput flags. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBLow-Level Input Functionality\fP"
+.br
+.RI "\fIYou should generally not need to mess around with these. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBMid-Level Input Functionality\fP"
+.br
+.RI "\fIThese functions provide you with user input at the middle-level. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBCommand Concatenation (Mid-to-High-Level)\fP"
+.br
+.RI "\fIProcessing multiple commands typed together. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBHigh-Level user-interacting input/validation\fP"
+.br
+.RI "\fIVery high-level input functionality. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBinjothbuf\fP"
+.br
+.RI "\fIMessage buffer for injoth(). \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBuint32\fP \fBinp_flags\fP"
+.br
+.RI "\fIThe input flags. \fP"
+.ti -1c
+.RI "char \fBinp_buffer\fP []"
+.br
+.RI "\fIUser's input buffer (sized \fCMAXINPLEN\fP). \fP"
+.ti -1c
+.RI "int \fBinp_len\fP"
+.br
+.RI "\fILength of user's last input line. \fP"
+.ti -1c
+.RI "char * \fBmargv\fP []"
+.br
+.RI "\fIInput arguments, no spaces, \fCargv[]\fP-style. \fP"
+.ti -1c
+.RI "int \fBmargc\fP"
+.br
+.RI "\fINumber of input arguments passed, in \fCargc\fP style. \fP"
+.ti -1c
+.RI "char \fBinp_del\fP []"
+.br
+.ti -1c
+.RI "\fBmonitor\fP * \fBmonitor\fP"
+.br
+.RI "\fIThe backspace-space-backspace sequence. \fP"
+.ti -1c
+.RI "int \fBinp_timeout_msecs\fP"
+.br
+.RI "\fILast \fCmsecs\fP argument to \fBinp_timeout()\fP. \fP"
+.ti -1c
+.RI "int \fBinp_timeout_intr\fP"
+.br
+.RI "\fILast \fCintrusive\fP argument to \fBinp_timeout()\fP. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Here you can find low-, medium- and high-level functions to acquire and validate input from the user. These functions do all sorts of weird and wonderful things with the user's input.
+.PP
+Thankfully, despite the wealth of functionality you can find here, getting input from the user is a straightforward thing in most cases. The most complex API is that of the concatenated command parser, and it \fIreally\fP should be made simpler (read: transparent). 
+.SH "Variable Documentation"
+.PP 
+.SS "char \fBinp_buffer\fP[]"
+.PP
+User's input buffer (sized \fCMAXINPLEN\fP). This is where users' input is kept. This is a \fCchar\fP array, but don't assume it represents the user's entire input. Concatenation commands may insert nulls to break the command line into \fBmargv\fP arguments. Definition at line 173 of file input.h.
+.SS "char \fBinp_del\fP[]"
+.PP
+Definition at line 188 of file input.h.
+.SS "\fBuint32\fP \fBinp_flags\fP"
+.PP
+The input flags. Definition at line 164 of file input.h.
+.SS "int \fBinp_len\fP"
+.PP
+Length of user's last input line. Definition at line 177 of file input.h.
+.SS "int \fBinp_timeout_intr\fP"
+.PP
+Last \fCintrusive\fP argument to \fBinp_timeout()\fP. Definition at line 210 of file input.h.
+.SS "int \fBinp_timeout_msecs\fP"
+.PP
+Last \fCmsecs\fP argument to \fBinp_timeout()\fP. Definition at line 207 of file input.h.
+.SS "int \fBmargc\fP"
+.PP
+Number of input arguments passed, in \fCargc\fP style. Definition at line 185 of file input.h.
+.SS "char* \fBmargv\fP[]"
+.PP
+Input arguments, no spaces, \fCargv[]\fP-style. Definition at line 184 of file input.h.
+.SS "struct \fBmonitor\fP* \fBmonitor\fP"
+.PP
+The backspace-space-backspace sequence. Definition at line 191 of file input.h.

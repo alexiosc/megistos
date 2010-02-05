@@ -1,0 +1,84 @@
+.TH "Lock result codes (LKR_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Lock result codes (LKR_x) \- Resource locking result codes.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLKR_OK\fP   0		/**< Operation successful */"
+.br
+.RI "\fIOperation successful. \fP"
+.ti -1c
+.RI "#define \fBLKR_STALE\fP   -1		/**< Lock's owner is dead, lock is removed */"
+.br
+.RI "\fILock's owner is dead, lock is removed. \fP"
+.ti -1c
+.RI "#define \fBLKR_OWN\fP   -2		/**< Lock belongs to the caller */"
+.br
+.RI "\fILock belongs to the caller. \fP"
+.ti -1c
+.RI "#define \fBLKR_TIMEOUT\fP   -3		/**< Timeout waiting for lock to be removed */"
+.br
+.RI "\fITimeout waiting for lock to be removed. \fP"
+.ti -1c
+.RI "#define \fBLKR_ERROR\fP   -4		/**< Some other error occurred */"
+.br
+.RI "\fISome other error occurred. \fP"
+.ti -1c
+.RI "#define \fBLKR_SYNTAX\fP   -5		/**< Lockd failed to parse the request */"
+.br
+.RI "\fILockd failed to parse the request. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Resource locking result codes. These result codes allow the caller to know if a lock request succeeded, and, if not, why. They are a necessary part of resource locking.
+.PP
+.IP "\(bu" 2
+LKR_OK. All is well, the lock request was successful.
+.PP
+.PP
+.IP "\(bu" 2
+LKR_STALE. The requested resource is locked, but the lock is stale. That is, the process that owned the lock has died. Your process may lock the resource.
+.PP
+.PP
+.IP "\(bu" 2
+LKR_OWN. The lock exists, and belongs to you.
+.PP
+.PP
+.IP "\(bu" 2
+LKR_TIMEOUT. There was a timeout while waiting for the lock to be removed. This result code is not returned by the daemon. Handling timeouts is the responsibility of the BBS library and they are reported locally.
+.PP
+.PP
+.IP "\(bu" 2
+LKR_ERROR. A strange error has occur-ed. Whoops.
+.PP
+.PP
+.IP "\(bu" 2
+LKR_SYNTAX. The lock daemon could not understand your request.
+.PP
+.PP
+Any other result code greater than zero denotes the PID of a process holding the lock in question. 
+.SH "Define Documentation"
+.PP 
+.SS "#define LKR_ERROR   -4		/**< Some other error occurred */"
+.PP
+Some other error occurred. Definition at line 148 of file lock.h.
+.SS "#define LKR_OK   0		/**< Operation successful */"
+.PP
+Operation successful. Definition at line 144 of file lock.h.
+.SS "#define LKR_OWN   -2		/**< Lock belongs to the caller */"
+.PP
+Lock belongs to the caller. Definition at line 146 of file lock.h.
+.SS "#define LKR_STALE   -1		/**< Lock's owner is dead, lock is removed */"
+.PP
+Lock's owner is dead, lock is removed. Definition at line 145 of file lock.h.
+.SS "#define LKR_SYNTAX   -5		/**< Lockd failed to parse the request */"
+.PP
+Lockd failed to parse the request. Definition at line 149 of file lock.h.
+.SS "#define LKR_TIMEOUT   -3		/**< Timeout waiting for lock to be removed */"
+.PP
+Timeout waiting for lock to be removed. Definition at line 147 of file lock.h.

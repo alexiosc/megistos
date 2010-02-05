@@ -1,0 +1,18 @@
+/Makefile-old/2.0/Sun Apr 22 16:49:23 2001//
+/a.c/2.0/Mon Apr 16 15:00:42 2001//
+/distclub.c/2.0/Mon Sep 13 19:44:53 2004//
+/main.c/2.0/Mon Sep 13 19:44:53 2004//
+/metabbs.h/2.0/Mon Sep 13 19:44:53 2004//
+/metaservices.h/2.0/Fri Apr 20 20:12:39 2001//
+/metaservices.x/2.0/Mon Sep 13 19:44:53 2004//
+/metaservices_clnt.c/2.0/Mon Apr 16 21:56:33 2001//
+/metaservices_svc.c/2.0/Mon Apr 16 21:56:33 2001//
+/metaservices_xdr.c/2.0/Mon Apr 16 21:56:33 2001//
+/parallelism.h/2.0/Mon Sep 13 19:44:53 2004//
+/register.c/2.0/Mon Sep 13 19:44:53 2004//
+/register_non_megistos.c/2.0/Mon Sep 13 19:44:53 2004//
+/request_ihave_list.c/2.0/Mon Sep 13 19:44:53 2004//
+/request_info.c/2.0/Mon Sep 13 19:44:53 2004//
+/request_message.c/2.0/Mon Sep 13 19:44:53 2004//
+/metabbs.msg/2.1/Mon Sep 13 19:54:00 2004//
+D

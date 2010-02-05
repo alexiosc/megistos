@@ -1,0 +1,193 @@
+.TH "bots.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bots.h \- Support for (ro)bots, AIs, artificial users and scripts.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Three-digit state codes"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBTS_PROMPT_STARTS\fP   601	/**< Beginning of a prompt */"
+.br
+.RI "\fIBeginning of a prompt. \fP"
+.ti -1c
+.RI "#define \fBBTS_PROMPT_ARGUMENT\fP   602	/**< A prompt argument (%s etc) follows */"
+.br
+.RI "\fIA prompt argument (s etc) follows. \fP"
+.ti -1c
+.RI "#define \fBBTS_PROMPT_TEXT\fP   603 /**< Human-readable prompt follows */"
+.br
+.RI "\fIHuman-readable prompt follows. \fP"
+.ti -1c
+.RI "#define \fBBTS_PROMPT_ENDS\fP   609 /**< End of prompt */"
+.br
+.RI "\fIEnd of prompt. \fP"
+.ti -1c
+.RI "#define \fBBTS_FILE_STARTS\fP   610 /**< Beginning of a long file display */"
+.br
+.RI "\fIBeginning of a long file display. \fP"
+.ti -1c
+.RI "#define \fBBTS_FILE_ENDS\fP   619 /**< End of a long file display */"
+.br
+.RI "\fIEnd of a long file display. \fP"
+.ti -1c
+.RI "#define \fBBTS_INJECTED_PROMPT\fP   630 /**< Message from other user follows */"
+.br
+.RI "\fIMessage from other user follows. \fP"
+.ti -1c
+.RI "#define \fBBTS_INPUT_EXPECTED\fP   650 /**< Input expected now */"
+.br
+.RI "\fIInput expected now. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "char * \fBbot_escape\fP (char *s)"
+.br
+.RI "\fIEscape a string before it's sent to a bot. \fP"
+.ti -1c
+.RI "char * \fBbot_unescape\fP (char *s)"
+.br
+.RI "\fIUnescape a string after it's been received by a bot. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Support for (ro)bots, AIs, artificial users and scripts. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+.PP
+This header file provides functionality used in interfacing with non-human users of the system. Many a task can be automated this way, and things like networked clubs use this facility to exchange messages with other systems.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     bots.h                                                       **
+ **  AUTHORS:  Alexios                                                      **
+ **  PURPOSE:  Bot support                                                  **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: bots.h,v 1.2 2003/09/27 20:29:41 alexios Exp $
+ *
+ * $Log: bots.h,v $
+ * Revision 1.2  2003/09/27 20:29:41  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.1  2001/04/22 15:20:51  alexios
+ * Initial checkin.
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBbots.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define BTS_FILE_ENDS   619 /**< End of a long file display */"
+.PP
+End of a long file display. Definition at line 88 of file bots.h.
+.SS "#define BTS_FILE_STARTS   610 /**< Beginning of a long file display */"
+.PP
+Beginning of a long file display. Definition at line 87 of file bots.h.
+.SS "#define BTS_INJECTED_PROMPT   630 /**< Message from other user follows */"
+.PP
+Message from other user follows. Definition at line 90 of file bots.h.
+.SS "#define BTS_INPUT_EXPECTED   650 /**< Input expected now */"
+.PP
+Input expected now. Definition at line 92 of file bots.h.
+.SS "#define BTS_PROMPT_ARGUMENT   602	/**< A prompt argument (%s etc) follows */"
+.PP
+A prompt argument (s etc) follows. Definition at line 83 of file bots.h.
+.SS "#define BTS_PROMPT_ENDS   609 /**< End of prompt */"
+.PP
+End of prompt. Definition at line 85 of file bots.h.
+.SS "#define BTS_PROMPT_STARTS   601	/**< Beginning of a prompt */"
+.PP
+Beginning of a prompt. Definition at line 82 of file bots.h.
+.SS "#define BTS_PROMPT_TEXT   603 /**< Human-readable prompt follows */"
+.PP
+Human-readable prompt follows. Definition at line 84 of file bots.h.
+.SS "#define RCS_VER   '$Id: bots.h,v 1.2 2003/09/27 20:29:41 alexios Exp $'"
+.PP
+Definition at line 59 of file bots.h.
+.SH "Function Documentation"
+.PP 
+.SS "char* bot_escape (char * s)"
+.PP
+Escape a string before it's sent to a bot. Bots depend on rigidly defined return codes. However, since return codes consist of easily used ASCII characters, it's necessary to escape arbitrary user-provided strings. Any character sequences that look like \fCnew-line digit digit digit space\fP are escaped by changing the newline to an \fCESC\fP (ASCII 27). You can use \fBbot_unescape()\fP to reverse this.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP The string to escape. The string itself is modified, not a copy thereof.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The escaped string. You can either call the function for its side effect, it's return value, or both, just like \fCstrcpy()\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBbot_unescape()\fP. 
+.RE
+.PP
+
+.SS "char* bot_unescape (char * s)"
+.PP
+Unescape a string after it's been received by a bot. Bots depend on rigidly defined return codes. However, since return codes consist of easily used ASCII characters, it's necessary to escape arbitrary user-provided strings. This function reverses this process, yielding the original, unescaped string. It's meant to be used by bots that have received a prompt string from the system.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP The string to unescape. The string itself is modified, not a copy thereof.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The original string. You can either call the function for its side effect, it's return value, or both, just like \fCstrcpy()\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBbot_escape()\fP. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

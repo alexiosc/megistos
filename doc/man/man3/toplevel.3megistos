@@ -1,0 +1,232 @@
+.TH "Top-Level Module Definitions and Handlers" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Top-Level Module Definitions and Handlers \- These functions define the main entry (and exit) points for Megistos modules.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBInitialisation mode flags (INI_x)\fP"
+.br
+.RI "\fISubsystems of the BBS API to be initialised. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmod_handler_t\fP"
+.br
+.RI "\fIModule handler. \fP"
+.ti -1c
+.RI "struct \fBmod_info_t\fP"
+.br
+.RI "\fIHigh-level module descriptor. \fP"
+.ti -1c
+.RI "struct \fBmod_handler_t\fP"
+.br
+.RI "\fIModule handler. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBmod_setinfo\fP (\fBmod_info_t\fP *mod)"
+.br
+.RI "\fISet module information block. \fP"
+.ti -1c
+.RI "void \fBmod_setprogname\fP (char *name)"
+.br
+.RI "\fISet program name. \fP"
+.ti -1c
+.RI "int \fBmod_main\fP (int argc, char **argv)"
+.br
+.RI "\fIModule entry point. \fP"
+.ti -1c
+.RI "void \fBmod_init\fP (\fBuint32\fP initflags)"
+.br
+.RI "\fIInitialise a module. \fP"
+.ti -1c
+.RI "void \fBmod_done\fP (\fBuint32\fP services)"
+.br
+.RI "\fIPrepares a module for exit. \fP"
+.ti -1c
+.RI "void \fBmod_end\fP ()"
+.br
+.RI "\fIPrepares a module for exit. \fP"
+.ti -1c
+.RI "void \fBmod_regpid\fP (char *tty)"
+.br
+.RI "\fIRegister this process as an interactive one. \fP"
+.ti -1c
+.RI "int \fBmod_isbot\fP ()"
+.br
+.RI "\fICheck whether a process is a bot. \fP"
+.ti -1c
+.RI "void \fBmod_setbot\fP (int isbot)"
+.br
+.RI "\fIEnter or leave bot mode. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBmod_info_t\fP \fB__module\fP"
+.br
+.RI "\fIInternally used module information. \fP"
+.ti -1c
+.RI "uid_t \fBbbs_uid\fP"
+.br
+.RI "\fIThe UNIX user ID of the `bbs' user. \fP"
+.ti -1c
+.RI "gid_t \fBbbs_gid\fP"
+.br
+.RI "\fIThe UNIX group ID of the `bbs' user. \fP"
+.ti -1c
+.RI "\fBsysvar\fP * \fBsysvar\fP"
+.br
+.RI "\fIA block of system-wide variables. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+These functions define the main entry (and exit) points for Megistos modules. Code here handles initialising different subsets of the API depending on the type of module. 
+.SH "Function Documentation"
+.PP 
+.SS "void mod_done (\fBuint32\fP services)"
+.PP
+Prepares a module for exit. Uninstalls signal handlers, resets terminal to normal operation, et cetera.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIservices\fP a set of \fCINI_x\fP flags denoting which subsystems are to be shut down. This argument is almost always equal to \fBINI_ALL\fP. Certain operations may need to temporarily suspend a few BBS subsystems, which is why this function allows a partial shutdown. However, this is an exception and not the rule.
+.RE
+.PP
+\fBWarning:\fP
+.RS 4
+Services will be shut down \fIonly\fP if they have been previously initialised by a corresponding call to \fBmod_init()\fP, hence \fBINI_ALL\fP is safe to use whatever the actual invocation of \fBmod_init()\fP. This constitutes a slight change of semantics of the \fCINI_x\fP flags.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_init()\fP, \fBmod_end()\fP. 
+.RE
+.PP
+
+.SS "void mod_end ()"
+.PP
+Prepares a module for exit. This is the same as \fCmod_done(INI_ALL)\fP. It's mostly used for graceful shutdowns of modules.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_init()\fP, \fBmod_done()\fP. 
+.RE
+.PP
+
+.SS "void mod_init (\fBuint32\fP initflags)"
+.PP
+Initialise a module. Prepares a module for running by installing signal handlers, initialising structures, and so on.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIinitflags\fP the \fBINI_ALL\fP flag, or a number of \fCINI_x\fP flags ORred together. The named subsystems will be initialised. Unless you really know what you are doing, specify \fBINI_ALL\fP here.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_done()\fP, \fBmod_end()\fP. 
+.RE
+.PP
+
+.SS "int mod_isbot ()"
+.PP
+Check whether a process is a bot. \fBReturns:\fP
+.RS 4
+Returns non-zero if the current module is being operated by a bot. Generally speaking, you should not need to treat bots any different from human users, but some subsystems do need this facility. 
+.RE
+.PP
+
+.SS "int mod_main (int argc, char ** argv)"
+.PP
+Module entry point. This is the function that turns your program into a full-blown, well-behaved BBS module. It deals with command-line arguments, can identify itself (and you, its author), et cetera. You must use \fBmod_setinfo()\fP before calling \fBmod_main()\fP.
+.PP
+The function never returns; it calls the entry point functions specified by your module's information block (\fBmod_info_t\fP) and exits. It also handles error reporting et cetera.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIargc\fP the number of elements in the array argv, exactly like the argc argument of main(). In fact, you should pass main()'s \fCargc\fP here.
+.br
+\fIargv\fP a string array of command line arguments. Pass the \fCargv\fP argument of your main() function here. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBmod_main.c\fP.
+.SS "void mod_regpid (char * tty)"
+.PP
+Register this process as an interactive one. Sets the PID of the interactive process for the supplied terminal. This is used internally to send signals to the process which is currently handling a user's input. This function is called internally by \fBmod_init()\fP. In certain unusual cases, it may be necessary to re-register an interactive process without calling \fC\fBmod_init()\fP\fP (for instance, after a child interactive process has just terminated).
+.PP
+\fBWarning:\fP
+.RS 4
+This is called internally. Unless you need to re-register your module with the system (for example after temporarily calling another Megistos module from your own), there's no need to ever call this function.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP the device name the process is attached to. Suitable values may be obtained using \fBonlinerec_t::channel\fP, or, as a last resort, the value of the environment variable \fCCHANNEL\fP. Do \fBnot\fP use any of the otherwise obvious POSIX ways of doing this such as \fCttyname(3)\fP. The controlling tty of the running process is not necessarily the device of the BBS channel, as the user monitoring/emulation daemon, \fCemud\fP, allocates a pseudotty to insert itself between the process and the user. 
+.RE
+.PP
+
+.SS "void mod_setbot (int isbot)"
+.PP
+Enter or leave bot mode. In bot mode, output is drastically changed to make it much more machine-readable so that bots can operate the system using UNIX facilities as simple as \fCchat(1)\fP or \fCexpect(1)\fP. The facility to change to/from bot mode is provided for scripts that operate in bot mode for a set period of time, then relinquish control to a user (or, conversely, are spawned by a user while that user is logged into the system).
+.PP
+\fBParameters:\fP
+.RS 4
+\fIisbot\fP Specify zero to leave bot mode, non-zero to enter it. 
+.RE
+.PP
+
+.SS "void mod_setinfo (\fBmod_info_t\fP * mod)"
+.PP
+Set module information block. You must call this function early in the module's initialisation to declare it to the system.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImod\fP a pointer to a module information block of type \fBmod_info_t\fP. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBmod_main.c\fP.
+.SS "void mod_setprogname (char * name)"
+.PP
+Set program name. This function facilitates setting the program name for subsystems of the BBS that are not modules. This is important, since error reporting needs the program name.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the name of the program. 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "\fBmod_info_t\fP \fB__module\fP"
+.PP
+Internally used module information. Definition at line 192 of file bbsmod.h.
+.SS "gid_t \fBbbs_gid\fP"
+.PP
+The UNIX group ID of the `bbs' user. Definition at line 196 of file bbsmod.h.
+.SS "uid_t \fBbbs_uid\fP"
+.PP
+The UNIX user ID of the `bbs' user. Definition at line 195 of file bbsmod.h.
+.SS "struct \fBsysvar\fP* \fBsysvar\fP"
+.PP
+A block of system-wide variables. Definition at line 201 of file bbsmod.h.

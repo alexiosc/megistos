@@ -1,0 +1,48 @@
+# This is a Megistos translation table.  Anything to the *RIGHT* of the first
+# hash (#) character in a line is a comment. 256 translations are given, one
+# for each of the possible character values. The format of the file is:
+#
+#
+# translation_for_character_000
+# translation_for_character_001
+# : : :
+# translation_for_character_255
+#
+# translation_for_character may be either:
+#    * a hexadecimal value in the form xx (00 to ff). ALWAYS specify
+#      both digits. Pad with 0 if necessary.
+#    * a character value EXCEPT white space (tabs, newlines, spaces) and the
+#      backslash (\). ALWAYS specify single characters (obviously).
+#
+# In order to specify white space, specify the character's hexadecimal ASCII
+# code. To specify the hash (#), use its hexadecimal ASCII value (23).
+#
+# White space is ignored, but we've organised the translation table as a
+# 16x16 matrix for obvious reasons.
+#
+# To leave a character untranslated, specify \000. Obviously, \000 is always
+# untranslated (why would you want to translate THAT?).
+
+
+# PURPOSE: Translate ELOT-928/ISO-8859-7 to 437G/737 DOS Greek.
+#
+# KBDXLATION: The obvious choice is 437G.737--to--ELOT928.ISO-8859-7.
+
+#   0  1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+#  --------------------------------------------------------------
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 0
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 1
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 2
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 3
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 4
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 5
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 6
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 7
+   20  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20	# 8
+   20  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20	# 9
+   20   "   A  23  23   Y   |   S   "   C  98   "  cf  c4   R   ~	# A
+   f8  f1  fd   ?   '  a3   P  f9  84  86  88   "  8e   ?  93  97	# B
+   e4  80  81  82  83  84  85  86  87  88  89  8a  8b  8c  8d  8e	# C
+   8f  90  fa  91  92  93  94  95  96  97  88  93  e1  e2  e3  e5	# D
+   e8  98  99  9a  9b  9c  9d  9e  9f  a0  a1  a2  a3  a4  a5  a6	# E
+   a7  a8  aa  a9  ab  ac  ad  ae  af  e0  e4  e8  e6  e7  e9  20	# F

@@ -1,0 +1,114 @@
+.TH "Channel definition flags (TTF_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Channel definition flags (TTF_x) \- Flags controlling default channel behaviour.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTTF_CONSOLE\fP   0x0001	/**< Channel is on the system console */"
+.br
+.RI "\fIChannel is on the system console. \fP"
+.ti -1c
+.RI "#define \fBTTF_SERIAL\fP   0x0002	/**< Channel is a plain serial line */"
+.br
+.RI "\fIChannel is a plain serial line. \fP"
+.ti -1c
+.RI "#define \fBTTF_MODEM\fP   0x0004	/**< There's a modem on this channel */"
+.br
+.RI "\fIThere's a modem on this channel. \fP"
+.ti -1c
+.RI "#define \fBTTF_TELNET\fP   0x0008	/**< This channel is for telnet connections */"
+.br
+.RI "\fIThis channel is for telnet connections. \fP"
+.ti -1c
+.RI "#define \fBTTF_SIGNUPS\fP   0x0010	/**< Signups are allowed here */"
+.br
+.RI "\fISignups are allowed here. \fP"
+.ti -1c
+.RI "#define \fBTTF_ASKXLT\fP   0x0100	/**< Ask people for translation mode */"
+.br
+.RI "\fIAsk people for translation mode. \fP"
+.ti -1c
+.RI "#define \fBTTF_ANSI\fP   0x0200	/**< ANSI enabled on this channel by default */"
+.br
+.RI "\fIANSI enabled on this channel by default. \fP"
+.ti -1c
+.RI "#define \fBTTF_ASKANSI\fP   0x0400	/**< Ask people whether they need ANSI */"
+.br
+.RI "\fIAsk people whether they need ANSI. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags controlling default channel behaviour. The flags control the default behaviour of channels with respect to translation, language and terminal settings.
+.PP
+.IP "\(bu" 2
+\fCTTF_CONSOLE\fP This channel is on the system console. Console lines behave slightly different during login. For instance, they interpret as blank user ID as a \fIredraw\fP command and redraw their screen. This is reminiscent of both the way \fCgetty\fP and the Major BBS operate.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_SERIAL\fP This channel is on a serial line, probably connected to a local terminal of sorts.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_MODEM\fP This channel is a modem. Modem channels have slightly different initialisation semantics from other types of channels.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_TELNET\fP This channel is for incoming telnet connections. This has \fIvery\fP different semantics from other channels types! For one, it's the only type of line the BBS isn't watching on a constant basis. When a telnet connection is established, \fIthen\fP the BBS knows about it.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_SIGNUPS\fP Allow new user signups on this line. This can be used to limit use of certain lines to existing users.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_ASKXLT\fP Present a menu so that the user can select the translation mode they require upon connection. If this flag is set, the \fCxlation\fP field in \fCstruct\fP channeldef defines the translation mode selected when the user simply presses \fCEnter\fP in this menu.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_ANSI\fP Set this flag to specify that this channel will output ANSI terminal directives by default.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_ASKANSI\fP Like { TTF_ASKXLT, present a menu so that the user can choose whether they'd like ANSI directives or not. The value of \fCTTF_ANSI\fP is the default menu selection.
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_METABBS\fP Allow use of the MetaBBS subsystem on this channel. Users are allowed to use this line to connect to another friendly BBS, without connecting to yours (and indeed without even having an \fIaccount\fP on yours).
+.PP
+.PP
+.IP "\(bu" 2
+\fCTTF_INTERBBS\fP Allow other systems to use this channel for networking. This causes a slight pause before presenting a user-oriented login screen, so that automated systems can issue their respective handshakes. The timeout is small, so it should not annoy your users.
+.PP
+.PP
+{description} 
+.SH "Define Documentation"
+.PP 
+.SS "#define TTF_ANSI   0x0200	/**< ANSI enabled on this channel by default */"
+.PP
+ANSI enabled on this channel by default. Definition at line 218 of file ttynum.h.
+.SS "#define TTF_ASKANSI   0x0400	/**< Ask people whether they need ANSI */"
+.PP
+Ask people whether they need ANSI. Definition at line 219 of file ttynum.h.
+.SS "#define TTF_ASKXLT   0x0100	/**< Ask people for translation mode */"
+.PP
+Ask people for translation mode. Definition at line 217 of file ttynum.h.
+.SS "#define TTF_CONSOLE   0x0001	/**< Channel is on the system console */"
+.PP
+Channel is on the system console. Definition at line 212 of file ttynum.h.
+.SS "#define TTF_MODEM   0x0004	/**< There's a modem on this channel */"
+.PP
+There's a modem on this channel. Definition at line 214 of file ttynum.h.
+.SS "#define TTF_SERIAL   0x0002	/**< Channel is a plain serial line */"
+.PP
+Channel is a plain serial line. Definition at line 213 of file ttynum.h.
+.SS "#define TTF_SIGNUPS   0x0010	/**< Signups are allowed here */"
+.PP
+Signups are allowed here. Definition at line 216 of file ttynum.h.
+.SS "#define TTF_TELNET   0x0008	/**< This channel is for telnet connections */"
+.PP
+This channel is for telnet connections. Definition at line 215 of file ttynum.h.

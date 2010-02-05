@@ -1,0 +1,599 @@
+
+
+                Gallops Script Format revision 4 - 20/09/2000
+                ---------------------------------------------
+
+ Ж тбЫжйЮ 4 лжм Пицлмзжм АиоЬхжм Ьдлжвщд ЪаШ лЮд мзжгждсЫШ ЬирлЮгШлжвжЪхрд.
+
+
+                            ====================
+                            ПхдШбШк ПЬиаЬожгтдрд
+                            --------------------
+
+                           0. ДайШЪрЪу
+                           1. Ддлжвтк йлж бмихрк лгугШ
+                           2. Ддлжвтк бШлс лЮ ЫуврйЮ ЬирлуйЬрд
+                           3. ДзЬблсйЬак
+                           4. ЛЬлШниШйлук
+                           5. ЛЬввждлабтк йЮгЬащйЬак
+                           6. ПШиШЫЬхЪгШлШ scripts (poll/quiz)
+
+
+0. ДайШЪрЪу
+===========
+ЙсЯЬ ШиоЬхж Ьдлжвщд (script) ШзжлЬвЬхлШа Шзц Ычж гтиЮ, лж бмихрк лгугШ (main
+body) бШа лак ЫЮвщйЬак лрд ЬирлуйЬрд (question bodies). ТШ Ычж гтиЮ ЫЬд
+ЬхдШа ЬхдШа ШмлжлЬву, бШа ЫЬд зитзЬа дШ ШввЮвжЬзабШвчзлждлШа.
+
+	ЛаШ ЪЬдабу гжину Ьдцк script гзжиЬх дШ ЬхдШа Ю Ьеук:
+
+# йоцваШ (ШиохЭжмд гЬ #)
+<Ьдлжвтк бмихжм лгугШлжк>
+
+<ЫуврйЮ ЬищлЮйЮк 1>
+
+<ЫуврйЮ ЬищлЮйЮк 2>
+...
+<ЫуврйЮ ЬищлЮйЮк М>
+
+
+	СмдхйлШлШа жа Ьдлжвтк лжм бмихрк лгугШлжк дШ ЫхдждлШа йлЮд Шиоу лжм
+script щйлЬ дШ ШзжнЬчЪждлШа зШиШджуйЬак. ПРОСОХЖ: Ад бсзжаШ Ьдлжву лжм
+бмихрк лгугШлжк ЫЮврЯЬх гЬлШеч лрд ЬирлуйЬрд, лцлЬ Шмлу тоЬа айоч *гцдж* ЪаШ
+лак ЬзцгЬдЬк ЬирлуйЬак (у гтоиа дШ ймдШдлЮЯЬх гаШ дтШ хЫаШ Ьдлжву). Оа
+зижЮЪжчгЬдЬк ЬирлуйЬак ЫЬд ЬзЮиЬсЭждлШа.
+
+	ТШ йоцваШ зитзЬа дШ бШлШвШгЩсджмд гаШ ЪиШггу Шзц гцдШ лжмк, бШа ж
+зищлжк оШиШблуиШк дШ ЬхдШа Ю ЫхЬйЮ (#). ГЬд ЬхдШа ШзШиШхлЮлж дШ еЬбаджчд Шзц
+лЮ йлувЮ 1. ПРОСОХЖ: СоцваШ йлЮд хЫаШ ЪиШггу гЬ Ьдлжвтк ЬхдШа ЫмШдлцд дШ
+жЫЮЪуйжмд йЬ зШиШджуйЬак лжм гЬлШниШйлу, Ъа'Шмлц бШвц ЬхдШа дШ ШзжнЬчЪждлШа.
+
+
+==============
+1. Ддлжвтк йлж бмихрк лгугШ
+Слж бмихрк лгугШ лжм ШиоЬхжм Ьдлжвщд, гзжижчд дШ гзжмд Ьдлжвтк ЪЬдабук
+нчйЬрк зжм Шнжижчд лж ЬирлЮгШлжвцЪаж.
+
+1.1. ОджгШйхШ лжм ЬирлЮгШлжвжЪхжм
+Тж цджгШ лжм ЬирлЮгШлжвжЪхжм ЫЬд тоЬа бШгхШ йотйЮ гЬ лж цджгШ лжм ШиоЬхжм
+Ьдлжвщд.
+
+СчдлШеЮ:
+	title <gallup-title>
+	
+	<gallup-title> ЬхдШа тдШ ШвнШиаЯгЮлабц лЮк гаШк йЬаиск. Тж гтЪЬЯжк
+		зЬиажихЭЬлШа йлШ 128 bytes.
+
+	Ж зШижмйхШ лЮк Ьдлжвук Шмлук ЬхдШа мзжоиЬрлабу.
+	
+
+1.2. Тчзжк лжм ЬирлЮгШлжвжЪхжм
+ДдШ ЬирлЮгШлжвцЪаж гзжиЬх дШ ЬхдШа гаШ ЫЮгжйбцзЮйЮ у тдШк ЫаШЪрдайгцк.
+
+СчдлШеЮ:
+	type <gallup-type>
+	
+	<gallup-type> гзжиЬх дШ всЩЬа лак лагтк,
+		 `poll' ЪаШ ЫЮгжйбжзуйЬак бШа
+		 `quiz' ЪаШ ЫаШЪрдайгжчк.
+
+	ОлШд лж ЬирлЮгШлжвцЪаж ЬхдШа ЫаШЪрдайгцк, ЬхдШа мзжоиЬрлабц йЬ бсЯЬ
+	ЬищлЮйЮ дШ ЫЮвщдЬлШа бШа Ю йрйлу ШзсдлЮйЮ.
+
+	Ж зШижмйхШ лЮк Ьдлжвук Шмлук ЬхдШа мзжоиЬрлабу.
+	
+	
+	
+1.2.1. ПижбШЯжиайгтджа ЩШЯгжх йЬ бсЯЬ ШзсдлЮйЮ
+СЬ тдШд ЫаШЪрдайгц, гзжижчгЬ дШ зижбШЯжихйжмгЬ зцйжмк ЩШЯгжчк ЯШ зШхидЬа ж
+бсЯЬ зШхблЮк ЪаШ бсЯЬ йрйлу у всЯжк ШзсдлЮйЮ. Дзазвтжд, гзжижчгЬ дШ
+зижбШЯжихйжмгЬ тдШ зжйц ЩШЯгщд зжм ЯШ ЫхдЬлШа йлжд бсЯЬ зШхблЮ йлЮд Шиоу лжм
+ЫаШЪрдайгжч.
+
+СчдлШеЮ:
+	credits <tag> <number>
+
+		<tag> гзжиЬх дШ всЩЬа лак лагтк,
+			`default' ЪаШ лжд Шиоабц ШиаЯгц ЩШЯгщд
+			`correct' ЪаШ лжмк ЩШЯгжчк зжм ЫхдждлШа йЬ бсЯЬ
+				йрйлу ЬищлЮйЮ
+			`wrong' ЪаШ лжмк ЩШЯгжчк зжм ШнШаижчдлШа йЬ бсЯЬ
+				всЯжк ЬищлЮйЮ
+			
+		<number> ж ШиаЯгцк лрд ЩШЯгщд. ЗЬлабцк у ШидЮлабцк.
+
+
+	Дсд Ю Ьдлжву Шмлу зШиШвЮнЯЬх лцлЬ бсЯЬ зШхблЮк ЩШЯгжвжЪЬхлШа гЬ тдШд
+	(1) ЩШЯгц ЪаШ бсЯЬ йрйлу ШзсдлЮйЮ. ГЬд ШнШаижчдлШа ЩШЯгжх ЪаШ всЯжк
+	ШзШдлуйЬак, бШа жа Шиоабжх ЩШЯгжх ЬхдШа гЮЫтд.
+
+	Ж Ьдлжву Шмлу ЬхдШа зижШаиЬлабу.
+	
+
+1.3. ЙШЯжиайгцк ЬирлуйЬрд
+Оа ЬиирлуйЬак бШЯжихЭждлШа гЬ тдШ гзвжб Ьдлжвщд зжм зЬиаЪиснжмд лж ЬхЫжк лЮк
+ЬищлЮйЬак бШа сввЬк оиуйагЬк зШиШгтлижмк.
+
+СчдлШеЮ:
+	<quest-type-id> <opt-args>
+	...
+	end
+	
+	<quest-type-id> гзжиЬх дШ тоЬа гаШ Шзц лак лагтк,
+		`number' ЪаШ ЬищлЮйЮ гЬ ШиаЯгЮлабу ШзсдлЮйЮ,
+		`text' ЪаШ ЬищлЮйЮ гЬ ШвЯШиаЯгЮлабу ШзсдлЮйЮ,
+		`select' ЪаШ ЬищлЮйЮ зжввШзвук ЬзавжЪук,
+		`combo' ЪаШ ймдЫмШйлабу ЬищлЮйЮ.
+
+	<opt-args> гзжиЬх дШ тоЬа ЫаШнжиЬлабу лагу, ШдсвжЪШ гЬ лж ЬхЫжк лЮк
+		ЬищлЮйЮк.
+
+			ЪаШ ШиаЯгЮлабтк Ьи.    : <value-min> <value-max>
+			ЪаШ ШвЯШиагЯЮлабтк Ьи. : <text-max-len>
+			ЪаШ Ьи. зжв. ЬзавжЪук  : nothing
+			ЪаШ ймдЫмШйлабтк Ьи.   : nothing or <num-of-user-choices>
+
+			<value-min> ЬхдШа Ю габицлЬиЮ лагу зжм гзжиЬх дШ
+				ЪхдЬа ШзжЫЬблу.
+
+			<value-max> ЬхдШа Ю гЬЪШвчлЬиЮ лагу зжм гзжиЬх дШ
+				ЪхдЬа ШзжЫЬблу.
+
+			<text-max-len> ЬхдШа лж гтЪайлж губжк лжм
+				ШвнШиаЯгЮлабжч
+			
+			Дсд лж зЬЫхж <num-of-user-choices> мзсиоЬа, лцлЬ
+			гзжиЬх дШ ЫЮврЯЬх гаШ аЫаШхлЬиЮ гжину ймдЫмШйлабук
+			ЬищлЮйЮк, бШа цоа тдШ Шзвц МШа/Ооа.  Ж гжину лЮк
+			ЬищлЮйЮк зитзЬа дШ бШЯжиайлЬх гЬ лЮд Ьдлжву
+			`choice'.
+
+	Лтоиа лЮд тбЫжйЮ 4 лжм Пижлчзжм тдШ ЬирлЮгШлжвцЪаж ЫЬд гзжиЬх дШ
+	зЬиавШгЩсдЬа ймдЫмШйлабтк ЬирлуйЬак.
+
+	ВаШ лак Ьдлжвтк зжм гзжижчд лжзжЯЬлЮЯжчд гтйШ йлж йщгШ гаШк ЬищлЮйЮк
+	ЫЬхлЬ лж ЙЬнсвШаж 2.
+
+
+
+=================
+2. СщгШ лЮк ЬищлЮйЮк
+ЛЬиабтк Ьдлжвтк гзжижчд дШ лжзжЯЬлЮЯжчд гждсоШ йЬ жиайгтджмк лчзжмк
+ЬирлуйЬрд. АввЬк ЬхдШа ШзШиШхлЮлж дШ мзсиожмд йЬ цвЬк, Ьдщ гЬиабтк ЬхдШа
+зижШаиЬлабтк.
+
+2.1. ГуврйЮ лжм бЬагтджм лЮк ЬищлЮйЮк
+Тж бЬхгЬдж лЮк ЬищлЮйЮк ЬхдШа зЬиаЪиснЮ лЮд ЬищлЮйЮ зжм зШижмйасЭЬлШа йлжд
+оиуйлЮ, Ьдщ ЬхдШа ЫЮдШлцд дШ ЬгнШдхЭЬа бШа сввЬк звЮижнжихЬк, цзрк ж ШиаЯгцк
+лЮк ЬищлЮйЬак, б.Ш.
+
+СчдлШеЮ:
+	{ <text> }
+	
+		<text> ЬхдШа тдШ бЬхгЬдж зжм гзжиЬх дШ ЬзЬблЬхдЬлШа йЬ
+			зЬиаййцлЬиЬк Шзц гаШ ЪиШггтк. ПитзЬа мзжоиЬрлабс дШ
+			ЬЪбвЬхЬлШа йЬ ШЪбчвЬк. Ж ШдсзжЫЮ бсЯЬлжк гзжиЬх дШ
+			оиЮйагжзжаЮЯЬх рк escape character.
+		
+		Ж ШЪбчвЮ зжм ШджхЪЬа зитзЬа дШ ЬхдШа ж зищлжк оШиШблуиШк лЮк
+		ЪиШггук, цоа цгрк бШа ШзШиШхлЮлШ йлЮд зищлЮ йлувЮ.
+
+	Ж зШижмйхШ лЮк Ьдлжвук Шмлук ЬхдШа мзжоиЬрлабу.
+
+
+2.2. ЙШЯжиайгцк аЫаШхлЬиЮк Шзжджгук ЩШЯгщд ЪаШ гаШ ЬищлЮйЮ
+СЬ зЬихзлрйЮ ЬирлЮгШлжвжЪхжм лчзжм ЫаШЪрдайгжч, гаШ ЬищлЮйЮ гзжиЬх дШ
+ЩШЯгжвжЪЬхлШа гЬ ЫаШнжиЬлабжчк ЩШЯгжчк Шзц Шмлжчк зжм тожмд зижбШЯжиайлЬх.
+
+СчдлШеЮ: 
+	credits <tag> <number>
+	
+	<tag> гзжиЬх дШ всЩЬа лак лагтк,
+		`correct' бШа `wrong'
+	
+	<number> ж ШиаЯгцк лрд ЩШЯгщд. ЗЬлабцк у ШидЮлабцк.
+
+
+	Ж Ьдлжву Шмлу ЬхдШа зижШаиЬлабу.
+
+
+2.3. ЙШЯжиайгцк ШзШдлуйЬрд йЬ ЬирлуйЬак зжввШзвук ЬзавжЪук бШа ймдЫмШйлабтк
+     ЬирлуйЬак.
+ЛЬ лЮд Ьдлжву Шмлу ЫЮвщдждлШа жа заЯШдтк ШзШдлуйЬак йЬ гаШ ЬищлЮйЮ зжввШзвук
+ЬзавжЪук, бШа Ю бШлЮЪжихШ ШзсдлЮйЮк йЬ гаШ ймдЫмШйлабу ЬищлЮйЮ. Ж Ьдлжву
+Шмлу ЬхдШа ЫмдШлу гцдж йЬ ЬирлуйЬак лчзжм `select' бШа `combo'.
+
+	options { <options-list> }
+
+		<options-list> ЬхдШа гаШ вхйлШ, зжм зЬиатоЬа лак заЯШдтк
+			ШзШдлуйЬак, ориайгтдЬк гЬ гаШ бсЯЬлЮ гзШиШ (|)
+			Ж вхйлШ зитзЬа дШ ЬЪбвЬхЬлШа йЬ ШЪбчвЬк.
+			ПШисЫЬаЪгШ:
+			
+			options	{One|Two|Three}
+			
+
+			Ж гзсиШ ЫЬд ЬхдШа ШзШиШхлЮлЮ йлж лтвжк лЮк
+			вхйлШк.
+
+		Ж вхйлШ гзжиЬх дШ ЩихйбЬлШа йЬ зЬиаййцлЬиЬк Шзц гаШ ЪиШггтк.
+		ЙсЯЬ бЬдц, tab, бШа ШввШЪу ЪиШггук, зиад бШа гЬлс Шзц лак
+		ЬзавжЪтк ШЪджЬхлШа.			
+
+		Лждж гаШ (1) лтлжаШ Ьдлжву ЬзалитзЬлШа йЬ бсЯЬ ЬищлЮйЮ.
+
+	Ж Ьдлжву Шмлу ЬхдШа ЫмдШлу гцдж йЬ ЬирлуйЬак лчзжм `select' бШа
+	`combo'.
+
+
+
+
+2.4. ЙШЯжиайгцк заЯШдщд ШзШдлуйЬрд йЬ ймдЫмШйлабтк ЬирлуйЬак
+Слак ймдЫмШйлабтк ЬирлуйЬак, ж оиуйлЮк бШвЬхлШа дШ ЫщйЬа лЮ ЪдщгЮ лжм йЬ
+жиайгтдЬк ЬирлуйЬак. Ж ШзсдлЮйЮ гзжиЬх дШ ЬхдШа тдШ Шзвц МШа/Ооа у заж
+зжвчзвжбЮк гжинук, лжм лчзжм: МШа/Ооа/Ийрк/ГЬд етир . ЛЬ лЮд Ьдлжву `choice'
+зЬиаЪиснЬлШа Ю гжину лЮк ШзсдлЮйЮк зжм ШдШгтдЬлШа Шзц лЮд оиуйлЮ.
+Ж Ьдлжву Шмлу ЬхдШа ЫмдШлу гцдж йЬ ЬирлуйЬак лчзжм `combo'.
+
+	choice <select-char> <text>
+
+		<select-char> ЬхдШа ж оШиШблуиШк гЬ лжд жзжхж ж оиуйлЮк
+			ЬзавтЪЬа гаШ ймЪбЬбиагтдЮ ЬзавжЪу. О оШиШблуиШк
+			Шмлцк ЯШ гЬлШлиШзЬх йлжд Шдлхйлжаож вШладабж. О
+			оШиШблуиШк `x' ЫЬд ЬзалитзЬлШа гаШк бШа
+			оиЮйагжзжаЬхлШа ЬйрлЬиабс Шзц лж зицЪиШггШ ЪаШ тежЫж
+			Шзц лЮд зШижчйШ ЫаШЫабШйхШ.
+			current procedure.
+
+		<text> ЬхдШа лж бЬхгЬдж лж жзжхж зШижмйасЭЬлШа йлжд оиуйлЮ.
+			ДхдШа гцдж гаШ ЪиШггу, бШа зитзЬа дШ ЬхдШа йчдлжгж.
+			ЙЬдс бШа tabs зиад бШа гЬлШ лж бЬхгЬдж ШЪджжчдлШа.
+
+	Ж Ьдлжву Шмлу зитзЬа дШ ЬайсЪЬлШа цйЮ ЬхдШа бШа Ю лагу
+	<num-of-user-choices>, зижбЬагтджм дШ зЬиаЪиШнжчд цвЬк жа заЯШдтк
+	ШзШдлуйЬак. (ЫЬк зШисЪиШнж 1.3)
+
+	Ж Ьдлжву Шмлу ЫЬд зитзЬа дШ мзсиоЬа цлШд лж зЬЫхж
+	<num-of-user-choices> ЫЬд тоЬа ЬайШоЯЬх.
+	
+
+
+2.5. ГЮвщдждлШк лЮ йрйлу ШзсдлЮйЮ йЬ гаШ ЬищлЮйЮ
+СЬ зЬихзлрйЮ ЫаШЪрдайгжч, мзсиоЬа гаШ йрйлу ШзсдлЮйЮ йЬ бсЯЬ ЬищлЮйЮ.
+
+СчдлШеЮ:
+	answer <answer>
+	
+	<answer> ЬхдШа Ю ШзсдлЮйЮ зжм гзжиЬх дШ ЬхдШа,
+		ШвШнШиаЯгЮлабц, Ьсд Ю ЬищлЮйЮ ЬхдШа лчзжм `text'
+		ШиаЯгцк, Ьсд Ю ЬищлЮйЮ ЬхдШа лчзжм `number'
+		ШиаЯгцк, Ьсд Ю ЬищлЮйЮ ЬхдШа зжввШзвук ЬзавжЪук.
+			ТцлЬ Ю ШзсдлЮйЮ ЬхдШа ж Шчерд ШиаЯгцк лЮк
+			ЬзавжЪук. (АиаЯгщдлШк Шзц лж 1)
+	
+	Дсд Ю ШзсдлЮйЮ лжм оиуйлЮ ЬхдШа хЫаШ гЬ лЮ йрйлу ШзсдлЮйЮ, лцлЬ ж
+	оиуйлЮк вШгЩсдЬа лжд ШиаЯгц лрд `correct' ЩШЯгщд. Дсд Ю ШзсдлЮйЮ
+	ЬадШа вШдЯШйгтдЮ лцлЬ ШнШхижчдлШа `wrong' ЩШЯгжх Шзц лж оиуйлЮ.
+	Ж ЩШЯгжвжЪхШ ЪаШ лж вцЪж Шмлц гзжиЬх дШ ЬхдШа бШа ШидЮлабу.
+
+	СЬ зЬихзлрйЮ зжм ШзсдлЮйЮк бЬагтджм, жа оШиШблуиЬк лжм бЬагтджм
+	гЬлШлитзждлШа зищлШ йлжмк Шдлхйлжаожмк вШладабжчк. ДхдШа бШвц дШ
+	ШзжнЬчЪждлШа ЬирлуйЬак лтлжажм лчзжм йЬ ЫаШЪрдайгжчк, Ыацла гзжижчд
+	дШ гзЬиЫтпжмд лж оиуйлЮ.
+
+
+=============
+3. ДзЬблсйЬак
+
+ДеШалхШк лжм гЬЪсвжм ШиаЯгжч зжм ЬхоШд ймййриЬмЯЬх йлЮ тбЫжйЮ 3 лжм
+зижлчзжм, ЫЮгажмиЪуЯЮбЬ Ю тбЫжйЮ 4. ЛЬввждлабтк ЬзЬблсйЬак ЫЬд зитзЬа дШ
+тиождлШа йЬ ШдлхЯЬйЮ гЬ лЮк зШиШзсдр Ьдлжвтк, бШа зитзЬа дШ ЬхдШа
+зижШаиЬлабтк, тлйа щйлЬ дШ мзсиоЬа зижк лШ зхйр ймгЩШлцлЮлШ.
+
+3.1. ЛжинжзжхЮйЮ лжм гЬджч лрд ЬирлуйЬрд зжввШзвук ЬзавжЪук Шзц лжд оиуйлЮ.
+ПижбЬагтджм дШ ЫщйжмгЬ лЮ ЫмдШлцлЮлШ йлжд ймЪЪиШнтШ лрд scripts дШ
+ЫаШгжинщйЬа лж Ыабц menu ЬзавжЪщд, ЬхдШа ЫмдШлцд дШ *ШзЬдЬиЪжзжауйжмгЬ* лЮд
+ЬгнсдайЮ лжм menu лрд ЬзавжЪщд йлак ЬирлуйЬак лчзжм `select'. ВаШ лж йбжзц
+Шмлц ЬхдШа ШзШиШхлЮлж дШ ЫхдждлШа жа заЯШдтк ЬзавжЪтк гтйШ йлж бЬхгЬдж лЮк
+ЬищлЮйЮк (ЫЮвШЫу гтйШ йлШ { } зЬиаЪиснжмд лЮд ЬищлЮйЮ). ПШицвШ Шмлс, Ю
+Ьдлжву options *зитзЬа* дШ ЫхдЬлШа, бШдждабс бШа гЬ цвЬк лак заЯШдтк
+ЬзавжЪтк. Ойлцйж зиад лак ШЪбчвЬк зитзЬа дШ ЩихйбЬлШа гаШ зШчвШ (-).
+ПШисЫЬаЪгШ:
+	options - {Sun|Earth|Moon}
+
+	Ж зШижмйхШ лЮк зШчвШк мзжЫЮвщдЬа лЮ *гЮ* ЬгнсдайЮ лжм menu, орихк дШ
+ЬзЮиЬсЭЬа йЬ лхзжлШ лак мзцвжазЬк зШиШгтлижмк лЮк ЬищлЮйЮк. Чк Ьб лжчлжм, ж
+ймЪЪиШнтШк зитзЬа дШ гзЬх йлжд ЬзазицйЯЬлж бцзж дШ ЪиспЬа лак заЯШдтк
+ШзШдлуйЬак Ычж нжитк.
+	Чйлцйж ЫЬд ЬхдШа ШзШиШхлЮлж йлЮд Ьдлжву options дШ зЬиатоЬлШа лж
+ШбиаЩтк ШдлхЪиШнж лрд заЯШдщд ШзШдлуйЬрд. ОзжажЫузжлЬ ЫаШбиалабц бЬхгЬдж,
+зжм ЯШ гзжижчйЬ дШ оиЮйагжзжаЮЯЬх ЪаШ лЮ йлШлайлабу ЬзЬеЬиЪШйхШ лжм
+ЬирлЮгШлжвжЪхжм ЬхдШа ШибЬлу (ЫЮвШЫЮ, гзжиЬхлЬ дШ ЩсвЬлЬ Шзвс джчгЬиШ
+1|2|3.. , ШибЬх дШ ЬхдШа лШ хЫаШ йлжд ШиаЯгц гЬ лак заЯШдтк ШзШдлуйЬак.
+
+Ж зШиШзсдр ЬзтблШйЮ айочЬа гждсоШ ЪаШ лак ЬирлуйЬак зжввШзвук ЬзавжЪук.
+
+
+
+3.2. ЙШЯжиайгцк йрйлук ШзсдлЮйЮк йлак ЬирлуйЬак зжввШзвук ЬзавжЪук.
+Ж йрйлу ШзсдлЮйЮ гзжиЬх дШ ЬзавЬоЯЬх бШа гтйШ Шзц лЮд Ьдлжву options ШибЬх
+Шгтйрк гЬлс Шзц лж ЫаШориайлабц | (у Шгтйрк гЬлШ лЮд ШджаблЮ ШЪбчвЮ {, Шд
+зицбЬалШа ЪаШ лЮд зищлЮ ЬзавжЪу), дШ зижлЬЯЬх тдШ ШйлЬисба (*).
+ПШисЫЬаЪгШ:
+	options {Sun|*Earth|Moon}
+	options - {*Sun|Earth|Moon}
+
+Дсд йлЮд ЬищлЮйЮ ЩихйбЬлШа ЙАИ Ю Ьдлжву answer лцлЬ Ю лЬвЬмлШхШ Ьдлжву зжм
+ймдШдлслШа мзЬиайочЬа.
+
+Ж зШиШзсдр ЬзтблШйЮ гзжиЬх дШ ймдЫмШйлЬх бШа гЬ лЮд ЬзтблШйЮ 3.1
+
+Ж зШиШзсдр ЬзтблШйЮ айочЬа гждсоШ ЪаШ лак ЬирлуйЬак лчзжм `select'
+
+
+
+==================
+4. Script compiler
+
+The script compiler compiles the script and possibly creates the binary data
+file that has the binary description of the gallup.
+
+The script compiler can be used to install a script in the data directory
+so to be available to the gallup module.
+
+During compilation:
+
+	o Any errors that do not concern the script structure, i.e.  no
+	  `answer' field in a quiz-type poll, generate an error message, but
+	  compilation is continued. At the end no output is generated.  The
+	  compiler is exiting with abort message.
+
+	o Any error that does concern the script structure, i.e. an
+	  misplaced `end' directive, generates an error, and script
+	  compilation is stopped. No output is generated. The compiler exits
+	  with abort message.
+
+	o Output is generated only when no warning or error is generated. 
+	  The compiler exits with success message.
+
+
+==========================
+5. Comments for the future
+
+5.1. Use of flags to enable questions to be presented or not in quiz-type
+gallups
+
+5.2. Timed quizzes
+
+===============
+6. ПШиШЫЬхЪгШлШ
+
+6.1. ГЮгжйбцзЮйЮ
+Тж зШисЫЬаЪгШ зжм ШбжвжмЯЬх ЬхдШа гаШ ЫЮгжйбцзЮйЮ.
+
+================== CUT HERE ==========================
+
+# This is a test script that displays the full features
+# of the Gallups Script Format revision 4.
+
+# The title of the gallup (one line only)
+title Gallups Script Format Revision 4 Test Suite (Poll)
+
+# The type of the gallup `poll' or `quiz'
+type	poll
+
+# a number question, input: any 32-bit signed integer
+number
+
+# the prompt
+{
+  Question 1
+  
+  This is Question 1 of the Test Suite (Poll).
+  
+  Enter a number to try it.
+
+}
+
+# the end question marker
+end
+
+# a number question but with specific range
+number 0 100
+
+{
+  Question 2 of the Test Suite (Poll)
+  
+  Enter a number. Its range should be from 0 to 100.
+  
+  Values less than 0 or higher than 100 are not allowed, and
+  you will reprompted if you try it out.
+
+}
+
+end
+
+# a text question
+text 100
+{
+  Question 3 of the Test Suite (Poll)
+  
+  In this question you can enter a string with the maximum of 100
+  characters. In text questions there is always an upper limit.
+  
+  Enter text, and then press enter.
+
+}
+
+end
+
+# a multiple choice question
+select
+{
+  Question 4 of the Test Suite (Poll)
+  
+  This is a multiple choice question.
+  There are 5 options below, and you have to choose one of them.
+  You can choose by entering the options ascending number (the one 
+  that is at the left of the option text).
+  
+  Go ahead choose your favorite comic character.
+
+}
+
+options {Mickey Mouse;Daisy;
+	Goofy;Tasmanian Devil;Tweety}
+
+end
+
+
+# a simple combo question
+combo
+{
+  Question 5 of the Test Suite (Poll)
+  
+  In this question you are about to answer whether you like
+  or not one of the following TV programs.
+  
+  You answer is logged, analyzed, and sent to the secret services.
+
+}
+
+options	{Friends;
+	7th Heaven;
+	Baywatch;
+	Esmeralda}
+
+end
+
+# and now a more complicated combo question
+combo 4
+{
+  Question 6 of the Test Suite (Poll)
+  
+  This is the last question, and I'd like to make some more
+  difficult questions. (Those how answered Yes to Esmeralda,
+  will be immediately deleted after filling this questionnaire)
+
+  So what is you opinion for the following people:
+
+  (enter a L for like, H for hate, C for don't care and W for who is he!)
+}
+
+options	{Bill Clinton; Bily Idol; Ayrton Senna;
+	Neal Armstrong; Santana; The author of this module}
+	
+choice	L I like him
+choice	H I hate him
+choice  C I don't care
+choice  W Who is he?
+
+end
+
+
+=============== CUT HERE = END ==================
+
+
+6.2. ГаШЪрдайгцк
+Тж зШисЫЬаЪгШ зжм ШбжвжмЯЬх ЬхдШа тдШк ЫаШЪрдайгцк.
+
+=============== CUT HERE ========================
+
+# This is a test script that displays the full features
+# of the Gallups Script Format revision 4.
+
+# The title of the gallup (one line only)
+title Gallups Script Format Revision 4 Test Suite (Quiz)
+
+# The type of the gallup `poll' or `quiz'
+type	quiz
+
+credits correct 5
+
+
+# a number question, input: any 32-bit signed integer
+number
+
+# the prompt
+{
+  Question 1
+  
+  This is Question 1 of the Test Suite (Quiz).
+  
+  Enter a number to try it.
+  The expected number is 66.
+
+}
+
+answer	66
+
+# the end question marker
+end
+
+# a number question but with specific range
+number 0 100
+
+{
+  Question 2 of the Test Suite (Poll)
+  
+  Enter a number. Its range should be from 0 to 100.
+  
+  Values less than 0 or higher than 100 are not allowed, and
+  you will reprompted if you try it out.
+
+  (don't you feel an irresistible force to enter 34?)
+   
+
+}
+
+answer	34
+
+end
+
+# a text question
+text 100
+{
+  Question 3 of the Test Suite (Poll)
+  
+  In this question you can enter a string with the maximum of 100
+  characters. In text questions there is always an upper limit.
+  
+  Enter the name of the local sysop, and then press enter.
+
+}
+
+answer Xenios
+
+end
+
+# a multiple choice question
+select
+{
+  Question 4 of the Test Suite (Poll)
+  
+  This is a multiple choice question.
+  There are 5 options below, and you have to choose one of them.
+  You can choose by entering the options ascending number (the one 
+  that is at the left of the option text).
+  
+  Go ahead choose your favorite comic character.
+
+  (you earn 2 points for answering Tweety!)
+
+}
+
+credits correct	2
+
+options {Mickey Mouse|
+	Daisy|
+	Goofy|
+	Tasmanian Devil|
+	Tweety}
+
+answer	5
+
+end
+
+# no combo questions in quiz gallups
+
+================= CUT HERE = END ======================

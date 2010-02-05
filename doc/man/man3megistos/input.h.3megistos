@@ -1,0 +1,328 @@
+.TH "input.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+input.h \- Low and high-level user input functions.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBinjothbuf\fP"
+.br
+.RI "\fIMessage buffer for injoth(). \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: input.h,v 1.4 2003/09/27 20:31:25 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBINF_HELP\fP   0x0001 /**< High-level help requests to be handled by caller. */"
+.br
+.RI "\fIHigh-level help requests to be handled by caller. \fP"
+.ti -1c
+.RI "#define \fBINF_PASSWD\fP   0x0002 /**< Echo asterisks (for password entry) */"
+.br
+.RI "\fIEcho asterisks (for password entry). \fP"
+.ti -1c
+.RI "#define \fBINF_REPROMPT\fP   0x0004 /**< You must reprompt, <tt>injoth()</tt> received */"
+.br
+.RI "\fIYou must reprompt, \fCinjoth()\fP received. \fP"
+.ti -1c
+.RI "#define \fBINF_NOINJOTH\fP   0x0008 /**< Set to disable incoming <tt>injoth()</tt>s */"
+.br
+.RI "\fISet to disable incoming \fCinjoth()\fPs. \fP"
+.ti -1c
+.RI "#define \fBINF_TIMEOUT\fP   0x0010 /**< Set to indicate that a timeout occurred */"
+.br
+.RI "\fISet to indicate that a timeout occurred. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBinp_init\fP ()"
+.br
+.RI "\fIInitialise input subsystem. \fP"
+.ti -1c
+.RI "void \fBinp_done\fP ()"
+.br
+.RI "\fIShutdown input system. \fP"
+.ti -1c
+.RI "int \fBinp_acceptinjoth\fP ()"
+.br
+.RI "\fIDisplay any queued injected messages. \fP"
+.ti -1c
+.RI "void \fBinp_setmonitorid\fP (char *tty_or_uid)"
+.br
+.RI "\fISet tty or username for monitoring. \fP"
+.ti -1c
+.RI "void \fBinp_monitor\fP ()"
+.br
+.RI "\fIMonitor a line. \fP"
+.ti -1c
+.RI "void \fBinp_readstring\fP (int maxlen)"
+.br
+.RI "\fILow-level input function. \fP"
+.ti -1c
+.RI "int \fBinp_reprompt\fP ()"
+.br
+.RI "\fICheck if a reprompt is necessary. \fP"
+.ti -1c
+.RI "void \fBinp_nonblock\fP ()"
+.br
+.RI "\fISet non-blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_block\fP ()"
+.br
+.RI "\fISet blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_resetblocking\fP ()"
+.br
+.RI "\fIRevert to previous blocking mode. \fP"
+.ti -1c
+.RI "void \fBinp_setidle\fP (int t)"
+.br
+.RI "\fISet user inactivity timeout. \fP"
+.ti -1c
+.RI "void \fBinp_resetidle\fP ()"
+.br
+.RI "\fIReset user inactivity timer. \fP"
+.ti -1c
+.RI "int \fBinp_isX\fP (char *s)"
+.br
+.RI "\fICheck for the eXit command. \fP"
+.ti -1c
+.RI "void \fBinp_timeout\fP (int msec, int intrusive)"
+.br
+.RI "\fISet user input timeout. \fP"
+.ti -1c
+.RI "void \fBinp_cancel\fP ()"
+.br
+.RI "\fIAbort pending user input. \fP"
+.ti -1c
+.RI "void \fBinp_setflags\fP (\fBuint32\fP f)"
+.br
+.RI "\fISet input flags. \fP"
+.ti -1c
+.RI "void \fBinp_clearflags\fP (\fBuint32\fP f)"
+.br
+.RI "\fISet input flags. \fP"
+.ti -1c
+.RI "char * \fBinp_get\fP (int maxlen)"
+.br
+.RI "\fIMid-level input function. \fP"
+.ti -1c
+.RI "void \fBinp_parsin\fP ()"
+.br
+.RI "\fIParse input. \fP"
+.ti -1c
+.RI "void \fBinp_clear\fP ()"
+.br
+.RI "\fIClear input buffers. \fP"
+.ti -1c
+.RI "void \fBinp_raw\fP ()"
+.br
+.RI "\fIRestores raw input. \fP"
+.ti -1c
+.RI "void \fBcnc_begin\fP ()"
+.br
+.RI "\fIBegin concatenation handling. \fP"
+.ti -1c
+.RI "int \fBcnc_end\fP ()"
+.br
+.RI "\fIEnd concatenation processing. \fP"
+.ti -1c
+.RI "char \fBcnc_chr\fP ()"
+.br
+.RI "\fIRead a concatenated character. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcnc_int\fP ()"
+.br
+.RI "\fIRead a concatenated 32-bit integer. \fP"
+.ti -1c
+.RI "\fBint64\fP \fBcnc_long\fP ()"
+.br
+.RI "\fIRead a concatenated 64-bit integer. \fP"
+.ti -1c
+.RI "char \fBcnc_yesno\fP ()"
+.br
+.RI "\fIRead a concatenated `Y' or `N'. \fP"
+.ti -1c
+.RI "char * \fBcnc_word\fP ()"
+.br
+.RI "\fIRead a space-delimited word. \fP"
+.ti -1c
+.RI "char * \fBcnc_all\fP ()"
+.br
+.RI "\fIReturn all remaining concatenated commands. \fP"
+.ti -1c
+.RI "char \fBcnc_more\fP ()"
+.br
+.RI "\fICheck remaining input. \fP"
+.ti -1c
+.RI "\fBuint64\fP \fBcnc_hex\fP ()"
+.br
+.RI "\fIRead a concatenated hexadecimal 64-bit integer. \fP"
+.ti -1c
+.RI "char * \fBcnc_num\fP ()"
+.br
+.RI "\fIRead an arbitrary precision integer. \fP"
+.ti -1c
+.RI "int \fBget_number\fP (int *num, int msg, int min, int max, int err, int def, int defval)"
+.br
+.RI "\fIGet an integer within certain limits. \fP"
+.ti -1c
+.RI "int \fBget_bool\fP (int *retbool, int msg, int err, int def, int defval)"
+.br
+.RI "\fIGet a boolean (yes or no) answer. \fP"
+.ti -1c
+.RI "int \fBget_userid\fP (char *uid, int msg, int err, int def, char *defval, int online)"
+.br
+.RI "\fIGet and validate a user ID. \fP"
+.ti -1c
+.RI "int \fBget_menu\fP (char *option, int showmenu, int lmenu, int smenu, int err, char *opts, int def, int defval)"
+.br
+.RI "\fIValidate input for a simple menu. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBuint32\fP \fBinp_flags\fP"
+.br
+.RI "\fIThe input flags. \fP"
+.ti -1c
+.RI "char \fBinp_buffer\fP []"
+.br
+.RI "\fIUser's input buffer (sized \fCMAXINPLEN\fP). \fP"
+.ti -1c
+.RI "int \fBinp_len\fP"
+.br
+.RI "\fILength of user's last input line. \fP"
+.ti -1c
+.RI "char * \fBmargv\fP []"
+.br
+.RI "\fIInput arguments, no spaces, \fCargv[]\fP-style. \fP"
+.ti -1c
+.RI "int \fBmargc\fP"
+.br
+.RI "\fINumber of input arguments passed, in \fCargc\fP style. \fP"
+.ti -1c
+.RI "char \fBinp_del\fP []"
+.br
+.ti -1c
+.RI "\fBmonitor\fP * \fBmonitor\fP"
+.br
+.RI "\fIThe backspace-space-backspace sequence. \fP"
+.ti -1c
+.RI "int \fBinp_timeout_msecs\fP"
+.br
+.RI "\fILast \fCmsecs\fP argument to \fBinp_timeout()\fP. \fP"
+.ti -1c
+.RI "int \fBinp_timeout_intr\fP"
+.br
+.RI "\fILast \fCintrusive\fP argument to \fBinp_timeout()\fP. \fP"
+.ti -1c
+.RI "char * \fBcnc_nxtcmd\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Low and high-level user input functions. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     input.h                                                      **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Interface to input.c                                         **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: input.h,v 1.4 2003/09/27 20:31:25 alexios Exp $
+ *
+ * $Log: input.h,v $
+ * Revision 1.4  2003/09/27 20:31:25  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.8  1999/07/28 23:09:07  alexios
+ * *** empty log message ***
+ *
+ * Revision 0.7  1999/07/18 21:13:24  alexios
+ * Made inputflags public to allow for user-supplied high
+ * level input functions.
+ *
+ * Revision 0.6  1998/12/27 15:19:19  alexios
+ * Moved function declarations from miscfx.h.
+ *
+ * Revision 0.5  1998/08/14 11:23:21  alexios
+ * Added function to set monitor ID (initially channel number,
+ * but user's user ID after login).
+ *
+ * Revision 0.4  1998/07/26 21:17:06  alexios
+ * Removed obsoleted extern injothfile.
+ *
+ * Revision 0.3  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.2  1997/09/12 12:45:25  alexios
+ * Added resetblocking() to remember previous states of block-
+ * ing/non-blocking and switch between them.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBinput.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: input.h,v 1.4 2003/09/27 20:31:25 alexios Exp $'"
+.PP
+Definition at line 79 of file input.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,25 @@
+# -*- Makefile -*-
+#
+# $Id: typhoon,v 2.0 2004/09/13 19:44:55 alexios Exp $
+#
+# $Log: typhoon,v $
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
+# Revision 1.1  2003/12/25 08:22:16  alexios
+# Initial revision.
+#
+
+TYPHOON_IF_NEEDED = @TYPHOON_LIBS@
+
+DDLP = @DDLP@ -f
+
+%.h %.dbd:	%.ddl
+		$(DDLP) $(patsubst .ddl,,$<)
+
+# End of file.

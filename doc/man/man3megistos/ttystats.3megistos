@@ -1,0 +1,50 @@
+.TH "ttystats" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ttystats \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [32]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBchannel\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcredits\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBminutes\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcalls\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "\fBuint32\fP \fBttystats::calls\fP"
+.PP
+Definition at line 226 of file sysstruct.h.
+.SS "\fBuint32\fP \fBttystats::channel\fP"
+.PP
+Definition at line 223 of file sysstruct.h.
+.SS "\fBuint32\fP \fBttystats::credits\fP"
+.PP
+Definition at line 224 of file sysstruct.h.
+.SS "\fBuint32\fP \fBttystats::minutes\fP"
+.PP
+Definition at line 225 of file sysstruct.h.
+.SS "char \fBttystats::name\fP[32]"
+.PP
+Definition at line 222 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

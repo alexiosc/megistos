@@ -1,0 +1,85 @@
+.TH "promptblock_t" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+promptblock_t \- A prompt block descriptor.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <prompts.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBfname\fP [64]"
+.br
+.RI "\fIFilename of the prompt block. \fP"
+.ti -1c
+.RI "FILE * \fBhandle\fP"
+.br
+.RI "\fIOpen prompt block file. \fP"
+.ti -1c
+.RI "long \fBindexsize\fP"
+.br
+.RI "\fISize of prompt index. \fP"
+.ti -1c
+.RI "int \fBlanguage\fP"
+.br
+.RI "\fICurrently active language. \fP"
+.ti -1c
+.RI "int \fBlangoffs\fP [NUMLANGUAGES]"
+.br
+.RI "\fIIndices to where languages start. \fP"
+.ti -1c
+.RI "\fBidx_t\fP * \fBindex\fP"
+.br
+.RI "\fIPrompt index structure. \fP"
+.ti -1c
+.RI "long \fBsize\fP"
+.br
+.RI "\fISize of data block. \fP"
+.ti -1c
+.RI "char * \fBdata\fP"
+.br
+.RI "\fIPrompt data. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+A prompt block descriptor. 
+
+This is the structure used to hold state et cetera for an open prompt block. The data type is instantiated by \fC\fBmsg_open()\fP\fP. This data type should be considered opaque. 
+.PP
+Definition at line 126 of file prompts.h.
+.SH "Field Documentation"
+.PP 
+.SS "char* \fBpromptblock_t::data\fP"
+.PP
+Prompt data. Definition at line 134 of file prompts.h.
+.SS "char \fBpromptblock_t::fname\fP[64]"
+.PP
+Filename of the prompt block. Definition at line 127 of file prompts.h.
+.SS "FILE* \fBpromptblock_t::handle\fP"
+.PP
+Open prompt block file. Definition at line 128 of file prompts.h.
+.SS "\fBidx_t\fP* \fBpromptblock_t::index\fP"
+.PP
+Prompt index structure. Definition at line 132 of file prompts.h.
+.SS "long \fBpromptblock_t::indexsize\fP"
+.PP
+Size of prompt index. Definition at line 129 of file prompts.h.
+.SS "int \fBpromptblock_t::langoffs\fP[NUMLANGUAGES]"
+.PP
+Indices to where languages start. Definition at line 131 of file prompts.h.
+.SS "int \fBpromptblock_t::language\fP"
+.PP
+Currently active language. Definition at line 130 of file prompts.h.
+.SS "long \fBpromptblock_t::size\fP"
+.PP
+Size of data block. Definition at line 133 of file prompts.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

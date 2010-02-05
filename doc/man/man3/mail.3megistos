@@ -1,0 +1,186 @@
+.TH "Mail-Related Definitions" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Mail-Related Definitions \- Here you can find declarations for various structures used in mail-related tasks throughout the system.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBMessage Flags (MSF_x)\fP"
+.br
+.RI "\fIFlags used to describe private and public messages. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBUser Mail Preference Flags (ECP_x)\fP"
+.br
+.RI "\fIFlags used to describe user preferences as regards private email reading. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBMail Flags (ECF_x)\fP"
+.br
+.RI "\fIFlags used to store user state with respect to mail reading. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBLast-Read Block Flags (LRF_x)\fP"
+.br
+.RI "\fIFlags used to store state with respect to public mail reading. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBClub Flags (CLF_x)\fP"
+.br
+.RI "\fIFlags used to describe clubs in the club header. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group\fBClub Access Levels (CAX_x)\fP"
+.br
+.RI "\fIThese constants denote the various club access levels. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmessage_t\fP"
+.br
+.RI "\fIAn email or club message. \fP"
+.ti -1c
+.RI "struct \fBemailuser\fP"
+.br
+.RI "\fIPreferences for the private mail reader. \fP"
+.ti -1c
+.RI "struct \fBlastread\fP"
+.br
+.RI "\fIPer-user, per-club message reading state. \fP"
+.ti -1c
+.RI "struct \fBclubheader\fP"
+.br
+.RI "\fIClub header. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBMESSAGE_MAGIC\fP   'Mmsg'"
+.br
+.ti -1c
+.RI "#define \fBMSG_ALL\fP   '***ALL***'"
+.br
+.RI "\fIUsed to mark a message as intended for all users. \fP"
+.ti -1c
+.RI "#define \fBHST_CC\fP   'Cc:'"
+.br
+.ti -1c
+.RI "#define \fBHST_CP\fP   'CpBy:'"
+.br
+.ti -1c
+.RI "#define \fBHST_FW\fP   'FwBy:'"
+.br
+.ti -1c
+.RI "#define \fBHST_NETMAIL\fP   'Netmail'"
+.br
+.ti -1c
+.RI "#define \fBHST_RECEIPT\fP   'RRR:'"
+.br
+.ti -1c
+.RI "#define \fBHST_REPLY\fP   'ReplyTo:'"
+.br
+.ti -1c
+.RI "#define \fBHST_AUTOFW\fP   'Autofw:'"
+.br
+.ti -1c
+.RI "#define \fBHST_DIST\fP   'Distributed'"
+.br
+.ti -1c
+.RI "#define \fBHST_OFFLINE\fP   'Offline'"
+.br
+.ti -1c
+.RI "#define \fBHST_NET\fP   'RemoteBBS:'"
+.br
+.ti -1c
+.RI "#define \fBEMAILUSER_MAGIC\fP   'Memu'"
+.br
+.RI "\fIThis spells 'Memu' on big endians, umeM on little endians. \fP"
+.ti -1c
+.RI "#define \fBLASTREAD_MAGIC\fP   'Mlrd'"
+.br
+.RI "\fIMagic number for \fClastread\fP. \fP"
+.ti -1c
+.RI "#define \fBCLUBHEADER_MAGIC\fP   'Mclb'"
+.br
+.ti -1c
+.RI "#define \fBIHT_MESSAGE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBIHT_CONTROL_DELETE\fP   1	/* oooh, can we have ALT too? */"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Here you can find declarations for various structures used in mail-related tasks throughout the system. The most useful is the definition of \fC\fBmessage_t\fP\fP, a BBS private or public message. There are other structures here, but most are used by the mail reading modules (Email and Clubs). I doubt you'll ever need any of them, but a few subsystems do, so the declarations are available. 
+.SH "Define Documentation"
+.PP 
+.SS "#define CLUBHEADER_MAGIC   'Mclb'"
+.PP
+Definition at line 644 of file mail.h.
+.SS "#define EMAILUSER_MAGIC   'Memu'"
+.PP
+This spells 'Memu' on big endians, umeM on little endians. Definition at line 375 of file mail.h.
+.SS "#define HST_AUTOFW   'Autofw:'"
+.PP
+Definition at line 329 of file mail.h.
+.SS "#define HST_CC   'Cc:'"
+.PP
+Definition at line 323 of file mail.h.
+.SS "#define HST_CP   'CpBy:'"
+.PP
+Definition at line 324 of file mail.h.
+.SS "#define HST_DIST   'Distributed'"
+.PP
+Definition at line 330 of file mail.h.
+.SS "#define HST_FW   'FwBy:'"
+.PP
+Definition at line 325 of file mail.h.
+.SS "#define HST_NET   'RemoteBBS:'"
+.PP
+Definition at line 332 of file mail.h.
+.SS "#define HST_NETMAIL   'Netmail'"
+.PP
+Definition at line 326 of file mail.h.
+.SS "#define HST_OFFLINE   'Offline'"
+.PP
+Definition at line 331 of file mail.h.
+.SS "#define HST_RECEIPT   'RRR:'"
+.PP
+Definition at line 327 of file mail.h.
+.SS "#define HST_REPLY   'ReplyTo:'"
+.PP
+Definition at line 328 of file mail.h.
+.SS "#define IHT_CONTROL_DELETE   1	/* oooh, can we have ALT too? */"
+.PP
+Definition at line 721 of file mail.h.
+.SS "#define IHT_MESSAGE   0"
+.PP
+Definition at line 720 of file mail.h.
+.SS "#define LASTREAD_MAGIC   'Mlrd'"
+.PP
+Magic number for \fClastread\fP. Definition at line 489 of file mail.h.
+.SS "#define MESSAGE_MAGIC   'Mmsg'"
+.PP
+Definition at line 230 of file mail.h.
+.SS "#define MSG_ALL   '***ALL***'"
+.PP
+Used to mark a message as intended for all users. Do not change after you start using your system. This string does \fInot\fP appear to the user. Instead, a nice, user-defined version is shown. See? You really, really don't have to change this. Definition at line 238 of file mail.h.

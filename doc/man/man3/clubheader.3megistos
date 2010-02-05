@@ -1,0 +1,299 @@
+.TH "clubheader" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+clubheader \- Club header.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <mail.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBclub\fP [16]"
+.br
+.RI "\fIName of the club. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmagic\fP"
+.br
+.RI "\fIMagic number (\fCCLUBHEADER_MAGIC\fP). \fP"
+.ti -1c
+.RI "char \fBreserved\fP [12]"
+.br
+.RI "\fIFor future expansion. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBclubid\fP"
+.br
+.RI "\fINumber of the club. \fP"
+.ti -1c
+.RI "char \fBdescr\fP [64]"
+.br
+.RI "\fIClub description. \fP"
+.ti -1c
+.RI "char \fBclubop\fP [24]"
+.br
+.RI "\fIMain club operator. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcrdate\fP"
+.br
+.RI "\fIClub creation date. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcrtime\fP"
+.br
+.RI "\fIClub creation time. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmsgno\fP"
+.br
+.RI "\fIHighest message number. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnmsgs\fP"
+.br
+.RI "\fINumber of messages. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnper\fP"
+.br
+.RI "\fINumber of periodic messages. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnblts\fP"
+.br
+.RI "\fINumber of bulletins. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnfiles\fP"
+.br
+.RI "\fINumber of files. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnfunapp\fP"
+.br
+.RI "\fINumber of unapproved files. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeyreadax\fP"
+.br
+.RI "\fIKey required for read access. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeydnlax\fP"
+.br
+.RI "\fIKey required for download access. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeywriteax\fP"
+.br
+.RI "\fIKey required for write access. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeyuplax\fP"
+.br
+.RI "\fIKey required for upload access. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIClub options. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBmsglife\fP"
+.br
+.RI "\fIMessage lifetime. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBpostchg\fP"
+.br
+.RI "\fICharge for posting. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBuploadchg\fP"
+.br
+.RI "\fICharge for uploading. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBdnloadchg\fP"
+.br
+.RI "\fICharge for downloading. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcredspermin\fP"
+.br
+.RI "\fICredits*100 mins, -1=default. \fP"
+.ti -1c
+.RI "char \fBexport_access_list\fP [128]"
+.br
+.RI "\fIAllow/deny access list. \fP"
+.ti -1c
+.RI "char \fBdummy\fP [1024-324]"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Club header. 
+
+This structure describes all aspects club, except per-user access levels (except except Club operator accesses), the club's banner and messages. This really is a biggy. Allrighty, here goes:
+.PP
+.IP "\(bu" 2
+\fCclub\fP. Short name of the club.
+.IP "\(bu" 2
+\fCmagic\fP. A magic number (\fBCLUBHEADER_MAGIC\fP).
+.IP "\(bu" 2
+\fCreserved\fP. ...for future expansion.
+.PP
+.PP
+.IP "\(bu" 2
+\fCclubidq\fP. A unique integer identifying this club. Historically, the Major BBS stored its club headers in a statically allocated array, which imposed a (usually quite low) limit on the maximum number of clubs. The club ID was used as an index in that array. Megistos doesn't do this (I'm not \fIthat\fP lazy), but the (braindead, IMHO) QWK format still needs club indices.
+.PP
+.PP
+.IP "\(bu" 2
+\fCdescr\fP. A 63-character short description of the club. Typically describes the club's content, or gives the club motto. It's usually displayed right next to the club's name, if there's space.
+.PP
+.PP
+.IP "\(bu" 2
+\fCclubop\fP. The user ID of the main club's operator (ClubOP). At least one user must be associated with the club in this way. Further (identically privileged) clubops may be added by setting their individual access levels in the club.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcrdate\fP, \fCcrtime\fP. Old-style club creation date and time. We kept these in view of the eventual migration to a 64-bit \fCtime_t\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmsgno\fP. Highest message number in this club.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnmsgs\fP. Number of messages existing in the club at the time of the last cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnper\fP. Number of periodic messages existing in the club at the time of the last cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnblts\fP. Number of bulletins associated with the club at the time of the last cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnfiles\fP. Number of files in the club at the time of the last cleanup. Approved and unapproved files are included in this count.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnfunapp\fP. Number of \fIunapproved\fP files in the club at the time of the last cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeyreadax\fP. Key needed to read this club (or, indeed, \fIsee\fP it in lists).
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeydnlax\fP. Key needed to download files from this club.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeywriteax\fP. Key needed to write messages in this club.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeyuplax\fP. Key needed to upload files to this club.
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. Flags describing this club, as a set of \fCCLF_x\fP constants.
+.PP
+.PP
+.IP "\(bu" 2
+\fCpostchg\fP. Charge (in credits) for posting a message to this club. Can be negative, in which case users get rewarded.
+.PP
+.PP
+.IP "\(bu" 2
+\fCuploadchg\fP. Charge (in credits) for uploading a file to this club. Can be negative, in which case users get rewarded.
+.PP
+.PP
+.IP "\(bu" 2
+\fCdnloadchg\fP. Charge (in credits) for downloading a file to this club. Can be negative, in which case users get rewarded.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcredspermin\fP. Credits per 100 minutes spent while the user is in the club. To charge 2.5 credits per minute, set this field to 250. Negative values reward the user. Zero means being in the club consumes no credits. A special case: \fC-1\fP is the default credit consumption rate for the Clubs module.
+.PP
+.PP
+.IP "\(bu" 2
+\fCexport_access_list\fP. Access control list for networked clubs. This string specifies which remote systems can or can't access this club. 
+.PP
+
+.PP
+Definition at line 608 of file mail.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBclubheader::club\fP[16]"
+.PP
+Name of the club. Definition at line 609 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::clubid\fP"
+.PP
+Number of the club. Definition at line 612 of file mail.h.
+.SS "char \fBclubheader::clubop\fP[24]"
+.PP
+Main club operator. Definition at line 614 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::crdate\fP"
+.PP
+Club creation date. Definition at line 615 of file mail.h.
+.SS "\fBint32\fP \fBclubheader::credspermin\fP"
+.PP
+Credits*100 mins, -1=default. Definition at line 636 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::crtime\fP"
+.PP
+Club creation time. Definition at line 616 of file mail.h.
+.SS "char \fBclubheader::descr\fP[64]"
+.PP
+Club description. Definition at line 613 of file mail.h.
+.SS "\fBint32\fP \fBclubheader::dnloadchg\fP"
+.PP
+Charge for downloading. Definition at line 635 of file mail.h.
+.SS "char \fBclubheader::dummy\fP[1024-324]"
+.PP
+Definition at line 640 of file mail.h.
+.SS "char \fBclubheader::export_access_list\fP[128]"
+.PP
+Allow/deny access list. Definition at line 638 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::flags\fP"
+.PP
+Club options. Definition at line 630 of file mail.h.
+.SS "\fBbbskey_t\fP \fBclubheader::keydnlax\fP"
+.PP
+Key required for download access. Definition at line 626 of file mail.h.
+.SS "\fBbbskey_t\fP \fBclubheader::keyreadax\fP"
+.PP
+Key required for read access. Definition at line 625 of file mail.h.
+.SS "\fBbbskey_t\fP \fBclubheader::keyuplax\fP"
+.PP
+Key required for upload access. Definition at line 628 of file mail.h.
+.SS "\fBbbskey_t\fP \fBclubheader::keywriteax\fP"
+.PP
+Key required for write access. Definition at line 627 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::magic\fP"
+.PP
+Magic number (\fCCLUBHEADER_MAGIC\fP). Definition at line 610 of file mail.h.
+.SS "\fBint32\fP \fBclubheader::msglife\fP"
+.PP
+Message lifetime. Definition at line 632 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::msgno\fP"
+.PP
+Highest message number. Definition at line 618 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::nblts\fP"
+.PP
+Number of bulletins. Definition at line 621 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::nfiles\fP"
+.PP
+Number of files. Definition at line 622 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::nfunapp\fP"
+.PP
+Number of unapproved files. Definition at line 623 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::nmsgs\fP"
+.PP
+Number of messages. Definition at line 619 of file mail.h.
+.SS "\fBuint32\fP \fBclubheader::nper\fP"
+.PP
+Number of periodic messages. Definition at line 620 of file mail.h.
+.SS "\fBint32\fP \fBclubheader::postchg\fP"
+.PP
+Charge for posting. Definition at line 633 of file mail.h.
+.SS "char \fBclubheader::reserved\fP[12]"
+.PP
+For future expansion. Definition at line 611 of file mail.h.
+.SS "\fBint32\fP \fBclubheader::uploadchg\fP"
+.PP
+Charge for uploading. Definition at line 634 of file mail.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

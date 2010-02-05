@@ -1,0 +1,38 @@
+.TH "clsstats" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+clsstats \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [10]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcredits\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBminutes\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "\fBuint32\fP \fBclsstats::credits\fP"
+.PP
+Definition at line 216 of file sysstruct.h.
+.SS "\fBuint32\fP \fBclsstats::minutes\fP"
+.PP
+Definition at line 217 of file sysstruct.h.
+.SS "char \fBclsstats::name\fP[10]"
+.PP
+Definition at line 215 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

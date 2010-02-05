@@ -1,0 +1,56 @@
+.TH "event" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+event \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBdescr\fP [41]"
+.br
+.ti -1c
+.RI "char \fBcommand\fP [256]"
+.br
+.ti -1c
+.RI "int \fBhour\fP"
+.br
+.ti -1c
+.RI "int \fBmin\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBlastrun\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "char \fBevent::command\fP[256]"
+.PP
+Definition at line 253 of file sysstruct.h.
+.SS "char \fBevent::descr\fP[41]"
+.PP
+Definition at line 252 of file sysstruct.h.
+.SS "\fBuint32\fP \fBevent::flags\fP"
+.PP
+Definition at line 255 of file sysstruct.h.
+.SS "int \fBevent::hour\fP"
+.PP
+Definition at line 254 of file sysstruct.h.
+.SS "\fBuint32\fP \fBevent::lastrun\fP"
+.PP
+Definition at line 256 of file sysstruct.h.
+.SS "int \fBevent::min\fP"
+.PP
+Definition at line 254 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,14 @@
+.TH "ver.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ver.h \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <megistos/systemversion.h>\fP
+.br
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

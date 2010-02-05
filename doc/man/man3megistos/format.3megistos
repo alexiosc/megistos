@@ -1,0 +1,102 @@
+.TH "Formatting Text" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Formatting Text \- This module provides low-level access to the formatter engine.  
+
+.PP
+You really shouldn't use anything in here, unless you know what you're doing. It's far better to use the higher-level functions provided elsewhere and to leave the low level formatting chores to the library.
+.PP
+This part of the documentation also includes an explanation of the various \fIad hoc\fP escape sequences used for formatting purposes.
+.SH "Formatting Directives"
+.PP
+Megistos includes a reasonably sophisticated formatting system, inspired by the really basic one included in the Major BBS. Major offered a pretty useful line wrapping feature, which came in handy for the built-in (line) editor, among other things. It was only applied to the user's input, though. Megistos applies it to the output, where it's most useful. It supports setting left and right margins, paragraph indentations, left and right alignment, centering, and full justification (my favourite).
+.PP
+This takes full advantage of any user's terminal. I'm pretty sensitive to this type of need, because I've always had larger than normal text resolutions (things like 132 by 30, even on the poor little 286 I had in 1991). Major couldn't take advantage of them, and it always annoyed me. I suppose it annoyed me enough to make this beast!
+.PP
+Right, then. Formatting directives are escape sequences, just like most terminal directives (also known as `ANSI' in the BBS world, to refer to a minute subset of the ANSI X3.64 Standard for Control Sequences for Video Terminals and Peripherals).
+.PP
+All formatting directives start with the sequence `\fCESC !\fP', or ASCII codes \fC27 33\fP (in decimal). A character identifying the directive follows. Many directives take an optional argument, a base ten integer.
+.PP
+In default of any formatting directives, characters are printed in the normal way, left-aligned, without any word wrapping, justification or any margin or indentation adjustments. If your prompts are 80 columns wide and a user has a 64 column screen, they'll get ugly wrap-around effects.
+.PP
+Here are the specific commands. Spaces have been inserted between command elements. This was done for clarity. \fINo spaces\fP are actually used within the directives.
+.PP
+.PD 0
+.IP "\(bu" 2
+\fCESC ! L\fP. Start formatting text. The current and subsequent lines will be rendered left-aligned. This is the default.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! R\fP. Start formatting text. Current and subsequent lines will be rendered right-aligned.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! C\fP. Start formatting text. Current and subsequent lines will be centred.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! W\fP. Start formatting text. Current and subsequent lines will be rendered in wrap-around mode. This mode allows you to format ragged-edge text so that words are not split in two lines. There is, of course, no hyphenation!
+.PP
+
+.IP "\(bu" 2
+\fCESC ! J\fP. Start formatting text. Current and subsequent lines will be justified. This mode one produces professional-looking straight-edge text from left to right border.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! l\fP. (lower case `L') Place left margin. If preceded by an optional decimal argument (\fCESC ! arg l\fP), this sets the left margin to as many characters as the argument (zero denotes the physical left margin of the screen):
+.PP
+.PP
+.nf
+
+|<--------- physical line length -------->|
+|<-- arg -->|Left Margin                  |
+      .PP
+.PP
+If the argument is not specified, this directive sets the left margin to the current cursor position.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! i\fP. Works just like 'l', but sets the left margin on {\fIsubsequent}\fP lines, whereas `l' affects the current line too. This is useful for paragraphs where the first line is indented, or for lists, where subsequent lines are indented.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! r\fP. Place right margin. If the optional decimal argument is specified immediately before the `\fCr\fP', this sets the right margin to the specified number of characters (zero denotes the physical right margin of the screen):
+.PP
+.PP
+.nf
+
+|<------- physical line length -------->|
+|               Right Margin|<-- arg -->|
+      .PP
+.PP
+If not preceded by a number, this command sets the right margin to the current cursor position.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! F\fP. With the optional integer argument, this directive repeats the char following it as many times as specified by the argument. That is, \fCESC!10F-\fP will render as `\fC----------\fP'. If not preceded by a number, the character following the `F' is repeated all the way to the right margin.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! (\fP. (open parenthesis) Begin formatting using the last formatting mode specified. This begins formatting, starts taking into account margins, etc. When wrapping/justifying, use this to begin a new paragraph. Specify the mode (left, right, centre or justify) for the first paragraph, and use this directive for subsequent ones. This way, if you later change your mind, you only need to change the first paragraph, not all of them. To end a paragraph, you need the following command:
+.PP
+
+.IP "\(bu" 2
+\fCESC ! )\fP. (closed parenthesis) Stop formatting. All subsequent output will be dumped to the output stream as-is, until another format command is encountered. Stops using set margins, etc. When wrapping/justifying, use this to end a paragraph so that newline characters are not transformed into horizontal spacing.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! Z\fP. Zero the horizontal position counter. Start formatting from this position. Can cause really nasty formatting problems unless you know what you're doing. We like to allow you to shoot your foot.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! v\fP. Controls the expansion of substitution variables (\fC @VAR@\fP-style embedded vars). This directive \fIrequires\fP an argument. A value of 0 inhibits variable expansion, allowing normal use of the at-sign `\fC@\fP' symbol. Use this in places where the user is likely to use this symbol, e.g. pages, reading mail, etc. Non-zero values enable variable expansion, giving the at-sign its special meaning. You'll have to use `\fC@@\fP' (two at-signs) to get `\fC@\fP', et cetera. The default is full variable expansion.
+.PP
+
+.IP "\(bu" 2
+\fCESC ! P\fP. Causes a forced pause at the current point. Waits for the user to press any key, then continues printing. Use this sparingly, because it tends to annoy users.
+.PP
+
+.PP
+.PP
+@{ 

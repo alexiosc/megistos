@@ -1,0 +1,4 @@
+base referer
+rect $config_8h.html 97,155 209,174
+rect $bbsinclude_8h.html 83,86 224,105
+rect $version_8h.html 248,86 365,105

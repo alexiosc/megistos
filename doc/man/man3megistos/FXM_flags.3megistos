@@ -1,0 +1,53 @@
+.TH "File transfer modes (FXM_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+File transfer modes (FXM_x) \- File transfer modes.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBFXM_UPLOAD\fP   'U'"
+.br
+.ti -1c
+.RI "#define \fBFXM_DOWNLOAD\fP   'D'"
+.br
+.ti -1c
+.RI "#define \fBFXM_TRANSIENT\fP   'T'"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+File transfer modes. These control the direction and type of a file to be transferred. Please note that they are \fINOT\fP to be ORred together. Although they don't look that way, they are mutually exclusive: \fCFXM_TRANSIENT\fP implies a download.
+.PP
+.IP "\(bu" 2
+FXM_UPLOAD. The user will upload a file to the BBS.
+.PP
+.PP
+.IP "\(bu" 2
+FXM_DOWNLOAD. The user will download a file from the BBS. The file is considered permanent. It will be there (at least) until the user's exit from the system.
+.PP
+.PP
+.IP "\(bu" 2
+FXM_TRANSIENT. The user will download a temporary file from the BBS. Transient files are built by a module and are deleted at some undefined time \fIbefore\fP the user's exit from the system. As such, their download cannot be postponed until later.
+.PP
+.PP
+\fBSee also:\fP
+.RS 4
+\fBxfer_add()\fP, \fBxfer_addwild()\fP. 
+.RE
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define FXM_DOWNLOAD   'D'"
+.PP
+Definition at line 191 of file filexfer.h.
+.SS "#define FXM_TRANSIENT   'T'"
+.PP
+Definition at line 192 of file filexfer.h.
+.SS "#define FXM_UPLOAD   'U'"
+.PP
+Definition at line 190 of file filexfer.h.

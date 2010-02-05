@@ -1,0 +1,18 @@
+# -*- Makefile -*-
+#
+# $Id: module-with-gcs,v 2.0 2004/09/13 19:44:55 alexios Exp $
+#
+# $Log: module-with-gcs,v $
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+include $(top_srcdir)/templates/module
+
+lib_LTLIBRARIES = $(GCS)
+
+# End of file.

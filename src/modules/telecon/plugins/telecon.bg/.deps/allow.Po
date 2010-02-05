@@ -1,0 +1,3 @@
+allow.o: allow.c back.h
+
+back.h:

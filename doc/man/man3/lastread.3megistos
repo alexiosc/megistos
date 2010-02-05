@@ -1,0 +1,118 @@
+.TH "lastread" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+lastread \- Per-user, per-club message reading state.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <mail.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBclub\fP [16]"
+.br
+.RI "\fIClub to which preferences apply. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBlastmsg\fP"
+.br
+.RI "\fILast message read in club. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fILast-read flags (\fCLRF_x\fP). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBemllast\fP"
+.br
+.RI "\fILast club message read from Email module. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBentrymsg\fP"
+.br
+.RI "\fIGeneral purpose temporary field. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBqwklast\fP"
+.br
+.RI "\fILast message downloaded in msg packet. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmagic\fP"
+.br
+.RI "\fIMagic number (\fCLASTREAD_MAGIC\fP). \fP"
+.ti -1c
+.RI "char \fBdummy\fP [4]"
+.br
+.RI "\fIReserved space. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Per-user, per-club message reading state. 
+
+This structure holds per-user, per-club preferences and state used by the public message reader (the Clubs module).
+.PP
+.IP "\(bu" 2
+\fCclub\fP. Name of club this structure applies to.
+.PP
+.PP
+.IP "\(bu" 2
+\fClastmsg\fP. The maximum number of any public message read (in \fCclub\fP).
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. State-saving flags, in the form of a set of { LRF_x flags.
+.PP
+.PP
+.IP "\(bu" 2
+\fCemllast\fP. Like \fClastmsg\fP, but used by the Email reader (don't ask, it's messy).
+.PP
+.PP
+.IP "\(bu" 2
+\fCentrymsg\fP. General-purpose temporary variable.
+.PP
+.PP
+.IP "\(bu" 2
+\fCqwklast\fP. Like \fClastmsg\fP, but used by the off-line mailer.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmagic\fP. A magic number used to detect corrupted structures. This should be set to \fBEMAILUSER_MAGIC\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCdummy\fP. Reserved for future expansion (not much of it, mind). 
+.PP
+
+.PP
+Definition at line 474 of file mail.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBlastread::club\fP[16]"
+.PP
+Club to which preferences apply. Definition at line 475 of file mail.h.
+.SS "char \fBlastread::dummy\fP[4]"
+.PP
+Reserved space. Definition at line 483 of file mail.h.
+.SS "\fBuint32\fP \fBlastread::emllast\fP"
+.PP
+Last club message read from Email module. Definition at line 478 of file mail.h.
+.SS "\fBint32\fP \fBlastread::entrymsg\fP"
+.PP
+General purpose temporary field. Definition at line 479 of file mail.h.
+.SS "\fBuint32\fP \fBlastread::flags\fP"
+.PP
+Last-read flags (\fCLRF_x\fP). Definition at line 477 of file mail.h.
+.SS "\fBuint32\fP \fBlastread::lastmsg\fP"
+.PP
+Last message read in club. Definition at line 476 of file mail.h.
+.SS "\fBuint32\fP \fBlastread::magic\fP"
+.PP
+Magic number (\fCLASTREAD_MAGIC\fP). Definition at line 481 of file mail.h.
+.SS "\fBuint32\fP \fBlastread::qwklast\fP"
+.PP
+Last message downloaded in msg packet. Definition at line 480 of file mail.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,70 @@
+.TH "Mid-Level Input Functionality" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Mid-Level Input Functionality \- These functions provide you with user input at the middle-level.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "char * \fBinp_get\fP (int maxlen)"
+.br
+.RI "\fIMid-level input function. \fP"
+.ti -1c
+.RI "void \fBinp_parsin\fP ()"
+.br
+.RI "\fIParse input. \fP"
+.ti -1c
+.RI "void \fBinp_clear\fP ()"
+.br
+.RI "\fIClear input buffers. \fP"
+.ti -1c
+.RI "void \fBinp_raw\fP ()"
+.br
+.RI "\fIRestores raw input. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+These functions provide you with user input at the middle-level. Some processing is carried out, but not much. Perhaps the most useful function here is \fBinp_get()\fP, which will yield one full line of user's input. The other functions allow you to break input strings into arrays of white space-separated words, storing them in \fBmargv\fP. They can also reverse this, yielding back a single input line. 
+.SH "Function Documentation"
+.PP 
+.SS "void inp_clear ()"
+.PP
+Clear input buffers. Resets the input subsystem by clearing everything. 
+.SS "char* inp_get (int maxlen)"
+.PP
+Mid-level input function. You can call this function to receive a line of input from the system and parse it into a number of space-delimited arguments. The input length can be limited to an arbitrary number of characters, in which case the function will interactively block input until characters are deleted, making the length limitation plain to the user.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImaxlen\fP the maximum number of characters to allow. Don't set this too low unless absolutely necessary. Even if you only need a single-character string, it's better to check the length and rebuff the user than to do this. You must \fIalways\fP allow the user to enter long global commands. \fIDO NOT SET THIS ARGUMENT TO VALUES GREATER THAN \fCMAXINPLEN-1.\fP\fP
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+\fI a pointer to the first argument, \fCmargv[0]\fP). The input string is automatically partitioned into space-delimited arguments. To restore the raw input line, call \fBinp_raw()\fP afterwards. You should \fInot\fP use \fBinp_readstring()\fP unless necessary, because it does not deal with reprompts and other aspects of the user interface.\fP
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fI \fBinp_raw()\fP, \fBinp_readstring()\fP. \fP
+.RE
+.PP
+
+.SS "void inp_parsin ()"
+.PP
+Parse input. Splits \fBinp_buffer\fP into white space-separated arguments. Sets \fBmargc\fP to the number of such arguments, and \fBmargv\fP[i] to point to the first non-space character of the \fCi\fP-th argument. 
+.SS "void inp_raw ()"
+.PP
+Restores raw input. `Unparses' the input by restoring the white space in \fBinp_buffer\fP. This gives you back the original, full input line as entered by the user.
+.PP
+Please note that \fBmargc\fP and \fBmargv\fP are invalidated by this function. If you use these variables afterwards, bad things will happen.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_get()\fP. 
+.RE
+.PP
+

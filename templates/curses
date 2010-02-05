@@ -1,0 +1,20 @@
+# -*- Makefile -*-
+#
+# $Id: curses,v 2.0 2004/09/13 19:44:55 alexios Exp $
+#
+# $Log: curses,v $
+# Revision 2.0  2004/09/13 19:44:55  alexios
+# Stepped version to recover CVS repository after near-catastrophic disk
+# crash.
+#
+# Revision 1.2  2003/12/27 13:17:35  alexios
+# Various changes to accommodate the growing pains of the template
+# infrastructure.
+#
+# Revision 1.1  2003/12/24 11:26:35  alexios
+# Initial revision.
+#
+
+CURSES_IF_NEEDED = @CURSES_LIBS@
+
+# End of file.

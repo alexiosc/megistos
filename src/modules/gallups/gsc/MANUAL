@@ -1,0 +1,291 @@
+
+
+               Gallops Script Format revision 4.1 - 21/09/2000
+               -----------------------------------------------
+
+                              =================
+                              Table of Contents
+                              ----------------
+
+                           1. Script body
+                           2. Questions body
+                           3. Extensions
+                           4. Compiler behavior
+                           5. Comments for the future
+
+
+
+==============
+1. Script body
+In the script body, there is a number of directives that can be placed.
+
+
+1.1. Title of the gallup
+The gallup writer should name the gallup, by entering its title.
+
+Syntax:
+	title <gallup-title>
+	
+	<gallup-title> should be of a limited length which hard-coded in the
+		gallups module. So far it is 128 characters. It also should
+		be placed in one line. Multi-line gallup titles are not allowed.
+
+	This directive must be present.
+	
+
+1.2. Selecting the gallup type
+Gallups can be of two different kinds, polls and quizzes.
+
+Syntax:
+	type <gallup-type>
+	
+	<gallup-type> can be one of the tags `poll' or `quiz'.
+		Selecting a quiz-type gallup enables the writer to set
+		a _correct_ answer for each question, and points to be
+		credited when the user choices the right or wrong answer.
+
+	This directive must be present.
+	
+	
+	
+1.2.1. Setting the default answer credits
+In a quiz-type gallup the user is given some points for each correct
+answers. For each wrong answer some points are taken.
+
+Syntax:
+	credits <tag> <number>
+
+		<tag> can be on of `default', `correct' or `wrong'
+		
+		<number> is the number of credits that are added or
+			subtracted for every correct or wrong answer. Can be
+			positive or negative.
+
+	When <tag> is `default' then the user is given <number> credits in
+	the beginning of the quiz. This can enable various tricks.
+
+	If this field is omitted then *only* correct answers are credited
+	with 1 point. (default)
+
+	This directive is optional.
+	
+
+1.3. Setting up the questions
+Questions are blocks of directives that control what the user is presented
+with, and what answer is expected.
+
+Syntax:
+	<quest-type-id> <opt-args>
+	...
+	end
+	
+	<quest-type-id> can be one of `number', `text', `select' or `combo'
+
+	<opt-args> are arguments specific to the question type.
+		Each type can have different <opt-args> :
+			for number : <value-min> <value-max>
+			for text   : <text-max-len>
+			for select : nothing
+			for combo  : nothing or <num-of-user-choices>
+
+			<value-min> is the minimum value for a number
+
+			<value-max> is the maximum value for a number
+
+			<text-max-len> is the maximum size of a string
+			
+			If <num-of-user-choices> exists, then a user defined
+			prompt is used, and the user should declare the
+			possible choices using `choice' directive.
+
+
+	Until revision 4 you cannot enter a `combo' question in a Quiz-type
+	gallup.
+
+	For directives that can be placed a question body see section 2. 
+	Warnings are generated if some fields where not present in the
+	question body, such as question prompt.
+
+
+
+=================
+2. Questions body
+Some directives in the question body are only needed in specific question
+types. They have no meaning in other types and should not be used anywhere
+else. Others should be present in each question, and others are optional.
+
+
+2.1. Setting the question prompt
+The question prompt is the actual text that the user is shown, in order to
+explain, what his a answer should be, why, etc...
+
+Syntax:
+	{ <text> }
+	
+		<text> can be any multi-line text, that is why it should be
+			entered inside brackets ({}). "\" is used as an
+			escape character.  The openning bracket should be
+			the first character in the line, but necessarily at
+			the first column.
+	
+	This directive must be present.
+
+
+2.2. Setting individual credits for a question
+In case of a quiz-type gallup, an individual question can credit the user
+with different point than the default, set in the script body.
+
+Syntax: 
+	credits <tag> <number>
+	
+	<tag> can *only* be one of `correct' or `wrong'
+	
+	<number> the number of points to give the user. Positive or negative
+
+
+	This directive is optional
+
+
+
+2.3. Setting options in select and combo questions
+The user is asked to select on of many options, by entering its ascending
+number. This directive can only be encountered inside a `select' or a
+`combo' question.
+
+	options {<options-list>}
+
+		<options-list> is a semicolumn-separated list of available
+			options. The list is enclosed in brackets.
+			
+			An example could be:
+			
+			options	{One;Two;Three}
+			
+
+			There is no need for a semicolumn at the end of the
+			list, though it is not an error.
+			
+		The list may be placed in multiple lines, any space,
+		newline, or tab space before and after the option text is
+		ignored.
+		
+		Only one `options' field can be entered.
+
+	This directive must be present in any `select' or `combo' question.
+
+
+
+
+2.4. Setting choices in combinatory questions
+When user is asked to enter his opinion in one or more situations. The user
+input can be a simple Yes/No or more complicated. The more complicated
+question should be described with a series of `choice' directives. This
+directive is only valid on `combo' questions.
+
+	choice <select-char> <text>
+
+		<select-char> is the character that the user should enter to
+			select this choice. It will be converted to its
+			respective latin character. A <select-char> cannot
+			fbe an `x', which is used internally to quit, the
+			current procedure.
+
+		<text> is the text that the user is presented in order to
+			select. <text> is considered to be one line long. 
+			White spaces before and after text are ignored.
+
+		This directive is only possible when the
+		<num-of-user-choices> parameter is present in question
+		header. (See section 1.3)
+		
+		The directive should be encountered <num-of-user-choices>
+		times, in order to describe each of the possible choices.
+
+
+	This directive should not be present if <num-of-user-choices> is not
+	present in the question header.
+	
+
+
+2.5. Setting the correct answer for a question
+In case of a quiz-type gallup, the correct answer should be defined The
+answer can be a string, a number or a selection.
+
+Syntax:
+	answer <answer>
+	
+	<answer> is a string if the question is of type text,
+		is a number if the question is of type number,
+		is a number if the question is of type select.
+	
+	If the user's answer matches <answer> then the user is given the
+	`correct number' credits, otherwise `wrong number' of credits are
+	taken from him.
+	
+	String type answers are first latin-ized and then compared. Try to
+	avoid this type of questions in quizzes since they may confuse the
+	user.
+
+
+=============
+3. Extensions
+
+Due to the great extend of the extensions section of revision 3, revision 4
+is introduced. Future extensions should not interfere with the directives
+above, and should be optional.
+
+3.1. Enabling special features (Revision 4.1)
+There are some flags that can be enabled or disabled inside a gallup.
+One can toggle them with the commands `enable' and `disable'.
+Syntax:
+	enable	<flag>
+	disable	<flag>
+	
+		<flag> is one of the following words:
+			- `timer'		(Rev. 4.1)
+			
+	The text in the parenthesis is the revision that flag was first
+	introduced.
+
+	`timer' enables a seconds timer that counts in how much time the
+		user completed the gallup. This flag is only available in
+		Quiz-type gallups.
+
+
+
+
+==================
+4. Script compiler
+
+The script compiler compiles the script and possibly creates the binary data
+file that has the binary description of the gallup.
+
+The script compiler can be used to install a script in the data directory
+so to be available to the gallup module.
+
+During compilation:
+
+	o Any errors that do not concern the script structure, i.e.  no
+	  `answer' field in a quiz-type poll, generate an error message, but
+	  compilation is continued. At the end no output is generated.  The
+	  compiler is exiting with abort message.
+
+	o Any error that does concern the script structure, i.e. an
+	  misplaced `end' directive, generates an error, and script
+	  compilation is stopped. No output is generated. The compiler exits
+	  with abort message.
+
+	o Output is generated only when no warning or error is generated. 
+	  The compiler exits with success message.
+
+
+==========================
+5. Comments for the future
+
+5.1. Use of flags to enable questions to be presented or not in quiz-type
+gallups
+
+5.2. Timed quizzes
+
+========================
+$Id: MANUAL,v 2.0 2004/09/13 19:44:51 alexios Exp $

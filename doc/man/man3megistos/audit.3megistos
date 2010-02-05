@@ -1,0 +1,857 @@
+.TH "Auditing (logging)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Auditing (logging) \- This header file provides functionality needed to use Megistos logging facilities.  
+
+.PP
+.SS "Audit entry flags"
+
+.in +1c
+.ti -1c
+.RI "#define \fBAUF_SECURITY\fP   0x0001	/**< Security auditing */"
+.br
+.RI "\fISecurity auditing. \fP"
+.ti -1c
+.RI "#define \fBAUF_ACCOUNTING\fP   0x0002	/**< Accounting (statistics etc) */"
+.br
+.RI "\fIAccounting (statistics etc). \fP"
+.ti -1c
+.RI "#define \fBAUF_TRANSFER\fP   0x0004	/**< File transfers/reads, etc */"
+.br
+.RI "\fIFile transfers/reads, etc. \fP"
+.ti -1c
+.RI "#define \fBAUF_EVENT\fP   0x0008	/**< Event execution/logging */"
+.br
+.RI "\fIEvent execution/logging. \fP"
+.ti -1c
+.RI "#define \fBAUF_OPERATION\fP   0x0010	/**< System operation of some kind */"
+.br
+.RI "\fISystem operation of some kind. \fP"
+.ti -1c
+.RI "#define \fBAUF_USERLOG\fP   0x0020	/**< User logs (login/logout etc) */"
+.br
+.RI "\fIUser logs (login/logout etc). \fP"
+.ti -1c
+.RI "#define \fBAUF_OTHER\fP   0x0040	/**< Other, miscellaneous kinds of auditing */"
+.br
+.RI "\fIOther, miscellaneous kinds of auditing. \fP"
+.ti -1c
+.RI "#define \fBAUF_INFO\fP   0x0080   /**< Informational (severity) */"
+.br
+.RI "\fIInformational (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_CAUTION\fP   0x0100   /**< Cautionary (severity) */"
+.br
+.RI "\fICautionary (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_EMERGENCY\fP   0x0200	/**< Emergency (severity) */"
+.br
+.RI "\fIEmergency (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_SEVERITY\fP   (AUF_INFO|AUF_CAUTION|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUF_SEVSHIFT\fP   7"
+.br
+.ti -1c
+.RI "#define \fBGETSEVERITY\fP(f)   ((((f)&AUF_SEVERITY)>>AUF_SEVSHIFT)-1)"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBAUS_CRACKTRY\fP   'INVALID PASSWORD ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_UNKUSER\fP   'INVALID USERID ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_DUPUSER\fP   'DUPLICATE LOGIN ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_LOGIN\fP   'USER LOGIN'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RELOGON\fP   'USER LOGOUT, RELOGGING ON'"
+.br
+.ti -1c
+.RI "#define \fBAUS_LOGOUT\fP   'USER LOGOUT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_SIGNUP\fP   'NEW USER SIGNED UP'"
+.br
+.ti -1c
+.RI "#define \fBAUS_DISCON\fP   'LINE HANGUP'"
+.br
+.ti -1c
+.RI "#define \fBAUS_TIMEOUT\fP   'USER KICKED OUT (TIMEOUT)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_CREDHUP\fP   'USER KICKED OUT (NO CREDITS)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_TIMEHUP\fP   'USER KICKED OUT (TIME LIMIT)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_KICKED\fP   'USER FORCEFULLY DISCONNECTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_EVSPAWN\fP   'EVENT ACTIVATION'"
+.br
+.ti -1c
+.RI "#define \fBAUS_EVEND\fP   'EVENT FINISHED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_CRDPOST\fP   'CREDIT POST'"
+.br
+.ti -1c
+.RI "#define \fBAUS_NEWCLSS\fP   'CLASS CHANGE'"
+.br
+.ti -1c
+.RI "#define \fBAUS_USERDEL\fP   'USER DELETED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSMDEL\fP   'USER MARKED FOR DELETION'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSMUDEL\fP   'USER DELETION MARK REMOVED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSSUSP\fP   'USER SUSPENDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSUSUSP\fP   'USER UNSUSPENDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSXMPT\fP   'USER EXEMPTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSUXMPT\fP   'USER UNEXEMPTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESUPLS\fP   'FILE ATTACHMENT UPLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESDNLS\fP   'FILE ATTACHMENT DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESUPLF\fP   'FAILED FILE ATT UPLOAD'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESDNLF\fP   'FAILED FILE ATT DOWNLOAD'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTINS\fP   'NEW BULLETIN ADDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTDEL\fP   'BULLETIN DELETED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTEDT\fP   'BULLETIN MODIFIED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTRD\fP   'BULLETIN READ'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTDNL\fP   'BULLETIN DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_QWKDNL\fP   'QWK PACKET DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_QWKUPL\fP   'QWK PACKET UPLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ERROR\fP   'ERROR CONDITION OCCURRED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_FATAL\fP   'FATAL ERROR OCCURRED!!!'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CRACKTRY\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_UNKUSER\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_DUPUSER\fP   '%s is already online, Attempted speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_LOGIN\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RELOGON\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_LOGOUT\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_SIGNUP\fP   'User %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_DISCON\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_TIMEOUT\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CREDHUP\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_TIMEHUP\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_KICKED\fP   '%s kicked out %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_EVSPAWN\fP   '%s activated %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_EVEND\fP   'Event %s has finished (exit code %d)'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CRDPOST\fP   'Posted %d %s credit(s) to %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_NEWCLSS\fP   '%s changed class %s -> %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_USERDEL\fP   '%s, CL:%s, CR:%d'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSMDEL\fP   '%s marked %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSMUDEL\fP   '%s unmarked %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSSUSP\fP   '%s suspended %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSUSUSP\fP   '%s unsuspended %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSXMPT\fP   '%s exempted %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSUXMPT\fP   '%s unexempted %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESUPLS\fP   '%s -> %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESDNLS\fP   '%s <- %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESUPLF\fP   '%s -) %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESDNLF\fP   '%s (- %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTINS\fP   '%s added %s to /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTDEL\fP   '%s deleted %s from /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTEDT\fP   '%s edited %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTRD\fP   '%s read %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTDNL\fP   '%s downloaded %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_QWKDNL\fP   '%s <- QWK, %d bytes'"
+.br
+.ti -1c
+.RI "#define \fBAUD_QWKUPL\fP   '%s -> QWK'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ERROR\fP   'Please see bbs/log/errors for details'"
+.br
+.ti -1c
+.RI "#define \fBAUD_FATAL\fP   'CHECK bbs/log/errors NOW!'"
+.br
+.ti -1c
+.RI "#define \fBAUT_CRACKTRY\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_UNKUSER\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_DUPUSER\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_LOGIN\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RELOGON\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_LOGOUT\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_SIGNUP\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_DISCON\fP   (AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_TIMEOUT\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_CREDHUP\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_TIMEHUP\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_KICKED\fP   (AUF_OPERATION|AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_EVSPAWN\fP   (AUF_EVENT|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_EVEND\fP   (AUF_EVENT|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_CRDPOST\fP   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_NEWCLSS\fP   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_USERDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_EVENT|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSMDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSMUDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSSUSP\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSUSUSP\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSXMPT\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSUXMPT\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESUPLS\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESDNLS\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESUPLF\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESDNLF\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTINS\fP   (AUF_TRANSFER|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTDEL\fP   (AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTEDT\fP   (AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTRD\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTDNL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_QWKDNL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_QWKUPL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ERROR\fP   (AUF_OTHER|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUT_FATAL\fP   (AUF_OTHER|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUDIT\fP(x)   AUT_##x,AUS_##x,AUD_##x"
+.br
+.RI "\fIAUDIT convenience macro. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBaudit\fP (char *channel, \fBuint32\fP flags, char *summary, char *format,...)"
+.br
+.RI "\fIThe main auditing function. \fP"
+.ti -1c
+.RI "void \fBaudit_setfile\fP (char *filename)"
+.br
+.RI "\fISet the audit file. \fP"
+.ti -1c
+.RI "void \fBaudit_resetfile\fP ()"
+.br
+.RI "\fIRevert to the previous audit file. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This header file provides functionality needed to use Megistos logging facilities. The system logs a variety of information:
+.PP
+.IP "\(bu" 2
+Date,
+.IP "\(bu" 2
+Time,
+.IP "\(bu" 2
+BBS channel (or daemon/service name, where a channel isn't available),
+.IP "\(bu" 2
+Message flags, giving the type and severity of the log entry,
+.IP "\(bu" 2
+Entry summary (typically a canned string), and
+.IP "\(bu" 2
+Detailed entry text.
+.PP
+.PP
+The default log file set up by the BBS library is the Audit Trail (Major users should be at home with the name). The API defined here allows you to switch to other files.
+.PP
+In addition to the API, this include file predefines most of the entries that are most widely used by the standard modules. 
+.SH "Define Documentation"
+.PP 
+.SS "#define AUD_BLTDEL   '%s deleted %s from /%s'"
+.PP
+Definition at line 230 of file audit.h.
+.SS "#define AUD_BLTDNL   '%s downloaded %s in /%s'"
+.PP
+Definition at line 233 of file audit.h.
+.SS "#define AUD_BLTEDT   '%s edited %s in /%s'"
+.PP
+Definition at line 231 of file audit.h.
+.SS "#define AUD_BLTINS   '%s added %s to /%s'"
+.PP
+Definition at line 229 of file audit.h.
+.SS "#define AUD_BLTRD   '%s read %s in /%s'"
+.PP
+Definition at line 232 of file audit.h.
+.SS "#define AUD_CRACKTRY   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 202 of file audit.h.
+.SS "#define AUD_CRDPOST   'Posted %d %s credit(s) to %s'"
+.PP
+Definition at line 216 of file audit.h.
+.SS "#define AUD_CREDHUP   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 211 of file audit.h.
+.SS "#define AUD_DISCON   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 209 of file audit.h.
+.SS "#define AUD_DUPUSER   '%s is already online, Attempted speed: %5s'"
+.PP
+Definition at line 204 of file audit.h.
+.SS "#define AUD_ERROR   'Please see bbs/log/errors for details'"
+.PP
+Definition at line 236 of file audit.h.
+.SS "#define AUD_ESDNLF   '%s (- %s/%d.ATT'"
+.PP
+Definition at line 228 of file audit.h.
+.SS "#define AUD_ESDNLS   '%s <- %s/%d.ATT'"
+.PP
+Definition at line 226 of file audit.h.
+.SS "#define AUD_ESUPLF   '%s -) %s/%d.ATT'"
+.PP
+Definition at line 227 of file audit.h.
+.SS "#define AUD_ESUPLS   '%s -> %s/%d.ATT'"
+.PP
+Definition at line 225 of file audit.h.
+.SS "#define AUD_EVEND   'Event %s has finished (exit code %d)'"
+.PP
+Definition at line 215 of file audit.h.
+.SS "#define AUD_EVSPAWN   '%s activated %s'"
+.PP
+Definition at line 214 of file audit.h.
+.SS "#define AUD_FATAL   'CHECK bbs/log/errors NOW!'"
+.PP
+Definition at line 237 of file audit.h.
+.SS "#define AUD_KICKED   '%s kicked out %s'"
+.PP
+Definition at line 213 of file audit.h.
+.SS "#define AUD_LOGIN   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 205 of file audit.h.
+.SS "#define AUD_LOGOUT   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 207 of file audit.h.
+.SS "#define AUD_NEWCLSS   '%s changed class %s -> %s'"
+.PP
+Definition at line 217 of file audit.h.
+.SS "#define AUD_QWKDNL   '%s <- QWK, %d bytes'"
+.PP
+Definition at line 234 of file audit.h.
+.SS "#define AUD_QWKUPL   '%s -> QWK'"
+.PP
+Definition at line 235 of file audit.h.
+.SS "#define AUD_RELOGON   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 206 of file audit.h.
+.SS "#define AUD_RSMDEL   '%s marked %s'"
+.PP
+Definition at line 219 of file audit.h.
+.SS "#define AUD_RSMUDEL   '%s unmarked %s'"
+.PP
+Definition at line 220 of file audit.h.
+.SS "#define AUD_RSSUSP   '%s suspended %s'"
+.PP
+Definition at line 221 of file audit.h.
+.SS "#define AUD_RSUSUSP   '%s unsuspended %s'"
+.PP
+Definition at line 222 of file audit.h.
+.SS "#define AUD_RSUXMPT   '%s unexempted %s'"
+.PP
+Definition at line 224 of file audit.h.
+.SS "#define AUD_RSXMPT   '%s exempted %s'"
+.PP
+Definition at line 223 of file audit.h.
+.SS "#define AUD_SIGNUP   'User %s'"
+.PP
+Definition at line 208 of file audit.h.
+.SS "#define AUD_TIMEHUP   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 212 of file audit.h.
+.SS "#define AUD_TIMEOUT   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 210 of file audit.h.
+.SS "#define AUD_UNKUSER   'User %-24s  Speed: %5s'"
+.PP
+Definition at line 203 of file audit.h.
+.SS "#define AUD_USERDEL   '%s, CL:%s, CR:%d'"
+.PP
+Definition at line 218 of file audit.h.
+.SS "#define AUDIT(x)   AUT_##x,AUS_##x,AUD_##x"
+.PP
+AUDIT convenience macro. This macro shortens considerably most calls to \fBaudit()\fP. By convention, audit entry flags, summary and detailed text are \fC#define\fPd as \fCAUT_x\fP, \fCAUS_x\fP and \fCAUD_x\fP macros, where \fCx\fP is a name common to all three. Given an argument x, the macro expands to the triplet \fCAUT_x,AUS_x,AUD_x\fP. In this way, arguments 2 to 4 of \fBaudit()\fP can be replaced by a simple \fBAUDIT\fP call.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBaudit()\fP 
+.RE
+.PP
+Definition at line 318 of file audit.h.
+.SS "#define AUF_ACCOUNTING   0x0002	/**< Accounting (statistics etc) */"
+.PP
+Accounting (statistics etc). Definition at line 144 of file audit.h.
+.SS "#define AUF_CAUTION   0x0100   /**< Cautionary (severity) */"
+.PP
+Cautionary (severity). Definition at line 152 of file audit.h.
+.SS "#define AUF_EMERGENCY   0x0200	/**< Emergency (severity) */"
+.PP
+Emergency (severity). Definition at line 153 of file audit.h.
+.SS "#define AUF_EVENT   0x0008	/**< Event execution/logging */"
+.PP
+Event execution/logging. Definition at line 146 of file audit.h.
+.SS "#define AUF_INFO   0x0080   /**< Informational (severity) */"
+.PP
+Informational (severity). Definition at line 151 of file audit.h.
+.SS "#define AUF_OPERATION   0x0010	/**< System operation of some kind */"
+.PP
+System operation of some kind. Definition at line 147 of file audit.h.
+.SS "#define AUF_OTHER   0x0040	/**< Other, miscellaneous kinds of auditing */"
+.PP
+Other, miscellaneous kinds of auditing. Definition at line 149 of file audit.h.
+.SS "#define AUF_SECURITY   0x0001	/**< Security auditing */"
+.PP
+Security auditing. Definition at line 143 of file audit.h.
+.SS "#define AUF_SEVERITY   (AUF_INFO|AUF_CAUTION|AUF_EMERGENCY)"
+.PP
+Definition at line 155 of file audit.h.
+.SS "#define AUF_SEVSHIFT   7"
+.PP
+Definition at line 156 of file audit.h.
+.SS "#define AUF_TRANSFER   0x0004	/**< File transfers/reads, etc */"
+.PP
+File transfers/reads, etc. Definition at line 145 of file audit.h.
+.SS "#define AUF_USERLOG   0x0020	/**< User logs (login/logout etc) */"
+.PP
+User logs (login/logout etc). Definition at line 148 of file audit.h.
+.SS "#define AUS_BLTDEL   'BULLETIN DELETED'"
+.PP
+Definition at line 191 of file audit.h.
+.SS "#define AUS_BLTDNL   'BULLETIN DOWNLOADED'"
+.PP
+Definition at line 194 of file audit.h.
+.SS "#define AUS_BLTEDT   'BULLETIN MODIFIED'"
+.PP
+Definition at line 192 of file audit.h.
+.SS "#define AUS_BLTINS   'NEW BULLETIN ADDED'"
+.PP
+Definition at line 190 of file audit.h.
+.SS "#define AUS_BLTRD   'BULLETIN READ'"
+.PP
+Definition at line 193 of file audit.h.
+.SS "#define AUS_CRACKTRY   'INVALID PASSWORD ATTEMPT'"
+.PP
+Definition at line 163 of file audit.h.
+.SS "#define AUS_CRDPOST   'CREDIT POST'"
+.PP
+Definition at line 177 of file audit.h.
+.SS "#define AUS_CREDHUP   'USER KICKED OUT (NO CREDITS)'"
+.PP
+Definition at line 172 of file audit.h.
+.SS "#define AUS_DISCON   'LINE HANGUP'"
+.PP
+Definition at line 170 of file audit.h.
+.SS "#define AUS_DUPUSER   'DUPLICATE LOGIN ATTEMPT'"
+.PP
+Definition at line 165 of file audit.h.
+.SS "#define AUS_ERROR   'ERROR CONDITION OCCURRED'"
+.PP
+Definition at line 197 of file audit.h.
+.SS "#define AUS_ESDNLF   'FAILED FILE ATT DOWNLOAD'"
+.PP
+Definition at line 189 of file audit.h.
+.SS "#define AUS_ESDNLS   'FILE ATTACHMENT DOWNLOADED'"
+.PP
+Definition at line 187 of file audit.h.
+.SS "#define AUS_ESUPLF   'FAILED FILE ATT UPLOAD'"
+.PP
+Definition at line 188 of file audit.h.
+.SS "#define AUS_ESUPLS   'FILE ATTACHMENT UPLOADED'"
+.PP
+Definition at line 186 of file audit.h.
+.SS "#define AUS_EVEND   'EVENT FINISHED'"
+.PP
+Definition at line 176 of file audit.h.
+.SS "#define AUS_EVSPAWN   'EVENT ACTIVATION'"
+.PP
+Definition at line 175 of file audit.h.
+.SS "#define AUS_FATAL   'FATAL ERROR OCCURRED!!!'"
+.PP
+Definition at line 198 of file audit.h.
+.SS "#define AUS_KICKED   'USER FORCEFULLY DISCONNECTED'"
+.PP
+Definition at line 174 of file audit.h.
+.SS "#define AUS_LOGIN   'USER LOGIN'"
+.PP
+Definition at line 166 of file audit.h.
+.SS "#define AUS_LOGOUT   'USER LOGOUT'"
+.PP
+Definition at line 168 of file audit.h.
+.SS "#define AUS_NEWCLSS   'CLASS CHANGE'"
+.PP
+Definition at line 178 of file audit.h.
+.SS "#define AUS_QWKDNL   'QWK PACKET DOWNLOADED'"
+.PP
+Definition at line 195 of file audit.h.
+.SS "#define AUS_QWKUPL   'QWK PACKET UPLOADED'"
+.PP
+Definition at line 196 of file audit.h.
+.SS "#define AUS_RELOGON   'USER LOGOUT, RELOGGING ON'"
+.PP
+Definition at line 167 of file audit.h.
+.SS "#define AUS_RSMDEL   'USER MARKED FOR DELETION'"
+.PP
+Definition at line 180 of file audit.h.
+.SS "#define AUS_RSMUDEL   'USER DELETION MARK REMOVED'"
+.PP
+Definition at line 181 of file audit.h.
+.SS "#define AUS_RSSUSP   'USER SUSPENDED'"
+.PP
+Definition at line 182 of file audit.h.
+.SS "#define AUS_RSUSUSP   'USER UNSUSPENDED'"
+.PP
+Definition at line 183 of file audit.h.
+.SS "#define AUS_RSUXMPT   'USER UNEXEMPTED'"
+.PP
+Definition at line 185 of file audit.h.
+.SS "#define AUS_RSXMPT   'USER EXEMPTED'"
+.PP
+Definition at line 184 of file audit.h.
+.SS "#define AUS_SIGNUP   'NEW USER SIGNED UP'"
+.PP
+Definition at line 169 of file audit.h.
+.SS "#define AUS_TIMEHUP   'USER KICKED OUT (TIME LIMIT)'"
+.PP
+Definition at line 173 of file audit.h.
+.SS "#define AUS_TIMEOUT   'USER KICKED OUT (TIMEOUT)'"
+.PP
+Definition at line 171 of file audit.h.
+.SS "#define AUS_UNKUSER   'INVALID USERID ATTEMPT'"
+.PP
+Definition at line 164 of file audit.h.
+.SS "#define AUS_USERDEL   'USER DELETED'"
+.PP
+Definition at line 179 of file audit.h.
+.SS "#define AUT_BLTDEL   (AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 268 of file audit.h.
+.SS "#define AUT_BLTDNL   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 271 of file audit.h.
+.SS "#define AUT_BLTEDT   (AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 269 of file audit.h.
+.SS "#define AUT_BLTINS   (AUF_TRANSFER|AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 267 of file audit.h.
+.SS "#define AUT_BLTRD   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 270 of file audit.h.
+.SS "#define AUT_CRACKTRY   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.PP
+Definition at line 240 of file audit.h.
+.SS "#define AUT_CRDPOST   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 254 of file audit.h.
+.SS "#define AUT_CREDHUP   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 249 of file audit.h.
+.SS "#define AUT_DISCON   (AUF_USERLOG|AUF_CAUTION)"
+.PP
+Definition at line 247 of file audit.h.
+.SS "#define AUT_DUPUSER   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.PP
+Definition at line 242 of file audit.h.
+.SS "#define AUT_ERROR   (AUF_OTHER|AUF_EMERGENCY)"
+.PP
+Definition at line 274 of file audit.h.
+.SS "#define AUT_ESDNLF   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 266 of file audit.h.
+.SS "#define AUT_ESDNLS   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 264 of file audit.h.
+.SS "#define AUT_ESUPLF   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 265 of file audit.h.
+.SS "#define AUT_ESUPLS   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 263 of file audit.h.
+.SS "#define AUT_EVEND   (AUF_EVENT|AUF_INFO)"
+.PP
+Definition at line 253 of file audit.h.
+.SS "#define AUT_EVSPAWN   (AUF_EVENT|AUF_INFO)"
+.PP
+Definition at line 252 of file audit.h.
+.SS "#define AUT_FATAL   (AUF_OTHER|AUF_EMERGENCY)"
+.PP
+Definition at line 275 of file audit.h.
+.SS "#define AUT_KICKED   (AUF_OPERATION|AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 251 of file audit.h.
+.SS "#define AUT_LOGIN   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 243 of file audit.h.
+.SS "#define AUT_LOGOUT   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 245 of file audit.h.
+.SS "#define AUT_NEWCLSS   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 255 of file audit.h.
+.SS "#define AUT_QWKDNL   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 272 of file audit.h.
+.SS "#define AUT_QWKUPL   (AUF_TRANSFER|AUF_INFO)"
+.PP
+Definition at line 273 of file audit.h.
+.SS "#define AUT_RELOGON   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 244 of file audit.h.
+.SS "#define AUT_RSMDEL   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 257 of file audit.h.
+.SS "#define AUT_RSMUDEL   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 258 of file audit.h.
+.SS "#define AUT_RSSUSP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 259 of file audit.h.
+.SS "#define AUT_RSUSUSP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 260 of file audit.h.
+.SS "#define AUT_RSUXMPT   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.PP
+Definition at line 262 of file audit.h.
+.SS "#define AUT_RSXMPT   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 261 of file audit.h.
+.SS "#define AUT_SIGNUP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.PP
+Definition at line 246 of file audit.h.
+.SS "#define AUT_TIMEHUP   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 250 of file audit.h.
+.SS "#define AUT_TIMEOUT   (AUF_USERLOG|AUF_INFO)"
+.PP
+Definition at line 248 of file audit.h.
+.SS "#define AUT_UNKUSER   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.PP
+Definition at line 241 of file audit.h.
+.SS "#define AUT_USERDEL   (AUF_SECURITY|AUF_ACCOUNTING|AUF_EVENT|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.PP
+Definition at line 256 of file audit.h.
+.SS "#define GETSEVERITY(f)   ((((f)&AUF_SEVERITY)>>AUF_SEVSHIFT)-1)"
+.PP
+Definition at line 157 of file audit.h.
+.SH "Function Documentation"
+.PP 
+.SS "int audit (char * channel, \fBuint32\fP flags, char * summary, char * format,  ...)"
+.PP
+The main auditing function. In most cases, this function is all you need to know. It takes quite a few arguments and comes with a helper macro, \fBAUDIT\fP (which is quite handy).
+.PP
+\fBParameters:\fP
+.RS 4
+\fIchannel\fP the name of the current user's channel, or a daemon/service name if a channel is not available. A value of \fCNULL\fP is equivalent to thisuesronl::channel.
+.br
+\fIflags\fP the type and severity of this message, using \fCAUF_\fP constants.
+.br
+\fIsummary\fP a string summarising the logged event. This is in capital letters by (Majoresque) convention.
+.br
+\fIformat\fP a \fCprintf()\fP-like fmt string that formats the detailed log text. Like \fCprintf()\fP, this argument is followed by as many additional arguments as are required by the format specifiers.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+If the audit file could not be appended to, zero is returned, and errno is set appropriately. A non-zero value denotes success.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBAUDIT\fP, \fBaudit_setfile()\fP, printf() 
+.RE
+.PP
+
+.SS "void audit_resetfile ()"
+.PP
+Revert to the previous audit file. Resets the audit filename to the Audit Trail.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBaudit_setfile()\fP 
+.RE
+.PP
+
+.SS "void audit_setfile (char * filename)"
+.PP
+Set the audit file. Specifies the audit file to which subsequent calls to \fBaudit()\fP will append entries. In default of a call to this function, the Audit Trail will be used.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfilename\fP the full pathname of a file to set as the current audit file. A value of \fCNULL\fP is equivalent to calling { audit_resetfile.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBaudit_resetfile()\fP 
+.RE
+.PP
+

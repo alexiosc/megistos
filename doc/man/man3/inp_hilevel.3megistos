@@ -1,0 +1,171 @@
+.TH "High-Level user-interacting input/validation" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+High-Level user-interacting input/validation \- Very high-level input functionality.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBget_number\fP (int *num, int msg, int min, int max, int err, int def, int defval)"
+.br
+.RI "\fIGet an integer within certain limits. \fP"
+.ti -1c
+.RI "int \fBget_bool\fP (int *retbool, int msg, int err, int def, int defval)"
+.br
+.RI "\fIGet a boolean (yes or no) answer. \fP"
+.ti -1c
+.RI "int \fBget_userid\fP (char *uid, int msg, int err, int def, char *defval, int online)"
+.br
+.RI "\fIGet and validate a user ID. \fP"
+.ti -1c
+.RI "int \fBget_menu\fP (char *option, int showmenu, int lmenu, int smenu, int err, char *opts, int def, int defval)"
+.br
+.RI "\fIValidate input for a simple menu. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Very high-level input functionality. This group of functions implements most of the input functionality needed by Megistos modules. It is \fIstrongly\fP recommended that you use them, as they keep the user interface consistent (and if the interface changes, the behaviour of your module will change without you having to rewrite code).
+.PP
+These functions present the user with prompts, read and validate input, offer and handle defaults, deal with concatenated commands, and produce error messages and help. Unfortunately, they need quite a few arguments. Sorry!
+.PP
+Fortunately, the calling interface is very similar for all these functions. Don't be scared by the long documentation, it's mostly cut and paste stuff!
+.PP
+You can use them as examples to code your own, specialised functions in your modules. However, please only do so if the functionality isn't provided here.
+.PP
+There are some common points in all these functions.
+.PP
+.IP "\(bu" 2
+Prompts are provided to the user. Any prompts may be zero, in which case the user is not prompted at all. This may be inelegant in some cases.
+.PP
+.PP
+.IP "\(bu" 2
+Defaults are handled by providing a prompt number and default value. The prompt indexed by the prompt number displays the default value using a suitable format specifier. If the prompt number is zero, it is not printed (it is thus expected that the first prompt printed will tell the user what the default value is). If the default value is zero or NULL (depending on the function), the default facility is disabled and the user \fImust\fP enter a value. This is done so as to allow BBS prompts the flexibility to be issued with and without defaults with minimum hassle.
+.PP
+.PP
+.IP "\(bu" 2
+Reprompting after injected messages (see injoth()) is handled elegantly.
+.PP
+.PP
+.IP "\(bu" 2
+Help is available to the user by providing a help prompt index. If it is zero, no help will be available. In the case of menu handling, asking for help redisplays the long version of a menu.
+.PP
+.PP
+.IP "\(bu" 2
+Optionally, the caller can set #INP_HELP. In this case, if \fC?\fP is specified by the user, the function exits returning -1. The caller can then handle the help request themselves, e.g. by generating and printing a long list of possible values the user may enter.
+.PP
+.PP
+.IP "\(bu" 2
+The user may exit at any time by entering 'X'. In this case, these functions return 0 and do \fInot\fP return any input. 
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "int get_bool (int * retbool, int msg, int err, int def, int defval)"
+.PP
+Get a boolean (yes or no) answer. Works just like getnumber(). Prompts \fCmsg\fP, asks for a { Y/N answer, prompts \fCerr\fP if there was a bad response, optionally prompts \fCdef\fP with a default value of \fCdefval\fP: 0 for no or 1 for yes.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIretbool\fP pointer to an \fCint\fP. This is written to if a valid (or default) answer is provided. The variable will be set to 1 if `yes' was chosen, and to 0 if the answer was `no'.
+.br
+\fImsg\fP is the short prompt number to display. This should give the user a brief idea of what is expected of them. This prompt should belong to the current message block. It will not be displayed if the value is zero, but please don't do this as it makes things look inelegant.
+.br
+\fIerr\fP the error prompt to display. Specify zero to disable error printing.
+.br
+\fIdef\fP is the user prompt used when defaults are used (which must belong to the current prompt block). This is usually a short string added to the short menu prompt, and looks like `\fC(Enter=%c)\fP' or `\fC[%d]\fP'. The format specifier gets either `Y' or `N', depending on the value of \fCdefval\fP. Use a zero to disable printing of \fCdefval\fP where, for instance, the default value is printed by \fCmsg\fP.
+.br
+\fIdefval\fP is the default value for when the user presses \fCEnter\fP. Non-zero values stand for yes; zero is no.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if X entered; one is returned if the answer was valid, in which case it is stored in \fCretbool\fP (1 for `yes', 0 for `no'). A value of \fC-1\fP implies that \fBINF_HELP\fP was set and the user entered `?'. 
+.RE
+.PP
+
+.SS "int get_menu (char * option, int showmenu, int lmenu, int smenu, int err, char * opts, int def, int defval)"
+.PP
+Validate input for a simple menu. Displays a long menu (\fClmenu\fP) once per session (if \fCshowmenu\fP is non-zero), plus whenever the question mark (\fC?\fP) is entered. The prompt is a short version of the long menu (\fCsmenu\fP). Options are single characters contained in the string \fCopts\fP}. In case of error, \fCerr\fP is prompted. Defaults are handled in the usual way. The selection is returned in \fCoption\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIoption\fP pass a pointer to a single \fCchar\fP variable here. On successful exit, the variable will hold the user's option in upper case.
+.br
+\fIshowmenu\fP controls display of the long menu prompt \fClmenu\fP. A non-zero value displays \fClmenu\fP before doing anything else, or when the user types \fC?\fP to request for help. A zero only displays the \fClmenu\fP when the user requests for help, unless input flag \fBINF_HELP\fP is in effect, in which case the function exits and the caller is responsible for processing the help request themselves. Complicated? Yes, it is. Sorry.
+.br
+\fIlmenu\fP is the prompt number of the long menu to display. If \fClmenu\fP is zero, no long menu will be displayed, no matter what the value of \fCshowmenu\fP is. The long menu prompt must belong to the current message block.
+.br
+\fIsmenu\fP is the short prompt number to display. This should give the user their options and little more besides. This prompt should belong to the current message block. It will not be displayed if the value is zero, but please don't do this as it makes things look inelegant.
+.br
+\fIerr\fP the error prompt to display. As usual, specify zero to disable error printing. You can have an optional \fC%c\fP format specifier in the error prompt. It will be substituted by the character entered by the user.
+.br
+\fIopts\fP is a string of upper case characters representing the options available to the user. Leave this empty and the user will only be able to exit this part of the module by using \fCX\fP (which should work everywhere).
+.br
+\fIdef\fP is the default user prompt (which must belong to the current prompt block). This is usually a short string added to the short menu prompt, and looks like `\fC(Enter=%c)\fP' or `\fC[%c]\fP'. The format specifier gets the value of \fCdefval\fP. Use a zero to disable printing of \fCdefval\fP where, for instance, the default value is printed as part of the \fCsmenu\fP prompt.
+.br
+\fIdefval\fP is the default user option (in upper case) for when the user presses \fCEnter\fP. Zero indicates no default is available and Enter reprompts.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if the user bails out with \fCX\fP; one if the process was successful, in which case \fCoption\fP is modified to hold the user's selection (or the default value). A value of \fC-1\fP means that \fBINF_HELP\fP was set and the user pressed `\fC?\fP'. 
+.RE
+.PP
+
+.SS "int get_number (int * num, int msg, int min, int max, int err, int def, int defval)"
+.PP
+Get an integer within certain limits. Prompt \fCmsg\fP asking for a number between \fCmin\fP and \fCmax\fP. Return the number in \fCnum\fP. If \fCdef!=0\fP, there is a default value (prompt \fCdef\fP displays it) which is passed in \fCdefval\fP. Prompts \fCerr\fP if bad value entered.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP pointer to an \fCint\fP. This is written to if a valid number is entered.
+.br
+\fImsg\fP is the short prompt number to display. This should give the user a brief idea of what is expected of them. This prompt should belong to the current message block. It will not be displayed if the value is zero, but please don't do this as it makes things look inelegant.
+.br
+\fImin\fP minimum allowed value for the number. 
+.br
+\fImax\fP likewise, the maximum allowed value for the number.
+.br
+\fIerr\fP the error prompt to display. Specify zero to disable error printing. You can have an optional \fC%d\fP format specifier in the error prompt. It will be substituted by the (wrong) number entered.
+.br
+\fIdef\fP is the user prompt used when defaults are used (which must belong to the current prompt block). This is usually a short string added to the short menu prompt, and looks like `\fC(Enter=%d)\fP' or `\fC[%d]\fP'. The format specifier gets the value of \fCdefval\fP. Use a zero to disable printing of \fCdefval\fP where, for instance, the default value is printed by \fCmsg\fP.
+.br
+\fIdefval\fP is the default value for when the user presses \fCEnter\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if X entered; one is returned if the number was valid, in which case it is stored in \fCnum\fP. A value of \fC-1\fP implies that \fBINF_HELP\fP was set and the user entered `\fC?\fP'. 
+.RE
+.PP
+
+.SS "int get_userid (char * uid, int msg, int err, int def, char * defval, int online)"
+.PP
+Get and validate a user ID. Prompts \fCmsg\fP asking for a user ID. If the user does not exist (as checked by uidxref()), \fCerr\fP is prompted (with a \fC%s\fP format specifier containing the invalid user ID. If \fCdef!=0\fP, prompt \fCdef\fP is displayed along with a default user ID of \fCdefval\fP.
+.PP
+The user can enter the first few characters of a user ID (three at least), and uidxref() will complete the user ID will when \fCEnter\fP is pressed. If there are more than one user IDs matching what the user entered, a short menu will be shown and the user can choose which one they meant.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuid\fP pointer to a \fCchar *\fP. This is written to if a valid (or default) answer is provided. The variable will be set to the canonical form of the user ID, i.e. in full, and capitalised properly.
+.br
+\fImsg\fP is the short prompt number to display. This should give the user a brief idea of what is expected of them. This prompt should belong to the current message block. It will not be displayed if the value is zero, but please don't do this as it makes things look inelegant.
+.br
+\fIerr\fP the error prompt to display. Specify zero to disable error printing.
+.br
+\fIdef\fP is the user prompt used when defaults are used (which must belong to the current prompt block). This is usually a short string added to the short menu prompt, and looks like `\fC(Enter=%s)\fP' or `\fC[%s]\fP'. The format specifier gets the default user ID provided in \fCdefval\fP. Use a zero to disable printing of \fCdefval\fP where, for instance, the default value is static and included in \fCmsg\fP.
+.br
+\fIdefval\fP is the default value for when the user presses \fCEnter\fP. Specify \fCNULL\fP if there is no default.
+.br
+\fIonline\fP if this is non-zero, the entered user ID must belong to a user who is currently on-line.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a value of one is returned if input is valid, in which case the selected user ID can be found in \fCuid\fP. Zero is returned if the user bailed out with \fCX\fP. A value of \fC-1\fP implies that \fBINF_HELP\fP was set and the user entered `\fC?\fP'. 
+.RE
+.PP
+

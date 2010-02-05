@@ -1,0 +1,479 @@
+.TH "Outputting to the User" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Outputting to the User \- This module includes functions used to send output to the user, and to control how this output is sent.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBOutput Flags (OFL_x)\fP"
+.br
+.RI "\fIOutput flags. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBsubstvar\fP"
+.br
+.RI "\fISubstitution variable record. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fB_ASCIIVARCHAR\fP   '@'"
+.br
+.ti -1c
+.RI "#define \fB_VARCHAR\fP   0x7f"
+.br
+.ti -1c
+.RI "#define \fBXLATION_OFF\fP   -1		/**< Disable automatic translation */"
+.br
+.RI "\fIDisable automatic translation. \fP"
+.ti -1c
+.RI "#define \fBXLATION_ON\fP   -2		/**< Re-enable automatic translation */"
+.br
+.RI "\fIRe-enable automatic translation. \fP"
+.ti -1c
+.RI "#define \fBout_setflags\fP(flags)   __out_setclear(1,flags)"
+.br
+.RI "\fISet output flags. \fP"
+.ti -1c
+.RI "#define \fBout_clearflags\fP(flags)   __out_setclear(0,flags)"
+.br
+.RI "\fIClear output flags. \fP"
+.ti -1c
+.RI "#define \fBout_setansiflag\fP(f)   __out_setclear(f,OFL_ANSIENABLE)"
+.br
+.RI "\fISet or clear the \fBOFL_ANSIENABLE\fP flag. \fP"
+.ti -1c
+.RI "#define \fBout_setwaittoclear\fP(f)   __out_setclear(f,OFL_WAITTOCLEAR)"
+.br
+.RI "\fISet or clear the \fBOFL_WAITTOCLEAR\fP flag. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBout_init\fP ()"
+.br
+.RI "\fIInitialise output subsystem. \fP"
+.ti -1c
+.RI "void \fBout_done\fP ()"
+.br
+.RI "\fIShut down output to the user. \fP"
+.ti -1c
+.RI "void \fBout_initsubstvars\fP ()"
+.br
+.RI "\fIInitialise substitution variables. \fP"
+.ti -1c
+.RI "void \fBout_addsubstvar\fP (char *name, char *(*varcalc)(void))"
+.br
+.RI "\fIInstall a new substitution variable. \fP"
+.ti -1c
+.RI "void \fBout_setxlation\fP (int mode)"
+.br
+.RI "\fIControl character translation. \fP"
+.ti -1c
+.RI "void \fBprompt\fP (int num,...)"
+.br
+.RI "\fIFormat and display a prompt. \fP"
+.ti -1c
+.RI "void \fBsprompt\fP (char *buf, int num,...)"
+.br
+.RI "\fIFormat a prompt and store it in a string. \fP"
+.ti -1c
+.RI "char * \fBsprompt_other\fP (struct \fBshmuserrec\fP *ushm, char *buf, int num,...)"
+.br
+.RI "\fIFormat a prompt for another user and store it in a string. \fP"
+.ti -1c
+.RI "void \fBprint\fP (char *buf,...)"
+.br
+.RI "\fIFormat and print a string. \fP"
+.ti -1c
+.RI "void \fBsprint\fP (char *stg, char *buf,...)"
+.br
+.RI "\fIFormat and store a string. \fP"
+.ti -1c
+.RI "int \fBout_printfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file. \fP"
+.ti -1c
+.RI "int \fBout_printlongfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file. \fP"
+.ti -1c
+.RI "int \fBout_catfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file verbatim. \fP"
+.ti -1c
+.RI "void \fB__out_setclear\fP (int set, \fBuint32\fP f)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "char \fBout_buffer\fP [8192]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBout_flags\fP"
+.br
+.RI "\fITemporary output buffer. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This module includes functions used to send output to the user, and to control how this output is sent. It largely implements high-level functions, with the really low-level ones abstracted away (they're horrible, ugly and kludgy, anyway). 
+.SH "Define Documentation"
+.PP 
+.SS "#define _ASCIIVARCHAR   '@'"
+.PP
+Definition at line 103 of file output.h.
+.SS "#define _VARCHAR   0x7f"
+.PP
+Definition at line 104 of file output.h.
+.SS "#define out_clearflags(flags)   __out_setclear(0,flags)"
+.PP
+Clear output flags. This function clears the given output flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIflags\fP A set of flags, ORred together.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Nothing. This is a macro and should be only be used for its side-effect.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_setflags()\fP, \fBout_setansiflag()\fP, \fBout_setwaittoclear()\fP. 
+.RE
+.PP
+Definition at line 569 of file output.h.
+.SS "#define out_setansiflag(f)   __out_setclear(f,OFL_ANSIENABLE)"
+.PP
+Set or clear the \fBOFL_ANSIENABLE\fP flag. This function is only a legacy interface to the \fBout_setflags\fP and \fBout_clearflags\fP} macros. It's used to control the \fBOFL_ANSIENABLE\fP flag, which in turn controls whether or not ANSI directives are stripped before output.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIf\fP Causes the flag to be set if non-zero, or to be cleared if zero. 
+.RE
+.PP
+Definition at line 585 of file output.h.
+.SS "#define out_setflags(flags)   __out_setclear(1,flags)"
+.PP
+Set output flags. This function sets the given output flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIflags\fP A set of flags, ORred together.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Nothing. This is a macro and should be only be used for its side-effect.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_clearflags()\fP, \fBout_setansiflag()\fP, \fBout_setwaittoclear()\fP. 
+.RE
+.PP
+Definition at line 556 of file output.h.
+.SS "#define out_setwaittoclear(f)   __out_setclear(f,OFL_WAITTOCLEAR)"
+.PP
+Set or clear the \fBOFL_WAITTOCLEAR\fP flag. This function is only a legacy interface to the \fBout_setflags\fP and \fBout_clearflags\fP macros. It's used to control the \fBOFL_WAITTOCLEAR\fP flag. This flag controls whether or not pauses will be forced before screen clears to make sure the user has time to read the last characters of the previous screen.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIf\fP Causes the flag to be set if non-zero, or to be cleared if zero. 
+.RE
+.PP
+Definition at line 599 of file output.h.
+.SS "#define XLATION_OFF   -1		/**< Disable automatic translation */"
+.PP
+Disable automatic translation. Definition at line 293 of file output.h.
+.SS "#define XLATION_ON   -2		/**< Re-enable automatic translation */"
+.PP
+Re-enable automatic translation. Definition at line 295 of file output.h.
+.SH "Function Documentation"
+.PP 
+.SS "void __out_setclear (int set, \fBuint32\fP f)"
+.PP
+.SS "void out_addsubstvar (char * name, char *(* varcalc)(void))"
+.PP
+Install a new substitution variable. This function may be called from within your own modules to install new, local substitution variables. This function only adds a single variable. You might find it handy to add multiple variables by using this little trick (also available as example out_subst.c):
+.PP
+.PP
+.nf
+
+struct substvar table []={
+	{"BBS",      sv_bbstitle, NULL},
+	{"COMPANY",  sv_company,  NULL},
+	{"ADDRESS1", sv_address1, NULL},
+	{"",         NULL,        NULL}
+};
+
+. . .
+
+int i=0;
+
+while (table [i].varname [0]) {
+	out_addsubstvar (table [i].varname, table [i].varcalc);
+	i++;
+}
+.PP
+.PP
+This has the additional advantage of reusing the struct substvar datatype for our own, vile purposes. Note how the \fCnext\fP (i.e. the third) field isn't used here and is initialised to \fCNULL\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP The name of the substitution variable, as a string. You can either specify the name with the enclosing at-signs \fC@\fP, or plain. The function will add any missing at-signs internally.
+.br
+\fIvarcalc\fP A function of that returns a string. This function will be called in response to encountering a variable \fCname\fP. The return value of the function will used instead of the variable. This allows pretty complex functionality.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_initsubstvars()\fP. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBout_subst.c\fP.
+.SS "int out_catfile (char * fname)"
+.PP
+Print a file verbatim. Works a bit like \fBout_printfile()\fP, but does \fInot\fP format the file before output. Substitution variables will not expand, formatting directives will be printed as-is, et cetera.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfname\fP The filename of the file to print.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One on success, zero if opening the file failed, in which case \fCerrno\fP will contain the exact error.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_printfile()\fP, \fBout_printlongfile()\fP. 
+.RE
+.PP
+
+.SS "void out_done ()"
+.PP
+Shut down output to the user. Nothing much to this function, really. Almost everything is handled by the operating system, anyway. 
+.SS "void out_init ()"
+.PP
+Initialise output subsystem. Prepares for output to the user by opening the system prompt block (\fBsysvar\fP), initialising substitution variables, and giving default values to the output flags. 
+.SS "void out_initsubstvars ()"
+.PP
+Initialise substitution variables. This function is called by \fBout_init()\fP, which is in turn called by \fBmod_init()\fP. You shouldn't have to call it yourself. It adds a wide collection of built-in, system-wide substitution variables, using calls to \fBout_addsubstvar()\fP.
+.PP
+\fBSee also:\fP
+.RS 4
+out_substvar(). 
+.RE
+.PP
+
+.SS "int out_printfile (char * fname)"
+.PP
+Print a file. This function causes a file to be opened and its contents printed using successive calls to the \fC\fBprint()\fP\fP function. Any substitution variables within the file will be expanded, and any formatting directives will be obeyed as usual.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfname\fP The filename of the file to print.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One on success, zero if opening the file failed, in which case { errno} will contain the exact error.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_printlongfile()\fP, \fBout_catfile()\fP. 
+.RE
+.PP
+
+.SS "int out_printlongfile (char * fname)"
+.PP
+Print a file. Works exactly like \fBout_printfile()\fP. This function, however, puts the terminal in non-blocking mode. The user may press a special control character (Enter, New Line, Line Feed, Escape, Control-C or Control-O) to stop the transmission. The terminal is reset to its previous mode of operation after the function finishes, using \fBinp_resetblocking()\fP. Do not use this latter function with \fBout_printlongfile()\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfname\fP The filename of the file to print.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One on success, zero if opening the file failed, in which case { errno} will contain the exact error.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBout_printfile()\fP, \fBout_catfile()\fP. 
+.RE
+.PP
+
+.SS "void out_setxlation (int mode)"
+.PP
+Control character translation. This function controls how characters will be translated, if at all.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImode\fP The number of the translation table to use for both input and output characters. Alternatively, one of the following:
+.RE
+.PP
+.IP "\(bu" 2
+\fCXLATION_OFF\fP. Disables automatic translation. This is necessary before running software that talks to the user (or some client) in binary, or simply to display something to the user without translation (though I can't think of a reason at 2am).
+.PP
+.PP
+.IP "\(bu" 2
+\fCXLATION_ON\fP. Enables automatic translation, using whatever table used to be active at the time of de-activation. Useful for turning translation back on (see above).
+.PP
+.PP
+Please bear in mind that the translation itself is done by \fCemud\fP, and so any settings are persistent throughout the user's session with the system. The translation table is initialised by \fCemud\fP itself in the beginning, so don't change it unless you can guarantee the user will be able to read whatever you're sending!
+.PP
+Currently, the only use for \fCXLATION_OFF\fP and \fCXLATION_ON\fP is to disable (temporarily) translation while a binary file transfer protocol (like Z-Modem) is running. The only use for the function itself is during the logon or signup processes, or after changing translation preferences in the Account module. 
+.SS "void print (char * buf,  ...)"
+.PP
+Format and print a string. This is the equivalent of \fCprintf()\fP in the context of Megistos. It performs \fIexactly\fP like \fCprintf()\fP, which is small wonder, considering it uses \fCvsprintf()\fP interally.
+.PP
+You \fIshould not\fP use this function to print literal strings. BBS internationalisation and customisation depend on having all strings inside prompt blocks. Okay, so we don't always follow this rule, but we try to, and we (usually) only print white space.
+.PP
+`Why is this function here, then', I hear you ask (among death threats and other severe complaints). It's useful for formatting and printing strings that you've previously constructed from prompts and stored for later. Really, it \fIdoes\fP have its uses.
+.PP
+Like all of the output functions in this subsystem, \fBprint()\fP does line wrapping, justification, et cetera in order to print out your string. This, of course, depends on your wishes, as embedded within the string in the form of format directives.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP A string with zero or more format specifiers, followed by zero or more additional arguments based on the number and type of format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+printf(), \fBsprint()\fP, \fBprompt()\fP, \fBsprompt()\fP. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBmod_dialog.c\fP.
+.SS "void prompt (int num,  ...)"
+.PP
+Format and display a prompt. Ah, the building block of every module in the system. This function performs almost all of the output of your average module. It works in much the same was as \fCprintf()\fP. Unlike the omnipresent C function, however, \fBprompt()\fP doesn't use a string format string, but a \fCnumber\fP. The number indices one of the prompts inside the currently active prompt block. These indices have symbolic names attached to them, that are also defined in C headers. A prompt block called \fCtest.mbk\fP containing a prompt called HELLO would thus have an include file \fCtest.h\fP with something like \fC#define HELLO 4\fP.
+.PP
+The \fBprompt()\fP function takes just this symbolic name for a prompt, where it obtains the format string. Most prompts have no format specifiers, and thus take no arguments, just like you can use \fCprintf()\fP to print a string without formatting numbers et cetera inside it. Format specifiers within prompt blocks are exactly the same as those used by \fCprintf()\fP and friends. The same rules about number and type of additional arguments hold here, too.
+.PP
+The format specifiers are substituted with formatted strings, numbers (and what have you) \fIbefore\fP anything else. Variable substitution, line wrapping, et cetera happen immediately afterwards.
+.PP
+This function is not without its limits. Expect horrific breakage if the prompt is longer than 8 kbytes. Actually, the breakages may occur somewhere between 8 and 16 kbytes. This is a reasonable limit: given an 80 by 25 text mode, 8 kbytes is around four \fIcompletely\fP full screens. If you need to print something this large, you're probably doing something wrong (try using the Menu Manager, which prints out the contents of entire files without size limitations), or just use \fBout_printfile()\fP or \fBout_catfile()\fP within your module.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt number to use, followed by any arguments needed by the prompt in question.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+printf(), \fBsprompt()\fP, \fBsprompt_other()\fP, \fBprint()\fP, \fBsprint()\fP, sprint_other(). 
+.RE
+.PP
+
+.SS "void sprint (char * stg, char * buf,  ...)"
+.PP
+Format and store a string. This function resembles \fBprint()\fP, but stores its results in a string instead of printing them. Its workings are \fInot\fP identical! There are subtle but important differences in semantics. Unlike \fBprint()\fP, \fBsprint()\fP:
+.PP
+.IP "\(bu" 2
+Does not offer page breaks.
+.IP "\(bu" 2
+Does not interpret, expand, strip or translate ANSI directives.
+.IP "\(bu" 2
+Does not interpret or act on formatting directives.
+.IP "\(bu" 2
+Does not consult or alter the output flags.
+.IP "\(bu" 2
+Generally alters no state.
+.PP
+.PP
+However, like \fBprint()\fP, \fBsprint()\fP \fIdoes\fP expand substitution variables.
+.PP
+This function is useful for delayed evaluation of user prompts. Strings created with \fBsprint()\fP can be stored and later shown to the user with \fBprint()\fP, which will take care of page breaks, ANSI and formatting directives. However, substitution variables will be expanded at the time \fBsprint()\fP was called.
+.PP
+Alternatively, you can prepare a message using msg_getu() and \fBsprint()\fP. Then invoke \fBusr_injoth()\fP to send the string to another user. The string will be formatted \fIlocally\fP for that user's terminal and preferences. Substitution variables will reflect the state of affairs of the user calling \fBsprint()\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIstg\fP The string to store the formatted text in.
+.br
+\fIbuf\fP A string with zero or more format specifiers, followed by zero or more additional arguments based on the number and type of format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+printf(), \fBprint()\fP, \fBprompt()\fP, \fBsprompt()\fP. 
+.RE
+.PP
+
+.SS "void sprompt (char * buf, int num,  ...)"
+.PP
+Format a prompt and store it in a string. This function behaves somewhat like \fBprompt()\fP, but stores the formatted text in a string, instead of printing it out directly. There are a few subtle but important differences, due to the way \fBsprint()\fP works. See the documentation for \fBsprint()\fP for a list of the differences in formatting.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP The buffer to hold the resultant prompt string.
+.br
+\fInum\fP The prompt number to use, followed by any arguments needed by the prompt in question.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBprompt()\fP, \fBsprompt_other()\fP, printf(), \fBprint()\fP, \fBsprint()\fP, sprint_other(). 
+.RE
+.PP
+
+.SS "char* sprompt_other (struct \fBshmuserrec\fP * ushm, char * buf, int num,  ...)"
+.PP
+Format a prompt for another user and store it in a string. This function behaves just like like \fBsprompt()\fP, but takes into account the other user's (::othruser) setup. If the other user is a bot, the string will be in a suitable format. It will also be in the other user's language. Other than that, semantics are identical to those of \fBsprint()\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIushm\fP The struct shmuserrec structure for the other user. This will almost always be \fBothrshm\fP.
+.br
+\fIbuf\fP The buffer to hold the resultant prompt string.
+.br
+\fInum\fP The prompt number to use, followed by any arguments needed by the prompt in question.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A pointer to the resultant \fCbuf\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBprompt()\fP, \fBsprompt()\fP, printf(), \fBprint()\fP, \fBsprint()\fP, sprint_other(). 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "char \fBout_buffer\fP[8192]"
+.PP
+Definition at line 110 of file output.h.
+.SS "\fBuint32\fP \fBout_flags\fP"
+.PP
+Temporary output buffer. Definition at line 111 of file output.h.

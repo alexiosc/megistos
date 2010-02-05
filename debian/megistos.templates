@@ -1,0 +1,21 @@
+Template: megistos/postrm_clean
+Type: boolean
+Default: false
+Description: Delete the BBS data directories after removing Megistos?
+ If you answer 'yes' to this question, all BBS data directories will be deleted
+ if you remove Megistos from your system. Otherwise, the BBS data directories
+ will remain on disk. If in doubt, say 'no' to reduce the chance of losing data.
+
+Template: megistos/lockdown
+Type: boolean
+Default: true
+Description: Tighten up the BBS instance directories' permissions?
+ If you answer 'yes' to this question, BBS data directories will be unreadable
+ by users who don't belong to the BBS group and aren't the BBS owner or user.
+ .
+ This will stop unauthorised users from having a look around the BBS directory
+ tree, which may not be what you want, for instance during development in a
+ relatively secure environment.
+ .
+ If in doubt, answer 'yes' if installing a production system, 'no' for
+ an experimental or development installation.

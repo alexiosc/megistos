@@ -1,0 +1,44 @@
+.TH "menumanpage" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+menumanpage \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <menuman.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBmenupage\fP \fBm\fP"
+.br
+.ti -1c
+.RI "\fBfilepage\fP \fBf\fP"
+.br
+.ti -1c
+.RI "\fBexecpage\fP \fBe\fP"
+.br
+.ti -1c
+.RI "\fBrunpage\fP \fBr\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "struct \fBexecpage\fP \fBmenumanpage::e\fP"
+.PP
+Definition at line 198 of file menuman.h.
+.SS "struct \fBfilepage\fP \fBmenumanpage::f\fP"
+.PP
+Definition at line 197 of file menuman.h.
+.SS "struct \fBmenupage\fP \fBmenumanpage::m\fP"
+.PP
+Definition at line 196 of file menuman.h.
+.SS "struct \fBrunpage\fP \fBmenumanpage::r\fP"
+.PP
+Definition at line 199 of file menuman.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

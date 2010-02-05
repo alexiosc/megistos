@@ -1,0 +1,261 @@
+.TH "File transfers" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+File transfers \- Like every self-respecting BBS worth the coffee it was coded on, Megistos allows users to transfer files from and to the system.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBFile transfer modes (FXM_x)\fP"
+.br
+.RI "\fIFile transfer modes. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBxfer_item_t\fP"
+.br
+.RI "\fIFile transfer item structure. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: filexfer.h,v 1.4 2003/09/27 20:30:34 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBXFERLIST\fP   TMPDIR'/xfer%05d'"
+.br
+.ti -1c
+.RI "#define \fBTAGLIST\fP   TMPDIR'/tag%s%s'"
+.br
+.ti -1c
+.RI "#define \fBXFER_ITEM_MAGIC\fP   'Mxfi' /**< Value of \fBxfer_item_t::magic\fP */"
+.br
+.RI "\fIValue of \fBxfer_item_t::magic\fP. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBxfer_setaudit\fP (\fBuint32\fP fok, char *sok, char *dok, \fBuint32\fP ffail, char *sfail, char *dfail)"
+.br
+.RI "\fICustomise post-transfer auditing. \fP"
+.ti -1c
+.RI "void \fBxfer_setcmd\fP (char *cmdok, char *cmdfail)"
+.br
+.RI "\fICustomise post-transfer commands. \fP"
+.ti -1c
+.RI "int \fBxfer_add\fP (char mode, char *file, char *description, \fBint32\fP refund, \fBint32\fP credspermin)"
+.br
+.RI "\fIAdd a file to the transfer queue. \fP"
+.ti -1c
+.RI "int \fBxfer_addwild\fP (char mode, char *filespec, char *description, \fBint32\fP refund, \fBint32\fP credspermin)"
+.br
+.RI "\fIAdd a number of files to the transfer queue. \fP"
+.ti -1c
+.RI "int \fBxfer_run\fP ()"
+.br
+.RI "\fIBegin the file transfer. \fP"
+.ti -1c
+.RI "int \fBxfer_kill_list\fP ()"
+.br
+.RI "\fIEmpties the transfer queue. \fP"
+.ti -1c
+.RI "int \fBxfer_kill_taglist\fP ()"
+.br
+.RI "\fIClears the tagged file list. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Like every self-respecting BBS worth the coffee it was coded on, Megistos allows users to transfer files from and to the system. The file transfer subsystem is a pretty complex thing in itself and coded as a separate module. Thankfully, its API is disproportionately easy to use.
+.PP
+This interface provides functions to add files to the user's upload or download queue, call the file transfer module, and customise its actions before and after the file transfer itself.
+.PP
+The user has the option to download files immediately when they are presented to them, or to tag them for a later transfer. Your code should be aware of this because the successful exit of the file transfer module does \fInot\fP guarantee the file was actually downloaded by the user. Files created specifically for the user should thus be kept around until the user exits, at which point they can either be deleted by the module's logout/hangup handler, or kept for a while and deleted during the nightly cleanup.
+.PP
+Alternatively, they may be marked as \fItransient\fP files using the \fBFXM_TRANSIENT\fP flag, and the user will be forced to download the file on the spot.
+.PP
+User-defined audit messages can be logged on successful or unsuccessful termination of the file transfer.
+.PP
+A file transfer session may upload or download files (but not both simultaneously).
+.PP
+Custom charges may be set for downloading a file. Refunds are handled transparently.
+.PP
+Custom shell commands may be executed on (un)successful termination of a download. 
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: filexfer.h,v 1.4 2003/09/27 20:30:34 alexios Exp $'"
+.PP
+Definition at line 110 of file filexfer.h.
+.SS "#define TAGLIST   TMPDIR'/tag%s%s'"
+.PP
+Definition at line 119 of file filexfer.h.
+.SS "#define XFER_ITEM_MAGIC   'Mxfi' /**< Value of \fBxfer_item_t::magic\fP */"
+.PP
+Value of \fBxfer_item_t::magic\fP. Definition at line 163 of file filexfer.h.
+.SS "#define XFERLIST   TMPDIR'/xfer%05d'"
+.PP
+Definition at line 118 of file filexfer.h.
+.SH "Function Documentation"
+.PP 
+.SS "int xfer_add (char mode, char * file, char * description, \fBint32\fP refund, \fBint32\fP credspermin)"
+.PP
+Add a file to the transfer queue. This function adds a file for transfer. A number of arguments are required:
+.PP
+\fBParameters:\fP
+.RS 4
+\fImode\fP one of the \fCFXM_x\fP file transfer modes.
+.br
+\fIfile\fP the full pathname to a file. If this file is about to be uploaded (user to BBS), this is the recommended (but \fINOT\fP certain) name of the file.
+.br
+\fIdescription\fP a short (50 bytes including terminating null) description of the file.
+.br
+\fIrefund\fP how many credits we will refund the user for canceling this transfer.
+.br
+\fIcredspermin\fP credit consumption rate during the file transfer. \fI This quantity is times 100\fP. To specify consumption of 2.5 credits per minute, use 250. Specify 0 for no time-based credit charges, or -1 for the current per-minute charge, whatever that is.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+This function returns 0 if the file is being downloaded and \fCfstat()\fP could not access \fCfile\fP, or (regardless of file direction) if the file transfer queue for this user could not be appended to.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBxfer_setaudit()\fP, \fBxfer_setcmd()\fP, \fBxfer_addwild()\fP 
+.RE
+.PP
+
+.SS "int xfer_addwild (char mode, char * filespec, char * description, \fBint32\fP refund, \fBint32\fP credspermin)"
+.PP
+Add a number of files to the transfer queue. This function adds zero or more files for transfer, based on a UNIX glob (filename with wildcards). This function is very similar to \fC\fBxfer_add()\fP\fP, but is more useful for downloads than uploads. Be warned, this function executes the \fCfind\fP UNIX command to expand the glob. This implies a relative latency in executing and a serious lack of security.
+.PP
+\fBWarning:\fP
+.RS 4
+DO NOT CALL THIS FUNCTION WITH USER-SUPPLIED VALUES FOR THE \fCfilespec\fP ARGUMENT.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fImode\fP one of the \fCFXM_x\fP file transfer modes.
+.br
+\fIfilespec\fP a glob that will be expanded in order to get the filenames. Anything that you could give to, say, \fCls\fP is acceptable. Incorrectly formed globs will simply yield no filenames.
+.br
+\fIdescription\fP a short (50 bytes including terminating null) description of the files. The description will be common to all files.
+.br
+\fIrefund\fP how many credits we will refund the user for canceling \fI each file\fP in this transfer.
+.br
+\fIcredspermin\fP credit consumption rate during the file transfer. \fIThis quantity is times 100\fP. To specify consumption of 2.5 credits per minute, use 250. Specify 0 for no time-based credit charges, or -1 for the current per-minute charge, whatever that is.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+This function returns 0 if the \fCfind\fP command could not run to expand the glob, or if the file transfer queue for this user could not be appended to.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBxfer_setaudit()\fP, \fBxfer_setcmd()\fP, \fBxfer_add()\fP 
+.RE
+.PP
+
+.SS "int xfer_kill_list ()"
+.PP
+Empties the transfer queue. Run this function to delete the user's transfer queue. Do not use this function unless you really, really know what you're doing. The transfer queue may contain file transfer requests other than your own module's.
+.PP
+\fBReturns:\fP
+.RS 4
+The same as the \fCunlink()\fP system call: zero if everything went well, -1 if not (in which case, \fCerrno\fP will be set accordingly). 
+.RE
+.PP
+
+.SS "int xfer_kill_taglist ()"
+.PP
+Clears the tagged file list. Run this function to delete the user's tagged file list. Do not use this function unless you really, really know what you're doing. The transfer queue may contain postponed file transfer requests other than your own module's.
+.PP
+\fBReturns:\fP
+.RS 4
+The same as the \fCunlink()\fP system call: zero if everything went well, -1 if not (in which case, \fCerrno\fP will be set accordingly). 
+.RE
+.PP
+
+.SS "int xfer_run ()"
+.PP
+Begin the file transfer. This very simple function begins the file transfer. It should be run after one of more files have been added to the transfer queue, or if you can guarantee that the queue contains files. The file transfer subsystem will exit gracefully if the list is empty, but not before notifying the user of this. You don't want to appear stupid in front of your users, do you?
+.PP
+\fBReturns:\fP
+.RS 4
+The UNIX exit code of the file transfer module. This is the same as that returned by the C \fCsystem()\fP function. A value of 0 means that the subsystem has exited normally. Anything else represents an abnormal termination. 
+.RE
+.PP
+
+.SS "void xfer_setaudit (\fBuint32\fP fok, char * sok, char * dok, \fBuint32\fP ffail, char * sfail, char * dfail)"
+.PP
+Customise post-transfer auditing. This function should be executed before adding a file to the transfer list. It will affect any subsequent additions to the list, but not existing items.
+.PP
+The arguments of this function are ordered in such a way as to allow the use of the \fBAUDIT\fP macro, as used in normal auditing. If any of the string arguments is \fCNULL\fP, the corresponding logging action will not be performed. This way you can add logging for, say, failed transfers, but not successful ones.
+.PP
+Please note that, unlike \fBaudit()\fP, you \fIcannot\fP provide arguments to the detailed information format strings (\fCdok\fP and { dfail}). These must always contain the following two format specifiers, \fIin order\fP:
+.PP
+.IP "\(bu" 2
+A string (\fC%s\fP) specifier. This will be substituted by the user ID of the user performing the transfer.
+.PP
+.PP
+.IP "\(bu" 2
+A string (\fC%s\fP) specifier to be substituted by the transfer filename.
+.PP
+.PP
+It might be nice to use (loosely) the Major shorthand for successful and failed file transfers: `\fCuser <- file\fP' for successful downloads, `\fC user (- file\fP' (think of a blunt arrow) for failed downloads. For uploads, the arrow points to the right. Of course, you can always add any required information to this.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfok\fP audit type and severity for successful transfer logging. 
+.br
+\fIsok\fP audit summary for successful transfers. 
+.br
+\fIdok\fP audit detailed text template for successful transfers.
+.br
+\fIffail\fP audit type and severity for failed transfer logging. 
+.br
+\fIsfail\fP audit summary for failed transfers. 
+.br
+\fIdfail\fP audit detailed text template for failed transfers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBAUDIT\fP, \fBxfer_add()\fP, \fBxfer_addwild()\fP. 
+.RE
+.PP
+
+.SS "void xfer_setcmd (char * cmdok, char * cmdfail)"
+.PP
+Customise post-transfer commands. This function sets a pair of commands to be executed after a successful or failed download respectively. Please uses this responsibly and with an eye open for security risks. The command will, of course, be executed by the \fCbbs\fP user, but be wary of untested \fC rm\fPs, or commands with any components that may be filled in by users.
+.PP
+To disable a command execution, pass a \fCNULL\fP to the corresponding argument. If you use this function, you should call \fCxfer_setcmd(NULL,NULL)\fP immediately after calling \fBxfer_run()\fP.
+.PP
+\fBWarning:\fP
+.RS 4
+This will affect any subsequent additions to the transfer queue, but not existing entries. Use this function before adding files to the queue and \fIREMEMBER TO RESET IT AFTERWARDS\fP if you'll be transferring other files from within the current module.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcmdok\fP a command to execute if the transfer succeeds. 
+.br
+\fIcmdfail\fP a command to execute if the transfer fails.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBxfer_add()\fP, \fBxfer_addwild()\fP. 
+.RE
+.PP
+

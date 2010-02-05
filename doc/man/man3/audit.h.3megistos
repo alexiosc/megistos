@@ -1,0 +1,527 @@
+.TH "audit.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+audit.h \- Auditing (logging) events.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Audit entry flags"
+
+.in +1c
+.ti -1c
+.RI "#define \fBAUF_SECURITY\fP   0x0001	/**< Security auditing */"
+.br
+.RI "\fISecurity auditing. \fP"
+.ti -1c
+.RI "#define \fBAUF_ACCOUNTING\fP   0x0002	/**< Accounting (statistics etc) */"
+.br
+.RI "\fIAccounting (statistics etc). \fP"
+.ti -1c
+.RI "#define \fBAUF_TRANSFER\fP   0x0004	/**< File transfers/reads, etc */"
+.br
+.RI "\fIFile transfers/reads, etc. \fP"
+.ti -1c
+.RI "#define \fBAUF_EVENT\fP   0x0008	/**< Event execution/logging */"
+.br
+.RI "\fIEvent execution/logging. \fP"
+.ti -1c
+.RI "#define \fBAUF_OPERATION\fP   0x0010	/**< System operation of some kind */"
+.br
+.RI "\fISystem operation of some kind. \fP"
+.ti -1c
+.RI "#define \fBAUF_USERLOG\fP   0x0020	/**< User logs (login/logout etc) */"
+.br
+.RI "\fIUser logs (login/logout etc). \fP"
+.ti -1c
+.RI "#define \fBAUF_OTHER\fP   0x0040	/**< Other, miscellaneous kinds of auditing */"
+.br
+.RI "\fIOther, miscellaneous kinds of auditing. \fP"
+.ti -1c
+.RI "#define \fBAUF_INFO\fP   0x0080   /**< Informational (severity) */"
+.br
+.RI "\fIInformational (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_CAUTION\fP   0x0100   /**< Cautionary (severity) */"
+.br
+.RI "\fICautionary (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_EMERGENCY\fP   0x0200	/**< Emergency (severity) */"
+.br
+.RI "\fIEmergency (severity). \fP"
+.ti -1c
+.RI "#define \fBAUF_SEVERITY\fP   (AUF_INFO|AUF_CAUTION|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUF_SEVSHIFT\fP   7"
+.br
+.ti -1c
+.RI "#define \fBGETSEVERITY\fP(f)   ((((f)&AUF_SEVERITY)>>AUF_SEVSHIFT)-1)"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: audit.h,v 1.5 2003/09/27 20:27:37 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBAUS_CRACKTRY\fP   'INVALID PASSWORD ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_UNKUSER\fP   'INVALID USERID ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_DUPUSER\fP   'DUPLICATE LOGIN ATTEMPT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_LOGIN\fP   'USER LOGIN'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RELOGON\fP   'USER LOGOUT, RELOGGING ON'"
+.br
+.ti -1c
+.RI "#define \fBAUS_LOGOUT\fP   'USER LOGOUT'"
+.br
+.ti -1c
+.RI "#define \fBAUS_SIGNUP\fP   'NEW USER SIGNED UP'"
+.br
+.ti -1c
+.RI "#define \fBAUS_DISCON\fP   'LINE HANGUP'"
+.br
+.ti -1c
+.RI "#define \fBAUS_TIMEOUT\fP   'USER KICKED OUT (TIMEOUT)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_CREDHUP\fP   'USER KICKED OUT (NO CREDITS)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_TIMEHUP\fP   'USER KICKED OUT (TIME LIMIT)'"
+.br
+.ti -1c
+.RI "#define \fBAUS_KICKED\fP   'USER FORCEFULLY DISCONNECTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_EVSPAWN\fP   'EVENT ACTIVATION'"
+.br
+.ti -1c
+.RI "#define \fBAUS_EVEND\fP   'EVENT FINISHED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_CRDPOST\fP   'CREDIT POST'"
+.br
+.ti -1c
+.RI "#define \fBAUS_NEWCLSS\fP   'CLASS CHANGE'"
+.br
+.ti -1c
+.RI "#define \fBAUS_USERDEL\fP   'USER DELETED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSMDEL\fP   'USER MARKED FOR DELETION'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSMUDEL\fP   'USER DELETION MARK REMOVED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSSUSP\fP   'USER SUSPENDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSUSUSP\fP   'USER UNSUSPENDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSXMPT\fP   'USER EXEMPTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_RSUXMPT\fP   'USER UNEXEMPTED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESUPLS\fP   'FILE ATTACHMENT UPLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESDNLS\fP   'FILE ATTACHMENT DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESUPLF\fP   'FAILED FILE ATT UPLOAD'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ESDNLF\fP   'FAILED FILE ATT DOWNLOAD'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTINS\fP   'NEW BULLETIN ADDED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTDEL\fP   'BULLETIN DELETED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTEDT\fP   'BULLETIN MODIFIED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTRD\fP   'BULLETIN READ'"
+.br
+.ti -1c
+.RI "#define \fBAUS_BLTDNL\fP   'BULLETIN DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_QWKDNL\fP   'QWK PACKET DOWNLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_QWKUPL\fP   'QWK PACKET UPLOADED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_ERROR\fP   'ERROR CONDITION OCCURRED'"
+.br
+.ti -1c
+.RI "#define \fBAUS_FATAL\fP   'FATAL ERROR OCCURRED!!!'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CRACKTRY\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_UNKUSER\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_DUPUSER\fP   '%s is already online, Attempted speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_LOGIN\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RELOGON\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_LOGOUT\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_SIGNUP\fP   'User %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_DISCON\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_TIMEOUT\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CREDHUP\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_TIMEHUP\fP   'User %-24s  Speed: %5s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_KICKED\fP   '%s kicked out %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_EVSPAWN\fP   '%s activated %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_EVEND\fP   'Event %s has finished (exit code %d)'"
+.br
+.ti -1c
+.RI "#define \fBAUD_CRDPOST\fP   'Posted %d %s credit(s) to %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_NEWCLSS\fP   '%s changed class %s -> %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_USERDEL\fP   '%s, CL:%s, CR:%d'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSMDEL\fP   '%s marked %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSMUDEL\fP   '%s unmarked %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSSUSP\fP   '%s suspended %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSUSUSP\fP   '%s unsuspended %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSXMPT\fP   '%s exempted %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_RSUXMPT\fP   '%s unexempted %s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESUPLS\fP   '%s -> %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESDNLS\fP   '%s <- %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESUPLF\fP   '%s -) %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ESDNLF\fP   '%s (- %s/%d.ATT'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTINS\fP   '%s added %s to /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTDEL\fP   '%s deleted %s from /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTEDT\fP   '%s edited %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTRD\fP   '%s read %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_BLTDNL\fP   '%s downloaded %s in /%s'"
+.br
+.ti -1c
+.RI "#define \fBAUD_QWKDNL\fP   '%s <- QWK, %d bytes'"
+.br
+.ti -1c
+.RI "#define \fBAUD_QWKUPL\fP   '%s -> QWK'"
+.br
+.ti -1c
+.RI "#define \fBAUD_ERROR\fP   'Please see bbs/log/errors for details'"
+.br
+.ti -1c
+.RI "#define \fBAUD_FATAL\fP   'CHECK bbs/log/errors NOW!'"
+.br
+.ti -1c
+.RI "#define \fBAUT_CRACKTRY\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_UNKUSER\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_DUPUSER\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_LOGIN\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RELOGON\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_LOGOUT\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_SIGNUP\fP   (AUF_SECURITY|AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_DISCON\fP   (AUF_USERLOG|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_TIMEOUT\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_CREDHUP\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_TIMEHUP\fP   (AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_KICKED\fP   (AUF_OPERATION|AUF_USERLOG|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_EVSPAWN\fP   (AUF_EVENT|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_EVEND\fP   (AUF_EVENT|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_CRDPOST\fP   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_NEWCLSS\fP   (AUF_ACCOUNTING|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_USERDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_EVENT|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSMDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSMUDEL\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSSUSP\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSUSUSP\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSXMPT\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_RSUXMPT\fP   (AUF_SECURITY|AUF_ACCOUNTING|AUF_USERLOG|AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESUPLS\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESDNLS\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESUPLF\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ESDNLF\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTINS\fP   (AUF_TRANSFER|AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTDEL\fP   (AUF_OPERATION|AUF_CAUTION)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTEDT\fP   (AUF_OPERATION|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTRD\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_BLTDNL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_QWKDNL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_QWKUPL\fP   (AUF_TRANSFER|AUF_INFO)"
+.br
+.ti -1c
+.RI "#define \fBAUT_ERROR\fP   (AUF_OTHER|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUT_FATAL\fP   (AUF_OTHER|AUF_EMERGENCY)"
+.br
+.ti -1c
+.RI "#define \fBAUDIT\fP(x)   AUT_##x,AUS_##x,AUD_##x"
+.br
+.RI "\fIAUDIT convenience macro. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBaudit\fP (char *channel, \fBuint32\fP flags, char *summary, char *format,...)"
+.br
+.RI "\fIThe main auditing function. \fP"
+.ti -1c
+.RI "void \fBaudit_setfile\fP (char *filename)"
+.br
+.RI "\fISet the audit file. \fP"
+.ti -1c
+.RI "void \fBaudit_resetfile\fP ()"
+.br
+.RI "\fIRevert to the previous audit file. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Auditing (logging) events. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     audit.h                                                      **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, August 94 (originally)                                    **
+ **  PURPOSE:  Audit trail features                                         **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: audit.h,v 1.5 2003/09/27 20:27:37 alexios Exp $
+ *
+ * $Log: audit.h,v $
+ * Revision 1.5  2003/09/27 20:27:37  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.4  2001/05/20 13:58:13  alexios
+ * Wisely changed HACKTRY to CRACKTRY. Cosmetic changes.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.10  1999/07/28 23:09:07  alexios
+ * Added audit entry for downloading bulletins.
+ *
+ * Revision 0.9  1999/07/18 21:13:24  alexios
+ * Added new entries to distinguish reasons why users hang up
+ * or are kicked out.
+ *
+ * Revision 0.8  1998/08/14 11:23:21  alexios
+ * Removed sysop hangup logging from security logs. Added
+ * audit entry for relogons.
+ *
+ * Revision 0.7  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.6  1997/11/06 16:49:10  alexios
+ * One change of flags for AUT_SIGNUP.
+ *
+ * Revision 0.5  1997/11/05 10:52:05  alexios
+ * Radical changes. Audit entries are now flagged by type and
+ * severity (created a set of flags to take care of that, as
+ * well as macros to take care of setting and clearing flags).
+ * audit() now needs the message's flag as well. To simplify
+ * things, a new macro has been generated to specify all three
+ * audit arguments (AUT_, AUS_, AUD_) in one fell swoop. Added
+ * AUT_ definitions for all entries already in this file. Finally,
+ * added two entries that appear when logerror() or fatal()
+ * are called, so as to attract the Sysop's attention when
+ * something goes wrong with some user.
+ *
+ * Revision 0.4  1997/09/14 13:47:56  alexios
+ * Added an audit entry for finished events (EVEND).
+ *
+ * Revision 0.3  1997/09/12 12:45:25  alexios
+ * A couplpe of new audit entries added here.
+ *
+ * Revision 0.2  1997/08/30 12:54:20  alexios
+ * Updated contents of DISCON entry.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBaudit.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: audit.h,v 1.5 2003/09/27 20:27:37 alexios Exp $'"
+.PP
+Definition at line 98 of file audit.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

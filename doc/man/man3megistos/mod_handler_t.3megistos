@@ -1,0 +1,52 @@
+.TH "mod_handler_t" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+mod_handler_t \- Module handler.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <bbsmod.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBint32\fP \fBpriority\fP"
+.br
+.RI "\fIPriority of this handler. \fP"
+.ti -1c
+.RI "int(* \fBhandler\fP )(int, char **)"
+.br
+.RI "\fIHandler function call. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Module handler. 
+
+This is how a module handler is defined. There is a \fCpriority\fP attached to the \fCmain()\fP-like function pointer \fChandler\fP. When calling multiple modules (e.g. when logging in or out), the handlers are called in order of \fIincreasing\fP priority. The entry points are called with pairs of \fCargc\fP and \fCargv\fP arguments, just like \fCmain()\fP.
+.PP
+This structure is used within \fBmod_info_t\fP.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_info_t\fP. 
+.RE
+.PP
+
+.PP
+Definition at line 111 of file bbsmod.h.
+.SH "Field Documentation"
+.PP 
+.SS "int(* \fBmod_handler_t::handler\fP)(int, char **)"
+.PP
+Handler function call. 
+.SS "\fBint32\fP \fBmod_handler_t::priority\fP"
+.PP
+Priority of this handler. Definition at line 112 of file bbsmod.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

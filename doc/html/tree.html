@@ -1,0 +1,263 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset="iso-8859-1" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta http-equiv="Content-Language" content="en" />
+    <link rel="stylesheet" href="doxygen.css">
+    <title>TreeView</title>
+    <style type="text/css">
+    <!--
+    .directory { font-size: 10pt; font-weight: bold; }
+    .directory h3 { margin: 0px; margin-top: 1em; font-size: 11pt; }
+    .directory p { margin: 0px; white-space: nowrap; }
+    .directory div { display: none; margin: 0px; }
+    .directory img { vertical-align: middle; }
+    -->
+    </style>
+    <script type="text/javascript">
+    <!-- // Hide script from old browsers
+    
+    function findChildNode(node, name) 
+    {
+      var temp;
+      if (node == null) 
+      {
+        return null;
+      } 
+      node = node.firstChild;
+      while (node != null) 
+      {
+        if (node.nodeName == name) 
+        {
+          return node;
+        }
+        temp = findChildNode(node, name);
+        if (temp != null) 
+        {
+          return temp;
+        }
+        node = node.nextSibling;
+      }
+      return null;
+    }
+
+    function toggleFolder(id, imageNode) 
+    {
+      var folder = document.getElementById(id);
+      var l = 0;
+      var vl = "ftv2vertline.png";
+      if (imageNode != null && imageNode.nodeName != "IMG") 
+      {
+        imageNode = findChildNode(imageNode, "IMG");
+        if (imageNode!=null) l = imageNode.src.length;
+      }
+      if (folder == null) 
+      {
+      } 
+      else if (folder.style.display == "block") 
+      {
+        while (imageNode != null && 
+               imageNode.src.substring(l-vl.length,l) == vl)
+        {
+          imageNode = imageNode.nextSibling;
+          l = imageNode.src.length;
+        }
+        if (imageNode != null) 
+        {
+          l = imageNode.src.length;
+          imageNode.nextSibling.src = "ftv2folderclosed.png";
+          if (imageNode.src.substring(l-13,l) == "ftv2mnode.png")
+          {
+            imageNode.src = "ftv2pnode.png";
+          }
+          else if (imageNode.src.substring(l-17,l) == "ftv2mlastnode.png")
+          {
+            imageNode.src = "ftv2plastnode.png";
+          }
+        }
+        folder.style.display = "none";
+      } 
+      else 
+      {
+        while (imageNode != null && 
+               imageNode.src.substring(l-vl.length,l) == vl)
+        {
+          imageNode = imageNode.nextSibling;
+          l = imageNode.src.length;
+        }
+        if (imageNode != null) 
+        {
+          l = imageNode.src.length;
+          imageNode.nextSibling.src = "ftv2folderopen.png";
+          if (imageNode.src.substring(l-13,l) == "ftv2pnode.png")
+          {
+            imageNode.src = "ftv2mnode.png";
+          }
+          else if (imageNode.src.substring(l-17,l) == "ftv2plastnode.png")
+          {
+            imageNode.src = "ftv2mlastnode.png";
+          }
+        }
+        folder.style.display = "block";
+      }
+    }
+
+    // End script hiding -->        
+    </script>
+  </head>
+
+  <body>
+    <div class="directory">
+      <h3>Megistos API</h3>
+      <div style="display: block;">
+        <p><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="main.html" target="basefrm">Main Page</a></p>
+        <p><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder1', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder1', this)"/><a class="el" href="files.html" target="basefrm">File List</a></p>
+        <div id="folder1">
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="audit_8h.html" target="basefrm">audit.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="bbs_8h.html" target="basefrm">bbs.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="bbsinclude_8h.html" target="basefrm">bbsinclude.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="bbsmod_8h.html" target="basefrm">bbsmod.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="bots_8h.html" target="basefrm">bots.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="channels_8h.html" target="basefrm">channels.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="config_8h.html" target="basefrm">config.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="dialog_8h.html" target="basefrm">dialog.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="errorprompts_8h.html" target="basefrm">errorprompts.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="errors_8h.html" target="basefrm">errors.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="filexfer_8h.html" target="basefrm">filexfer.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="format_8h.html" target="basefrm">format.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="gettext_8h.html" target="basefrm">gettext.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="globalcmd_8h.html" target="basefrm">globalcmd.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="input_8h.html" target="basefrm">input.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="lock_8h.html" target="basefrm">lock.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="mail_8h.html" target="basefrm">mail.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="menuman_8h.html" target="basefrm">menuman.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="miscfx_8h.html" target="basefrm">miscfx.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="output_8h.html" target="basefrm">output.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="prompts_8h.html" target="basefrm">prompts.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="security_8h.html" target="basefrm">security.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="sysstruct_8h.html" target="basefrm">sysstruct.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="systemversion_8h.html" target="basefrm">systemversion.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="timedate_8h.html" target="basefrm">timedate.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="ttynum_8h.html" target="basefrm">ttynum.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="useracc_8h.html" target="basefrm">useracc.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="ver_8h.html" target="basefrm">ver.h</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="version_8h.html" target="basefrm">version.h</a></p>
+        </div>
+        <p><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder2', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder2', this)"/><a class="el" href="annotated.html" target="basefrm">Data Structures</a></p>
+        <div id="folder2">
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structbaudstats.html" target="basefrm">baudstats</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structchannel__status__t.html" target="basefrm">channel_status_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structchanneldef.html" target="basefrm">channeldef</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structclassrec__t.html" target="basefrm">classrec_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structclsstats.html" target="basefrm">clsstats</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structclubheader.html" target="basefrm">clubheader</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structemailuser.html" target="basefrm">emailuser</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structemuqueue.html" target="basefrm">emuqueue</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structevent.html" target="basefrm">event</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structexecpage.html" target="basefrm">execpage</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structfilepage.html" target="basefrm">filepage</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structidx__t.html" target="basefrm">idx_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structinjoth__buf.html" target="basefrm">injoth_buf</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structinjothbuf.html" target="basefrm">injothbuf</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structlastread.html" target="basefrm">lastread</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="unionmenumanpage.html" target="basefrm">menumanpage</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmenuoption.html" target="basefrm">menuoption</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmenupage.html" target="basefrm">menupage</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmessage__t.html" target="basefrm">message_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmod__handler__t.html" target="basefrm">mod_handler_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmod__info__t.html" target="basefrm">mod_info_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmodstats.html" target="basefrm">modstats</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structmonitor.html" target="basefrm">monitor</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structonlinerec__t.html" target="basefrm">onlinerec_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structpromptblock__t.html" target="basefrm">promptblock_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structrunpage.html" target="basefrm">runpage</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structshmuserrec.html" target="basefrm">shmuserrec</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structsubstvar.html" target="basefrm">substvar</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structsysvar.html" target="basefrm">sysvar</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structtop.html" target="basefrm">top</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structttystats.html" target="basefrm">ttystats</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structusagestats.html" target="basefrm">usagestats</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structuseracc__t.html" target="basefrm">useracc_t</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="structxfer__item__t.html" target="basefrm">xfer_item_t</a></p>
+        </div>
+        <p><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="functions.html" target="basefrm">Data Fields</a></p>
+        <p><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder3', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder3', this)"/><a class="el" href="modules.html" target="basefrm">Modules</a></p>
+        <div id="folder3">
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__audit.html" target="basefrm">Auditing (logging)</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder4', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder4', this)"/><a class="el" href="group__toplevel.html" target="basefrm">Top-Level Module Definitions and Handlers</a></p>
+          <div id="folder4">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__INI__flags.html" target="basefrm">Initialisation mode flags (INI_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder5', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder5', this)"/><a class="el" href="group__channels.html" target="basefrm">BBS Channel Functionality</a></p>
+          <div id="folder5">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__LST__flags.html" target="basefrm">Channel modes (LST_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__LSR__flags.html" target="basefrm">Channel result codes (LSR_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__TTF__flags.html" target="basefrm">Channel definition flags (TTF_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__dialog.html" target="basefrm">Dialog Boxes (Visual And Textual)</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__errors.html" target="basefrm">Reporting errors</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder6', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder6', this)"/><a class="el" href="group__filexfer.html" target="basefrm">File transfers</a></p>
+          <div id="folder6">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__FXM__flags.html" target="basefrm">File transfer modes (FXM_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__format.html" target="basefrm">Formatting Text</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__PAUSE__flags.html" target="basefrm">Paging result codes (PAUSE_x)</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__gcs.html" target="basefrm">Declaring Global Commands</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder7', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder7', this)"/><a class="el" href="group__input.html" target="basefrm">Reading data from the user</a></p>
+          <div id="folder7">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__INF__flags.html" target="basefrm">Input option flags (INF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__inp__lowlevel.html" target="basefrm">Low-Level Input Functionality</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__inp__midlevel.html" target="basefrm">Mid-Level Input Functionality</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__input__cnc.html" target="basefrm">Command Concatenation (Mid-to-High-Level)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__inp__hilevel.html" target="basefrm">High-Level user-interacting input/validation</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder8', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder8', this)"/><a class="el" href="group__lock.html" target="basefrm">Resource Locking and Serialisation</a></p>
+          <div id="folder8">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__LKR__flags.html" target="basefrm">Lock result codes (LKR_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder9', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder9', this)"/><a class="el" href="group__mail.html" target="basefrm">Mail-Related Definitions</a></p>
+          <div id="folder9">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__MSF__flags.html" target="basefrm">Message Flags (MSF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__ECP__flags.html" target="basefrm">User Mail Preference Flags (ECP_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__User.html" target="basefrm">Mail Flags (ECF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__LRF__flags.html" target="basefrm">Last-Read Block Flags (LRF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__CLF__flags.html" target="basefrm">Club Flags (CLF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__CAX__levels.html" target="basefrm">Club Access Levels (CAX_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__menuman__h.html" target="basefrm">The Menu Manager Interface</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__miscfx.html" target="basefrm">Miscellaneous Functionality</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder10', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder10', this)"/><a class="el" href="group__output.html" target="basefrm">Outputting to the User</a></p>
+          <div id="folder10">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__OFL__flags.html" target="basefrm">Output Flags (OFL_x)</a></p>
+          </div>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__prompts.html" target="basefrm">Accessing Prompt Blocks</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__security.html" target="basefrm">Security Functions</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__timedate.html" target="basefrm">Time and Date handling</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2plastnode.png" alt="\" width=16 height=22 onclick="toggleFolder('folder11', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder11', this)"/><a class="el" href="group__useracc.html" target="basefrm">User Account Handling</a></p>
+          <div id="folder11">
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__UPF__flags.html" target="basefrm">User preference flags</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__USY__flags.html" target="basefrm">Sysop commands and privileges</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__UFL__flags.html" target="basefrm">User account flags (UFL_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__USX__flags.html" target="basefrm">User sexes (USX_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__CLF__flags.html" target="basefrm">Club Flags (CLF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__OLF__FLAGS.html" target="basefrm">Online user flags (OLF_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__PGS__flags.html" target="basefrm">Page states (PGS_x)</a></p>
+            <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__user__shm.html" target="basefrm">Users and shared memory</a></p>
+          </div>
+        </div>
+        <p><img src="ftv2pnode.png" alt="o" width=16 height=22 onclick="toggleFolder('folder12', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder12', this)"/><a class="el" href="examples.html" target="basefrm">Examples</a></p>
+        <div id="folder12">
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__gcs.html" target="basefrm">gcs_builtin.c</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="mod__dialog_8c-example.html" target="basefrm">mod_dialog.c</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__toplevel.html" target="basefrm">mod_main.c</a></p>
+          <p><img src="ftv2vertline.png" alt="|" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="group__output.html" target="basefrm">out_subst.c</a></p>
+        </div>
+        <p><img src="ftv2node.png" alt="o" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="globals.html" target="basefrm">Globals</a></p>
+        <p><img src="ftv2plastnode.png" alt="\" width=16 height=22 onclick="toggleFolder('folder13', this)"/><img src="ftv2folderclosed.png" alt="+" width=24 height=22 onclick="toggleFolder('folder13', this)"/><a class="el" href="pages.html" target="basefrm">Related Pages</a></p>
+        <div id="folder13">
+          <p><img src="ftv2blank.png" alt="&nbsp;" width=16 height=22 /><img src="ftv2lastnode.png" alt="\" width=16 height=22 /><img src="ftv2doc.png" alt="*" width=24 height=22 /><a class="el" href="deprecated.html" target="basefrm">Deprecated List</a></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

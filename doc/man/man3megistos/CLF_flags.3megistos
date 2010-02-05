@@ -1,0 +1,65 @@
+.TH "Club Flags (CLF_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Club Flags (CLF_x) \- Flags used to describe clubs in the club header.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBCLF_MMODAX\fP   0x0001	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCLF_MMODCH\fP   0x0002	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCLF_MMODHD\fP   0x0004	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCLF_NOCHRGE\fP   0x0002   /**< Class is exempt from credit charges.  */"
+.br
+.RI "\fIClass is exempt from credit charges. \fP"
+.ti -1c
+.RI "#define \fBCLF_LINUX\fP   0x0004   /**< Users have access to Linux shell.     */"
+.br
+.RI "\fIUsers have access to Linux shell. \fP"
+.ti -1c
+.RI "#define \fBCLF_LOCKOUT\fP   0x0008   /**< Users not allowed to login at all.    */"
+.br
+.RI "\fIUsers not allowed to login at all. \fP"
+.ti -1c
+.RI "#define \fBCLF_CRDXFER\fP   0x0010   /**< Allowed to transfer credits to others.*/"
+.br
+.RI "\fIAllowed to transfer credits to others. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags used to describe clubs in the club header. There are three flags defined here, but, to the best of my knowledge, they are vestigial. I certainly can't find a reference to them anywhere. 
+.SH "Define Documentation"
+.PP 
+.SS "#define CLF_CRDXFER   0x0010   /**< Allowed to transfer credits to others.*/"
+.PP
+Allowed to transfer credits to others. Definition at line 744 of file useracc.h.
+.SS "#define CLF_LINUX   0x0004   /**< Users have access to Linux shell.     */"
+.PP
+Users have access to Linux shell. Definition at line 742 of file useracc.h.
+.SS "#define CLF_LOCKOUT   0x0008   /**< Users not allowed to login at all.    */"
+.PP
+Users not allowed to login at all. Definition at line 743 of file useracc.h.
+.SS "#define CLF_MMODAX   0x0001	/**< Unknown/unused */"
+.PP
+Unknown/unused. Definition at line 638 of file mail.h.
+.SS "#define CLF_MMODCH   0x0002	/**< Unknown/unused */"
+.PP
+Unknown/unused. Definition at line 639 of file mail.h.
+.SS "#define CLF_MMODHD   0x0004	/**< Unknown/unused */"
+.PP
+Unknown/unused. Definition at line 640 of file mail.h.
+.SS "#define CLF_NOCHRGE   0x0002   /**< Class is exempt from credit charges.  */"
+.PP
+Class is exempt from credit charges. Definition at line 741 of file useracc.h.

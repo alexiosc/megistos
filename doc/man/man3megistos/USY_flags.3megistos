@@ -1,0 +1,506 @@
+.TH "Sysop commands and privileges" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Sysop commands and privileges \- Sysop command and privilege constants.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBUSY_CHANGE\fP   0	/**< Alter channel modes. */"
+.br
+.RI "\fIAlter channel modes. \fP"
+.ti -1c
+.RI "#define \fBUSY_EMULATE\fP   1	/**< Emulate a user. */"
+.br
+.RI "\fIEmulate a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_MONITOR\fP   2	/**< Monitor all input. */"
+.br
+.RI "\fIMonitor all input. \fP"
+.ti -1c
+.RI "#define \fBUSY_SEND\fP   3	/**< Send sysop message to user or all users. */"
+.br
+.RI "\fISend sysop message to user or all users. \fP"
+.ti -1c
+.RI "#define \fBUSY_DELETE\fP   10	/**< Delete a user. */"
+.br
+.RI "\fIDelete a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_DETAIL\fP   11	/**< User account information. */"
+.br
+.RI "\fIUser account information. \fP"
+.ti -1c
+.RI "#define \fBUSY_EXEMPT\fP   12	/**< Delete-(un)protect a user. */"
+.br
+.RI "\fIDelete-(un)protect a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_HANGUP\fP   13	/**< Hang up a channel. */"
+.br
+.RI "\fIHang up a channel. \fP"
+.ti -1c
+.RI "#define \fBUSY_POST\fP   14	/**< Give credits to a user. */"
+.br
+.RI "\fIGive credits to a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_SEARCH\fP   15	/**< Search user accounts. */"
+.br
+.RI "\fISearch user accounts. \fP"
+.ti -1c
+.RI "#define \fBUSY_SUSPEND\fP   16	/**< (Un)suspend a user's account. */"
+.br
+.RI "\fI(Un)suspend a user's account \fP"
+.ti -1c
+.RI "#define \fBUSY_AUDIT\fP   20	/**< View audit trail. */"
+.br
+.RI "\fIView audit trail. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLEANUP\fP   21	/**< View cleanup logs. */"
+.br
+.RI "\fIView cleanup logs. \fP"
+.ti -1c
+.RI "#define \fBUSY_EVENT\fP   22	/**< Event manager. */"
+.br
+.RI "\fIEvent manager. \fP"
+.ti -1c
+.RI "#define \fBUSY_LOGON\fP   23	/**< Change logon messages. */"
+.br
+.RI "\fIChange logon messages. \fP"
+.ti -1c
+.RI "#define \fBUSY_TRANSFER\fP   24	/**< Upload or download files. */"
+.br
+.RI "\fIUpload or download files. \fP"
+.ti -1c
+.RI "#define \fBUSY_SECURITY\fP   25	/**< Security logs (subset of audit trail). */"
+.br
+.RI "\fISecurity logs (subset of audit trail). \fP"
+.ti -1c
+.RI "#define \fBUSY_SIGNUPS\fP   26	/**< Signup logs (subset of audit trail). */"
+.br
+.RI "\fISignup logs (subset of audit trail). \fP"
+.ti -1c
+.RI "#define \fBUSY_FILTAUD\fP   27	/**< Search audit trail. */"
+.br
+.RI "\fISearch audit trail. \fP"
+.ti -1c
+.RI "#define \fBUSY_AGESTATS\fP   30	/**< Demographic statistics. */"
+.br
+.RI "\fIDemographic statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLSSTATS\fP   31	/**< User class statistics. */"
+.br
+.RI "\fIUser class statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_GENSTATS\fP   32	/**< Generic, user-defined statistics. */"
+.br
+.RI "\fIGeneric, user-defined statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_LINSTATS\fP   33	/**< Linux/UNIX operating system statistics. */"
+.br
+.RI "\fILinux/UNIX operating system statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_MODSTATS\fP   34	/**< Module usage statistics. */"
+.br
+.RI "\fIModule usage statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYSTATS\fP   35	/**< System statistics. */"
+.br
+.RI "\fISystem statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_TOP\fP   36	/**< Various \fBtop\fP-<em>n</em> charts. */"
+.br
+.RI "\fIVarious top-\fIn\fP charts. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLASS\fP   40	/**< Change user class. */"
+.br
+.RI "\fIChange user class. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLASSED\fP   41	/**< User class manager. */"
+.br
+.RI "\fIUser class manager. \fP"
+.ti -1c
+.RI "#define \fBUSY_KEYS\fP   42	/**< Edit user's personal keyring. */"
+.br
+.RI "\fIEdit user's personal keyring. \fP"
+.ti -1c
+.RI "#define \fBUSY_COPY\fP   50	/**< Copy a file. */"
+.br
+.RI "\fICopy a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_DEL\fP   51	/**< Remove a file. */"
+.br
+.RI "\fIRemove a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_DIR\fP   52	/**< Produce file listing. */"
+.br
+.RI "\fIProduce file listing. \fP"
+.ti -1c
+.RI "#define \fBUSY_EDITOR\fP   53	/**< Text file editor. */"
+.br
+.RI "\fIText file editor. \fP"
+.ti -1c
+.RI "#define \fBUSY_REN\fP   54	/**< Rename a file. */"
+.br
+.RI "\fIRename a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_SHELL\fP   55	/**< UNIX shell escape. */"
+.br
+.RI "\fIUNIX shell escape. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYS\fP   56	/**< Execute a UNIX command. */"
+.br
+.RI "\fIExecute a UNIX command. \fP"
+.ti -1c
+.RI "#define \fBUSY_TYPE\fP   57	/**< View contents of a file. */"
+.br
+.RI "\fIView contents of a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_PAGEAUDIT\fP   90	/**< Set types of audit entries to be paged. */"
+.br
+.RI "\fISet types of audit entries to be paged. \fP"
+.ti -1c
+.RI "#define \fBUSY_INVIS\fP   91	/**< Sysop invisibility privilege. */"
+.br
+.RI "\fISysop invisibility privilege. \fP"
+.ti -1c
+.RI "#define \fBUSY_GDET\fP   92	/**< Global detail privilege. */"
+.br
+.RI "\fIGlobal detail privilege. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYSOP\fP   95	/**< User is a Sysop (same as below). */"
+.br
+.RI "\fIUser is a Sysop (same as below). \fP"
+.ti -1c
+.RI "#define \fBUSY_MASTERKEY\fP   95	/**< User is a Sysop (same as above). */"
+.br
+.RI "\fIUser is a Sysop (same as above). \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Sysop command and privilege constants. These constants are used inside \fC\fBuseracc_t\fP\fP to encode any sysop command and/or privileges the user may have. There is a wide range of these, roughly broken in seven categories:
+.PP
+.PD 0
+.IP "\(bu" 2
+Channel management.
+.PP
+.IP "  \(bu" 4
+\fCUSY_CHANGE\fP. Change mode of one channel, or all of them. Allows the Sysop to set certain channels to \fCBUSY-OUT, NO-ANSWER\fP, et cetera. Any change of status of a free telnet channel will affect all telnet lines.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_EMULATE\fP. Allows the Sysop to see `with the eyes of a user'. Everything the user sees or types is presented to the operator and everything the sysop types appears like it was typed by the user. This enables the operator to help stuck users.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_MONITOR\fP. Watches all input of all users. Unlike monitor, this only works with software that co-operates with the BBS (i.e. modules et cetera).
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SEND\fP. Sends an operator message to one user or all users. This is slower to do than a page, but is much more official.
+.PP
+.PP
+
+.IP "\(bu" 2
+User account management
+.PP
+.IP "  \(bu" 4
+\fCUSY_DELETE\fP. Marks a user for deletion. If the user is online, they are kicked out immediately. The actual deletion will take place at the coming cleanup. Until then, the same command can be used to lift the deletion mark from the victimised user.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_DETAIL\fP. Display detailed information on the user's account. Some of the information may be restricted, depending on the BBS setup and the operator's access levels.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_EXEMPT\fP. Forbids the system to delete a user. Deletions, automatic or otherwise, will not affect the specified user. Use the same command again to lift the exemption flag.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_HANGUP\fP. Hangs up a channel, effectively kicking out a user.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_POST\fP. Credit a user's account with free or paid credits.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SEARCH\fP. Search the database of user accounts. This command allows for powerful search criteria.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SUSPEND\fP. Suspends a user. If the user is online, they are kicked out. Suspended users cannot enter the system, getting a suitable message every time they try. You can lift the suspension by using the same command on a suspended user.
+.PP
+.PP
+
+.IP "\(bu" 2
+Logs, events and file transfer
+.PP
+.IP "  \(bu" 4
+\fCUSY_AUDIT\fP. View the audit trail, starting either with the most recent or oldest entry first.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_CLEANUP\fP. As above, but shows the cleanup log instead.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_EVENT\fP. The event manager allows the operator to schedule commands to execute at specified times in the day.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_LOGON\fP. Set the logon message-of-the-day for one channel or for all channels. A channel will display both its own, individual message and the global message at the login screen, provided of course the messages exist.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_TRANSFER\fP. Allows the operator to upload and download BBS files.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SECURITY\fP. Like \fCUSY_AUDIT\fP, but filters the audit trail for security-related entries.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SIGNUPS\fP. Like \fCUSY_SECURITY\fP, but only shows new signups.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_FILTAUD\fP. Allows complex filtering of the audit trail, including masking severity levels and specified entry types.
+.PP
+.PP
+
+.IP "\(bu" 2
+Statistics
+.PP
+.IP "  \(bu" 4
+\fCUSY_AGESTATS\fP. Age demographics. Shows user ages, language use, computer systems, et cetera.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_CLSSTATS\fP. Shows user class statistics.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_GENSTATS\fP. Generates user defined bar-graphs plotting a number of quantities against another range of quantities, over a specified range of time and providing totals or averages.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_LINSTATS\fP. UNIX/Linux statistics. Gives information on the system hosting the BBS.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_MODSTATS\fP. Module usage statistics.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SYSTATS\fP. System-wide statistics: stuff like number of messages written, total number of connections, et cetera.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_TOP.Shows\fP a wide range of top-\fIN\fPs (where {\fIN\fP is configurable) for things like the oldest user accounts, users with the most downloads or uploads, clubs with the most messages, et cetera.
+.PP
+.PP
+
+.IP "\(bu" 2
+User classes and keys
+.PP
+.IP "  \(bu" 4
+\fCUSY_CLASS\fP. Moves a user from one class to another.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_CLASSED\fP. The class editor allows the operator to manage classes by creating new ones, editing existing ones, and deleting old ones. All aspects of classes can be controlled, and users can be mass-moved from one class to another.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_KEYS\fP. Edit a user's personal keyring.
+.PP
+.PP
+
+.IP "\(bu" 2
+Filing and command execution
+.PP
+.IP "  \(bu" 4
+\fCUSY_COPY\fP. Copy a file, in a similar way to the shell command \fCcp\fP. Existing target files will be clobbered without confirmation!
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_DEL\fP. Remove a file, much like the shell command { rm}. No confirmation will be required!
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_DIR\fP. Show the files in a directory.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_EDITOR\fP. Run the editor on a file.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_REN\fP. Rename a file, just like the shell command \fCmv\fP.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SHELL\fP. Run a child UNIX shell. This is a gigantic security risk. Only operators of the utmost trust should be granted this command, and only those who can use UNIX. As you probably know, the shell isn't exactly forgiving!
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SYS\fP. Execute a UNIX command. Give this command to the same people who'd get the one above. If you have this command, running a full-blown shell is trivial.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_TYPE\fP. Print the contents of a file, like the shell command \fCcat\fP would do.
+.PP
+.PP
+
+.IP "\(bu" 2
+Filing and command execution
+.PP
+.IP "  \(bu" 4
+\fCUSY_PAGEAUDIT\fP. Pages the operator with audit trail entries, whenever they are logged. Using this command, the operator can select which severities and types of messages will be paged. This removes unnecessary noise on a large system, where unimportant audit trail entries fly by all the time.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_INVIS\fP. Denotes the presence of the \fIinvisibility\fP privilege. Operators owning this privilege can use the \fC/invis\fP global command to become `invisible' by other users. Invisible operators can only be seen and paged by operators with the \fCUSY_SYSOP\fP privilege. Thus, an operator with \fCUSY_INVIS\fP but without \fCUSY_SYSOP\fP can turn invisible, but is isolated from everyone. Not a particularly bad idea, when you need to do some work on a large system.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_GDET\fP. Denotes the presence of the \fIglobal detail\fP privilege. This enables the command \fC/l\fP which is synonymous to the \fCUSY_DETAIL\fP command here: it displays the specified user's account particulars. Some fields may be hidden depending on the operator's access levels. Global detail hides different fields from \fCUSY_DETAIL\fP, due to the global nature of the command.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCUSY_SYSOP\fP, \fCUSY_MASTERKEY\fP. Implies that this operator is a full-blown Sysop of the system. Keys no longer apply to them, and they can bypass most restrictions. For all intents and purposes, they behave a bit like \fCroot\fP does on a UNIX system. Of course, this does not imply that Sysops are the UNIX superuser! Only one user can actually run this command: the user with ID `Sysop' (or whatever is specified by the \fCSYSOP\fP macro in \fC\fBconfig.h\fP\fP). For all other users, it is a mere notification of the Sysop privilege. Sysop can use this command to grant and life privileges and commands to other users, promoting them to operators or demoting them back to ordinary users.
+.PP
+.PP
+
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define USY_AGESTATS   30	/**< Demographic statistics. */"
+.PP
+Demographic statistics. Definition at line 554 of file useracc.h.
+.SS "#define USY_AUDIT   20	/**< View audit trail. */"
+.PP
+View audit trail. Definition at line 546 of file useracc.h.
+.SS "#define USY_CHANGE   0	/**< Alter channel modes. */"
+.PP
+Alter channel modes. Definition at line 535 of file useracc.h.
+.SS "#define USY_CLASS   40	/**< Change user class. */"
+.PP
+Change user class. Definition at line 561 of file useracc.h.
+.SS "#define USY_CLASSED   41	/**< User class manager. */"
+.PP
+User class manager. Definition at line 562 of file useracc.h.
+.SS "#define USY_CLEANUP   21	/**< View cleanup logs. */"
+.PP
+View cleanup logs. Definition at line 547 of file useracc.h.
+.SS "#define USY_CLSSTATS   31	/**< User class statistics. */"
+.PP
+User class statistics. Definition at line 555 of file useracc.h.
+.SS "#define USY_COPY   50	/**< Copy a file. */"
+.PP
+Copy a file. Definition at line 564 of file useracc.h.
+.SS "#define USY_DEL   51	/**< Remove a file. */"
+.PP
+Remove a file. Definition at line 565 of file useracc.h.
+.SS "#define USY_DELETE   10	/**< Delete a user. */"
+.PP
+Delete a user. Definition at line 539 of file useracc.h.
+.SS "#define USY_DETAIL   11	/**< User account information. */"
+.PP
+User account information. Definition at line 540 of file useracc.h.
+.SS "#define USY_DIR   52	/**< Produce file listing. */"
+.PP
+Produce file listing. Definition at line 566 of file useracc.h.
+.SS "#define USY_EDITOR   53	/**< Text file editor. */"
+.PP
+Text file editor. Definition at line 567 of file useracc.h.
+.SS "#define USY_EMULATE   1	/**< Emulate a user. */"
+.PP
+Emulate a user. Definition at line 536 of file useracc.h.
+.SS "#define USY_EVENT   22	/**< Event manager. */"
+.PP
+Event manager. Definition at line 548 of file useracc.h.
+.SS "#define USY_EXEMPT   12	/**< Delete-(un)protect a user. */"
+.PP
+Delete-(un)protect a user. Definition at line 541 of file useracc.h.
+.SS "#define USY_FILTAUD   27	/**< Search audit trail. */"
+.PP
+Search audit trail. Definition at line 553 of file useracc.h.
+.SS "#define USY_GDET   92	/**< Global detail privilege. */"
+.PP
+Global detail privilege. Definition at line 574 of file useracc.h.
+.SS "#define USY_GENSTATS   32	/**< Generic, user-defined statistics. */"
+.PP
+Generic, user-defined statistics. Definition at line 556 of file useracc.h.
+.SS "#define USY_HANGUP   13	/**< Hang up a channel. */"
+.PP
+Hang up a channel. Definition at line 542 of file useracc.h.
+.SS "#define USY_INVIS   91	/**< Sysop invisibility privilege. */"
+.PP
+Sysop invisibility privilege. Definition at line 573 of file useracc.h.
+.SS "#define USY_KEYS   42	/**< Edit user's personal keyring. */"
+.PP
+Edit user's personal keyring. Definition at line 563 of file useracc.h.
+.SS "#define USY_LINSTATS   33	/**< Linux/UNIX operating system statistics. */"
+.PP
+Linux/UNIX operating system statistics. Definition at line 557 of file useracc.h.
+.SS "#define USY_LOGON   23	/**< Change logon messages. */"
+.PP
+Change logon messages. Definition at line 549 of file useracc.h.
+.SS "#define USY_MASTERKEY   95	/**< User is a Sysop (same as above). */"
+.PP
+User is a Sysop (same as above). Definition at line 576 of file useracc.h.
+.SS "#define USY_MODSTATS   34	/**< Module usage statistics. */"
+.PP
+Module usage statistics. Definition at line 558 of file useracc.h.
+.SS "#define USY_MONITOR   2	/**< Monitor all input. */"
+.PP
+Monitor all input. Definition at line 537 of file useracc.h.
+.SS "#define USY_PAGEAUDIT   90	/**< Set types of audit entries to be paged. */"
+.PP
+Set types of audit entries to be paged. Definition at line 572 of file useracc.h.
+.SS "#define USY_POST   14	/**< Give credits to a user. */"
+.PP
+Give credits to a user. Definition at line 543 of file useracc.h.
+.SS "#define USY_REN   54	/**< Rename a file. */"
+.PP
+Rename a file. Definition at line 568 of file useracc.h.
+.SS "#define USY_SEARCH   15	/**< Search user accounts. */"
+.PP
+Search user accounts. Definition at line 544 of file useracc.h.
+.SS "#define USY_SECURITY   25	/**< Security logs (subset of audit trail). */"
+.PP
+Security logs (subset of audit trail). Definition at line 551 of file useracc.h.
+.SS "#define USY_SEND   3	/**< Send sysop message to user or all users. */"
+.PP
+Send sysop message to user or all users. Definition at line 538 of file useracc.h.
+.SS "#define USY_SHELL   55	/**< UNIX shell escape. */"
+.PP
+UNIX shell escape. Definition at line 569 of file useracc.h.
+.SS "#define USY_SIGNUPS   26	/**< Signup logs (subset of audit trail). */"
+.PP
+Signup logs (subset of audit trail). Definition at line 552 of file useracc.h.
+.SS "#define USY_SUSPEND   16	/**< (Un)suspend a user's account. */"
+.PP
+(Un)suspend a user's account Definition at line 545 of file useracc.h.
+.SS "#define USY_SYS   56	/**< Execute a UNIX command. */"
+.PP
+Execute a UNIX command. Definition at line 570 of file useracc.h.
+.SS "#define USY_SYSOP   95	/**< User is a Sysop (same as below). */"
+.PP
+User is a Sysop (same as below). Definition at line 575 of file useracc.h.
+.SS "#define USY_SYSTATS   35	/**< System statistics. */"
+.PP
+System statistics. Definition at line 559 of file useracc.h.
+.SS "#define USY_TOP   36	/**< Various \fBtop\fP-<em>n</em> charts. */"
+.PP
+Various top-\fIn\fP charts. Definition at line 560 of file useracc.h.
+.SS "#define USY_TRANSFER   24	/**< Upload or download files. */"
+.PP
+Upload or download files. Definition at line 550 of file useracc.h.
+.SS "#define USY_TYPE   57	/**< View contents of a file. */"
+.PP
+View contents of a file. Definition at line 571 of file useracc.h.

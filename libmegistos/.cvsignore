@@ -1,0 +1,14 @@
+*.lo
+*.o
+.deps
+.libs
+Makefile
+Makefile.in
+libmegistos.la
+mbk_*.h
+megistos-config
+mksysvar
+msgidx
+version.h
+version.mk
+visual

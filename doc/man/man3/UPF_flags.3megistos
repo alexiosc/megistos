@@ -1,0 +1,186 @@
+.TH "User preference flags" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+User preference flags \- User preference flags.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBUPF_ANSION\fP   0x0001 /**< User likes ANSI directives. */"
+.br
+.RI "\fIUser likes ANSI directives. \fP"
+.ti -1c
+.RI "#define \fBUPF_VISUAL\fP   0x0002 /**< User wants visual tools, where available. */"
+.br
+.RI "\fIUser wants visual tools, where available. \fP"
+.ti -1c
+.RI "#define \fBUPF_NONSTOP\fP   0x0004 /**< Don't pause at the bottom the screen. */"
+.br
+.RI "\fIDon't pause at the bottom the screen. \fP"
+.ti -1c
+.RI "#define \fBUPF_ANSIDEF\fP   0x0008 /**< Use channel default ANSI value. */"
+.br
+.RI "\fIUse channel default ANSI value. \fP"
+.ti -1c
+.RI "#define \fBUPF_ANSIASK\fP   0x0010 /**< Ask about use of ANSI at login. */"
+.br
+.RI "\fIAsk about use of ANSI at login. \fP"
+.ti -1c
+.RI "#define \fBUPF_OBSOLETE\fP   0x0020 /**< Obsolete flag value; re-use at will. */"
+.br
+.RI "\fIObsolete flag value; re-use at will. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRDEF\fP   0x0040 /**< Use default channel translation. */"
+.br
+.RI "\fIUse default channel translation. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRASK\fP   0x0080 /**< Ask for translation mode at login. */"
+.br
+.RI "\fIAsk for translation mode at login. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR0\fP   0x0100 /**< Translation mode, bit 0. */"
+.br
+.RI "\fITranslation mode, bit 0. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR1\fP   0x0200 /**< Translation mode, bit 1. */"
+.br
+.RI "\fITranslation mode, bit 1. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR2\fP   0x0300 /**< Translation mode, bit 2. */"
+.br
+.RI "\fITranslation mode, bit 2. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR3\fP   0x0400 /**< Translation mode, bit 3. */"
+.br
+.RI "\fITranslation mode, bit 3. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRANS\fP   (UPF_TR0|UPF_TR1|UPF_TR2|UPF_TR3)"
+.br
+.ti -1c
+.RI "#define \fBUPF_TRSHIFT\fP   8"
+.br
+.ti -1c
+.RI "#define \fBusr_getpxlation\fP(u)   (((u).flags&UPF_TRANS)>>UPF_TRSHIFT)"
+.br
+.RI "\fIExtract permanent translation mode from user account. \fP"
+.ti -1c
+.RI "#define \fBusr_setpxlation\fP(u, i)"
+.br
+.RI "\fISet permanent translation mode in user account. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User preference flags. These flags denote permanent user preferences as regards translation modes, ANSI directives, et cetera.
+.PP
+.IP "\(bu" 2
+\fCUPF_ANSION\fP. If this flag is set, ANSI output is preferred by the user.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_VISUAL\fP. Set to denote that the user prefers visual (full-screen) tools, where these are available.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_NONSTOP\fP. Ignore the user's screen height; never pause the display for the user.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_ANSIDEF\fP. User likes to leave their ANSI setting to whatever was set at login.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_ANSIASK\fP. User likes to be asked about their ANSI setting at every login (if this wasn't already done \fIprior\fP to login).
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_TRDEF\fP. User prefers to leave the translation mode to whatever was set at login.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_TRASK\fP. User likes to be asked for a translation mode at every login.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUPF_TR0--UPF_TR3\fP. Four bits denoting the translation table the user prefers to use (only valid if \fCUPF_TRDEF\fP and \fCPF_TRASK\fP are clear). 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define UPF_ANSIASK   0x0010 /**< Ask about use of ANSI at login. */"
+.PP
+Ask about use of ANSI at login. Definition at line 315 of file useracc.h.
+.SS "#define UPF_ANSIDEF   0x0008 /**< Use channel default ANSI value. */"
+.PP
+Use channel default ANSI value. Definition at line 313 of file useracc.h.
+.SS "#define UPF_ANSION   0x0001 /**< User likes ANSI directives. */"
+.PP
+User likes ANSI directives. Definition at line 307 of file useracc.h.
+.SS "#define UPF_NONSTOP   0x0004 /**< Don't pause at the bottom the screen. */"
+.PP
+Don't pause at the bottom the screen. Definition at line 311 of file useracc.h.
+.SS "#define UPF_OBSOLETE   0x0020 /**< Obsolete flag value; re-use at will. */"
+.PP
+Obsolete flag value; re-use at will. Definition at line 317 of file useracc.h.
+.SS "#define UPF_TR0   0x0100 /**< Translation mode, bit 0. */"
+.PP
+Translation mode, bit 0. Definition at line 323 of file useracc.h.
+.SS "#define UPF_TR1   0x0200 /**< Translation mode, bit 1. */"
+.PP
+Translation mode, bit 1. Definition at line 325 of file useracc.h.
+.SS "#define UPF_TR2   0x0300 /**< Translation mode, bit 2. */"
+.PP
+Translation mode, bit 2. Definition at line 327 of file useracc.h.
+.SS "#define UPF_TR3   0x0400 /**< Translation mode, bit 3. */"
+.PP
+Translation mode, bit 3. Definition at line 329 of file useracc.h.
+.SS "#define UPF_TRANS   (UPF_TR0|UPF_TR1|UPF_TR2|UPF_TR3)"
+.PP
+Definition at line 332 of file useracc.h.
+.SS "#define UPF_TRASK   0x0080 /**< Ask for translation mode at login. */"
+.PP
+Ask for translation mode at login. Definition at line 321 of file useracc.h.
+.SS "#define UPF_TRDEF   0x0040 /**< Use default channel translation. */"
+.PP
+Use default channel translation. Definition at line 319 of file useracc.h.
+.SS "#define UPF_TRSHIFT   8"
+.PP
+Definition at line 333 of file useracc.h.
+.SS "#define UPF_VISUAL   0x0002 /**< User wants visual tools, where available. */"
+.PP
+User wants visual tools, where available. Definition at line 309 of file useracc.h.
+.SS "#define usr_getpxlation(u)   (((u).flags&UPF_TRANS)>>UPF_TRSHIFT)"
+.PP
+Extract permanent translation mode from user account. The following macro extracts the 0--9 (0--15, actually) translation table number from the user's flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIu\fP A user \fIaccount\fP structure, \fC\fBuseracc_t\fP\fP. Pass the structure itself, not a pointer to it.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The translation table specified by the user's preference flags. 
+.RE
+.PP
+Definition at line 347 of file useracc.h.
+.SS "#define usr_setpxlation(u, i)"
+.PP
+\fBValue:\fP.nf
+((u).flags=((u).flags&~UPF_TRANS)|\
+                          (((i)&0xf)<<UPF_TRSHIFT))
+.fi
+Set permanent translation mode in user account. 
+.PP
+This macro sets the translation mode in the user preference flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIu\fP A user \fIaccount\fP structure, \fC\fBuseracc_t\fP\fP. Pass the structure itself, not a pointer to it.
+.br
+\fIi\fP The new translation mode. 
+.RE
+.PP
+Definition at line 359 of file useracc.h.

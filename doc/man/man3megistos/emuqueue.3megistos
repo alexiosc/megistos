@@ -1,0 +1,50 @@
+.TH "emuqueue" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+emuqueue \- User emulation structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "volatile char \fBqueue\fP [16376]"
+.br
+.RI "\fIUser output queue. \fP"
+.ti -1c
+.RI "volatile int \fBindex\fP"
+.br
+.RI "\fIThe pointer in the queue. \fP"
+.ti -1c
+.RI "volatile int \fBxlation\fP"
+.br
+.RI "\fICurrently active translation mode. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User emulation structure. 
+
+This structure contains enough information to help in emulating a user (the user-to-emulator part). It isn't well documented because you won't need to use it. 
+.PP
+Definition at line 98 of file sysstruct.h.
+.SH "Field Documentation"
+.PP 
+.SS "volatile int \fBemuqueue::index\fP"
+.PP
+The pointer in the queue. Definition at line 100 of file sysstruct.h.
+.SS "volatile char \fBemuqueue::queue\fP[16376]"
+.PP
+User output queue. Definition at line 99 of file sysstruct.h.
+.SS "volatile int \fBemuqueue::xlation\fP"
+.PP
+Currently active translation mode. Definition at line 101 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,58 @@
+.TH "Page states (PGS_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Page states (PGS_x) \- User paging restrictions.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBPGS_STORE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBPGS_OK\fP   1"
+.br
+.ti -1c
+.RI "#define \fBPGS_ON\fP   2"
+.br
+.ti -1c
+.RI "#define \fBPGS_OFF\fP   3"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+User paging restrictions. These constants outline the user's preferred restrictions on incoming pages from other users. The following mutually exclusive constants are available:
+.PP
+.IP "\(bu" 2
+\fCPGS_OFF\fP. The user wants to receive no pages from other users.
+.PP
+.PP
+.IP "\(bu" 2
+\fCPGS_ON\fP. The user will accept pages, but with a minimum of \fCpagetime\fP minutes in between pages. The \fCpagetime\fP field is in the user account structure, \fC\fBuseracc_t\fP\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCPGS_OK\fP. The user will always accept pages, regardless of their number and frequency.
+.PP
+.PP
+.IP "\(bu" 2
+\fCPGS_STORE\fP. Just like \fCPGS_OK\fP, but pages to the user sent while the user is busy (i.e. when the \fCOLF_BUSY\fP flag is set in their \fC\fBonlinerec_t\fP\fP) will be stored by the system and sent to the user \fIen masse\fP as soon as the \fCOLF_BUSY\fP flag is cleared. This is the default state on our system, since it guarantees that pages to the user will not be lost. Historically, it dates all the way back to 1992, when it was one of our most favoured custom additions to our (then) freshly licensed source of the Major BBS.
+.PP
+.PP
+Please note that any restrictions imposed above do not apply to users with the \fCUSY_SYSOP\fP privilege flag. Even if a user is in the \fCPGS_OFF\fP state, an operator can page them as if they were in the \fCPGS_STORE\fP state. 
+.SH "Define Documentation"
+.PP 
+.SS "#define PGS_OFF   3"
+.PP
+Definition at line 1045 of file useracc.h.
+.SS "#define PGS_OK   1"
+.PP
+Definition at line 1043 of file useracc.h.
+.SS "#define PGS_ON   2"
+.PP
+Definition at line 1044 of file useracc.h.
+.SS "#define PGS_STORE   0"
+.PP
+Definition at line 1042 of file useracc.h.

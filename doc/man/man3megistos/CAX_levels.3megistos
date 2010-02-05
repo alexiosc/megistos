@@ -1,0 +1,107 @@
+.TH "Club Access Levels (CAX_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Club Access Levels (CAX_x) \- These constants denote the various club access levels.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBCAX_SYSOP\fP   70"
+.br
+.ti -1c
+.RI "#define \fBCAX_CLUBOP\fP   60"
+.br
+.ti -1c
+.RI "#define \fBCAX_COOP\fP   50"
+.br
+.ti -1c
+.RI "#define \fBCAX_UPLOAD\fP   40"
+.br
+.ti -1c
+.RI "#define \fBCAX_WRITE\fP   30"
+.br
+.ti -1c
+.RI "#define \fBCAX_DNLOAD\fP   20"
+.br
+.ti -1c
+.RI "#define \fBCAX_READ\fP   10"
+.br
+.ti -1c
+.RI "#define \fBCAX_ZERO\fP   0"
+.br
+.ti -1c
+.RI "#define \fBCAX_DEFAULT\fP   -1"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+These constants denote the various club access levels. You'll notice the access level values are nicely spaced out to allow for future expansion. Here they are:
+.PP
+.IP "\(bu" 2
+\fCCAX_SYSOP\fP. We're not worthy! We're not worthy! We're scum! Sysops can, of course, do anything they want in clubs.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_CLUBOP\fP. All hail the mighty clubop! These guys are normal users, but have operator privileges within their respective clubs.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_COOP\fP. Like clubops, but can't modify users' access levels and are limited in a few other minor ways.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_UPLOAD\fP. Full access, normal user. Can read and write messages, as well as download and upload files. Their files need operator approval
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_WRITE\fP. Like above, but can't upload files: they can read and write messages and download files only.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_DNLOAD\fP. Like above, but can't write messages: they can only read messages and download files.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_READ\fP. Like above, but can't even download files: they can only read club messages.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_ZERO\fP. Absolutely no access. Users in this level can't even see the club in club lists.
+.PP
+.PP
+.IP "\(bu" 2
+\fCCAX_DEFAULT\fP. Transparent access level. Used in per-user access level specifications to mean `don't make exceptions for this user, use whatever default access is defined for this club'. This `level' effectively removes a per-user specification of access levels. Not stored anywhere, used only internally while changing levels. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define CAX_CLUBOP   60"
+.PP
+Definition at line 685 of file mail.h.
+.SS "#define CAX_COOP   50"
+.PP
+Definition at line 686 of file mail.h.
+.SS "#define CAX_DEFAULT   -1"
+.PP
+Definition at line 692 of file mail.h.
+.SS "#define CAX_DNLOAD   20"
+.PP
+Definition at line 689 of file mail.h.
+.SS "#define CAX_READ   10"
+.PP
+Definition at line 690 of file mail.h.
+.SS "#define CAX_SYSOP   70"
+.PP
+Definition at line 684 of file mail.h.
+.SS "#define CAX_UPLOAD   40"
+.PP
+Definition at line 687 of file mail.h.
+.SS "#define CAX_WRITE   30"
+.PP
+Definition at line 688 of file mail.h.
+.SS "#define CAX_ZERO   0"
+.PP
+Definition at line 691 of file mail.h.

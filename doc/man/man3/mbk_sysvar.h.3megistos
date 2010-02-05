@@ -1,0 +1,1013 @@
+.TH "mbk_sysvar.h" 3 "8 Sep 2003" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+mbk_sysvar.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBBSTTL\fP   1"
+.br
+.ti -1c
+.RI "#define \fBBBSCOD\fP   2"
+.br
+.ti -1c
+.RI "#define \fBCOMPANY\fP   3"
+.br
+.ti -1c
+.RI "#define \fBADDRES1\fP   4"
+.br
+.ti -1c
+.RI "#define \fBADDRES2\fP   5"
+.br
+.ti -1c
+.RI "#define \fBCITY\fP   6"
+.br
+.ti -1c
+.RI "#define \fBDATAPH\fP   7"
+.br
+.ti -1c
+.RI "#define \fBLIVEPH\fP   8"
+.br
+.ti -1c
+.RI "#define \fBVOICEPH\fP   9"
+.br
+.ti -1c
+.RI "#define \fBIDLZAP\fP   10"
+.br
+.ti -1c
+.RI "#define \fBIDLZAPT\fP   11"
+.br
+.ti -1c
+.RI "#define \fBIDLOVR\fP   12"
+.br
+.ti -1c
+.RI "#define \fBSVRATE\fP   13"
+.br
+.ti -1c
+.RI "#define \fBCHGHOUR\fP   14"
+.br
+.ti -1c
+.RI "#define \fBCHGTIME\fP   15"
+.br
+.ti -1c
+.RI "#define \fBCHGMIN\fP   16"
+.br
+.ti -1c
+.RI "#define \fBLONAUD\fP   17"
+.br
+.ti -1c
+.RI "#define \fBLOFAUD\fP   18"
+.br
+.ti -1c
+.RI "#define \fBTNLMAX\fP   19"
+.br
+.ti -1c
+.RI "#define \fBBBSRST\fP   20"
+.br
+.ti -1c
+.RI "#define \fBPSWEXP\fP   21"
+.br
+.ti -1c
+.RI "#define \fBPAGEKEY\fP   22"
+.br
+.ti -1c
+.RI "#define \fBPGOVKEY\fP   23"
+.br
+.ti -1c
+.RI "#define \fBPALLKEY\fP   24"
+.br
+.ti -1c
+.RI "#define \fBDFTPOP\fP   25"
+.br
+.ti -1c
+.RI "#define \fBDFTPTM\fP   26"
+.br
+.ti -1c
+.RI "#define \fBGLOCKIE\fP   27"
+.br
+.ti -1c
+.RI "#define \fBKGDNAM\fP   28"
+.br
+.ti -1c
+.RI "#define \fBKGDCOM\fP   29"
+.br
+.ti -1c
+.RI "#define \fBKGDADR\fP   30"
+.br
+.ti -1c
+.RI "#define \fBKGDPHO\fP   31"
+.br
+.ti -1c
+.RI "#define \fBKGDAGE\fP   32"
+.br
+.ti -1c
+.RI "#define \fBKGDSEX\fP   33"
+.br
+.ti -1c
+.RI "#define \fBKGDPSS\fP   34"
+.br
+.ti -1c
+.RI "#define \fBKGDPASS\fP   35"
+.br
+.ti -1c
+.RI "#define \fBW2CLR\fP   36"
+.br
+.ti -1c
+.RI "#define \fBPAUSE\fP   37"
+.br
+.ti -1c
+.RI "#define \fBNOCREDS\fP   38"
+.br
+.ti -1c
+.RI "#define \fBNOCRDBYE\fP   39"
+.br
+.ti -1c
+.RI "#define \fBNOCTIM\fP   40"
+.br
+.ti -1c
+.RI "#define \fBNOCTIMBYE\fP   41"
+.br
+.ti -1c
+.RI "#define \fBNODTIM\fP   42"
+.br
+.ti -1c
+.RI "#define \fBNODTIMBYE\fP   43"
+.br
+.ti -1c
+.RI "#define \fBIDLEWRN\fP   44"
+.br
+.ti -1c
+.RI "#define \fBIDLEBYE\fP   45"
+.br
+.ti -1c
+.RI "#define \fBSHTDW1\fP   46"
+.br
+.ti -1c
+.RI "#define \fBSHTDW2\fP   47"
+.br
+.ti -1c
+.RI "#define \fBSHTDW3\fP   48"
+.br
+.ti -1c
+.RI "#define \fBLNCHGW1\fP   49"
+.br
+.ti -1c
+.RI "#define \fBLNCHGW2\fP   50"
+.br
+.ti -1c
+.RI "#define \fBLNCHGW3\fP   51"
+.br
+.ti -1c
+.RI "#define \fBDTCJAN\fP   52"
+.br
+.ti -1c
+.RI "#define \fBDTCFEB\fP   53"
+.br
+.ti -1c
+.RI "#define \fBDTCMAR\fP   54"
+.br
+.ti -1c
+.RI "#define \fBDTCAPR\fP   55"
+.br
+.ti -1c
+.RI "#define \fBDTCMAY\fP   56"
+.br
+.ti -1c
+.RI "#define \fBDTCJUN\fP   57"
+.br
+.ti -1c
+.RI "#define \fBDTCJUL\fP   58"
+.br
+.ti -1c
+.RI "#define \fBDTCAUG\fP   59"
+.br
+.ti -1c
+.RI "#define \fBDTCSEP\fP   60"
+.br
+.ti -1c
+.RI "#define \fBDTCOCT\fP   61"
+.br
+.ti -1c
+.RI "#define \fBDTCNOV\fP   62"
+.br
+.ti -1c
+.RI "#define \fBDTCDEC\fP   63"
+.br
+.ti -1c
+.RI "#define \fBTIME\fP   64"
+.br
+.ti -1c
+.RI "#define \fBWHOHDR\fP   65"
+.br
+.ti -1c
+.RI "#define \fBWHOLINE1\fP   66"
+.br
+.ti -1c
+.RI "#define \fBWHOLINE2\fP   67"
+.br
+.ti -1c
+.RI "#define \fBWHOLON\fP   68"
+.br
+.ti -1c
+.RI "#define \fBWHOSUP\fP   69"
+.br
+.ti -1c
+.RI "#define \fBWHONIX\fP   70"
+.br
+.ti -1c
+.RI "#define \fBINVON\fP   71"
+.br
+.ti -1c
+.RI "#define \fBINVOFF\fP   72"
+.br
+.ti -1c
+.RI "#define \fBAUDINJI\fP   73"
+.br
+.ti -1c
+.RI "#define \fBAUDINJC\fP   74"
+.br
+.ti -1c
+.RI "#define \fBAUDINJE\fP   75"
+.br
+.ti -1c
+.RI "#define \fBCRDSING\fP   76"
+.br
+.ti -1c
+.RI "#define \fBCRDPLUR\fP   77"
+.br
+.ti -1c
+.RI "#define \fBMINSING\fP   78"
+.br
+.ti -1c
+.RI "#define \fBMINPLUR\fP   79"
+.br
+.ti -1c
+.RI "#define \fBCRDAVAIL\fP   80"
+.br
+.ti -1c
+.RI "#define \fBCANTPG\fP   81"
+.br
+.ti -1c
+.RI "#define \fBPAGFMT\fP   82"
+.br
+.ti -1c
+.RI "#define \fBPAGTON\fP   83"
+.br
+.ti -1c
+.RI "#define \fBPAGTOF\fP   84"
+.br
+.ti -1c
+.RI "#define \fBPAGTOK\fP   85"
+.br
+.ti -1c
+.RI "#define \fBPAGTST\fP   86"
+.br
+.ti -1c
+.RI "#define \fBPAGNON\fP   87"
+.br
+.ti -1c
+.RI "#define \fBPAGMOM\fP   88"
+.br
+.ti -1c
+.RI "#define \fBSEXM\fP   89"
+.br
+.ti -1c
+.RI "#define \fBSEXF\fP   90"
+.br
+.ti -1c
+.RI "#define \fBPAGOFF\fP   91"
+.br
+.ti -1c
+.RI "#define \fBPAGL2M\fP   92"
+.br
+.ti -1c
+.RI "#define \fBURINVS\fP   93"
+.br
+.ti -1c
+.RI "#define \fBPAGMSG1\fP   94"
+.br
+.ti -1c
+.RI "#define \fBPAGNOT1\fP   95"
+.br
+.ti -1c
+.RI "#define \fBPAGMSG2\fP   96"
+.br
+.ti -1c
+.RI "#define \fBPAGNOT2\fP   97"
+.br
+.ti -1c
+.RI "#define \fBPAGEOK\fP   98"
+.br
+.ti -1c
+.RI "#define \fBACKM\fP   99"
+.br
+.ti -1c
+.RI "#define \fBACKF\fP   100"
+.br
+.ti -1c
+.RI "#define \fBPGSYSOP\fP   101"
+.br
+.ti -1c
+.RI "#define \fBPAGNPS\fP   102"
+.br
+.ti -1c
+.RI "#define \fBPAGNPST\fP   103"
+.br
+.ti -1c
+.RI "#define \fBPAGSTOK\fP   104"
+.br
+.ti -1c
+.RI "#define \fBNOMM\fP   105"
+.br
+.ti -1c
+.RI "#define \fBNOMF\fP   106"
+.br
+.ti -1c
+.RI "#define \fBPALLNC\fP   107"
+.br
+.ti -1c
+.RI "#define \fBCHATBEG\fP   108"
+.br
+.ti -1c
+.RI "#define \fBCHATEND\fP   109"
+.br
+.ti -1c
+.RI "#define \fBGCOOKIE\fP   110"
+.br
+.ti -1c
+.RI "#define \fBGCKIEEND\fP   111"
+.br
+.ti -1c
+.RI "#define \fBCOOKIE\fP   112"
+.br
+.ti -1c
+.RI "#define \fBCKIELN1\fP   113"
+.br
+.ti -1c
+.RI "#define \fBCKIELN2\fP   114"
+.br
+.ti -1c
+.RI "#define \fBCKIEEND\fP   115"
+.br
+.ti -1c
+.RI "#define \fBUXRF1\fP   116"
+.br
+.ti -1c
+.RI "#define \fBUXRF2\fP   117"
+.br
+.ti -1c
+.RI "#define \fBUXRF3\fP   118"
+.br
+.ti -1c
+.RI "#define \fBUXRF3A\fP   119"
+.br
+.ti -1c
+.RI "#define \fBUXRF4\fP   120"
+.br
+.ti -1c
+.RI "#define \fBUXRF5\fP   121"
+.br
+.ti -1c
+.RI "#define \fBGDETUR\fP   122"
+.br
+.ti -1c
+.RI "#define \fBGDETNAX\fP   123"
+.br
+.ti -1c
+.RI "#define \fBGDETSUSP\fP   124"
+.br
+.ti -1c
+.RI "#define \fBGDETXMPT\fP   125"
+.br
+.ti -1c
+.RI "#define \fBGDETDEL\fP   126"
+.br
+.ti -1c
+.RI "#define \fBGDETOP\fP   127"
+.br
+.ti -1c
+.RI "#define \fBGDETM\fP   128"
+.br
+.ti -1c
+.RI "#define \fBGDETF\fP   129"
+.br
+.ti -1c
+.RI "#define \fBGDETS1\fP   130"
+.br
+.ti -1c
+.RI "#define \fBGDETS2\fP   131"
+.br
+.ti -1c
+.RI "#define \fBGDETS3\fP   132"
+.br
+.ti -1c
+.RI "#define \fBGDETS4\fP   133"
+.br
+.ti -1c
+.RI "#define \fBGDETS5\fP   134"
+.br
+.ti -1c
+.RI "#define \fBGDETS6\fP   135"
+.br
+.ti -1c
+.RI "#define \fBGDETS7\fP   136"
+.br
+.ti -1c
+.RI "#define \fBGDETS8\fP   137"
+.br
+.ti -1c
+.RI "#define \fBGDETS9\fP   138"
+.br
+.ti -1c
+.RI "#define \fBGDETNST\fP   139"
+.br
+.ti -1c
+.RI "#define \fBGDETL1\fP   140"
+.br
+.ti -1c
+.RI "#define \fBGDETL2\fP   141"
+.br
+.ti -1c
+.RI "#define \fBGDETL3\fP   142"
+.br
+.ti -1c
+.RI "#define \fBGDETL4\fP   143"
+.br
+.ti -1c
+.RI "#define \fBGDETL5\fP   144"
+.br
+.ti -1c
+.RI "#define \fBGDETL6\fP   145"
+.br
+.ti -1c
+.RI "#define \fBGDETL7\fP   146"
+.br
+.ti -1c
+.RI "#define \fBGDETL8\fP   147"
+.br
+.ti -1c
+.RI "#define \fBGDETL9\fP   148"
+.br
+.ti -1c
+.RI "#define \fBGDETL0\fP   149"
+.br
+.ti -1c
+.RI "#define \fBGDET\fP   150"
+.br
+.ti -1c
+.RI "#define \fBREMSERR\fP   151"
+.br
+.ti -1c
+.RI "#define \fBCANTGO\fP   152"
+.br
+.ti -1c
+.RI "#define \fBGONAX\fP   153"
+.br
+.ti -1c
+.RI "#define \fBLSTHDR\fP   154"
+.br
+.ti -1c
+.RI "#define \fBLSTLIN\fP   155"
+.br
+.ti -1c
+.RI "#define \fBRCFTR\fP   156"
+.br
+.ti -1c
+.RI "#define \fBUNKUSR\fP   157"
+.br
+.ti -1c
+.RI "#define \fBUSRHDR\fP   158"
+.br
+.ti -1c
+.RI "#define \fBUSRLIN\fP   159"
+.br
+.ti -1c
+.RI "#define \fBURCFTR\fP   160"
+.br
+.ti -1c
+.RI "#define \fBRCNTHLP\fP   161"
+.br
+.ti -1c
+.RI "#define \fBAUDITHLP\fP   162"
+.br
+.ti -1c
+.RI "#define \fBAUDITOFF\fP   163"
+.br
+.ti -1c
+.RI "#define \fBAUDITE\fP   164"
+.br
+.ti -1c
+.RI "#define \fBAUDITC\fP   165"
+.br
+.ti -1c
+.RI "#define \fBAUDITI\fP   166"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define ACKF   100"
+.PP
+Definition at line 123 of file mbk_sysvar.h.
+.SS "#define ACKM   99"
+.PP
+Definition at line 122 of file mbk_sysvar.h.
+.SS "#define ADDRES1   4"
+.PP
+Definition at line 27 of file mbk_sysvar.h.
+.SS "#define ADDRES2   5"
+.PP
+Definition at line 28 of file mbk_sysvar.h.
+.SS "#define AUDINJC   74"
+.PP
+Definition at line 97 of file mbk_sysvar.h.
+.SS "#define AUDINJE   75"
+.PP
+Definition at line 98 of file mbk_sysvar.h.
+.SS "#define AUDINJI   73"
+.PP
+Definition at line 96 of file mbk_sysvar.h.
+.SS "#define AUDITC   165"
+.PP
+Definition at line 188 of file mbk_sysvar.h.
+.SS "#define AUDITE   164"
+.PP
+Definition at line 187 of file mbk_sysvar.h.
+.SS "#define AUDITHLP   162"
+.PP
+Definition at line 185 of file mbk_sysvar.h.
+.SS "#define AUDITI   166"
+.PP
+Definition at line 189 of file mbk_sysvar.h.
+.SS "#define AUDITOFF   163"
+.PP
+Definition at line 186 of file mbk_sysvar.h.
+.SS "#define BBSCOD   2"
+.PP
+Definition at line 25 of file mbk_sysvar.h.
+.SS "#define BBSRST   20"
+.PP
+Definition at line 43 of file mbk_sysvar.h.
+.SS "#define BBSTTL   1"
+.PP
+Definition at line 24 of file mbk_sysvar.h.
+.SS "#define CANTGO   152"
+.PP
+Definition at line 175 of file mbk_sysvar.h.
+.SS "#define CANTPG   81"
+.PP
+Definition at line 104 of file mbk_sysvar.h.
+.SS "#define CHATBEG   108"
+.PP
+Definition at line 131 of file mbk_sysvar.h.
+.SS "#define CHATEND   109"
+.PP
+Definition at line 132 of file mbk_sysvar.h.
+.SS "#define CHGHOUR   14"
+.PP
+Definition at line 37 of file mbk_sysvar.h.
+.SS "#define CHGMIN   16"
+.PP
+Definition at line 39 of file mbk_sysvar.h.
+.SS "#define CHGTIME   15"
+.PP
+Definition at line 38 of file mbk_sysvar.h.
+.SS "#define CITY   6"
+.PP
+Definition at line 29 of file mbk_sysvar.h.
+.SS "#define CKIEEND   115"
+.PP
+Definition at line 138 of file mbk_sysvar.h.
+.SS "#define CKIELN1   113"
+.PP
+Definition at line 136 of file mbk_sysvar.h.
+.SS "#define CKIELN2   114"
+.PP
+Definition at line 137 of file mbk_sysvar.h.
+.SS "#define COMPANY   3"
+.PP
+Definition at line 26 of file mbk_sysvar.h.
+.SS "#define COOKIE   112"
+.PP
+Definition at line 135 of file mbk_sysvar.h.
+.SS "#define CRDAVAIL   80"
+.PP
+Definition at line 103 of file mbk_sysvar.h.
+.SS "#define CRDPLUR   77"
+.PP
+Definition at line 100 of file mbk_sysvar.h.
+.SS "#define CRDSING   76"
+.PP
+Definition at line 99 of file mbk_sysvar.h.
+.SS "#define DATAPH   7"
+.PP
+Definition at line 30 of file mbk_sysvar.h.
+.SS "#define DFTPOP   25"
+.PP
+Definition at line 48 of file mbk_sysvar.h.
+.SS "#define DFTPTM   26"
+.PP
+Definition at line 49 of file mbk_sysvar.h.
+.SS "#define DTCAPR   55"
+.PP
+Definition at line 78 of file mbk_sysvar.h.
+.SS "#define DTCAUG   59"
+.PP
+Definition at line 82 of file mbk_sysvar.h.
+.SS "#define DTCDEC   63"
+.PP
+Definition at line 86 of file mbk_sysvar.h.
+.SS "#define DTCFEB   53"
+.PP
+Definition at line 76 of file mbk_sysvar.h.
+.SS "#define DTCJAN   52"
+.PP
+Definition at line 75 of file mbk_sysvar.h.
+.SS "#define DTCJUL   58"
+.PP
+Definition at line 81 of file mbk_sysvar.h.
+.SS "#define DTCJUN   57"
+.PP
+Definition at line 80 of file mbk_sysvar.h.
+.SS "#define DTCMAR   54"
+.PP
+Definition at line 77 of file mbk_sysvar.h.
+.SS "#define DTCMAY   56"
+.PP
+Definition at line 79 of file mbk_sysvar.h.
+.SS "#define DTCNOV   62"
+.PP
+Definition at line 85 of file mbk_sysvar.h.
+.SS "#define DTCOCT   61"
+.PP
+Definition at line 84 of file mbk_sysvar.h.
+.SS "#define DTCSEP   60"
+.PP
+Definition at line 83 of file mbk_sysvar.h.
+.SS "#define GCKIEEND   111"
+.PP
+Definition at line 134 of file mbk_sysvar.h.
+.SS "#define GCOOKIE   110"
+.PP
+Definition at line 133 of file mbk_sysvar.h.
+.SS "#define GDET   150"
+.PP
+Definition at line 173 of file mbk_sysvar.h.
+.SS "#define GDETDEL   126"
+.PP
+Definition at line 149 of file mbk_sysvar.h.
+.SS "#define GDETF   129"
+.PP
+Definition at line 152 of file mbk_sysvar.h.
+.SS "#define GDETL0   149"
+.PP
+Definition at line 172 of file mbk_sysvar.h.
+.SS "#define GDETL1   140"
+.PP
+Definition at line 163 of file mbk_sysvar.h.
+.SS "#define GDETL2   141"
+.PP
+Definition at line 164 of file mbk_sysvar.h.
+.SS "#define GDETL3   142"
+.PP
+Definition at line 165 of file mbk_sysvar.h.
+.SS "#define GDETL4   143"
+.PP
+Definition at line 166 of file mbk_sysvar.h.
+.SS "#define GDETL5   144"
+.PP
+Definition at line 167 of file mbk_sysvar.h.
+.SS "#define GDETL6   145"
+.PP
+Definition at line 168 of file mbk_sysvar.h.
+.SS "#define GDETL7   146"
+.PP
+Definition at line 169 of file mbk_sysvar.h.
+.SS "#define GDETL8   147"
+.PP
+Definition at line 170 of file mbk_sysvar.h.
+.SS "#define GDETL9   148"
+.PP
+Definition at line 171 of file mbk_sysvar.h.
+.SS "#define GDETM   128"
+.PP
+Definition at line 151 of file mbk_sysvar.h.
+.SS "#define GDETNAX   123"
+.PP
+Definition at line 146 of file mbk_sysvar.h.
+.SS "#define GDETNST   139"
+.PP
+Definition at line 162 of file mbk_sysvar.h.
+.SS "#define GDETOP   127"
+.PP
+Definition at line 150 of file mbk_sysvar.h.
+.SS "#define GDETS1   130"
+.PP
+Definition at line 153 of file mbk_sysvar.h.
+.SS "#define GDETS2   131"
+.PP
+Definition at line 154 of file mbk_sysvar.h.
+.SS "#define GDETS3   132"
+.PP
+Definition at line 155 of file mbk_sysvar.h.
+.SS "#define GDETS4   133"
+.PP
+Definition at line 156 of file mbk_sysvar.h.
+.SS "#define GDETS5   134"
+.PP
+Definition at line 157 of file mbk_sysvar.h.
+.SS "#define GDETS6   135"
+.PP
+Definition at line 158 of file mbk_sysvar.h.
+.SS "#define GDETS7   136"
+.PP
+Definition at line 159 of file mbk_sysvar.h.
+.SS "#define GDETS8   137"
+.PP
+Definition at line 160 of file mbk_sysvar.h.
+.SS "#define GDETS9   138"
+.PP
+Definition at line 161 of file mbk_sysvar.h.
+.SS "#define GDETSUSP   124"
+.PP
+Definition at line 147 of file mbk_sysvar.h.
+.SS "#define GDETUR   122"
+.PP
+Definition at line 145 of file mbk_sysvar.h.
+.SS "#define GDETXMPT   125"
+.PP
+Definition at line 148 of file mbk_sysvar.h.
+.SS "#define GLOCKIE   27"
+.PP
+Definition at line 50 of file mbk_sysvar.h.
+.SS "#define GONAX   153"
+.PP
+Definition at line 176 of file mbk_sysvar.h.
+.SS "#define IDLEBYE   45"
+.PP
+Definition at line 68 of file mbk_sysvar.h.
+.SS "#define IDLEWRN   44"
+.PP
+Definition at line 67 of file mbk_sysvar.h.
+.SS "#define IDLOVR   12"
+.PP
+Definition at line 35 of file mbk_sysvar.h.
+.SS "#define IDLZAP   10"
+.PP
+Definition at line 33 of file mbk_sysvar.h.
+.SS "#define IDLZAPT   11"
+.PP
+Definition at line 34 of file mbk_sysvar.h.
+.SS "#define INVOFF   72"
+.PP
+Definition at line 95 of file mbk_sysvar.h.
+.SS "#define INVON   71"
+.PP
+Definition at line 94 of file mbk_sysvar.h.
+.SS "#define KGDADR   30"
+.PP
+Definition at line 53 of file mbk_sysvar.h.
+.SS "#define KGDAGE   32"
+.PP
+Definition at line 55 of file mbk_sysvar.h.
+.SS "#define KGDCOM   29"
+.PP
+Definition at line 52 of file mbk_sysvar.h.
+.SS "#define KGDNAM   28"
+.PP
+Definition at line 51 of file mbk_sysvar.h.
+.SS "#define KGDPASS   35"
+.PP
+Definition at line 58 of file mbk_sysvar.h.
+.SS "#define KGDPHO   31"
+.PP
+Definition at line 54 of file mbk_sysvar.h.
+.SS "#define KGDPSS   34"
+.PP
+Definition at line 57 of file mbk_sysvar.h.
+.SS "#define KGDSEX   33"
+.PP
+Definition at line 56 of file mbk_sysvar.h.
+.SS "#define LIVEPH   8"
+.PP
+Definition at line 31 of file mbk_sysvar.h.
+.SS "#define LNCHGW1   49"
+.PP
+Definition at line 72 of file mbk_sysvar.h.
+.SS "#define LNCHGW2   50"
+.PP
+Definition at line 73 of file mbk_sysvar.h.
+.SS "#define LNCHGW3   51"
+.PP
+Definition at line 74 of file mbk_sysvar.h.
+.SS "#define LOFAUD   18"
+.PP
+Definition at line 41 of file mbk_sysvar.h.
+.SS "#define LONAUD   17"
+.PP
+Definition at line 40 of file mbk_sysvar.h.
+.SS "#define LSTHDR   154"
+.PP
+Definition at line 177 of file mbk_sysvar.h.
+.SS "#define LSTLIN   155"
+.PP
+Definition at line 178 of file mbk_sysvar.h.
+.SS "#define MINPLUR   79"
+.PP
+Definition at line 102 of file mbk_sysvar.h.
+.SS "#define MINSING   78"
+.PP
+Definition at line 101 of file mbk_sysvar.h.
+.SS "#define NOCRDBYE   39"
+.PP
+Definition at line 62 of file mbk_sysvar.h.
+.SS "#define NOCREDS   38"
+.PP
+Definition at line 61 of file mbk_sysvar.h.
+.SS "#define NOCTIM   40"
+.PP
+Definition at line 63 of file mbk_sysvar.h.
+.SS "#define NOCTIMBYE   41"
+.PP
+Definition at line 64 of file mbk_sysvar.h.
+.SS "#define NODTIM   42"
+.PP
+Definition at line 65 of file mbk_sysvar.h.
+.SS "#define NODTIMBYE   43"
+.PP
+Definition at line 66 of file mbk_sysvar.h.
+.SS "#define NOMF   106"
+.PP
+Definition at line 129 of file mbk_sysvar.h.
+.SS "#define NOMM   105"
+.PP
+Definition at line 128 of file mbk_sysvar.h.
+.SS "#define PAGEKEY   22"
+.PP
+Definition at line 45 of file mbk_sysvar.h.
+.SS "#define PAGEOK   98"
+.PP
+Definition at line 121 of file mbk_sysvar.h.
+.SS "#define PAGFMT   82"
+.PP
+Definition at line 105 of file mbk_sysvar.h.
+.SS "#define PAGL2M   92"
+.PP
+Definition at line 115 of file mbk_sysvar.h.
+.SS "#define PAGMOM   88"
+.PP
+Definition at line 111 of file mbk_sysvar.h.
+.SS "#define PAGMSG1   94"
+.PP
+Definition at line 117 of file mbk_sysvar.h.
+.SS "#define PAGMSG2   96"
+.PP
+Definition at line 119 of file mbk_sysvar.h.
+.SS "#define PAGNON   87"
+.PP
+Definition at line 110 of file mbk_sysvar.h.
+.SS "#define PAGNOT1   95"
+.PP
+Definition at line 118 of file mbk_sysvar.h.
+.SS "#define PAGNOT2   97"
+.PP
+Definition at line 120 of file mbk_sysvar.h.
+.SS "#define PAGNPS   102"
+.PP
+Definition at line 125 of file mbk_sysvar.h.
+.SS "#define PAGNPST   103"
+.PP
+Definition at line 126 of file mbk_sysvar.h.
+.SS "#define PAGOFF   91"
+.PP
+Definition at line 114 of file mbk_sysvar.h.
+.SS "#define PAGSTOK   104"
+.PP
+Definition at line 127 of file mbk_sysvar.h.
+.SS "#define PAGTOF   84"
+.PP
+Definition at line 107 of file mbk_sysvar.h.
+.SS "#define PAGTOK   85"
+.PP
+Definition at line 108 of file mbk_sysvar.h.
+.SS "#define PAGTON   83"
+.PP
+Definition at line 106 of file mbk_sysvar.h.
+.SS "#define PAGTST   86"
+.PP
+Definition at line 109 of file mbk_sysvar.h.
+.SS "#define PALLKEY   24"
+.PP
+Definition at line 47 of file mbk_sysvar.h.
+.SS "#define PALLNC   107"
+.PP
+Definition at line 130 of file mbk_sysvar.h.
+.SS "#define PAUSE   37"
+.PP
+Definition at line 60 of file mbk_sysvar.h.
+.SS "#define PGOVKEY   23"
+.PP
+Definition at line 46 of file mbk_sysvar.h.
+.SS "#define PGSYSOP   101"
+.PP
+Definition at line 124 of file mbk_sysvar.h.
+.SS "#define PSWEXP   21"
+.PP
+Definition at line 44 of file mbk_sysvar.h.
+.SS "#define RCFTR   156"
+.PP
+Definition at line 179 of file mbk_sysvar.h.
+.SS "#define RCNTHLP   161"
+.PP
+Definition at line 184 of file mbk_sysvar.h.
+.SS "#define REMSERR   151"
+.PP
+Definition at line 174 of file mbk_sysvar.h.
+.SS "#define SEXF   90"
+.PP
+Definition at line 113 of file mbk_sysvar.h.
+.SS "#define SEXM   89"
+.PP
+Definition at line 112 of file mbk_sysvar.h.
+.SS "#define SHTDW1   46"
+.PP
+Definition at line 69 of file mbk_sysvar.h.
+.SS "#define SHTDW2   47"
+.PP
+Definition at line 70 of file mbk_sysvar.h.
+.SS "#define SHTDW3   48"
+.PP
+Definition at line 71 of file mbk_sysvar.h.
+.SS "#define SVRATE   13"
+.PP
+Definition at line 36 of file mbk_sysvar.h.
+.SS "#define TIME   64"
+.PP
+Definition at line 87 of file mbk_sysvar.h.
+.SS "#define TNLMAX   19"
+.PP
+Definition at line 42 of file mbk_sysvar.h.
+.SS "#define UNKUSR   157"
+.PP
+Definition at line 180 of file mbk_sysvar.h.
+.SS "#define URCFTR   160"
+.PP
+Definition at line 183 of file mbk_sysvar.h.
+.SS "#define URINVS   93"
+.PP
+Definition at line 116 of file mbk_sysvar.h.
+.SS "#define USRHDR   158"
+.PP
+Definition at line 181 of file mbk_sysvar.h.
+.SS "#define USRLIN   159"
+.PP
+Definition at line 182 of file mbk_sysvar.h.
+.SS "#define UXRF1   116"
+.PP
+Definition at line 139 of file mbk_sysvar.h.
+.SS "#define UXRF2   117"
+.PP
+Definition at line 140 of file mbk_sysvar.h.
+.SS "#define UXRF3   118"
+.PP
+Definition at line 141 of file mbk_sysvar.h.
+.SS "#define UXRF3A   119"
+.PP
+Definition at line 142 of file mbk_sysvar.h.
+.SS "#define UXRF4   120"
+.PP
+Definition at line 143 of file mbk_sysvar.h.
+.SS "#define UXRF5   121"
+.PP
+Definition at line 144 of file mbk_sysvar.h.
+.SS "#define VOICEPH   9"
+.PP
+Definition at line 32 of file mbk_sysvar.h.
+.SS "#define W2CLR   36"
+.PP
+Definition at line 59 of file mbk_sysvar.h.
+.SS "#define WHOHDR   65"
+.PP
+Definition at line 88 of file mbk_sysvar.h.
+.SS "#define WHOLINE1   66"
+.PP
+Definition at line 89 of file mbk_sysvar.h.
+.SS "#define WHOLINE2   67"
+.PP
+Definition at line 90 of file mbk_sysvar.h.
+.SS "#define WHOLON   68"
+.PP
+Definition at line 91 of file mbk_sysvar.h.
+.SS "#define WHONIX   70"
+.PP
+Definition at line 93 of file mbk_sysvar.h.
+.SS "#define WHOSUP   69"
+.PP
+Definition at line 92 of file mbk_sysvar.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

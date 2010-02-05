@@ -1,0 +1,176 @@
+.TH "sysstruct.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+sysstruct.h \- System-wide statistics and data types.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBemuqueue\fP"
+.br
+.RI "\fIUser emulation structure. \fP"
+.ti -1c
+.RI "struct \fBmonitor\fP"
+.br
+.RI "\fIUser monitoring structure. \fP"
+.ti -1c
+.RI "struct \fBsysvar\fP"
+.br
+.RI "\fISystem variables blocks. \fP"
+.ti -1c
+.RI "struct \fBclsstats\fP"
+.br
+.ti -1c
+.RI "struct \fBttystats\fP"
+.br
+.ti -1c
+.RI "struct \fBbaudstats\fP"
+.br
+.ti -1c
+.RI "struct \fBusagestats\fP"
+.br
+.ti -1c
+.RI "struct \fBmodstats\fP"
+.br
+.ti -1c
+.RI "struct \fBevent\fP"
+.br
+.ti -1c
+.RI "struct \fBtop\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: sysstruct.h,v 1.4 2003/09/27 20:32:05 alexios Exp $'"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+System-wide statistics and data types. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+Documentation for this header file is relatively scarce, since it'll soon be undergoing many changes. The file contains global data structures to store BBS state and global settings.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     sysstruct.h                                                  **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, July 94                                                   **
+ **  PURPOSE:  Define system structures, system variable structs, etc       **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: sysstruct.h,v 1.4 2003/09/27 20:32:05 alexios Exp $
+ *
+ * $Log: sysstruct.h,v $
+ * Revision 1.4  2003/09/27 20:32:05  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.6  1998/12/27 15:19:19  alexios
+ * Added magic number fields etc.
+ *
+ * Revision 0.5  1998/08/14 11:23:21  alexios
+ * Increased width of monitor.channel to accommodate a full
+ * user name for the new modus operandi of the MONITOR command.
+ *
+ * Revision 0.4  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.3  1997/11/05 10:52:05  alexios
+ * Removed SVR_SOPAUD. With the new auditing scheme, this is
+ * obsolete; the operator has far more features than just
+ * turning auditing notification on and off.
+ *
+ * Revision 0.2  1997/11/03 00:29:40  alexios
+ * Made emuqueue and monitor volatile.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBsysstruct.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define EVF_ASAP   0x0008"
+.PP
+Definition at line 263 of file sysstruct.h.
+.SS "#define EVF_NOW   0x0010"
+.PP
+Definition at line 264 of file sysstruct.h.
+.SS "#define EVF_ONLYONCE   0x0001"
+.PP
+Definition at line 260 of file sysstruct.h.
+.SS "#define EVF_UNIQUE   0x0002"
+.PP
+Definition at line 261 of file sysstruct.h.
+.SS "#define EVF_WARN   0x0004"
+.PP
+Definition at line 262 of file sysstruct.h.
+.SS "#define RCS_VER   '$Id: sysstruct.h,v 1.4 2003/09/27 20:32:05 alexios Exp $'"
+.PP
+Definition at line 79 of file sysstruct.h.
+.SS "#define SVR_ANSIASK   0x00000002"
+.PP
+Definition at line 211 of file sysstruct.h.
+.SS "#define SVR_ANSIOFF   0x00000000"
+.PP
+Definition at line 209 of file sysstruct.h.
+.SS "#define SVR_ANSION   0x00000001"
+.PP
+Definition at line 210 of file sysstruct.h.
+.SS "#define SVR_STARTANSI   0x3"
+.PP
+Definition at line 208 of file sysstruct.h.
+.SS "#define SYSVAR_MAGIC   'SVAR'"
+.PP
+Definition at line 205 of file sysstruct.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

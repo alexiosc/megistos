@@ -1,0 +1,39 @@
+.TH "User sexes (USX_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+User sexes (USX_x) \- User sexes.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBUSX_MALE\fP   'M'		/**< User is male. */"
+.br
+.RI "\fIUser is male. \fP"
+.ti -1c
+.RI "#define \fBUSX_FEMALE\fP   'F'		/**< User is female. */"
+.br
+.RI "\fIUser is female. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User sexes. These flags give a user's sex. We take the prude approach and only define the two biological sexes. Feel free to make any additions yourself nd send us a patch for the sheer heck of it.
+.PP
+.IP "\(bu" 2
+\fCUSX_MALE\fP. User is male.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUSX_FEMALE\fP. User is female. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define USX_FEMALE   'F'		/**< User is female. */"
+.PP
+User is female. Definition at line 676 of file useracc.h.
+.SS "#define USX_MALE   'M'		/**< User is male. */"
+.PP
+User is male. Definition at line 674 of file useracc.h.

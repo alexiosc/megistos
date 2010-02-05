@@ -1,0 +1,38 @@
+.TH "top" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+top \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBlabel\fP [40]"
+.br
+.ti -1c
+.RI "char \fBscorestg\fP [16]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBscore\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "char \fBtop::label\fP[40]"
+.PP
+Definition at line 268 of file sysstruct.h.
+.SS "\fBuint32\fP \fBtop::score\fP"
+.PP
+Definition at line 270 of file sysstruct.h.
+.SS "char \fBtop::scorestg\fP[16]"
+.PP
+Definition at line 269 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

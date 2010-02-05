@@ -1,0 +1,612 @@
+/*****************************************************************************\
+ **                                                                         **
+ **  FILE:     emud (orig. ttysnoops)                                       **
+ **  AUTHORS:  Alexios (hack only)                                          **
+ **  REVISION: B, February 95                                               **
+ **  PURPOSE:  The new emulation daemon                                     **
+ **  NOTES:    This is a hack based on ttysnoop 0.12 alpha by Carl          **
+ **            Declerck. Copyrights etc belong to the author.               **
+ **                                                                         **
+ **            Emud uses a pseudo-tty to emulate a user session. It must    **
+ **            be run by the super-user, for obvious reasons of security.   **
+ **            Once it forks, it spawns bbslogin. Hence it's execl()'d by   **
+ **            bbsgetty to handle the line once a connection is made.       **
+ **                                                                         **
+ **            All the output sent to the user is logged in                 **
+ **            /bbs/etc/.log-tty*. A FIFO (/bbs/etc/.emu-tty*) is provided  **
+ **            for emulating the user's input (writing to the FIFO has the  **
+ **            same effect as the user typing at their keyboard). The PID   **
+ **            of the daemon is stored in /bbs/etc/.emud-tty*.pid.          **
+ **                                                                         **
+ **            Environment variables passed on: CHANNEL contains the tty    **
+ **            where the user logged from (without the "/dev/" string).     **
+ **            EMUINP contains the pseudo-tty used by the daemon. EMUINP    **
+ **            is also the controlling tty of all subsequent processes.     **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+\*****************************************************************************/
+
+/*
+ * $Id: emud.c-old,v 2.0 2004/09/13 19:44:53 alexios Exp $
+ *
+ * $Log: emud.c-old,v $
+ * Revision 2.0  2004/09/13 19:44:53  alexios
+ * Stepped version to recover CVS repository after near-catastrophic disk
+ * crash.
+ *
+ * Revision 1.3  2001/04/22 14:49:07  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 1.2  1997/11/06 20:16:19  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 1.1  1997/11/03 00:48:51  alexios
+ * Trimmed includes so that we don't read in useless header files.
+ * Beautified code a bit. Added a few comments. Added code to read
+ * in translation tables from disk using function readxlation().
+ * Added code to translate text on the fly for both user and
+ * any emulating operators.
+ *
+ * Revision 1.0  1997/09/14 18:35:09  alexios
+ * Initial revision
+ *
+ *
+ */
+
+
+#ifndef RCS_VER 
+#define RCS_VER "$Id: emud.c-old,v 2.0 2004/09/13 19:44:53 alexios Exp $"
+#endif
+
+
+/*
+	ttysnoops.c
+	
+	ttysnoops sets up a pseudo-tty for the specified program and
+	redirects its stdin/stdout/stderr to/from the current ctty 
+	and a specified snoop device (usually another tty or a socket)
+	
+	v0.00	4-1-94 Carl Declerck	- first version
+	v0.01	6-1-94	     ""		- added /etc/snooptab file
+	v0.02	9-1-94	     ""		- added socket support
+	v0.10	8-8-94	     ""		- various bug fixes
+	v0.11	9-8-94       ""		- password authentication added
+	v0.11a 23-8-94 Ulrich Callmeier - shadow support hacked in
+	v0.12	6-9-94 Carl Declerck	- added suspend/resume key
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include "config.h"
+#include "bbs.h"
+
+
+#define BUFF_SIZE	16384
+
+char buff[BUFF_SIZE+1];
+
+int    authpid = -1;
+int    emuin = -1;
+int    fdmax = 0;
+int    pid;
+char   ptynam[32];
+char   fname[128], tty[32];
+char   relogfn[256];
+char   xlation[NUMXLATIONS][256];
+char   revxlation[NUMXLATIONS][256];
+struct emuqueue *emuq;
+struct stat st;
+
+
+#define TTY_STORE	16
+
+static struct termios orig_tty_state[TTY_STORE];
+static int sttyfds[TTY_STORE];
+
+
+
+void
+storepid()
+{
+  FILE *fp;
+  char fname[256];
+  
+  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  if((fp=fopen(fname,"w"))==NULL)return;
+  fprintf(fp,"%d",getpid());
+  fclose(fp);
+}
+
+
+void
+notifybbsd()
+{
+  FILE *fp;
+  
+  if((fp=fopen(BBSDPIPEFILE,"w"))==NULL)return;
+  fprintf(fp,"getty %s %d\n",tty,getpid());
+  fclose(fp);
+}
+
+
+void errorf (char *fmt, ...)
+{
+  va_list args;
+	
+  va_start (args, fmt);
+  fprintf(stderr,"emud: ");
+  vfprintf (stderr, fmt, args);
+  exit (1);
+}
+
+
+
+char *leafname (char *path)
+{
+  int i = 0, j;
+	
+  for (j = 0; path[j]; j++) if (path[j] == '/') i = j + 1;
+  return (path + i);
+}
+
+
+
+/* init the stty store array */
+
+void stty_initstore (void)
+{
+  int i;
+	
+  for (i = 0; i < TTY_STORE; i++) sttyfds[i] = -1;
+}
+
+/* set tty on fd into raw mode */
+
+int stty_raw (int fd)
+{
+  struct termios tty_state;
+  int i;
+	
+  if (tcgetattr(fd, &tty_state) < 0) return (-1);
+  
+  for (i = 0; i < TTY_STORE; i++)
+    if (sttyfds[i] == -1) {
+      orig_tty_state[i] = tty_state;
+      sttyfds[i] = fd;
+      break;
+    }
+	
+  tty_state.c_lflag &= ~(ICANON | IEXTEN | ISIG | ECHO);
+  tty_state.c_iflag &= ~(ICRNL | INPCK | ISTRIP | IXON | BRKINT);
+  tty_state.c_oflag &= ~OPOST;
+  tty_state.c_cflag |= CS8;
+	
+  tty_state.c_cc[VMIN]  = 1;
+  tty_state.c_cc[VTIME] = 0;
+	
+  if (tcsetattr(fd, TCSAFLUSH, &tty_state) < 0) return (-1);
+  
+  return (0);
+}
+
+
+/* restore all altered ttys to their original state */
+
+void stty_orig (void)
+{
+  int i;
+
+  for (i = 0; i < TTY_STORE; i++)
+    if (sttyfds[i] != -1) {
+      tcsetattr (sttyfds[i], TCSAFLUSH, &orig_tty_state[i]);
+      sttyfds[i] = -1;
+    }
+}
+
+
+
+
+
+void
+makeshm(char *tty)
+{
+  char fname[256];
+  FILE *fp;
+  int shmid=0;
+  struct shmid_ds buf;
+  struct passwd *pass=getpwnam(BBSUSERNAME);
+
+  /* Create shared memory */
+
+  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  if((shmid=shmget(ftok(fname,'E'),16384,IPC_CREAT|IPC_EXCL|0660))==-1)return;
+  sprintf(fname,"%s/.shmid-%s",BBSETCDIR,tty);
+
+  /* Write shared memory ID to disk */
+
+  if((fp=fopen(fname,"w"))==NULL)return;
+  fprintf(fp,"%012d",shmid);
+  fclose(fp);
+
+  /* Attach to shared memory */
+
+  if((emuq=(struct emuqueue *)shmat(shmid,NULL,0))==NULL){
+    errorf("unable to attach shared memory.\n");
+  }
+
+  /* Create the emuqueue data structure */
+
+  bzero(emuq,sizeof(struct emuqueue));
+  emuq->xlation=-1;
+
+  /* Make bbs:bbs the owner of the shared memory block */
+
+  if(shmctl(shmid,IPC_STAT,&buf)<0){
+    errorf("unable to IPC_STAT shared memory (errno=%d)",errno);
+  } else {
+    buf.shm_perm.uid=pass->pw_uid;
+    buf.shm_perm.gid=pass->pw_gid;
+
+    if(shmctl(shmid,IPC_SET,&buf)<0){
+      errorf("unable to IPC_SET shared memory (errno=%d)",errno);
+    }
+  }
+
+  /* Mark the block for destruction when we're done with it. */
+
+  shmctl(shmid,IPC_RMID,&buf);
+
+
+  /* Fix file permissions */
+
+  chown(fname,pass->pw_uid,pass->pw_gid);
+  sprintf(fname,"%s/emud-%s.pid",BBSETCDIR,tty);
+  chown(fname,pass->pw_uid,pass->pw_gid);
+}
+
+
+void
+gracefulexit()
+{
+  char majst[32], minst[32], user[32];
+  int baud;
+  FILE *fp;
+
+  putchar(0);
+  getlinestatus(tty,majst,minst,&baud,user);
+  initmodule(INITOUTPUT|INITSYSVARS|INITTTYNUM);
+
+  sprintf(fname,"%s/.status-%s",CHANDEFDIR,tty);
+  
+  if((fp=fopen(fname,"w"))==NULL){
+    fatal("emud","Cannot open status file %s for writing.",fname,NULL);
+  }
+
+  fprintf(fp,"%s OK 0 [NO-USER]\n",majst);
+  fclose(fp);
+
+  /*  if(sysvar->lofaud && user[0]!='[')
+    audit(tty,AUS_DISCON,AUD_DISCON,baudstg(baud)); */
+
+  sprintf(fname,"%s/%s",ONLINEDIR,user);
+  unlink(fname);
+  sprintf(fname,"%s/[SIGNUP-%s]",ONLINEDIR,tty);
+  unlink(fname);
+
+  sprintf(fname,"%s/_%s",ONLINEDIR,user);
+  fp=fopen(fname,"w");
+  fclose(fp);
+
+  kill(-getpid(),SIGKILL);
+  exit(0);
+}
+
+
+
+/* find & open a pty to be used by the pty-master */
+
+int find_ptyxx (char *ptyname)
+{
+  int fd, i, j;
+  static char *s1 = "srpq", *s2 = "fedcba9876543210";
+  
+  strcpy (ptyname, "/dev/ptyxx");
+  
+  for (i = 0; s1[i]; i++){
+    ptyname[8] = s1[i];
+    
+    for (j = 0; s2[j]; j++){
+      ptyname[9] = s2[j];
+      
+      if ((fd = open(ptyname, O_RDWR)) >= 0){
+	ptyname[5] = 't';
+	return (fd);
+      }
+      
+      if (errno == ENOENT) return (-1);
+    }
+  }
+  
+  return (-1);
+}
+
+/* find & open a pty (tty) to be used by pty-client */
+
+int find_ttyxx (char *ttyname, int ptyfd)
+{
+  struct group *grp;
+  int gid, fd;
+  
+  if ((grp = getgrnam("tty")) != NULL) gid = grp->gr_gid;
+  else gid = -1;
+  
+  chown (ttyname, getuid(), gid);
+  chmod (ttyname, S_IRUSR | S_IWUSR | S_IWGRP);
+  
+  if ((fd = open(ttyname, O_RDWR)) >= 0) return (fd);
+  
+  close (ptyfd);
+  return (-1);
+}
+
+/* fork off the pty-client and redirect its stdin/out/err to the pty */
+
+int fork_pty (int *ptyfd, char *ttynam)
+{
+  struct termios term;
+  struct winsize twin;
+  int    ttyfd;
+  char   name[32];
+  
+  tcgetattr (STDIN_FILENO, &term);
+  ioctl (STDIN_FILENO, TIOCGWINSZ, (char *) &twin);
+  
+  if ((*ptyfd = find_ptyxx(name)) < 0)
+    errorf ("No free pty.\n");
+  
+  strcpy (ttynam, leafname(name));
+  setenv("EMUPTY",ttynam,1);
+  
+  if ((pid = fork()) < 0)
+    errorf ("Can't fork.\n");
+
+  if (pid == 0)       /* child */
+    {
+      if (setsid() < 0)
+	errorf ("setsid failed.\n");
+      
+      if ((ttyfd = find_ttyxx(name, *ptyfd)) < 0)
+	errorf ("can't open tty.\n");
+      
+      close (*ptyfd);
+      
+      if (tcsetattr(ttyfd, TCSANOW, &term) < 0)
+	errorf ("can't set termios.\n");
+      
+      if (ioctl(ttyfd, TIOCSWINSZ, &twin) < 0)
+	errorf ("can't set winsize.\n");
+      
+      if (dup2(ttyfd, STDIN_FILENO) != STDIN_FILENO)
+	errorf ("can't dup2 into stdin.\n");
+      
+      if (dup2(ttyfd, STDOUT_FILENO) != STDOUT_FILENO)
+	errorf ("can't dup2 into stdout.\n");
+      
+      if (dup2(ttyfd, STDERR_FILENO) != STDERR_FILENO)
+	errorf ("can't dup2 into stderr.\n");
+      
+      if (ttyfd > STDERR_FILENO)
+	close (ttyfd);
+    }
+  
+  return (pid);
+}		
+
+
+void
+makepipe()
+{
+  struct stat s;
+  char fname[256];
+  char command[256];
+
+  sprintf(fname,"%s/.injoth-%s",ONLINEDIR,tty);
+  unlink(fname);
+
+  sprintf(fname,"%s/.emu-%s",EMUFIFODIR,tty);
+  if(!stat(fname,&s))return;
+  sprintf(command,"mkfifo -m 660 %s; chown bbs.bbs %s",fname,fname);
+  system(command);
+}
+
+
+void
+mkrevxlation()
+{
+  int n,i;
+  for(n=0;n<NUMXLATIONS;n++)for(i=0;i<255;i++){
+    revxlation[n][(int)(xlation[n][i])]=i;
+  }
+}
+
+
+void
+readxlation()
+{
+  FILE *fp;
+  if((fp=fopen(XLATIONFILE,"r"))==NULL){
+    int i=errno;
+    errorf("unable to open %s (errno=%d)\n",XLATIONFILE,i);
+  }
+  if(fread(xlation,sizeof(xlation),1,fp)!=1){
+    int i=errno;
+    errorf("unable to read %s (errno=%d)\n",XLATIONFILE,i);
+  }
+
+  mkrevxlation();
+  fclose(fp);
+}
+
+
+
+/* main program */
+
+int main (int argc, char *argv[])
+{
+  fd_set readset;
+  int ptyfd, n, sel = 0;
+
+  if (getuid()) errorf("Only root can execute this daemon.\n");
+  if (!isatty(STDIN_FILENO)) errorf("stdin is not a tty.\n");
+  
+
+  /* do init stuff */
+  
+  readxlation();
+  strcpy (tty, leafname(ttyname(STDIN_FILENO)));
+  setenv("CHANNEL",tty,1);
+  setenv("BAUD","0",0);
+  storepid();
+  makeshm(tty);
+  makepipe();
+
+
+  /*  signal (SIGPIPE, gracefulexit); */
+  /*  signal (SIGCHLD, gracefulexit); */
+  signal (SIGHUP, gracefulexit);
+  signal (SIGINT, gracefulexit);
+  signal (SIGQUIT, gracefulexit);
+  signal (SIGUSR1, readxlation);
+
+  stty_initstore ();
+  atexit (stty_orig);
+  atexit(gracefulexit);
+
+  
+  /* fork off the client and load the new image */
+
+relogon:
+  
+  if(fork_pty(&ptyfd, ptynam)==0){
+
+    /* exec the real pty-client program */
+		
+    execl (BINDIR"/bbslogin","bbslogin","-",NULL);
+      
+    errorf ("can't exec "BINDIR"/bbslogin\n");
+  }
+  
+  notifybbsd();
+	
+  /* put stdin into raw mode */
+
+  stty_raw (STDIN_FILENO);
+	
+  /* calc (initial) max file descriptor to use in select() */
+		
+  fdmax = max(STDIN_FILENO, ptyfd);
+
+  /* open snoop-device and put it into raw mode */
+		
+  sprintf(fname,"%s/.emu-%s",BBSETCDIR,tty);
+  if((emuin=open(fname,O_RDONLY|O_NDELAY))<0)
+    errorf ("can't open input emulation FIFO %s\n", fname);
+  
+  fdmax = max(fdmax, emuin);
+
+  sprintf(relogfn,"%s/.relogon-%s",ONLINEDIR,tty);
+	
+  while (1) {
+    if(!stat(relogfn,&st)){
+      bbsdcommand("relogon",tty,"");
+      unlink(relogfn);
+      if(!kill(pid,SIGKILL)) wait(NULL);
+      stty_orig();
+      goto relogon;
+    }
+    
+    do {
+      struct timeval tv;
+      tv.tv_sec=0;
+      tv.tv_usec=500000;
+      FD_ZERO (&readset);
+      FD_SET (STDIN_FILENO, &readset);
+      FD_SET (ptyfd, &readset);
+      FD_SET (emuin, &readset);
+
+      sel = select(fdmax + 1, &readset, NULL, NULL, &tv);
+    } while (sel == -1);
+
+    if(sel==0)continue;
+
+    if (sel == -1 /* && errno != EINTR */ ){
+      printf ("select failed; errno = %d\n", errno);
+      fflush(stdout);
+    }
+
+    /* Input FROM the USER goes to BBS */
+		
+    if (FD_ISSET(STDIN_FILENO, &readset)) {
+      n = read(STDIN_FILENO, buff, BUFF_SIZE);
+      if(emuq->xlation>0){
+	buff[n]=0;
+	faststgxlate(buff,xlation[emuq->xlation]);
+      }
+      write (ptyfd, buff, n);
+      buff[1]=buff[0]; buff[0]='['; buff[2]=']'; write(ptyfd,buff,3);
+    }
+
+    /* Input FROM the EMULATOR goes to the BBS */
+		
+    if ((emuin >= 0) && FD_ISSET(emuin, &readset)) {
+      n = read(emuin, buff, BUFF_SIZE);
+      write (ptyfd, buff, n);
+    }
+
+
+    /* Output TO the USER goes to EMU QUEUE *AND* USER */
+		
+    if (FD_ISSET(ptyfd, &readset)) {
+      register int i;
+      if ((n = read(ptyfd, buff, BUFF_SIZE)) < 1) exit (0);
+
+      if(emuq->xlation>0){
+	buff[n]=0;
+	faststgxlate(buff,xlation[emuq->xlation]);
+      }
+
+      write (STDOUT_FILENO, buff, n);
+
+      for(i=0;i<n;i++){
+	emuq->queue[emuq->index]=buff[i];
+	emuq->index=(emuq->index+1)%sizeof(emuq->queue);
+      }
+
+    }
+  }
+}

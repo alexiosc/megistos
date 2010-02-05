@@ -1,0 +1,61 @@
+.TH "shmuserrec" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+shmuserrec \- Per-user shared memory segment.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <useracc.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBuseracc_t\fP \fBacc\fP"
+.br
+.RI "\fIUser's account. \fP"
+.ti -1c
+.RI "\fBonlinerec_t\fP \fBonl\fP"
+.br
+.RI "\fIUser's online record. \fP"
+.ti -1c
+.RI "char \fBaux\fP [2048]"
+.br
+.RI "\fIGeneric shared scratch space. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Per-user shared memory segment. 
+
+This structure is allocated when a user logs in. It is shared throughout the system and contains the user's account (\fC\fBuseracc_t\fP\fP), the online record, \fC\fBonlinerec_t\fP\fP and a 2 kbyte free-for-all, generic scratch buffer.
+.PP
+For each runtime, there are two pointers to such structures: \fCthisshm\fP and \fCothrshm\fP. The former holds the current user's particulars. The latter is normally unused, but is instantiated by function in this part of the API to point to some other user's shared structure. This is used to allow transactions between users.
+.PP
+There are six macro shortcuts to access the three fields of each of the two shared memory segments.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBthisuseracc\fP, \fBothruseracc\fP, \fBthisuseronl\fP, \fBothruseronl\fP, \fB_thisuseraux\fP, \fB_othruseraux\fP. 
+.RE
+.PP
+
+.PP
+Definition at line 1189 of file useracc.h.
+.SH "Field Documentation"
+.PP 
+.SS "\fBuseracc_t\fP \fBshmuserrec::acc\fP"
+.PP
+User's account. Definition at line 1190 of file useracc.h.
+.SS "char \fBshmuserrec::aux\fP[2048]"
+.PP
+Generic shared scratch space. Definition at line 1192 of file useracc.h.
+.SS "\fBonlinerec_t\fP \fBshmuserrec::onl\fP"
+.PP
+User's online record. Definition at line 1191 of file useracc.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

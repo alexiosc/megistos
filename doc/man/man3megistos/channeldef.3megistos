@@ -1,0 +1,107 @@
+.TH "channeldef" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+channeldef \- Channel definition.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <ttynum.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBttyname\fP [16]"
+.br
+.RI "\fIName of the device, minus \fC'/dev/'\fP. \fP"
+.ti -1c
+.RI "char \fBconfig\fP [32]"
+.br
+.RI "\fIConfig file for \fCbbsgetty\fP. \fP"
+.ti -1c
+.RI "unsigned int \fBchannel\fP"
+.br
+.RI "\fIBBS channel number. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkey\fP"
+.br
+.RI "\fIKey required to login. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBlang\fP"
+.br
+.RI "\fIDefault language for this channel. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIChannel flags (\fCTTF_x\fP flags). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBxlation\fP"
+.br
+.RI "\fIDefault translation mode. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Channel definition. 
+
+Each channel entry in the file etc/channel.defs/CHANNELS is parsed into this structure. All of the information in the CHANNELS table is available here, too.
+.PP
+.IP "\(bu" 2
+\fCttyname\fP. The name of the device special this channel is on, minus the \fC'/dev/'\fP. For instance, the third virtual console on a Linux box is \fC'tty3'\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCconfig\fP. The name of the \fCbbsgetty\fP config file to load for this channel. Each config file corresponds to one type of hardware (one make and model of modem, serial hardware, et cetera), and prepares it for use by the BBS. In the case of a modem, for example, it sends initialisation strings, sets the bps rate, and instructs \fCbbsgetty\fP to wait for a \fCRING\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCchannel\fP. The channel number. This is printed as a hexadecimal number to keep it short and for traditional reasons: Major did it because their popular 'Galactibox' ISO bus expander had 16 slots, and there were Galacticomm multiple modems with power-of-two devices on each card, up to, I think, eight. Besides, with Major only supporting 64 (and later 256) lines, a 16x4 and then 16x16 arrangement was a good idea. Thus, bear in mind that channel \fC'20'\fP, is, in fact, channel 0x20, i.e. 32. Channels are almost always referred to in this confusing manner (i.e. without any indication of base). It is considered a good idea to avoid (if possible) using numbers such as { 1a} because they've been known to drive computer-naive users nuts.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkey\fP. The key required to allow users to login on this channel.
+.PP
+.PP
+.IP "\(bu" 2
+\fClang\fP. The default language to use for this channel. Different channels can have different languages. The reason is simple: certain encodings don't mix well with certain connections (older telnet clients, 7-bit ASCII serial connections, et cetera). It'd be a good idea to be able to display a language the users can \fIread\fP in order to login. The default language may be negative, in which case a language selection menu is presented to the user, and the default language is the absolute value of this field.
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. Flags for this channel, in the form of \fCTTF_x\fP flags ORred together. This field sets the channel's defaults and assumptions, like whether to assume that users have ANSI enabled, et cetera.
+.PP
+.PP
+.IP "\(bu" 2
+\fCxlation\fP. The default translation mode for this channel. It's here for the same reasons as the default language field, \fClang\fP. 
+.PP
+
+.PP
+Definition at line 149 of file ttynum.h.
+.SH "Field Documentation"
+.PP 
+.SS "unsigned int \fBchanneldef::channel\fP"
+.PP
+BBS channel number. Definition at line 152 of file ttynum.h.
+.SS "char \fBchanneldef::config\fP[32]"
+.PP
+Config file for \fCbbsgetty\fP. Definition at line 151 of file ttynum.h.
+.SS "\fBuint32\fP \fBchanneldef::flags\fP"
+.PP
+Channel flags (\fCTTF_x\fP flags). Definition at line 155 of file ttynum.h.
+.SS "\fBbbskey_t\fP \fBchanneldef::key\fP"
+.PP
+Key required to login. Definition at line 153 of file ttynum.h.
+.SS "\fBint32\fP \fBchanneldef::lang\fP"
+.PP
+Default language for this channel. Definition at line 154 of file ttynum.h.
+.SS "char \fBchanneldef::ttyname\fP[16]"
+.PP
+Name of the device, minus \fC'/dev/'\fP. Definition at line 150 of file ttynum.h.
+.SS "\fBint32\fP \fBchanneldef::xlation\fP"
+.PP
+Default translation mode. Definition at line 156 of file ttynum.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,80 @@
+.TH "User Mail Preference Flags (ECP_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+User Mail Preference Flags (ECP_x) \- Flags used to describe user preferences as regards private email reading.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBECP_QUOTEYES\fP   0x0001	/**< Always quote */"
+.br
+.RI "\fIAlways quote. \fP"
+.ti -1c
+.RI "#define \fBECP_QUOTEASK\fP   0x0002	/**< Ask before quoting */"
+.br
+.RI "\fIAsk before quoting. \fP"
+.ti -1c
+.RI "#define \fBECP_LOGINYES\fP   0x0004	/**< Unconditionally read mail on login */"
+.br
+.RI "\fIUnconditionally read mail on login. \fP"
+.ti -1c
+.RI "#define \fBECP_LOGINASK\fP   0x0008	/**< Ask if user wants to read mail on login */"
+.br
+.RI "\fIAsk if user wants to read mail on login. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags used to describe user preferences as regards private email reading. The following flags are available:
+.PP
+.PD 0
+.IP "\(bu" 2
+\fCECP_QUOTEYES\fP and \fCECP_QUOTEASK\fP. Two-bit (pardon the pun) setting that controls whether or not messages are quoted when replying to them. The following combinations are valid:
+.PP
+.IP "  \(bu" 4
+None: no quoting at all.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCECP_QUOTEASK:\fP when replying to a message, the user is asked if they want the message quoted or not. The state of \fBECP_QUOTEYES\fP is a don't-care.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCECP_QUOTEYES:\fP always quote messages without asking.
+.PP
+.PP
+
+.IP "\(bu" 2
+\fCECP_LOGINYES\fP and \fCECP_LOGINASK\fP. Another two-bit setting that controls how new mail is presented to the user. The following three combinations are valid:
+.PP
+.IP "  \(bu" 4
+None: users are notified about new messages immediately after they login. No further action is taken.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCECP_LOGINYES:\fP users are immediately and unconditionally taken to the Email module to read their mail on login. Quite intrusive.
+.PP
+.PP
+.IP "  \(bu" 4
+\fCECP_LOGINASK:\fP if new mail exists, users are asked if they wish to read it immediately. On positive answer, they are taken to the Email module to read their messages. Otherwise, they can always read their mail afterwards. If \fBECP_LOGINASK\fP is set, the state of \fBECP_LOGINYES\fP is a don't-care.
+.PP
+.PP
+
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define ECP_LOGINASK   0x0008	/**< Ask if user wants to read mail on login */"
+.PP
+Ask if user wants to read mail on login. Definition at line 410 of file mail.h.
+.SS "#define ECP_LOGINYES   0x0004	/**< Unconditionally read mail on login */"
+.PP
+Unconditionally read mail on login. Definition at line 409 of file mail.h.
+.SS "#define ECP_QUOTEASK   0x0002	/**< Ask before quoting */"
+.PP
+Ask before quoting. Definition at line 408 of file mail.h.
+.SS "#define ECP_QUOTEYES   0x0001	/**< Always quote */"
+.PP
+Always quote. Definition at line 407 of file mail.h.

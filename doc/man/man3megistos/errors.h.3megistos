@@ -1,0 +1,162 @@
+.TH "errors.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+errors.h \- Error logging functionality.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <errno.h>\fP
+.br
+
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: errors.h,v 1.4 2003/09/27 20:30:29 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBerror_log\fP(fmt...)   _logerror(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log a plain error. \fP"
+.ti -1c
+.RI "#define \fBerror_logsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log a system error. \fP"
+.ti -1c
+.RI "#define \fBerror_int\fP(fmt...)   _interror(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log an internal error. \fP"
+.ti -1c
+.RI "#define \fBerror_intsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log an internal system error. \fP"
+.ti -1c
+.RI "#define \fBerror_fatal\fP(fmt...)   _fatal(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log a fatal error. \fP"
+.ti -1c
+.RI "#define \fBerror_fatalsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log a fatal system error. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fB_logerror\fP (char *file, \fBuint32\fP line, char *format,...)"
+.br
+.RI "\fILog a plain error. \fP"
+.ti -1c
+.RI "void \fB_logerrorsys\fP (char *file, \fBuint32\fP line, \fBint32\fP err, char *format,...)"
+.br
+.RI "\fILog a plain system error. \fP"
+.ti -1c
+.RI "void \fB_interror\fP (char *file, \fBuint32\fP line, char *format,...)"
+.br
+.RI "\fILog an internal error. \fP"
+.ti -1c
+.RI "void \fB_interrorsys\fP (char *file, \fBuint32\fP line, \fBint32\fP err, char *format,...)"
+.br
+.RI "\fILog an internal system error. \fP"
+.ti -1c
+.RI "void \fB_fatal\fP (char *file, int line, char *format,...)"
+.br
+.RI "\fILog a fatal error. \fP"
+.ti -1c
+.RI "void \fB_fatalsys\fP (char *file, int line, int err, char *format,...)"
+.br
+.RI "\fILog a fatal system error. \fP"
+.ti -1c
+.RI "void \fBerror_setnotify\fP (int state)"
+.br
+.RI "\fIEnable or disable user notifications. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Error logging functionality. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+Original banner, legalese and change history follow
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     errors.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Include file for errors.c. Provides fatal error logging.     **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: errors.h,v 1.4 2003/09/27 20:30:29 alexios Exp $
+ *
+ * $Log: errors.h,v $
+ * Revision 1.4  2003/09/27 20:30:29  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.5  1999/07/18 21:13:24  alexios
+ * Added an #include directive to read in errno.h. Some systems
+ * don't define this in other include files and we need it.
+ *
+ * Revision 0.4  1998/12/27 15:19:19  alexios
+ * Added functions to report system errors.
+ *
+ * Revision 0.3  1998/07/26 21:17:06  alexios
+ * Automated the process of reporting the exact position of an
+ * error.
+ *
+ * Revision 0.2  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBerrors.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: errors.h,v 1.4 2003/09/27 20:30:29 alexios Exp $'"
+.PP
+Definition at line 72 of file errors.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

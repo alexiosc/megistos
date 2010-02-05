@@ -1,0 +1,41 @@
+.TH "injothbuf" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+injothbuf \- Message buffer for injoth().  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <input.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "long \fBmtype\fP"
+.br
+.ti -1c
+.RI "char \fBmtext\fP [1]"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Message buffer for injoth(). 
+
+This is the injoth() buffer, identical to the archetypal IPC struct \fCmsgbuf\fP. injoth() works via IPC messages. 
+.PP
+Definition at line 194 of file input.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBinjothbuf::mtext\fP[1]"
+.PP
+Definition at line 196 of file input.h.
+.SS "long \fBinjothbuf::mtype\fP"
+.PP
+Definition at line 195 of file input.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

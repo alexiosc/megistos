@@ -1,0 +1,83 @@
+.TH "Output Flags (OFL_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Output Flags (OFL_x) \- Output flags.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBOFL_ANSIENABLE\fP   0x01	/**< Enable ANSI output */"
+.br
+.RI "\fIEnable ANSI output. \fP"
+.ti -1c
+.RI "#define \fBOFL_WAITTOCLEAR\fP   0x02	/**< Pause before clearing screen */"
+.br
+.RI "\fIPause before clearing screen. \fP"
+.ti -1c
+.RI "#define \fBOFL_AFTERINPUT\fP   0x04	/**< First output after an input */"
+.br
+.RI "\fIFirst output after an input. \fP"
+.ti -1c
+.RI "#define \fBOFL_INHIBITVARS\fP   0x08	/**< Do not interpret substitution variables */"
+.br
+.RI "\fIDo not interpret substitution variables. \fP"
+.ti -1c
+.RI "#define \fBOFL_PROTECTVARS\fP   0x10	/**< Only interpret subst vars inside prompts */"
+.br
+.RI "\fIOnly interpret subst vars inside prompts. \fP"
+.ti -1c
+.RI "#define \fBOFL_ISBOT\fP   0x20	/**< Output is for a bot/AI/script */"
+.br
+.RI "\fIOutput is for a bot/AI/script. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Output flags. These flags control the behaviour of the low-level output subsystem.
+.PP
+.IP "\(bu" 2
+\fCOFL_ANSIENABLE\fP. If this flag is set, ANSI output is enabled. Actually, the flag works the other way round: if it's clear, ANSI directives are stripped from all output.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOFL_WAITTOCLEAR\fP. Set to indicate that, if a clear screen ANSI directive is received, and this does not happen \fIimmediately\fP a user input request, a screen pause will be forced. This is done to make sure that the user can see all output of the system. If even a single character (even white space or ANSI directives) has been output to the user between the user's last input and the screen clear, the pause will be forced. For that reason, try to place clear screen directives at the top of message prompts.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOFL_AFTERINPUT\fP. Set by the low-level input subsystem to indicate that user input has just been received. This is used, among other things, in co-operation with the flag above to generate screen pauses.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOFL_INHIBITVARS\fP. Substitution variables are variables enclosed in at-signs. These variables will be replaced by their value before being printed. For instance, you can issue the name of the BBS by using \fC@BBS@\fP, and the current time using \fC@TIME@\fP. Setting this flag inhibits interpretation of at-signs as variable delimiters. Effectively, no variable substitution will occur. This is useful as a security measure. You certainly don't want users to be able to use substitution variables in their messages or pages. It could be used by crackers to confuse people or for `social engineering'.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOFL_PROTECTVARS\fP. If the above flag is clear, you can set this flag to partially inhibit variable substitution to \fIonly\fP system prompts. Expansion in user-contributed material will not occur.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOFL_ISBOT\fP. Set to mark a non-human user of the system. Output is reformatted for easier parsing by scripts, AIs etc and output in a nice, easily parsable format. You shouldn't need to touch this flag. It's set by the BBS library whenever needed. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define OFL_AFTERINPUT   0x04	/**< First output after an input */"
+.PP
+First output after an input. Definition at line 161 of file output.h.
+.SS "#define OFL_ANSIENABLE   0x01	/**< Enable ANSI output */"
+.PP
+Enable ANSI output. Definition at line 157 of file output.h.
+.SS "#define OFL_INHIBITVARS   0x08	/**< Do not interpret substitution variables */"
+.PP
+Do not interpret substitution variables. Definition at line 163 of file output.h.
+.SS "#define OFL_ISBOT   0x20	/**< Output is for a bot/AI/script */"
+.PP
+Output is for a bot/AI/script. Definition at line 167 of file output.h.
+.SS "#define OFL_PROTECTVARS   0x10	/**< Only interpret subst vars inside prompts */"
+.PP
+Only interpret subst vars inside prompts. Definition at line 165 of file output.h.
+.SS "#define OFL_WAITTOCLEAR   0x02	/**< Pause before clearing screen */"
+.PP
+Pause before clearing screen. Definition at line 159 of file output.h.

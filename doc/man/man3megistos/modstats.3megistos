@@ -1,0 +1,38 @@
+.TH "modstats" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modstats \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [44]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcredits\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBminutes\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "\fBuint32\fP \fBmodstats::credits\fP"
+.PP
+Definition at line 246 of file sysstruct.h.
+.SS "\fBuint32\fP \fBmodstats::minutes\fP"
+.PP
+Definition at line 247 of file sysstruct.h.
+.SS "char \fBmodstats::name\fP[44]"
+.PP
+Definition at line 245 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,172 @@
+.TH "xfer_item_t" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+xfer_item_t \- File transfer item structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <filexfer.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBuint32\fP \fBmagic\fP"
+.br
+.RI "\fIMagic number (XFER_ITEM_MAGIC). \fP"
+.ti -1c
+.RI "char \fBdir\fP"
+.br
+.RI "\fIOne of the \fCFXM_x\fP constants. \fP"
+.ti -1c
+.RI "char \fBfullname\fP [256]"
+.br
+.RI "\fIFull path to the file. \fP"
+.ti -1c
+.RI "char * \fBfilename\fP"
+.br
+.RI "\fIPointer to basename inside \fCfullname\fP. \fP"
+.ti -1c
+.RI "char \fBdescription\fP [50]"
+.br
+.RI "\fIShort description of the file. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBauditfok\fP"
+.br
+.RI "\fIAudit flags used to log successful transfer. \fP"
+.ti -1c
+.RI "char \fBauditsok\fP [80]"
+.br
+.RI "\fIAudit summary used to log successful transfer. \fP"
+.ti -1c
+.RI "char \fBauditdok\fP [80]"
+.br
+.RI "\fIAudit detailed text template (used on success). \fP"
+.ti -1c
+.RI "int \fBauditffail\fP"
+.br
+.RI "\fIAudit flags used to log failed transfer. \fP"
+.ti -1c
+.RI "char \fBauditsfail\fP [80]"
+.br
+.RI "\fIAudit summary used to log failed transfer. \fP"
+.ti -1c
+.RI "char \fBauditdfail\fP [80]"
+.br
+.RI "\fIAudit detailed text template (failed transfer). \fP"
+.ti -1c
+.RI "char \fBcmdok\fP [80]"
+.br
+.RI "\fICommand to execute after successful transfer. \fP"
+.ti -1c
+.RI "char \fBcmdfail\fP [80]"
+.br
+.RI "\fICommand to execute after failed transfer. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBsize\fP"
+.br
+.RI "\fIFile size (bytes). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcredspermin\fP"
+.br
+.RI "\fICredit consumption rate (times 100). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBrefund\fP"
+.br
+.RI "\fICredits to refund in case of failure. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIFile transfer flags (internal use only). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBresult\fP"
+.br
+.RI "\fIFile transfer result (internal use only). \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+File transfer item structure. 
+
+This has fields for all the information needed to upload or download a file. In short, the following capabilities of the file transfer subsystem are reflected here:
+.PP
+.IP "\(bu" 2
+Can allow files to be downloaded (BBS to user) or uploaded (user to BBS).
+.PP
+.PP
+.IP "\(bu" 2
+Allows user-defined auditing of both successful and failed transfers. There are separate settings for each case.
+.PP
+.PP
+.IP "\(bu" 2
+Allows a shell command to be executed immediately after successful or failed transfers. There are two separate commands for each occasion.
+.PP
+.PP
+.IP "\(bu" 2
+Automatically refunds the user for canceled file transfers with a charge attached. 
+.PP
+
+.PP
+Definition at line 140 of file filexfer.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBxfer_item_t::auditdfail\fP[80]"
+.PP
+Audit detailed text template (failed transfer). Definition at line 151 of file filexfer.h.
+.SS "char \fBxfer_item_t::auditdok\fP[80]"
+.PP
+Audit detailed text template (used on success). Definition at line 148 of file filexfer.h.
+.SS "int \fBxfer_item_t::auditffail\fP"
+.PP
+Audit flags used to log failed transfer. Definition at line 149 of file filexfer.h.
+.SS "\fBuint32\fP \fBxfer_item_t::auditfok\fP"
+.PP
+Audit flags used to log successful transfer. Definition at line 146 of file filexfer.h.
+.SS "char \fBxfer_item_t::auditsfail\fP[80]"
+.PP
+Audit summary used to log failed transfer. Definition at line 150 of file filexfer.h.
+.SS "char \fBxfer_item_t::auditsok\fP[80]"
+.PP
+Audit summary used to log successful transfer. Definition at line 147 of file filexfer.h.
+.SS "char \fBxfer_item_t::cmdfail\fP[80]"
+.PP
+Command to execute after failed transfer. Definition at line 153 of file filexfer.h.
+.SS "char \fBxfer_item_t::cmdok\fP[80]"
+.PP
+Command to execute after successful transfer. Definition at line 152 of file filexfer.h.
+.SS "\fBint32\fP \fBxfer_item_t::credspermin\fP"
+.PP
+Credit consumption rate (times 100). Definition at line 155 of file filexfer.h.
+.SS "char \fBxfer_item_t::description\fP[50]"
+.PP
+Short description of the file. Definition at line 145 of file filexfer.h.
+.SS "char \fBxfer_item_t::dir\fP"
+.PP
+One of the \fCFXM_x\fP constants. Definition at line 142 of file filexfer.h.
+.SS "char* \fBxfer_item_t::filename\fP"
+.PP
+Pointer to basename inside \fCfullname\fP. Definition at line 144 of file filexfer.h.
+.SS "\fBuint32\fP \fBxfer_item_t::flags\fP"
+.PP
+File transfer flags (internal use only). Definition at line 157 of file filexfer.h.
+.SS "char \fBxfer_item_t::fullname\fP[256]"
+.PP
+Full path to the file. Definition at line 143 of file filexfer.h.
+.SS "\fBuint32\fP \fBxfer_item_t::magic\fP"
+.PP
+Magic number (XFER_ITEM_MAGIC). Definition at line 141 of file filexfer.h.
+.SS "\fBint32\fP \fBxfer_item_t::refund\fP"
+.PP
+Credits to refund in case of failure. Definition at line 156 of file filexfer.h.
+.SS "\fBint32\fP \fBxfer_item_t::result\fP"
+.PP
+File transfer result (internal use only). Definition at line 158 of file filexfer.h.
+.SS "\fBuint32\fP \fBxfer_item_t::size\fP"
+.PP
+File size (bytes). Definition at line 154 of file filexfer.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

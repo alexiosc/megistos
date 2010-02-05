@@ -1,0 +1,96 @@
+LEVEL2 {}
+
+ONKEY {Key required to download news? 0} N 0 129
+
+DEFNEWS {Download news by default? YES} B
+
+NEWSFILE {news.ans} S 12 Filename of news file
+
+
+LEVEL3 {}
+
+ONVT {[0m[30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m¬Ÿ£å©œ ª ’œ¢œ¬«˜åà¤ Œâà¤[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  ’˜ «œ¢œ¬«˜å˜ ¤â˜ ©«¦ §˜¡â«¦;                 [0;30;46m [@"X "t] [0;47;30m  (Space š ˜ ˜¢¢˜šã)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R: ¦ãŸœ ˜                 [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"€¡¬¨¦"b[0;47;30mÜ  [0;1;47;37m³ [0m
+[30;47m ³                                   ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Setup, Visual template
+
+
+ONLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34m¬Ÿ£å©œ ª «œ¢œ¬«˜åà¤ ¤âà¤[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m1[30m. ’˜ «œ¢œ¬«˜å˜ ¤â˜ ©«¦ §˜¡â«¦ . . . . . . . . . . . . . . . . . . . [34m@"X "t[0;1;47;37m ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+} T Setup QWK, Linear template
+
+
+ONNEWS {[0;1m
+!J„¤œ¨š¦§¦ é¤«˜ª ˜¬«ã «¤ œ§ ¢¦šã, «á«œ «¤ œ ©˜šàšã «à¤ Œâà¤ «ª ™á©ª
+©«˜ §˜¡â«˜ ©˜ª.!)
+[0;1m} T Setup QWK, Linear template, enable/disable news
+
+
+ONDHDR {
+[0;1m’˜ «œ¢œ¬«˜å˜ ¤â˜: } T News Download: header
+
+
+ONDMT {[0;1;33m!Wƒœ¤ ¬§á¨®¦¬¤ ¤â˜.!)
+!0l[0;1m} T News Download: news database is empty
+
+
+ONDNAX {[0;1;31m!W’¦ œ§å§œ›¦ §¨æ©™˜©ãª ©˜ª ›œ¤ œ§ «¨â§œ  « ¢ã¯.!)
+!0l[0;1m} T News Download: access denied
+
+
+ONDOK {[0;1;32m!W„¤«á¥œ .!)
+!0l[0;1m} T News Download: done
+
+
+
+LANG {}
+
+
+ONVT {[0m[30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mLatest News Properties[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Include latest news in packages  . . . . . .  [0;30;46m [@"X "t] [0;47;30m  (Space to toggle)  [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³                                                                          [0;1;47;37m³ [0m
+[30;47m ³  Ctrl-R for help                 [0;1;42;33m@14;"OK"b[0;47;30mÜ    [0;1;41;33m@14;"Cancel"b[0;47;30mÜ  [0;1;47;37m³ [0m
+[30;47m ³                                   ßßßßßßßßßßßßßßßß     ßßßßßßßßßßßßßßßß  [0;1;47;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0m} T Setup, Visual template
+
+
+ONLT {[2J[0;30;47m ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ [34mLatest News Properties[0;30;47m ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ[0;1;37;47m¿ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m ³ [31m1[30m. Include latest news in packages . . . . . . . . . . . . . . . . . [34m@"X "t[0;1;47;37m ³ [0m
+[30;47m ³                                                                          [1;37m³ [0m
+[30;47m À[0;1;37;47mÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ [0;1m
+} T Setup QWK, Linear template
+
+
+ONNEWS {[0;1m
+!JTurn this on to receive the latest news of the BBS in your mail packages.!)
+[0;1m} T Setup QWK, Linear template, enable/disable news
+
+
+ONDHDR {
+[0;1mLatest news: } T News Download: header
+
+
+ONDMT {[0;1;33m!WNo news.!)
+!0l[0;1m} T News Download: news database is empty
+
+
+ONDNAX {[0;1;31m!WSorry, you don't have access to the latest news.!)
+!0l[0;1m} T News Download: access denied
+
+
+ONDOK {[0;1;32m!WDone.!)
+!0l[0;1m} T News Download: done
+
+
+
+LANGEND {}

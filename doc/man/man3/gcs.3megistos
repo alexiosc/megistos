@@ -1,0 +1,80 @@
+.TH "Declaring Global Commands" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Declaring Global Commands \- Global commands are commands that work almost anywhere on the system.  
+
+.PP
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef int(* \fBgcs_t\fP )(void)"
+.br
+.RI "\fIDeclaration for a GCS handler. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBgcs_add\fP (\fBgcs_t\fP gcs)"
+.br
+.RI "\fIAdd a local-global command. \fP"
+.ti -1c
+.RI "void \fBgcs_init\fP ()"
+.br
+.RI "\fIInitialise the global command services. \fP"
+.ti -1c
+.RI "int \fBgcs_handle\fP ()"
+.br
+.RI "\fIHandle GCS. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Global commands are commands that work almost anywhere on the system. Although it's no rule of thumb, commands that start with a slash (\fC/\fP) are global commands.
+.PP
+Megistos implements a dynamic plugin system for global commands. We used to put everything in this source file, which made things inelegant, big and ugly. Now, GCS (global command service) plugins can be compiled as dynamically loaded shared objects (DLLs in the DOS/Windows world, SOs in the UNIX world) and loaded at runtime. This way, commands are implemented by the modules that contribute them. I can't even begin to list the advantages of this scheme.
+.PP
+To see a simple example of a global command handler, please see the Cookie module and file \fCgcs_cookie.c\fP in particular. A more complete collection is in file \fCgcs_builtin.c\fP in the main BBS library directory. 
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef int(* \fBgcs_t\fP)(void)"
+.PP
+Declaration for a GCS handler. This is a pointer to a function similar to:
+.PP
+.PP
+.nf
+
+int handler (void)
+    .PP
+.PP
+The handler takes no arguments. Its duties include parsing a user command that has already been input. You may use any means provided by the BBS library to this effect. I usually use the \fBmargc\fP and \fBmargv\fP technique because it's more elegant (and because I started my BBS programming days writing for the Major BBS, where this was right about the only decent way of parsing input).
+.PP
+The handler must check to see if the user input is the command it implements. If so, it must perform any processing and return a value of 1 to the caller. If the command is not the one dealt with by the handler, the handler must return 0 to the caller.
+.PP
+Please do not modify the user input in any way until you make sure is contains the command you service. Definition at line 117 of file globalcmd.h.
+.SH "Function Documentation"
+.PP 
+.SS "void gcs_add (\fBgcs_t\fP gcs)"
+.PP
+Add a local-global command. This somewhat surreal function is mostly used internally. You can use it to add your own handlers, but they will only be valid while the user is in your module. This is still useful to implement commands that work anywhere within \fIone\fP module only.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIgcs\fP the global command service handler. 
+.RE
+.PP
+
+.SS "int gcs_handle ()"
+.PP
+Handle GCS. Executes all of the registered global command handlers in turn.
+.PP
+\fBReturns:\fP
+.RS 4
+If any handler returns non-zero, no more handlers are executed and a value of 1 is returned. Otherwise, zero is returned. 
+.RE
+.PP
+
+.SS "void gcs_init ()"
+.PP
+Initialise the global command services. This scans the directory lib/gcs for GCS plugins, loads them and installs the handlers. It is called by \fBmod_init()\fP when specified with \fBINI_GLOBCMD\fP (or, of course, \fBINI_ALL\fP). No need for you to call it manually, unless you're doing something strange. 

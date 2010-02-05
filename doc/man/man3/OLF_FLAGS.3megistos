@@ -1,0 +1,302 @@
+.TH "Online user flags (OLF_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Online user flags (OLF_x) \- Temporary user state and preferences.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBOLF_MMEXITING\fP   0x00000001 /**< Exit module after concatenated command. */"
+.br
+.RI "\fIExit module after concatenated command. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMCALLING\fP   0x00000002 /**< Menuman has just executed a module.  */"
+.br
+.RI "\fIMenuman has just executed a module. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMCONCAT\fP   0x00000004 /**< Module should process menuman input. */"
+.br
+.RI "\fIModule should process menuman input. \fP"
+.ti -1c
+.RI "#define \fBOLF_ISYSOP\fP   0x00000008 /**< Obsolete. Re-use at will. */"
+.br
+.RI "\fIObsolete. \fP"
+.ti -1c
+.RI "#define \fBOLF_INVISIBLE\fP   0x00000010 /**< Sysop invisibility mode activated. */"
+.br
+.RI "\fISysop invisibility mode activated. \fP"
+.ti -1c
+.RI "#define \fBOLF_BUSY\fP   0x00000020 /**< User is unable to accept pages etc. */"
+.br
+.RI "\fIUser is unable to accept pages etc. \fP"
+.ti -1c
+.RI "#define \fBOLF_NOTIMEOUT\fP   0x00000040 /**< Don't enforce inactivity timeouts. */"
+.br
+.RI "\fIDon't enforce inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_ANSION\fP   0x00000080 /**< ANSI directives are allowed. */"
+.br
+.RI "\fIANSI directives are allowed. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR0\fP   0x00000100 /**< Translation mode, bit 0 */"
+.br
+.RI "\fITranslation mode, bit 0. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR1\fP   0x00000200 /**< Translation mode, bit 1 */"
+.br
+.RI "\fITranslation mode, bit 1. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR2\fP   0x00000400 /**< Translation mode, bit 2 */"
+.br
+.RI "\fITranslation mode, bit 2. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR3\fP   0x00000800 /**< Translation mode, bit 3 */"
+.br
+.RI "\fITranslation mode, bit 3. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMGCDGO\fP   0x00001000 /**< Module exit due to <tt>'/go'</tt> command. */"
+.br
+.RI "\fIModule exit due to \fC'/go'\fP command. \fP"
+.ti -1c
+.RI "#define \fBOLF_INHIBITGO\fP   0x00002000 /**< Disables <tt>'/go'</tt> command. */"
+.br
+.RI "\fIDisables \fC'/go'\fP command. \fP"
+.ti -1c
+.RI "#define \fBOLF_INTELECON\fP   0x00004000 /**< User is in teleconference module. */"
+.br
+.RI "\fIUser is in teleconference module. \fP"
+.ti -1c
+.RI "#define \fBOLF_TLCUNLIST\fP   0x00008000 /**< Personal telecon channel is unlisted. */"
+.br
+.RI "\fIPersonal telecon channel is unlisted. \fP"
+.ti -1c
+.RI "#define \fBOLF_FORCEIDLE\fP   0x00010000 /**< Always force inactivity timeouts. */"
+.br
+.RI "\fIAlways force inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_LOGGEDOUT\fP   0x00020000 /**< User is logging out or has logged out. */"
+.br
+.RI "\fIUser is logging out or has logged out. \fP"
+.ti -1c
+.RI "#define \fBOLF_RELOGGED\fP   0x00040000 /**< User is re-logging on. */"
+.br
+.RI "\fIUser is re-logging on. \fP"
+.ti -1c
+.RI "#define \fBOLF_ZAPBYPASS\fP   0x00080000 /**< Eligible to bypass inactivity timeouts. */"
+.br
+.RI "\fIEligible to bypass inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_JMP2BLT\fP   0x00100000 /**< Jumping from clubs to bulletins. */"
+.br
+.RI "\fIJumping from clubs to bulletins. \fP"
+.ti -1c
+.RI "#define \fBOLF_INSYSCHAT\fP   0x00200000 /**< User is in Sysop chat mode. */"
+.br
+.RI "\fIUser is in Sysop chat mode. \fP"
+.ti -1c
+.RI "#define \fBOLF_AFTERINP\fP   0x00400000 /**< Persistent version of OFL_AFTERINPUT. */"
+.br
+.RI "\fIPersistent version of OFL_AFTERINPUT. \fP"
+.ti -1c
+.RI "#define \fBOLF_ISBOT\fP   0x00800000 /**< This is a bot/script/etc. */"
+.br
+.RI "\fIThis is a bot/script/etc. \fP"
+.ti -1c
+.RI "#define \fBOLF_TRSHIFT\fP   8"
+.br
+.ti -1c
+.RI "#define \fBOLF_TRANS\fP   (OLF_TR0|OLF_TR1|OLF_TR2|OLF_TR3)"
+.br
+.ti -1c
+.RI "#define \fBusr_getoxlation\fP(o)   (((o).flags&OLF_TRANS)>>OLF_TRSHIFT)"
+.br
+.RI "\fIExtract current translation mode from user online record. \fP"
+.ti -1c
+.RI "#define \fBusr_setoxlation\fP(o, i)"
+.br
+.RI "\fISet current translation mode in user online record. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Temporary user state and preferences. These flags denote volatile, temporary user preferences as regards translation modes, ANSI directives, et cetera.
+.PP
+.IP "\(bu" 2
+\fCOLF_MMEXITING\fP, \fCOLF_MMCALLING}\fP, \fCOLF_MMCONCAT\fP, \fCOLF_MMGCDGO\fP. Flags used by the Menu Manager (hence the `\fCMM\fP'). \fCOLF_MMEXITING\fP is used to remind a module to exit after processing a concatenated command that originated from outside the module. This flags is also set by the module in question so that the Menu Manager can return the user to the appropriate page. \fCOLF_CALLING\fP is set by the Menu Manager prior to calling a module and \fCOLF_CONCAT\fP is set by the Menu Manager to notify a module that there is concatenated input left over for it to process. \fCOLF_MMGCDGO\fP is set by a module prior to calling the Menu Manager to handle a \fC/go\fP global command.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_ISYSOP\fP. Is obsolete. Feel free to re-use this particular flag value.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_INVISIBLE\fP. Set to indicate that the sysop invisibility mode is enabled.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_BUSY\fP. Set to indicate that the user is in a state where they cannot receive or send pages.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_NOTIMEOUT\fP, \fCOLF_FORCEIDLE\fP, \fCOLF_ZAPBYPASS\fP. These flags control the system's behaviour with respect to inactivity timeouts. \fCOLF_NOTIMEOUT\fP is set to \fIrecommend\fP to the system that the user should not be kicked out if they are inactive for too long. The system will not respect this recommendation if \fCOLF_FORCEIDLE\fP is set. This is done for telnet lines where the connection may be dropped and an inactivity timeout is the best way to trap abruptly lost connections. \fCOLF_ZAPBYPASS\fP indicates that inactivity timeouts should not be applied to this user. Unlike \fCOLF_NOTIMEOUT\fP, which is a relatively mutable flag, this flag remains constant for a user's entire session. Thus, it is used to indicate that the user is a privileged operator.\fCOLF_NOTIMEOUT\fP is used for temporary reprieves while the system is performing some long-winded task.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_ANSION\fP. Indicates that the user's terminal (emulator) can support ANSI X3.64 terminal directives.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_TR0--UPF_TR3\fP. Four bits denoting the translation table currently in use by the user.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_INHIBITGO\fP. Set to disable the global command \fC\fP/go that takes the user to an arbitrary Menu Manager page. This is a necessary action if you need the user to be `locked' in a module for one reason or another.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_INTELECON\fP. Set by the teleconferences module to signify that a user is currently within the confines of a teleconference channel, and is therefore a candidate for receiving teleconference text.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_TLCUNLIST\fP. Set to indicate that the user's personal teleconference channel is unlisted.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_LOGGEDOUT\fP. Set by the system to indicate that the user has just logged out, although the user-related data structures are still around.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_RELOGGED\fP. Notifies \fCemud\fP that the user is `relogging on', i.e. has asked to log out without the connection dropped, so that another user can have a go at the BBS.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_JMP2BLT\fP. Used by the Clubs module to denote an exit to the Bulletin reader.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_INSYSCHAT\fP. Set to indicate that the user is in sysop chat mode.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_AFTERINP\fP. User to store the last state of \fCOFL_AFTERINPUT\fP for smoother transitions between modules.
+.PP
+.PP
+.IP "\(bu" 2
+\fCOLF_ISBOT\fP. This online structure belongs to a robot, a script or other automated process. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define OLF_AFTERINP   0x00400000 /**< Persistent version of OFL_AFTERINPUT. */"
+.PP
+Persistent version of OFL_AFTERINPUT. Definition at line 1061 of file useracc.h.
+.SS "#define OLF_ANSION   0x00000080 /**< ANSI directives are allowed. */"
+.PP
+ANSI directives are allowed. Definition at line 1031 of file useracc.h.
+.SS "#define OLF_BUSY   0x00000020 /**< User is unable to accept pages etc. */"
+.PP
+User is unable to accept pages etc. Definition at line 1027 of file useracc.h.
+.SS "#define OLF_FORCEIDLE   0x00010000 /**< Always force inactivity timeouts. */"
+.PP
+Always force inactivity timeouts. Definition at line 1049 of file useracc.h.
+.SS "#define OLF_INHIBITGO   0x00002000 /**< Disables <tt>'/go'</tt> command. */"
+.PP
+Disables \fC'/go'\fP command. Definition at line 1043 of file useracc.h.
+.SS "#define OLF_INSYSCHAT   0x00200000 /**< User is in Sysop chat mode. */"
+.PP
+User is in Sysop chat mode. Definition at line 1059 of file useracc.h.
+.SS "#define OLF_INTELECON   0x00004000 /**< User is in teleconference module. */"
+.PP
+User is in teleconference module. Definition at line 1045 of file useracc.h.
+.SS "#define OLF_INVISIBLE   0x00000010 /**< Sysop invisibility mode activated. */"
+.PP
+Sysop invisibility mode activated. Definition at line 1025 of file useracc.h.
+.SS "#define OLF_ISBOT   0x00800000 /**< This is a bot/script/etc. */"
+.PP
+This is a bot/script/etc. Definition at line 1063 of file useracc.h.
+.SS "#define OLF_ISYSOP   0x00000008 /**< Obsolete. Re-use at will. */"
+.PP
+Obsolete. Re-use at will. Definition at line 1023 of file useracc.h.
+.SS "#define OLF_JMP2BLT   0x00100000 /**< Jumping from clubs to bulletins. */"
+.PP
+Jumping from clubs to bulletins. Definition at line 1057 of file useracc.h.
+.SS "#define OLF_LOGGEDOUT   0x00020000 /**< User is logging out or has logged out. */"
+.PP
+User is logging out or has logged out. Definition at line 1051 of file useracc.h.
+.SS "#define OLF_MMCALLING   0x00000002 /**< Menuman has just executed a module.  */"
+.PP
+Menuman has just executed a module. Definition at line 1019 of file useracc.h.
+.SS "#define OLF_MMCONCAT   0x00000004 /**< Module should process menuman input. */"
+.PP
+Module should process menuman input. Definition at line 1021 of file useracc.h.
+.SS "#define OLF_MMEXITING   0x00000001 /**< Exit module after concatenated command. */"
+.PP
+Exit module after concatenated command. Definition at line 1017 of file useracc.h.
+.SS "#define OLF_MMGCDGO   0x00001000 /**< Module exit due to <tt>'/go'</tt> command. */"
+.PP
+Module exit due to \fC'/go'\fP command. Definition at line 1041 of file useracc.h.
+.SS "#define OLF_NOTIMEOUT   0x00000040 /**< Don't enforce inactivity timeouts. */"
+.PP
+Don't enforce inactivity timeouts. Definition at line 1029 of file useracc.h.
+.SS "#define OLF_RELOGGED   0x00040000 /**< User is re-logging on. */"
+.PP
+User is re-logging on. Definition at line 1053 of file useracc.h.
+.SS "#define OLF_TLCUNLIST   0x00008000 /**< Personal telecon channel is unlisted. */"
+.PP
+Personal telecon channel is unlisted. Definition at line 1047 of file useracc.h.
+.SS "#define OLF_TR0   0x00000100 /**< Translation mode, bit 0 */"
+.PP
+Translation mode, bit 0. Definition at line 1033 of file useracc.h.
+.SS "#define OLF_TR1   0x00000200 /**< Translation mode, bit 1 */"
+.PP
+Translation mode, bit 1. Definition at line 1035 of file useracc.h.
+.SS "#define OLF_TR2   0x00000400 /**< Translation mode, bit 2 */"
+.PP
+Translation mode, bit 2. Definition at line 1037 of file useracc.h.
+.SS "#define OLF_TR3   0x00000800 /**< Translation mode, bit 3 */"
+.PP
+Translation mode, bit 3. Definition at line 1039 of file useracc.h.
+.SS "#define OLF_TRANS   (OLF_TR0|OLF_TR1|OLF_TR2|OLF_TR3)"
+.PP
+Definition at line 1067 of file useracc.h.
+.SS "#define OLF_TRSHIFT   8"
+.PP
+Definition at line 1066 of file useracc.h.
+.SS "#define OLF_ZAPBYPASS   0x00080000 /**< Eligible to bypass inactivity timeouts. */"
+.PP
+Eligible to bypass inactivity timeouts. Definition at line 1055 of file useracc.h.
+.SS "#define usr_getoxlation(o)   (((o).flags&OLF_TRANS)>>OLF_TRSHIFT)"
+.PP
+Extract current translation mode from user online record. The following macro extracts the 0--9 (0--15, actually) translation table number from the user's flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIu\fP A user \fIonlinerec\fP structure, \fC\fBonlinerec_t\fP\fP. Pass the structure itself, not a pointer to it.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The translation table specified by the user's preference flags. 
+.RE
+.PP
+Definition at line 1080 of file useracc.h.
+.SS "#define usr_setoxlation(o, i)"
+.PP
+\fBValue:\fP.nf
+((o).flags=((o).flags&~OLF_TRANS)|\
+                             (((i)&0xf)<<OLF_TRSHIFT))
+.fi
+Set current translation mode in user online record. 
+.PP
+This macro sets the translation mode in the user preference flags.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIu\fP A user \fIonlinerec\fP structure, \fConlinrec_t\fP. Pass the structure itself, not a pointer to it.
+.br
+\fIi\fP The new translation mode. 
+.RE
+.PP
+Definition at line 1092 of file useracc.h.

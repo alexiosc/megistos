@@ -1,0 +1,1203 @@
+.TH "config.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+config.h \- High-level, hardwired system configuration.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <bbsconfig.h>\fP
+.br
+\fC#include <megistos/bbsinclude.h>\fP
+.br
+\fC#include <megistos/version.h>\fP
+.br
+
+.SS "Directory names"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBBSDATADIR\fP   'data'"
+.br
+.ti -1c
+.RI "#define \fBBBSETCDIR\fP   'etc'"
+.br
+.ti -1c
+.RI "#define \fBBBSFILEDIR\fP   BBSDATADIR'/files'"
+.br
+.ti -1c
+.RI "#define \fBBBSLIBDIR\fP   'lib'"
+.br
+.ti -1c
+.RI "#define \fBBBSMODULERCDIR\fP   BBSETC'/module.rc'"
+.br
+.ti -1c
+.RI "#define \fBBBSRUNDIR\fP   'run'"
+.br
+.ti -1c
+.RI "#define \fBBINDIR\fP   'bin'"
+.br
+.ti -1c
+.RI "#define \fBDAEMONDIR\fP   BINDIR'/daemons'"
+.br
+.ti -1c
+.RI "#define \fBMODULEDIR\fP   BINDIR'/modules'"
+.br
+.ti -1c
+.RI "#define \fBBLTDBDIR\fP   MSGSDIR'/..bltdb'"
+.br
+.ti -1c
+.RI "#define \fBCHANDEFDIR\fP   BBSETCDIR'/channel.defs'"
+.br
+.ti -1c
+.RI "#define \fBCLUBAXDIR\fP   MSGSDIR'/..access'"
+.br
+.ti -1c
+.RI "#define \fBCLUBHDRDIR\fP   MSGSDIR'/..clubhdr'"
+.br
+.ti -1c
+.RI "#define \fBCONFIGDIR\fP   BBSETCDIR'/config'"
+.br
+.ti -1c
+.RI "#define \fBCOOKIEDIR\fP   BBSDATADIR'/cookie'"
+.br
+.ti -1c
+.RI "#define \fBDEVDIR\fP   '/dev'"
+.br
+.ti -1c
+.RI "#define \fBDOCDIR\fP   'doc'"
+.br
+.ti -1c
+.RI "#define \fBEMAILATTDIR\fP   EMAILDIR'/'MSGATTDIR"
+.br
+.ti -1c
+.RI "#define \fBEMAILDIR\fP   MSGSDIR'/'EMAILDIRNAME"
+.br
+.ti -1c
+.RI "#define \fBEMUFIFODIR\fP   'etc'"
+.br
+.ti -1c
+.RI "#define \fBEMULOGDIR\fP   'etc'"
+.br
+.ti -1c
+.RI "#define \fBEVENTDIR\fP   BBSDATADIR'/events'"
+.br
+.ti -1c
+.RI "#define \fBFILELIBDBDIR\fP   BBSFILEDIR'/.DB'"
+.br
+.ti -1c
+.RI "#define \fBFILELIBDIR\fP   BBSDATADIR'/files'"
+.br
+.ti -1c
+.RI "#define \fBGCSDIR\fP   BBSLIBDIR'/gcs'"
+.br
+.ti -1c
+.RI "#define \fBIHAVEDIR\fP   MSGSDIR'/..ihave'"
+.br
+.ti -1c
+.RI "#define \fBLOCKDIR\fP   'lock'"
+.br
+.ti -1c
+.RI "#define \fBLOGDIR\fP   'log'"
+.br
+.ti -1c
+.RI "#define \fBMAILERDIR\fP   BBSDATADIR'/mailer'"
+.br
+.ti -1c
+.RI "#define \fBMAILERFILESDIR\fP   MAILERDIR'/QWKfiles'"
+.br
+.ti -1c
+.RI "#define \fBMAILERREQDIR\fP   MAILERDIR'/requests'"
+.br
+.ti -1c
+.RI "#define \fBMAILERUSRDIR\fP   MAILERDIR'/usr'"
+.br
+.ti -1c
+.RI "#define \fBMBKDIR\fP   BBSDATADIR'/prompts'"
+.br
+.ti -1c
+.RI "#define \fBMBKINCLUDEDIR\fP   __INCLUDEDIR'/mbk'"
+.br
+.ti -1c
+.RI "#define \fBMENUMANDIR\fP   BBSDATADIR'/menuman'"
+.br
+.ti -1c
+.RI "#define \fBMSGATTDIR\fP   '.ATT'"
+.br
+.ti -1c
+.RI "#define \fBMSGBLTDIR\fP   '.BLT'"
+.br
+.ti -1c
+.RI "#define \fBMSGSDIR\fP   BBSDATADIR'/msgs'"
+.br
+.ti -1c
+.RI "#define \fBMSGSDISTDIR\fP   MSGSDIR'/..dist'"
+.br
+.ti -1c
+.RI "#define \fBMSGSIGDIR\fP   MSGSDIR'/..sig'"
+.br
+.ti -1c
+.RI "#define \fBMSGUSRDIR\fP   MSGSDIR'/..usr'"
+.br
+.ti -1c
+.RI "#define \fBNEWSDIR\fP   BBSDATADIR'/news'"
+.br
+.ti -1c
+.RI "#define \fBONLINEDIR\fP   BBSETCDIR'/online'"
+.br
+.ti -1c
+.RI "#define \fBQSCDIR\fP   MSGSDIR'/..quickscan'"
+.br
+.ti -1c
+.RI "#define \fBRECENTDIR\fP   BBSDATADIR'/recent'"
+.br
+.ti -1c
+.RI "#define \fBREGISTRYDIR\fP   BBSDATADIR'/registry'"
+.br
+.ti -1c
+.RI "#define \fBSTATDIR\fP   BBSDATADIR'/stats'"
+.br
+.ti -1c
+.RI "#define \fBTELEACTIONDIR\fP   TELEETCDIR"
+.br
+.ti -1c
+.RI "#define \fBTELEDIR\fP   BBSDATADIR'/telecon'"
+.br
+.ti -1c
+.RI "#define \fBTELEETCDIR\fP   TELEDIR'/.etc'"
+.br
+.ti -1c
+.RI "#define \fBTELEPLUGINDIR\fP   TELEETCDIR"
+.br
+.ti -1c
+.RI "#define \fBTELEPLUGINBIN\fP   BBSLIBDIR'/telecon'"
+.br
+.ti -1c
+.RI "#define \fBTELEQDIR\fP   TELEETCDIR"
+.br
+.ti -1c
+.RI "#define \fBTELEUSRDIR\fP   TELEDIR'/.usr'"
+.br
+.ti -1c
+.RI "#define \fBUSRDIR\fP   BBSDATADIR'/usr'"
+.br
+.ti -1c
+.RI "#define \fBXLATIONDIR\fP   BBSETCDIR'/xlation'"
+.br
+.ti -1c
+.RI "#define \fBNETMAILDIR\fP   '/var/spool/mail'"
+.br
+.ti -1c
+.RI "#define \fBPROCDIR\fP   '/proc'"
+.br
+.ti -1c
+.RI "#define \fBTMPDIR\fP   '/tmp'"
+.br
+.in -1c
+.SS "Standard BBS subsystem names"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBBSDIALOGBIN\fP   BINDIR'/bbsdialog'"
+.br
+.ti -1c
+.RI "#define \fBBBSMAILBIN\fP   BINDIR'/bbsmail'"
+.br
+.ti -1c
+.RI "#define \fBBULLETINBIN\fP   MODULEDIR'/bulletins'"
+.br
+.ti -1c
+.RI "#define \fBEMUDBIN\fP   DAEMONDIR'/emud'"
+.br
+.ti -1c
+.RI "#define \fBLINEDBIN\fP   BINDIR'/lined'"
+.br
+.ti -1c
+.RI "#define \fBLOGINBIN\fP   '/bin/login'"
+.br
+.ti -1c
+.RI "#define \fBBBSLOGINBIN\fP   BINDIR'/bbslogin'"
+.br
+.ti -1c
+.RI "#define \fBLOGOUTBIN\fP   BINDIR'/bbslogout'"
+.br
+.ti -1c
+.RI "#define \fBREMSYSBIN\fP   MODULEDIR'/remsys'"
+.br
+.ti -1c
+.RI "#define \fBSIGNUPBIN\fP   BINDIR'/signup'"
+.br
+.ti -1c
+.RI "#define \fBSTATSBIN\fP   BINDIR'/stats'"
+.br
+.ti -1c
+.RI "#define \fBSTTYBIN\fP   '/bin/stty'"
+.br
+.ti -1c
+.RI "#define \fBUPDOWNBIN\fP   BINDIR'/updown'"
+.br
+.ti -1c
+.RI "#define \fBUSERADDBIN\fP   BINDIR'/bbsuseradd'"
+.br
+.ti -1c
+.RI "#define \fBUSERDELBIN\fP   BINDIR'/bbsdeluser'"
+.br
+.ti -1c
+.RI "#define \fBVISEDBIN\fP   BINDIR'/vised'"
+.br
+.in -1c
+.SS "Filenames used throughout the system."
+
+.in +1c
+.ti -1c
+.RI "#define \fBAUDITFILE\fP   LOGDIR'/audit' /**< Full path to the Audit Trail */"
+.br
+.RI "\fIFull path to the Audit Trail. \fP"
+.ti -1c
+.RI "#define \fBBADPASSFILE\fP   BBSETCDIR'/stupid.passwords' /**< A list of forbidden passwords */"
+.br
+.RI "\fIA list of forbidden passwords. \fP"
+.ti -1c
+.RI "#define \fBBADUIDFILE\fP   BBSETCDIR'/bad.userids' /**< A list of forbidden user IDs */"
+.br
+.RI "\fIA list of forbidden user IDs. \fP"
+.ti -1c
+.RI "#define \fBBAUDSTATFILE\fP   STATDIR'/baudstats' /**< Speed statistics log file */"
+.br
+.RI "\fISpeed statistics log file. \fP"
+.ti -1c
+.RI "#define \fBBBSDPIPEFILE\fP   BBSETCDIR'/pbbsd'"
+.br
+.ti -1c
+.RI "#define \fBBBSRESTARTFILE\fP   BBSETCDIR'/rc.bbs'"
+.br
+.ti -1c
+.RI "#define \fBCHANDEFFILE\fP   CHANDEFDIR'/channels' /**< Binary file where \fBchannels\fP are defined */"
+.br
+.RI "\fIBinary file where channels are defined. \fP"
+.ti -1c
+.RI "#define \fBGETTYDEFFILE\fP   CHANDEFDIR'/bbsgetty.' /**< bbsgetty channel definition file */"
+.br
+.RI "\fIbbsgetty channel definition file \fP"
+.ti -1c
+.RI "#define \fBCHANDEFSRCFILE\fP   CHANDEFDIR'/CHANNELS' /**< Text file where \fBchannels\fP are defined */"
+.br
+.RI "\fIText file where channels are defined. \fP"
+.ti -1c
+.RI "#define \fBCLASSFILE\fP   BBSETCDIR'/userclasses' /**< Binary file where user classes are stored */"
+.br
+.RI "\fIBinary file where user classes are stored. \fP"
+.ti -1c
+.RI "#define \fBCLNUPAUDITFILE\fP   LOGDIR'/audit.cleanup' /**< Cleanup log file */"
+.br
+.RI "\fICleanup log file. \fP"
+.ti -1c
+.RI "#define \fBCLSSTATFILE\fP   STATDIR'/clsstats' /**< User class statistics log file */"
+.br
+.RI "\fIUser class statistics log file. \fP"
+.ti -1c
+.RI "#define \fBCOOKIEFILE\fP   COOKIEDIR'/cookies-%02d.dat'"
+.br
+.ti -1c
+.RI "#define \fBCOOKIEIDXFILE\fP   COOKIEDIR'/cookies-%02d.idx'"
+.br
+.ti -1c
+.RI "#define \fBDAYSTATFILE\fP   STATDIR'/daystats' /**< Daily traffic log file */"
+.br
+.RI "\fIDaily traffic log file. \fP"
+.ti -1c
+.RI "#define \fBDEMOSTATFILE\fP   STATDIR'/demographics' /**< Demographics log file */"
+.br
+.RI "\fIDemographics log file. \fP"
+.ti -1c
+.RI "#define \fBEMLLISTFILE\fP   EMAILDIR'/'MSGLISTFILE"
+.br
+.ti -1c
+.RI "#define \fBERRORFILE\fP   LOGDIR'/errors' /**< Fatal error log file */"
+.br
+.RI "\fIFatal error log file. \fP"
+.ti -1c
+.RI "#define \fBETCTTYFILE\fP   '/etc/ttys' /**< The UNIX /etc/ttys file that maps terminal types to ttys */"
+.br
+.RI "\fIThe UNIX /etc/ttys file that maps terminal types to ttys. \fP"
+.ti -1c
+.RI "#define \fBFLETTRWORDS\fP   BBSETCDIR'/four.letter.words' /**< A list of words used to create passwords */"
+.br
+.RI "\fIA list of words used to create passwords. \fP"
+.ti -1c
+.RI "#define \fBLANGUAGEFILE\fP   BBSETCDIR'/languages' /**< List of languages of the BBS */"
+.br
+.RI "\fIList of languages of the BBS. \fP"
+.ti -1c
+.RI "#define \fBLOGINMSGFILE\fP   BBSETCDIR'/login.message' /**< The login message of the day */"
+.br
+.RI "\fIThe login message of the day. \fP"
+.ti -1c
+.RI "#define \fBLOGINSCRIPT\fP   BBSETCDIR'/bbs.session' /**< The script that manages a user's entire session */"
+.br
+.RI "\fIThe script that manages a user's entire session. \fP"
+.ti -1c
+.RI "#define \fBMENUMANINDEX\fP   MENUMANDIR'/.index' /**< Index file for Menuman */"
+.br
+.RI "\fIIndex file for Menuman. \fP"
+.ti -1c
+.RI "#define \fBMENUMANPAGES\fP   MENUMANDIR'/.pages' /**< Page directory for Menuman */"
+.br
+.RI "\fIPage directory for Menuman. \fP"
+.ti -1c
+.RI "#define \fBMODSTATFILE\fP   STATDIR'/modstats' /**< Module usage statistics log file */"
+.br
+.RI "\fIModule usage statistics log file. \fP"
+.ti -1c
+.RI "#define \fBMONITORFILE\fP   BBSETCDIR'/monitor' /**< The system \fBmonitor\fP file */"
+.br
+.RI "\fIThe system monitor file. \fP"
+.ti -1c
+.RI "#define \fBMSGLISTFILE\fP   '.LIST'"
+.br
+.ti -1c
+.RI "#define \fBPROTOCOLFILE\fP   BBSETCDIR'/protocols' /**< The file transfer protocol definition file */"
+.br
+.RI "\fIThe file transfer protocol definition file. \fP"
+.ti -1c
+.RI "#define \fBRECENTFILE\fP   LOGDIR'/recent.global' /**< The Megistos equivalent of utmp */"
+.br
+.RI "\fIThe Megistos equivalent of utmp. \fP"
+.ti -1c
+.RI "#define \fBSYSVARFILE\fP   BBSETCDIR'/sysvar' /**< The main system variable block */"
+.br
+.RI "\fIThe main system variable block. \fP"
+.ti -1c
+.RI "#define \fBSYSVARBKFILE\fP   BBSETCDIR'/sysvar-backup' /**< Backup of the system variables */"
+.br
+.RI "\fIBackup of the system variables. \fP"
+.ti -1c
+.RI "#define \fBSYSVARSHMFILE\fP   BBSETCDIR'/sysvar-shm' /**< Shared memory ID of the system variable block */"
+.br
+.RI "\fIShared memory ID of the system variable block. \fP"
+.ti -1c
+.RI "#define \fBTELEACTIONFILE\fP   MBKDIR'/teleactions.mbk'"
+.br
+.ti -1c
+.RI "#define \fBTELEACTMSGFILE\fP   TELEACTIONDIR'/teleactions.msg'"
+.br
+.ti -1c
+.RI "#define \fBTELEACTSRCFILE\fP   TELEACTIONDIR'/ACTIONS'"
+.br
+.ti -1c
+.RI "#define \fBTELEPISRCFILE\fP   TELEPLUGINDIR'/PLUGINS'"
+.br
+.ti -1c
+.RI "#define \fBTELEPLUGINFILE\fP   TELEPLUGINDIR'/plugins'"
+.br
+.ti -1c
+.RI "#define \fBTTYINFOFILE\fP   CHANDEFDIR'/msg-%s' /**< Per-channel message of the day */"
+.br
+.RI "\fIPer-channel message of the day. \fP"
+.ti -1c
+.RI "#define \fBTTYSTATFILE\fP   STATDIR'/ttystats' /**< Channel usage statistics log file */"
+.br
+.RI "\fIChannel usage statistics log file. \fP"
+.ti -1c
+.RI "#define \fBXLATIONFILE\fP   XLATIONDIR'/xlation-binary' /**< Encoding translation table */"
+.br
+.RI "\fIEncoding translation table. \fP"
+.in -1c
+.SS "Miscellaneous."
+
+.in +1c
+.ti -1c
+.RI "#define \fBCLUBLOCK\fP   'LCK..club.%s'"
+.br
+.ti -1c
+.RI "#define \fBECUSERLOCK\fP   'LCK..ecuser.%s'"
+.br
+.ti -1c
+.RI "#define \fBINCLUBLOCK\fP   'LCK..club.%s.%s'"
+.br
+.ti -1c
+.RI "#define \fBMESSAGELOCK\fP   'LCK..msg.%s.%s'"
+.br
+.ti -1c
+.RI "#define \fBMSGREADLOCK\fP   'LCK..msg.%s.%s.%s'"
+.br
+.ti -1c
+.RI "#define \fBNEMESSAGELOCK\fP   'LCK..emsgn'"
+.br
+.ti -1c
+.RI "#define \fBBLTREADLOCK\fP   'LCK..BLT'"
+.br
+.ti -1c
+.RI "#define \fBBBSD_IPC\fP   0x42425344  /**< This spells 'BBSD' (BBS restart) */"
+.br
+.RI "\fIThis spells 'BBSD' (BBS restart). \fP"
+.ti -1c
+.RI "#define \fBDELETEDCLASS\fP   'DELETED' /**< Where do deleted users go? (may need to change other classes) */"
+.br
+.RI "\fIWhere do deleted users go? (may need to change other classes). \fP"
+.ti -1c
+.RI "#define \fBEMAILCLUBNAME\fP   'Email'"
+.br
+.ti -1c
+.RI "#define \fBEMUD_IPC\fP   0x454d5544 /**< This spells 'EMUD' (BBS restart) */"
+.br
+.RI "\fIThis spells 'EMUD' (BBS restart). \fP"
+.ti -1c
+.RI "#define \fBEMULOGSIZE\fP   4e096"
+.br
+.ti -1c
+.RI "#define \fBFILEATTACHMENT\fP   '%d.att' /**< The format of message attachments */"
+.br
+.RI "\fIThe format of message attachments. \fP"
+.ti -1c
+.RI "#define \fBKEYLENGTH\fP   4"
+.br
+.ti -1c
+.RI "#define \fBLOGINSTRIKES\fP   3 /**< Hard-wired number of login attempts */"
+.br
+.RI "\fIHard-wired number of login attempts. \fP"
+.ti -1c
+.RI "#define \fBMAXARCHIVERS\fP   20 /**< Maximum number of archivers allowed */"
+.br
+.RI "\fIMaximum number of archivers allowed. \fP"
+.ti -1c
+.RI "#define \fBMAXCLASS\fP   64 /**< Maximum number of classes allowed (rebuild class file) */"
+.br
+.RI "\fIMaximum number of classes allowed (rebuild class file). \fP"
+.ti -1c
+.RI "#define \fBMAXINPLEN\fP   2048 /**< Length of user input buf (may cause overflows in silly modules) */"
+.br
+.RI "\fILength of user input buf (may cause overflows in silly modules). \fP"
+.ti -1c
+.RI "#define \fBNUMLANGUAGES\fP   9 /**< Maximum number of languages */"
+.br
+.RI "\fIMaximum number of languages. \fP"
+.ti -1c
+.RI "#define \fBNUMXLATIONS\fP   10 /**< Maximum number of encodings */"
+.br
+.RI "\fIMaximum number of encodings. \fP"
+.ti -1c
+.RI "#define \fBMESSAGEFILE\fP   '%010d'"
+.br
+.ti -1c
+.RI "#define \fBMSGBUFSIZE\fP   8192 /**< Buffer for preparing user prompts */"
+.br
+.RI "\fIBuffer for preparing user prompts. \fP"
+.ti -1c
+.RI "#define \fBMSGINDEX\fP   '.INDEX%d'"
+.br
+.ti -1c
+.RI "#define \fBRECENT_ENTRIES\fP   20 /**< Number of recent per-user logons retained */"
+.br
+.RI "\fINumber of recent per-user logons retained. \fP"
+.ti -1c
+.RI "#define \fBREGISTRYSIZE\fP   1024 /**< Size of user registry record */"
+.br
+.RI "\fISize of user registry record. \fP"
+.ti -1c
+.RI "#define \fBSIGCHAT\fP   SIGUSR1 /**< The signal used to toggle Sysop chat */"
+.br
+.RI "\fIThe signal used to toggle Sysop chat. \fP"
+.ti -1c
+.RI "#define \fBSIGMAIN\fP   SIGUSR2 /**< Signal to drop to main channel in teleconferences */"
+.br
+.RI "\fISignal to drop to main channel in teleconferences. \fP"
+.ti -1c
+.RI "#define \fBSIGNUPID\fP   'new' /**< What new users have to type to signup */"
+.br
+.RI "\fIWhat new users have to type to signup. \fP"
+.ti -1c
+.RI "#define \fBSYSOP\fP   'Sysop' /**< The username of the Sysop */"
+.br
+.RI "\fIThe username of the Sysop. \fP"
+.ti -1c
+.RI "#define \fBTOP_N_ENTRIES\fP   30 /**< Number of entries in the Top listings */"
+.br
+.RI "\fINumber of entries in the Top listings. \fP"
+.ti -1c
+.RI "#define \fBEMAILDIRNAME\fP   '.email'"
+.br
+.ti -1c
+.RI "#define \fBINJOTHFNAME\fP   ONLINEDIR'/.injoth-%s'"
+.br
+.ti -1c
+.RI "#define \fBXLATIONSRC\fP   'xlation.%d' /**< Output translation tables */"
+.br
+.RI "\fIOutput translation tables. \fP"
+.ti -1c
+.RI "#define \fBKBDXLATIONSRC\fP   'kbdxlation.%d' /**< Input translation tables */"
+.br
+.RI "\fIInput translation tables. \fP"
+.ti -1c
+.RI "#define \fBFNAMECHARS\fP"
+.br
+.RI "\fICharacters allowed in user-supplied filenames. \fP"
+.in -1c
+.SS "Basic integer types"
+
+.in +1c
+.ti -1c
+.RI "typedef int8_t \fBint8\fP"
+.br
+.RI "\fI8-bit signed integer \fP"
+.ti -1c
+.RI "typedef int16_t \fBint16\fP"
+.br
+.RI "\fI16-bit signed integer \fP"
+.ti -1c
+.RI "typedef int32_t \fBint32\fP"
+.br
+.RI "\fI32-bit signed integer \fP"
+.ti -1c
+.RI "typedef int64_t \fBint64\fP"
+.br
+.RI "\fI64-bit signed integer \fP"
+.ti -1c
+.RI "typedef uint8_t \fBuint8\fP"
+.br
+.RI "\fI8-bit unsigned integer \fP"
+.ti -1c
+.RI "typedef uint16_t \fBuint16\fP"
+.br
+.RI "\fI16-bit unsigned integer \fP"
+.ti -1c
+.RI "typedef uint32_t \fBuint32\fP"
+.br
+.RI "\fI32-bit unsigned integer \fP"
+.ti -1c
+.RI "typedef uint64_t \fBuint64\fP"
+.br
+.RI "\fI64-bit unsigned integer \fP"
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef \fBuint32\fP \fBbbskey_t\fP"
+.br
+.RI "\fIType of security `keys' and `locks'. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+High-level, hardwired system configuration. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This is a sensitive file that contains a lot of values that are hardwired into the system. In fact, it contains almost \fIall\fP of the values that aren't readily configurable by the end user (erm, Sysop).
+.PP
+You can change these, but you shouldn't do so after your system has compiled and ran for the first time. Oh, unless you're into heavy wizardry and/or pain (to misquote Larry Wall).
+.PP
+Subsequent documentation will clearly note which options can be frobbed and at what stage. But take it with a pinch of salt. Anything that isn't documented is almost certainly a no-no.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     config.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, July 94                                                   **
+ **  PURPOSE:  define configuration macros                                  **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: config.h,v 1.8 2004/02/29 17:10:14 alexios Exp $
+ *
+ * $Log: config.h,v $
+ * Revision 1.8  2004/02/29 17:10:14  alexios
+ * Various changes to reflect the new infrastructure.
+ *
+ * Revision 1.7  2004/02/22 18:52:39  alexios
+ * Obsoleted BBSUSERNAME. Added BBSRUNDIR where all the PIDs are stored
+ * (it was BBSETCDIR previously). Added DAEMONDIR which is where the
+ * daemons live. It's used by bbsinitd to spawn the daemons. Fixed MBKDIR
+ * so it's a child of BBSDATADIR, not BBSLIBDIR.
+ *
+ * Revision 1.6  2003/12/19 13:23:51  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
+ * Revision 1.5  2003/09/27 20:29:54  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.4  2003/08/15 18:17:17  alexios
+ * Switched from including bbsconfig.defs.h to bbsconfig.h.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.11  1999/08/13 16:58:25  alexios
+ * Delete BBSTERM and made provisions for BBSUSERNAME to be
+ * mutable using the configure script.
+ *
+ * Revision 0.10  1999/07/18 21:13:24  alexios
+ * Added MetaBBS support.
+ *
+ * Revision 0.9  1998/12/27 15:19:19  alexios
+ * Added autoconf support. Made directories relative to the
+ * BBS prefix directory.
+ *
+ * Revision 0.8  1998/07/26 21:17:06  alexios
+ * Major changes in directory structure.
+ *
+ * Revision 0.7  1997/12/02 20:39:00  alexios
+ * Deleted file of viewers. Added MAXARCHIVERS, the maximum
+ * number of archivers (and/or viewers), which share the same
+ * global mbk file now.
+ *
+ * Revision 0.6  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.5  1997/11/05 10:52:05  alexios
+ * Added NOTIFYDIR for the notify module.
+ *
+ * Revision 0.4  1997/11/03 00:29:40  alexios
+ * Added XLATIONDIR, XLATIONFILE, XLATIONSRC and NUMXLATIONS
+ * to define generalised translation tables.
+ *
+ * Revision 0.3  1997/09/12 12:45:25  alexios
+ * Added directory definitions for the Filing module. Added a
+ * definition for the full pathname to a user's injoth() file
+ * (now obsolete since injoth doesn't use files anymore).
+ *
+ * Revision 0.2  1997/08/30 12:54:20  alexios
+ * Added definition of BBSD pipe file.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+}
+.RE
+.PP
+
+.PP
+Definition in file \fBconfig.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define AUDITFILE   LOGDIR'/audit' /**< Full path to the Audit Trail */"
+.PP
+Full path to the Audit Trail. Definition at line 300 of file config.h.
+.SS "#define BADPASSFILE   BBSETCDIR'/stupid.passwords' /**< A list of forbidden passwords */"
+.PP
+A list of forbidden passwords. Definition at line 302 of file config.h.
+.SS "#define BADUIDFILE   BBSETCDIR'/bad.userids' /**< A list of forbidden user IDs */"
+.PP
+A list of forbidden user IDs. Definition at line 304 of file config.h.
+.SS "#define BAUDSTATFILE   STATDIR'/baudstats' /**< Speed statistics log file */"
+.PP
+Speed statistics log file. Definition at line 306 of file config.h.
+.SS "#define BBSD_IPC   0x42425344  /**< This spells 'BBSD' (BBS restart) */"
+.PP
+This spells 'BBSD' (BBS restart). Definition at line 396 of file config.h.
+.SS "#define BBSDATADIR   'data'"
+.PP
+Definition at line 189 of file config.h.
+.SS "#define BBSDIALOGBIN   BINDIR'/bbsdialog'"
+.PP
+Definition at line 264 of file config.h.
+.SS "#define BBSDPIPEFILE   BBSETCDIR'/pbbsd'"
+.PP
+Definition at line 308 of file config.h.
+.SS "#define BBSETCDIR   'etc'"
+.PP
+Definition at line 190 of file config.h.
+.SS "#define BBSFILEDIR   BBSDATADIR'/files'"
+.PP
+Definition at line 191 of file config.h.
+.SS "#define BBSLIBDIR   'lib'"
+.PP
+Definition at line 192 of file config.h.
+.SS "#define BBSLOGINBIN   BINDIR'/bbslogin'"
+.PP
+Definition at line 270 of file config.h.
+.SS "#define BBSMAILBIN   BINDIR'/bbsmail'"
+.PP
+Definition at line 265 of file config.h.
+.SS "#define BBSMODULERCDIR   BBSETC'/module.rc'"
+.PP
+Definition at line 193 of file config.h.
+.SS "#define BBSRESTARTFILE   BBSETCDIR'/rc.bbs'"
+.PP
+Definition at line 309 of file config.h.
+.SS "#define BBSRUNDIR   'run'"
+.PP
+Definition at line 194 of file config.h.
+.SS "#define BINDIR   'bin'"
+.PP
+Definition at line 195 of file config.h.
+.SS "#define BLTDBDIR   MSGSDIR'/..bltdb'"
+.PP
+Definition at line 198 of file config.h.
+.SS "#define BLTREADLOCK   'LCK..BLT'"
+.PP
+Definition at line 394 of file config.h.
+.SS "#define BULLETINBIN   MODULEDIR'/bulletins'"
+.PP
+Definition at line 266 of file config.h.
+.SS "#define CHANDEFDIR   BBSETCDIR'/channel.defs'"
+.PP
+Definition at line 199 of file config.h.
+.SS "#define CHANDEFFILE   CHANDEFDIR'/channels' /**< Binary file where \fBchannels\fP are defined */"
+.PP
+Binary file where channels are defined. Definition at line 310 of file config.h.
+.SS "#define CHANDEFSRCFILE   CHANDEFDIR'/CHANNELS' /**< Text file where \fBchannels\fP are defined */"
+.PP
+Text file where channels are defined. Definition at line 314 of file config.h.
+.SS "#define CLASSFILE   BBSETCDIR'/userclasses' /**< Binary file where user classes are stored */"
+.PP
+Binary file where user classes are stored. Definition at line 316 of file config.h.
+.SS "#define CLNUPAUDITFILE   LOGDIR'/audit.cleanup' /**< Cleanup log file */"
+.PP
+Cleanup log file. Definition at line 318 of file config.h.
+.SS "#define CLSSTATFILE   STATDIR'/clsstats' /**< User class statistics log file */"
+.PP
+User class statistics log file. Definition at line 320 of file config.h.
+.SS "#define CLUBAXDIR   MSGSDIR'/..access'"
+.PP
+Definition at line 200 of file config.h.
+.SS "#define CLUBHDRDIR   MSGSDIR'/..clubhdr'"
+.PP
+Definition at line 201 of file config.h.
+.SS "#define CLUBLOCK   'LCK..club.%s'"
+.PP
+Definition at line 388 of file config.h.
+.SS "#define CONFIGDIR   BBSETCDIR'/config'"
+.PP
+Definition at line 202 of file config.h.
+.SS "#define COOKIEDIR   BBSDATADIR'/cookie'"
+.PP
+Definition at line 203 of file config.h.
+.SS "#define COOKIEFILE   COOKIEDIR'/cookies-%02d.dat'"
+.PP
+Definition at line 322 of file config.h.
+.SS "#define COOKIEIDXFILE   COOKIEDIR'/cookies-%02d.idx'"
+.PP
+Definition at line 323 of file config.h.
+.SS "#define DAEMONDIR   BINDIR'/daemons'"
+.PP
+Definition at line 196 of file config.h.
+.SS "#define DAYSTATFILE   STATDIR'/daystats' /**< Daily traffic log file */"
+.PP
+Daily traffic log file. Definition at line 324 of file config.h.
+.SS "#define DELETEDCLASS   'DELETED' /**< Where do deleted users go? (may need to change other classes) */"
+.PP
+Where do deleted users go? (may need to change other classes). Definition at line 403 of file config.h.
+.SS "#define DEMOSTATFILE   STATDIR'/demographics' /**< Demographics log file */"
+.PP
+Demographics log file. Definition at line 326 of file config.h.
+.SS "#define DEVDIR   '/dev'"
+.PP
+Definition at line 204 of file config.h.
+.SS "#define DOCDIR   'doc'"
+.PP
+Definition at line 205 of file config.h.
+.SS "#define ECUSERLOCK   'LCK..ecuser.%s'"
+.PP
+Definition at line 389 of file config.h.
+.SS "#define EMAILATTDIR   EMAILDIR'/'MSGATTDIR"
+.PP
+Definition at line 206 of file config.h.
+.SS "#define EMAILCLUBNAME   'Email'"
+.PP
+Definition at line 405 of file config.h.
+.SS "#define EMAILDIR   MSGSDIR'/'EMAILDIRNAME"
+.PP
+Definition at line 207 of file config.h.
+.SS "#define EMAILDIRNAME   '.email'"
+.PP
+Definition at line 445 of file config.h.
+.SS "#define EMLLISTFILE   EMAILDIR'/'MSGLISTFILE"
+.PP
+Definition at line 328 of file config.h.
+.SS "#define EMUD_IPC   0x454d5544 /**< This spells 'EMUD' (BBS restart) */"
+.PP
+This spells 'EMUD' (BBS restart). Definition at line 406 of file config.h.
+.SS "#define EMUDBIN   DAEMONDIR'/emud'"
+.PP
+Definition at line 267 of file config.h.
+.SS "#define EMUFIFODIR   'etc'"
+.PP
+Definition at line 208 of file config.h.
+.SS "#define EMULOGDIR   'etc'"
+.PP
+Definition at line 209 of file config.h.
+.SS "#define EMULOGSIZE   4e096"
+.PP
+Definition at line 408 of file config.h.
+.SS "#define ERRORFILE   LOGDIR'/errors' /**< Fatal error log file */"
+.PP
+Fatal error log file. Definition at line 329 of file config.h.
+.SS "#define ETCTTYFILE   '/etc/ttys' /**< The UNIX /etc/ttys file that maps terminal types to ttys */"
+.PP
+The UNIX /etc/ttys file that maps terminal types to ttys. Definition at line 331 of file config.h.
+.SS "#define EVENTDIR   BBSDATADIR'/events'"
+.PP
+Definition at line 210 of file config.h.
+.SS "#define FILEATTACHMENT   '%d.att' /**< The format of message attachments */"
+.PP
+The format of message attachments. Definition at line 409 of file config.h.
+.SS "#define FILELIBDBDIR   BBSFILEDIR'/.DB'"
+.PP
+Definition at line 211 of file config.h.
+.SS "#define FILELIBDIR   BBSDATADIR'/files'"
+.PP
+Definition at line 212 of file config.h.
+.SS "#define FLETTRWORDS   BBSETCDIR'/four.letter.words' /**< A list of words used to create passwords */"
+.PP
+A list of words used to create passwords. Definition at line 333 of file config.h.
+.SS "#define FNAMECHARS"
+.PP
+\fBValue:\fP.nf
+'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' \
+                       '1234567890@#%^()-_+=[].'
+.fi
+Characters allowed in user-supplied filenames. 
+.PP
+Definition at line 454 of file config.h.
+.SS "#define GCSDIR   BBSLIBDIR'/gcs'"
+.PP
+Definition at line 213 of file config.h.
+.SS "#define GETTYDEFFILE   CHANDEFDIR'/bbsgetty.' /**< bbsgetty channel definition file */"
+.PP
+bbsgetty channel definition file Definition at line 312 of file config.h.
+.SS "#define IHAVEDIR   MSGSDIR'/..ihave'"
+.PP
+Definition at line 214 of file config.h.
+.SS "#define INCLUBLOCK   'LCK..club.%s.%s'"
+.PP
+Definition at line 390 of file config.h.
+.SS "#define INJOTHFNAME   ONLINEDIR'/.injoth-%s'"
+.PP
+Definition at line 446 of file config.h.
+.SS "#define KBDXLATIONSRC   'kbdxlation.%d' /**< Input translation tables */"
+.PP
+Input translation tables. Definition at line 449 of file config.h.
+.SS "#define KEYLENGTH   4"
+.PP
+Definition at line 411 of file config.h.
+.SS "#define LANGUAGEFILE   BBSETCDIR'/languages' /**< List of languages of the BBS */"
+.PP
+List of languages of the BBS. Definition at line 335 of file config.h.
+.SS "#define LINEDBIN   BINDIR'/lined'"
+.PP
+Definition at line 268 of file config.h.
+.SS "#define LOCKDIR   'lock'"
+.PP
+Definition at line 215 of file config.h.
+.SS "#define LOGDIR   'log'"
+.PP
+Definition at line 216 of file config.h.
+.SS "#define LOGINBIN   '/bin/login'"
+.PP
+Definition at line 269 of file config.h.
+.SS "#define LOGINMSGFILE   BBSETCDIR'/login.message' /**< The login message of the day */"
+.PP
+The login message of the day. Definition at line 337 of file config.h.
+.SS "#define LOGINSCRIPT   BBSETCDIR'/bbs.session' /**< The script that manages a user's entire session */"
+.PP
+The script that manages a user's entire session. Definition at line 339 of file config.h.
+.SS "#define LOGINSTRIKES   3 /**< Hard-wired number of login attempts */"
+.PP
+Hard-wired number of login attempts. Definition at line 412 of file config.h.
+.SS "#define LOGOUTBIN   BINDIR'/bbslogout'"
+.PP
+Definition at line 271 of file config.h.
+.SS "#define MAILERDIR   BBSDATADIR'/mailer'"
+.PP
+Definition at line 217 of file config.h.
+.SS "#define MAILERFILESDIR   MAILERDIR'/QWKfiles'"
+.PP
+Definition at line 218 of file config.h.
+.SS "#define MAILERREQDIR   MAILERDIR'/requests'"
+.PP
+Definition at line 219 of file config.h.
+.SS "#define MAILERUSRDIR   MAILERDIR'/usr'"
+.PP
+Definition at line 220 of file config.h.
+.SS "#define MAXARCHIVERS   20 /**< Maximum number of archivers allowed */"
+.PP
+Maximum number of archivers allowed. Definition at line 414 of file config.h.
+.SS "#define MAXCLASS   64 /**< Maximum number of classes allowed (rebuild class file) */"
+.PP
+Maximum number of classes allowed (rebuild class file). Definition at line 416 of file config.h.
+.SS "#define MAXINPLEN   2048 /**< Length of user input buf (may cause overflows in silly modules) */"
+.PP
+Length of user input buf (may cause overflows in silly modules). Definition at line 418 of file config.h.
+.SS "#define MBKDIR   BBSDATADIR'/prompts'"
+.PP
+Definition at line 221 of file config.h.
+.SS "#define MBKINCLUDEDIR   __INCLUDEDIR'/mbk'"
+.PP
+Definition at line 222 of file config.h.
+.SS "#define MENUMANDIR   BBSDATADIR'/menuman'"
+.PP
+Definition at line 223 of file config.h.
+.SS "#define MENUMANINDEX   MENUMANDIR'/.index' /**< Index file for Menuman */"
+.PP
+Index file for Menuman. Definition at line 341 of file config.h.
+.SS "#define MENUMANPAGES   MENUMANDIR'/.pages' /**< Page directory for Menuman */"
+.PP
+Page directory for Menuman. Definition at line 343 of file config.h.
+.SS "#define MESSAGEFILE   '%010d'"
+.PP
+Definition at line 424 of file config.h.
+.SS "#define MESSAGELOCK   'LCK..msg.%s.%s'"
+.PP
+Definition at line 391 of file config.h.
+.SS "#define MODSTATFILE   STATDIR'/modstats' /**< Module usage statistics log file */"
+.PP
+Module usage statistics log file. Definition at line 345 of file config.h.
+.SS "#define MODULEDIR   BINDIR'/modules'"
+.PP
+Definition at line 197 of file config.h.
+.SS "#define MONITORFILE   BBSETCDIR'/monitor' /**< The system \fBmonitor\fP file */"
+.PP
+The system monitor file. Definition at line 347 of file config.h.
+.SS "#define MSGATTDIR   '.ATT'"
+.PP
+Definition at line 224 of file config.h.
+.SS "#define MSGBLTDIR   '.BLT'"
+.PP
+Definition at line 225 of file config.h.
+.SS "#define MSGBUFSIZE   8192 /**< Buffer for preparing user prompts */"
+.PP
+Buffer for preparing user prompts. Definition at line 425 of file config.h.
+.SS "#define MSGINDEX   '.INDEX%d'"
+.PP
+Definition at line 427 of file config.h.
+.SS "#define MSGLISTFILE   '.LIST'"
+.PP
+Definition at line 349 of file config.h.
+.SS "#define MSGREADLOCK   'LCK..msg.%s.%s.%s'"
+.PP
+Definition at line 392 of file config.h.
+.SS "#define MSGSDIR   BBSDATADIR'/msgs'"
+.PP
+Definition at line 226 of file config.h.
+.SS "#define MSGSDISTDIR   MSGSDIR'/..dist'"
+.PP
+Definition at line 227 of file config.h.
+.SS "#define MSGSIGDIR   MSGSDIR'/..sig'"
+.PP
+Definition at line 228 of file config.h.
+.SS "#define MSGUSRDIR   MSGSDIR'/..usr'"
+.PP
+Definition at line 229 of file config.h.
+.SS "#define NEMESSAGELOCK   'LCK..emsgn'"
+.PP
+Definition at line 393 of file config.h.
+.SS "#define NETMAILDIR   '/var/spool/mail'"
+.PP
+Definition at line 246 of file config.h.
+.SS "#define NEWSDIR   BBSDATADIR'/news'"
+.PP
+Definition at line 230 of file config.h.
+.SS "#define NUMLANGUAGES   9 /**< Maximum number of languages */"
+.PP
+Maximum number of languages. Definition at line 420 of file config.h.
+.SS "#define NUMXLATIONS   10 /**< Maximum number of encodings */"
+.PP
+Maximum number of encodings. Definition at line 422 of file config.h.
+.SS "#define ONLINEDIR   BBSETCDIR'/online'"
+.PP
+Definition at line 231 of file config.h.
+.SS "#define PROCDIR   '/proc'"
+.PP
+Definition at line 247 of file config.h.
+.SS "#define PROTOCOLFILE   BBSETCDIR'/protocols' /**< The file transfer protocol definition file */"
+.PP
+The file transfer protocol definition file. Definition at line 350 of file config.h.
+.SS "#define QSCDIR   MSGSDIR'/..quickscan'"
+.PP
+Definition at line 232 of file config.h.
+.SS "#define RCS_VER   '$Id: config.h,v 1.8 2004/02/29 17:10:14 alexios Exp $'"
+.PP
+Definition at line 124 of file config.h.
+.SS "#define RECENT_ENTRIES   20 /**< Number of recent per-user logons retained */"
+.PP
+Number of recent per-user logons retained. Definition at line 428 of file config.h.
+.SS "#define RECENTDIR   BBSDATADIR'/recent'"
+.PP
+Definition at line 233 of file config.h.
+.SS "#define RECENTFILE   LOGDIR'/recent.global' /**< The Megistos equivalent of utmp */"
+.PP
+The Megistos equivalent of utmp. Definition at line 352 of file config.h.
+.SS "#define REGISTRYDIR   BBSDATADIR'/registry'"
+.PP
+Definition at line 234 of file config.h.
+.SS "#define REGISTRYSIZE   1024 /**< Size of user registry record */"
+.PP
+Size of user registry record. Definition at line 430 of file config.h.
+.SS "#define REMSYSBIN   MODULEDIR'/remsys'"
+.PP
+Definition at line 272 of file config.h.
+.SS "#define SIGCHAT   SIGUSR1 /**< The signal used to toggle Sysop chat */"
+.PP
+The signal used to toggle Sysop chat. Definition at line 432 of file config.h.
+.SS "#define SIGMAIN   SIGUSR2 /**< Signal to drop to main channel in teleconferences */"
+.PP
+Signal to drop to main channel in teleconferences. Definition at line 434 of file config.h.
+.SS "#define SIGNUPBIN   BINDIR'/signup'"
+.PP
+Definition at line 273 of file config.h.
+.SS "#define SIGNUPID   'new' /**< What new users have to type to signup */"
+.PP
+What new users have to type to signup. Definition at line 436 of file config.h.
+.SS "#define STATDIR   BBSDATADIR'/stats'"
+.PP
+Definition at line 235 of file config.h.
+.SS "#define STATSBIN   BINDIR'/stats'"
+.PP
+Definition at line 274 of file config.h.
+.SS "#define STTYBIN   '/bin/stty'"
+.PP
+Definition at line 275 of file config.h.
+.SS "#define SYSOP   'Sysop' /**< The username of the Sysop */"
+.PP
+The username of the Sysop. Definition at line 441 of file config.h.
+.SS "#define SYSVARBKFILE   BBSETCDIR'/sysvar-backup' /**< Backup of the system variables */"
+.PP
+Backup of the system variables. Definition at line 356 of file config.h.
+.SS "#define SYSVARFILE   BBSETCDIR'/sysvar' /**< The main system variable block */"
+.PP
+The main system variable block. Definition at line 354 of file config.h.
+.SS "#define SYSVARSHMFILE   BBSETCDIR'/sysvar-shm' /**< Shared memory ID of the system variable block */"
+.PP
+Shared memory ID of the system variable block. Definition at line 358 of file config.h.
+.SS "#define TELEACTIONDIR   TELEETCDIR"
+.PP
+Definition at line 236 of file config.h.
+.SS "#define TELEACTIONFILE   MBKDIR'/teleactions.mbk'"
+.PP
+Definition at line 360 of file config.h.
+.SS "#define TELEACTMSGFILE   TELEACTIONDIR'/teleactions.msg'"
+.PP
+Definition at line 361 of file config.h.
+.SS "#define TELEACTSRCFILE   TELEACTIONDIR'/ACTIONS'"
+.PP
+Definition at line 362 of file config.h.
+.SS "#define TELEDIR   BBSDATADIR'/telecon'"
+.PP
+Definition at line 237 of file config.h.
+.SS "#define TELEETCDIR   TELEDIR'/.etc'"
+.PP
+Definition at line 238 of file config.h.
+.SS "#define TELEPISRCFILE   TELEPLUGINDIR'/PLUGINS'"
+.PP
+Definition at line 363 of file config.h.
+.SS "#define TELEPLUGINBIN   BBSLIBDIR'/telecon'"
+.PP
+Definition at line 240 of file config.h.
+.SS "#define TELEPLUGINDIR   TELEETCDIR"
+.PP
+Definition at line 239 of file config.h.
+.SS "#define TELEPLUGINFILE   TELEPLUGINDIR'/plugins'"
+.PP
+Definition at line 364 of file config.h.
+.SS "#define TELEQDIR   TELEETCDIR"
+.PP
+Definition at line 241 of file config.h.
+.SS "#define TELEUSRDIR   TELEDIR'/.usr'"
+.PP
+Definition at line 242 of file config.h.
+.SS "#define TMPDIR   '/tmp'"
+.PP
+Definition at line 248 of file config.h.
+.SS "#define TOP_N_ENTRIES   30 /**< Number of entries in the Top listings */"
+.PP
+Number of entries in the Top listings. Definition at line 443 of file config.h.
+.SS "#define TTYINFOFILE   CHANDEFDIR'/msg-%s' /**< Per-channel message of the day */"
+.PP
+Per-channel message of the day. Definition at line 365 of file config.h.
+.SS "#define TTYSTATFILE   STATDIR'/ttystats' /**< Channel usage statistics log file */"
+.PP
+Channel usage statistics log file. Definition at line 367 of file config.h.
+.SS "#define UPDOWNBIN   BINDIR'/updown'"
+.PP
+Definition at line 276 of file config.h.
+.SS "#define USERADDBIN   BINDIR'/bbsuseradd'"
+.PP
+Definition at line 277 of file config.h.
+.SS "#define USERDELBIN   BINDIR'/bbsdeluser'"
+.PP
+Definition at line 278 of file config.h.
+.SS "#define USRDIR   BBSDATADIR'/usr'"
+.PP
+Definition at line 243 of file config.h.
+.SS "#define VISEDBIN   BINDIR'/vised'"
+.PP
+Definition at line 279 of file config.h.
+.SS "#define WANT_SIGNAL_H   1"
+.PP
+Definition at line 135 of file config.h.
+.SS "#define XLATIONDIR   BBSETCDIR'/xlation'"
+.PP
+Definition at line 244 of file config.h.
+.SS "#define XLATIONFILE   XLATIONDIR'/xlation-binary' /**< Encoding translation table */"
+.PP
+Encoding translation table. Definition at line 369 of file config.h.
+.SS "#define XLATIONSRC   'xlation.%d' /**< Output translation tables */"
+.PP
+Output translation tables. Definition at line 447 of file config.h.
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef \fBuint32\fP \fBbbskey_t\fP"
+.PP
+Type of security `keys' and `locks'. Definition at line 165 of file config.h.
+.SS "typedef int16_t \fBint16\fP"
+.PP
+16-bit signed integer Definition at line 153 of file config.h.
+.SS "typedef int32_t \fBint32\fP"
+.PP
+32-bit signed integer Definition at line 154 of file config.h.
+.SS "typedef int64_t \fBint64\fP"
+.PP
+64-bit signed integer Definition at line 155 of file config.h.
+.SS "typedef int8_t \fBint8\fP"
+.PP
+8-bit signed integer Definition at line 152 of file config.h.
+.SS "typedef uint16_t \fBuint16\fP"
+.PP
+16-bit unsigned integer Definition at line 158 of file config.h.
+.SS "typedef uint32_t \fBuint32\fP"
+.PP
+32-bit unsigned integer Definition at line 159 of file config.h.
+.SS "typedef uint64_t \fBuint64\fP"
+.PP
+64-bit unsigned integer Definition at line 160 of file config.h.
+.SS "typedef uint8_t \fBuint8\fP"
+.PP
+8-bit unsigned integer Definition at line 157 of file config.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

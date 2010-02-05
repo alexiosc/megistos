@@ -1,0 +1,7 @@
+[0;1;36m!J If you have a file listing rules and guidelines for your users, or an
+Acceptable Use Policy, this where you put it. This file can be seen by
+anyone on the BBS if they invoke /RULES (this is a silly command, of course,
+you could change it to /AUI by tweaking the source). !)
+
+!JBy the way, if you're reading this from within the BBS, this file lives
+in doc/RULES.!)

@@ -1,0 +1,26 @@
+.TH "Mail Flags (ECF_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Mail Flags (ECF_x) \- Flags used to store user state with respect to mail reading.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBECF_QSCCFG\fP   0x0001	/**< User has configured quickscan. */"
+.br
+.RI "\fIUser has configured quickscan. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags used to store user state with respect to mail reading. .IP "\(bu" 2
+\fCECF_QSCCFG\fP. The user has configured their quickscan. The clubs module takes the user into the quickscan configuration tool on the user's first visit to the module. After the first quickscan, this flag is set and the Clubs module behaves the normal way. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define ECF_QSCCFG   0x0001	/**< User has configured quickscan. */"
+.PP
+User has configured quickscan. Definition at line 427 of file mail.h.

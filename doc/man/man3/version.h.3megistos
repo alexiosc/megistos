@@ -1,0 +1,95 @@
+.TH "version.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+version.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fB__MAJORVERSION\fP   '1'"
+.br
+.ti -1c
+.RI "#define \fB__MINORVERSION\fP   '0'"
+.br
+.ti -1c
+.RI "#define \fB__PATCHLEVEL\fP   '7'"
+.br
+.ti -1c
+.RI "#define \fB__COMPILED_BY\fP   'root@vennea'"
+.br
+.ti -1c
+.RI "#define \fB__MAKE_NUMBER\fP   '1'"
+.br
+.ti -1c
+.RI "#define \fB__DATE\fP   '2004-05-18 20:05:14 +0300'"
+.br
+.ti -1c
+.RI "#define \fB__PREFIX\fP   '/usr'"
+.br
+.ti -1c
+.RI "#define \fB__EXECPREFIX\fP   '/usr'"
+.br
+.ti -1c
+.RI "#define \fB__VIRGINDIR\fP   '/usr/lib/megistos/virgin'"
+.br
+.ti -1c
+.RI "#define \fB__LIBDIR\fP   '/usr/lib/megistos'"
+.br
+.ti -1c
+.RI "#define \fB__DATADIR\fP   '/usr/lib/megistos'"
+.br
+.ti -1c
+.RI "#define \fB__INSTANCEDIR\fP   '/var/lib/megistos'"
+.br
+.ti -1c
+.RI "#define \fB__INCLUDEDIR\fP   '/usr/include/megistos'"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define __COMPILED_BY   'root@vennea'"
+.PP
+Definition at line 8 of file version.h.
+.SS "#define __DATADIR   '/usr/lib/megistos'"
+.PP
+Definition at line 15 of file version.h.
+.SS "#define __DATE   '2004-05-18 20:05:14 +0300'"
+.PP
+Definition at line 10 of file version.h.
+.SS "#define __EXECPREFIX   '/usr'"
+.PP
+Definition at line 12 of file version.h.
+.SS "#define __INCLUDEDIR   '/usr/include/megistos'"
+.PP
+Definition at line 17 of file version.h.
+.SS "#define __INSTANCEDIR   '/var/lib/megistos'"
+.PP
+Definition at line 16 of file version.h.
+.SS "#define __LIBDIR   '/usr/lib/megistos'"
+.PP
+Definition at line 14 of file version.h.
+.SS "#define __MAJORVERSION   '1'"
+.PP
+Definition at line 5 of file version.h.
+.SS "#define __MAKE_NUMBER   '1'"
+.PP
+Definition at line 9 of file version.h.
+.SS "#define __MINORVERSION   '0'"
+.PP
+Definition at line 6 of file version.h.
+.SS "#define __PATCHLEVEL   '7'"
+.PP
+Definition at line 7 of file version.h.
+.SS "#define __PREFIX   '/usr'"
+.PP
+Definition at line 11 of file version.h.
+.SS "#define __VIRGINDIR   '/usr/lib/megistos/virgin'"
+.PP
+Definition at line 13 of file version.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

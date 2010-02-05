@@ -1,0 +1,82 @@
+.TH "Paging result codes (PAUSE_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Paging result codes (PAUSE_x) \- Results codes from the last paging pause.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBPAUSE_NONSTOP\fP   1 /**< The user opted for a non-stop listing. */"
+.br
+.RI "\fIThe user opted for a non-stop listing. \fP"
+.ti -1c
+.RI "#define \fBPAUSE_QUIT\fP   2 /**< The user quit a listing. */"
+.br
+.RI "\fIThe user quit a listing. \fP"
+.ti -1c
+.RI "#define \fBPAUSE_CONTINUE\fP   3 /**< The user continued a paged listing. */"
+.br
+.RI "\fIThe user continued a paged listing. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Results codes from the last paging pause. These provide information on what user's request at the last paging pause (the Nonstop/Quit/Continue/Step message you get when a message won't fit the screen).
+.PP
+Of these constants, the most important one is \fBPAUSE_QUIT\fP. You should test this when printing large lists or tables with loops. The output library will interrupt the message currently printed when the user hits `Q', but there is no way for the library to know what \fIyou\fP are doing. Use something like this:
+.PP
+.PP
+.nf
+
+while (some_condition) {
+
+	. . .
+
+	print (SOME_LIST_FORMAT, . . . );
+
+	. . .
+	 
+	if (mt_lastresult == PAUSE_QUIT) {
+		prompt (LISTCANCEL);
+		break;	
+	}
+}
+    .PP
+.PP
+Otherwise, the user will be able to interrupt individual messages from being printed, but not your entire listing or tabulation loop. It is a good convention to print something like `this listing was aborted' (prompt \fCLISTCANCEL\fP in this case) after doing this so that users will later know the entire list has not been shown.
+.PP
+Anyway, here are the defined values:
+.PP
+.IP "\(bu" 2
+\fBPAUSE_NONSTOP\fP. The user selected non-stop operation. No further paging breaks will be issued until the next request for user input.
+.PP
+.PP
+.IP "\(bu" 2
+\fBPAUSE_QUIT\fP. The user interrupted the list. If you are currently printing a list, table, or generally issuing many messages in a loop, you should break out of the loop, notify the user of the interruption and return the user to the previous menu.
+.PP
+.PP
+.IP "\(bu" 2
+\fBPAUSE_CONTINUE\fP. The simply requested a continuation of the list.
+.PP
+.PP
+You'll notice that there is no result code for the `Step' command. This is because stepping is handled within the formatter, not the pager.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBfmt_lastresult\fP. 
+.RE
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define PAUSE_CONTINUE   3 /**< The user continued a paged listing. */"
+.PP
+The user continued a paged listing. Definition at line 271 of file format.h.
+.SS "#define PAUSE_NONSTOP   1 /**< The user opted for a non-stop listing. */"
+.PP
+The user opted for a non-stop listing. Definition at line 267 of file format.h.
+.SS "#define PAUSE_QUIT   2 /**< The user quit a listing. */"
+.PP
+The user quit a listing. Definition at line 269 of file format.h.

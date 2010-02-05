@@ -1,0 +1,18 @@
+D/patches////
+/MANUAL/2.0/Mon Sep 13 19:44:51 2004//
+/Makefile.am/2.0/Mon Sep 13 19:44:51 2004//
+/Makefile.bcc/2.0/Mon Apr 16 14:56:30 2001//
+/Makefile.gcc/2.0/Mon Apr 16 14:56:30 2001//
+/analyze.c/2.0/Mon Sep 13 19:44:51 2004//
+/compiler.c/2.0/Mon Sep 13 19:44:51 2004//
+/glps-bcc.h/2.0/Mon Sep 13 19:44:52 2004//
+/gsc/2.0/Thu May 10 10:18:39 2001//
+/gsc.c/2.0/Mon Sep 13 19:44:52 2004//
+/gsc.h/2.0/Mon Sep 13 19:44:52 2004//
+/gsc.ide/2.0/Mon Apr 16 14:56:45 2001//
+/gsc.mak/2.0/Mon Apr 16 14:56:45 2001//
+/io-bcc.c/2.0/Mon Sep 13 19:44:52 2004//
+/io.c/2.0/Mon Sep 13 19:44:52 2004//
+/magic.gallups/2.0/Mon Apr 16 14:56:47 2001//
+/test-p.scr/2.0/Mon Apr 16 14:56:49 2001//
+/test-q.scr/2.0/Mon Apr 16 14:56:49 2001//

@@ -1,0 +1,10 @@
+.TH "Time and Date handling" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Time and Date handling \- This module is populated mostly by horrible legacy functions originally meant to provide a modicum of Major BBS compatibility in time calculations.  
+
+.PP
+UNIX, of course, does not separate time and date functions like MS-DOS (and the Major BBS), which is why the functions here are so bletcherous. Thankfully, they can be replaced by more modern equivalent functions \fIand\fP retain their kludgy old functionality.
+.PP
+Currently, the functions here are not documented, and they will become deprecated soon enough. 

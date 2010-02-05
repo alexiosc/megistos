@@ -1,0 +1,194 @@
+.TH "ttynum.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ttynum.h \- Mapping between devices and BBS channels.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBchanneldef\fP"
+.br
+.RI "\fIChannel definition. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: ttynum.h,v 1.4 2003/09/27 20:32:31 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBCHANNEL_MAGIC\fP   'MEGISTOS BINARY CHANNEL FILE\\n\\n\\n'"
+.br
+.RI "\fIThe channel file magic number. \fP"
+.ti -1c
+.RI "#define \fBTTF_CONSOLE\fP   0x0001	/**< Channel is on the system console */"
+.br
+.RI "\fIChannel is on the system console. \fP"
+.ti -1c
+.RI "#define \fBTTF_SERIAL\fP   0x0002	/**< Channel is a plain serial line */"
+.br
+.RI "\fIChannel is a plain serial line. \fP"
+.ti -1c
+.RI "#define \fBTTF_MODEM\fP   0x0004	/**< There's a modem on this channel */"
+.br
+.RI "\fIThere's a modem on this channel. \fP"
+.ti -1c
+.RI "#define \fBTTF_TELNET\fP   0x0008	/**< This channel is for telnet connections */"
+.br
+.RI "\fIThis channel is for telnet connections. \fP"
+.ti -1c
+.RI "#define \fBTTF_SIGNUPS\fP   0x0010	/**< Signups are allowed here */"
+.br
+.RI "\fISignups are allowed here. \fP"
+.ti -1c
+.RI "#define \fBTTF_ASKXLT\fP   0x0100	/**< Ask people for translation mode */"
+.br
+.RI "\fIAsk people for translation mode. \fP"
+.ti -1c
+.RI "#define \fBTTF_ANSI\fP   0x0200	/**< ANSI enabled on this channel by default */"
+.br
+.RI "\fIANSI enabled on this channel by default. \fP"
+.ti -1c
+.RI "#define \fBTTF_ASKANSI\fP   0x0400	/**< Ask people whether they need ANSI */"
+.br
+.RI "\fIAsk people whether they need ANSI. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBchan_init\fP ()"
+.br
+.RI "\fIInitialise the channel map. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getnum\fP (char *tty)"
+.br
+.RI "\fIFind the channel number of a device. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getindex\fP (char *tty)"
+.br
+.RI "\fIFind the index of a channel in \fCchannels\fP. \fP"
+.ti -1c
+.RI "char * \fBchan_getname\fP (\fBuint32\fP num)"
+.br
+.RI "\fIFind the device associated with a channel. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_telnetlinecount\fP ()"
+.br
+.RI "\fICount number of telnet lines in use. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchannels\fP"
+.br
+.RI "\fIThe channels index, mapping ttys to channels. \fP"
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchan_last\fP"
+.br
+.RI "\fILast referenced element of \fCchannels\fP. \fP"
+.ti -1c
+.RI "int \fBchan_count\fP"
+.br
+.RI "\fINumber of channels in \fCchannels\fP. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Mapping between devices and BBS channels. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This header provides function to map between the physical, UNIX device names users are riding and the convenient, numerical BBS channels.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     ttynum.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, July 94                                                   **
+ **  PURPOSE:  Interface to ttynum.c                                        **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: ttynum.h,v 1.4 2003/09/27 20:32:31 alexios Exp $
+ *
+ * $Log: ttynum.h,v $
+ * Revision 1.4  2003/09/27 20:32:31  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.6  1999/07/18 21:13:24  alexios
+ * Added MetaBBS flag to control whether the MetaBBS client
+ * should be enabled for a line.
+ *
+ * Revision 0.5  1998/12/27 15:19:19  alexios
+ * Added some comments and the channel file magic number.
+ *
+ * Revision 0.4  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.3  1997/11/03 00:29:40  alexios
+ * Added xlation field to struct channeldef to keep the number
+ * of the default translation table for a channel. Removed
+ * defines for hardwired xlation tables.
+ *
+ * Revision 0.2  1997/08/30 12:54:20  alexios
+ * Added a config field to allow for the new handling of bbsgetty
+ * configuration.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+*
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBttynum.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: ttynum.h,v 1.4 2003/09/27 20:32:31 alexios Exp $'"
+.PP
+Definition at line 81 of file ttynum.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

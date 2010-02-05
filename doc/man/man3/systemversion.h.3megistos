@@ -1,0 +1,142 @@
+.TH "systemversion.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+systemversion.h \- Declare strings to hold system version numbers.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "char \fBbbs_shortversion\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_systemversion\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_compiledby\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_compiledon\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_majorversion\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_minorversion\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_patchlevel\fP []"
+.br
+.ti -1c
+.RI "char \fBbbs_makenumber\fP []"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Declare strings to hold system version numbers. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This simple header file only declares symbols to hold version information on when the Megistos libraries were built.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************\
+ **                                                                         **
+ **  FILE:     systemversion.h                                              **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, July 94                                                   **
+ **  PURPOSE:  Declare the version of the system                            **
+ **  NOTES:    Proud to say this file has been thoroughly debugged to the   **
+ **            point where even Murphy's Law on Bugs does not apply to it.  **
+ **            Now, if only we can find an interesting name to give to the  **
+ **            damn thing...                                                **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+\*****************************************************************************
+
+
+ *
+ * $Id: systemversion.h,v 1.4 2003/09/27 20:32:53 alexios Exp $
+ *
+ * $Log: systemversion.h,v $
+ * Revision 1.4  2003/09/27 20:32:53  alexios
+ * Documented this file. An easy task.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.4  1998/07/26 21:17:06  alexios
+ * Made version more complete and OS-like.
+ *
+ * Revision 0.3  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.2  1997/11/03 00:29:40  alexios
+ * Changed the version to 0.5a, obviously.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBsystemversion.h\fP.
+.SH "Variable Documentation"
+.PP 
+.SS "char \fBbbs_compiledby\fP[]"
+.PP
+Definition at line 77 of file systemversion.h.
+.SS "char \fBbbs_compiledon\fP[]"
+.PP
+Definition at line 78 of file systemversion.h.
+.SS "char \fBbbs_majorversion\fP[]"
+.PP
+Definition at line 79 of file systemversion.h.
+.SS "char \fBbbs_makenumber\fP[]"
+.PP
+Definition at line 82 of file systemversion.h.
+.SS "char \fBbbs_minorversion\fP[]"
+.PP
+Definition at line 80 of file systemversion.h.
+.SS "char \fBbbs_patchlevel\fP[]"
+.PP
+Definition at line 81 of file systemversion.h.
+.SS "char \fBbbs_shortversion\fP[]"
+.PP
+Definition at line 75 of file systemversion.h.
+.SS "char \fBbbs_systemversion\fP[]"
+.PP
+Definition at line 76 of file systemversion.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

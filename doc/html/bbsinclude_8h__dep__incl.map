@@ -1,0 +1,8 @@
+base referer
+rect $bbs_8h.html 141,17 184,36
+rect $config_8h.html 159,225 215,244
+rect $useracc_8h.html 108,156 175,175
+rect $output_8h.html 168,87 224,105
+rect $miscfx_8h.html 261,225 320,244
+rect $timedate_8h.html 351,87 423,105
+rect $menuman_8h.html 199,156 276,175

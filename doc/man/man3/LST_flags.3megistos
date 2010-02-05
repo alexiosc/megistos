@@ -1,0 +1,70 @@
+.TH "Channel modes (LST_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Channel modes (LST_x) \- Basic line states.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLST_NORMAL\fP   0   /**< Normal behaviour (answers calls, logins) */"
+.br
+.RI "\fINormal behaviour (answers calls, logins). \fP"
+.ti -1c
+.RI "#define \fBLST_NOANSWER\fP   1   /**< Do not answer incoming calls */"
+.br
+.RI "\fIDo not answer incoming calls. \fP"
+.ti -1c
+.RI "#define \fBLST_BUSYOUT\fP   2   /**< Keep the line off-hook so it appears busy */"
+.br
+.RI "\fIKeep the line off-hook so it appears busy. \fP"
+.ti -1c
+.RI "#define \fBLST_OFFLINE\fP   3   /**< Answer calls, say something and hang up */"
+.br
+.RI "\fIAnswer calls, say something and hang up. \fP"
+.ti -1c
+.RI "#define \fBLST_NUMSTATES\fP   4  /**< The number of line states available */"
+.br
+.RI "\fIThe number of line states available. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Basic line states. These control the behaviour of each BBS channel with respect to incoming calls. Here's how it works:
+.PP
+{description}
+.PP
+.IP "\(bu" 2
+\fBLST_NORMAL\fP. Normal BBS behaviour. The channel is open for business, answering calls and allowing connections.
+.PP
+.PP
+.IP "\(bu" 2
+\fBLST_NOANSWER\fP. The channel will not answer incoming connections.
+.PP
+.PP
+.IP "\(bu" 2
+\fBLST_BUSYOUT\fP. The modem is off the hook and the channel behaves as if the line is busy. This, of course, only works with modems.
+.PP
+.PP
+.IP "\(bu" 2
+\fBLST_OFFLINE\fP. The channel answers incoming calls, but does not allow connections. Instead, a message is printed and the line is connection dropped. This way you can let people know the system is down for maintenance, or whatever. Of course, this also means that people get charged for each call. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define LST_BUSYOUT   2   /**< Keep the line off-hook so it appears busy */"
+.PP
+Keep the line off-hook so it appears busy. Definition at line 129 of file channels.h.
+.SS "#define LST_NOANSWER   1   /**< Do not answer incoming calls */"
+.PP
+Do not answer incoming calls. Definition at line 127 of file channels.h.
+.SS "#define LST_NORMAL   0   /**< Normal behaviour (answers calls, logins) */"
+.PP
+Normal behaviour (answers calls, logins). Definition at line 125 of file channels.h.
+.SS "#define LST_NUMSTATES   4  /**< The number of line states available */"
+.PP
+The number of line states available. Definition at line 134 of file channels.h.
+.SS "#define LST_OFFLINE   3   /**< Answer calls, say something and hang up */"
+.PP
+Answer calls, say something and hang up. Definition at line 131 of file channels.h.

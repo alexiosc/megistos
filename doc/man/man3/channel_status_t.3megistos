@@ -1,0 +1,64 @@
+.TH "channel_status_t" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+channel_status_t \- Channel status structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <channels.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBuint32\fP \fBstate\fP"
+.br
+.RI "\fIThe line state (from line_states). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBresult\fP"
+.br
+.RI "\fILast result (from line_results). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBbaud\fP"
+.br
+.RI "\fIThe `baud' (bps, really) rate of the line. \fP"
+.ti -1c
+.RI "char \fBuser\fP [24]"
+.br
+.RI "\fIThe user occupying the line, if any. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Channel status structure. 
+
+This has fields for all the state information attached to channels. It is used by \fBchannel_getstatus()\fP and \fBchannel_setstatus()\fP.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBchannel_getstatus()\fP, \fBchannel_setstatus()\fP 
+.RE
+.PP
+
+.PP
+Definition at line 250 of file channels.h.
+.SH "Field Documentation"
+.PP 
+.SS "\fBint32\fP \fBchannel_status_t::baud\fP"
+.PP
+The `baud' (bps, really) rate of the line. Definition at line 253 of file channels.h.
+.SS "\fBint32\fP \fBchannel_status_t::result\fP"
+.PP
+Last result (from line_results). Definition at line 252 of file channels.h.
+.SS "\fBuint32\fP \fBchannel_status_t::state\fP"
+.PP
+The line state (from line_states). Definition at line 251 of file channels.h.
+.SS "char \fBchannel_status_t::user\fP[24]"
+.PP
+The user occupying the line, if any. Definition at line 256 of file channels.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

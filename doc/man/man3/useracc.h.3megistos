@@ -1,0 +1,697 @@
+.TH "useracc.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+useracc.h \- Definitions related to user accounts.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <megistos/config.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBuseracc_t\fP"
+.br
+.RI "\fIUser account structure. \fP"
+.ti -1c
+.RI "struct \fBclassrec_t\fP"
+.br
+.RI "\fIUser class. \fP"
+.ti -1c
+.RI "struct \fBonlinerec_t\fP"
+.br
+.RI "\fIUser online structure. \fP"
+.ti -1c
+.RI "struct \fBshmuserrec\fP"
+.br
+.RI "\fIPer-user shared memory segment. \fP"
+.ti -1c
+.RI "struct \fBinjoth_buf\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: useracc.h,v 1.5 2003/12/19 13:25:18 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBCHAR\fP   unsigned char"
+.br
+.ti -1c
+.RI "#define \fBDELIM\fP   '!@#$%^&*-_=+.:'"
+.br
+.ti -1c
+.RI "#define \fBUSR_MAGIC\fP   'USER'"
+.br
+.RI "\fIUser account magic. \fP"
+.ti -1c
+.RI "#define \fBUPF_ANSION\fP   0x0001 /**< User likes ANSI directives. */"
+.br
+.RI "\fIUser likes ANSI directives. \fP"
+.ti -1c
+.RI "#define \fBUPF_VISUAL\fP   0x0002 /**< User wants visual tools, where available. */"
+.br
+.RI "\fIUser wants visual tools, where available. \fP"
+.ti -1c
+.RI "#define \fBUPF_NONSTOP\fP   0x0004 /**< Don't pause at the bottom the screen. */"
+.br
+.RI "\fIDon't pause at the bottom the screen. \fP"
+.ti -1c
+.RI "#define \fBUPF_ANSIDEF\fP   0x0008 /**< Use channel default ANSI value. */"
+.br
+.RI "\fIUse channel default ANSI value. \fP"
+.ti -1c
+.RI "#define \fBUPF_ANSIASK\fP   0x0010 /**< Ask about use of ANSI at login. */"
+.br
+.RI "\fIAsk about use of ANSI at login. \fP"
+.ti -1c
+.RI "#define \fBUPF_OBSOLETE\fP   0x0020 /**< Obsolete flag value; re-use at will. */"
+.br
+.RI "\fIObsolete flag value; re-use at will. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRDEF\fP   0x0040 /**< Use default channel translation. */"
+.br
+.RI "\fIUse default channel translation. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRASK\fP   0x0080 /**< Ask for translation mode at login. */"
+.br
+.RI "\fIAsk for translation mode at login. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR0\fP   0x0100 /**< Translation mode, bit 0. */"
+.br
+.RI "\fITranslation mode, bit 0. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR1\fP   0x0200 /**< Translation mode, bit 1. */"
+.br
+.RI "\fITranslation mode, bit 1. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR2\fP   0x0300 /**< Translation mode, bit 2. */"
+.br
+.RI "\fITranslation mode, bit 2. \fP"
+.ti -1c
+.RI "#define \fBUPF_TR3\fP   0x0400 /**< Translation mode, bit 3. */"
+.br
+.RI "\fITranslation mode, bit 3. \fP"
+.ti -1c
+.RI "#define \fBUPF_TRANS\fP   (UPF_TR0|UPF_TR1|UPF_TR2|UPF_TR3)"
+.br
+.ti -1c
+.RI "#define \fBUPF_TRSHIFT\fP   8"
+.br
+.ti -1c
+.RI "#define \fBusr_getpxlation\fP(u)   (((u).flags&UPF_TRANS)>>UPF_TRSHIFT)"
+.br
+.RI "\fIExtract permanent translation mode from user account. \fP"
+.ti -1c
+.RI "#define \fBusr_setpxlation\fP(u, i)"
+.br
+.RI "\fISet permanent translation mode in user account. \fP"
+.ti -1c
+.RI "#define \fBUSY_CHANGE\fP   0	/**< Alter channel modes. */"
+.br
+.RI "\fIAlter channel modes. \fP"
+.ti -1c
+.RI "#define \fBUSY_EMULATE\fP   1	/**< Emulate a user. */"
+.br
+.RI "\fIEmulate a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_MONITOR\fP   2	/**< Monitor all input. */"
+.br
+.RI "\fIMonitor all input. \fP"
+.ti -1c
+.RI "#define \fBUSY_SEND\fP   3	/**< Send sysop message to user or all users. */"
+.br
+.RI "\fISend sysop message to user or all users. \fP"
+.ti -1c
+.RI "#define \fBUSY_DELETE\fP   10	/**< Delete a user. */"
+.br
+.RI "\fIDelete a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_DETAIL\fP   11	/**< User account information. */"
+.br
+.RI "\fIUser account information. \fP"
+.ti -1c
+.RI "#define \fBUSY_EXEMPT\fP   12	/**< Delete-(un)protect a user. */"
+.br
+.RI "\fIDelete-(un)protect a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_HANGUP\fP   13	/**< Hang up a channel. */"
+.br
+.RI "\fIHang up a channel. \fP"
+.ti -1c
+.RI "#define \fBUSY_POST\fP   14	/**< Give credits to a user. */"
+.br
+.RI "\fIGive credits to a user. \fP"
+.ti -1c
+.RI "#define \fBUSY_SEARCH\fP   15	/**< Search user accounts. */"
+.br
+.RI "\fISearch user accounts. \fP"
+.ti -1c
+.RI "#define \fBUSY_SUSPEND\fP   16	/**< (Un)suspend a user's account. */"
+.br
+.RI "\fI(Un)suspend a user's account \fP"
+.ti -1c
+.RI "#define \fBUSY_AUDIT\fP   20	/**< View audit trail. */"
+.br
+.RI "\fIView audit trail. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLEANUP\fP   21	/**< View cleanup logs. */"
+.br
+.RI "\fIView cleanup logs. \fP"
+.ti -1c
+.RI "#define \fBUSY_EVENT\fP   22	/**< Event manager. */"
+.br
+.RI "\fIEvent manager. \fP"
+.ti -1c
+.RI "#define \fBUSY_LOGON\fP   23	/**< Change logon messages. */"
+.br
+.RI "\fIChange logon messages. \fP"
+.ti -1c
+.RI "#define \fBUSY_TRANSFER\fP   24	/**< Upload or download files. */"
+.br
+.RI "\fIUpload or download files. \fP"
+.ti -1c
+.RI "#define \fBUSY_SECURITY\fP   25	/**< Security logs (subset of audit trail). */"
+.br
+.RI "\fISecurity logs (subset of audit trail). \fP"
+.ti -1c
+.RI "#define \fBUSY_SIGNUPS\fP   26	/**< Signup logs (subset of audit trail). */"
+.br
+.RI "\fISignup logs (subset of audit trail). \fP"
+.ti -1c
+.RI "#define \fBUSY_FILTAUD\fP   27	/**< Search audit trail. */"
+.br
+.RI "\fISearch audit trail. \fP"
+.ti -1c
+.RI "#define \fBUSY_AGESTATS\fP   30	/**< Demographic statistics. */"
+.br
+.RI "\fIDemographic statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLSSTATS\fP   31	/**< User class statistics. */"
+.br
+.RI "\fIUser class statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_GENSTATS\fP   32	/**< Generic, user-defined statistics. */"
+.br
+.RI "\fIGeneric, user-defined statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_LINSTATS\fP   33	/**< Linux/UNIX operating system statistics. */"
+.br
+.RI "\fILinux/UNIX operating system statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_MODSTATS\fP   34	/**< Module usage statistics. */"
+.br
+.RI "\fIModule usage statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYSTATS\fP   35	/**< System statistics. */"
+.br
+.RI "\fISystem statistics. \fP"
+.ti -1c
+.RI "#define \fBUSY_TOP\fP   36	/**< Various \fBtop\fP-<em>n</em> charts. */"
+.br
+.RI "\fIVarious top-\fIn\fP charts. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLASS\fP   40	/**< Change user class. */"
+.br
+.RI "\fIChange user class. \fP"
+.ti -1c
+.RI "#define \fBUSY_CLASSED\fP   41	/**< User class manager. */"
+.br
+.RI "\fIUser class manager. \fP"
+.ti -1c
+.RI "#define \fBUSY_KEYS\fP   42	/**< Edit user's personal keyring. */"
+.br
+.RI "\fIEdit user's personal keyring. \fP"
+.ti -1c
+.RI "#define \fBUSY_COPY\fP   50	/**< Copy a file. */"
+.br
+.RI "\fICopy a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_DEL\fP   51	/**< Remove a file. */"
+.br
+.RI "\fIRemove a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_DIR\fP   52	/**< Produce file listing. */"
+.br
+.RI "\fIProduce file listing. \fP"
+.ti -1c
+.RI "#define \fBUSY_EDITOR\fP   53	/**< Text file editor. */"
+.br
+.RI "\fIText file editor. \fP"
+.ti -1c
+.RI "#define \fBUSY_REN\fP   54	/**< Rename a file. */"
+.br
+.RI "\fIRename a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_SHELL\fP   55	/**< UNIX shell escape. */"
+.br
+.RI "\fIUNIX shell escape. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYS\fP   56	/**< Execute a UNIX command. */"
+.br
+.RI "\fIExecute a UNIX command. \fP"
+.ti -1c
+.RI "#define \fBUSY_TYPE\fP   57	/**< View contents of a file. */"
+.br
+.RI "\fIView contents of a file. \fP"
+.ti -1c
+.RI "#define \fBUSY_PAGEAUDIT\fP   90	/**< Set types of audit entries to be paged. */"
+.br
+.RI "\fISet types of audit entries to be paged. \fP"
+.ti -1c
+.RI "#define \fBUSY_INVIS\fP   91	/**< Sysop invisibility privilege. */"
+.br
+.RI "\fISysop invisibility privilege. \fP"
+.ti -1c
+.RI "#define \fBUSY_GDET\fP   92	/**< Global detail privilege. */"
+.br
+.RI "\fIGlobal detail privilege. \fP"
+.ti -1c
+.RI "#define \fBUSY_SYSOP\fP   95	/**< User is a Sysop (same as below). */"
+.br
+.RI "\fIUser is a Sysop (same as below). \fP"
+.ti -1c
+.RI "#define \fBUSY_MASTERKEY\fP   95	/**< User is a Sysop (same as above). */"
+.br
+.RI "\fIUser is a Sysop (same as above). \fP"
+.ti -1c
+.RI "#define \fBUFL_SUSPENDED\fP   0x00000001 /**< User has been suspended. */"
+.br
+.RI "\fIUser has been suspended. \fP"
+.ti -1c
+.RI "#define \fBUFL_DELETED\fP   0x00000002 /**< User is marked for deletion tonight. */"
+.br
+.RI "\fIUser is marked for deletion tonight. \fP"
+.ti -1c
+.RI "#define \fBUFL_EXEMPT\fP   0x00000004 /**< User is exempt from deletions. */"
+.br
+.RI "\fIUser is exempt from deletions. \fP"
+.ti -1c
+.RI "#define \fBUSX_MALE\fP   'M'		/**< User is male. */"
+.br
+.RI "\fIUser is male. \fP"
+.ti -1c
+.RI "#define \fBUSX_FEMALE\fP   'F'		/**< User is female. */"
+.br
+.RI "\fIUser is female. \fP"
+.ti -1c
+.RI "#define \fBCLF_NOCHRGE\fP   0x0002   /**< Class is exempt from credit charges.  */"
+.br
+.RI "\fIClass is exempt from credit charges. \fP"
+.ti -1c
+.RI "#define \fBCLF_LINUX\fP   0x0004   /**< Users have access to Linux shell.     */"
+.br
+.RI "\fIUsers have access to Linux shell. \fP"
+.ti -1c
+.RI "#define \fBCLF_LOCKOUT\fP   0x0008   /**< Users not allowed to login at all.    */"
+.br
+.RI "\fIUsers not allowed to login at all. \fP"
+.ti -1c
+.RI "#define \fBCLF_CRDXFER\fP   0x0010   /**< Allowed to transfer credits to others.*/"
+.br
+.RI "\fIAllowed to transfer credits to others. \fP"
+.ti -1c
+.RI "#define \fBML\fP   NUMLANGUAGES"
+.br
+.ti -1c
+.RI "#define \fBONL_MAGIC\fP   'OUSR'"
+.br
+.ti -1c
+.RI "#define \fBOLF_MMEXITING\fP   0x00000001 /**< Exit module after concatenated command. */"
+.br
+.RI "\fIExit module after concatenated command. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMCALLING\fP   0x00000002 /**< Menuman has just executed a module.  */"
+.br
+.RI "\fIMenuman has just executed a module. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMCONCAT\fP   0x00000004 /**< Module should process menuman input. */"
+.br
+.RI "\fIModule should process menuman input. \fP"
+.ti -1c
+.RI "#define \fBOLF_ISYSOP\fP   0x00000008 /**< Obsolete. Re-use at will. */"
+.br
+.RI "\fIObsolete. \fP"
+.ti -1c
+.RI "#define \fBOLF_INVISIBLE\fP   0x00000010 /**< Sysop invisibility mode activated. */"
+.br
+.RI "\fISysop invisibility mode activated. \fP"
+.ti -1c
+.RI "#define \fBOLF_BUSY\fP   0x00000020 /**< User is unable to accept pages etc. */"
+.br
+.RI "\fIUser is unable to accept pages etc. \fP"
+.ti -1c
+.RI "#define \fBOLF_NOTIMEOUT\fP   0x00000040 /**< Don't enforce inactivity timeouts. */"
+.br
+.RI "\fIDon't enforce inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_ANSION\fP   0x00000080 /**< ANSI directives are allowed. */"
+.br
+.RI "\fIANSI directives are allowed. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR0\fP   0x00000100 /**< Translation mode, bit 0 */"
+.br
+.RI "\fITranslation mode, bit 0. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR1\fP   0x00000200 /**< Translation mode, bit 1 */"
+.br
+.RI "\fITranslation mode, bit 1. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR2\fP   0x00000400 /**< Translation mode, bit 2 */"
+.br
+.RI "\fITranslation mode, bit 2. \fP"
+.ti -1c
+.RI "#define \fBOLF_TR3\fP   0x00000800 /**< Translation mode, bit 3 */"
+.br
+.RI "\fITranslation mode, bit 3. \fP"
+.ti -1c
+.RI "#define \fBOLF_MMGCDGO\fP   0x00001000 /**< Module exit due to <tt>'/go'</tt> command. */"
+.br
+.RI "\fIModule exit due to \fC'/go'\fP command. \fP"
+.ti -1c
+.RI "#define \fBOLF_INHIBITGO\fP   0x00002000 /**< Disables <tt>'/go'</tt> command. */"
+.br
+.RI "\fIDisables \fC'/go'\fP command. \fP"
+.ti -1c
+.RI "#define \fBOLF_INTELECON\fP   0x00004000 /**< User is in teleconference module. */"
+.br
+.RI "\fIUser is in teleconference module. \fP"
+.ti -1c
+.RI "#define \fBOLF_TLCUNLIST\fP   0x00008000 /**< Personal telecon channel is unlisted. */"
+.br
+.RI "\fIPersonal telecon channel is unlisted. \fP"
+.ti -1c
+.RI "#define \fBOLF_FORCEIDLE\fP   0x00010000 /**< Always force inactivity timeouts. */"
+.br
+.RI "\fIAlways force inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_LOGGEDOUT\fP   0x00020000 /**< User is logging out or has logged out. */"
+.br
+.RI "\fIUser is logging out or has logged out. \fP"
+.ti -1c
+.RI "#define \fBOLF_RELOGGED\fP   0x00040000 /**< User is re-logging on. */"
+.br
+.RI "\fIUser is re-logging on. \fP"
+.ti -1c
+.RI "#define \fBOLF_ZAPBYPASS\fP   0x00080000 /**< Eligible to bypass inactivity timeouts. */"
+.br
+.RI "\fIEligible to bypass inactivity timeouts. \fP"
+.ti -1c
+.RI "#define \fBOLF_JMP2BLT\fP   0x00100000 /**< Jumping from clubs to bulletins. */"
+.br
+.RI "\fIJumping from clubs to bulletins. \fP"
+.ti -1c
+.RI "#define \fBOLF_INSYSCHAT\fP   0x00200000 /**< User is in Sysop chat mode. */"
+.br
+.RI "\fIUser is in Sysop chat mode. \fP"
+.ti -1c
+.RI "#define \fBOLF_AFTERINP\fP   0x00400000 /**< Persistent version of OFL_AFTERINPUT. */"
+.br
+.RI "\fIPersistent version of OFL_AFTERINPUT. \fP"
+.ti -1c
+.RI "#define \fBOLF_ISBOT\fP   0x00800000 /**< This is a bot/script/etc. */"
+.br
+.RI "\fIThis is a bot/script/etc. \fP"
+.ti -1c
+.RI "#define \fBOLF_TRSHIFT\fP   8"
+.br
+.ti -1c
+.RI "#define \fBOLF_TRANS\fP   (OLF_TR0|OLF_TR1|OLF_TR2|OLF_TR3)"
+.br
+.ti -1c
+.RI "#define \fBusr_getoxlation\fP(o)   (((o).flags&OLF_TRANS)>>OLF_TRSHIFT)"
+.br
+.RI "\fIExtract current translation mode from user online record. \fP"
+.ti -1c
+.RI "#define \fBusr_setoxlation\fP(o, i)"
+.br
+.RI "\fISet current translation mode in user online record. \fP"
+.ti -1c
+.RI "#define \fBPGS_STORE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBPGS_OK\fP   1"
+.br
+.ti -1c
+.RI "#define \fBPGS_ON\fP   2"
+.br
+.ti -1c
+.RI "#define \fBPGS_OFF\fP   3"
+.br
+.ti -1c
+.RI "#define \fBCRD_PAID\fP   1"
+.br
+.ti -1c
+.RI "#define \fBCRD_FREE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBSTF_FIRST\fP   1"
+.br
+.ti -1c
+.RI "#define \fBthisuseracc\fP   (\fBthisshm\fP->acc) /**< This user's account. */"
+.br
+.RI "\fIThis user's account. \fP"
+.ti -1c
+.RI "#define \fBothruseracc\fP   (\fBothrshm\fP->acc) /**< Other user's account. */"
+.br
+.RI "\fIOther user's account. \fP"
+.ti -1c
+.RI "#define \fBthisuseronl\fP   (\fBthisshm\fP->onl) /**< This user's online record. */"
+.br
+.RI "\fIThis user's online record. \fP"
+.ti -1c
+.RI "#define \fBothruseronl\fP   (\fBothrshm\fP->onl) /**< Other user's online record. */"
+.br
+.RI "\fIOther user's online record. \fP"
+.ti -1c
+.RI "#define \fB_thisuseraux\fP   (\fBthisshm\fP->aux) /**< This user's shared scratch space. */"
+.br
+.RI "\fIThis user's shared scratch space. \fP"
+.ti -1c
+.RI "#define \fB_othruseraux\fP   (\fBothrshm\fP->aux) /**< Other user's shared scratch space. */"
+.br
+.RI "\fIOther user's shared scratch space. \fP"
+.ti -1c
+.RI "#define \fBINJ_MESSAGE\fP   1	/**< Simple injected message */"
+.br
+.RI "\fISimple injected message. \fP"
+.ti -1c
+.RI "#define \fBINJ_MESSAGE_ACK\fP   2	/**< Injected message with acknowledgement */"
+.br
+.RI "\fIInjected message with acknowledgement. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBclassrec_t\fP * \fBcls_find\fP (char *s)"
+.br
+.RI "\fIFind a user class. \fP"
+.ti -1c
+.RI "int \fBusr_exists\fP (char *uid)"
+.br
+.RI "\fICheck for the existence of a user. \fP"
+.ti -1c
+.RI "int \fBusr_loadaccount\fP (char *whose, \fBuseracc_t\fP *uacc)"
+.br
+.RI "\fIRead a user account from file. \fP"
+.ti -1c
+.RI "int \fBusr_loadonlrec\fP (char *whose, \fBonlinerec_t\fP *onlrec)"
+.br
+.RI "\fIRead a user online structure from file. \fP"
+.ti -1c
+.RI "int \fBusr_saveaccount\fP (\fBuseracc_t\fP *uacc)"
+.br
+.RI "\fIWrite a user account to disk. \fP"
+.ti -1c
+.RI "int \fBusr_saveonlrec\fP (\fBonlinerec_t\fP *onlrec)"
+.br
+.RI "\fIWrite a user online record to disk. \fP"
+.ti -1c
+.RI "void \fBusr_postcredits\fP (char *userid, int amount, int paid)"
+.br
+.RI "\fIPost credits to a user account. \fP"
+.ti -1c
+.RI "void \fBusr_chargecredits\fP (int amount)"
+.br
+.RI "\fICharge a user's account. \fP"
+.ti -1c
+.RI "int \fBusr_canpay\fP (int amount)"
+.br
+.RI "\fICheck if the user has enough credits. \fP"
+.ti -1c
+.RI "void \fBusr_setclass\fP (char *userid, char *newclass, int permanent)"
+.br
+.RI "\fIChange a user's class. \fP"
+.ti -1c
+.RI "int \fBusr_insystem\fP (char *userid, int checkinvis, struct \fBshmuserrec\fP **buf)"
+.br
+.RI "\fICheck if a user is online (deprecated). \fP"
+.ti -1c
+.RI "int \fBusr_insys\fP (char *userid, int checkinvis)"
+.br
+.RI "\fICheck if a user is online and attach shared segment. \fP"
+.ti -1c
+.RI "int \fBusr_injoth\fP (\fBonlinerec_t\fP *user, char *msg, int force)"
+.br
+.RI "\fIPage another user with a message. \fP"
+.ti -1c
+.RI "int \fBusr_injoth_ack\fP (\fBonlinerec_t\fP *user, char *msg, char *ack, int force)"
+.br
+.RI "\fIPage another user with a message and acknowledgement. \fP"
+.ti -1c
+.RI "int \fBusr_uidxref\fP (char *userid, int online)"
+.br
+.RI "\fIUser ID completion. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBshmuserrec\fP * \fBthisshm\fP"
+.br
+.ti -1c
+.RI "\fBshmuserrec\fP * \fBothrshm\fP"
+.br
+.ti -1c
+.RI "\fBclassrec_t\fP * \fBcls_classes\fP"
+.br
+.RI "\fIArray of all defined user classes. \fP"
+.ti -1c
+.RI "int \fBcls_count\fP"
+.br
+.RI "\fINumber of classes in \fCcls_classes\fP. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definitions related to user accounts. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This header declares a veritable hodge-podge of structures and functions dealing with user accounts. There is a wide collection of low-level and high-level functions. Some of these could be living somewhere else, but they seem to fit right here.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     useracc.h                                                    **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Define data structures used for storing users et al.         **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: useracc.h,v 1.5 2003/12/19 13:25:18 alexios Exp $
+ *
+ * $Log: useracc.h,v $
+ * Revision 1.5  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
+ * Revision 1.4  2003/09/27 20:32:38  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.11  2000/01/06 11:40:19  alexios
+ * Added field lastconsolepage to denote the time of the user's
+ * last page to the console (if any). The field was, of course,
+ * added to the onlinerec structure.
+ *
+ * Revision 0.10  1998/12/27 15:19:19  alexios
+ * Added user magic numbers and declarations for the functions
+ * migrated from miscfx.h.
+ *
+ * Revision 0.9  1998/08/14 11:23:21  alexios
+ * Added on-line flag to tell bbsd and emud that we're not
+ * logging off completely (this is only for auditing purposes).
+ *
+ * Revision 0.8  1998/07/26 21:17:06  alexios
+ * Added a flag to force idle zapping of users on telnet
+ * connections.
+ *
+ * Revision 0.7  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.6  1997/11/06 16:49:10  alexios
+ * Renamed USY_AUDITPAGE to USY_PAGEAUDIT so it's easier to
+ * find in the remsys module. Added new command flags for the
+ * new commands in remsys (USY_SECURITY, USY_SIGNUPS and
+ * USY_FILTAUD).
+ *
+ * Revision 0.5  1997/11/05 10:52:05  alexios
+ * Cosmetic changes. Added field auditfiltering in useracc to
+ * store operator's audit filtering preferences. Added remote
+ * sysop command flags USY_AUDITPAGE. Changed the values of
+ * USY_INVIS and USY_GDET (shouldn't have; they're not in
+ * alpha order anyway). Obsoleted OLF_SOPAUD since
+ * useracc.auditfiltering is used now.
+ *
+ * Revision 0.4  1997/11/03 00:29:40  alexios
+ * Removed defines for hardwired xlation tables, added code
+ * and defines for generalised tables.
+ *
+ * Revision 0.3  1997/09/12 12:48:48  alexios
+ * Added the last selected library to onlinerec. Also added a
+ * field injothqueue to hold the IPC ID of the injoth queue for
+ * this user.
+ *
+ * Revision 0.2  1997/08/30 12:54:20  alexios
+ * Added OLF_LOGGEDOUT to distinguish between normal and unexpected
+ * disconnections from the system.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBuseracc.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define CHAR   unsigned char"
+.PP
+Definition at line 122 of file useracc.h.
+.SS "#define RCS_VER   '$Id: useracc.h,v 1.5 2003/12/19 13:25:18 alexios Exp $'"
+.PP
+Definition at line 113 of file useracc.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

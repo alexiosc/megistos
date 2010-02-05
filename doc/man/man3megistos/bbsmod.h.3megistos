@@ -1,0 +1,229 @@
+.TH "bbsmod.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bbsmod.h \- Entry points for BBS modules.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmod_handler_t\fP"
+.br
+.RI "\fIModule handler. \fP"
+.ti -1c
+.RI "struct \fBmod_info_t\fP"
+.br
+.RI "\fIHigh-level module descriptor. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: bbsmod.h,v 1.4 2003/09/27 20:28:07 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBINI_SIGNALS\fP   0x00000001	/**< Initialise signal handlers. */"
+.br
+.RI "\fIInitialise signal handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_INPUT\fP   0x00000002	/**< Initialise user input handling. */"
+.br
+.RI "\fIInitialise user input handling. \fP"
+.ti -1c
+.RI "#define \fBINI_SYSVARS\fP   0x00000004	/**< Attach to system variable shared block. */"
+.br
+.RI "\fIAttach to system variable shared block. \fP"
+.ti -1c
+.RI "#define \fBINI_CLASSES\fP   0x00000008  /**< Load the user classes. */"
+.br
+.RI "\fILoad the user classes. \fP"
+.ti -1c
+.RI "#define \fBINI_ERRMSGS\fP   0x00000010	/**< Initialise hardwired fatal error messages. */"
+.br
+.RI "\fIInitialise hardwired fatal error messages. \fP"
+.ti -1c
+.RI "#define \fBINI_ATEXIT\fP   0x00000020  /**< Set internal at-exit handlers. */"
+.br
+.RI "\fISet internal at-exit handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_LANGS\fP   0x00000040  /**< Prepare languages. */"
+.br
+.RI "\fIPrepare languages. \fP"
+.ti -1c
+.RI "#define \fBINI_OUTPUT\fP   0x00000080  /**< Initialise user output subsystem. */"
+.br
+.RI "\fIInitialise user output subsystem. \fP"
+.ti -1c
+.RI "#define \fBINI_USER\fP   0x00000100  /**< Load/attach to the user. */"
+.br
+.RI "\fILoad/attach to the user. \fP"
+.ti -1c
+.RI "#define \fBINI_GLOBCMD\fP   0x00000200  /**< Initialise global commands. */"
+.br
+.RI "\fIInitialise global commands. \fP"
+.ti -1c
+.RI "#define \fBINI_TTYNUM\fP   0x00000400  /**< Read TTY to/from BBS channel mapping. */"
+.br
+.RI "\fIRead TTY to/from BBS channel mapping. \fP"
+.ti -1c
+.RI "#define \fBINI_CHAT\fP   0x00000800  /**< Initialise Sysop chat mode handlers. */"
+.br
+.RI "\fIInitialise Sysop chat mode handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_ALL\fP"
+.br
+.RI "\fIInitialise everything. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBmod_setinfo\fP (\fBmod_info_t\fP *mod)"
+.br
+.RI "\fISet module information block. \fP"
+.ti -1c
+.RI "void \fBmod_setprogname\fP (char *name)"
+.br
+.RI "\fISet program name. \fP"
+.ti -1c
+.RI "int \fBmod_main\fP (int argc, char **argv)"
+.br
+.RI "\fIModule entry point. \fP"
+.ti -1c
+.RI "void \fBmod_init\fP (\fBuint32\fP initflags)"
+.br
+.RI "\fIInitialise a module. \fP"
+.ti -1c
+.RI "void \fBmod_done\fP (\fBuint32\fP services)"
+.br
+.RI "\fIPrepares a module for exit. \fP"
+.ti -1c
+.RI "void \fBmod_end\fP ()"
+.br
+.RI "\fIPrepares a module for exit. \fP"
+.ti -1c
+.RI "void \fBmod_regpid\fP (char *tty)"
+.br
+.RI "\fIRegister this process as an interactive one. \fP"
+.ti -1c
+.RI "int \fBmod_isbot\fP ()"
+.br
+.RI "\fICheck whether a process is a bot. \fP"
+.ti -1c
+.RI "void \fBmod_setbot\fP (int isbot)"
+.br
+.RI "\fIEnter or leave bot mode. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBmod_info_t\fP \fB__module\fP"
+.br
+.RI "\fIInternally used module information. \fP"
+.ti -1c
+.RI "uid_t \fBbbs_uid\fP"
+.br
+.RI "\fIThe UNIX user ID of the `bbs' user. \fP"
+.ti -1c
+.RI "gid_t \fBbbs_gid\fP"
+.br
+.RI "\fIThe UNIX group ID of the `bbs' user. \fP"
+.ti -1c
+.RI "\fBsysvar\fP * \fBsysvar\fP"
+.br
+.RI "\fIA block of system-wide variables. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Entry points for BBS modules. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This header defines the main entry (and exit) points for Megistos modules. It handles initialising different subsets of the API depending on the type of module.
+.PP
+Please be aware that this part of the library is undergoing an almost complete redesign.
+.PP
+Original banner, legalese and change history follow
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     bbsmod.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Interface to module functions bbsmod.c                       **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: bbsmod.h,v 1.4 2003/09/27 20:28:07 alexios Exp $
+ *
+ * $Log: bbsmod.h,v $
+ * Revision 1.4  2003/09/27 20:28:07  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.4  1998/12/27 15:19:19  alexios
+ * Declare the BBS user's UID and GID.
+ *
+ * Revision 0.3  1998/07/26 21:17:06  alexios
+ * Added structure to declare modules and their individual
+ * functions, plus functions to initialise said structure.
+ * The setprogname() function is necessary for proper error
+ * reporting.
+ *
+ * Revision 0.2  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBbbsmod.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: bbsmod.h,v 1.4 2003/09/27 20:28:07 alexios Exp $'"
+.PP
+Definition at line 77 of file bbsmod.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

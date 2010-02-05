@@ -1,0 +1,14 @@
+/.cvsignore/2.0/Sun Feb 29 12:24:30 2004//
+/Makefile.am/2.0/Mon Sep 13 19:44:53 2004//
+/bbsd-old/2.0/Mon Apr 16 15:00:31 2001//
+/bbsd.c/2.0/Mon Sep 13 19:44:53 2004//
+/bbsd.h/2.0/Mon Sep 13 19:44:53 2004//
+/channels.c/2.0/Mon Sep 13 19:44:53 2004//
+/charge.c/2.0/Mon Sep 13 19:44:53 2004//
+/commands.c/2.0/Mon Sep 13 19:44:53 2004//
+/events.c/2.0/Mon Sep 13 19:44:53 2004//
+/metabbs.c/2.0/Mon Sep 13 19:44:53 2004//
+/misc.c/2.0/Mon Sep 13 19:44:53 2004//
+/respawn.c/2.0/Mon Sep 13 19:44:53 2004//
+/shm.c/2.0/Mon Sep 13 19:44:53 2004//
+D

@@ -1,0 +1,147 @@
+.TH "Security Functions" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Security Functions \- This header implements system security.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBhassysaxs\fP (\fBuseracc_t\fP *user, int index)"
+.br
+.RI "\fICheck if a user has a certain operator command. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP * \fBkey_make\fP (\fBbbskey_t\fP *userkeys, \fBbbskey_t\fP *classkeys, \fBbbskey_t\fP *unionkeys)"
+.br
+.RI "\fIUnites user and class keyrings. \fP"
+.ti -1c
+.RI "int \fBkey_exists\fP (\fBbbskey_t\fP *keys, int key)"
+.br
+.RI "\fICheck for a key in a key array. \fP"
+.ti -1c
+.RI "int \fBkey_owns\fP (\fBuseracc_t\fP *user, int key)"
+.br
+.RI "\fICheck if a user owns a key. \fP"
+.ti -1c
+.RI "void \fBkey_set\fP (\fBbbskey_t\fP *keys, int key, int set)"
+.br
+.RI "\fIAdd or remove keys from a key array. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This header implements system security. Namely, sysop privilege checking and key/lock security.
+.PP
+Sysops have an array of flags denoting a number of different command and privileges. Most of those privileges are available within the Remote Sysop module, but they have to be checked for in other places, too.
+.PP
+Keys are similar to sysop privileges, but are available everywhere. Keys are numerical (work is underway to establish a better, database-driven, alphanumeric key system). On a normal system (i.e. not hacked and kludged), there are 130 keys, 128 of which are available to people:
+.PP
+.IP "\(bu" 2
+0. All users implicitly have this key. It cannot be added or removed, but it can be checked for.
+.PP
+.PP
+.IP "\(bu" 2
+1--128. These keys can be added or removed freely.
+.PP
+.PP
+.IP "\(bu" 2
+129. Only the user ID `Sysop' has this key, or whatever user ID is specified in the \fBSYSOP\fP macro in \fC\fBconfig.h\fP\fP. The key cannot be added to anyone and it cannot be removed from Sysop's keyring.
+.PP
+.PP
+BBS features have locks on them. Each lock can only be unlocked by one, specified key. A user needs to possess this key in order to access locked features.
+.PP
+There are two sources of keys for users: their class keyring, and their own, personal keyring. The class keyring is a set of keys granted to an entire user class. Belonging to the class implies ownership of those keys. The personal keyring is the obvious: a keyring that only the user possesses. Operators can grant keys to individuals in addition to the keys their classes provide. 
+.SH "Function Documentation"
+.PP 
+.SS "int hassysaxs (\fBuseracc_t\fP * user, int index)"
+.PP
+Check if a user has a certain operator command. This function checks a user account record for the existence of a specified operator privilege or command.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuser\fP Pointer to the account record of the user in question.
+.br
+\fIindex\fP The number of the privilege or operator command in question. This is one of the \fCUSY_x\fP constants.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if the user lacks the privilege or command, non-zero if they have it. 
+.RE
+.PP
+
+.SS "int key_exists (\fBbbskey_t\fP * keys, int key)"
+.PP
+Check for a key in a key array. Examines the given key array for ownership of the specified key. Two keys are handled specially: key 0 is the `non-key'. All users implicitly have this one. Key 129 is the Sysop key. Only user `Sysop' (or whatever the value of the macro \fBSYSOP\fP is) has this key. Not even users with the master key (usually 128, but can be changed at will) can unlock features locked with the Sysop key. All other keys are explicitly specified in the key array.
+.PP
+If you need to check a user for ownership of a key, this isn't the right function. You need \fBkey_owns()\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIkeys\fP A key array to test for key ownership.
+.RE
+.PP
+key Key number to check.
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if the key array does not contain the key; non-zero if it does.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBkey_owns()\fP. 
+.RE
+.PP
+
+.SS "\fBbbskey_t\fP* key_make (\fBbbskey_t\fP * userkeys, \fBbbskey_t\fP * classkeys, \fBbbskey_t\fP * unionkeys)"
+.PP
+Unites user and class keyrings. This function combines user and class keys to form the complete set of keys that a user has. A user has a key if it's contained in the keyring of the user's class, or if the user has been given this key on an individual basis.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserkeys\fP a pointer to the user's keyring array.
+.br
+\fIclasskeys\fP a pointer to the user's class' keyring array.
+.br
+\fIunionkeys\fP a pointer to a keyring array that will be filled in with tue union of the two keyrings. This is effectively the return value of the function.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The function returns \fCunionkeys\fP for no particular reason. 
+.RE
+.PP
+
+.SS "int key_owns (\fBuseracc_t\fP * user, int key)"
+.PP
+Check if a user owns a key. Checks if a user owns a key, taking into account the Master Key privilege and the user's class keyring. This is the function to use if you need to check a user for ownership of a key.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuser\fP Pointer to the user's account structure.
+.br
+\fIkey\fP Number of the key to check for.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if the user does not have the key; non-zero if they do. 
+.RE
+.PP
+
+.SS "void key_set (\fBbbskey_t\fP * keys, int key, int set)"
+.PP
+Add or remove keys from a key array. Sets or clears keys within the specified key array.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIkeys\fP The key array to modify.
+.br
+\fIkey\fP The key to add or remove. Key 0 cannot be added or removed, it is implicitly present in all keyrings. Key 129 cannot be added or removed, it is implicitly absent from all keyrings (won't even fit, on a normal system). Specifying an invalid key number causes no error, but no operation either.
+.br
+\fIset\fP If non-zero, the specified key will be added to the keyring. If zero, the key will be removed. 
+.RE
+.PP
+

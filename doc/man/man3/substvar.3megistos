@@ -1,0 +1,61 @@
+.TH "substvar" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+substvar \- Substitution variable record.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <output.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char * \fBvarname\fP"
+.br
+.RI "\fIName of substitution variable (upper case). \fP"
+.ti -1c
+.RI "char *(* \fBvarcalc\fP )(void)"
+.br
+.RI "\fIFunction that returns variable contents. \fP"
+.ti -1c
+.RI "void * \fBnext\fP"
+.br
+.RI "\fINext handler in linked list. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Substitution variable record. 
+
+This is used in two ways. Internally, it represents one record in the substitution variable registry. Externally, i.e. within modules, it can be used to register new, local substitution variables. Most of the larger modules do this to provide extra flexibility for customisation. There are three fields here: \fCvarname\fP is the string name of the variable (in upper case by convention); \fCvarcalc\fP is the function executed to return the value of the variable; and \fCnext\fP is only used internally to make a linked list of variables. 
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBout_subst.c\fP.
+.PP
+Definition at line 184 of file output.h.
+.SH "Field Documentation"
+.PP 
+.SS "void* \fBsubstvar::next\fP"
+.PP
+Next handler in linked list. Definition at line 187 of file output.h.
+.SS "char*(* \fBsubstvar::varcalc\fP)(void)"
+.PP
+Function that returns variable contents. 
+.SS "char* \fBsubstvar::varname\fP"
+.PP
+Name of substitution variable (upper case). 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBout_subst.c\fP.
+.PP
+Definition at line 185 of file output.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

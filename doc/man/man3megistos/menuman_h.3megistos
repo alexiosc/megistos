@@ -1,0 +1,140 @@
+.TH "The Menu Manager Interface" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+The Menu Manager Interface \- The discussion below is largely academic: you won't need to call the menu manager from your own modules (\fIit\fP calls \fIthem\fP) and you definitely shouldn't include this header file.  
+
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmenuoption\fP"
+.br
+.ti -1c
+.RI "struct \fBmenupage\fP"
+.br
+.ti -1c
+.RI "struct \fBfilepage\fP"
+.br
+.ti -1c
+.RI "struct \fBexecpage\fP"
+.br
+.ti -1c
+.RI "struct \fBrunpage\fP"
+.br
+.ti -1c
+.RI "union \fBmenumanpage\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBPAGENAMELEN\fP   16"
+.br
+.ti -1c
+.RI "#define \fBPAGEDESCRLEN\fP   44"
+.br
+.ti -1c
+.RI "#define \fBMENUOPTNUM\fP   64"
+.br
+.ti -1c
+.RI "#define \fBFNAMELEN\fP   64"
+.br
+.ti -1c
+.RI "#define \fBINPUTSTRLEN\fP   192"
+.br
+.ti -1c
+.RI "#define \fBRUNSTRLEN\fP   256"
+.br
+.ti -1c
+.RI "#define \fBPAGETYPE_MENU\fP   'M'"
+.br
+.ti -1c
+.RI "#define \fBPAGETYPE_FILE\fP   'F'"
+.br
+.ti -1c
+.RI "#define \fBPAGETYPE_EXEC\fP   'E'"
+.br
+.ti -1c
+.RI "#define \fBPAGETYPE_RUN\fP   'R'"
+.br
+.ti -1c
+.RI "#define \fBDEFAULTCCR\fP   (-1<<30)"
+.br
+.ti -1c
+.RI "#define \fBMPF_HIDDEN\fP   0x0001"
+.br
+.ti -1c
+.RI "#define \fBMPF_INHIBIT\fP   0x0002"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+The discussion below is largely academic: you won't need to call the menu manager from your own modules (\fIit\fP calls \fIthem\fP) and you definitely shouldn't include this header file. The API already defines enough menuman-related functionality for your modules. I'll still include the description, in the hope that it'll be useful at some later stage.
+.PP
+The menu manager was inspired by the corresponding subsystem in the Major BBS. Of course, Major's menuman was created for an entirely different environment. Megistos' Menu Manager is a more versatile thingy, but the experienced Major programmer may notice behavioural similarities.
+.PP
+The menu manager is a `meta-module': it behaves as the glue that binds modules together. It handles all menuing outside modules. The operator defines a number of \fIpages\fP. There are four types of pages:
+.PP
+.IP "\(bu" 2
+Menu pages. These offer menus to the user. Each of the menu's options take the user to another page.
+.PP
+.PP
+.IP "\(bu" 2
+File pages. These pages print out specific files to the user. Different files can be specified for each supported language. Also, depending on the user's terminal settings (e.g. whether their terminal has VT-100/ANSI graphics capabilities), different files may be printed. All this is implemented using file suffixes. Intelligent fallbacks are supplied. Once the file has been printed, the user is returned to the Menu page they came from.
+.PP
+.PP
+.IP "\(bu" 2
+Command execution pages. Also known as `exec' pages. These execute a specified UNIX command when the user accesses them. Commands may be interactive or not. While the user is executing the command, he appears to be busy and no inactivity timeouts are enforced.
+.PP
+.PP
+.IP "\(bu" 2
+Module execution pages. Also known as `run' pages. These pass interactive control to a BBS module to handle further user input. Control passes to the calling page when the module is finished. Each page may specify a string of concatenated commands to be passed to the module. In this way, different pages may access different parts of a module, effectively allowing for different entry points.
+.PP
+.PP
+Pages have three basic security features built into them. They can be made available to only one user class; access may be limited to users who possess a key; and options may be hidden from view, even if they are available to a user.
+.PP
+Each page has its own multilingual description used in statistics and when the user issues the \fC/#\fP global command. Individual per-page credit consumption rates may also be applied. Finally, each page has its own unique name. The names may be used by the user for quick, random access to pages using the \fC/go\fP global command. 
+.SH "Define Documentation"
+.PP 
+.SS "#define DEFAULTCCR   (-1<<30)"
+.PP
+Definition at line 138 of file menuman.h.
+.SS "#define FNAMELEN   64"
+.PP
+Definition at line 129 of file menuman.h.
+.SS "#define INPUTSTRLEN   192"
+.PP
+Definition at line 130 of file menuman.h.
+.SS "#define MENUOPTNUM   64"
+.PP
+Definition at line 128 of file menuman.h.
+.SS "#define MPF_HIDDEN   0x0001"
+.PP
+Definition at line 203 of file menuman.h.
+.SS "#define MPF_INHIBIT   0x0002"
+.PP
+Definition at line 204 of file menuman.h.
+.SS "#define PAGEDESCRLEN   44"
+.PP
+Definition at line 127 of file menuman.h.
+.SS "#define PAGENAMELEN   16"
+.PP
+Definition at line 126 of file menuman.h.
+.SS "#define PAGETYPE_EXEC   'E'"
+.PP
+Definition at line 135 of file menuman.h.
+.SS "#define PAGETYPE_FILE   'F'"
+.PP
+Definition at line 134 of file menuman.h.
+.SS "#define PAGETYPE_MENU   'M'"
+.PP
+Definition at line 133 of file menuman.h.
+.SS "#define PAGETYPE_RUN   'R'"
+.PP
+Definition at line 136 of file menuman.h.
+.SS "#define RUNSTRLEN   256"
+.PP
+Definition at line 131 of file menuman.h.

@@ -1,0 +1,130 @@
+.TH "Message Flags (MSF_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Message Flags (MSF_x) \- Flags used to describe private and public messages.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBMSF_EXEMPT\fP   0x0001  /**< Message is `tagged', i.e. can't be deleted */"
+.br
+.RI "\fIMessage is `tagged', i.e. \fP"
+.ti -1c
+.RI "#define \fBMSF_RECEIPT\fP   0x0002  /**< Read receipt requested */"
+.br
+.RI "\fIRead receipt requested. \fP"
+.ti -1c
+.RI "#define \fBMSF_FILEATT\fP   0x0004  /**< A file is attached */"
+.br
+.RI "\fIA file is attached. \fP"
+.ti -1c
+.RI "#define \fBMSF_APPROVD\fP   0x0008  /**< The file has been approved by the Sysop */"
+.br
+.RI "\fIThe file has been approved by the Sysop. \fP"
+.ti -1c
+.RI "#define \fBMSF_CANTMOD\fP   0x0010  /**< Sender cannot modify this message */"
+.br
+.RI "\fISender cannot modify this message. \fP"
+.ti -1c
+.RI "#define \fBMSF_SIGNUP\fP   0x0020  /**< This is a signup special message */"
+.br
+.RI "\fIThis is a signup special message. \fP"
+.ti -1c
+.RI "#define \fBMSF_AUTOFW\fP   0x0080  /**< Message has been auto-forwarded */"
+.br
+.RI "\fIMessage has been auto-forwarded. \fP"
+.ti -1c
+.RI "#define \fBMSF_REPLY\fP   0x0100  /**< This is a reply to another message */"
+.br
+.RI "\fIThis is a reply to another message. \fP"
+.ti -1c
+.RI "#define \fBMSF_NET\fP   0x0200  /**< Message came in through the network */"
+.br
+.RI "\fIMessage came in through the network. \fP"
+.ti -1c
+.RI "#define \fBMSF_COPYMASK\fP   (MSF_FILEATT|MSF_REPLY)"
+.br
+.RI "\fIFlags to clear when forwarding and copying messages. \fP"
+.ti -1c
+.RI "#define \fBMSF_NETMASK\fP   (MSF_EXEMPT|MSF_APPROVD|MSF_FILEATT)"
+.br
+.RI "\fIFlags to clear when transmitting messages over the network. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags used to describe private and public messages. These following flags are available:
+.PP
+.IP "\(bu" 2
+MSF_EXEMPT. The message is protected from accidental deletion. This applies to public messages only. Deletion-exempt messages (also known as `tagged' messages) will not be automatically deleted by the system when they expire. The sysop will have to `untag' them before being able to delete them manually.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_RECEIPT. A read receipt has been requested for this message. When the recipient reads the message (or uses the off-line mailer to create a message packet containing the message), the system will notify the sender by personal message. This flag only applies to private messages.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_FILEATT. Signifies that this message has a file attached.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_APPROVD. Public messages only. It may be necessary to moderate public file attachments for viri, illegal content, et cetera. Files attached to public messages are, by default, not available for download before an operator approves them. This flag is set to denote a public message with an approved file attachment. \fBMSF_FILEATT\fP must also be set. If it isn't, the state of this flag should be considered undefined.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_CANTMOD. Usually, the sender of a message can modify it, even after its delivery (of course, if it's a private message, there's no guarantee that the recipient will re-read it). Certain types of messages should not be modifiable by their senders. The canonical example is the message sent by the system to the Sysop to notify them of a new user signing up. This is sent in the user's name, but it is a very bad idea for the user to be able to change the message. Can you say `spoof'?
+.PP
+.PP
+.IP "\(bu" 2
+MSF_SIGNUP. While we're at it, here's another interesting flag. When the sysop is presented with a signup message, they get a very special command that \fIdeletes the sender of the message\fP! This flag enables this command. It's quite obvious that you should stay clear of this one, unless you really, \fIreally\fP know what you're doing!
+.PP
+.PP
+.IP "\(bu" 2
+MSF_AUTOFW. Set by the mailing subsystem to indicate that a message has been auto-forwarded. Auto-forwarding is the Megistos equivalent of forwarding Internet mail with \fC.forward\fP files. People can specify an alternative username to receive all their mail instead of them. It's useful for people who have multiple IDs and only read messages on one, for people away on holidays, et cetera.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_REPLY. Set if a message is a reply to another.
+.PP
+.PP
+.IP "\(bu" 2
+MSF_NET. Set to indicate that a message was not written locally, but was obtained over the network. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define MSF_APPROVD   0x0008  /**< The file has been approved by the Sysop */"
+.PP
+The file has been approved by the Sysop. Definition at line 297 of file mail.h.
+.SS "#define MSF_AUTOFW   0x0080  /**< Message has been auto-forwarded */"
+.PP
+Message has been auto-forwarded. Definition at line 300 of file mail.h.
+.SS "#define MSF_CANTMOD   0x0010  /**< Sender cannot modify this message */"
+.PP
+Sender cannot modify this message. Definition at line 298 of file mail.h.
+.SS "#define MSF_COPYMASK   (MSF_FILEATT|MSF_REPLY)"
+.PP
+Flags to clear when forwarding and copying messages. Definition at line 305 of file mail.h.
+.SS "#define MSF_EXEMPT   0x0001  /**< Message is `tagged', i.e. can't be deleted */"
+.PP
+Message is `tagged', i.e. can't be deleted Definition at line 294 of file mail.h.
+.SS "#define MSF_FILEATT   0x0004  /**< A file is attached */"
+.PP
+A file is attached. Definition at line 296 of file mail.h.
+.SS "#define MSF_NET   0x0200  /**< Message came in through the network */"
+.PP
+Message came in through the network. Definition at line 302 of file mail.h.
+.SS "#define MSF_NETMASK   (MSF_EXEMPT|MSF_APPROVD|MSF_FILEATT)"
+.PP
+Flags to clear when transmitting messages over the network. Definition at line 308 of file mail.h.
+.SS "#define MSF_RECEIPT   0x0002  /**< Read receipt requested */"
+.PP
+Read receipt requested. Definition at line 295 of file mail.h.
+.SS "#define MSF_REPLY   0x0100  /**< This is a reply to another message */"
+.PP
+This is a reply to another message. Definition at line 301 of file mail.h.
+.SS "#define MSF_SIGNUP   0x0020  /**< This is a signup special message */"
+.PP
+This is a signup special message. Definition at line 299 of file mail.h.

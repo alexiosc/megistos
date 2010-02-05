@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"
+      xmlns:m="http://megistos.sourceforge.net/xml/modconf"
+      xmlns="http://www.w3.org/HTML/1998/html4"
+?>
+<!DOCTYPE modconf PUBLIC "-//MegistosBBS//Module Configuration Block 0.1//EN"
+                      "http://megistos.sourceforge.nrt/xml/dtd/modconf-0.1.dtd">
+  <m:modconf>
+    <m:group name="Configuration">
+      
+      <m:setting id="DEFCCR" title="Credits consumed at the Main menu">
+	<m:int min="0" max="32767" default="100">100</m:int>
+	<m:help>Credits are purchased by users to permit them "live" connect
+	  time on The Major BBS.  They are consumed, typically, at the rate of
+	  1 per minute.  You may change this value to adjust the default "cost"
+	  to users of using your system. Please note that the consumption unit
+	  is credits per 100 minutes, not credits per minute!  So, for the
+	  standard charge of 1 credit/min, you should fill in this field with
+	  the value '100' (100 creds/100 mins, 1 cred/min)
+	</m:help>
+      </m:setting>
+
+    </m:group>
+  </m:modconf>
+
+<!DOCTYPE promptblock SYSTEM "promptblock.dtd">
+<group name="Configuration">
+  <int id="DEFCCR" min="0" max="32767" default="  <val>0</val>
+"
+	desc="Credits per 100 minutes consumed at the Main menu 10">
+  <val>0</val>
+</int>
+
+<string id="TOPPAG" maxlength="16" default="  <val>TOP</val>
+"
+	desc="Name of the default top-level page">  <val>TOP</val>
+</string">
+
+<string id="EXTPAG" maxlength="16" default="  <val>EXIT</val>
+"
+	desc="Name of the 'exit' page">  <val>EXIT</val>
+</string">
+
+<select id="USESHM" default="  <val>PROMPT</val>
+"
+	options="SHORT PROMPT"
+	desc="What do we display after a long menu?">
+  <help> Do you want the menuman to display the ordinary short
+ menu or just a short prompt right after displaying a full
+ menu?
+</help>
+  <val>PROMPT</val>
+</select>
+
+<select id="RETMENU" default="  <val>SHORT</val>
+"
+	options="SHORT LONG"
+	desc="Which menu type to use after Return key pressed?">
+  <help> Do you want to show the short or full menu when RETURN
+ is pressed?
+</help>
+  <val>SHORT</val>
+</select>
+
+<select id="EXTMENU" default="  <val>SHORT</val>
+"
+	options="SHORT LONG"
+	desc="Display what menu type when exiting from another page?">
+  <help> Do you want to display the short or full menu when exit-
+ int from another page?
+</help>
+  <val>SHORT</val>
+</select>
+
+<string id="RELOGSTG" maxlength="20" default="  <val>rel</val>
+"
+	desc="'Relogon' command string">  <val>rel</val>
+</string">
+
+<key id="KEYREL" default="  <val>2</val>
+"
+	desc="Key required to use the relogon command: 1">  <val>2</val>
+</key>
+
+</group>

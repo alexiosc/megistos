@@ -1,0 +1,185 @@
+.TH "classrec_t" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+classrec_t \- User class.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <useracc.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [10]"
+.br
+.RI "\fIName of class. \fP"
+.ti -1c
+.RI "char \fBnotaround\fP [10]"
+.br
+.RI "\fIClass to go to when user not logged on. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBnadays\fP"
+.br
+.RI "\fI.. \fP"
+.ti -1c
+.RI "char \fBaround\fP [10]"
+.br
+.RI "\fIClass to go to after user has been. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBardays\fP"
+.br
+.RI "\fI.. \fP"
+.ti -1c
+.RI "char \fBnocreds\fP [10]"
+.br
+.RI "\fIClass to go to when no credits left. \fP"
+.ti -1c
+.RI "char \fBcredpost\fP [10]"
+.br
+.RI "\fIClass to go to when paid creds posted. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBlimpercall\fP"
+.br
+.RI "\fITime limit per call (-1 disables). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBlimperday\fP"
+.br
+.RI "\fITime limit per day (-1 disables). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcrdperday\fP"
+.br
+.RI "\fIFree time per day. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcrdperweek\fP"
+.br
+.RI "\fIBonus time posted every week. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcrdpermonth\fP"
+.br
+.RI "\fIBonus time posted every month. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIFlags bits. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBusers\fP"
+.br
+.RI "\fINumber of users in this class. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBkeys\fP [KEYLENGTH]"
+.br
+.RI "\fI128 Key bits \fP"
+.ti -1c
+.RI "char \fBdummy\fP [512-104]"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+User class. 
+
+This structure describes one user class. Classes are there to help you manage your users in a large system, with many different types of people and services. For instance, you can design a monthly subscription system whereby users pay to get full access for a month. Or, you could make a class where people are allowed two hours a day online time for a month, then are moved to a full-access class where the normal credit charging system applies. The possibilities are endless.
+.PP
+The set of classes in use define a graph. Transitions between classes happen based on various events: the user's absence from the system; the user staying in a class for a number of days; the user running out of credits; and the user receiving credits. The operator can also move a user to an arbitrary class.
+.PP
+Here are the class fields. They'll show exactly what you can do with classes.
+.PP
+.IP "\(bu" 2
+\fCname\fP. The name of the class. For no reason in particular, convention is to make class names upper case.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnotaround\fP, \fCnadays\fP. This pair of fields define the name of a class (\fCnotaround\fP) the user will be moved to if they don't use the system for \fCnadays\fP days. This is useful for revoking privileges of people who've stopped using the system. Setting \fCnotaround\fP to be equal to \fCname\fP effectively disables this class transition.
+.PP
+.PP
+.IP "\(bu" 2
+\fCaround\fP, \fCardays\fP. Like above, but the user is moved to class \fCaround\fP if they've been in their current class for at least \fCardays\fP. Setting \fCaround\fP to be equal to \fCname\fP effectively disables this class transition.
+.PP
+.PP
+.IP "\(bu" 2
+\fCnocreds\fP, \fCcredpost\fP. Users running out of credits are temporarily moved to class specified by \fCnocreds\fP for the rest of the day (provided the coming cleanup posts credits to them). Users receiving credits are moved to the class specified by \fCcredpost\fP. Disabling this transitions is done in the usual manner, setting the target class to \fCname\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fClimpercall\fP, \fClimperday\fP. Denote respectively the maximum online time per call and maximum daily online time for a user in this class. Regardless of the amount of credits a user has, they will be (politely) kicked out when they exceed their time limits. For time limits on a per-call basis, the user can redial later and get another \fClimpercall\fP minutes online, as long as they have credits. These values may be set to -1 to denote no limitations on time.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcrdperday\fP. Specifies the minimum number of credits the user should have at the beginning of each day. If the user has less credits than \fCcrdperday\fP, the cleanup process posts enough credits to bring the user to the minimum. If the user has more credits than the minimum, nothing is done.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcrdperweek\fP, crdpermonth. These fields specify bonuses (or taxes, if negative) given to users on a weekly and monthly basis. Unlike the above field, these amounts are \fIposted\fP to the user's account (i.e. they don't work as minima).
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. A set of flags describing minor features of the class, given by zero or more \fCCLF_x\fP flags ORred together.
+.PP
+.PP
+.IP "\(bu" 2
+\fCusers\fP. The number of users in this class. Updated every cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCkeys\fP. The class keyring. This is combined with users' personal keyrings to provide the full set of keys owned by the user. 
+.PP
+
+.PP
+Definition at line 751 of file useracc.h.
+.SH "Field Documentation"
+.PP 
+.SS "\fBint32\fP \fBclassrec_t::ardays\fP"
+.PP
+.. around for ardays number of days Definition at line 756 of file useracc.h.
+.SS "char \fBclassrec_t::around\fP[10]"
+.PP
+Class to go to after user has been. Definition at line 755 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::crdperday\fP"
+.PP
+Free time per day. Definition at line 761 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::crdpermonth\fP"
+.PP
+Bonus time posted every month. Definition at line 763 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::crdperweek\fP"
+.PP
+Bonus time posted every week. Definition at line 762 of file useracc.h.
+.SS "char \fBclassrec_t::credpost\fP[10]"
+.PP
+Class to go to when paid creds posted. Definition at line 758 of file useracc.h.
+.SS "char \fBclassrec_t::dummy\fP[512-104]"
+.PP
+Definition at line 768 of file useracc.h.
+.SS "\fBuint32\fP \fBclassrec_t::flags\fP"
+.PP
+Flags bits. Definition at line 764 of file useracc.h.
+.SS "\fBbbskey_t\fP \fBclassrec_t::keys\fP[KEYLENGTH]"
+.PP
+128 Key bits Definition at line 766 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::limpercall\fP"
+.PP
+Time limit per call (-1 disables). Definition at line 759 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::limperday\fP"
+.PP
+Time limit per day (-1 disables). Definition at line 760 of file useracc.h.
+.SS "\fBint32\fP \fBclassrec_t::nadays\fP"
+.PP
+.. for nadays number of days Definition at line 754 of file useracc.h.
+.SS "char \fBclassrec_t::name\fP[10]"
+.PP
+Name of class. Definition at line 752 of file useracc.h.
+.SS "char \fBclassrec_t::nocreds\fP[10]"
+.PP
+Class to go to when no credits left. Definition at line 757 of file useracc.h.
+.SS "char \fBclassrec_t::notaround\fP[10]"
+.PP
+Class to go to when user not logged on. Definition at line 753 of file useracc.h.
+.SS "\fBuint32\fP \fBclassrec_t::users\fP"
+.PP
+Number of users in this class. Definition at line 765 of file useracc.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

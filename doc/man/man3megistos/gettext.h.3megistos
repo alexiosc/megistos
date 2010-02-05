@@ -1,0 +1,83 @@
+.TH "gettext.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+gettext.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fB_LIBGETTEXT_H\fP   1"
+.br
+.ti -1c
+.RI "#define \fBgettext\fP(Msgid)   ((const char *) (Msgid))"
+.br
+.ti -1c
+.RI "#define \fBdgettext\fP(Domainname, Msgid)   ((const char *) (Msgid))"
+.br
+.ti -1c
+.RI "#define \fBdcgettext\fP(Domainname, Msgid, Category)   ((const char *) (Msgid))"
+.br
+.ti -1c
+.RI "#define \fBngettext\fP(Msgid1, Msgid2, N)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.br
+.ti -1c
+.RI "#define \fBdngettext\fP(Domainname, Msgid1, Msgid2, N)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.br
+.ti -1c
+.RI "#define \fBdcngettext\fP(Domainname, Msgid1, Msgid2, N, Category)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.br
+.ti -1c
+.RI "#define \fBtextdomain\fP(Domainname)   ((const char *) (Domainname))"
+.br
+.ti -1c
+.RI "#define \fBbindtextdomain\fP(Domainname, Dirname)   ((const char *) (Dirname))"
+.br
+.ti -1c
+.RI "#define \fBbind_textdomain_codeset\fP(Domainname, Codeset)   ((const char *) (Codeset))"
+.br
+.ti -1c
+.RI "#define \fBgettext_noop\fP(String)   String"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define _LIBGETTEXT_H   1"
+.PP
+Definition at line 20 of file gettext.h.
+.SS "#define bind_textdomain_codeset(Domainname, Codeset)   ((const char *) (Codeset))"
+.PP
+Definition at line 56 of file gettext.h.
+.SS "#define bindtextdomain(Domainname, Dirname)   ((const char *) (Dirname))"
+.PP
+Definition at line 55 of file gettext.h.
+.SS "#define dcgettext(Domainname, Msgid, Category)   ((const char *) (Msgid))"
+.PP
+Definition at line 47 of file gettext.h.
+.SS "#define dcngettext(Domainname, Msgid1, Msgid2, N, Category)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.PP
+Definition at line 52 of file gettext.h.
+.SS "#define dgettext(Domainname, Msgid)   ((const char *) (Msgid))"
+.PP
+Definition at line 46 of file gettext.h.
+.SS "#define dngettext(Domainname, Msgid1, Msgid2, N)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.PP
+Definition at line 50 of file gettext.h.
+.SS "#define gettext(Msgid)   ((const char *) (Msgid))"
+.PP
+Definition at line 45 of file gettext.h.
+.SS "#define gettext_noop(String)   String"
+.PP
+Definition at line 67 of file gettext.h.
+.SS "#define ngettext(Msgid1, Msgid2, N)   ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))"
+.PP
+Definition at line 48 of file gettext.h.
+.SS "#define textdomain(Domainname)   ((const char *) (Domainname))"
+.PP
+Definition at line 54 of file gettext.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,136 @@
+.TH "Resource Locking and Serialisation" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Resource Locking and Serialisation \- This header defines an interface to the locking features of the BBS.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group\fBLock result codes (LKR_x)\fP"
+.br
+.RI "\fIResource locking result codes. \fP"
+.PP
+
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBBSLOCKD_SOCKET\fP   mkfname(BBSETCDIR'/lock.socket')"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBlock_place\fP (const char *name, const char *info)"
+.br
+.RI "\fIPlace a lock. \fP"
+.ti -1c
+.RI "int \fBlock_check\fP (const char *name, char *info)"
+.br
+.RI "\fICheck if a lock exists. \fP"
+.ti -1c
+.RI "int \fBlock_rm\fP (const char *name)"
+.br
+.RI "\fIRemove a lock. \fP"
+.ti -1c
+.RI "int \fBlock_wait\fP (const char *name, int delay)"
+.br
+.RI "\fIWaits for a lock. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This header defines an interface to the locking features of the BBS. Locks are implemented with the aid of the lock daemon, lockd, which listens to commands on a socket.
+.PP
+Lockd requests are strings sent to the daemon's socket. They look like this:
+.PP
+.PP
+.nf
+
+MAKE foo 42 bar  Creates lock "foo" with info "bar" for PID 42
+CHCK foo 42      Checks for the presence of lock "foo" (we're PID 42)
+KILL foo 42      Removes lock "foo" on behalf of process with PID 42
+.PP
+.PP
+Results are integers in decimal (matching the \fCLKR_\fP constants below) followed by a string. A positive result code denotes the PID of a process holding the lock. In this case, the result code is followed by a string containing the \fCinfo\fP field of the lock. Negative result codes denote error conditions.
+.PP
+All this is slightly academic, though. The details of the transactions with the daemon are hidden from the user. 
+.SH "Define Documentation"
+.PP 
+.SS "#define BBSLOCKD_SOCKET   mkfname(BBSETCDIR'/lock.socket')"
+.PP
+Definition at line 102 of file lock.h.
+.SH "Function Documentation"
+.PP 
+.SS "int lock_check (const char * name, char * info)"
+.PP
+Check if a lock exists. Checks for the existence of a lock. If the lock does not exist, { LKR_OK} will be returned. If the lock exists, a PID (an integer greater than zero) will be returned. Please refer to the documentation for the { LKR_x} constants for more information.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the name of the resource to be checked (filename of the lock, too).
+.br
+\fIinfo\fP if the lock exists, its \fCinfo\fP field is copied to the supplied string.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One of the \fCLKR_x\fP result codes. 
+.RE
+.PP
+
+.SS "int lock_place (const char * name, const char * info)"
+.PP
+Place a lock. Registers a resource lock. The lock will first be checked to make sure you have permission to place it. Permission is given if the lock:
+.PP
+{itemize}  does not exist;  exists and is your own; or  exists and is stale (i.e. belongs to a dead process). {itemize}
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the name of the resource to be locked (filename of the lock, too).
+.br
+\fIinfo\fP a short description of the lock. This is for your benefit only, so that processes competing for a lock will know why a lock is in place.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One of the \fCLKR_x\fP result codes. 
+.RE
+.PP
+
+.SS "int lock_rm (const char * name)"
+.PP
+Remove a lock. Removes the named lock.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the name of the lock to be removed.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One of the \fCLKR_x} result codes. { LKR_ERROR\fP denotes an error with \fCunlink()\fP, in which case the error will be left in { errno} for your delectation. 
+.RE
+.PP
+
+.SS "int lock_wait (const char * name, int delay)"
+.PP
+Waits for a lock. Waits for a resource lock to become available. This function blocks, repeatedly checking if the specified lock has been released.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the name of the lock to check.
+.br
+\fIdelay\fP the maximum time to wait in seconds.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+One of the \fCLKR_x\fP result codes representing the state of the lock when the process exist. \fCLKR_TIMEOUT\fP is reported when the time specified by \fCdelay\fP expired and the lock was still unavailable. 
+.RE
+.PP
+

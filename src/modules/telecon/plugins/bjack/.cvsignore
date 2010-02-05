@@ -1,0 +1,6 @@
+.deps
+.libs
+Makefile
+Makefile.in
+bjack
+mbk_bjack.h

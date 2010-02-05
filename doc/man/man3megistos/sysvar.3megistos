@@ -1,0 +1,336 @@
+.TH "sysvar" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+sysvar \- System variables blocks.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBbbstitle\fP [52]"
+.br
+.RI "\fIFull name of the BBS. \fP"
+.ti -1c
+.RI "char \fBcompany\fP [48]"
+.br
+.RI "\fICompany owning the BBS, if any. \fP"
+.ti -1c
+.RI "char \fBaddress1\fP [48]"
+.br
+.RI "\fIBBS mailing address, line 1 of 2. \fP"
+.ti -1c
+.RI "char \fBaddress2\fP [48]"
+.br
+.RI "\fIBBS mailing address, line 2 of 2. \fP"
+.ti -1c
+.RI "char \fBcity\fP [48]"
+.br
+.RI "\fICity where BBS is. \fP"
+.ti -1c
+.RI "char \fBdataphone\fP [48]"
+.br
+.RI "\fIMain dialup phone. \fP"
+.ti -1c
+.RI "char \fBvoicephone\fP [48]"
+.br
+.RI "\fIMain voice phone. \fP"
+.ti -1c
+.RI "char \fBlivephone\fP [48]"
+.br
+.RI "\fIDialup for paid users. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBidlezap\fP"
+.br
+.RI "\fIInactivity timeout (minutes, 0=off). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBsaverate\fP"
+.br
+.RI "\fIMinutes between saving sysvar to disk. \fP"
+.ti -1c
+.RI "char \fBchargehour\fP [32]"
+.br
+.RI "\fICharge per hour (textual description). \fP"
+.ti -1c
+.RI "char \fBmincredits\fP [32]"
+.br
+.RI "\fIMinimum time users can buy. \fP"
+.ti -1c
+.RI "char \fBminmoney\fP [32]"
+.br
+.RI "\fIMinimum charge on users. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIUnknown. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBpswexpiry\fP"
+.br
+.RI "\fIPassword lifetime (days). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBinjaudit\fP"
+.br
+.ti -1c
+.RI "\fBbbskey_t\fP \fBpagekey\fP"
+.br
+.RI "\fIKey needed to page. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBpgovkey\fP"
+.br
+.RI "\fIKey needed to override page restrictions. \fP"
+.ti -1c
+.RI "\fBbbskey_t\fP \fBpallkey\fP"
+.br
+.RI "\fIKey needed to page all users. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBglockie\fP"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBlonaud\fP"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBlofaud\fP"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBtnlmax\fP"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBidlovr\fP"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBbbsrst\fP"
+.br
+.ti -1c
+.RI "char \fBdummy1\fP [6144-540]"
+.br
+.ti -1c
+.RI "\fBint32\fP \fBtcredspaid\fP"
+.br
+.RI "\fITotal paid credits posted ever. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtcreds\fP"
+.br
+.RI "\fITotal credits (paid+free) posted ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBtimever\fP"
+.br
+.RI "\fITotal on-line time ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBfilesupl\fP"
+.br
+.RI "\fITotal number of files uploaded ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBfilesdnl\fP"
+.br
+.RI "\fITotal number of files downloaded ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBbytesupl\fP"
+.br
+.RI "\fITotal bytes * 100 uploaded ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBbytesdnl\fP"
+.br
+.RI "\fITotal bytes * 100 downloaded ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBsigmessages\fP"
+.br
+.RI "\fITotal Club messages written. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBemessages\fP"
+.br
+.RI "\fITotal Email messages written. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBnmessages\fP"
+.br
+.RI "\fITotal outgoing (net) messages written. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBconnections\fP"
+.br
+.RI "\fITotal number of connections ever. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBincnetmsgs\fP"
+.br
+.RI "\fITotal incoming net messages received. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBemsgslive\fP"
+.br
+.RI "\fIEmail messages active at this time. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBclubmsgslive\fP"
+.br
+.RI "\fIClub messages active at this time. \fP"
+.ti -1c
+.RI "char \fBdummy2\fP [2044-56]"
+.br
+.ti -1c
+.RI "char \fBmagic\fP [4]"
+.br
+.RI "\fIMagic number (\fCSYSVAR_MAGIC\fP). \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+System variables blocks. 
+
+This is a very old and almost vestigial part of Megistos. It was modeled after the corresponding part of the Major BBS. However, Megistos' design was very different from the design that imposed the system variable block on the Major BBS. As a result, this part of the system really shows its age. It should be removed at some point, for a very large number of reasons:
+.PP
+.IP "\(bu" 2
+Stability: even given the unbelievably paranoid backup policy of the system variable file, this is the most common point-of-failure for the BBS. It has numerous natural enemies, including stupidity, race conditions, disk crashes, et cetera.
+.PP
+.PP
+.IP "\(bu" 2
+It's a binary structure (and file) and that always spells disaster for maintenance and recovery.
+.PP
+.PP
+.IP "\(bu" 2
+Most of the fields no longer make sense. For that matter, many of the fields found in Major's system variable block weren't really applicable when I started programming the Major BBS in 1992. Having room for a single voice phone is stupid, if your BBS has 32 lines and a telnet connection. Having by-the-minute charges is silly, if you have monthly subscriptions. Having \fIcharges\fP is silly if you run a free system.
+.PP
+.PP
+.IP "\(bu" 2
+All of the fields here should be present because there is absolutely no other place to put them. This clearly does not hold for most fields. Even the statistics block could easily be moved to the \fCdata/stats\fP directory where all the other statistics are. BBS names, addresses, et cetera are handled by substitution variables. No need to involve global state for things that are seldom needed.
+.PP
+.PP
+.IP "\(bu" 2
+The system variable block was meant to service a centralised system, where everything was a single process, with a single view of memory. Megistos is pretty distributed. The BBS is split among different processes, with global state (such as it is) being kept by the BBS daemon (\fCbbsd\fP).
+.PP
+.PP
+Given all that, I'm not going to document the entire structure. 
+.PP
+Definition at line 155 of file sysstruct.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBsysvar::address1\fP[48]"
+.PP
+BBS mailing address, line 1 of 2. Definition at line 158 of file sysstruct.h.
+.SS "char \fBsysvar::address2\fP[48]"
+.PP
+BBS mailing address, line 2 of 2. Definition at line 159 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::bbsrst\fP"
+.PP
+Definition at line 180 of file sysstruct.h.
+.SS "char \fBsysvar::bbstitle\fP[52]"
+.PP
+Full name of the BBS. Definition at line 156 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::bytesdnl\fP"
+.PP
+Total bytes * 100 downloaded ever. Definition at line 190 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::bytesupl\fP"
+.PP
+Total bytes * 100 uploaded ever. Definition at line 189 of file sysstruct.h.
+.SS "char \fBsysvar::chargehour\fP[32]"
+.PP
+Charge per hour (textual description). Definition at line 166 of file sysstruct.h.
+.SS "char \fBsysvar::city\fP[48]"
+.PP
+City where BBS is. Definition at line 160 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::clubmsgslive\fP"
+.PP
+Club messages active at this time. Definition at line 197 of file sysstruct.h.
+.SS "char \fBsysvar::company\fP[48]"
+.PP
+Company owning the BBS, if any. Definition at line 157 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::connections\fP"
+.PP
+Total number of connections ever. Definition at line 194 of file sysstruct.h.
+.SS "char \fBsysvar::dataphone\fP[48]"
+.PP
+Main dialup phone. Definition at line 161 of file sysstruct.h.
+.SS "char \fBsysvar::dummy1\fP[6144-540]"
+.PP
+Definition at line 182 of file sysstruct.h.
+.SS "char \fBsysvar::dummy2\fP[2044-56]"
+.PP
+Definition at line 199 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::emessages\fP"
+.PP
+Total Email messages written. Definition at line 192 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::emsgslive\fP"
+.PP
+Email messages active at this time. Definition at line 196 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::filesdnl\fP"
+.PP
+Total number of files downloaded ever. Definition at line 188 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::filesupl\fP"
+.PP
+Total number of files uploaded ever. Definition at line 187 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::flags\fP"
+.PP
+Unknown. Definition at line 169 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::glockie\fP"
+.PP
+Definition at line 175 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::idlezap\fP"
+.PP
+Inactivity timeout (minutes, 0=off). Definition at line 164 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::idlovr\fP"
+.PP
+Definition at line 179 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::incnetmsgs\fP"
+.PP
+Total incoming net messages received. Definition at line 195 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::injaudit\fP"
+.PP
+Definition at line 171 of file sysstruct.h.
+.SS "char \fBsysvar::livephone\fP[48]"
+.PP
+Dialup for paid users. Definition at line 163 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::lofaud\fP"
+.PP
+Definition at line 177 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::lonaud\fP"
+.PP
+Definition at line 176 of file sysstruct.h.
+.SS "char \fBsysvar::magic\fP[4]"
+.PP
+Magic number (\fCSYSVAR_MAGIC\fP). Definition at line 201 of file sysstruct.h.
+.SS "char \fBsysvar::mincredits\fP[32]"
+.PP
+Minimum time users can buy. Definition at line 167 of file sysstruct.h.
+.SS "char \fBsysvar::minmoney\fP[32]"
+.PP
+Minimum charge on users. Definition at line 168 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::nmessages\fP"
+.PP
+Total outgoing (net) messages written. Definition at line 193 of file sysstruct.h.
+.SS "\fBbbskey_t\fP \fBsysvar::pagekey\fP"
+.PP
+Key needed to page. Definition at line 172 of file sysstruct.h.
+.SS "\fBbbskey_t\fP \fBsysvar::pallkey\fP"
+.PP
+Key needed to page all users. Definition at line 174 of file sysstruct.h.
+.SS "\fBbbskey_t\fP \fBsysvar::pgovkey\fP"
+.PP
+Key needed to override page restrictions. Definition at line 173 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::pswexpiry\fP"
+.PP
+Password lifetime (days). Definition at line 170 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::saverate\fP"
+.PP
+Minutes between saving sysvar to disk. Definition at line 165 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::sigmessages\fP"
+.PP
+Total Club messages written. Definition at line 191 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::tcreds\fP"
+.PP
+Total credits (paid+free) posted ever. Definition at line 185 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::tcredspaid\fP"
+.PP
+Total paid credits posted ever. Definition at line 184 of file sysstruct.h.
+.SS "\fBuint32\fP \fBsysvar::timever\fP"
+.PP
+Total on-line time ever. Definition at line 186 of file sysstruct.h.
+.SS "\fBint32\fP \fBsysvar::tnlmax\fP"
+.PP
+Definition at line 178 of file sysstruct.h.
+.SS "char \fBsysvar::voicephone\fP[48]"
+.PP
+Main voice phone. Definition at line 162 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,6 @@
+.deps
+.libs
+Makefile.in
+graffiti
+mbk_graffiti.h
+Makefile

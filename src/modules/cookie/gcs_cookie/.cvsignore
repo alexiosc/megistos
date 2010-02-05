@@ -1,0 +1,7 @@
+.deps
+.libs
+Makefile
+Makefile.in
+gcs_cookie.lo
+libgcs50_cookie.la
+libgcs_cookie.la

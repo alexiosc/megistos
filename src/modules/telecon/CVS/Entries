@@ -1,0 +1,28 @@
+D/mkaction////
+D/mkplugin////
+D/plugins////
+/.cvsignore/2.0/Thu Dec 25 18:10:34 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:53 2004//
+/accesses.c/2.0/Mon Sep 13 19:44:53 2004//
+/actions.c/2.0/Mon Sep 13 19:44:53 2004//
+/actions.h/2.0/Mon Sep 13 19:44:53 2004//
+/broadcast.c/2.0/Mon Sep 13 19:44:53 2004//
+/channel.c/2.0/Mon Sep 13 19:44:53 2004//
+/chanusr.c/2.0/Mon Sep 13 19:44:53 2004//
+/chat.c/2.0/Mon Sep 13 19:44:53 2004//
+/editprefs.c/2.0/Mon Sep 13 19:44:53 2004//
+/init.c/2.0/Mon Sep 13 19:44:53 2004//
+/invitations.c/2.0/Mon Sep 13 19:44:53 2004//
+/misc.c/2.0/Mon Sep 13 19:44:53 2004//
+/plugins.c/2.0/Mon Sep 13 19:44:53 2004//
+/plugins.c-0.6/2.0/Mon Sep 13 19:44:53 2004//
+/plugins.c-0.8/2.0/Mon Sep 13 19:44:53 2004//
+/scan.c/2.0/Mon Sep 13 19:44:53 2004//
+/substvars.c/2.0/Mon Sep 13 19:44:53 2004//
+/talk.c/2.0/Mon Sep 13 19:44:53 2004//
+/telecon.h/2.0/Mon Sep 13 19:44:53 2004//
+/telecon.msg/2.0/Sat Apr 21 10:34:54 2001//
+/teleconplugins.h/2.0/Mon Sep 13 19:44:53 2004//
+/usr.c/2.0/Mon Sep 13 19:44:53 2004//
+/utils.c/2.0/Mon Sep 13 19:44:53 2004//
+/telecon.c/2.1/Mon Sep 13 19:55:33 2004//

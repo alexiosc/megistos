@@ -1,0 +1,121 @@
+.TH "Initialisation mode flags (INI_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Initialisation mode flags (INI_x) \- Subsystems of the BBS API to be initialised.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBINI_SIGNALS\fP   0x00000001	/**< Initialise signal handlers. */"
+.br
+.RI "\fIInitialise signal handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_INPUT\fP   0x00000002	/**< Initialise user input handling. */"
+.br
+.RI "\fIInitialise user input handling. \fP"
+.ti -1c
+.RI "#define \fBINI_SYSVARS\fP   0x00000004	/**< Attach to system variable shared block. */"
+.br
+.RI "\fIAttach to system variable shared block. \fP"
+.ti -1c
+.RI "#define \fBINI_CLASSES\fP   0x00000008  /**< Load the user classes. */"
+.br
+.RI "\fILoad the user classes. \fP"
+.ti -1c
+.RI "#define \fBINI_ERRMSGS\fP   0x00000010	/**< Initialise hardwired fatal error messages. */"
+.br
+.RI "\fIInitialise hardwired fatal error messages. \fP"
+.ti -1c
+.RI "#define \fBINI_ATEXIT\fP   0x00000020  /**< Set internal at-exit handlers. */"
+.br
+.RI "\fISet internal at-exit handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_LANGS\fP   0x00000040  /**< Prepare languages. */"
+.br
+.RI "\fIPrepare languages. \fP"
+.ti -1c
+.RI "#define \fBINI_OUTPUT\fP   0x00000080  /**< Initialise user output subsystem. */"
+.br
+.RI "\fIInitialise user output subsystem. \fP"
+.ti -1c
+.RI "#define \fBINI_USER\fP   0x00000100  /**< Load/attach to the user. */"
+.br
+.RI "\fILoad/attach to the user. \fP"
+.ti -1c
+.RI "#define \fBINI_GLOBCMD\fP   0x00000200  /**< Initialise global commands. */"
+.br
+.RI "\fIInitialise global commands. \fP"
+.ti -1c
+.RI "#define \fBINI_TTYNUM\fP   0x00000400  /**< Read TTY to/from BBS channel mapping. */"
+.br
+.RI "\fIRead TTY to/from BBS channel mapping. \fP"
+.ti -1c
+.RI "#define \fBINI_CHAT\fP   0x00000800  /**< Initialise Sysop chat mode handlers. */"
+.br
+.RI "\fIInitialise Sysop chat mode handlers. \fP"
+.ti -1c
+.RI "#define \fBINI_ALL\fP"
+.br
+.RI "\fIInitialise everything. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Subsystems of the BBS API to be initialised. Different modules have different needs. In most cases, all of the API will have to be initialised, especially for interactive modules. However, non-interactive, pre-login or other unusual requirements may call for only a few of the subsystems to be initialised at a time (the \fCbbslogin\fP subsystem does this, for example).
+.PP
+Unless you really know what you're doing, always initialise everything! Too many things rely on too many other things, and the breakage would be significant.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_init()\fP 
+.RE
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define INI_ALL"
+.PP
+\fBValue:\fP.nf
+0xffffffff  
+.fi
+Initialise everything. 
+.PP
+Use this flag with \fBmod_init()\fP unless you know what you're doing. Definition at line 236 of file bbsmod.h.
+.SS "#define INI_ATEXIT   0x00000020  /**< Set internal at-exit handlers. */"
+.PP
+Set internal at-exit handlers. Definition at line 229 of file bbsmod.h.
+.SS "#define INI_CHAT   0x00000800  /**< Initialise Sysop chat mode handlers. */"
+.PP
+Initialise Sysop chat mode handlers. Definition at line 235 of file bbsmod.h.
+.SS "#define INI_CLASSES   0x00000008  /**< Load the user classes. */"
+.PP
+Load the user classes. Definition at line 227 of file bbsmod.h.
+.SS "#define INI_ERRMSGS   0x00000010	/**< Initialise hardwired fatal error messages. */"
+.PP
+Initialise hardwired fatal error messages. Definition at line 228 of file bbsmod.h.
+.SS "#define INI_GLOBCMD   0x00000200  /**< Initialise global commands. */"
+.PP
+Initialise global commands. Definition at line 233 of file bbsmod.h.
+.SS "#define INI_INPUT   0x00000002	/**< Initialise user input handling. */"
+.PP
+Initialise user input handling. Definition at line 225 of file bbsmod.h.
+.SS "#define INI_LANGS   0x00000040  /**< Prepare languages. */"
+.PP
+Prepare languages. Definition at line 230 of file bbsmod.h.
+.SS "#define INI_OUTPUT   0x00000080  /**< Initialise user output subsystem. */"
+.PP
+Initialise user output subsystem. Definition at line 231 of file bbsmod.h.
+.SS "#define INI_SIGNALS   0x00000001	/**< Initialise signal handlers. */"
+.PP
+Initialise signal handlers. Definition at line 224 of file bbsmod.h.
+.SS "#define INI_SYSVARS   0x00000004	/**< Attach to system variable shared block. */"
+.PP
+Attach to system variable shared block. Definition at line 226 of file bbsmod.h.
+.SS "#define INI_TTYNUM   0x00000400  /**< Read TTY to/from BBS channel mapping. */"
+.PP
+Read TTY to/from BBS channel mapping. Definition at line 234 of file bbsmod.h.
+.SS "#define INI_USER   0x00000100  /**< Load/attach to the user. */"
+.PP
+Load/attach to the user. Definition at line 232 of file bbsmod.h.

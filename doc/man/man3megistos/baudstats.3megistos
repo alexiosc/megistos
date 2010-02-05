@@ -1,0 +1,44 @@
+.TH "baudstats" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+baudstats \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "\fBint32\fP \fBbaud\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcredits\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBminutes\fP"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBcalls\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "\fBint32\fP \fBbaudstats::baud\fP"
+.PP
+Definition at line 231 of file sysstruct.h.
+.SS "\fBuint32\fP \fBbaudstats::calls\fP"
+.PP
+Definition at line 234 of file sysstruct.h.
+.SS "\fBuint32\fP \fBbaudstats::credits\fP"
+.PP
+Definition at line 232 of file sysstruct.h.
+.SS "\fBuint32\fP \fBbaudstats::minutes\fP"
+.PP
+Definition at line 233 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

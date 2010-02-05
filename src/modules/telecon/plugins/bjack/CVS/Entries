@@ -1,0 +1,23 @@
+/.cvsignore/2.0/Thu Dec 25 18:10:34 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:53 2004//
+/README/2.0/Mon Apr 16 14:59:57 2001//
+/TODO/2.0/Mon Apr 16 14:59:57 2001//
+/UPDATE/2.0/Mon Apr 16 14:59:57 2001//
+/bjack.c/2.0/Mon Sep 13 19:44:53 2004//
+/bjack.h/2.0/Mon Sep 13 19:44:53 2004//
+/bjack.msg/2.0/Mon Apr 16 15:00:01 2001//
+/bjcmd.c/2.0/Mon Sep 13 19:44:53 2004//
+/bjconf.h/2.0/Mon Sep 13 19:44:53 2004//
+/bjglob.c/2.0/Mon Sep 13 19:44:53 2004//
+/bjintrfc.c/2.0/Mon Sep 13 19:44:53 2004//
+/bjintrfc.h/2.0/Mon Sep 13 19:44:53 2004//
+/bjutil.c/2.0/Mon Sep 13 19:44:53 2004//
+/bjver.h/2.0/Thu Dec 25 08:26:19 2003//
+/blackjack.txt/2.0/Mon Apr 16 15:00:06 2001//
+/cards.c/2.0/Mon Sep 13 19:44:53 2004//
+/cards.h/2.0/Mon Sep 13 19:44:53 2004//
+/mkversion.sh/2.0/Mon Apr 16 15:00:09 2001//
+/plugins.c-0.6/2.0/Mon Sep 13 19:44:53 2004//
+/wdog.c/2.0/Thu Dec 25 16:27:37 2003//
+/wdog.h/2.0/Thu Dec 25 08:26:19 2003//
+D

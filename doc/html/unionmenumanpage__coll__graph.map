@@ -1,0 +1,6 @@
+base referer
+rect $structmenupage.html 11,161 80,337
+rect $structmenuoption.html 7,16 84,90
+rect $structfilepage.html 104,168 160,330
+rect $structexecpage.html 184,161 251,337
+rect $structrunpage.html 275,168 355,330

@@ -1,0 +1,7 @@
+.deps
+.libs
+Makefile
+Makefile.in
+gcs_go.lo
+libgcs_go.la
+menuman

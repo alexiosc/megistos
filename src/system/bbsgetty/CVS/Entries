@@ -1,0 +1,15 @@
+/.cvsignore/2.0/Tue Dec 23 06:43:59 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:53 2004//
+/bbsgetty.c/2.0/Mon Sep 13 19:44:53 2004//
+/bbsgetty.h/2.0/Mon Sep 13 19:44:53 2004//
+/chat.c/2.0/Mon Sep 13 19:44:53 2004//
+/debug.c/2.0/Mon Sep 13 19:44:53 2004//
+/gettydefs.c/2.0/Mon Sep 13 19:44:53 2004//
+/gettydefs.h/2.0/Mon Sep 13 19:44:53 2004//
+/init.c/2.0/Mon Sep 13 19:44:53 2004//
+/initline.c/2.0/Mon Sep 13 19:44:53 2004//
+/misc.c/2.0/Mon Sep 13 19:44:53 2004//
+/opentty.c/2.0/Mon Sep 13 19:44:53 2004//
+/setdefaults.c/2.0/Mon Sep 13 19:44:53 2004//
+/uucplocks.c/2.0/Mon Sep 13 19:44:53 2004//
+D

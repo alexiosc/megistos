@@ -1,0 +1,20 @@
+/.cvsignore/2.0/Thu Dec 25 18:10:34 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:53 2004//
+/allow.c/2.0/Mon Sep 13 19:44:53 2004//
+/back.h/2.0/Thu Dec 25 08:26:19 2003//
+/board.c/2.0/Mon Sep 13 19:44:53 2004//
+/check.c/2.0/Mon Sep 13 19:44:53 2004//
+/extra.c/2.0/Mon Sep 13 19:44:53 2004//
+/init.c/2.0/Mon Sep 13 19:44:53 2004//
+/main.c/2.0/Mon Sep 13 19:44:53 2004//
+/move.c/2.0/Mon Sep 13 19:44:53 2004//
+/odds.c/2.0/Mon Sep 13 19:44:53 2004//
+/one.c/2.0/Mon Sep 13 19:44:53 2004//
+/plugin.c/2.0/Mon Sep 13 19:44:53 2004//
+/roll.c/2.0/Mon Sep 13 19:44:53 2004//
+/save.c/2.0/Mon Sep 13 19:44:53 2004//
+/subs.c/2.0/Mon Sep 13 19:44:53 2004//
+/table.c/2.0/Mon Sep 13 19:44:53 2004//
+/telecon.bg.h/2.0/Mon Sep 13 19:44:53 2004//
+/telecon.bg.msg/2.0/Mon Apr 16 15:00:16 2001//
+D

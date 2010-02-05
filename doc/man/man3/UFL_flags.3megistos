@@ -1,0 +1,50 @@
+.TH "User account flags (UFL_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+User account flags (UFL_x) \- User account flags.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBUFL_SUSPENDED\fP   0x00000001 /**< User has been suspended. */"
+.br
+.RI "\fIUser has been suspended. \fP"
+.ti -1c
+.RI "#define \fBUFL_DELETED\fP   0x00000002 /**< User is marked for deletion tonight. */"
+.br
+.RI "\fIUser is marked for deletion tonight. \fP"
+.ti -1c
+.RI "#define \fBUFL_EXEMPT\fP   0x00000004 /**< User is exempt from deletions. */"
+.br
+.RI "\fIUser is exempt from deletions. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User account flags. These flags flag a user's account in different ways.
+.PP
+.IP "\(bu" 2
+\fCUFL_SUSPENDED\fP. User's account has been suspended.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUFL_DELETED\fP. User has been marked for deletion. The account will be deleted at the coming cleanup.
+.PP
+.PP
+.IP "\(bu" 2
+\fCUFL_EXEMPT\fP. User cannot be deleted. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define UFL_DELETED   0x00000002 /**< User is marked for deletion tonight. */"
+.PP
+User is marked for deletion tonight. Definition at line 652 of file useracc.h.
+.SS "#define UFL_EXEMPT   0x00000004 /**< User is exempt from deletions. */"
+.PP
+User is exempt from deletions. Definition at line 654 of file useracc.h.
+.SS "#define UFL_SUSPENDED   0x00000001 /**< User has been suspended. */"
+.PP
+User has been suspended. Definition at line 650 of file useracc.h.

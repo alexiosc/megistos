@@ -1,0 +1,68 @@
+.TH "runpage" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+runpage \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <menuman.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [PAGENAMELEN]"
+.br
+.ti -1c
+.RI "char \fBprev\fP [PAGENAMELEN]"
+.br
+.ti -1c
+.RI "char \fBdescr\fP [NUMLANGUAGES][PAGEDESCRLEN]"
+.br
+.ti -1c
+.RI "char \fBtype\fP"
+.br
+.ti -1c
+.RI "int \fBcreds\fP"
+.br
+.ti -1c
+.RI "int \fBkey\fP"
+.br
+.ti -1c
+.RI "int \fBflags\fP"
+.br
+.ti -1c
+.RI "char \fBcommand\fP [RUNSTRLEN]"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "char \fBrunpage::command\fP[RUNSTRLEN]"
+.PP
+Definition at line 192 of file menuman.h.
+.SS "int \fBrunpage::creds\fP"
+.PP
+Definition at line 188 of file menuman.h.
+.SS "char \fBrunpage::descr\fP[NUMLANGUAGES][PAGEDESCRLEN]"
+.PP
+Definition at line 186 of file menuman.h.
+.SS "int \fBrunpage::flags\fP"
+.PP
+Definition at line 190 of file menuman.h.
+.SS "int \fBrunpage::key\fP"
+.PP
+Definition at line 189 of file menuman.h.
+.SS "char \fBrunpage::name\fP[PAGENAMELEN]"
+.PP
+Definition at line 184 of file menuman.h.
+.SS "char \fBrunpage::prev\fP[PAGENAMELEN]"
+.PP
+Definition at line 185 of file menuman.h.
+.SS "char \fBrunpage::type\fP"
+.PP
+Definition at line 187 of file menuman.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

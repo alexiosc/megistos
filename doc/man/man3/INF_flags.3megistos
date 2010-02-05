@@ -1,0 +1,78 @@
+.TH "Input option flags (INF_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Input option flags (INF_x) \- Input flags.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBINF_HELP\fP   0x0001 /**< High-level help requests to be handled by caller. */"
+.br
+.RI "\fIHigh-level help requests to be handled by caller. \fP"
+.ti -1c
+.RI "#define \fBINF_PASSWD\fP   0x0002 /**< Echo asterisks (for password entry) */"
+.br
+.RI "\fIEcho asterisks (for password entry). \fP"
+.ti -1c
+.RI "#define \fBINF_REPROMPT\fP   0x0004 /**< You must reprompt, <tt>injoth()</tt> received */"
+.br
+.RI "\fIYou must reprompt, \fCinjoth()\fP received. \fP"
+.ti -1c
+.RI "#define \fBINF_NOINJOTH\fP   0x0008 /**< Set to disable incoming <tt>injoth()</tt>s */"
+.br
+.RI "\fISet to disable incoming \fCinjoth()\fPs. \fP"
+.ti -1c
+.RI "#define \fBINF_TIMEOUT\fP   0x0010 /**< Set to indicate that a timeout occurred */"
+.br
+.RI "\fISet to indicate that a timeout occurred. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Input flags. These flags control the operation of subsequent input operations. They're ORred together and stored in the global variable \fBinp_flags\fP.
+.PP
+.IP "\(bu" 2
+\fBINF_HELP\fP. High-level menuing and data-validation functions will return the default help action (option `\fC?\fP') to the caller so they can provide their own `help' functionality. If \fBINF_HELP\fP is not set, then the high-level entry/validation functions will deal with help requests on their own, typically printing a longer version of a menu or redisplaying a full prompt.
+.PP
+.PP
+.IP "\(bu" 2
+\fBINF_PASSWD\fP. The mid-level \fBinp_get()\fP function will echo stars instead of the characters typed. This is intended for password entry. This flag is cleared after calling an input function. This is meant to prevent normal data input operations from echoing asterisks because of programmer oversight or bug.
+.PP
+.PP
+.IP "\(bu" 2
+\fBINF_REPROMPT\fP. This variable is set to a non-zero value by the low-level input functions when the user is `injected' with a paged message from another user (or the system). Traditional Major BBS behaviour simulated a carriage return in such cases. We just flag such events and let the caller deal with them. You must \fIalways\fP check this value (use the \fBinp_reprompt()\fP function) in mid-to-high-level functions, to see if you need to reprompt the user. You must reprompt the user after an injected message, because the previous prompt may have scrolled off the screen, or it just might be out of context.
+.PP
+.PP
+.IP "\(bu" 2
+\fBINF_NOINJOTH\fP. Disables processing of incoming injoth() injected messages. In this state, the user will not receive pages, audit entries, et cetera. You should use this \fIonly\fP when it's necessary. The user should not be cut off from other users and the system for too long.
+.PP
+.PP
+.IP "\(bu" 2
+\fBINF_TIMEOUT\fP. Is set by \fBinp_readstring()\fP to indicate that it exited because of a timeout arranged by \fBinp_timeout()\fP or a signal handler.
+.PP
+.PP
+\fBSee also:\fP
+.RS 4
+\fBinp_flags\fP. 
+.RE
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define INF_HELP   0x0001 /**< High-level help requests to be handled by caller. */"
+.PP
+High-level help requests to be handled by caller. Definition at line 148 of file input.h.
+.SS "#define INF_NOINJOTH   0x0008 /**< Set to disable incoming <tt>injoth()</tt>s */"
+.PP
+Set to disable incoming \fCinjoth()\fPs. Definition at line 154 of file input.h.
+.SS "#define INF_PASSWD   0x0002 /**< Echo asterisks (for password entry) */"
+.PP
+Echo asterisks (for password entry). Definition at line 150 of file input.h.
+.SS "#define INF_REPROMPT   0x0004 /**< You must reprompt, <tt>injoth()</tt> received */"
+.PP
+You must reprompt, \fCinjoth()\fP received. Definition at line 152 of file input.h.
+.SS "#define INF_TIMEOUT   0x0010 /**< Set to indicate that a timeout occurred */"
+.PP
+Set to indicate that a timeout occurred. Definition at line 156 of file input.h.

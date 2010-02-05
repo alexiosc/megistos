@@ -1,0 +1,61 @@
+.TH "Last-Read Block Flags (LRF_x)" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Last-Read Block Flags (LRF_x) \- Flags used to store state with respect to public mail reading.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLRF_QUICKSCAN\fP   0x0001	/**< Club is in user's quickscan */"
+.br
+.RI "\fIClub is in user's quickscan. \fP"
+.ti -1c
+.RI "#define \fBLRF_INQWK\fP   0x0002	/**< Club is in user's off-line packets */"
+.br
+.RI "\fIClub is in user's off-line packets. \fP"
+.ti -1c
+.RI "#define \fBLRF_DELETED\fP   0x0004	/**< This preference block has been deleted */"
+.br
+.RI "\fIThis preference block has been deleted. \fP"
+.ti -1c
+.RI "#define \fBLRF_INITQWK\fP   0x0010	/**< For use by the off-line mailer. */"
+.br
+.RI "\fIFor use by the off-line mailer. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flags used to store state with respect to public mail reading. Here are the available flags:
+.PP
+.IP "\(bu" 2
+\fCLRF_QUICKSCAN\fP. The \fCclub\fP is in this user's quickscan list. I will be scanned automatically for new messages, along with the other quickscanned clubs.
+.PP
+.PP
+.IP "\(bu" 2
+\fCLRF_INQWK\fP. Similarly, \fCclub\fP is included in this user's off-line mail packets.
+.PP
+.PP
+.IP "\(bu" 2
+\fCLRF_DELETED\fP. Last-read blocks are stored in sparse arrays (I'm lazy). When a last-read block is deleted, this flag is set. The next addition of a last-read block will overwrite the first entry with the \fCLRF_DELETED\fP flag set.
+.PP
+.PP
+.IP "\(bu" 2
+\fCLRF_INITQWK\fP. Used by the off-line mailer to initialise the last-read pointers. 
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define LRF_DELETED   0x0004	/**< This preference block has been deleted */"
+.PP
+This preference block has been deleted. Definition at line 505 of file mail.h.
+.SS "#define LRF_INITQWK   0x0010	/**< For use by the off-line mailer. */"
+.PP
+For use by the off-line mailer. Definition at line 506 of file mail.h.
+.SS "#define LRF_INQWK   0x0002	/**< Club is in user's off-line packets */"
+.PP
+Club is in user's off-line packets. Definition at line 504 of file mail.h.
+.SS "#define LRF_QUICKSCAN   0x0001	/**< Club is in user's quickscan */"
+.PP
+Club is in user's quickscan. Definition at line 503 of file mail.h.

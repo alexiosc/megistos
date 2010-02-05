@@ -1,0 +1,20 @@
+/control.c/2.0/Mon Sep 13 19:44:50 2004//
+/extern.c/2.0/Mon Sep 13 19:44:50 2004//
+/fileio.c/2.0/Mon Sep 13 19:44:50 2004//
+/input.c/2.0/Mon Sep 13 19:44:50 2004//
+/interpre.c/2.0/Mon Sep 13 19:44:50 2004//
+/math.c/2.0/Mon Sep 13 19:44:50 2004//
+/memory.c/2.0/Mon Sep 13 19:44:50 2004//
+/object.c/2.0/Mon Sep 13 19:44:50 2004//
+/operand.c/2.0/Mon Sep 13 19:44:50 2004//
+/osdepend.c/2.0/Mon Sep 13 19:44:50 2004//
+/property.c/2.0/Mon Sep 13 19:44:50 2004//
+/screen.c/2.0/Mon Sep 13 19:44:50 2004//
+/text.c/2.0/Mon Sep 13 19:44:50 2004//
+/unixio.c/2.0/Mon Sep 13 19:44:50 2004//
+/variable.c/2.0/Mon Sep 13 19:44:50 2004//
+/zip.c/2.0/Mon Sep 13 19:44:50 2004//
+/ztypes.h/2.0/Mon Sep 13 19:44:50 2004//
+/.cvsignore/2.1/Mon May  3 05:55:06 2004//
+/Makefile.am/2.1/Sun Dec  5 12:26:59 2004//
+D

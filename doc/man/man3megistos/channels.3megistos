@@ -1,0 +1,344 @@
+.TH "BBS Channel Functionality" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+BBS Channel Functionality \- This file provides an API for controlling BBS channels.  
+
+.PP
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "group \fBChannel modes (LST_x)\fP"
+.br
+.RI "\fIBasic line states. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group \fBChannel result codes (LSR_x)\fP"
+.br
+.RI "\fIResult codes. \fP"
+.PP
+.in +1c
+
+.ti -1c
+.RI "group \fBChannel definition flags (TTF_x)\fP"
+.br
+.RI "\fIFlags controlling default channel behaviour. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBchannel_status_t\fP"
+.br
+.RI "\fIChannel status structure. \fP"
+.ti -1c
+.RI "struct \fBchanneldef\fP"
+.br
+.RI "\fIChannel definition. \fP"
+.ti -1c
+.RI "struct \fBchannel_status_t\fP"
+.br
+.RI "\fIChannel status structure. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBCHANNEL_MAGIC\fP   'MEGISTOS BINARY CHANNEL FILE\\n\\n\\n'"
+.br
+.RI "\fIThe channel file magic number. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBchannel_getstatus\fP (char *tty, \fBchannel_status_t\fP *status)"
+.br
+.RI "\fIGet channel status. \fP"
+.ti -1c
+.RI "int \fBchannel_setstatus\fP (char *tty, \fBchannel_status_t\fP *status)"
+.br
+.RI "\fISet channel status. \fP"
+.ti -1c
+.RI "void \fBchannel_setmode\fP (char *tty, \fBint32\fP mode)"
+.br
+.RI "\fISet channel mode. \fP"
+.ti -1c
+.RI "void \fBchannel_setresult\fP (char *tty, \fBint32\fP result)"
+.br
+.RI "\fISet channel result code. \fP"
+.ti -1c
+.RI "void \fBchannel_hangup\fP ()"
+.br
+.RI "\fIHangup this user's channel. \fP"
+.ti -1c
+.RI "int \fBchannel_disconnect\fP (char *ttyname)"
+.br
+.RI "\fIDisconnect a channel. \fP"
+.ti -1c
+.RI "char * \fBchannel_baudstg\fP (\fBint32\fP baud)"
+.br
+.RI "\fIFormats channel speed as a string. \fP"
+.ti -1c
+.RI "void \fBchan_init\fP ()"
+.br
+.RI "\fIInitialise the channel map. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getnum\fP (char *tty)"
+.br
+.RI "\fIFind the channel number of a device. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getindex\fP (char *tty)"
+.br
+.RI "\fIFind the index of a channel in \fCchannels\fP. \fP"
+.ti -1c
+.RI "char * \fBchan_getname\fP (\fBuint32\fP num)"
+.br
+.RI "\fIFind the device associated with a channel. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_telnetlinecount\fP ()"
+.br
+.RI "\fICount number of telnet lines in use. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "char * \fBchannel_states\fP []"
+.br
+.ti -1c
+.RI "char * \fBchannel_results\fP []"
+.br
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchannels\fP"
+.br
+.RI "\fIThe channels index, mapping ttys to channels. \fP"
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchan_last\fP"
+.br
+.RI "\fILast referenced element of \fCchannels\fP. \fP"
+.ti -1c
+.RI "int \fBchan_count\fP"
+.br
+.RI "\fINumber of channels in \fCchannels\fP. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This file provides an API for controlling BBS channels. Each channel has a number of status components:
+.PP
+.IP "\(bu" 2
+Channel mode (e.g. Normal, No-Answer, Busy, etc).
+.IP "\(bu" 2
+Result code (e.g. OK, RING, ERROR, etc).
+.IP "\(bu" 2
+Line speed where applicable (e.g. 33600 bps),
+.IP "\(bu" 2
+Occupant of line (a user ID, usually).
+.PP
+.PP
+The functionality declared here helps deal with these aspects of channels. This is usually not for modules' use. Unless of course you have some strange module that touches channels. 
+.SH "Define Documentation"
+.PP 
+.SS "#define CHANNEL_MAGIC   'MEGISTOS BINARY CHANNEL FILE\\n\\n\\n'"
+.PP
+The channel file magic number. Definition at line 97 of file ttynum.h.
+.SH "Function Documentation"
+.PP 
+.SS "\fBuint32\fP chan_getindex (char * tty)"
+.PP
+Find the index of a channel in \fCchannels\fP. Given a device name, this function yields the index of the channel structure in the \fCchannels\fP array.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP The name of a device special, without the \fC'/dev/'\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The index of the channel associated with the given device, or -1 if the device is not associated with a BBS channel. 
+.RE
+.PP
+
+.SS "char* chan_getname (\fBuint32\fP num)"
+.PP
+Find the device associated with a channel. Given the number of a channel, this function returns the device (minus the leading \fC'/dev/'\fP) associated with it.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP A channel number.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The device name of channel \fCnum\fP, or \fCNULL\fP if \fCnum\fP is not a existing BBS channel. 
+.RE
+.PP
+
+.SS "\fBuint32\fP chan_getnum (char * tty)"
+.PP
+Find the channel number of a device. Maps device name to channel number, effectively yielding the number of a channel associated with the given device.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP The name of a device special, without the \fC'/dev/'\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The channel number associated with the given device, or \fCNULL\fP if the device is not associated with a BBS channel. 
+.RE
+.PP
+
+.SS "void chan_init ()"
+.PP
+Initialise the channel map. Reads the binary channel file, initialising the channel map. 
+.SS "\fBuint32\fP chan_telnetlinecount ()"
+.PP
+Count number of telnet lines in use. Returns the number of telnet lines that are currently in use.
+.PP
+\fBReturns:\fP
+.RS 4
+The number of telnet lines in use. 
+.RE
+.PP
+
+.SS "char* channel_baudstg (\fBint32\fP baud)"
+.PP
+Formats channel speed as a string. \fBParameters:\fP
+.RS 4
+\fIbaud\fP a channel speed, as obtained with \fC\fBchannel_getstatus()\fP\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A string denoting the user's bps rate, if applicable, or a short string describing the connection type, e.g. \fC'[NET]'\fP if the user is connected using Telnet. 
+.RE
+.PP
+
+.SS "int channel_disconnect (char * ttyname)"
+.PP
+Disconnect a channel. This kills a channel, causing it to respawn from scratch. Any user logged at that time on is unceremoniously kicked out in the process.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP a UNIX tty name minus \fC'/dev/'\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+If all goes well, 0 is returned. Anything else denotes an error and \fCerrno\fP will be set accordingly). 
+.RE
+.PP
+
+.SS "int channel_getstatus (char * tty, \fBchannel_status_t\fP * status)"
+.PP
+Get channel status. Given a UNIX tty name, this function retrieves the respective channel status.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP a UNIX tty name minus \fC'/dev/'\fP.
+.br
+\fIstatus\fP a pointer to a \fBchannel_status_t\fP status block where the channel status will be stored.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+if the status of the channel cannot be read from the status file, -1 is returned and the default line status \fC{LST_NORMAL\fP,LSR_OK,0,'[NO-USER]'}) is copied to \fCstatus\fP. If all goes well, 1 is returned.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBchannel_status_t\fP, \fBchannel_setstatus()\fP 
+.RE
+.PP
+
+.SS "void channel_hangup ()"
+.PP
+Hangup this user's channel. This function causes a (UNIX) hangup of the current line. This is done the secure (and traditional) way, which is to set the baud rate of the current terminal to zero. Both UNIX and Megistos catch the death of the terminal and act accordingly.
+.PP
+For a function to hangup another channel, see \fBchannel_disconnect()\fP.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBchannel_disconnect()\fP. 
+.RE
+.PP
+
+.SS "void channel_setmode (char * tty, \fBint32\fP mode)"
+.PP
+Set channel mode. This sets the channel mode to one of the \fCLST_x\fP states. The function only affects a subset of the entire channel state, and is there for convenience.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP a UNIX tty name minus \fC'/dev/'\fP.
+.br
+\fImode\fP the new mode of the line (one of the \fCLST_x\fP states).
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+LST_x flags. 
+.RE
+.PP
+
+.SS "void channel_setresult (char * tty, \fBint32\fP result)"
+.PP
+Set channel result code. This sets a channel's result code to the supplied value. It only affects the result code, so it can be used to update a channel's state after its condition changes.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP a UNIX tty name minus \fC'/dev/'\fP.
+.br
+\fIresult\fP the new result code for the line (one of the \fCLSR_x\fP flags).
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+LSR_x flags. 
+.RE
+.PP
+
+.SS "int channel_setstatus (char * tty, \fBchannel_status_t\fP * status)"
+.PP
+Set channel status. Given a UNIX tty name, this function changes the channel status of the given tty according to the information passed in \fCstatus\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP a UNIX tty name minus \fC'/dev/'\fP.
+.br
+\fIstatus\fP a pointer to a \fBchannel_status_t\fP status block containing the updated state for the channel.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+always returns 1, which implies success. Failure to write the state to the state file causes the module to die, logging a fatal error. This is necessary and acceptable as the channel status is only changed during critical sections in the lifetime of a user session. Custom modules should never need to call this function.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBchannel_status_t\fP, \fBchannel_getstatus()\fP 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "int \fBchan_count\fP"
+.PP
+Number of channels in \fCchannels\fP. Definition at line 242 of file ttynum.h.
+.SS "struct \fBchanneldef\fP* \fBchan_last\fP"
+.PP
+Last referenced element of \fCchannels\fP. Definition at line 237 of file ttynum.h.
+.SS "char* \fBchannel_results\fP[]"
+.PP
+Definition at line 221 of file channels.h.
+.SS "char* \fBchannel_states\fP[]"
+.PP
+Definition at line 220 of file channels.h.
+.SS "struct \fBchanneldef\fP* \fBchannels\fP"
+.PP
+The channels index, mapping ttys to channels. Definition at line 232 of file ttynum.h.

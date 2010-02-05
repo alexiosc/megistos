@@ -1,0 +1,304 @@
+.TH "mail.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+mail.h \- Definitions pertaining to email/club messages.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmessage_t\fP"
+.br
+.RI "\fIAn email or club message. \fP"
+.ti -1c
+.RI "struct \fBemailuser\fP"
+.br
+.RI "\fIPreferences for the private mail reader. \fP"
+.ti -1c
+.RI "struct \fBlastread\fP"
+.br
+.RI "\fIPer-user, per-club message reading state. \fP"
+.ti -1c
+.RI "struct \fBclubheader\fP"
+.br
+.RI "\fIClub header. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: mail.h,v 1.4 2003/09/27 20:31:39 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBMESSAGE_MAGIC\fP   'Mmsg'"
+.br
+.ti -1c
+.RI "#define \fBMSG_ALL\fP   '***ALL***'"
+.br
+.RI "\fIUsed to mark a message as intended for all users. \fP"
+.ti -1c
+.RI "#define \fBMSF_EXEMPT\fP   0x0001  /**< Message is `tagged', i.e. can't be deleted */"
+.br
+.RI "\fIMessage is `tagged', i.e. \fP"
+.ti -1c
+.RI "#define \fBMSF_RECEIPT\fP   0x0002  /**< Read receipt requested */"
+.br
+.RI "\fIRead receipt requested. \fP"
+.ti -1c
+.RI "#define \fBMSF_FILEATT\fP   0x0004  /**< A file is attached */"
+.br
+.RI "\fIA file is attached. \fP"
+.ti -1c
+.RI "#define \fBMSF_APPROVD\fP   0x0008  /**< The file has been approved by the Sysop */"
+.br
+.RI "\fIThe file has been approved by the Sysop. \fP"
+.ti -1c
+.RI "#define \fBMSF_CANTMOD\fP   0x0010  /**< Sender cannot modify this message */"
+.br
+.RI "\fISender cannot modify this message. \fP"
+.ti -1c
+.RI "#define \fBMSF_SIGNUP\fP   0x0020  /**< This is a signup special message */"
+.br
+.RI "\fIThis is a signup special message. \fP"
+.ti -1c
+.RI "#define \fBMSF_AUTOFW\fP   0x0080  /**< Message has been auto-forwarded */"
+.br
+.RI "\fIMessage has been auto-forwarded. \fP"
+.ti -1c
+.RI "#define \fBMSF_REPLY\fP   0x0100  /**< This is a reply to another message */"
+.br
+.RI "\fIThis is a reply to another message. \fP"
+.ti -1c
+.RI "#define \fBMSF_NET\fP   0x0200  /**< Message came in through the network */"
+.br
+.RI "\fIMessage came in through the network. \fP"
+.ti -1c
+.RI "#define \fBMSF_COPYMASK\fP   (MSF_FILEATT|MSF_REPLY)"
+.br
+.RI "\fIFlags to clear when forwarding and copying messages. \fP"
+.ti -1c
+.RI "#define \fBMSF_NETMASK\fP   (MSF_EXEMPT|MSF_APPROVD|MSF_FILEATT)"
+.br
+.RI "\fIFlags to clear when transmitting messages over the network. \fP"
+.ti -1c
+.RI "#define \fBHST_CC\fP   'Cc:'"
+.br
+.ti -1c
+.RI "#define \fBHST_CP\fP   'CpBy:'"
+.br
+.ti -1c
+.RI "#define \fBHST_FW\fP   'FwBy:'"
+.br
+.ti -1c
+.RI "#define \fBHST_NETMAIL\fP   'Netmail'"
+.br
+.ti -1c
+.RI "#define \fBHST_RECEIPT\fP   'RRR:'"
+.br
+.ti -1c
+.RI "#define \fBHST_REPLY\fP   'ReplyTo:'"
+.br
+.ti -1c
+.RI "#define \fBHST_AUTOFW\fP   'Autofw:'"
+.br
+.ti -1c
+.RI "#define \fBHST_DIST\fP   'Distributed'"
+.br
+.ti -1c
+.RI "#define \fBHST_OFFLINE\fP   'Offline'"
+.br
+.ti -1c
+.RI "#define \fBHST_NET\fP   'RemoteBBS:'"
+.br
+.ti -1c
+.RI "#define \fBEMAILUSER_MAGIC\fP   'Memu'"
+.br
+.RI "\fIThis spells 'Memu' on big endians, umeM on little endians. \fP"
+.ti -1c
+.RI "#define \fBECP_QUOTEYES\fP   0x0001	/**< Always quote */"
+.br
+.RI "\fIAlways quote. \fP"
+.ti -1c
+.RI "#define \fBECP_QUOTEASK\fP   0x0002	/**< Ask before quoting */"
+.br
+.RI "\fIAsk before quoting. \fP"
+.ti -1c
+.RI "#define \fBECP_LOGINYES\fP   0x0004	/**< Unconditionally read mail on login */"
+.br
+.RI "\fIUnconditionally read mail on login. \fP"
+.ti -1c
+.RI "#define \fBECP_LOGINASK\fP   0x0008	/**< Ask if user wants to read mail on login */"
+.br
+.RI "\fIAsk if user wants to read mail on login. \fP"
+.ti -1c
+.RI "#define \fBECF_QSCCFG\fP   0x0001	/**< User has configured quickscan. */"
+.br
+.RI "\fIUser has configured quickscan. \fP"
+.ti -1c
+.RI "#define \fBLASTREAD_MAGIC\fP   'Mlrd'"
+.br
+.RI "\fIMagic number for \fClastread\fP. \fP"
+.ti -1c
+.RI "#define \fBLRF_QUICKSCAN\fP   0x0001	/**< Club is in user's quickscan */"
+.br
+.RI "\fIClub is in user's quickscan. \fP"
+.ti -1c
+.RI "#define \fBLRF_INQWK\fP   0x0002	/**< Club is in user's off-line packets */"
+.br
+.RI "\fIClub is in user's off-line packets. \fP"
+.ti -1c
+.RI "#define \fBLRF_DELETED\fP   0x0004	/**< This preference block has been deleted */"
+.br
+.RI "\fIThis preference block has been deleted. \fP"
+.ti -1c
+.RI "#define \fBLRF_INITQWK\fP   0x0010	/**< For use by the off-line mailer. */"
+.br
+.RI "\fIFor use by the off-line mailer. \fP"
+.ti -1c
+.RI "#define \fBCLUBHEADER_MAGIC\fP   'Mclb'"
+.br
+.ti -1c
+.RI "#define \fBCLF_MMODAX\fP   0x0001	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCLF_MMODCH\fP   0x0002	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCLF_MMODHD\fP   0x0004	/**< Unknown/unused */"
+.br
+.RI "\fIUnknown/unused. \fP"
+.ti -1c
+.RI "#define \fBCAX_SYSOP\fP   70"
+.br
+.ti -1c
+.RI "#define \fBCAX_CLUBOP\fP   60"
+.br
+.ti -1c
+.RI "#define \fBCAX_COOP\fP   50"
+.br
+.ti -1c
+.RI "#define \fBCAX_UPLOAD\fP   40"
+.br
+.ti -1c
+.RI "#define \fBCAX_WRITE\fP   30"
+.br
+.ti -1c
+.RI "#define \fBCAX_DNLOAD\fP   20"
+.br
+.ti -1c
+.RI "#define \fBCAX_READ\fP   10"
+.br
+.ti -1c
+.RI "#define \fBCAX_ZERO\fP   0"
+.br
+.ti -1c
+.RI "#define \fBCAX_DEFAULT\fP   -1"
+.br
+.ti -1c
+.RI "#define \fBIHT_MESSAGE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBIHT_CONTROL_DELETE\fP   1	/* oooh, can we have ALT too? */"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Definitions pertaining to email/club messages. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This header file includes declarations for various structures used in mail-related tasks throughout the system. You will typically want to include it for its definition of \fC\fBmessage_t\fP\fP, a BBS private or public message. There are other structures here, but most are used by the mail reading modules (Email and Clubs). I doubt you'll ever need any of them.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     mail.h                                                       **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, May 95                                                    **
+ **            B, July 95                                                   **
+ **            C, July 95                                                   **
+ **            D, August 96                                                 **
+ **  PURPOSE:  Define mail and club headers                                 **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+ *
+ * $Id: mail.h,v 1.4 2003/09/27 20:31:39 alexios Exp $
+ *
+ * $Log: mail.h,v $
+ * Revision 1.4  2003/09/27 20:31:39  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.6  1999/07/28 23:09:07  alexios
+ * Cosmetic changes, added stuff for networked clubs.
+ *
+ * Revision 0.5  1999/07/18 21:13:24  alexios
+ * Cosmetic changes. Added export access list field to struct
+ * clubheader for use by the MetaBBS Distributed Club code.
+ * Added flags for the IHAVE database used by DistClubs.
+ *
+ * Revision 0.4  1998/08/14 11:23:21  alexios
+ * Shortened from and to fields to 80 bytes. Removed dummy
+ * field to shorten size of message header.
+ *
+ * Revision 0.3  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.2  1997/09/12 12:45:25  alexios
+ * Minor cosmetic changes.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+}
+.PP
+Definition in file \fBmail.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: mail.h,v 1.4 2003/09/27 20:31:39 alexios Exp $'"
+.PP
+Definition at line 84 of file mail.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,9 @@
+*.lo
+.deps
+.libs
+Makefile
+Makefile.in
+libmegistos_teleconplugin.la
+log
+mbk_telecon.h
+telecon

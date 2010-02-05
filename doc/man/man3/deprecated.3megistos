@@ -1,0 +1,30 @@
+.TH "deprecated" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+deprecated \- Deprecated List
+ 
+.IP "\fBGlobal \fB_interror\fP(char *file, uint32 line, char *format,...) \fP" 1c
+For internal use only. Please use #logerror instead. 
+.PP
+.PP
+ 
+.IP "\fBGlobal \fB_logerror\fP(char *file, uint32 line, char *format,...) \fP" 1c
+For internal use only. Please use #logerror instead. 
+.PP
+.PP
+ 
+.IP "\fBGlobal \fB_logerrorsys\fP(char *file, uint32 line, int32 err, char *format,...) \fP" 1c
+For internal use only. Please use #logerror instead. 
+.PP
+.PP
+ 
+.IP "\fBGlobal \fBmsg_getl_bot\fP(int num, int language, int checkbot) \fP" 1c
+Don't use this one, use the macro \fBmsg_getl\fP instead. It'll save you some effort. 
+.PP
+.PP
+ 
+.IP "\fBGlobal \fBusr_insystem\fP(char *userid, int checkinvis, struct shmuserrec **buf) \fP" 1c
+Do not use this function. It is easy to misuse it. Please use the simpler \fC\fBusr_insys()\fP\fP function that does not suffer from the same problems. This function is for internal use only. 
+.PP
+

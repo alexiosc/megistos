@@ -1,0 +1,289 @@
+.TH "onlinerec" 3 "8 Sep 2003" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+onlinerec \- User online structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <useracc.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBuserid\fP [24]"
+.br
+.ti -1c
+.RI "char \fBchannel\fP [16]"
+.br
+.RI "\fIUser's ID, just for checking. \fP"
+.ti -1c
+.RI "char \fBemupty\fP [16]"
+.br
+.RI "\fIUser's channel, minus '/dev/'. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBbaudrate\fP"
+.br
+.RI "\fIEmulation PTY, user's 'real' tty. \fP"
+.ti -1c
+.RI "char \fBcurpage\fP [32]"
+.br
+.RI "\fIUser's baud rate. \fP"
+.ti -1c
+.RI "char \fBprevpage\fP [32]"
+.br
+.RI "\fIUser's current page in the menuman. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIUser's previous menuman page. \fP"
+.ti -1c
+.RI "char \fBinput\fP [256]"
+.br
+.RI "\fIGeneric on-line flags. \fP"
+.ti -1c
+.RI "char \fBdescr\fP [ML][44]"
+.br
+.RI "\fIUser's last input concatenation. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBpagestate\fP"
+.br
+.RI "\fIUser's position described. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBlastpage\fP"
+.br
+.RI "\fIPage enable flags. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBtick\fP"
+.br
+.RI "\fITime this user was last paged. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBcredspermin\fP"
+.br
+.RI "\fIbbsd ticks (used for credit charge). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBonlinetime\fP"
+.br
+.RI "\fICredit consumption, creds/100 min. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBfraccharge\fP"
+.br
+.RI "\fITime (in min) user has been on-line. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtimeoutticks\fP"
+.br
+.RI "\fIFractional charge (bbsd). \fP"
+.ti -1c
+.RI "\fBint32\fP \fBidlezap\fP"
+.br
+.RI "\fIInactivity counter. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBstatptrs\fP"
+.br
+.RI "\fIMinutes of inactivity allowed. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBstatcreds\fP"
+.br
+.RI "\fIUsed internally by statd. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBloggedin\fP"
+.br
+.RI "\fIUsed internally by statd. \fP"
+.ti -1c
+.RI "char \fBtelechan\fP [32]"
+.br
+.RI "\fITime logged in: used by /recent. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBtelecountdown\fP"
+.br
+.RI "\fILast teleconference channel. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBlastlib\fP"
+.br
+.RI "\fITimes left to talk in telecons. \fP"
+.ti -1c
+.RI "\fBint32\fP \fBinjothqueue\fP"
+.br
+.RI "\fILast file library visited. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBlastconsolepage\fP"
+.br
+.RI "\fIIPC message queue ID for injoth(). \fP"
+.ti -1c
+.RI "char \fBdummy\fP [1020-476-44 *ML]"
+.br
+.RI "\fITime of last page to system console. \fP"
+.ti -1c
+.RI "char \fBmagic\fP [4]"
+.br
+.RI "\fIScratch space. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User online structure. 
+
+\fBDeprecated\fP
+.RS 4
+Please use \fCtypedef onlinerec_t\fP instead. 
+.RE
+.PP
+.PP
+This is a temporary record of user details that change a lot while the user is online. Most of the fields are derived from the user's account record. The rest are filled in by the system while the user is online. Unlike \fCuseracc_t\fP, this record is not saved to disk.
+.PP
+{description}
+.PP
+[\fCuserid\fP] The user's handle in the system. Mainly used for sanity checks, since including the user ID here is redundant.
+.PP
+[\fCchannel\fP] The field name is slightly misleading: it contains the \fIdevice name\fP (minus the \fC'/dev/'\fP the user's channel is using.
+.PP
+[\fCemupty}] This is the device name (minus the { '/dev/'\fP) where processes servicing the user are running. This is not the same as \fCchannel} because of { emud\fP, the emulation/translation daemon, which sits on the device denoted by \fCchannel\fP and creates a new, pseudo-tty \fCemupty\fP for the processes to run on.
+.PP
+[\fCbaudrate}] The user's \fIbps\fP rate ({\fIbaud\fP\fP is such a misnomer), as returned by \fCbbsgetty\fP. This may be a real bps value if the number is positive, or a special, non-positive (i.e less than one) value denoting special connections. For instance, telnet connections don't have an easily measurable bps rate, so they're denoted as such.
+.PP
+[\fCcurpage}, { prevpage\fP] The user's current and previous pages in the menu structure of the BBS. Used by the Menu Manager meta-module.
+.PP
+[\fCflags\fP] A set of flags defining per-session, volatile user preferences and state. This field is formed by ORring together zero or more of the \fCOLF_x\fP flags.
+.PP
+[\fCinput\fP] User's remaining input before entering a module. Menu Manager fills this in before running a module with concatenated commands still to be processed. It is the module's responsibility to process those as soon as it starts.
+.PP
+[\fCdescr\fP] The user's current position in the BBS described in all available languages (if available). Again, this is filled in by the Menu Manager and is the description of the user's current page, \fCcurpage\fP.
+.PP
+[\fCpagestate, lastpage\fP] The page state restricts paging to the user in a small range of ways, listed as the \fCPGS_x\fP constants. The \fClastpage\fP field gives the time of the last successful page to the user. It's used internally to enforce the paging restrictions.
+.PP
+[\fCtick}, { fraccharge\fP] Used internally by the BBS daemon (\fCbbsd\fP) to charge fraction-credits.
+.PP
+[\fCcredspermin\fP] The credit consumption rate for this user (this varies with the user's location in the system). The unit is credits per 100 minutes. That is, for a typical 1 credit per minute, you need to specify 100 for this field. A value of 250 gives a credit consumption rate of 2.5 credits per minute.
+.PP
+[\fConlinetime\fP] The time (in minutes) the user has spent on this connection.
+.PP
+[\fCtimeoutticks}, { idlezap\fP] The inactivity counter and inactivity timeout setting. Used internally. The two fields do not have the same units. The former is in \fCbbsd} {\fIticks\fP\fP (fractions of a minute), the latter in minutes.
+.PP
+[\fCstatptrs}, { statcreds}] Used by { statd\fP, the statistics daemon.
+.PP
+[\fCloggedin\fP] Time the user logged in. Used to keep track of the user's recent connections.
+.PP
+[\fCtelechan}, { telecountdown\fP] State used for the Teleconference module. The former field stores the last channel accessed by the user; the latter keeps track of the number of times the user is allowed to talk in the Teleconference module (this is an optional restriction on non-paid users).
+.PP
+[\fClastlib\fP] State used by the Files module. Denotes the last file library (directory) visited by the user.
+.PP
+[\fCinjothqueue\fP] System V IPC message queue ID used to page messages to this user.
+.PP
+[\fClastconsolepage\fP] The time of the user's last page to the system console.
+.PP
+[\fCmagic\fP] A magic number used to avoid data corruption. Set to \fCONL_MAGIC\fP.
+.PP
+{description} 
+.PP
+Definition at line 907 of file useracc.h.
+.SH "Field Documentation"
+.PP 
+.SS "\fBint32\fP \fBonlinerec::baudrate\fP"
+.PP
+Emulation PTY, user's 'real' tty. Definition at line 911 of file useracc.h.
+.SS "char \fBonlinerec::channel\fP[16]"
+.PP
+User's ID, just for checking. Definition at line 909 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::credspermin\fP"
+.PP
+bbsd ticks (used for credit charge). Definition at line 920 of file useracc.h.
+.SS "char \fBonlinerec::curpage\fP[32]"
+.PP
+User's baud rate. Definition at line 912 of file useracc.h.
+.SS "char \fBonlinerec::descr\fP[ML][44]"
+.PP
+User's last input concatenation. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBgcs_builtin.c\fP.
+.PP
+Definition at line 916 of file useracc.h.
+.SS "char \fBonlinerec::dummy\fP[1020-476-44*ML]"
+.PP
+Time of last page to system console. Definition at line 934 of file useracc.h.
+.SS "char \fBonlinerec::emupty\fP[16]"
+.PP
+User's channel, minus '/dev/'. Definition at line 910 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::flags\fP"
+.PP
+User's previous menuman page. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBgcs_builtin.c\fP.
+.PP
+Definition at line 914 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::fraccharge\fP"
+.PP
+Time (in min) user has been on-line. Definition at line 922 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::idlezap\fP"
+.PP
+Inactivity counter. Definition at line 924 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::injothqueue\fP"
+.PP
+Last file library visited. Definition at line 931 of file useracc.h.
+.SS "char \fBonlinerec::input\fP[256]"
+.PP
+Generic on-line flags. Definition at line 915 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::lastconsolepage\fP"
+.PP
+IPC message queue ID for injoth(). Definition at line 932 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::lastlib\fP"
+.PP
+Times left to talk in telecons. Definition at line 930 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::lastpage\fP"
+.PP
+Page enable flags. Definition at line 918 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::loggedin\fP"
+.PP
+Used internally by statd. Definition at line 927 of file useracc.h.
+.SS "char \fBonlinerec::magic\fP[4]"
+.PP
+Scratch space. Definition at line 935 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::onlinetime\fP"
+.PP
+Credit consumption, creds/100 min. Definition at line 921 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::pagestate\fP"
+.PP
+User's position described. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBgcs_builtin.c\fP.
+.PP
+Definition at line 917 of file useracc.h.
+.SS "char \fBonlinerec::prevpage\fP[32]"
+.PP
+User's current page in the menuman. Definition at line 913 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::statcreds\fP"
+.PP
+Used internally by statd. Definition at line 926 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::statptrs\fP"
+.PP
+Minutes of inactivity allowed. Definition at line 925 of file useracc.h.
+.SS "char \fBonlinerec::telechan\fP[32]"
+.PP
+Time logged in: used by /recent. Definition at line 928 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::telecountdown\fP"
+.PP
+Last teleconference channel. Definition at line 929 of file useracc.h.
+.SS "\fBuint32\fP \fBonlinerec::tick\fP"
+.PP
+Time this user was last paged. Definition at line 919 of file useracc.h.
+.SS "\fBint32\fP \fBonlinerec::timeoutticks\fP"
+.PP
+Fractional charge (bbsd). Definition at line 923 of file useracc.h.
+.SS "char \fBonlinerec::userid\fP[24]"
+.PP
+\fBExamples: \fP
+.in +1c
+\fBgcs_builtin.c\fP.
+.PP
+Definition at line 908 of file useracc.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

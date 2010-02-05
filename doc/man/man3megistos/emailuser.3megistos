@@ -1,0 +1,107 @@
+.TH "emailuser" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+emailuser \- Preferences for the private mail reader.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <mail.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBforwardto\fP [24]"
+.br
+.RI "\fIAuto-forward recipient. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIMail flags (\fCECF_x\fP flags). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBprefs\fP"
+.br
+.RI "\fIUser preferences (\fCECP_x\fP flags). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBlastemailread\fP"
+.br
+.RI "\fILast email read (maximum msg number). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBlastemailqwk\fP"
+.br
+.RI "\fILast email downloaded (max msg num). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmagic\fP"
+.br
+.RI "\fIMagic number (\fBEMAILUSER_MAGIC\fP). \fP"
+.ti -1c
+.RI "char \fBdummy\fP [512-44]"
+.br
+.RI "\fIReserved for future expansion. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Preferences for the private mail reader. 
+
+This structure holds per-user personal preferences (and other state) used by the private mail reader.
+.PP
+.IP "\(bu" 2
+\fCforwardto\fP. Defines recipient user ID for autoforwarding. Please not that only BBS users can be recipients. Clubs and RFC-822 email addresses aren't valid. Set to the user's own user ID to disable auto-forwarding.
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. State-saving flags, in the form of a set of \fCECF_x\fP flags.
+.PP
+.PP
+.IP "\(bu" 2
+\fCprefs\fP. User preferences, in the form of a set of \fCECP_x\fP flags.
+.PP
+.PP
+.IP "\(bu" 2
+\fClastmailread\fP. The maximum number of any private message read.
+.PP
+.PP
+.IP "\(bu" 2
+\fClastemailqwk\fP. The maximum number of any private message inserted into an off-line mail packet.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmagic\fP. A magic number used to detect corrupted structures. This should be set to \fBEMAILUSER_MAGIC\fP.
+.PP
+.PP
+.IP "\(bu" 2
+\fCdummy\fP. Reserved for future expansion. 
+.PP
+
+.PP
+Definition at line 352 of file mail.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBemailuser::dummy\fP[512-44]"
+.PP
+Reserved for future expansion. Definition at line 360 of file mail.h.
+.SS "\fBuint32\fP \fBemailuser::flags\fP"
+.PP
+Mail flags (\fCECF_x\fP flags). Definition at line 354 of file mail.h.
+.SS "char \fBemailuser::forwardto\fP[24]"
+.PP
+Auto-forward recipient. Definition at line 353 of file mail.h.
+.SS "\fBuint32\fP \fBemailuser::lastemailqwk\fP"
+.PP
+Last email downloaded (max msg num). Definition at line 357 of file mail.h.
+.SS "\fBuint32\fP \fBemailuser::lastemailread\fP"
+.PP
+Last email read (maximum msg number). Definition at line 356 of file mail.h.
+.SS "\fBuint32\fP \fBemailuser::magic\fP"
+.PP
+Magic number (\fBEMAILUSER_MAGIC\fP). Definition at line 358 of file mail.h.
+.SS "\fBuint32\fP \fBemailuser::prefs\fP"
+.PP
+User preferences (\fCECP_x\fP flags). Definition at line 355 of file mail.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

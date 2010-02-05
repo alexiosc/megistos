@@ -1,0 +1,249 @@
+.TH "output.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+output.h \- Outputting data to the user.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <megistos/useracc.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBsubstvar\fP"
+.br
+.RI "\fISubstitution variable record. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: output.h,v 1.5 2003/12/19 13:25:18 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fB_ASCIIVARCHAR\fP   '@'"
+.br
+.ti -1c
+.RI "#define \fB_VARCHAR\fP   0x7f"
+.br
+.ti -1c
+.RI "#define \fBOFL_ANSIENABLE\fP   0x01	/**< Enable ANSI output */"
+.br
+.RI "\fIEnable ANSI output. \fP"
+.ti -1c
+.RI "#define \fBOFL_WAITTOCLEAR\fP   0x02	/**< Pause before clearing screen */"
+.br
+.RI "\fIPause before clearing screen. \fP"
+.ti -1c
+.RI "#define \fBOFL_AFTERINPUT\fP   0x04	/**< First output after an input */"
+.br
+.RI "\fIFirst output after an input. \fP"
+.ti -1c
+.RI "#define \fBOFL_INHIBITVARS\fP   0x08	/**< Do not interpret substitution variables */"
+.br
+.RI "\fIDo not interpret substitution variables. \fP"
+.ti -1c
+.RI "#define \fBOFL_PROTECTVARS\fP   0x10	/**< Only interpret subst vars inside prompts */"
+.br
+.RI "\fIOnly interpret subst vars inside prompts. \fP"
+.ti -1c
+.RI "#define \fBOFL_ISBOT\fP   0x20	/**< Output is for a bot/AI/script */"
+.br
+.RI "\fIOutput is for a bot/AI/script. \fP"
+.ti -1c
+.RI "#define \fBXLATION_OFF\fP   -1		/**< Disable automatic translation */"
+.br
+.RI "\fIDisable automatic translation. \fP"
+.ti -1c
+.RI "#define \fBXLATION_ON\fP   -2		/**< Re-enable automatic translation */"
+.br
+.RI "\fIRe-enable automatic translation. \fP"
+.ti -1c
+.RI "#define \fBout_setflags\fP(flags)   __out_setclear(1,flags)"
+.br
+.RI "\fISet output flags. \fP"
+.ti -1c
+.RI "#define \fBout_clearflags\fP(flags)   __out_setclear(0,flags)"
+.br
+.RI "\fIClear output flags. \fP"
+.ti -1c
+.RI "#define \fBout_setansiflag\fP(f)   __out_setclear(f,OFL_ANSIENABLE)"
+.br
+.RI "\fISet or clear the \fBOFL_ANSIENABLE\fP flag. \fP"
+.ti -1c
+.RI "#define \fBout_setwaittoclear\fP(f)   __out_setclear(f,OFL_WAITTOCLEAR)"
+.br
+.RI "\fISet or clear the \fBOFL_WAITTOCLEAR\fP flag. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBout_init\fP ()"
+.br
+.RI "\fIInitialise output subsystem. \fP"
+.ti -1c
+.RI "void \fBout_done\fP ()"
+.br
+.RI "\fIShut down output to the user. \fP"
+.ti -1c
+.RI "void \fBout_initsubstvars\fP ()"
+.br
+.RI "\fIInitialise substitution variables. \fP"
+.ti -1c
+.RI "void \fBout_addsubstvar\fP (char *name, char *(*varcalc)(void))"
+.br
+.RI "\fIInstall a new substitution variable. \fP"
+.ti -1c
+.RI "void \fBout_setxlation\fP (int mode)"
+.br
+.RI "\fIControl character translation. \fP"
+.ti -1c
+.RI "void \fBprompt\fP (int num,...)"
+.br
+.RI "\fIFormat and display a prompt. \fP"
+.ti -1c
+.RI "void \fBsprompt\fP (char *buf, int num,...)"
+.br
+.RI "\fIFormat a prompt and store it in a string. \fP"
+.ti -1c
+.RI "char * \fBsprompt_other\fP (struct \fBshmuserrec\fP *ushm, char *buf, int num,...)"
+.br
+.RI "\fIFormat a prompt for another user and store it in a string. \fP"
+.ti -1c
+.RI "void \fBprint\fP (char *buf,...)"
+.br
+.RI "\fIFormat and print a string. \fP"
+.ti -1c
+.RI "void \fBsprint\fP (char *stg, char *buf,...)"
+.br
+.RI "\fIFormat and store a string. \fP"
+.ti -1c
+.RI "int \fBout_printfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file. \fP"
+.ti -1c
+.RI "int \fBout_printlongfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file. \fP"
+.ti -1c
+.RI "int \fBout_catfile\fP (char *fname)"
+.br
+.RI "\fIPrint a file verbatim. \fP"
+.ti -1c
+.RI "void \fB__out_setclear\fP (int set, \fBuint32\fP f)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "char \fBout_buffer\fP [8192]"
+.br
+.ti -1c
+.RI "\fBuint32\fP \fBout_flags\fP"
+.br
+.RI "\fITemporary output buffer. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Outputting data to the user. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This header file includes functions used to send output to the user, and to control how this output is sent. It largely implements high-level functions, with the really low-level ones abstracted away (they're horrible, ugly and kludgy, anyway).
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     output.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Provide an interface to output.c, autoconfig the kernel,     **
+ **            solve differential equations, speed up Windows, and other    **
+ **            legends.                                                     **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: output.h,v 1.5 2003/12/19 13:25:18 alexios Exp $
+ *
+ * $Log: output.h,v $
+ * Revision 1.5  2003/12/19 13:25:18  alexios
+ * Updated include directives.
+ *
+ * Revision 1.4  2003/09/27 20:31:57  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.6  2000/01/06 11:37:41  alexios
+ * Added declaration for send_out(), a wrapper for write(2) that
+ * deals with overruns due to non-blocking I/O.
+ *
+ * Revision 0.5  1998/12/27 15:19:19  alexios
+ * Added declarations that allow us to enable/disable auto-
+ * matic translation.
+ *
+ * Revision 0.4  1998/07/26 21:17:06  alexios
+ * Added function printlongfile() that outputs a very long file
+ * checking if the user has interrupted the listing.
+ *
+ * Revision 0.3  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.2  1997/11/03 00:29:40  alexios
+ * Removed hardwired translation tables.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBoutput.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: output.h,v 1.5 2003/12/19 13:25:18 alexios Exp $'"
+.PP
+Definition at line 86 of file output.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

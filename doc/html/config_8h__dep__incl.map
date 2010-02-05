@@ -1,0 +1,5 @@
+base referer
+rect $bbs_8h.html 49,17 92,35
+rect $useracc_8h.html 57,155 124,174
+rect $output_8h.html 108,86 164,105
+rect $menuman_8h.html 148,155 225,174

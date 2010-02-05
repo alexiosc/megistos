@@ -1,0 +1,50 @@
+.TH "monitor" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+monitor \- User monitoring structure.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sysstruct.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "volatile long \fBtimestamp\fP"
+.br
+.RI "\fITime and date of last inpuit. \fP"
+.ti -1c
+.RI "volatile char \fBchannel\fP [24]"
+.br
+.RI "\fIChannel where input came from. \fP"
+.ti -1c
+.RI "volatile char \fBinput\fP [8192-28]"
+.br
+.RI "\fIThe input itself. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+User monitoring structure. 
+
+This structure allows monitoring of user input, which only works where supported by modules and other user-side software. This structure is less than thoroughly documented because there is no need for you to use it. 
+.PP
+Definition at line 111 of file sysstruct.h.
+.SH "Field Documentation"
+.PP 
+.SS "volatile char \fBmonitor::channel\fP[24]"
+.PP
+Channel where input came from. Definition at line 113 of file sysstruct.h.
+.SS "volatile char \fBmonitor::input\fP[8192-28]"
+.PP
+The input itself. Definition at line 114 of file sysstruct.h.
+.SS "volatile long \fBmonitor::timestamp\fP"
+.PP
+Time and date of last inpuit. Definition at line 112 of file sysstruct.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,95 @@
+.TH "Users and shared memory" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Users and shared memory \- Shared user particulars.  
+
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBshmuserrec\fP"
+.br
+.RI "\fIPer-user shared memory segment. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBthisuseracc\fP   (\fBthisshm\fP->acc) /**< This user's account. */"
+.br
+.RI "\fIThis user's account. \fP"
+.ti -1c
+.RI "#define \fBothruseracc\fP   (\fBothrshm\fP->acc) /**< Other user's account. */"
+.br
+.RI "\fIOther user's account. \fP"
+.ti -1c
+.RI "#define \fBthisuseronl\fP   (\fBthisshm\fP->onl) /**< This user's online record. */"
+.br
+.RI "\fIThis user's online record. \fP"
+.ti -1c
+.RI "#define \fBothruseronl\fP   (\fBothrshm\fP->onl) /**< Other user's online record. */"
+.br
+.RI "\fIOther user's online record. \fP"
+.ti -1c
+.RI "#define \fB_thisuseraux\fP   (\fBthisshm\fP->aux) /**< This user's shared scratch space. */"
+.br
+.RI "\fIThis user's shared scratch space. \fP"
+.ti -1c
+.RI "#define \fB_othruseraux\fP   (\fBothrshm\fP->aux) /**< Other user's shared scratch space. */"
+.br
+.RI "\fIOther user's shared scratch space. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBshmuserrec\fP * \fBthisshm\fP"
+.br
+.ti -1c
+.RI "\fBshmuserrec\fP * \fBothrshm\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Shared user particulars. Since Megistos is a distributed system, no central authority keeps state. Each process is individually responsible for the user running it.
+.PP
+However, every now and then transactions between users will have to be performed (that is ultimately the point of being of any BBS --- interaction and communication between \fIusers\fP, the underlying BBS system should try to be as transparent as possible).
+.PP
+Thus, the BBS Daemon allocates one 4 kbyte System V IPC shared memory segment for each user. Each process ran by the user automatically has this segment attached, but it is also able to attach the segments of other users, so as to effect transactions between them. The current user is referred to by the highly technical term `this user'. The optional additional user is known as `other user'. You can use certain functions within this part of the BBS API to attach other users' segments to your `other user' pointer. `This user' pointer is always and immutably set to the user owning the current process.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBthisuseracc\fP, \fBothruseracc\fP, \fBthisuseronl\fP, \fBothruseronl\fP, \fB_thisuseraux\fP, \fB_othruseraux\fP. 
+.RE
+.PP
+
+.SH "Define Documentation"
+.PP 
+.SS "#define _othruseraux   (\fBothrshm\fP->aux) /**< Other user's shared scratch space. */"
+.PP
+Other user's shared scratch space. Definition at line 1209 of file useracc.h.
+.SS "#define _thisuseraux   (\fBthisshm\fP->aux) /**< This user's shared scratch space. */"
+.PP
+This user's shared scratch space. Definition at line 1207 of file useracc.h.
+.SS "#define othruseracc   (\fBothrshm\fP->acc) /**< Other user's account. */"
+.PP
+Other user's account. Definition at line 1199 of file useracc.h.
+.SS "#define othruseronl   (\fBothrshm\fP->onl) /**< Other user's online record. */"
+.PP
+Other user's online record. Definition at line 1204 of file useracc.h.
+.SS "#define thisuseracc   (\fBthisshm\fP->acc) /**< This user's account. */"
+.PP
+This user's account. Definition at line 1197 of file useracc.h.
+.SS "#define thisuseronl   (\fBthisshm\fP->onl) /**< This user's online record. */"
+.PP
+This user's online record. Definition at line 1202 of file useracc.h.
+.SH "Variable Documentation"
+.PP 
+.SS "struct \fBshmuserrec\fP * \fBothrshm\fP"
+.PP
+Definition at line 1195 of file useracc.h.
+.SS "struct \fBshmuserrec\fP* \fBthisshm\fP"
+.PP
+Definition at line 1195 of file useracc.h.

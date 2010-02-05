@@ -1,0 +1,325 @@
+.TH "Reporting errors" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Reporting errors \- This header file defines means of reporting errors to various types of recipients.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBerror_log\fP(fmt...)   _logerror(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log a plain error. \fP"
+.ti -1c
+.RI "#define \fBerror_logsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log a system error. \fP"
+.ti -1c
+.RI "#define \fBerror_int\fP(fmt...)   _interror(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log an internal error. \fP"
+.ti -1c
+.RI "#define \fBerror_intsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log an internal system error. \fP"
+.ti -1c
+.RI "#define \fBerror_fatal\fP(fmt...)   _fatal(__FILE__,__LINE__,##fmt)"
+.br
+.RI "\fIProper way to log a fatal error. \fP"
+.ti -1c
+.RI "#define \fBerror_fatalsys\fP(fmt...)"
+.br
+.RI "\fIProper way to log a fatal system error. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fB_logerror\fP (char *file, \fBuint32\fP line, char *format,...)"
+.br
+.RI "\fILog a plain error. \fP"
+.ti -1c
+.RI "void \fB_logerrorsys\fP (char *file, \fBuint32\fP line, \fBint32\fP err, char *format,...)"
+.br
+.RI "\fILog a plain system error. \fP"
+.ti -1c
+.RI "void \fB_interror\fP (char *file, \fBuint32\fP line, char *format,...)"
+.br
+.RI "\fILog an internal error. \fP"
+.ti -1c
+.RI "void \fB_interrorsys\fP (char *file, \fBuint32\fP line, \fBint32\fP err, char *format,...)"
+.br
+.RI "\fILog an internal system error. \fP"
+.ti -1c
+.RI "void \fB_fatal\fP (char *file, int line, char *format,...)"
+.br
+.RI "\fILog a fatal error. \fP"
+.ti -1c
+.RI "void \fB_fatalsys\fP (char *file, int line, int err, char *format,...)"
+.br
+.RI "\fILog a fatal system error. \fP"
+.ti -1c
+.RI "void \fBerror_setnotify\fP (int state)"
+.br
+.RI "\fIEnable or disable user notifications. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This header file defines means of reporting errors to various types of recipients. There are basically three different levels of errors:
+.PP
+.IP "\(bu" 2
+Internal errors. These are recorded internally by appending them to the error log. The fact that an error occurred is also logged into the audit trail (though the exact nature of the error isn't). This type of error reporting is silent, making it suitable for situations where we don't want the user to know (mostly because we're sneaky offspring of female canines).
+.PP
+.PP
+.IP "\(bu" 2
+(Plain) errors. They are identical to internal errors, but a message is sent to the user after the error is logged and audited.
+.PP
+.PP
+.IP "\(bu" 2
+Fatal errors. These ones are pretty intrusive. In addition to logging, auditing and notifying the user, the current process is terminated.
+.PP
+.PP
+There are variants of the above error logging styles to log UNIX system errors. These are exactly as above, but the logging functions interpret the value of the UNIX \fCerrno\fP variable and log its numerical value and textual explanation.
+.PP
+Since error reporting should be available to non-interactive processes too, there is a mechanism to inhibit the user notification part of the reporting process. Please note that, any people with enough access to receive audit trail entries by automatic system paging will still get notified about these silent errors, since they are audited (depending on their setup of the personal audit trail filters, et cetera). 
+.SH "Define Documentation"
+.PP 
+.SS "#define error_fatal(fmt...)   _fatal(__FILE__,__LINE__,##fmt)"
+.PP
+Proper way to log a fatal error. Logs and audits a fatal error. \fIThis\fP is the function you should use in order to log such an error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+Definition at line 318 of file errors.h.
+.SS "#define error_fatalsys(fmt...)"
+.PP
+\fBValue:\fP.nf
+{\
+   int32 i=errno; \
+   _fatalsys(__FILE__,__LINE__,i,##fmt);\
+}
+.fi
+Proper way to log a fatal system error. 
+.PP
+Logs and audits a fatal system error, along with the explanation of the current value of \fCerrno\fP. The user is notified and the current process is terminated. \fIThis\fP is the function you should use in order to log a system error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+Definition at line 331 of file errors.h.
+.SS "#define error_int(fmt...)   _interror(__FILE__,__LINE__,##fmt)"
+.PP
+Proper way to log an internal error. Logs and audits an internal error. \fIThis\fP is the function you should use in order to log such an error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+Definition at line 249 of file errors.h.
+.SS "#define error_intsys(fmt...)"
+.PP
+\fBValue:\fP.nf
+{\
+   int32 i=errno; \
+   _interrorsys(__FILE__,__LINE__,i,##fmt);\
+}
+.fi
+Proper way to log an internal system error. 
+.PP
+Logs and audits an internal system error, along with the explanation of the current value of \fCerrno}. {\fIThis\fP\fP is the function you should use in order to log a system error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+Definition at line 262 of file errors.h.
+.SS "#define error_log(fmt...)   _logerror(__FILE__,__LINE__,##fmt)"
+.PP
+Proper way to log a plain error. Logs and audits a non-fatal error. \fIThis\fP is the function you should use in order to log an error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a printf()-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBmod_dialog.c\fP.
+.PP
+Definition at line 173 of file errors.h.
+.SS "#define error_logsys(fmt...)"
+.PP
+\fBValue:\fP.nf
+{\
+   int32 i=errno; \
+   _logerrorsys(__FILE__,__LINE__,i,##fmt);\
+}
+.fi
+Proper way to log a system error. 
+.PP
+Logs and audits a non-fatal system error, along with the explanation of the current value of \fCerrno\fP. \fIThis\fP is the function you should use in order to log a system error.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP a printf()-like format string, followed by any necessary arguments, as required by the format specifiers. 
+.RE
+.PP
+Definition at line 186 of file errors.h.
+.SH "Function Documentation"
+.PP 
+.SS "void _fatal (char * file, int line, char * format,  ...)"
+.PP
+Log a fatal error. Logs and audits a fatal error. The user is notified and the current process is terminated. Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, { logerror}. In fact, you \fImust not\fP use this function directly.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIformat\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_fatal()\fP 
+.RE
+.PP
+
+.SS "void _fatalsys (char * file, int line, int err, char * format,  ...)"
+.PP
+Log a fatal system error. Logs and audits a fatal system error, along with its standard UNIX explanation. The user is notified and the current process is terminated. Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, { logerror}. In fact, you \fImust not\fP use this function directly.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIerr\fP the value of \fCerrno\fP.
+.br
+\fIformat\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_fatalsys()\fP 
+.RE
+.PP
+
+.SS "void _interror (char * file, \fBuint32\fP line, char * format,  ...)"
+.PP
+Log an internal error. Logs and audits an error silently (no user notification). Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, #logerror. In fact, you \fImust not\fP use this function directly.
+.PP
+\fBDeprecated\fP
+.RS 4
+For internal use only. Please use #logerror instead. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIformat\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_int()\fP 
+.RE
+.PP
+
+.SS "void _interrorsys (char * file, \fBuint32\fP line, \fBint32\fP err, char * format,  ...)"
+.PP
+Log an internal system error. Logs and audits a system error, along with its standard UNIX explanation. The user is \fInot\fP notified. Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, \fClogerror}. In fact, you \fImust not\fP use this function directly.\fP
+.PP
+\fC 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIerr\fP the value of \fCerrno\fP.
+.br
+\fIformat\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_intsys()\fP 
+.RE
+.PP
+\fP
+.SS "void _logerror (char * file, \fBuint32\fP line, char * format,  ...)"
+.PP
+Log a plain error. Logs and audits an error, notifying the user. Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, #logerror. In fact, you \fImust not\fP use this function directly.
+.PP
+\fBDeprecated\fP
+.RS 4
+For internal use only. Please use #logerror instead. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIformat\fP a printf()-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_log()\fP 
+.RE
+.PP
+
+.SS "void _logerrorsys (char * file, \fBuint32\fP line, \fBint32\fP err, char * format,  ...)"
+.PP
+Log a plain system error. Logs and audits a system error, along with its standard UNIX explanation. The user is notified. Don't worry about the unusual nature of most of the arguments. They are filled in automatically by the helper macro, #logerror. In fact, you \fImust not\fP use this function directly.
+.PP
+\fBDeprecated\fP
+.RS 4
+For internal use only. Please use #logerror instead. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile\fP the source filename where the error occurred.
+.br
+\fIline\fP the line number executing at the time of the error.
+.br
+\fIerr\fP the value of \fCerrno\fP.
+.br
+\fIformat\fP a \fCprintf()\fP-like format string, followed by any necessary arguments, as required by the format specifiers.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBerror_logsys()\fP 
+.RE
+.PP
+
+.SS "void error_setnotify (int state)"
+.PP
+Enable or disable user notifications. \fBParameters:\fP
+.RS 4
+\fIstate\fP Pass zero to disable all user notifications. Non-zero values enable notifications. 
+.RE
+.PP
+

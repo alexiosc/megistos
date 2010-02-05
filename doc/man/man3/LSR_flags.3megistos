@@ -1,0 +1,111 @@
+.TH "Channel result codes (LSR_x)" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Channel result codes (LSR_x) \- Result codes.  
+
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLSR_INIT\fP   0   /**< The line is being initialised */"
+.br
+.RI "\fIThe line is being initialised. \fP"
+.ti -1c
+.RI "#define \fBLSR_OK\fP   1   /**< Line initialised and awaiting connection */"
+.br
+.RI "\fILine initialised and awaiting connection. \fP"
+.ti -1c
+.RI "#define \fBLSR_RING\fP   2	/**< Incoming modem connection */"
+.br
+.RI "\fIIncoming modem connection. \fP"
+.ti -1c
+.RI "#define \fBLSR_ANSWER\fP   3	/**< Answering call */"
+.br
+.RI "\fIAnswering call. \fP"
+.ti -1c
+.RI "#define \fBLSR_LOGIN\fP   4	/**< User is logging in */"
+.br
+.RI "\fIUser is logging in. \fP"
+.ti -1c
+.RI "#define \fBLSR_USER\fP   5	/**< User occupies the channel */"
+.br
+.RI "\fIUser occupies the channel. \fP"
+.ti -1c
+.RI "#define \fBLSR_FAIL\fP   6	/**< Initialisation failed */"
+.br
+.RI "\fIInitialisation failed. \fP"
+.ti -1c
+.RI "#define \fBLSR_RELOGON\fP   7	/**< User is re-logging in. */"
+.br
+.RI "\fIUser is re-logging in. \fP"
+.ti -1c
+.RI "#define \fBLSR_LOGOUT\fP   8   /**< Session has ended, awaiting new bbsgetty */"
+.br
+.RI "\fISession has ended, awaiting new bbsgetty. \fP"
+.ti -1c
+.RI "#define \fBLSR_NUMRESULTS\fP   9"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Result codes. These constants give an idea of what a channel is doing now, or what has gone wrong with what it was instructed to do.
+.PP
+.IP "\(bu" 2
+LSR_INIT. A modem or other line hardware is being initialised.
+.IP "\(bu" 2
+LSR_OK. Everything is in order.
+.IP "\(bu" 2
+LSR_RING. An incoming call is being detected.
+.IP "\(bu" 2
+LSR_ANSWER. Answering an incoming call.
+.IP "\(bu" 2
+LSR_LOGIN. Call connected, a user is logging in.
+.IP "\(bu" 2
+LSR_USER. There is a user occupying this channel.
+.IP "\(bu" 2
+LSR_FAIL. Hardware initialisation has failed on this channel.
+.IP "\(bu" 2
+LSR_RELOGON. A user is re-logging in without disconnecting.
+.IP "\(bu" 2
+LSR_LOGOUT. A user has just logged out and \fCbbsgetty\fP is respawning.
+.IP "\(bu" 2
+LSR_METABBS. A user who hasn't yet logged in is using the MetaBBS client to access another system.
+.IP "\(bu" 2
+LSR_INTERBBS. Another BBS is using this line for networking.
+.PP
+.PP
+The last two result codes are only available when MetaBBS is compiled in. 
+.SH "Define Documentation"
+.PP 
+.SS "#define LSR_ANSWER   3	/**< Answering call */"
+.PP
+Answering call. Definition at line 173 of file channels.h.
+.SS "#define LSR_FAIL   6	/**< Initialisation failed */"
+.PP
+Initialisation failed. Definition at line 179 of file channels.h.
+.SS "#define LSR_INIT   0   /**< The line is being initialised */"
+.PP
+The line is being initialised. Definition at line 167 of file channels.h.
+.SS "#define LSR_LOGIN   4	/**< User is logging in */"
+.PP
+User is logging in. Definition at line 175 of file channels.h.
+.SS "#define LSR_LOGOUT   8   /**< Session has ended, awaiting new bbsgetty */"
+.PP
+Session has ended, awaiting new bbsgetty. Definition at line 183 of file channels.h.
+.SS "#define LSR_NUMRESULTS   9"
+.PP
+Definition at line 192 of file channels.h.
+.SS "#define LSR_OK   1   /**< Line initialised and awaiting connection */"
+.PP
+Line initialised and awaiting connection. Definition at line 169 of file channels.h.
+.SS "#define LSR_RELOGON   7	/**< User is re-logging in. */"
+.PP
+User is re-logging in. Definition at line 181 of file channels.h.
+.SS "#define LSR_RING   2	/**< Incoming modem connection */"
+.PP
+Incoming modem connection. Definition at line 171 of file channels.h.
+.SS "#define LSR_USER   5	/**< User occupies the channel */"
+.PP
+User occupies the channel. Definition at line 177 of file channels.h.

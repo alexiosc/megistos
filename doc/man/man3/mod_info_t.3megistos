@@ -1,0 +1,153 @@
+.TH "mod_info_t" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+mod_info_t \- High-level module descriptor.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <bbsmod.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char * \fBprogname\fP"
+.br
+.RI "\fIThe module's program name. \fP"
+.ti -1c
+.RI "char * \fBname\fP"
+.br
+.RI "\fIThe module's full name, capitalised etc. \fP"
+.ti -1c
+.RI "char * \fBauthor\fP"
+.br
+.RI "\fIThe module's author(s). \fP"
+.ti -1c
+.RI "char * \fBdescr\fP"
+.br
+.RI "\fIOne-sentence description of module. \fP"
+.ti -1c
+.RI "char * \fBversion\fP"
+.br
+.RI "\fIFull RCS compatible version. \fP"
+.ti -1c
+.RI "char * \fBshortversion\fP"
+.br
+.RI "\fIShort, decimal (x.yy[.zz]) version. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBlogin\fP"
+.br
+.RI "\fILogin-time processing handler. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBrun\fP"
+.br
+.RI "\fIRuntime handler. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBlogout\fP"
+.br
+.RI "\fILogout handler. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBhangup\fP"
+.br
+.RI "\fIHangup handler. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBcleanup\fP"
+.br
+.RI "\fICleanup handler. \fP"
+.ti -1c
+.RI "\fBmod_handler_t\fP \fBuserdel\fP"
+.br
+.RI "\fIUser deletion handler. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+High-level module descriptor. 
+
+This structure should be defined for all modules of the BBS. It contains enough information to identify the module and its capabilities to the BBS library, which can then deal with some basic command-line arguments on the module's behalf, \fIa la\fP X toolkit.
+.PP
+A module should call the function \fBmod_setinfo()\fP early in its initialisation. A properly initialised \fBmod_info_t\fP should be provided as argument. All string information in this structure should be filled in and pointing to permanently allocated string buffers. Handlers may be \fCNULL\fP, in which case the library considers the corresponding feature of the module not available and does not invoke it.
+.PP
+The handler functions \fBlogin()\fP, \fBrun()\fP, et cetera have the same form as good old \fCmain()\fP: they are passed the usual \fCargc\fP and \fCargv\fP arguments and are expected to return an integer exit code. This is what the handlers do:
+.PP
+.IP "\(bu" 2
+\fClogin\fP. You can arrange for a (small) part of the module to run immediately after the user has authenticated themselves. This can be used, for instance, to advertise the module, provide the user with urgently needed information, perform registration or housekeeping chores, et cetera.
+.PP
+.PP
+.IP "\(bu" 2
+\fCrun\fP is the main runtime part of the module, called when a user interactively enters. This is what gives the main module menu, waits for a selection and acts on it.
+.PP
+.PP
+.IP "\(bu" 2
+\fClogout\fP gets activated immediately before the user logs out of the system in a normal manner. This allows the module to say goodbye and perhaps provide some information. Log-out fortune cookies use this handler.
+.PP
+.PP
+.IP "\(bu" 2
+\fChangup\fP gets activated immediately after the user hangs up, or is kicked out of the system by an operator. There should be no interactivity here, because the user is no longer on-line. However, housekeeping tasks may need to be performed upon the user's exit from the system. Please note that due to perverse situations and possible race conditions, the \fClogout\fP handler might be called \fIin addition\fP to the \fChangup\fP handler. If you need to do housekeeping upon a user's exit, you should check if this has already been done by another handler. Quite often both \fChangup\fP and \fClogout\fP handlers have the same tasks to perform, and thus may call the same function which checks an internal flag to ensure it hasn't been called before.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcleanup\fP gets (typically) activated once daily to perform non-interactive maintenance. Certain large operations should be performed in the background, for instance account aging, database maintenance, et cetera.
+.PP
+.PP
+.IP "\(bu" 2
+\fCuserdel\fP is activated when a user needs to be deleted from the system. The module should remove all of its per-user files for the user ID (\fBuseracc_t::userid\fP) that will be specified as \fCargv\fP[2] inside your module.
+.PP
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmod_handler_t\fP, \fBmod_setinfo()\fP. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBmod_main.c\fP.
+.PP
+Definition at line 176 of file bbsmod.h.
+.SH "Field Documentation"
+.PP 
+.SS "char* \fBmod_info_t::author\fP"
+.PP
+The module's author(s). Definition at line 179 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::cleanup\fP"
+.PP
+Cleanup handler. Definition at line 187 of file bbsmod.h.
+.SS "char* \fBmod_info_t::descr\fP"
+.PP
+One-sentence description of module. Definition at line 180 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::hangup\fP"
+.PP
+Hangup handler. Definition at line 186 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::login\fP"
+.PP
+Login-time processing handler. Definition at line 183 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::logout\fP"
+.PP
+Logout handler. Definition at line 185 of file bbsmod.h.
+.SS "char* \fBmod_info_t::name\fP"
+.PP
+The module's full name, capitalised etc. Definition at line 178 of file bbsmod.h.
+.SS "char* \fBmod_info_t::progname\fP"
+.PP
+The module's program name. Definition at line 177 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::run\fP"
+.PP
+Runtime handler. Definition at line 184 of file bbsmod.h.
+.SS "char* \fBmod_info_t::shortversion\fP"
+.PP
+Short, decimal (x.yy[.zz]) version. Definition at line 182 of file bbsmod.h.
+.SS "\fBmod_handler_t\fP \fBmod_info_t::userdel\fP"
+.PP
+User deletion handler. Definition at line 188 of file bbsmod.h.
+.SS "char* \fBmod_info_t::version\fP"
+.PP
+Full RCS compatible version. Definition at line 181 of file bbsmod.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

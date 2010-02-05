@@ -1,0 +1,7 @@
+Makefile
+Makefile.in
+doc-stamp
+examples
+html
+man
+warnings.log

@@ -1,0 +1,244 @@
+.TH "miscfx.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+miscfx.h \- Miscelaneous functions.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <megistos/bbsinclude.h>\fP
+.br
+
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBRCS_VER\fP   '$Id: miscfx.h,v 1.5 2003/12/19 13:25:19 alexios Exp $'"
+.br
+.ti -1c
+.RI "#define \fBWANT_TIME_H\fP   1"
+.br
+.ti -1c
+.RI "#define \fBWANT_UNISTD_H\fP   1"
+.br
+.ti -1c
+.RI "#define \fBPHONETIC\fP"
+.br
+.ti -1c
+.RI "#define \fBLATINIZE\fP"
+.br
+.ti -1c
+.RI "#define \fBrnd\fP(num)   (int)((long)rand()%(num))"
+.br
+.RI "\fIA simple way to get (pseudo-)random numbers. \fP"
+.ti -1c
+.RI "#define \fBrandomize\fP()   srand((unsigned)time(NULL)+(unsigned)getpid())"
+.br
+.RI "\fISeed the random number generator. \fP"
+.ti -1c
+.RI "#define \fBmin\fP(a, b)   (((a)<(b))?(a):(b))"
+.br
+.RI "\fIReturns the minimum of two numbers. \fP"
+.ti -1c
+.RI "#define \fBmax\fP(a, b)   (((a)>(b))?(a):(b))"
+.br
+.RI "\fIReturns the maximum of two numbers. \fP"
+.ti -1c
+.RI "#define \fBphonetic\fP(s)   stgxlate(s,PHONETIC)"
+.br
+.ti -1c
+.RI "#define \fBlatinize\fP(s)   (s)"
+.br
+.ti -1c
+.RI "#define \fBtolatin\fP(c)   (c)"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void * \fBalcmem\fP (size_t size)"
+.br
+.RI "\fISafe memory allocation. \fP"
+.ti -1c
+.RI "char * \fBlowerc\fP (char *s)"
+.br
+.RI "\fIConvert a string to lower case. \fP"
+.ti -1c
+.RI "char * \fBupperc\fP (char *s)"
+.br
+.RI "\fIConvert a string to upper case. \fP"
+.ti -1c
+.RI "char * \fBstripspace\fP (char *s)"
+.br
+.RI "\fIStrips leading and trailing white space. \fP"
+.ti -1c
+.RI "int \fBsameto\fP (char *shorts, char *longs)"
+.br
+.RI "\fICase-insensitive initial substring match. \fP"
+.ti -1c
+.RI "int \fBsameas\fP (char *stg1, char *stg2)"
+.br
+.RI "\fICase-insensitive string match. \fP"
+.ti -1c
+.RI "char * \fBzeropad\fP (char *s, int count)"
+.br
+.RI "\fIZero-pads a string array. \fP"
+.ti -1c
+.RI "char * \fBstgxlate\fP (char *s, char *table)"
+.br
+.RI "\fIPerforms character-for-character string translation. \fP"
+.ti -1c
+.RI "char * \fBfaststgxlate\fP (char *s, char *table)"
+.br
+.RI "\fIPerforms faster character-for-character string translation. \fP"
+.ti -1c
+.RI "int \fBbbsdcommand\fP (char *command, char *tty, char *arg)"
+.br
+.RI "\fISends a command to the BBS daemon. \fP"
+.ti -1c
+.RI "int \fBsearch\fP (char *string, char *keywords)"
+.br
+.RI "\fISearch a string for a set of keywords. \fP"
+.ti -1c
+.RI "int \fBrunmodule\fP (char *command)"
+.br
+.RI "\fIExecutes a module. \fP"
+.ti -1c
+.RI "int \fBruncommand\fP (char *command)"
+.br
+.RI "\fIExecutes a command. \fP"
+.ti -1c
+.RI "int \fBeditor\fP (char *fname, int limit)"
+.br
+.RI "\fIEdit a file. \fP"
+.ti -1c
+.RI "void \fBgopage\fP (char *page)"
+.br
+.RI "\fICall the menu manager. \fP"
+.ti -1c
+.RI "int \fBfcopy\fP (char *source, char *target)"
+.br
+.RI "\fICopy a file. \fP"
+.ti -1c
+.RI "void \fBusleep\fP ((unsigned long __usec))"
+.br
+.RI "\fISleep for a given number of microseconds. \fP"
+.ti -1c
+.RI "char * \fBmkfname\fP (char *fmt,...)"
+.br
+.RI "\fIFormat a filename. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Miscelaneous functions. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+These functions are declared here because, frankly, they wouldn't fit anywhere else. Some of them should be considered deprecated. All in due course, I suppose.
+.PP
+Original banner, legalese and change history follow.
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     miscfx.h                                                     **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  Interface to miscfx.h, implementing various useful functs.   **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: miscfx.h,v 1.5 2003/12/19 13:25:19 alexios Exp $
+ *
+ * $Log: miscfx.h,v $
+ * Revision 1.5  2003/12/19 13:25:19  alexios
+ * Updated include directives.
+ *
+ * Revision 1.4  2003/09/27 20:31:51  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.8  1999/07/18 21:13:24  alexios
+ * Supplied own version of usleep for borken (sic) bastard
+ * operating systems that don't define it.
+ *
+ * Revision 0.7  1998/12/27 15:19:19  alexios
+ * Moved functions that didn't really belong here to other
+ * header files.
+ *
+ * Revision 0.6  1998/08/14 11:23:21  alexios
+ * Added long-awaited function stripspace() to remove leading
+ * and trailing white space from a string.
+ *
+ * Revision 0.5  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.4  1997/11/03 00:29:40  alexios
+ * Optimised stgxlate for speed; created a new translation
+ * function, faststgxlate that is suitable for very fast
+ * applications with complete translation tables.
+ *
+ * Revision 0.3  1997/09/12 12:45:25  alexios
+ * Added lowerc() and upperc() functions.
+ *
+ * Revision 0.2  1997/08/30 12:54:20  alexios
+ * Removed bladcommand(), replaced it by bbsdcommand() (different
+ * syntax).
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+}
+.RE
+.PP
+
+.PP
+Definition in file \fBmiscfx.h\fP.
+.SH "Define Documentation"
+.PP 
+.SS "#define RCS_VER   '$Id: miscfx.h,v 1.5 2003/12/19 13:25:19 alexios Exp $'"
+.PP
+Definition at line 91 of file miscfx.h.
+.SS "#define WANT_TIME_H   1"
+.PP
+Definition at line 98 of file miscfx.h.
+.SS "#define WANT_UNISTD_H   1"
+.PP
+Definition at line 99 of file miscfx.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

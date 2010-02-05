@@ -1,0 +1,72 @@
+.TH "injoth_buf" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+injoth_buf \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <useracc.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "long \fBmtype\fP"
+.br
+.RI "\fIOne of the \fCINJ_x\fP constants. \fP"
+.ti -1c
+.RI "union {"
+.br
+.ti -1c
+.RI "   char \fBsimple\fP [1]"
+.br
+.RI "\fISimple message (variable length). \fP"
+.ti -1c
+.RI "   struct {"
+.br
+.ti -1c
+.RI "      char \fBsender\fP [24]"
+.br
+.RI "\fISender of message. \fP"
+.ti -1c
+.RI "      \fBuint32\fP \fBackofs\fP"
+.br
+.RI "\fILength of message+1. \fP"
+.ti -1c
+.RI "      char \fBmsg\fP [1]"
+.br
+.RI "\fIMessage (variable length). \fP"
+.ti -1c
+.RI "   } \fBwithack\fP"
+.br
+.ti -1c
+.RI "} \fBm\fP"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "\fBuint32\fP \fBinjoth_buf::ackofs\fP"
+.PP
+Length of message+1. Definition at line 1132 of file useracc.h.
+.SS "union { ... }   \fBinjoth_buf::m\fP"
+.PP
+.SS "char \fBinjoth_buf::msg\fP[1]"
+.PP
+Message (variable length). Definition at line 1133 of file useracc.h.
+.SS "long \fBinjoth_buf::mtype\fP"
+.PP
+One of the \fCINJ_x\fP constants. Definition at line 1125 of file useracc.h.
+.SS "char \fBinjoth_buf::sender\fP[24]"
+.PP
+Sender of message. Definition at line 1131 of file useracc.h.
+.SS "char \fBinjoth_buf::simple\fP[1]"
+.PP
+Simple message (variable length). Definition at line 1128 of file useracc.h.
+.SS "struct { ... }   \fBinjoth_buf::withack\fP"
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

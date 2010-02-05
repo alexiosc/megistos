@@ -1,0 +1,48 @@
+# This is a Megistos translation table.  Anything to the *RIGHT* of the first
+# hash (#) character in a line is a comment. 256 translations are given, one
+# for each of the possible character values. The format of the file is:
+#
+#
+# translation_for_character_000
+# translation_for_character_001
+# : : :
+# translation_for_character_255
+#
+# translation_for_character may be either:
+#    * a hexadecimal value in the form xx (00 to ff). ALWAYS specify
+#      both digits. Pad with 0 if necessary.
+#    * a character value EXCEPT white space (tabs, newlines, spaces) and the
+#      backslash (\). ALWAYS specify single characters (obviously).
+#
+# In order to specify white space, specify the character's hexadecimal ASCII
+# code. To specify the hash (#), use its hexadecimal ASCII value (23).
+#
+# White space is ignored, but we've organised the translation table as a
+# 16x16 matrix for obvious reasons.
+#
+# To leave a character untranslated, specify \000. Obviously, \000 is always
+# untranslated (why would you want to translate THAT?).
+
+
+# PURPOSE: 437 Extended IBM character set to US-ASCII.
+#
+# KBDXLATION: 1--to--1.
+
+#   0  1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+#  --------------------------------------------------------------
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 0
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 1
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 2
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 3
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 4
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 5
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 6
+   00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00	# 7
+    C   u   e   a   a   a   a   c   e   e   e   i   i   i   A   A	# 8
+    E   e   E   O   O   o   u   u   Y   O   U   c  23   Y   P   f 	# 9
+    a   i   o   u   n   N   a   o   ?   +   +   ?   ?   !   "   "	# A
+    :   /   I   |   +   +   +   +   +   +   |   +   +   +   +   +	# B
+    +   +   +   +   -   +   +   |   +   +   +   +   +   -   +   +	# C
+    +   +   +   +   +   +   +   +   +   +   +   8   o   P   8   "	# D
+    a   b   g   p   S   s   u   g   ?   0   W   d   ?   0   e   ?	# E
+    =   ?   ?   ?   ?   ?   /   ~   o   *   -   ?   ?   ?   *  20	# F

@@ -1,0 +1,261 @@
+.TH "message_t" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+message_t \- An email or club message.  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <mail.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBfrom\fP [80]"
+.br
+.RI "\fIUser ID or RFC-822 address of message sender. \fP"
+.ti -1c
+.RI "char \fBto\fP [80]"
+.br
+.RI "\fIUser ID or RFC-822 address of message recipient. \fP"
+.ti -1c
+.RI "char \fBsubject\fP [64]"
+.br
+.RI "\fIMessage subject. \fP"
+.ti -1c
+.RI "char \fBhistory\fP [80]"
+.br
+.RI "\fIHistory of message. \fP"
+.ti -1c
+.RI "char \fBfatt\fP [16]"
+.br
+.RI "\fIName of attached file (if any). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmsgno\fP"
+.br
+.RI "\fIMessage number. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBflags\fP"
+.br
+.RI "\fIMessage flags (\fCMSF_x\fP). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcrdate\fP"
+.br
+.RI "\fICreation date. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcrtime\fP"
+.br
+.RI "\fICreation time. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBreplies\fP"
+.br
+.RI "\fINumber of replies to this message. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBtimesread\fP"
+.br
+.RI "\fITimes this message was read. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBtimesdnl\fP"
+.br
+.RI "\fITimes the attached file was downloaded. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBperiod\fP"
+.br
+.RI "\fIResurfacing period. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBcryptkey\fP"
+.br
+.RI "\fIKey for weak private mail cryptography. \fP"
+.ti -1c
+.RI "char \fBclub\fP [16]"
+.br
+.RI "\fIClub this message was posted to. \fP"
+.ti -1c
+.RI "char \fBorigbbs\fP [12]"
+.br
+.RI "\fIOriginal BBS message was posted to. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBmagic\fP"
+.br
+.RI "\fIMagic number (\fCMESSAGE_MAGIC\fP). \fP"
+.ti -1c
+.RI "char \fBspare\fP [16]"
+.br
+.RI "\fIA little of spare space. \fP"
+.ti -1c
+.RI "char \fBorigclub\fP [16]"
+.br
+.RI "\fIOriginal remote BBS club message was posted to. \fP"
+.ti -1c
+.RI "char \fBmsgid\fP [32]"
+.br
+.RI "\fIMessage ID (for networking). \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBreplyto\fP"
+.br
+.RI "\fIReference to a message that this one replies to. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+An email or club message. 
+
+This structure describes a BBS message, be it private or public. BBS messages differ from RFC-822 (Internet email) messages in a number of ways. In fact, in terms of philosophy BBS messages are a combination of email messages and newsgroup articles, with built-in (horribly weak) encryption and (optional single) file attachments. Here is a description of the fields:
+.PP
+.IP "\(bu" 2
+\fCfrom\fP. The message's sender. This is usually a user ID, but could also be an RFC-822 email address (hence the larger length of the string).
+.PP
+.PP
+.IP "\(bu" 2
+\fCto\fP. The message's recipient (a BBS user ID or RFC-822 email address). BBS messages can either have a single recipient, or be public, in which case this field is set to \fBMSG_ALL\fP. If a message needs to be private, yet must reach more than one recipient, \fIcopies\fP are made, i.e. multiple individual messages are sent.
+.PP
+.PP
+.IP "\(bu" 2
+\fCsubject\fP. A brief summary of the contents of the message.
+.PP
+.PP
+.IP "\(bu" 2
+\fChistory\fP. A list of tortures this message has been subjected to in the recent past. These include forwarding from user to user, networking between systems, sending via off-line reader, being a reply to another message, et cetera. Don't print the contents of this field directly, if you can help it. The field should be tokenised, parsed and translated to improve readability.
+.PP
+.PP
+.IP "\(bu" 2
+\fCfatt\fP. The preferred filename of the optional file attachment. In default of a value for this field, the attachment name is constructed the \fIMajoresque\fP way: by appending the extension \fC.ATT\fP(achment) to the message's number. If the message has no attachment, the contents of this field should be considered undefined.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmsgno\fP. The aforementioned message number.
+.PP
+.PP
+.IP "\(bu" 2
+\fCflags\fP. Flags describing this message. Please see the documentation for the \fCMSF_x\fP flags.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcrdate\fP, crtime. These two 32-bit fields contain the date and time the message was created. This is \fIsilly\fP, yes. The very names of the fields refer to the 16-bit days when date and time couldn't fit in one \fCint\fP. These days we only need 32 bits for both time and date. However, these fields are kept in place. We'll need to migrate to a 64-bit { time_t} soon.
+.PP
+.PP
+.IP "\(bu" 2
+replies. The number of replies to this message.
+.PP
+.PP
+.IP "\(bu" 2
+timesread. How many times the message was read or downloaded as part of an off-line reader message packet.
+.PP
+.PP
+.IP "\(bu" 2
+timesdnl. How many times the file attachment of this message was downloaded. The value should be treated as undefined if the message has no file attachment.
+.PP
+.PP
+.IP "\(bu" 2
+\fCtimesdnl\fP. How many times the file attachment of this message was downloaded.
+.PP
+.PP
+.IP "\(bu" 2
+\fCperiod\fP. Megistos public messages can be \fIperiodic\fP: they re-appear after a set period of time. This field sets the period in days. A value of zero means the message is not periodic. Re-appearance is implemented by forwarding, which implies that the original message is automatically deleted. This makes sense: you don't want \fIrabbit\fP messages in your system.
+.PP
+.PP
+.IP "\(bu" 2
+\fCcryptkey\fP. Private messages are weakly encrypted to protect them from the curious eyes of the unscrupulous, inept (and bored) Sysop. This really \fIis\fP weak. The unscrupulous but expert Sysop could crack this in a flash, but at least the contents aren't clearly visible to anyone. If you need strong encryption for private messages, I recommend you look into transparently encrypted filesystems. Although this still doesn't cure the Bastard Sysop From Hell problem, it keeps things safe from outsiders. Only private messages are encrypted. Public messages have this field set to zero.
+.PP
+.PP
+.IP "\(bu" 2
+\fCclub\fP. The name of the club this message was published in. Set to the empty string if the message is private (in which case, \fCcryptkey\fP should also be non-zero). The club lacks the conventional leading slash.
+.PP
+.PP
+.IP "\(bu" 2
+\fCorigbbs\fP. The BBS this message was originally posted to. This is useful for networked systems.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmagic\fP. A magic number (\fBMESSAGE_MAGIC\fP) included as sort of an afterthought. It should avoid some nasty business with corrupted messages.
+.PP
+.PP
+.IP "\(bu" 2
+\fCspare\fP. Reserved for future expansion. Do not use.
+.PP
+.PP
+.IP "\(bu" 2
+\fCorigclub\fP. The club the message was originally posted to. Used in networking.
+.PP
+.PP
+.IP "\(bu" 2
+\fCmsgid.Along\fP with \fCorigbbs\fP and \fCorigclub\fP, this field forms a unique identifier for this message. This is used (unsurprisingly) to make sure that networked messages don't get exchanged if a system already has them.
+.PP
+.PP
+.IP "\(bu" 2
+\fCreplyto\fP. A tentative reference to the number of the message this message replies to. Set to zero if this is an original message. Do \fInot\fP use this! It's a fallback field used in networking. The \fChistory\fP field contains the \fIfull\fP reference to the original message. 
+.PP
+
+.PP
+Definition at line 205 of file mail.h.
+.SH "Field Documentation"
+.PP 
+.SS "char \fBmessage_t::club\fP[16]"
+.PP
+Club this message was posted to. Definition at line 220 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::crdate\fP"
+.PP
+Creation date. Definition at line 213 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::crtime\fP"
+.PP
+Creation time. Definition at line 214 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::cryptkey\fP"
+.PP
+Key for weak private mail cryptography. Definition at line 219 of file mail.h.
+.SS "char \fBmessage_t::fatt\fP[16]"
+.PP
+Name of attached file (if any). Definition at line 210 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::flags\fP"
+.PP
+Message flags (\fCMSF_x\fP). Definition at line 212 of file mail.h.
+.SS "char \fBmessage_t::from\fP[80]"
+.PP
+User ID or RFC-822 address of message sender. Definition at line 206 of file mail.h.
+.SS "char \fBmessage_t::history\fP[80]"
+.PP
+History of message. Definition at line 209 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::magic\fP"
+.PP
+Magic number (\fCMESSAGE_MAGIC\fP). Definition at line 222 of file mail.h.
+.SS "char \fBmessage_t::msgid\fP[32]"
+.PP
+Message ID (for networking). Definition at line 225 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::msgno\fP"
+.PP
+Message number. Definition at line 211 of file mail.h.
+.SS "char \fBmessage_t::origbbs\fP[12]"
+.PP
+Original BBS message was posted to. Definition at line 221 of file mail.h.
+.SS "char \fBmessage_t::origclub\fP[16]"
+.PP
+Original remote BBS club message was posted to. Definition at line 224 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::period\fP"
+.PP
+Resurfacing period. Definition at line 218 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::replies\fP"
+.PP
+Number of replies to this message. Definition at line 215 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::replyto\fP"
+.PP
+Reference to a message that this one replies to. Definition at line 226 of file mail.h.
+.SS "char \fBmessage_t::spare\fP[16]"
+.PP
+A little of spare space. Definition at line 223 of file mail.h.
+.SS "char \fBmessage_t::subject\fP[64]"
+.PP
+Message subject. Definition at line 208 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::timesdnl\fP"
+.PP
+Times the attached file was downloaded. Definition at line 217 of file mail.h.
+.SS "\fBuint32\fP \fBmessage_t::timesread\fP"
+.PP
+Times this message was read. Definition at line 216 of file mail.h.
+.SS "char \fBmessage_t::to\fP[80]"
+.PP
+User ID or RFC-822 address of message recipient. Definition at line 207 of file mail.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

@@ -1,0 +1,22 @@
+D/offline.bulletins////
+/.cvsignore/2.0/Sat Dec 27 12:25:03 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:50 2004//
+/autoins.c/2.0/Mon Sep 13 19:44:50 2004//
+/bltcnv.c/2.0/Mon Sep 13 19:44:50 2004//
+/bltidx.ddl/2.0/Mon Apr 16 14:54:47 2001//
+/bltidx.h/2.0/Wed Dec 24 20:12:15 2003//
+/bulletins.h/2.0/Mon Sep 13 19:44:50 2004//
+/bulletins.msg/2.0/Mon Apr 16 14:54:53 2001//
+/cleanup.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubs.c/2.0/Mon Sep 13 19:44:50 2004//
+/db.c/2.0/Mon Sep 13 19:44:50 2004//
+/delete.c/2.0/Mon Sep 13 19:44:50 2004//
+/edit.c/2.0/Mon Sep 13 19:44:50 2004//
+/insert.c/2.0/Mon Sep 13 19:44:50 2004//
+/list.c/2.0/Mon Sep 13 19:44:50 2004//
+/login.c/2.0/Mon Sep 13 19:44:50 2004//
+/misc.c/2.0/Mon Sep 13 19:44:50 2004//
+/read.c/2.0/Mon Sep 13 19:44:50 2004//
+/search.c/2.0/Mon Sep 13 19:44:50 2004//
+/substvars.c/2.0/Mon Sep 13 19:44:50 2004//
+/bulletins.c/2.1/Mon Sep 13 19:55:34 2004//

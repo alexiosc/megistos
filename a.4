@@ -1,0 +1,83 @@
+<!DOCTYPE promptblock SYSTEM "promptblock.dtd">
+<group name="Prompts" lang="" charset="">
+<string id="DEFDESCR" maxlength="40" default="  <val>Main menu</val>
+"
+	desc="Default menuman description">
+  <help> When a user makes the "exit" selection from the Main Menu
+ (option XITSEL), we confirm his request with this message.
+ If he types 'Y' in response to THIS message, he is logged
+ off.  If he types anything else, he is returned to the
+ short main menu (letters only).
+ This text applies to non-live users, who are not offered
+ the option of R for "re-logon".
+ When a user makes the "exit" selection from the Main Menu
+ (option XITSEL), we confirm his request with this message.
+ If he types 'Y' in response to THIS message, he is logged
+ off.  If he types anything else, he is returned to the
+ short main menu (letters only).
+ This text applies to live users, who are offered the
+ option to "re-logon" by entering an 'R' at this prompt.
+</help>
+  <val>Main menu</val>
+</string">
+
+<string id="XITDESCR" maxlength="40" default="  <val>Logging out</val>
+"
+	desc="Logout menuman description">  <val>Logging out</val>
+</string">
+
+<text desc="Menu prologue"
+id="MENPRO">  <val></val>
+</text>
+
+
+<text desc="Menu epilogue"
+id="MENEPI">[0;1;32mPage: [37m@PAGE@[0;1m</text>
+
+<text desc="Short menu starting prompt"
+id="SHMBEG">[0;1;32mPage: [37m@PAGE@
+!WPlease enter your choice (</text>
+
+<text desc="Short menu option"
+id="SHMOPT">  <val>[33m%c[37m,</val>
+</text>
+
+
+<text desc="Short menu last option"
+id="SHMLOP">  <val>[33m%c[37m,</val>
+</text>
+
+
+<text desc="Short menu ending prompt"
+id="SHMEND">  <val> or [33m?[37m for the menu): [0m!)</val>
+</text>
+
+
+<text desc="Short menu prompt"
+id="SHMPRM">!W[0;1mPlease enter your choice ([33m?[37m for the menu): [0m!)</text>
+
+<text desc="Incorrect selection"
+id="ERRSEL">[0;31;1mSorry, "%c" isn't a valid choice here.
+[0;1m</text>
+
+<text desc="You don't have access to that page"
+id="NOAXES1">[0;31;1mSorry, page "%s" doesn't exist.
+[0;1m</text>
+
+<text desc="You don't have access to that menu option"
+id="NOAXES2">[0;31;1mSorry, you don't have access to option "%c".
+[0;1m</text>
+
+<text desc="Unable to spawn module/program"
+id="CANTXEC">!J[0;31;1mSorry, page @PAGE@ could not be loaded.
+Please notify the System Operator of the circumstances
+leading up to this.!)
+[0;1m</text>
+
+<text desc="Main menu exit:  confirm logoff"
+id="RUSXITN">[0;1m!WDo you really want to disconnect? ([[33mY[31m~]es / [[33mN[31m~]o):!)[0m </text>
+
+<text desc="Main menu exit: confirm logoff (with relogon)"
+id="RUSXITL">[0;1m!WDo you really want to disconnect? ([[33mY[31m~]es / [[33mN[31m~]o /
+[[33mR[31m~]elogon as another user):!)[0m </text>
+

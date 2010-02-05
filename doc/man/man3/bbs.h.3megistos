@@ -1,0 +1,138 @@
+.TH "bbs.h" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bbs.h \- The Mother of All BBS Include Files.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <bbsinclude.h>\fP
+.br
+\fC#include <megistos/gettext.h>\fP
+.br
+\fC#include <megistos/config.h>\fP
+.br
+\fC#include <megistos/errors.h>\fP
+.br
+\fC#include <megistos/prompts.h>\fP
+.br
+\fC#include <megistos/useracc.h>\fP
+.br
+\fC#include <megistos/miscfx.h>\fP
+.br
+\fC#include <megistos/bbsmod.h>\fP
+.br
+\fC#include <megistos/input.h>\fP
+.br
+\fC#include <megistos/format.h>\fP
+.br
+\fC#include <megistos/output.h>\fP
+.br
+\fC#include <megistos/sysstruct.h>\fP
+.br
+\fC#include <megistos/timedate.h>\fP
+.br
+\fC#include <megistos/globalcmd.h>\fP
+.br
+\fC#include <megistos/ttynum.h>\fP
+.br
+\fC#include <megistos/lock.h>\fP
+.br
+\fC#include <megistos/audit.h>\fP
+.br
+\fC#include <megistos/filexfer.h>\fP
+.br
+\fC#include <megistos/mail.h>\fP
+.br
+\fC#include <megistos/security.h>\fP
+.br
+\fC#include <megistos/channels.h>\fP
+.br
+\fC#include <megistos/dialog.h>\fP
+.br
+\fC#include <megistos/bots.h>\fP
+.br
+
+.SH "Detailed Description"
+.PP 
+The Mother of All BBS Include Files. 
+
+\fBAuthor:\fP
+.RS 4
+Alexios
+.RE
+.PP
+This is a wildcard header file that includes \fIall\fP of the other header files. This is the strongly recommended way to include BBS header files in your code.
+.PP
+Original banner, legalese and change history follow
+.PP
+\fB\fP.RS 4
+.PP
+.nf
+
+
+ *****************************************************************************
+ **                                                                         **
+ **  FILE:     bbs.h                                                        **
+ **  AUTHORS:  Alexios                                                      **
+ **  REVISION: A, June 94                                                   **
+ **  PURPOSE:  #include all useful header files and just that!              **
+ **  NOTES:                                                                 **
+ **  LEGALESE:                                                              **
+ **                                                                         **
+ **  This program is free software; you  can redistribute it and/or modify  **
+ **  it under the terms of the GNU  General Public License as published by  **
+ **  the Free Software Foundation; either version 2 of the License, or (at  **
+ **  your option) any later version.                                        **
+ **                                                                         **
+ **  This program is distributed  in the hope  that it will be useful, but  **
+ **  WITHOUT    ANY WARRANTY;   without  even  the    implied warranty  of  **
+ **  MERCHANTABILITY or  FITNESS FOR  A PARTICULAR  PURPOSE.   See the GNU  **
+ **  General Public License for more details.                               **
+ **                                                                         **
+ **  You  should have received a copy   of the GNU  General Public License  **
+ **  along with    this program;  if   not, write  to  the   Free Software  **
+ **  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.              **
+ **                                                                         **
+ *****************************************************************************
+
+
+ *
+ * $Id: bbs.h,v 1.6 2003/12/19 13:23:29 alexios Exp $
+ *
+ * $Log: bbs.h,v $
+ * Revision 1.6  2003/12/19 13:23:29  alexios
+ * Updated include directives; updated some of the directory #defines.
+ *
+ * Revision 1.5  2003/09/28 22:27:04  alexios
+ * Added gettext.h inclusion.
+ *
+ * Revision 1.4  2003/09/27 20:27:45  alexios
+ * Documented more of the file and moved existing documentation from
+ * doc++ to doxygen format.
+ *
+ * Revision 1.3  2001/04/22 14:49:04  alexios
+ * Merged in leftover 0.99.2 changes and additional bug fixes.
+ *
+ * Revision 0.3  1998/12/27 15:19:19  alexios
+ * Now includes the new header files (channels.h and security.h).
+ *
+ * Revision 0.2  1997/11/06 20:03:39  alexios
+ * Added GPL legalese to the top of this file.
+ *
+ * Revision 0.1  1997/08/26 15:48:53  alexios
+ * First registered revision. Adequate.
+ *
+ *
+ *
+
+.PP
+.RE
+.PP
+
+.PP
+Definition in file \fBbbs.h\fP.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

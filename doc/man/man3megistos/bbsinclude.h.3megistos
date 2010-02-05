@@ -1,0 +1,44 @@
+.TH "bbsinclude.h" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+bbsinclude.h \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <bbsconfig.h>\fP
+.br
+\fC#include <stdio.h>\fP
+.br
+\fC#include <stdlib.h>\fP
+.br
+\fC#include <ctype.h>\fP
+.br
+
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBtextdomain\fP(Domain)"
+.br
+.ti -1c
+.RI "#define \fB_\fP(Text)   Text"
+.br
+.ti -1c
+.RI "#define \fBN_\fP(Text)   Text"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define _(Text)   Text"
+.PP
+Definition at line 559 of file bbsinclude.h.
+.SS "#define N_(Text)   Text"
+.PP
+Definition at line 561 of file bbsinclude.h.
+.SS "#define textdomain(Domain)"
+.PP
+Definition at line 558 of file bbsinclude.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

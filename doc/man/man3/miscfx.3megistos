@@ -1,0 +1,542 @@
+.TH "Miscellaneous Functionality" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Miscellaneous Functionality \- 
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBPHONETIC\fP"
+.br
+.ti -1c
+.RI "#define \fBLATINIZE\fP"
+.br
+.ti -1c
+.RI "#define \fBrnd\fP(num)   (int)((long)rand()%(num))"
+.br
+.RI "\fIA simple way to get (pseudo-)random numbers. \fP"
+.ti -1c
+.RI "#define \fBrandomize\fP()   srand((unsigned)time(NULL)+(unsigned)getpid())"
+.br
+.RI "\fISeed the random number generator. \fP"
+.ti -1c
+.RI "#define \fBmin\fP(a, b)   (((a)<(b))?(a):(b))"
+.br
+.RI "\fIReturns the minimum of two numbers. \fP"
+.ti -1c
+.RI "#define \fBmax\fP(a, b)   (((a)>(b))?(a):(b))"
+.br
+.RI "\fIReturns the maximum of two numbers. \fP"
+.ti -1c
+.RI "#define \fBphonetic\fP(s)   stgxlate(s,PHONETIC)"
+.br
+.ti -1c
+.RI "#define \fBlatinize\fP(s)   (s)"
+.br
+.ti -1c
+.RI "#define \fBtolatin\fP(c)   (c)"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void * \fBalcmem\fP (size_t size)"
+.br
+.RI "\fISafe memory allocation. \fP"
+.ti -1c
+.RI "char * \fBlowerc\fP (char *s)"
+.br
+.RI "\fIConvert a string to lower case. \fP"
+.ti -1c
+.RI "char * \fBupperc\fP (char *s)"
+.br
+.RI "\fIConvert a string to upper case. \fP"
+.ti -1c
+.RI "char * \fBstripspace\fP (char *s)"
+.br
+.RI "\fIStrips leading and trailing white space. \fP"
+.ti -1c
+.RI "int \fBsameto\fP (char *shorts, char *longs)"
+.br
+.RI "\fICase-insensitive initial substring match. \fP"
+.ti -1c
+.RI "int \fBsameas\fP (char *stg1, char *stg2)"
+.br
+.RI "\fICase-insensitive string match. \fP"
+.ti -1c
+.RI "char * \fBzeropad\fP (char *s, int count)"
+.br
+.RI "\fIZero-pads a string array. \fP"
+.ti -1c
+.RI "char * \fBstgxlate\fP (char *s, char *table)"
+.br
+.RI "\fIPerforms character-for-character string translation. \fP"
+.ti -1c
+.RI "char * \fBfaststgxlate\fP (char *s, char *table)"
+.br
+.RI "\fIPerforms faster character-for-character string translation. \fP"
+.ti -1c
+.RI "int \fBbbsdcommand\fP (char *command, char *tty, char *arg)"
+.br
+.RI "\fISends a command to the BBS daemon. \fP"
+.ti -1c
+.RI "int \fBsearch\fP (char *string, char *keywords)"
+.br
+.RI "\fISearch a string for a set of keywords. \fP"
+.ti -1c
+.RI "int \fBrunmodule\fP (char *command)"
+.br
+.RI "\fIExecutes a module. \fP"
+.ti -1c
+.RI "int \fBruncommand\fP (char *command)"
+.br
+.RI "\fIExecutes a command. \fP"
+.ti -1c
+.RI "int \fBeditor\fP (char *fname, int limit)"
+.br
+.RI "\fIEdit a file. \fP"
+.ti -1c
+.RI "void \fBgopage\fP (char *page)"
+.br
+.RI "\fICall the menu manager. \fP"
+.ti -1c
+.RI "int \fBfcopy\fP (char *source, char *target)"
+.br
+.RI "\fICopy a file. \fP"
+.ti -1c
+.RI "void \fBusleep\fP ((unsigned long __usec))"
+.br
+.RI "\fISleep for a given number of microseconds. \fP"
+.ti -1c
+.RI "char * \fBmkfname\fP (char *fmt,...)"
+.br
+.RI "\fIFormat a filename. \fP"
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define latinize(s)   (s)"
+.PP
+Definition at line 236 of file miscfx.h.
+.SS "#define LATINIZE"
+.PP
+Definition at line 144 of file miscfx.h.
+.SS "#define max(a, b)   (((a)>(b))?(a):(b))"
+.PP
+Returns the maximum of two numbers. A bog-standard but precious little macro.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIa\fP A number of any type. 
+.br
+\fIb\fP A number of any type.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The maximum of the two numbers. 
+.RE
+.PP
+Definition at line 228 of file miscfx.h.
+.SS "#define min(a, b)   (((a)<(b))?(a):(b))"
+.PP
+Returns the minimum of two numbers. A bog-standard but precious little macro.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIa\fP A number of any type. 
+.br
+\fIb\fP A number of any type.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The minimum of the two numbers. 
+.RE
+.PP
+Definition at line 216 of file miscfx.h.
+.SS "#define phonetic(s)   stgxlate(s,PHONETIC)"
+.PP
+Definition at line 231 of file miscfx.h.
+.SS "#define PHONETIC"
+.PP
+Definition at line 109 of file miscfx.h.
+.SS "#define randomize()   srand((unsigned)time(NULL)+(unsigned)getpid())"
+.PP
+Seed the random number generator. A macro that uses the current time and process ID to seed the pseudo-random number generator. Future versions should look for the \fC/dev/random\fP or \fC/dev/urandom\fP devices and use those, if they're available.
+.PP
+\fBSee also:\fP
+.RS 4
+\fBrnd()\fP 
+.RE
+.PP
+Definition at line 204 of file miscfx.h.
+.SS "#define rnd(num)   (int)((long)rand()%(num))"
+.PP
+A simple way to get (pseudo-)random numbers. This macro is just a wrapper for the C function \fCrand()\fP.
+.PP
+\fBWarning:\fP
+.RS 4
+DO NOT USE THIS FUNCTION FOR RANDOMNESS-SENSITIVE TASKS LIKE KEY GENERATION.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The maximum random number (plus 1) that will be generated.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A (pseudo-)random number between 0 and \fCnum\fP-1.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBrandomize()\fP 
+.RE
+.PP
+Definition at line 193 of file miscfx.h.
+.SS "#define tolatin(c)   (c)"
+.PP
+Definition at line 237 of file miscfx.h.
+.SH "Function Documentation"
+.PP 
+.SS "void* alcmem (size_t size)"
+.PP
+Safe memory allocation. Attempts to allocate memory, halting the module with an \fBerror_fatal()\fP if memory couldn't be allocated. The arguments are identical to those of malloc(), which this function calls internally.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIsize\fP The number of bytes to allocate.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a pointer to the block of memory allocated. This function never returns \fCNULL\fP. If an allocation error occurs, the current program is terminated. 
+.RE
+.PP
+
+.SS "int bbsdcommand (char * command, char * tty, char * arg)"
+.PP
+Sends a command to the BBS daemon. This function composes a command to the BBS daemon, \fCbbsd\fP, and sends it. BBS commands perform certain restricted tasks, like throwing other BBS users off the system, et cetera.
+.PP
+This is a low-level command. Most existing \fCbbsd\fP commands have individual functions to simplify the interface for the user.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcommand\fP The command to send to \fCbbsd\fP.
+.br
+\fItty\fP The first argument of the \fCbbsd\fP command is always a BBS channel name, in the form of a TTY device name, without the \fC'/dev/'\fP. For instance, the third Linux virtual console would be identified as \fC'tty3'\fP.
+.br
+\fIarg\fP The second argument of the command. 
+.RE
+.PP
+
+.SS "int editor (char * fname, int limit)"
+.PP
+Edit a file. Executes the visual or line editor (depending on user's settings) to edit a given file.
+.PP
+The correct way to edit a file is to either create it in \fC/tmp\fP, or to make a symbolic link to it.
+.PP
+\fBWarning:\fP
+.RS 4
+IF THE USER CANCELS THE EDITING PROCESS, \fITHE FILE WILL BE DELETED\fP.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfname\fP The full filename of the file to edit.
+.br
+\fIlimit\fP The size limit of the file. BBS editors, unlike most other editors, can impose this limit on users.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The same values as \fBrunmodule()\fP, which are the same as \fCsystem()\fP. If the user saved the file, the \fCfname\fP will still exist and will contain the updated content. If the user chose to cancel the editing session without saving, \fCfname\fP will no longer exist. 
+.RE
+.PP
+
+.SS "char* faststgxlate (char * s, char * table)\fC [inline]\fP"
+.PP
+Performs faster character-for-character string translation. \fBParameters:\fP
+.RS 4
+\fIs\fP A string to translate.
+.br
+\fItable\fP A translation table. This is a \fCchar\fP array with 256 elements. Translation of character \fCx\fP is done by the expression { table[x]}. Unlike \fC\fBstgxlate()\fP\fP, \fIall\fP characters will be translated.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A pointer to \fCs\fP with the characters translated as above. It should be obvious that this is a \fIdestructive\fP function! The translated string overwrites the original one.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBstgxlate()\fP 
+.RE
+.PP
+
+.SS "int fcopy (char * source, char * target)"
+.PP
+Copy a file. A useful function to copy a file to another one. The semantics are almost identical to those of the shell command \fCcp\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIsource\fP The filename of the source file.
+.br
+\fItarget\fP Filename of the target file.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero indicates success. Non-zero indicates an error, in which case \fCerrno\fP will be set accordingly. 
+.RE
+.PP
+
+.SS "void gopage (char * page)"
+.PP
+Call the menu manager. This function calls the menu manager from within a module. The menu manager will take the user to the specified page.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpage\fP The name of a menu manager page to go to.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The function never returns. 
+.RE
+.PP
+
+.SS "char* lowerc (char * s)"
+.PP
+Convert a string to lower case. \fBParameters:\fP
+.RS 4
+\fIs\fP A null-terminated string.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The string \fCs\fP with all upper case characters converted to lower case.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBupperc()\fP 
+.RE
+.PP
+
+.SS "char* mkfname (char * fmt,  ...)"
+.PP
+Format a filename. This function formats a filename string for a subdirectory under the BBS prefix. The environment variables \fCBBSPREFIX\fP and \fCPREFIX\fP are first checked, followed by the BBS prefix defined at compile time.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfmt\fP A \fCprintf()\fP-like format string, followed by any necessary parameters. The prefix will be automatically prepended to the format string to form the fully qualified filename.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The fully qualified filename. 
+.RE
+.PP
+
+.SS "int runcommand (char * command)"
+.PP
+Executes a command. Runs a UNIX command, making sure the module and BBS are aware of this for initialisation, charging, idling, statistics and other purposes. This is the best way to call external commands with minimal hassle.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcommand\fP The command to execute.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The same values as \fCsystem()\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+system() 
+.RE
+.PP
+
+.SS "int runmodule (char * command)"
+.PP
+Executes a module. Runs an interactive, Megistos module or other subsystem.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcommand\fP The command to execute.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The same values as \fCsystem()\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+system() 
+.RE
+.PP
+
+.SS "int sameas (char * stg1, char * stg2)"
+.PP
+Case-insensitive string match. \fBParameters:\fP
+.RS 4
+\fIstg1\fP The first string.
+.br
+\fIstg2\fP The second string.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Returns non-zero if the two strings are the same, zero if not. Case-insensitive comparison is used.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBsameto()\fP 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBmod_dialog.c\fP.
+.SS "int sameto (char * shorts, char * longs)"
+.PP
+Case-insensitive initial substring match. \fBParameters:\fP
+.RS 4
+\fIshorts\fP A string to search for.
+.br
+\fIlongs\fP The string in which to search.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Returns non-zero if \fCshorts\fP was found at the beginning of { longs}. Zero is returned otherwise. Case-insensitive comparison is used.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBsameas()\fP 
+.RE
+.PP
+
+.SS "int search (char * string, char * keywords)"
+.PP
+Search a string for a set of keywords. This function uses case-sensitive searching (\fCstrstr()\fP to locate any of a set of keywords within a string. Partial matching is done, so that, for instance, \fC'word'\fP will match \fC'keywords'\fP.
+.PP
+\fBWarning:\fP
+.RS 4
+THE \fCkeywords\fP ARGUMENT WILL BE DESTROYED IN THE PROCESS OF SEARCHING}.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIstring\fP The string to search in.
+.br
+\fIkeywords\fP A string holding space-delimited keywords to search for.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Non-zero if one of the keywords was found, zero if not. 
+.RE
+.PP
+
+.SS "char* stgxlate (char * s, char * table)\fC [inline]\fP"
+.PP
+Performs character-for-character string translation. \fBParameters:\fP
+.RS 4
+\fIs\fP A string to translate.
+.br
+\fItable\fP A translation table. This is a \fCchar\fP array with 256 elements. Translation of character x is done by the expression \fCtable[x]!=0 ? table[x] : x\fP. That is, the \fCx\fP-th element of \fCtable\fP holds the new value of character with ASCII code \fCx}. If the \fCx\fP-th element of \fCtable\fP is zero, the character is not translated. This is done for convenience to the programmer.\fP
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+\fC A pointer to \fCs\fP with the characters translated as above. It should be obvious that this is a \fIdestructive\fP function! The translated string overwrites the original one.\fP
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fC \fBfaststgxlate()\fP \fP
+.RE
+.PP
+
+.SS "char* stripspace (char * s)"
+.PP
+Strips leading and trailing white space. \fBParameters:\fP
+.RS 4
+\fIs\fP A null-terminated string.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The string \fCs\fP with all leading and trailing white space removed.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBlowerc()\fP 
+.RE
+.PP
+
+.SS "char* upperc (char * s)"
+.PP
+Convert a string to upper case. \fBParameters:\fP
+.RS 4
+\fIs\fP A null-terminated string.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The string \fCs\fP with all lower case characters converted to upper case.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBlowerc()\fP 
+.RE
+.PP
+
+.SS "void usleep ((unsigned long __usec))"
+.PP
+Sleep for a given number of microseconds. Some systems lack this particularly useful function. This is how we define it (the standard way, drawn from the standard include files). This is the actual documentation of the function from the person pages:
+.PP
+The \fBusleep()\fP function suspends execution of the calling process for \fC__usec\fP microseconds. The sleep may be lengthened slightly by any system activity or by the time spent processing the call.
+.PP
+\fBParameters:\fP
+.RS 4
+\fI__usec\fP The time delay in question. 
+.RE
+.PP
+
+.SS "char* zeropad (char * s, int count)"
+.PP
+Zero-pads a string array. This function zeroes any free space within an array holding a null-terminated string. Only characters after the terminating null will be terminated (including the terminating null, unless the moon is in its third quarter).
+.PP
+This function appears inane, and it is (partially). The first version was written in 1992, when I was dealing with Major BBS modules. The database system, Novell's \fIBTrieve\fP, didn't know about terminating nulls in strings and the C API didn't care. If a key was 24 bytes long, equality meant an identical 24 bytes. So, all database keys had to be zero-padded to avoid some very obscure bugs. These days, \fCzeropad\fP is only useful where sensitive information is likely to be held in memory and we don't want it written to disk along with a string. But it's much easier (not to mention faster) to use \fCbzero()\fP or \fCmemchr()\fP to do the trick.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIs\fP The string array to zero-pad.
+.br
+\fIcount\fP The size of the string array.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A pointer to \fCs\fP, with any post-null bytes zero-padded.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+bzero(), memchr() 
+.RE
+.PP
+

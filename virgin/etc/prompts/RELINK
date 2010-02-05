@@ -1,0 +1,14 @@
+#!/bin/bash
+prefix=
+echo -n Creating links to .msg files in `pwd`
+
+# Erase the old files
+
+find -type l|xargs rm >&/dev/null
+
+
+# Now relink them
+
+for a in `find ../../src -name '*.msg'`; do ln -s $a .; echo -n .; done
+
+echo -e '\n'

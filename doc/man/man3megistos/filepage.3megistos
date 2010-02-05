@@ -1,0 +1,68 @@
+.TH "filepage" 3megistos "15 Jul 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+filepage \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <menuman.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBname\fP [PAGENAMELEN]"
+.br
+.ti -1c
+.RI "char \fBprev\fP [PAGENAMELEN]"
+.br
+.ti -1c
+.RI "char \fBdescr\fP [NUMLANGUAGES][PAGEDESCRLEN]"
+.br
+.ti -1c
+.RI "char \fBtype\fP"
+.br
+.ti -1c
+.RI "int \fBcreds\fP"
+.br
+.ti -1c
+.RI "int \fBkey\fP"
+.br
+.ti -1c
+.RI "int \fBflags\fP"
+.br
+.ti -1c
+.RI "char \fBfname\fP [FNAMELEN]"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "int \fBfilepage::creds\fP"
+.PP
+Definition at line 163 of file menuman.h.
+.SS "char \fBfilepage::descr\fP[NUMLANGUAGES][PAGEDESCRLEN]"
+.PP
+Definition at line 161 of file menuman.h.
+.SS "int \fBfilepage::flags\fP"
+.PP
+Definition at line 165 of file menuman.h.
+.SS "char \fBfilepage::fname\fP[FNAMELEN]"
+.PP
+Definition at line 167 of file menuman.h.
+.SS "int \fBfilepage::key\fP"
+.PP
+Definition at line 164 of file menuman.h.
+.SS "char \fBfilepage::name\fP[PAGENAMELEN]"
+.PP
+Definition at line 159 of file menuman.h.
+.SS "char \fBfilepage::prev\fP[PAGENAMELEN]"
+.PP
+Definition at line 160 of file menuman.h.
+.SS "char \fBfilepage::type\fP"
+.PP
+Definition at line 162 of file menuman.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

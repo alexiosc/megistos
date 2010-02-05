@@ -1,0 +1,32 @@
+.TH "menuoption" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+menuoption \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <menuman.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char \fBopt\fP"
+.br
+.ti -1c
+.RI "char \fBname\fP [PAGENAMELEN]"
+.br
+.in -1c
+.SH "Field Documentation"
+.PP 
+.SS "char \fBmenuoption::name\fP[PAGENAMELEN]"
+.PP
+Definition at line 142 of file menuman.h.
+.SS "char \fBmenuoption::opt\fP"
+.PP
+Definition at line 141 of file menuman.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Megistos API from the source code.

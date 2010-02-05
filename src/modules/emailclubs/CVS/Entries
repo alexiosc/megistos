@@ -1,0 +1,48 @@
+D/bbsmail////
+D/msgcnv////
+D/netclub////
+D/offline.mail////
+D/mailfixup////
+/.cvsignore/2.0/Sat Dec 27 12:25:03 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:50 2004//
+/Makefile.clubs/2.0/Mon Apr 16 14:54:58 2001//
+/Makefile.email/2.0/Mon Apr 16 14:54:58 2001//
+/clubcleanup.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubfx.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubhdr.c/2.0/Mon Sep 13 19:44:50 2004//
+/clublist.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubop.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubread.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubs.h/2.0/Mon Sep 13 19:44:50 2004//
+/clubscan.c/2.0/Mon Sep 13 19:44:50 2004//
+/clubwrite.c/2.0/Mon Sep 13 19:44:50 2004//
+/database.c/2.0/Mon Sep 13 19:44:50 2004//
+/dbfrom.c/2.0/Mon Sep 13 19:44:50 2004//
+/dbnum.c/2.0/Mon Sep 13 19:44:50 2004//
+/dbsubj.c/2.0/Mon Sep 13 19:44:50 2004//
+/dbto.c/2.0/Mon Sep 13 19:44:50 2004//
+/distlist.c/2.0/Mon Sep 13 19:44:50 2004//
+/download.c/2.0/Mon Sep 13 19:44:50 2004//
+/ecdb.ddl/2.0/Mon Apr 16 14:55:09 2001//
+/ecdbase.h/2.0/Mon Sep 13 19:44:50 2004//
+/email.h/2.0/Mon Sep 13 19:44:50 2004//
+/emailclubs.msg/2.0/Sat Feb 28 14:17:01 2004//
+/funcs.c/2.0/Mon Sep 13 19:44:50 2004//
+/ihavedb.ddl/2.0/Mon Apr 16 14:55:23 2001//
+/mailcleanup.c/2.0/Mon Sep 13 19:44:50 2004//
+/mailcleanup.h/2.0/Mon Sep 13 19:44:50 2004//
+/misc.c/2.0/Mon Sep 13 19:44:50 2004//
+/modify.c/2.0/Mon Sep 13 19:44:50 2004//
+/networking.c/2.0/Mon Sep 13 19:44:50 2004//
+/operations.c/2.0/Mon Sep 13 19:44:50 2004//
+/prefs.c/2.0/Mon Sep 13 19:44:50 2004//
+/qsc.c/2.0/Mon Sep 13 19:44:50 2004//
+/read.c/2.0/Mon Sep 13 19:44:50 2004//
+/receipt.c/2.0/Mon Sep 13 19:44:50 2004//
+/reindex.c/2.0/Mon Sep 13 19:44:50 2004//
+/reply.c/2.0/Mon Sep 13 19:44:50 2004//
+/substvars.c/2.0/Mon Sep 13 19:44:50 2004//
+/test-typhoon.c/2.0/Thu Dec 25 13:33:27 2003//
+/write.c/2.0/Mon Sep 13 19:44:50 2004//
+/email.c/2.1/Mon Sep 13 19:55:34 2004//
+/clubs.c/2.1/Mon Sep 13 19:55:34 2004//

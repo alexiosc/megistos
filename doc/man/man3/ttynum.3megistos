@@ -1,0 +1,155 @@
+.TH "BBS Channel Handling" 3 "8 Sep 2003" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+BBS Channel Handling \- This module provides functionality for dealing with BBS channels and managing the mapping between BBS channels and UNIX ttys (where available).  
+More...
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "\fBChannel definition flags (TTF_x)\fP"
+.br
+.RI "\fIFlags controlling default channel behaviour. \fP"
+.PP
+
+.in -1c
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBchanneldef\fP"
+.br
+.RI "\fIChannel definition. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBCHANNEL_MAGIC\fP   'MEGISTOS BINARY CHANNEL FILE\\n\\n\\n'"
+.br
+.RI "\fIThe channel file magic number. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBchan_init\fP ()"
+.br
+.RI "\fIInitialise the channel map. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getnum\fP (char *tty)"
+.br
+.RI "\fIFind the channel number of a device. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_getindex\fP (char *tty)"
+.br
+.RI "\fIFind the index of a channel in \fCchannels\fP. \fP"
+.ti -1c
+.RI "char * \fBchan_getname\fP (\fBuint32\fP num)"
+.br
+.RI "\fIFind the device associated with a channel. \fP"
+.ti -1c
+.RI "\fBuint32\fP \fBchan_telnetlinecount\fP ()"
+.br
+.RI "\fICount number of telnet lines in use. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchannels\fP"
+.br
+.RI "\fIThe channels index, mapping ttys to channels. \fP"
+.ti -1c
+.RI "\fBchanneldef\fP * \fBchan_last\fP"
+.br
+.RI "\fILast referenced element of \fCchannels\fP. \fP"
+.ti -1c
+.RI "int \fBchan_count\fP"
+.br
+.RI "\fINumber of channels in \fCchannels\fP. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This module provides functionality for dealing with BBS channels and managing the mapping between BBS channels and UNIX ttys (where available). 
+.SH "Define Documentation"
+.PP 
+.SS "#define CHANNEL_MAGIC   'MEGISTOS BINARY CHANNEL FILE\\n\\n\\n'"
+.PP
+The channel file magic number. Definition at line 96 of file ttynum.h.
+.SH "Function Documentation"
+.PP 
+.SS "\fBuint32\fP chan_getindex (char * tty)"
+.PP
+Find the index of a channel in \fCchannels\fP. Given a device name, this function yields the index of the channel structure in the \fCchannels\fP array.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP The name of a device special, without the \fC'/dev/'\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The index of the channel associated with the given device, or -1 if the device is not associated with a BBS channel. 
+.RE
+.PP
+
+.SS "char* chan_getname (\fBuint32\fP num)"
+.PP
+Find the device associated with a channel. Given the number of a channel, this function returns the device (minus the leading \fC'/dev/'\fP) associated with it.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP A channel number.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The device name of channel \fCnum\fP, or \fCNULL\fP if \fCnum\fP is not a existing BBS channel. 
+.RE
+.PP
+
+.SS "\fBuint32\fP chan_getnum (char * tty)"
+.PP
+Find the channel number of a device. Maps device name to channel number, effectively yielding the number of a channel associated with the given device.
+.PP
+\fBParameters:\fP
+.RS 4
+\fItty\fP The name of a device special, without the \fC'/dev/'\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The channel number associated with the given device, or \fCNULL\fP if the device is not associated with a BBS channel. 
+.RE
+.PP
+
+.PP
+\fBExamples: \fP
+.in +1c
+\fBgcs_builtin.c\fP.
+.SS "void chan_init ()"
+.PP
+Initialise the channel map. Reads the binary channel file, initialising the channel map. 
+.SS "\fBuint32\fP chan_telnetlinecount ()"
+.PP
+Count number of telnet lines in use. Returns the number of telnet lines that are currently in use.
+.PP
+\fBReturns:\fP
+.RS 4
+The number of telnet lines in use. 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "int \fBchan_count\fP"
+.PP
+Number of channels in \fCchannels\fP. Definition at line 241 of file ttynum.h.
+.SS "struct \fBchanneldef\fP* \fBchan_last\fP"
+.PP
+Last referenced element of \fCchannels\fP. Definition at line 236 of file ttynum.h.
+.SS "struct \fBchanneldef\fP* \fBchannels\fP"
+.PP
+The channels index, mapping ttys to channels. Definition at line 231 of file ttynum.h.

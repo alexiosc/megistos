@@ -1,0 +1,486 @@
+# This file defines the adventures available to the user
+#
+# Lines beginning with '#' are comments.#
+#
+# Lines beginning with a ':' in the FIRST column should contain the filename
+# of a game file, then some white space, then the description of the game.
+# The description may be of arbitrary length, but keep it short! Subsequent
+# lines will be considered continuations of the description and appended to
+# it, unless of course they start with a ':', in which case they're new game
+# definition lines.
+#
+# Only options for which a file (gzip compressed or not) exists will be
+# shown to the user.
+#
+# Sorting is by increasing title in librarian style (initial articles
+# ignored). It is taken care of by the module.
+
+# All the game entries below are commented out. The games themselves are not
+# distributed here for obvious reasons of copyright (most of them are
+# freeware, but not necessary according to the rules of the GPL). Feel free
+# to download them from the usual places. If you don't know what the usual
+# places are, search the WWW for 'Interactive Fiction'.
+#
+# Put downloaded files in this directory. You can compress them with gzip if
+# you feel like saving some space. The virtual machine will decompress them
+# temporarily. Uncomment the respective entry below or create a new one, and
+# you're set!
+
+#:advent.z5           Adventure aka Colossal Cave, the original 350 points
+#                     version ported to Inform by Graham Nelson, based on Dave
+#                     Baggett's TADS reconstruction "Colossal Cave Revisited".
+#                     Release 5 / Serial number 961209.
+#
+#:adventureland.z5    Scott Adams' Adventureland, ported to Inform by
+#                     Graham Nelson. Release 1 / Serial number 961111
+#
+#:aisle.z5            Aisle, an instant in the life of a man, by Sam Barlow.
+#                     Release 1 / Serial number 990528
+#
+#:alpha.z5            Journey to Alpha Centauri (In Real Time), an Interactive
+#                     Waste of Time, by Julian Fleetwood.
+#                     Release 3 / Serial number 981017
+#
+#:balances.z5         Balances, An Interactive Short Story by Graham Nelson.
+#                     Release 5 / Serial number 961216
+#
+#:delusns.z5          Delusions, an Interactive Self-Discovery
+#                     by Christopher E. Forman.
+#                     Release 4 / Serial number 971121
+#
+#:frobozzi.z5         The Encyclopedia Frobozzica (Abridged Edition),
+#                     edited by Nino Ruffini and ported to the Inform
+#                     format by Digby McWiggle.
+#
+#:gumshoe.z5          Gumshoe, An Interactive Investigation by Mike Oliphant.
+#                     Release 1 / Serial number 960331
+#
+#:i-0.z5              I-0: Jailbait on Interstate Zero, by Adam Cadre.
+#                     Release 4 (v1.21) / Serial number 970307
+#
+#:informat.z5         Informatory, a Not Very Interactive Pastiche with
+#                     Tutorial Pretensions, by William J. Shlaer.
+#                     Release 2 / Serial number 981211
+#
+#:jigsaw_footnotes.z5 Jigsaw: Rules and Footnotes, by Graham Nelson,
+#                     Release 3 / Serial number 951129.
+#                     Help and background information only.
+#
+#:jigsaw_game.z5      Jigsaw, An Interactive History by Graham Nelson,
+#                     Release 3 / Serial number 951129.
+#                     Game only without help information.
+#
+#:mercy.z5            Mercy, A short story by Christopher Klimas.
+#                     Release 2 / Serial number 980217
+#
+#:ralph.z5            Ralph, An Interactive Sniffing by Miron Schmidt.
+#                     Release 7 / Serial number 980224
+#
+#:samegame.z5         SameGame, another episode in the Z-Machine abuse
+#                     saga, by Kevin Bracey. SameGame is an implementation
+#                     of a simple arcade game and is also a stress test
+#                     of Z-Machine interpreters.
+#                     Release 1 / Serial number 980731
+#
+#:slackerx.z5         Slacker X, A scatological breakthrough
+#                     in adventure gaming.
+#                     Release 1 / Serial number 971009
+#
+#:tangle.z5           Spider And Web, Interactive Fiction by Andrew Plotkin
+#                     Release 4 / Serial number 980226
+#
+#:abent.z5            Abenteuer, a German translation of the original 350 points
+#                     version of Adventure (aka Colossal Cave).
+#                     Translated by Toni Arnold, based on Graham Nelson's Inform
+#                     port of Adventure. Release 5 / Serial number 980419.
+#
+#:acorncourt.z5       The Acorn Court, An Interactive Text Adventure
+#                     by Todd S. Murchison.
+#                     Release 3 / Serial number 970904
+#
+#:advland.z5	     Adventureland, by Scott Adams.
+#
+#:bbanzai.z5	     Buckaroo Banzai, by Scott Adams.
+#
+#:count.z5	     The Count, by Scott Adams.
+#
+#:ghostwn.z5	     Ghost Town, by Scott Adams.
+#
+#:gvoyage.z5	     The Golder Voyage, by Scott Adams.
+#
+#:hulk.z5	     The Hulk, by Scott Adams.
+#
+#:funhouse.z5	     Mystery Fun House, by Scott Adams.
+#
+#:odyssey.z5	     Strange Odyssey, by Scott Adams.
+#
+#:pirate.z5	     Pirate Adventure (aka Pirate's Cove), by Scott Adams.
+#
+#:pyramid.z5	     Pyramid of Doom, by Scott Adams.
+#
+#:ret2pirt.z5	     Return to Pirate's Isle, by Scott Adams.
+#
+#:savage1.z5          Savage Island, Part I, by Scott Adams.
+#
+#:savage2.z5	     Savage Island, Part II, by Scott Adams.
+#
+#:scrtmiss.z5	     Secret Mission (aka Mission Impossible), by Scott Adams.
+#
+#:sorsocc.z5          Sorcerer of Claymorgue Castle, by Scott Adams.
+#
+#:spidermn.z5	     Spiderman, by Scott Adams.
+#
+#:voodoo.z5	     Voodoo Castle, by Scott Adams.
+#
+#:awitl.z5            A Week In The Life, An Interactive Self,
+#                     by Neil James Brown.
+#                     Release 3 / Serial number 980215
+#
+#:awaken.z5           The Awakening, by Dennis Matheson.
+#                     A horror game based loosely on the work of
+#                     H. P. Lovecraft.
+#                     Release 1 / Serial number 980726
+#
+#:balt.z5             Baltimore:24, An Exercise in Interactive Fiction
+#                     by Howard A. Sherman.
+#                     Relase 2 / Serial number 970706
+#
+#:bear.z5             A Bear's Night Out, an Interactive Children's Story
+#                     by David Dyte.  Release 5 / Serial number 990224
+#
+#:bedlam.z5           Bedlam, An Interactive Preview by Michael Zey.
+#                     Release 1 / Serial number 970711
+#
+#:bj.z5               Blow Job Drifter, An Interactive You Kno What, by Big Al.
+#                     Release 5 / Serial Number 981103
+#
+#:blair.z5            Tales From The College Presents A Breath Of Fresh Blair,
+#                     an Interactive In-Joke by Jesse Burneko.
+#                     Release 2 / Serial number 971119
+#
+#:bse.z5              BSE, An Interactive Epidemic by Chris Smith
+#                     Release 3 / Serial number 970110.
+#                     Winner of the Acorn User 1996 IF Competition
+#
+#:bunny.z5            The Night of the Vampire Bunnies by Jason Dyer,
+#                     somewhat a cross between a black comedy and a B-movie,
+#                     ported from QBASIC to Inform by Patrick Kellum.
+#                     Release 4 / Serial number 971205
+#
+#:busted.z5           Busted! A game of high cunning and low humor,
+#                     by Jon Drukman, ported from AdvSys to Inform by the author.
+#                     Release 4 / Serial number 941223
+#
+#:candy.z5            Candy, An Attempt at Reliving Childhood,
+#                     by Rybread Celsius. Beta One.
+#                     Release 1 / Serial number 970621
+#
+#:cheater.z5          Cheater, An Annoying Adventure by Martin Wesley Osam.
+#                     Release 1 / Serial number 960920
+#
+#:cia.z5              CIA Adventure by Hugh Lampert, ported to Inform by
+#                     J. Kevin Thomas, based on a GWBASIC version by Pete Wohlmut.
+#                     Release 1 / Serial number 961218
+#
+#:claw.z5             Wearing the Claw, an Interactive Fantasy by Paul O'Brian.
+#                     Release 3 / Serial number 970327
+#
+#:cokeisit.z5         Coke Is It! An Inform pastiche of various works of IF,
+#                     with the added bonus of Coca-Cola product placement
+#                     by Lucian Smith, Adam Thornton, J. Robinson Wheeler,
+#                     Michael Fessler, Adam Cadre, Dan Shiovitz, and David Dyte.
+#                     Release 1 / Serial number 990331
+#
+#:curses.z5           Curses, An Interactive Diversion by Graham Nelson.
+#                     Release 16 / Serial number 951024
+#
+#:detectiv.z5         Detective, originally by Matt Barringer. This is a
+#                     straight port to Inform, by Stuart Moore.
+#                     Release 1 / Serial number 981104
+#
+#:dogslife.z5         It's a Dog's Life, an interactive Heeling,
+#                     by "Mr. WiggleButt".
+#                     Release 1 / Serial number 981015
+#
+#:doll.z5             The Zuni Doll: An Interactive Horror Story,
+#                     by Jesse Burneko.
+#                     Release 1 / Serial number 971031
+#
+#:edifice.z5          The Edifice, An Interactive Allegory, By Lucian Smith.
+#                     Release 2 / Serial number 980206
+#                     Winner of the 1997 IF competition.
+#
+#:f209.z5             Apartment 209, an Interactive Pigsty, by Ben Parrish.
+#                     Release 1 / Serial number 970806
+#
+#:forms.z5            Of Forms Unknown, an Interactive Excursion
+#                     by Chris Markwyn.
+#                     Release 3 / Serial number 970206
+#
+#:freefall.z5         Free Fall, An, uh, Interactive Z-Code Demonstration
+#                     by Andrew C. Plotkin. Release 2 / Serial number 951111
+#
+#:frozen.z5           Frozen: A Night at the Lab, by Jeremy Farnham.
+#                     Release 1 / Serial number 960620
+#
+#:godot.z5            Looking For Godot,
+#                     An Interactive Looking-Around-For-A-Lost-English-Book,
+#                     by Patrick Shaughnessy.
+#                     Release 1 / Serial number 960599
+#
+#:hell.z5             Welcome to Hell, by Kevin Norton and Brandon Myers.
+#                     Release 1 / Serial number 980816
+#
+#:inhumane.z5         Inhumane: An Infralogic Massacre, by Andrew C. Plotkin.
+#                     Revision 2, ported from Applesoft BASIC to Inform by the
+#                     author. This is a parody of Infocom's Infidel, written by
+#                     Andrew when he was about 15.
+#
+#:intruder.z5         Intruder - Interactive Fiction: A Burglary, by
+#                     Volker Lanz. A cross between a mystery and a treasure
+#                     hunt, set in France.
+#                     Release 59 / serial number 990210
+#
+#:jewel.z5            The Jewel of Knowledge, "a somewhat traditional cave crawl"
+#                     by Francesco Bova.
+#                     Release 2 / serial number 990710
+#
+#:karn.z5             Return to Karn, by Patrick Wigfull.
+#                     Release 2 / serial number 961207
+#                     Based on the television programme "Doctor Who".
+#
+#:kirby.z5            The X-Child, The Second Installment In The Kevin
+#                     Johnson Residence Hall Saga, by Jesse Burneko.
+#                     Release 2 / Serial number 062776
+#
+#:kooku.z5            Kook U, An Interactive Kook Adventure
+#                     Release 1 / Serial number 971119
+#
+#:lambs.z5            Silence of the Lambs, An Interactive Horror.
+#                     Release 2 / serial number 971010
+#
+#:library.z5          All Quiet on the Library Front, An Interactive Vignette
+#                     by Michael S. Phillips. Release 2 / serial number 951204.
+#
+#:life.z5             Life or Death, an interactive biological diversion,
+#                     by David S. Glasser. Release 1 / Serial number 980702
+#
+#:limp.z5             Limp, an interactive thingy, by Rybread Celsius.
+#                     Release 1 / Serial number 980517
+#
+#:loose.z5            Mother Loose, an Interactive Nursery Rhyme
+#                     by Irene Callaci.
+#                     Release 2 / Serial number 981128
+#
+#:lost.z5             The Lost Spellmaker, An Interactive Mission.
+#                     by Neil James Brown.
+#                     Release 3 / Serial number 980116
+#
+#:magic-toyshop.z5    The Magic Toyshop, a fun game for all the family
+#                     by Gareth Rees. Release 1, serial number 951018.
+#
+#:mhpquest.z5         Quest for the Magic Healing Plant, by Adam Crutchlow.
+#                     Release 2 / Serial number 960613
+#                     Ported by the author from AGT to Inform.
+#
+#:mimesis.z5          Sins Against Mimesis: An Interactive Theosophy,
+#                     by Adam Thornton.
+#                     Release 3 / Serial number 980110
+#
+#:mindelec.z5         The Mind Electric, An Interactive Vision by Jason Dyer.
+#                     release 3 / serial number 941008 (should be 951008)
+#
+#:minster.z5          Christminster, An Interactive Conspiracy by Gareth Rees.
+#                     release 4, serial number 961117
+#
+#:mst3k1.z5           Detective, An Interactive MiSTing (Mystery Science Theater
+#                     3000) of Matt Barringer's AGT game "Detective",
+#                     Silver Screen Edition, by Christopher E. Forman.
+#                     Release 101 / Serial number 960831
+#
+#:mst3k1s.z5          Detective, An Interactive MiSTing (Mystery Science Theater
+#                     3000) of Matt Barringer's AGT game "Detective",
+#                     by Christopher E. Forman, updated by Stuart Moore.
+#                     Release 5 / Serial number 981104
+#
+#:mst3k2s.z5          A Fable, an interactive MiSTing-up of Stan Heller's
+#                     GAGS game "A Fable". Original AGT MiST-ed version
+#                     by Graeme Cree, ported to Inform by Stuart Moore.
+#                     Release 3 / Serial number 990608
+#
+#:muse.z5             Muse: An Autumn Romance, by Christopher Huang.
+#                     Release 2 / Serial number 990515
+#
+#:10lndns.z5	     Ten Little Indians (a Mysterious Adventure).
+#
+#:akyrz.z5	     The Wizard of Akyrz (a Mysterious Adventure).
+#
+#:arrow1.z5	     The Arrow of Death, Part 1 (a Mysterious Adventure).
+#
+#:arrow2.z5	     The Arrow of Death, Part 2 (a Mysterious Adventure).
+#
+#:baton.z5	     The Golden Baton (a Mysterious Adventure).
+#
+#:circus.z5	     Circus (a Mysterious Adventure).
+#
+#:feasibil.z5         Feasibility Experiment (a Mysterious Adventure).
+#
+#:perseus.z5	     Perseus and Andromeda (a Mysterious Adventure).
+#
+#:pulsar7.z5	     Escape from Pulsar 7 (a Mysterious Adventure).
+#
+#:timemach.z5	     The Time Machine (a Mysterious Adventure).
+#
+#:waxworks.z5	     Waxworks (a Mysterious Adventure).
+#
+#:newday.z5           A New Day, by Jonathan Fry.
+#                     Release 3 / Serial number 560827
+#
+#:night.z5            Night at the Computer Center, An Interactive Nocturnal
+#                     Chase, by Bonni Mierzejewska.
+#                     Release 1 / Serial number 961118
+#
+#:ninepts.z5          Nine Points
+#                     A Demonstration of an Interactive Fiction Game,
+#                     by Robert Janelle and Brad O'Donnell.
+#                     Release 12 / Serial number 961127
+#
+#:odieus.z5           Odieus's Quest for the Magic Flingshot (beta release),
+#                     author unknown. Original game converted from LADS to AGT
+#                     and "embellished" by David Malmberg, then ported to Inform
+#                     by Teo Kwang Liak.
+#                     Release 1 / Serial number 941021
+#
+#:pad.z5              Total Paddling Mania, An Interactive Punishment Jag
+#                     by Dr. Aloysius Beltway, Ph.D.
+#                     Release 1 / Serial number 314159
+#
+#:paperchase.z5       Paper Chase, An Interactive Education by Chris Skapura.
+#                     This game was originally published as a TRS-80 BASIC
+#                     listing titled "Collegiate Capers" in '80 Micro' magazine,
+#                     August 1983.
+#
+#:paranoia.z5         Paranoia, a not-very-interactive future.
+#                     Originally from an article by Sam Shirley, implemented in
+#                     C on a Vax 11/780 by Tim Lister and converted to Inform
+#                     by Glenn Hutchings.
+#                     Release 1 / Serial number 981208
+#
+#:pentari.z5          Pentari, an Interactive Prequel to "The Mission",
+#                     by Howard Sherman.
+#                     Release 4 / Serial number 980811
+#
+#:permagic.z5         Perilous Magic, a really short interactive comic
+#                     tragedy, by David Fillmore.
+#                     Release 6 / Serial number 990716
+#
+#:phlegm.z5           Phlegm, an Interactive Interactive by Adjacent Drooler,
+#                     (aka Jason Dyer). Release 3 / Serial number 970804
+#
+#:photopia.z5         Photopia, by Adam Cadre.
+#                     Version 1.22 (24dec98) / Serial number 9089
+#
+#:piece_v3.z5         Piece of Mind, an Interactive Short Story by Giles Boutel.
+#                     Release 3 / Serial number 970816
+#
+#:princess.z5         The Ice Princess, an Interactive Fairy-Tale
+#                     by Ruediger Hanke. Release 8 / Serial number 960901
+#
+#:promoted.z5         Promoted! by Mike DeSanto, ported from REXX Adventure to
+#                     Inform by Johannes Steingraeber. Release 1.1 of port.
+#
+#:residnt2.z5         The Resident, by Mike DeSanto, ported from REXX Adventure
+#                     to Inform by Johannes Steingraeber.
+#                     'The Resident' is a cyberspace adventure; its main quest is
+#                     to escape from a virtual world.
+#
+#:reverb.z5           Reverberations, a Hectic Voltairian Adventure,
+#                     by Russell Glasser.
+#                     Release 1 / Serial number 990110
+#
+#:rogue.z5            zRogue, a port of the classic game Rogue. Ported
+#                     by Gevan Dutton, based on Tim Stoehr's Rogue 5.3
+#                     clone.
+#                     Release 2 / Serial number 980706
+#
+#:sherbet.z5          The Meteor, the Stone and a Long Glass of Sherbet,
+#                     by Angela M. Horns (aka Graham Nelson).
+#                     Release 2 / Serial number 961216
+#                     Winner of the 1996 IF competition.
+#
+#:softporn.z5         Softporn Adventure, by Chuck Benton.
+#                     Release 0 / 971018
+#                     An Inform port of Softporn Adventure, by Patrick Kellum.
+#                     Benton's original was the predecessor of Leisure Suit
+#                     Larry I.
+#
+#:spacest2.z5         Space Station, a science fiction story based on the
+#                     example transcript included with Infocom's Planetfall,
+#                     by David Ledgard.
+#                     Release 2 / Serial number 990301
+#
+#:spacez.z5           Space InvaderZ, a Z-Machine implementation of Space
+#                     Invaders, by L. Ross Raszewski.
+#                     Release 1 / Serial number 980710
+#
+#:spirit.z5           SpiritWrak, An Interactive Fantasy Adventure
+#                     by Daniel S. Yu.
+#                     Release 3 / Serial number 960606
+#
+#:stiffmst.z5         Stiffy Makane: Mystery Science Theater 3000
+#                     An Interactive MiSTing of Mark Ryan's AGT game
+#                     "The Incredible Erotic Adventures of Stiffy Makane".
+#                     Release 69 / Serial number 690609
+#
+#:sutwin.z5           The Space Under the Window, by Andrew Plotkin.
+#                     Release 2 / Serial number 970402
+#
+#:theatre.z5          Theatre, An Interactive Night of Horror; by Brendon Wyber.
+#                     Release 2 / Serial number 951203
+#
+#:tk1.z5              Time Killer #1: Claustrophobia, a time-killer by Sam Hulick.
+#                     Release 1 / Serial number 950925
+#
+#:troll.z5            Zork: A Troll's Eye View, an interactive tedium.
+#                     by Dylan O'Donnell
+#                     Release 3 / Serial number 980518
+#
+#:tryst205.z5         Tryst of Fate, An Interactive Horse-Opera by
+#                     Gregory M. Zagurski.
+#                     Release 205 / Serial number 970629
+#
+#:tube.z5             Tube Trouble, a mini-adventure by Richard Tucker.
+#                     Release 0 / Serial number 950901
+#
+#:under.z5            The Underoos that ate New York!, by Gerry Kevin Wilson
+#                     Release 1 / Serial number 970329
+#
+#:vindaloo.z5         Vindaloo, An Interactive Recipe by Adam G Crutchlow.
+#                     Release 1 / Serial number 960613
+#
+#:weather.z5          A Change in the Weather, An Interactive Short Story
+#                     by Andrew Plotkin. Release 6, serial number 960613.
+#                     Winner of the Inform category of the 1995 IF competition.
+#
+#:wedding.z5          The Wedding, an Interactive Family Headache
+#                     by Neil James Brown.
+#                     Release 4 / Serial number 970602.
+#                     This game came second in the Acorn User 1996 IF Competition
+#
+#:zazie.z5            Zazie, una lettura interattiva, an adventure game
+#                     in Italian by Luca Melchionna.
+#                     Release 1 / Serial number 990509
+#
+#:zball.z5            ZassBall, Another Abuse of the Z-Machine, an arcade
+#                     game written in Inform by L. Ross Raszewski
+#                     Release 1.0B / Serial number 980314
+#
+#:zdungeon.z5         ZDungeon, a port to Inform of Dungeon, the more or
+#                     less public domain version of the original MIT Zork.
+#                     Ported by Ethan Dicks, based on the original MDL
+#                     sources, dated 22 July 1981.
+#                     Release 12 / Serial number 990623
+#
+#:zugzwang.z5p        Zugzwang: The Interactive Life of a Chess Piece,
+#                     by Magnus Olsson.
+#                     Release 2 / Serial number 990710

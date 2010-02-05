@@ -1,0 +1,18 @@
+D/plugins////
+/.cvsignore/2.0/Sat Dec 27 12:25:03 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:52 2004//
+/cksum.c/2.0/Mon Sep 13 19:44:52 2004//
+/download.c/2.0/Mon Sep 13 19:44:52 2004//
+/mailer.h/2.0/Mon Sep 13 19:44:52 2004//
+/mailer.msg/2.0/Mon Apr 16 21:56:32 2001//
+/mailerplugins.h/2.0/Mon Sep 13 19:44:52 2004//
+/plugindef.c/2.0/Mon Sep 13 19:44:52 2004//
+/req.h/2.0/Mon Sep 13 19:44:52 2004//
+/request.c/2.0/Mon Sep 13 19:44:52 2004//
+/request.ddl/2.0/Mon Apr 16 14:57:52 2001//
+/request.h/2.0/Thu Dec 25 08:26:20 2003//
+/setup.c/2.0/Mon Sep 13 19:44:52 2004//
+/upload.c/2.0/Mon Sep 13 19:44:52 2004//
+/usr.c/2.0/Mon Sep 13 19:44:52 2004//
+/xlate.c/2.0/Mon Sep 13 19:44:52 2004//
+/mailer.c/2.1/Mon Sep 13 19:55:34 2004//

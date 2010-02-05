@@ -1,0 +1,4 @@
+.dep
+Makefile
+Makefile.in
+mbk_*h

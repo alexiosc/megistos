@@ -1,0 +1,39 @@
+include ../../CONFIG/Make.config
+
+BINARY		= clubs
+CONVERTER	= $(BINDIR)/msgcnv
+DEFINES	       += -DCLUBS
+LIBS 	       += -ltyphoon $(LINK_ZLIB)
+CFILES		= clubs.c write.c read.c receipt.c download.c funcs.c \
+			distlist.c operations.c substvars.c clubhdr.c \
+			clubfx.c clubwrite.c clubread.c clubscan.c qsc.c \
+			clublist.c clubop.c misc.c reply.c modify.c \
+			database.c dbnum.c dbfrom.c dbto.c dbsubj.c \
+			networking.c \
+			msgcnv.c convert.c cnvtree.c
+AFILES	       += ../files/cnvutils.o
+
+all:		$(TARGET) $(CONVERTER)
+
+$(TARGET):	$(OFILES) $(AFILES)
+		$(LD) $(OFILES) $(AFILES) -o $(BINARY) $(DEFINES) $(CFLAGS) $(LIBS)
+		$(STRIP) $(BINARY)
+		$(CHMOD) $(ACCESS) $(BINARY)
+		$(CHOWN) $(OWNER).$(GROUP) $(BINARY)
+		$(MV) $(BINARY) $(BINDIR)/
+		$(BINDIR)/$(BINARY) --install >.tmpinst
+		. .tmpinst
+		$(RM) .tmpinst
+
+$(CONVERTER):	$(TARGET)
+		$(LN) $(TARGET) $(CONVERTER)
+
+.depend\
+depend dep:				
+		for i in *.c;do echo -n "";$(CPP) -M $$i;done >> .tmpdepend
+		$(MV) .tmpdepend .depend
+
+clean:	
+		$(RM) $(OFILES)
+
+include .depend

@@ -1,0 +1,5 @@
+base referer
+rect $useracc_8h.html 91,225 216,244
+rect $config_8h.html 97,156 209,175
+rect $bbsinclude_8h.html 83,87 224,105
+rect $version_8h.html 248,87 365,105

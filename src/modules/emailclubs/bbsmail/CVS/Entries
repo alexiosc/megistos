@@ -1,0 +1,14 @@
+/.cvsignore/2.0/Mon Dec 29 07:47:12 2003//
+/Makefile.am/2.0/Mon Sep 13 19:44:50 2004//
+/bbsmail.c/2.0/Mon Sep 13 19:44:50 2004//
+/bbsmail.h/2.0/Mon Sep 13 19:44:50 2004//
+/bbsmail_run.c/2.0/Mon Sep 13 19:44:50 2004//
+/database.c/2.0/Mon Sep 13 19:44:50 2004//
+/dump-ihave.c/2.0/Mon Dec 29 07:51:15 2003//
+/msghdr.c/2.0/Mon Sep 13 19:44:51 2004//
+/msgnum.c/2.0/Mon Sep 13 19:44:51 2004//
+/netmail.c/2.0/Mon Sep 13 19:44:51 2004//
+/resolve.c/2.0/Mon Sep 13 19:44:51 2004//
+/test.c/2.0/Tue Dec 23 23:20:23 2003//
+/utils.c/2.0/Mon Sep 13 19:44:51 2004//
+D

@@ -1,0 +1,453 @@
+.TH "Accessing Prompt Blocks" 3 "18 May 2004" "Megistos API" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Accessing Prompt Blocks \- Prompt (or message) blocks are effectively configuration files.  
+
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBidx_t\fP"
+.br
+.ti -1c
+.RI "struct \fBpromptblock_t\fP"
+.br
+.RI "\fIA prompt block descriptor. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBMBK_MAGIC\fP   'MMBK'"
+.br
+.RI "\fIMBK magic. \fP"
+.ti -1c
+.RI "#define \fBmsg_getl\fP(num, lang)   msg_getl_bot(num,lang,0)"
+.br
+.RI "\fIAccess a prompt by index and language. \fP"
+.ti -1c
+.RI "#define \fBmsg_get\fP(num)   msg_getl_bot(num,(\fBmsg_cur\fP->language),0)"
+.br
+.RI "\fIAccess a prompt by index. \fP"
+.ti -1c
+.RI "#define \fBmsg_getunit\fP(n, val)   msg_getunitl((n),(val),\fBmsg_cur\fP->language)"
+.br
+.RI "\fIGet the name of a unit in the current language. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBmsg_init\fP ()"
+.br
+.RI "\fIInitialise prompt subsystem. \fP"
+.ti -1c
+.RI "\fBpromptblock_t\fP * \fBmsg_open\fP (char *name)"
+.br
+.RI "\fIOpen a prompt block. \fP"
+.ti -1c
+.RI "void \fBmsg_set\fP (\fBpromptblock_t\fP *blk)"
+.br
+.RI "\fISet the current prompt block. \fP"
+.ti -1c
+.RI "void \fBmsg_reset\fP ()"
+.br
+.RI "\fIReturn to the last prompt block used. \fP"
+.ti -1c
+.RI "char * \fBmsg_getl_bot\fP (int num, int language, int checkbot)"
+.br
+.RI "\fILow level function to access a prompt by ID and language. \fP"
+.ti -1c
+.RI "char * \fBmsg_getunitl\fP (int num, int value, int language)"
+.br
+.RI "\fIGet the name of a unit. \fP"
+.ti -1c
+.RI "void \fBmsg_close\fP (\fBpromptblock_t\fP *blk)"
+.br
+.RI "\fIClose a prompt block. \fP"
+.ti -1c
+.RI "long \fBmsg_long\fP (int num, long floor, long ceiling)"
+.br
+.RI "\fIParse a \fClong int\fP in a prompt. \fP"
+.ti -1c
+.RI "unsigned \fBmsg_hex\fP (int num, unsigned floor, unsigned ceiling)"
+.br
+.RI "\fIParse a base-16 \fCunsigned int\fP in a prompt. \fP"
+.ti -1c
+.RI "int \fBmsg_int\fP (int num, int floor, int ceiling)"
+.br
+.RI "\fIParse an \fCint\fP in a prompt. \fP"
+.ti -1c
+.RI "int \fBmsg_bool\fP (int num)"
+.br
+.RI "\fIParse a yes/no configuration prompt. \fP"
+.ti -1c
+.RI "char \fBmsg_char\fP (int num)"
+.br
+.RI "\fIParse a single-character configuration prompt. \fP"
+.ti -1c
+.RI "char * \fBmsg_string\fP (int msgnum)"
+.br
+.RI "\fICopy a configuration prompt to a string. \fP"
+.ti -1c
+.RI "int \fBmsg_token\fP (int msgnum, char *toklst,...)"
+.br
+.RI "\fIExtract a token from a configuration prompt. \fP"
+.ti -1c
+.RI "void \fBmsg_setlanguage\fP (int l)"
+.br
+.RI "\fISet the active language. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "char * \fBmsg_buffer\fP"
+.br
+.RI "\fIUsed internally to format prompts. \fP"
+.ti -1c
+.RI "\fBpromptblock_t\fP * \fBmsg_cur\fP"
+.br
+.RI "\fIThe currently active block. \fP"
+.ti -1c
+.RI "\fBpromptblock_t\fP * \fBmsg_last\fP"
+.br
+.RI "\fIThe `other' block. \fP"
+.ti -1c
+.RI "\fBpromptblock_t\fP * \fBmsg_sys\fP"
+.br
+.RI "\fIThe system block. \fP"
+.ti -1c
+.RI "char \fBmsg_langnames\fP [NUMLANGUAGES][64]"
+.br
+.RI "\fINames of all the languages supported. \fP"
+.ti -1c
+.RI "int \fBmsg_numlangs\fP"
+.br
+.RI "\fIThe number of defined languages. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Prompt (or message) blocks are effectively configuration files. In their source form, they contain hierarchies of options or messages that are output to the user. In their compiled form, they are reduced to key-value pairs. This header file allows you to read these key-value pairs and act on them.
+.PP
+Keys aren't really keys, they're integer indices into the file. However, the prompt block indexer is nice enough to make a header file with definitions for each of those numeric indices. The symbolic names it chooses are the same as the symbolic names of the options themselves.
+.PP
+The low-level, compiled prompt block format is bound to change soon, so I won't go into much detail just yet.
+.PP
+By the way, the name `prompt block' originates from the Major BBS. Even on Major, it was somewhat inaccurate, as prompt blocks didn't just contain prompts. 
+.SH "Define Documentation"
+.PP 
+.SS "#define MBK_MAGIC   'MMBK'"
+.PP
+MBK magic. Definition at line 110 of file prompts.h.
+.SS "#define msg_get(num)   msg_getl_bot(num,(\fBmsg_cur\fP->language),0)"
+.PP
+Access a prompt by index. This is a macro that calls \fBmsg_getl()\fP that retrieves a prompt by index, using the currently active language.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A null terminated string pointer to the prompt. 
+.RE
+.PP
+Definition at line 255 of file prompts.h.
+.SS "#define msg_getl(num, lang)   msg_getl_bot(num,lang,0)"
+.PP
+Access a prompt by index and language. This is the generic prompt access function. It's used by most other prompt access functions.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The symbolic ID of the prompt.
+.br
+\fIlanguage\fP The language you want to access.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A null terminated string pointer to the prompt. 
+.RE
+.PP
+Definition at line 227 of file prompts.h.
+.SS "#define msg_getunit(n, val)   msg_getunitl((n),(val),\fBmsg_cur\fP->language)"
+.PP
+Get the name of a unit in the current language. This is a macro that calls \fBmsg_getunitl()\fP. It retrieves a unit name, but uses the currently active language to save you a lot of typing.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.br
+\fIval\fP The value mentioned above. If \fCval\fP is anything but one, string \fCnum+1\fP will be retrieved instead.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A null terminated string pointer to the prompt. 
+.RE
+.PP
+Definition at line 296 of file prompts.h.
+.SH "Function Documentation"
+.PP 
+.SS "int msg_bool (int num)"
+.PP
+Parse a yes/no configuration prompt. Retrieves the requested prompt and parses a yes/no boolean value contained therein. This function is used to extract configuration options from prompts.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIid\fP The prompt index as a symbolic name (constant).
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value: non-zero if `yes', zero if `no'. 
+.RE
+.PP
+
+.SS "char msg_char (int num)"
+.PP
+Parse a single-character configuration prompt. Retrieves the requested prompt and parses a single character value contained therein. This function is used to extract configuration options from prompts.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value: a single character. 
+.RE
+.PP
+
+.SS "void msg_close (\fBpromptblock_t\fP * blk)"
+.PP
+Close a prompt block. Closes the specified prompt block, deallocates its descriptor. Any subsequent calls to prompt retrieval function will have unpredictable results, unless you open a new block, set another one as the current, or use \fC\fBmsg_last()\fP\fP.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIblk\fP The prompt block descriptor to close. 
+.RE
+.PP
+
+.SS "char* msg_getl_bot (int num, int language, int checkbot)"
+.PP
+Low level function to access a prompt by ID and language. This is the low level function to read a prompt by its ID \fIand\fP index.
+.PP
+\fBDeprecated\fP
+.RS 4
+Don't use this one, use the macro \fBmsg_getl\fP instead. It'll save you some effort. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The numeric index of the prompt.
+.br
+\fIlanguage\fP The language you want to access.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A null terminated string pointer to the prompt. 
+.RE
+.PP
+
+.SS "char* msg_getunitl (int num, int value, int language)"
+.PP
+Get the name of a unit. This function is similar to \fBmsg_getl()\fP, with a catch: it retrieves either of two messages, based on the value of a variable. The function is used to format a unit's singular or plural form based on a value. For instance, you wouldn't want to say `1 Kbytes', and `1 Kbyte(s)' is an ugly way to avoid the problem. This function solves the problem.
+.PP
+The way to do it is to define two little prompt blocks. The first holds the word `Kbyte', the second the word `Kbytes'. Your module uses this function to access the needed form of the unit and includes it in a message given to the user. Needless to say, this function can be used for anything that needs dual, value-selected prompting. User sexes are just one example.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.br
+\fIvalue\fP The value mentioned above. If \fCvalue\fP is anything but one, \fCnum\fP will be increased by one.
+.br
+\fIlanguage\fP The language of the retrieved unit name.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A null terminated string pointer to the prompt. 
+.RE
+.PP
+
+.SS "unsigned msg_hex (int num, unsigned floor, unsigned ceiling)"
+.PP
+Parse a base-16 \fCunsigned int\fP in a prompt. Retrieves the requested prompt and parses a hexadecimal unsigned integer contained therein. This function is used to extract configuration options from prompts. The number is checked to ensure it's within a user-defined range of values. If not, a fatal error is issued.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt ID as a symbolic name (constant).
+.br
+\fIfloor\fP The minimum acceptable value.
+.br
+\fIceiling\fP The maximum acceptable value.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value. 
+.RE
+.PP
+
+.SS "void msg_init ()"
+.PP
+Initialise prompt subsystem. Load language descriptions, number of available languages, et cetera. You should not call this directly, use \fBmod_init()\fP instead. 
+.SS "int msg_int (int num, int floor, int ceiling)"
+.PP
+Parse an \fCint\fP in a prompt. Retrieves the requested prompt and parses an integer contained therein. This function is used to extract configuration options from prompts. The number is checked to ensure it's within a user-defined range of values. If not, a fatal error is issued.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.br
+\fIfloor\fP The minimum acceptable value.
+.br
+\fIceiling\fP The maximum acceptable value.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value. 
+.RE
+.PP
+
+.SS "long msg_long (int num, long floor, long ceiling)"
+.PP
+Parse a \fClong int\fP in a prompt. Retrieves the requested prompt and parses a long integer contained therein. This function is used to extract configuration options from prompts. The number is checked to ensure it's within a user-defined range of values. If not, a fatal error is issued.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt ID.
+.br
+\fIfloor\fP The minimum acceptable value.
+.br
+\fIceiling\fP The maximum acceptable value.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value. 
+.RE
+.PP
+
+.SS "\fBpromptblock_t\fP* msg_open (char * name)"
+.PP
+Open a prompt block. Opens a prompt block file, validates its magic number, reads its index and creates a descriptor for it. The descriptor is automatically allocated by the function, just like \fCfopen()\fP allocates a new \fCFILE\fP.
+.PP
+The current block (\fBmsg_cur\fP) becomes the last block (\fBmsg_last\fP). The newly opened block becomes the current block. If the function is called from a user-servicing module, the user's language is also selected for subsequent prompting.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP The \fIbasename\fP of the prompt block file, without its \fC\fP.mbk suffix. By convention, prompt blocks are named the same as the directory of their modules (and, in most cases, the main module source file). This isn't binding, though.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+A pointer to a freshly allocated prompt block descriptor. This function always returns on success. Failure causes the process to halt with a fatal error. 
+.RE
+.PP
+
+.SS "void msg_reset ()"
+.PP
+Return to the last prompt block used. This function simply swaps the current and last prompt block descriptors (\fBmsg_cur\fP and \fBmsg_last\fP). This is a quick way to revert to the previous message. System functions that access prompts in the system block use this function to revert immediately to the one the user assumes is active, without needing to have access to its descriptor. 
+.SS "void msg_set (\fBpromptblock_t\fP * blk)"
+.PP
+Set the current prompt block. Sets the current prompt block. All subsequent accesses will refer to this block, which must be a descriptor returned by \fBmsg_open()\fP. As a side effect, the current block (\fBmsg_cur\fP) becomes the last block (\fBmsg_last\fP). The specified block becomes the current block.
+.PP
+This function is used to switch between prompt blocks. Usually, each module has its own, single block. However, there are times when you need to access briefly another block and this is where this function comes in. The system block, \fBmsg_sys\fP (automatically opened) is one such example.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIblk\fP A prompt block descriptor returned by a previous call to \fBmsg_open()\fP.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBmsg_open()\fP, \fBmsg_reset()\fP. 
+.RE
+.PP
+
+.SS "void msg_setlanguage (int l)"
+.PP
+Set the active language. Specifies the language of all subsequently retrieved prompts. Only the current language in the current and system blocks is changed (\fBmsg_cur\fP, \fBmsg_sys\fP). The last block (\fBmsg_last\fP) is not touched at all.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIl\fP The new language to set. 
+.RE
+.PP
+
+.SS "char* msg_string (int msgnum)"
+.PP
+Copy a configuration prompt to a string. Retrieves the requested prompt, allocates a new string to hold its value, and returns the newly allocated string. This function is used to extract configuration options from prompts.
+.PP
+There is no need for you to allocate space for this string or to copy it over, this is done for you. You \fIwill\fP need to free it once you're done with it, though, to avoid memory leaks.
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The parsed value: a single character. 
+.RE
+.PP
+
+.SS "int msg_token (int msgnum, char * toklst,  ...)"
+.PP
+Extract a token from a configuration prompt. Retrieves and parses the requested prompt, trying to match it against a user-supplied list of tokens. This function is used to extract multiple-choice configuration options from prompt.
+.PP
+The list of tokens is represented by one or more string arguments to the function. As this is perhaps the most complex of the parsing functions, here is an example that includes error recovery:
+.PP
+.PP
+.nf
+
+int value = tokopt (COLOUR, "DARKBLUE", "DARKGREEN",
+                            "DARKCYAN", "DARKRED",
+                            "DARKMAGENTA", "BROWN", "GREY",
+                            "DARKGREY", "BLUE", "GREEN",
+		            "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE", NULL);
+
+if (value < 1) error_fatal ("Option COLOUR has unacceptable value.");
+.PP
+.PP
+\fBParameters:\fP
+.RS 4
+\fInum\fP The prompt index. You will want to use the symbolic name here.
+.br
+\fItoklst\fP An arbitrary number of one or more string pointers. The last one \fImust be\fP \fCNULL\fP.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Zero if the token didn't match any in the file. A value \fCi\fP greater than zero denoting a match against the \fCi\fP-th token supplied as an argument. 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "char* \fBmsg_buffer\fP"
+.PP
+Used internally to format prompts. Definition at line 138 of file prompts.h.
+.SS "\fBpromptblock_t\fP* \fBmsg_cur\fP"
+.PP
+The currently active block. Definition at line 139 of file prompts.h.
+.SS "char \fBmsg_langnames\fP[NUMLANGUAGES][64]"
+.PP
+Names of all the languages supported. Definition at line 146 of file prompts.h.
+.SS "\fBpromptblock_t\fP* \fBmsg_last\fP"
+.PP
+The `other' block. Definition at line 140 of file prompts.h.
+.SS "int \fBmsg_numlangs\fP"
+.PP
+The number of defined languages. Definition at line 151 of file prompts.h.
+.SS "\fBpromptblock_t\fP* \fBmsg_sys\fP"
+.PP
+The system block. Definition at line 141 of file prompts.h.
