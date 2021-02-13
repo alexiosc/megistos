@@ -7,4 +7,3 @@ Here's a list of tools used by many other modules.
 * **lined** is a line editor for dumb terminals, in the spirit of `ed` or `EDLIN.COM`, but easier to use.
 * **updown** is a front-end to the `protocols` framework. Given one or more files, it selects appropriate file transfer protocols for the files (and their number) and the user, and displays a menu to allow transfer of the file.
 * **vised** is a full-screen (visual) text file editor in the spirit of µEmacs or pico. It can be used to compose messages, etc. and gracefully falls back to `lined` in case of trouble. (or if the user prefers it)
-* **utils** Small, mostly command-line utilities.
