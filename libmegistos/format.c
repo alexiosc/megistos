@@ -20,7 +20,7 @@
  **            C: Start formatting text. Format mode will be centering.     **
  **                                                                         **
  **            W: Start formatting text. Format mode will be wrap-around.   **
- **               This mode allows you to format rugged-edge text so that   **
+ **               This mode allows you to format ragged-edge text so that   **
  **               words are not split in two lines.                         **
  **                                                                         **
  **            J: Start formatting text. Format mode will be justify. This  **
