@@ -1,0 +1,12 @@
+# pyhcl
+toml
+beautifulsoup4>4.0.0
+Markdown
+pexpect
+pytest>4.0.0
+python-dateutil
+pytz
+requests
+requests-unixsocket
+setuptools
+jinja2
