@@ -29,7 +29,7 @@ amver=-1.6
 acver="" #2.50
 
 echo Copying ltdl.
-libtoolize --copy --ltdl
+libtoolize --copy --ltdl --force
 cat <<EOF
 
 Warnings about existing (or nonexistent) files above are acceptable.
