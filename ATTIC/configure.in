@@ -113,7 +113,7 @@ AC_SUBST(LTDLINCL)
 AC_SUBST(LIBLTDL)
 AC_LIBLTDL_INSTALLABLE
 AC_PROG_LIBTOOL
-AC_CONFIG_SUBDIRS(libltdl)
+AC_CONFIG_SUBDIRS(libltdl externals/typhoon)
 AM_CFLAGS="$CFLAGS $LIBLINCL"
 LDFLAGS="$LDFLAGS $LIBLTDL"
 
@@ -143,14 +143,14 @@ AC_SUBST(CURSES_LIBS)
 LIBS="$LIBS_SAVE"
 
 dnl Check for typhoon
-LIBS_SAVE="$LIBS"
-LIBS=""
-AC_CHECK_LIB(typhoon,d_fillnew,,AC_MSG_ERROR([*** typhoon is required to build Megistos.]))
-TYPHOON_LIBS="$LIBS"
-AC_SUBST(TYPHOON_LIBS)
-LIBS="$LIBS_SAVE"
-AC_PATH_PROG([DDLP],[ddlp])
-AC_CHECK_HEADERS(libtyphoon/typhoon.h,,AC_MSG_ERROR([*** libtyphoon/typhoon.h is not available. Is the development package installed?]))
+dnl LIBS_SAVE="$LIBS"
+dnl LIBS=""
+dnl AC_CHECK_LIB(typhoon,d_fillnew,,AC_MSG_ERROR([*** typhoon is required to build Megistos.]))
+dnl TYPHOON_LIBS="$LIBS"
+dnl AC_SUBST(TYPHOON_LIBS)
+dnl LIBS="$LIBS_SAVE"
+dnl AC_PATH_PROG([DDLP],[ddlp])
+dnl AC_CHECK_HEADERS(externals/typhoon/include/typhoon.h,,AC_MSG_ERROR([*** externals/typhoon/include/typhoon.h is not available. Is the development package installed?]))
 
 # Checks for header files.
 AC_HEADER_STDC

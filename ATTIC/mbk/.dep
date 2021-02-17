@@ -1,0 +1,117 @@
+-e mbk_stats.h $(MBKDIR)/stats.msg: ../src/modules/stats/stats.msg
+	$(MSGIDX) $<
+
+-e mbk_offline.news.h $(MBKDIR)/offline.news.msg: ../src/modules/news/offline.news/offline.news.msg
+	$(MSGIDX) $<
+
+-e mbk_news.h $(MBKDIR)/news.msg: ../src/modules/news/news.msg
+	$(MSGIDX) $<
+
+-e mbk_offline.mail.h $(MBKDIR)/offline.mail.msg: ../src/modules/emailclubs/offline.mail/offline.mail.msg
+	$(MSGIDX) $<
+
+-e mbk_emailclubs.h $(MBKDIR)/emailclubs.msg: ../src/modules/emailclubs/emailclubs.msg
+	$(MSGIDX) $<
+
+-e mbk_classed.h $(MBKDIR)/classed.msg: ../src/modules/remsys/classed/classed.msg
+	$(MSGIDX) $<
+
+-e mbk_eventman.h $(MBKDIR)/eventman.msg: ../src/modules/remsys/eventman/eventman.msg
+	$(MSGIDX) $<
+
+-e mbk_remsys.h $(MBKDIR)/remsys.msg: ../src/modules/remsys/remsys.msg
+	$(MSGIDX) $<
+
+-e mbk_graffiti.h $(MBKDIR)/graffiti.msg: ../src/modules/graffiti/graffiti.msg
+	$(MSGIDX) $<
+
+-e mbk_offline.graffiti.h $(MBKDIR)/offline.graffiti.msg: ../src/modules/graffiti/offline.graffiti/offline.graffiti.msg
+	$(MSGIDX) $<
+
+-e mbk_offline.bulletins.h $(MBKDIR)/offline.bulletins.msg: ../src/modules/bulletins/offline.bulletins/offline.bulletins.msg
+	$(MSGIDX) $<
+
+-e mbk_bulletins.h $(MBKDIR)/bulletins.msg: ../src/modules/bulletins/bulletins.msg
+	$(MSGIDX) $<
+
+-e mbk_notify.h $(MBKDIR)/notify.msg: ../src/modules/notify/notify.msg
+	$(MSGIDX) $<
+
+-e mbk_gallups.h $(MBKDIR)/gallups.msg: ../src/modules/gallups-old/gallups.msg
+	$(MSGIDX) $<
+
+-e mbk_files.h $(MBKDIR)/files.msg: ../src/modules/files/files.msg
+	$(MSGIDX) $<
+
+-e mbk_registry.h $(MBKDIR)/registry.msg: ../src/modules/registry/registry.msg
+	$(MSGIDX) $<
+
+-e mbk_mailer.h $(MBKDIR)/mailer.msg: ../src/modules/mailer/mailer.msg
+	$(MSGIDX) $<
+
+-e mbk_adventure.h $(MBKDIR)/adventure.msg: ../src/modules/adventure/adventure.msg
+	$(MSGIDX) $<
+
+-e mbk_gstat.h $(MBKDIR)/gstat.msg: ../src/modules/gallups/gstat0/gstat.msg
+	$(MSGIDX) $<
+
+-e mbk_gstat.h $(MBKDIR)/gstat.msg: ../src/modules/gallups/gstat/gstat.msg
+	$(MSGIDX) $<
+
+-e mbk_gallups.h $(MBKDIR)/gallups.msg: ../src/modules/gallups/gallups.msg
+	$(MSGIDX) $<
+
+-e mbk_account.h $(MBKDIR)/account.msg: ../src/modules/account/account.msg
+	$(MSGIDX) $<
+
+-e mbk_telecon.bg.h $(MBKDIR)/telecon.bg.msg: ../src/modules/telecon/plugins/telecon.bg/telecon.bg.msg
+	$(MSGIDX) $<
+
+-e mbk_bjack.h $(MBKDIR)/bjack.msg: ../src/modules/telecon/plugins/bjack/bjack.msg
+	$(MSGIDX) $<
+
+-e mbk_telecon.h $(MBKDIR)/telecon.msg: ../src/modules/telecon/telecon.msg
+	$(MSGIDX) $<
+
+-e mbk_bbsdialog.h $(MBKDIR)/bbsdialog.msg: ../src/tools/bbsdialog/bbsdialog.msg
+	$(MSGIDX) $<
+
+-e mbk_bbsdialog.sample.h $(MBKDIR)/bbsdialog.sample.msg: ../src/tools/bbsdialog/bbsdialog.sample.msg
+	$(MSGIDX) $<
+
+-e mbk_vised.h $(MBKDIR)/vised.msg: ../src/tools/vised/vised.msg
+	$(MSGIDX) $<
+
+-e mbk_lined.h $(MBKDIR)/lined.msg: ../src/tools/lined/lined.msg
+	$(MSGIDX) $<
+
+-e mbk_archivers.h $(MBKDIR)/archivers.msg: ../src/tools/updown/archivers.msg
+	$(MSGIDX) $<
+
+-e mbk_updown.h $(MBKDIR)/updown.msg: ../src/tools/updown/updown.msg
+	$(MSGIDX) $<
+
+-e mbk_login.h $(MBKDIR)/login.msg: ../src/system/bbslogin/login.msg
+	$(MSGIDX) $<
+
+-e mbk_menuman.h $(MBKDIR)/menuman.msg: ../src/system/menuman/menuman.msg
+	$(MSGIDX) $<
+
+-e mbk_metabbs-client.h $(MBKDIR)/metabbs-client.msg: ../src/system/metabbs/client/metabbs-client.msg
+	$(MSGIDX) $<
+
+-e mbk_metabbs.h $(MBKDIR)/metabbs.msg: ../src/system/metabbs/metabbs.msg
+	$(MSGIDX) $<
+
+-e mbk_metabbs.h $(MBKDIR)/metabbs.msg: ../src/system/daemons/rpc.metabbs/metabbs.msg
+	$(MSGIDX) $<
+
+-e mbk_sysvar.h $(MBKDIR)/sysvar.msg: ../libmegistos/sysvar.msg
+	$(MSGIDX) $<
+
+-e mbk_signup.h $(MBKDIR)/signup.msg: ../libmegistos/signup.msg
+	$(MSGIDX) $<
+
+-e mbk_metabbs.h $(MBKDIR)/metabbs.msg: ../libmegistos/metabbs.msg
+	$(MSGIDX) $<
+

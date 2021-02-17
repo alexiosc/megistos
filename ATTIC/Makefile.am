@@ -38,9 +38,10 @@ else !HAVE_DOXYGEN
 DOCDIR = 
 endif !HAVE_DOXYGEN
 
-SUBDIRS = po intl m4 $(DOCDIR) libltdl libmegistos mbk src
+#SUBDIRS = po intl m4 $(DOCDIR) libltdl libmegistos mbk src
+SUBDIRS = po intl $(DOCDIR) libltdl libmegistos mbk src
 
-ACLOCAL_AMFLAGS = -I m4
+# ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = config.rpath autogen.sh
 

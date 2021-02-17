@@ -20,6 +20,6 @@ TYPHOON_IF_NEEDED = @TYPHOON_LIBS@
 DDLP = @DDLP@ -f
 
 %.h %.dbd:	%.ddl
-		$(DDLP) $(patsubst .ddl,,$<)
+		$(DDLP) $(patsubst .ddl,,$$<)
 
 # End of file.
