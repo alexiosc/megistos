@@ -1,0 +1,18 @@
+# -*- conf -*-
+
+/libltdl/*
+
+# Autotools crud
+/config.sub
+/configlog
+/config.log
+/m4/*
+/libtool
+/install-sh
+/ltmain.sh
+
+# Global ignores
+CVS
+.cvsignore
+*~
+#*#
