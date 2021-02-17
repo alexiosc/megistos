@@ -3,13 +3,13 @@
 /libltdl/*
 
 # Autotools crud
-/config.sub
-/configlog
+/config.guess
 /config.log
-/m4/*
-/libtool
+/config.sub
 /install-sh
+/libtool
 /ltmain.sh
+/m4/*
 
 # Global ignores
 CVS
