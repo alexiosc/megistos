@@ -13,6 +13,7 @@
 /compile
 /depcomp
 /missing
+/build
 
 # Global ignores
 CVS
