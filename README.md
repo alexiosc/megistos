@@ -124,3 +124,93 @@ Showing off the formatter, part two: the GPL at 132 columns. Still looking good!
 An elaborate April Fool prank on AcroBase (in Greek, this time). You Are Not Expected To Understand This.
 
 ![Acrobase April Fool's Prank](doc/screenshots/ss2.png)
+
+### Some Newer Screenshots from 2020
+
+The AcroBase main menu. The `/#` global command shows users currently online and their location. (similar to the Unix `who(1)` or `w(1)` commands)
+
+![Acrobase with a single logged-in user](doc/screenshots/Screenshot_20210220_174035.png)
+
+The Account module main menu, for ordinary users.
+
+![Account module main menu](doc/screenshots/Screenshot_20210220_174123.png)
+
+General information about the account module.
+
+![Account module, help](doc/screenshots/Screenshot_20210220_174138.png)
+
+The visual dialog (form) framework, showing account preferences.
+
+![Account module, preferences in full-screen form](doc/screenshots/Screenshot_20210220_174306.png)
+
+Help from the visual dialog (form) framework. The key bindings are Emacs-like, of course.
+
+![Account module, full-screen form help](doc/screenshots/Screenshot_20210220_174326.png)
+
+Pressing `Ctrl-X` drops you from the full-screen form to a line-based (still menu-driven) one. The handling is automatic; the module just defines the fields and their semantics just like in an HTML form. (but currently using Megistos-specific terminal directives).
+
+![Account module, line-based form](doc/screenshots/Screenshot_20210220_174336.png)
+
+User statistics from the Account module.
+
+![Account module, user statistics](doc/screenshots/Screenshot_20210220_174423.png)
+
+The plain user menu of the File Library module. This doesn't have English strings yet, but there's still some English.
+
+![File library, main menu](doc/screenshots/Screenshot_20210220_174445.png)
+
+The library hierarchy of the Files module. It's basically like an annotated tree of FTP subdirectories.
+
+![File library, library hierarchy](doc/screenshots/Screenshot_20210220_174515.png)
+
+The Graffiti Wall.
+
+![Graffiti Wall](doc/screenshots/Screenshot_20210220_174534.png)
+
+Reading the Graffiti Wall.
+
+![Reading the Graffiti Wall](doc/screenshots/Screenshot_20210220_174550.png)
+
+The `/rc` global command shows recent users logging in and out. It's similar to the Unix `last(1)` command.
+
+![Reading the Graffiti Wall](doc/screenshots/Screenshot_20210220_174646.png)
+
+The Electronic Mail module main menu. This is for local messages, but can also handle Internet email. The set-up for this is a lot more complicated for incoming email.
+
+![Electronic Mail main menu](doc/screenshots/Screenshot_20210220_174718.png)
+
+Electronic Mail help.
+
+![Electronic Mail, help](doc/screenshots/Screenshot_20210220_174727.png)
+
+Reading electronic mail (no mail, sorry).
+
+![Reading Electronic Mail](doc/screenshots/Screenshot_20210220_174803.png)
+
+The Registry of Users module, where user's public profiles are stored and displayed.
+
+![User Registry](doc/screenshots/Screenshot_20210220_174839.png)
+
+Registry module information.
+
+![User Registry info](doc/screenshots/Screenshot_20210220_174856.png)
+
+Listing all users starting with ‘a’. This also demonstrates *command concatenation*, normally you select `D` and then get prompted for the letter to start listing at (here, `A`). If you already know the menu structure at that point, you can just enter `DA` and the system will do the write thing and spare you the extra prompt.
+
+![User Registry info](doc/screenshots/Screenshot_20210220_174913.png)
+
+Displaying a user's profile. You can do this from the Registry module or anywhere on the BBS using the `/R <username>` global command.
+
+![/r global command](doc/screenshots/Screenshot_20210220_174942.png)
+
+The banner from the `/Photo` club (discussion group, SIG, forum, however you prefer). Note ‘`Curret`’ typo! 😉
+
+![Banner from the /Photo club on Acrobase](doc/screenshots/Screenshot_20210220_175105.png)
+
+Help from the Clubs module.
+
+![Clubs module, help](doc/screenshots/Screenshot_20210220_175116.png)
+
+Club `/Photo` information showing credit charge system.
+
+![Clubs module, help](doc/screenshots/Screenshot_20210220_192745.png)
