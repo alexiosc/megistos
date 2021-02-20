@@ -6123,7 +6123,7 @@ Enter your choice: [0m} T Club main menu, non-privileged version
 
 
 SHCLMNU1 {[0;1m
-!WCurret club: [32m@CLUB@: @CLUBDESC@[37m.!)
+!WCurrent club: [32m@CLUB@: @CLUBDESC@[37m.!)
 !WEnter your choice
 ([33mH[37m,[33mI[37m,[33mL[37m,[33mR[37m,[33mW[37m,[33mD[37m,[33mT[37m,[33mB[37m,[33mS[37m,[33mX[37m
 to exit, or [33m?[37m for the menu): !)[0m} T Club short menu, non-privileged version
