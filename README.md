@@ -101,33 +101,7 @@ People seem to judge a lot of books by their covers these days, so we made sure 
 
 Remember, screenshots of Megistos aren't really indicative of much, as the system is very customisable (every BBS needs its own personality).
 
-Let's start with the eye candy. This is The Quarter, Megistos' own ANSI/ASCII art editor (in beta).
-
-![The Quarter](doc/screenshots/ss4.png)
-
-The AcroBase login screen on a terminal with the IBM PC extended 'ASCII' (sic).
-
-![Acrobase Login Screen using IBM extended ‘ASCII’](doc/screenshots/ss1.png)
-
-The exact same screen on a plain US-ASCII terminal. The system translates between encodings automatically.
-
-![Acrobase Login Screen, autotranslated US ASCII](doc/screenshots/ss1a.png)
-
-Showing off the formatter: the GPL rendered on a standard 80x25 terminal.
-
-![Formatter, 80 columns](doc/screenshots/ss3.png)
-
-Showing off the formatter, part two: the GPL at 132 columns. Still looking good!
-
-![Formatter, 132 columns](doc/screenshots/ss3a.png)
-
-An elaborate April Fool prank on AcroBase (in Greek, this time). You Are Not Expected To Understand This.
-
-![Acrobase April Fool's Prank](doc/screenshots/ss2.png)
-
-### Some Newer Screenshots from 2020
-
-The AcroBase main menu. The `/#` global command shows users currently online and their location. (similar to the Unix `who(1)` or `w(1)` commands)
+The AcroBase main menu, in Greek. The `/#` global command shows users currently online and their location. (similar to the Unix `who(1)` or `w(1)` commands) The headings are *LINE*, *USER*, *BAUD*, and *AREA*.
 
 ![Acrobase with a single logged-in user](doc/screenshots/Screenshot_20210220_174035.png)
 
@@ -214,3 +188,29 @@ Help from the Clubs module.
 Club `/Photo` information showing credit charge system.
 
 ![Clubs module, help](doc/screenshots/Screenshot_20210220_192745.png)
+
+### Some older Screenshots
+
+Let's start with the eye candy. This is The Quarter, Megistos' own ANSI/ASCII art editor (in beta).
+
+![The Quarter](doc/screenshots/ss4.png)
+
+The AcroBase login screen on a terminal with the IBM PC extended 'ASCII' (sic).
+
+![Acrobase Login Screen using IBM extended ‘ASCII’](doc/screenshots/ss1.png)
+
+The exact same screen on a plain US-ASCII terminal. The system translates between encodings automatically.
+
+![Acrobase Login Screen, autotranslated US ASCII](doc/screenshots/ss1a.png)
+
+Showing off the formatter: the GPL rendered on a standard 80x25 terminal.
+
+![Formatter, 80 columns](doc/screenshots/ss3.png)
+
+Showing off the formatter, part two: the GPL at 132 columns. Still looking good!
+
+![Formatter, 132 columns](doc/screenshots/ss3a.png)
+
+An elaborate April Fool prank on AcroBase (in Greek, this time). You Are Not Expected To Understand This.
+
+![Acrobase April Fool's Prank](doc/screenshots/ss2.png)
