@@ -613,8 +613,6 @@ class MsgIdx(object):
         # Subsequent languages override the strings, but their index is the
         # same size.
 
-        
-
 
 if __name__ == '__main__':
     MsgIdx().run()

@@ -128,14 +128,14 @@ typedef struct {
 */
 
 typedef struct {
-	char  fname[64];	        /**< Filename of the prompt block  */
-	FILE  *handle;		        /**< Open prompt block file */
-	long  indexsize;		/**< Size of prompt index */
-	int   language;		        /**< Currently active language */
-	int   langoffs[NUMLANGUAGES];	/**< Indices to where languages start */
-	idx_t *index;			/**< Prompt index structure */
-	long  size;                     /**< Size of data block. */
-	char  *data;		        /**< Prompt data */
+	char      fname[64];	/**< Filename of the prompt block  */
+	FILE     *handle;	/**< Open prompt block file */
+	uint32_t  indexsize;	/**< Size of prompt index */
+	uint32_t  language;	/**< Currently active language */
+	uint32_t  langoffs[NUMLANGUAGES]; /**< Indices to where languages start */
+	idx_t    *index;	/**< Prompt index structure */
+	uint32_t  size;		/**< Size of data block. */
+	char     *data;		/**< Prompt data */
 } promptblock_t;
 
 

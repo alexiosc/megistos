@@ -11,9 +11,11 @@
 # Initial revision.
 #
 
-include $(top_srcdir)/templates/gcs
+ACLOCAL_AMFLAGS = -I m4
 
-GCS=libgcs10_builtin.la
-libgcs10_builtin_la_SOURCES=gcs_builtin.c
+# include $(top_srcdir)/templates/gcs
+
+# GCS=libgcs10_builtin.la
+# libgcs10_builtin_la_SOURCES=gcs_builtin.c
 
 # End of File.

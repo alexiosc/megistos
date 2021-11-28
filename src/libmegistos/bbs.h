@@ -79,7 +79,7 @@
 #ifndef BBS_H
 #define BBS_H
 
-#include <bbsinclude.h>
+#include <stdint.h>
 
 #include <megistos/gettext.h>
 

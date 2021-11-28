@@ -161,14 +161,12 @@ static const char rcsinfo[] =
     "$Id: format.c,v 2.0 2004/09/13 19:44:34 alexios Exp $";
 
 
-
-#define WANT_STDIO_H 1
-#define WANT_STDLIB_H 1
-#define WANT_CTYPE_H 1
-#define WANT_STRING_H 1
-#define WANT_UNISTD_H 1
-#define WANT_SEND_OUT 1
-#include <megistos/bbsinclude.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <ctype.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <megistos/config.h>
 #include <megistos/bbsmod.h>

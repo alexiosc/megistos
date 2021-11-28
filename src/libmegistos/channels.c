@@ -57,14 +57,18 @@ static const char rcsinfo[] =
     "$Id: channels.c,v 2.0 2004/09/13 19:44:34 alexios Exp $";
 
 
-#define WANT_TERMIO_H 1
-#define WANT_IOCTL_H 1
-#define WANT_DIRENT_H 1
-#define WANT_SYS_TYPES_H 1
-#define WANT_SYS_STAT_H 1
-#define WANT_UNISTD_H 1
-#define WANT_FCNTL_H 1
-#include <megistos/bbsinclude.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termio.h>
+#include <unistd.h>
 
 #define CHANNELS_C
 #include <megistos/config.h>
@@ -220,34 +224,40 @@ channel_disconnect (char *ttyname)
 	DIR    *dp;
 	struct dirent *buf;
 	struct stat st;
-	char    fname[600];
+	char   fname[600];
 
 	sprintf (fname, DEVDIR "/%s", ttyname);
-	if (stat (fname, &st))
+	if (stat (fname, &st)) {
 		return -1;
-
-	if ((dp = opendir (PROCDIR)) == NULL)
+	}
+	
+	if ((dp = opendir (PROCDIR)) == NULL) {
 		exit (1);
+	}
+	
 	while ((buf = readdir (dp)) != NULL) {
 		struct stat s;
-		char    fname[64];
-
+		char    fname[600];
+		
 		sprintf (fname, "%s/%s", PROCDIR, buf->d_name);
-		if (stat (fname, &s))
+		if (stat (fname, &s)) {
 			continue;
-
+		}
+		
 		{
 			char   *cp = (char *) &buf->d_name;
 			int     j = strlen (cp);
 			int     myid = getpid ();
-
-			while (*cp && isdigit (*cp++))
+			
+			while (*cp && isdigit (*cp++)) {
 				j--;
+			}
+			
 			if (!j && atoi (buf->d_name) != myid) {
 				FILE   *fp;
 				int     d, tty;
 				char    s[1024], c;
-
+				
 				sprintf (fname, "%s/%s/stat", PROCDIR,
 					 buf->d_name);
 				if ((fp = fopen (fname, "r")) == NULL)
@@ -257,7 +267,7 @@ channel_disconnect (char *ttyname)
 				     &d, &d, &tty) != 7)
 					continue;
 				if ((tty & 0xff) == (st.st_rdev & 0xff)) {
-/*	  printf("Killing job %5s %s TTY= 0x04,0x%02x.\n",buf->d_name,s,tty&0xff); */
+                                        /* printf("Killing job %5s %s TTY= 0x04,0x%02x.\n",buf->d_name,s,tty&0xff); */
 					kill (atoi (buf->d_name), SIGHUP);
 				}
 			}

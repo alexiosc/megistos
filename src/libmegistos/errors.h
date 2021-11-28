@@ -174,7 +174,7 @@ void _logerrorsys(char *file, uint32 line, int32 err, char *format, ...);
            arguments, as required by the format specifiers.
 */
 
-#define error_log(fmt...) _logerror(__FILE__,__LINE__,##fmt)
+#define error_log(...) _logerror(__FILE__, __LINE__, __VA_ARGS__)
 
 
 /** Proper way to log a system error.
@@ -187,10 +187,10 @@ void _logerrorsys(char *file, uint32 line, int32 err, char *format, ...);
            arguments, as required by the format specifiers.
 */
 
-#define error_logsys(fmt...) \
-{\
-   int32 i=errno; \
-   _logerrorsys(__FILE__,__LINE__,i,##fmt);\
+#define error_logsys(...)			     \
+{                                                    \
+   int32 i=errno;                                    \
+   _logerrorsys(__FILE__, __LINE__, i, __VA_ARGS__); \
 }
 
 
@@ -250,7 +250,7 @@ void _interrorsys(char *file, uint32 line, int32 err, char *format, ...);
            necessary arguments, as required by the format specifiers.
 */
 
-#define error_int(fmt...) _interror(__FILE__,__LINE__,##fmt)
+#define error_int(...) _interror(__FILE__, __LINE__, __VA_ARGS__)
 
 
 /** Proper way to log an internal system error.
@@ -263,10 +263,10 @@ void _interrorsys(char *file, uint32 line, int32 err, char *format, ...);
            necessary arguments, as required by the format specifiers.
 */
 
-#define error_intsys(fmt...) \
-{\
-   int32 i=errno; \
-   _interrorsys(__FILE__,__LINE__,i,##fmt);\
+#define error_intsys(...)                             \
+{                                                     \
+   int32 i = errno;                                   \
+   _interrorsys(__FILE__, __LINE__, i, __VA_ARGS__);  \
 }
 
 
@@ -319,7 +319,7 @@ void _fatalsys(char *file, int line, int err, char *format, ...);
     @param fmt a <tt>printf()</tt>-like format string, followed by any
            necessary arguments, as required by the format specifiers.  */
 
-#define error_fatal(fmt...) _fatal(__FILE__,__LINE__,##fmt)
+#define error_fatal(...) _fatal(__FILE__, __LINE__, __VA_ARGS__)
 
 
 /** Proper way to log a fatal system error.
@@ -332,10 +332,10 @@ void _fatalsys(char *file, int line, int err, char *format, ...);
     @param fmt a <tt>printf()</tt>-like format string, followed by any
            necessary arguments, as required by the format specifiers.  */
 
-#define error_fatalsys(fmt...) \
+#define error_fatalsys(...) \
 {\
    int32 i=errno; \
-   _fatalsys(__FILE__,__LINE__,i,##fmt);\
+   _fatalsys(__FILE__, __LINE__, i, __VA_ARGS__);\
 }
 
 

@@ -123,18 +123,19 @@
    already defined __isleap() or isleap() when people later include
    time.h (or whatever WANT_TIME_H includes). */
 
-#define WANT_TIME_H 1
-#include <megistos/bbsinclude.h>
+#include <time.h>
 
 
-/* Y2K compliant isleap(). Forced redefinition in case this system
-   already has a (broken) version of it. */
+// 2021: this is probably :P no longer needed.
 
-#ifndef isleap
-#  define isleap(year) __isleap(year)
-#endif
-#undef __isleap
-#define __isleap(year) ((year)%4==0&&((year)%100!=0||(year)%400==0))
+// /* Y2K compliant isleap(). Forced redefinition in case this system
+//    already has a (broken) version of it. */
+//
+// #ifndef isleap
+// #  define isleap(year) __isleap(year)
+// #endif
+// #undef __isleap
+// #define __isleap(year) ((year)%4==0&&((year)%100!=0||(year)%400==0))
 
 
 #define tdhour(t) ((t>>16)&0x1f)

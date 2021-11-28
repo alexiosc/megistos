@@ -268,6 +268,8 @@ xlwrite(int fd, const char *s, int count)
 */
 
 
+#warning "Rewrite this using writev()"
+
 int
 out_send (int fd, const char *s, int count)
 {

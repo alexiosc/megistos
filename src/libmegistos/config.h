@@ -134,10 +134,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdint.h>
+#include <signal.h>
 
 #include <bbsconfig.h>
-#define WANT_SIGNAL_H 1
-#include <megistos/bbsinclude.h>
 #include <megistos/version.h>
 
 

@@ -84,15 +84,14 @@ static const char rcsinfo[] =
     "$Id: audit.c,v 2.0 2004/09/13 19:44:34 alexios Exp $";
 
 
-
-#define WANT_STDIO_H 1
-#define WANT_STDLIB_H 1
-#define WANT_UNISTD_H 1
-#define WANT_STDARG_H 1
-#define WANT_SYS_SHM_H 1
-#define WANT_SYS_TYPES_H 1
-#define WANT_SYS_STAT_H 1
-#include <megistos/bbsinclude.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <megistos/config.h>
 #include <megistos/audit.h>

@@ -26,12 +26,12 @@
  **            Binary output file format:                                   **
  **                                                                         **
  **            Position 0x0000: 4-byte magic number == (char*)"MMBK"        **
- **            Position 0x0004: long int indexsize (number of entries)      **
- **                     0x0008: long int idx[1] (position of message #1)    **
- **                     0x000c: long int idx[2] (position of message #2)    **
+ **            Position 0x0004: int32_t indexsize (number of entries)      **
+ **                     0x0008: int32_t idx[1] (position of message #1)    **
+ **                     0x000c: int32_t idx[2] (position of message #2)    **
  **                     ... ... ... ...                                     **
- **               indexsize<<2: long int idx[indexsize]                     **
- **           (indexsize+1)<<2: long int file_size                          **
+ **               indexsize<<2: int32_t idx[indexsize]                     **
+ **           (indexsize+1)<<2: int32_t file_size                          **
  **                     idx[1]: char msg1[] (message #1, null terminated)   **
  **                     idx[2]: char msg2[] (message #2, null terminated)   **
  **                     ... ... ... ...                                     **
@@ -150,19 +150,19 @@ const char *__RCS = RCS_VER;
 
 
 
-/*
+
 #define DEBUG
 #define PRINT printf
-*/
 
-#define WANT_STDIO_H 1
-#define WANT_STDLIB_H 1
-#define WANT_STRINGS_H 1
-#define WANT_CTYPE_H 1
-#define WANT_UNISTD_H 1
-#define WANT_SYS_STAT_H 1
-#define WANT_VARARGS_H 1
-#include <megistos/bbsinclude.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdarg.h>
 
 #include <megistos/config.h>
 #include <megistos/prompts.h>
@@ -176,12 +176,12 @@ static enum {
 	mode_instance
 } op_mode;
 
-static char *_hdir, *_mdir;
+static char *_hdir = NULL, *_mdir = NULL;
 
 #define HEADERDIR _hdir
 #define BLOCKDIR  _mdir
 
-#define err(s...)  fprintf(stderr,##s)
+#define err(...)  fprintf(stderr, __VA_ARGS__)
 #define errp(s,p)  err(s,p)
 #define headermessage \
         "/***********************************************************\n"\
@@ -193,7 +193,7 @@ static char *_hdir, *_mdir;
 	"#ifndef __%s_UNAMBIGUOUS__\n"
 #define elsemessage "#else\n"
 #define footermessage "#endif /* __%s_UNAMBIGUOUS__ */\n"
-#define headerentry "#define\t%s %ld\n"
+#define headerentry "#define\t%s %d\n"
 
 
 void
@@ -213,7 +213,7 @@ help ()
 		err ("  Target .mbk directory:   %s\n", BLOCKDIR);
 	}
 
-	exit (-1);
+	exit(1);
 }
 
 
@@ -231,17 +231,23 @@ special (char *s)
 
 
 void
-adjustindex (FILE * fp, long from)
+adjustindex (FILE * fp, int32_t from)
 {
 	struct stat s;
-	long    i;
-	idx_t   idx;
+	int32_t     i;
+	idx_t       idx;
 
 	fflush (fp);
 	fstat (fileno (fp), &s);
 	fseek (fp, from, SEEK_SET);
 	for (i = from; i < s.st_size; i += sizeof (idx)) {
-		fread (&idx, sizeof (idx), 1, fp);
+#ifdef DEBUG
+		PRINT("Reading index i=%d, tell=%ld\n", i, ftell(fp));
+#endif // DEBUG
+		if (fread(&idx, sizeof(idx), 1, fp) != 1) {
+			perror("msgidx: fread()ing index");
+			//exit(1);
+		}
 
 		/* Nota Bene: Kludge city. The +sizeof(idx)-sizeof(idx.offset)
 		   is there to adjust the indices so they account for an
@@ -258,21 +264,21 @@ adjustindex (FILE * fp, long from)
 void
 parse (char *filename)
 {
-	FILE   *inp_buffer, *header1, *header2, *index, *output, *dict;
-	char    rawname[64], *cp, symbol[64];
-	char    hdrname[256], hdrtname[256], outname[256], idxname[256], tmpoutname[256];
-	char    keyword[64];
-	int     mode, i, curlang;
-	long    indexsize = 0;
-	long    langoffs[NUMLANGUAGES] = { 0 };
-	long    sourceidx = strlen (MBK_MAGIC) + sizeof (indexsize) + sizeof (langoffs);
+	FILE    *inp_buffer, *header1, *header2, *index, *output, *dict;
+	char     rawname[64], *cp, symbol[64];
+	char     hdrname[256], hdrtname[256], outname[256], idxname[256], tmpoutname[256];
+	char     keyword[64];
+	int      mode, i, curlang;
+	int32_t  indexsize = 0;
+	int32_t  langoffs[NUMLANGUAGES] = { 0 };
+	int32_t  sourceidx = strlen (MBK_MAGIC) + sizeof (indexsize) + sizeof (langoffs);
 
 	/* Open files, calculate names */
 
 	if ((inp_buffer = fopen (filename, "r")) == NULL) {
 		errp ("msgidx: unable to open %s", filename);
 		perror ("");
-		exit (-1);
+		exit(1);
 	}
 
 	if ((cp = strrchr (filename, '/')) == 0)
@@ -307,7 +313,7 @@ parse (char *filename)
 	if ((header1 = fopen (hdrtname, "w")) == NULL) {
 		errp ("msgidx: Unable to open %s", hdrtname);
 		perror ("");
-		exit (-1);
+		exit(1);
 	}
 
 	if (op_mode != mode_instance)
@@ -316,7 +322,7 @@ parse (char *filename)
 	if ((header2 = fopen (hdrtname, "w")) == NULL) {
 		errp ("msgidx: Unable to open %s", hdrtname);
 		perror ("");
-		exit (-1);
+		exit(1);
 	}
 	
 	fprintf (header1, headermessage, symbol);
@@ -330,7 +336,7 @@ parse (char *filename)
 	if ((output = fopen (tmpoutname, "w+")) == NULL) {
 		errp ("msgidx: Unable to open temporary file %s", tmpoutname);
 		perror ("");
-		exit (-1);
+		exit(1);
 	}
 
 
@@ -338,14 +344,14 @@ parse (char *filename)
 
 	if ((dict = tmpfile ()) == NULL) {
 		err ("msgidx: Unable to open temporary dictionary file.\n");
-		exit (-1);
+		exit(1);
 	}
 
 	sprintf (idxname, "%s/%s.idx", TMPDIR, rawname);
 	if ((index = fopen (idxname, "w+")) == NULL) {
 		errp ("msgidx: Unable to open %s", outname);
 		perror ("");
-		exit (-1);
+		exit(1);
 	}
 
 	/* Print information */
@@ -439,9 +445,9 @@ parse (char *filename)
 									sizeof (idx), 1, index);
 
 #ifdef DEBUG
-								PRINT
-								    ("  SRC=%ld  L=%ld\n",
-								     sourceidx, l);
+								// PRINT
+								//     ("  SRC=%d  L=%d\n",
+								//      sourceidx, l);
 #endif
 
 								sourceidx += sizeof (idx);
@@ -450,7 +456,7 @@ parse (char *filename)
 								indexsize++;
 
 #ifdef DEBUG
-								PRINT ("  DIFFERS\n");
+								PRINT (". INDEX DIFFERS, indexsize now %d\n", indexsize);
 #endif
 								break;
 							}
@@ -499,7 +505,7 @@ parse (char *filename)
 
 #ifdef DEBUG
 					PRINT
-					    ("Language %d starts at value offset %ld\n\n",
+					    ("Language %d starts at value offset %d\n\n",
 					     curlang, indexsize);
 #endif
 
@@ -512,7 +518,7 @@ parse (char *filename)
 
 #ifdef DEBUG
 					PRINT
-					    ("KEYWORD %s  IDX=%ld  OUT=%ld  SRC=%ld\n",
+					    ("KEYWORD %s  IDX=%ld  OUT=%ld  SRC=%d\n",
 					     keyword, ftell (index), ftell (output), sourceidx);
 #endif
 
@@ -610,16 +616,34 @@ parse (char *filename)
 	/* Concatenate the two halves of the header file */
 
 	if (op_mode != mode_instance) {
-		char    command[256];
-		char    fname1[2048], fname2[2048];
+		char    *command;
+		char    *fname1;
+		char    *fname2;
 		
 		sprintf (hdrtname, "%s/mbk_%s.h~", HEADERDIR, rawname);
-		sprintf (fname1, "%s/mbk_%s.h1~", HEADERDIR, rawname);
-		sprintf (fname2, "%s/mbk_%s.h2~", HEADERDIR, rawname);
-		sprintf (command, "cat %s %s >%s", fname1, fname2, hdrtname);
-		system (command);
+		if (asprintf (&fname1, "%s/mbk_%s.h1~", HEADERDIR, rawname) < 0) {
+			perror("msgidx: asprintf(fname1)");
+			exit(1);
+		}
+		if (asprintf (&fname2, "%s/mbk_%s.h2~", HEADERDIR, rawname) < 0) {
+			perror("msgidx: asprintf(fname2)");
+			exit(1);
+		}
+		if (asprintf (&command, "cat %s %s >%s", fname1, fname2, hdrtname) < 0) {
+			perror("msgidx: asprintf(command)");
+			exit(1);
+		}
+		if (system (command)) {
+			err ("msgidx: Unable to open temporary dictionary file.\n");
+			perror("");
+			exit(1);
+		}
 		unlink (fname1);
 		unlink (fname2);
+
+		free(command);
+		free(fname1);
+		free(fname2);
 	}
 
 	fclose (output);
@@ -630,9 +654,12 @@ parse (char *filename)
 	/* Now concatenate index and output file */
 
 	{
-		char    command[256];
+		char    *command;
 
-		sprintf (command, "cat %s %s >%s", idxname, tmpoutname, outname);
+		if (asprintf (&command, "cat %s %s >%s", idxname, tmpoutname, outname) < 0){
+			perror("msgidx: asprintf(command)");
+			exit(1);
+		}
 
 #ifdef DEBUG
 		PRINT ("%s\n", command);
@@ -641,6 +668,8 @@ parse (char *filename)
 		system (command);
 		unlink (idxname);
 		unlink (tmpoutname);
+
+		free(command);
 
 		/* And move the header file to the right place IF it's new */
 
@@ -672,7 +701,7 @@ main (int argc, char **argv)
 	/* Detect mode of operation */
 
 	op_mode = mode_undecided;
-	if ((s = getenv ("VIRGINDIR")) != NULL) {
+	if ((s = getenv ("BUILDDIR")) != NULL) {
 		struct stat st;
 		if (stat (s, &st) == 0 && S_ISDIR (st.st_mode)) {
 			op_mode = mode_source;
@@ -682,10 +711,10 @@ main (int argc, char **argv)
 			/* enough space for the two strings, a separating slash
 			 * and terminating NUL. */
 
-			_mdir = (char *) malloc (strlen (s) + 1 +
-						 strlen (MBKDIR) + 1);
-			if (_mdir == NULL) perror ("malloc()");
-			sprintf (_mdir, "%s/"MBKDIR, s);
+			if (asprintf(&_mdir, "%s/%s", s, MBKDIR) < 0) {
+				perror("msdidx: malloc()");
+				exit(1);
+			}
 			if (stat (_mdir, &st) || (!S_ISDIR (st.st_mode))) {
 				perror (_mdir);
 				exit (1);
@@ -710,11 +739,15 @@ main (int argc, char **argv)
 
 	if (op_mode == mode_undecided) {
 		err ("Unable to detect if I'm being called in a source tree ");
-		err ("or a BBS configuration directory. Bailing out.\n\n");
+		err ("or a BBS configuration directory. Bailing out.\n");
 		exit (1);
 
 	} else if (argc == 1) help ();
 
 	for (i = 1; i < argc; i++) parse (argv[i]);
+
+	if (_mdir) free(_mdir);
+	if (_hdir) free(_hdir);
+
 	return 0;
 }

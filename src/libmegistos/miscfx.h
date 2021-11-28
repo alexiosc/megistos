@@ -99,9 +99,8 @@
 #ifndef MISCFX_H
 #define MISCFX_H
 
-#define WANT_TIME_H 1
-#define WANT_UNISTD_H 1
-#include <megistos/bbsinclude.h>
+#include <time.h>
+#include <unistd.h>
 
 
 
@@ -505,22 +504,24 @@ void mmgopage(char *page); /* This is for Menuman's use only */
 int fcopy(char *source, char *target);
 
 
-/** Sleep for a given number of microseconds.
+// Assume everyone has a compliant usleep() now.
 
-    Some systems lack this particularly useful function. This is how we define
-    it (the standard way, drawn from the standard include files). This is the
-    actual documentation of the function from the person pages:
-
-    The usleep() function suspends execution of the calling process for @c
-    __usec microseconds.  The sleep may be lengthened slightly by any system
-    activity or by the time spent processing the call.
-
-    @param __usec The time delay in question.  */
-
-/* Redeclare usleep() for some systems */
-#ifndef HAVE_USLEEP
-extern void usleep ((unsigned long __usec));
-#endif /* HAVE_USLEEP */
+// /** Sleep for a given number of microseconds.
+//
+//     Some systems lack this particularly useful function. This is how we define
+//     it (the standard way, drawn from the standard include files). This is the
+//     actual documentation of the function from the person pages:
+//
+//     The usleep() function suspends execution of the calling process for @c
+//     __usec microseconds.  The sleep may be lengthened slightly by any system
+//     activity or by the time spent processing the call.
+//
+//     @param __usec The time delay in question.  */
+//
+// /* Redeclare usleep() for some systems */
+// #ifndef HAVE_USLEEP
+// extern void usleep ((unsigned long __usec));
+// #endif /* HAVE_USLEEP */
 
 
 
