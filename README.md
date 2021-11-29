@@ -103,7 +103,7 @@ Remember, screenshots of Megistos aren't really indicative of much, as the syste
 
 The AcroBase main menu, in Greek. The `/#` global command shows users currently online and their location. (similar to the Unix `who(1)` or `w(1)` commands) The headings are *LINE*, *USER*, *BAUD*, and *AREA*.
 
-![Acrobase with a single logged-in user](doc/screenshots/Screenshot_20210220_174035.png)
+![Acrobase with a single logged-in user](doc/screenshots/Screenshot_20210220_174035.png)auto
 
 The Account module main menu, for ordinary users.
 
