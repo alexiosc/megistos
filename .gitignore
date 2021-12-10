@@ -37,3 +37,7 @@ CVS
 .cvsignore
 *~
 #*#
+__pycache__
+*.pyc
+*.o
+autom4te.cache
