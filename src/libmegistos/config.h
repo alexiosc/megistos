@@ -142,6 +142,18 @@
 
 
 
+/* Whoops, MSGMAX (max length of IPC message) not defined. Guess wildly */
+
+// 2021-12-08: it's a kernel variable now (/proc/sys/kernel/msgmax). It
+// defaults to 8192, but we'll keep 4096.
+
+#ifndef MSGMAX
+#  define MSGMAX 4096
+#endif
+
+
+
+
 /** @name Basic integer types
     @filename int_types
 
