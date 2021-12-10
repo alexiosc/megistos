@@ -1,0 +1,16 @@
+# pyhcl
+attrs
+aiologger
+cerberus
+setuptools
+jinja2
+
+# toml
+# beautifulsoup4>4.0.0
+# Markdown
+# pexpect
+# pytest>4.0.0
+# python-dateutil
+# pytz
+# requests
+# requests-unixsocket

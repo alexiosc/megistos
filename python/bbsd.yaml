@@ -1,0 +1,5 @@
+bbsd:
+  socket: /tmp/bbsd.sock
+  tcp_addr: ::1
+  tcp_port: 8889
+  tick: 5
