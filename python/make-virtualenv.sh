@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR=$(readlink -e $(dirname "$0")/..)
+BASEDIR=$(readlink -e $(dirname "$0"))
 ENVDIR=python
 PYTHONDIR="$BASEDIR/$ENVDIR"
 
@@ -10,13 +10,13 @@ fail () {
 }
 
 set -e
-set -x
+#set -x
 
 # We must be in the base directory.
 cd $BASEDIR || fail "Failed to cd to $BASEDIR"
 
 # Sanity checks.
-[[ -d .git && -d node_modules && -d www ]] ||
+[[ -d ../.git ]] ||
     fail "Could not find base directory, tried $BASEDIR"
 
 [[ -d $ENVDIR ]] &&
@@ -30,7 +30,8 @@ grep -q "^${ENVDIR}$" .gitignore || echo "$ENVDIR" >>.gitignore
 
 # And do the work.
 #virtualenv -p $(which python3) --no-site-packages $PYTHONDIR
-virtualenv -p $(which python3) $PYTHONDIR
+#virtualenv -p $(which python3) $PYTHONDIR
+python3 -m venv $PYTHONDIR
 . $PYTHONDIR/bin/activate
 
 # We'll also need some Debian packages to help building.
@@ -40,6 +41,6 @@ virtualenv -p $(which python3) $PYTHONDIR
 pip install -r requirements.txt
 
 # And instal overrides
-cd $BASEDIR/overrides; make
+#cd $BASEDIR/overrides; make
 
 # End of file.

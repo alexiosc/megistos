@@ -4,6 +4,7 @@ aiologger
 cerberus
 setuptools
 jinja2
+pyyaml
 
 # toml
 # beautifulsoup4>4.0.0
