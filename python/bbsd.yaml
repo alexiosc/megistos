@@ -3,3 +3,17 @@ bbsd:
   tcp_addr: ::1
   tcp_port: 8889
   tick: 5
+
+channels:
+  - modems:
+      match_re: '/dev/tty(S|USB|ACM)(.+)'
+      name_re: 'S\1'
+      format: '{>:02}'
+  - pseudottys:
+      match_re: '/dev/pts/(.+)'
+      name_re: 'P\1'
+      baud: 0
+  - everything_else:
+      match_re: '^.*/(.*)'
+      name_re: '\1'
+      baud: 0

@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
 
-import os
 import argparse
 import asyncio
-import signal
-import uuid
+import fnmatch
 import json
+import os
+import signal
 import socket
-import yaml
 import sys
 import time
-import fnmatch
+import uuid
+import yaml
 
 import logging
 import random
 import string
 import pprint
 
+import attr
 import cerberus
 
+from megistos import MegistosProgram
+from megistos import config
 import megistos.validation
 
 
@@ -28,10 +31,59 @@ import megistos.validation
 {"op":"sub", "t":"*"}
 
 {"op":"pub", "t":"foo", "d":[1,2,3]}
-
-
 """
 
+
+class Connection:
+    connection_id: int = attr.ib()
+    channel: str = attr.ib()
+    queue: attr.ib(repr=False)
+
+
+    def __init__(self, connection_id, channel, reader, writer):
+        self.connection_id = connection_id
+        self.channel = channel
+        self.queue = asyncio.Queue()
+        self.dequeuer = asyncio.create_task(self.dequeuer(self.connection_id, reader, writer))
+        self.tty, self.pid, self.username = None, None, None
+
+
+    def __del__(self):
+        print("******")
+        self.dequeuer.cancel()  # Probably not necessary
+        del self.queue
+        
+
+    def __str__(self):
+        return f"Connection #{self.connection_id}"
+
+
+    def __repr__(self):
+        return f"Connection #{self.connection_id} " + \
+            f"(TTY {self.channel}, PID {self.pid}, User {self.username})"
+
+
+    async def dequeuer(self, connection_id, reader, writer):
+        try:
+            logging.debug(f"Dequeuer for connection #{connection_id} started.")
+            while not reader.at_eof():
+                logging.debug(f"Dequeuer for {self} waiting.")
+                msg = await self.queue.get()
+                logging.debug(f"{self!r}: delivering {msg}.")
+                writer.write((msg + "\n").encode("utf-8"))
+                await writer.drain()
+
+        except asyncio.CancelledError:
+            raise
+
+        except Exception as e:
+            logging.exception(f"Dequeuer for {self} failed")
+
+
+    def publish(self, message):
+        asyncio.create_task(self.queue.put(message))
+        
+             
 
 
 async def shutdown(loop, signal=None):
@@ -53,78 +105,34 @@ async def shutdown(loop, signal=None):
 
 
 
-class BBSD:
+class BBSD(MegistosProgram):
     """The BBS daemon coded as an asynchronous Python class, with a lot
     more functionality in a lot less code."""
 
     DESCRIPTION = "Megistos BBS Daemon (bbsd)"
 
-    BBSD_PORT = 8889
-
-    BBSD_SOCK = "/tmp/bbsd.sock"
-
-    CONFIG_SCHEMA = {
-        'bbsd': {
-            'type': 'dict',
-            'schema': {
-                'tick':     dict(type='integer', min=1, max=30, default=15),
-                'socket':   dict(type='string', default=BBSD_SOCK),
-                'tcp_addr': dict(type='string', default="127.0.0.1"),
-                'tcp_port': dict(type='integer', min=1, max=65535, default=BBSD_PORT),
-            }
-        }
-    }
-
     def __init__(self):
-        logging.basicConfig(
-            #level=logging.INFO,
-            level=logging.DEBUG,
-            format="%(asctime)s bbsd[%(process)d] %(levelname)s: %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        logging.info("Started")
+        super().__init__()
+        logging.debug("BBS Daemon starting")
+
+        self.parse_command_line()
+
+        # Read the configuration, keep only the bbsd section.
+        c = config.read_config(self.args.config, config.BBSD_CONFIG_SCHEMA)
+        self.config = c['bbsd']
 
         self.connection_id = 0
+        self.connections = dict()
         self.subscriptions = dict()
-        
-        self.parse_command_line()
-        self.parse_config()
+
+        logging.info("BBS Daemon started")
 
 
     def parse_command_line(self):
-        parser = argparse.ArgumentParser(description=self.DESCRIPTION)
-
-        parser.add_argument("-c", "--config", metavar="PATH",
-                            type=str, default="bbsd.yaml",
-                            help="""Specify configuration file. (default: %(default)s)""")
+        parser = self.create_command_line_parser(description=self.DESCRIPTION)
 
         self.args = parser.parse_args()
         return self.args
-
-
-    def parse_config(self):
-        logging.info(f"Reading configuration from {self.args.config}")
-        try:
-            with open(self.args.config, encoding="utf-8") as f:
-                config = yaml.safe_load(f)
-                v = cerberus.Validator(self.CONFIG_SCHEMA)
-                if not v.validate(config):
-                    logging.critical(f"Configuration invalid")
-                    sys.exit(1)
-                # We only care about this.
-                self.config = config['bbsd']
-                logging.debug(f"Configuration loaded and valid")
-
-        except cerberus.schema.SchemaError as e:
-            logging.critical(f"Configuration error: {e}")
-            raise
-            sys.exit(1)
-            
-        except Exception as e:
-            msg = f"Failed to read config file {self.args.config}"
-            logging.critical(msg, exc_info=e)
-            logging.exception(f"Failed to read config file {self.args.config}", exc_info=e)
-            raise
 
 
     async def ticks(self):
@@ -134,6 +142,8 @@ class BBSD:
             while True:
                 await asyncio.sleep(tick)
                 logging.debug("Tick!")
+                for x in asyncio.all_tasks():
+                    logging.debug(f"  running task: {x.cancelled():<5} {x.get_coro()}")
         except Exception as e:
             logging.exception(f"Whoops")
 
@@ -172,60 +182,35 @@ class BBSD:
             logging.exception(f"tcp_server")
 
 
-    async def dequeuer(self, connection_id, writer):
-        try:
-            logging.debug(f"Dequeuer for connection #{connection_id} started.")
-            while True:
-                try:
-                    logging.debug(f"Dequeuer for connection #{connection_id} waiting.")
-                    msg = await self.queues[connection_id].get()
-                    logging.debug(f"Dequeuer for connection #{connection_id}: {msg}.")
-                except KeyError:
-                    # The queue is gone.
-                    logging.error(f"Queue for connection #{connection_id} is gone.")
-                    return
-                
-                logging.debug(f"Connection #{connection_id}: delivering {msg}.")
-                writer.write((msg + "\n").encode("utf-8"))
-                await writer.drain()
-
-        except Exception as e:
-            logging.exception(f"Dequeuer for connection #{connection_id} failed")
-             
-
-
     async def handle_connection(self, reader, writer) -> None:
         self.connection_id += 1
         connection_id = self.connection_id
-        queue = asyncio.Queue()
-        dequeuer = asyncio.create_task(self.dequeuer(connection_id, writer))
-        self.queues[connection_id] = queue
-        logging.info(f"Connection #{connection_id} established")
+        channel = "?"
+
+        conn = Connection(self.connection_id, channel, reader, writer)
+        self.connections[connection_id] = conn
+
+        logging.info(f"{conn} established")
 
         try:
             while not reader.at_eof():
                 data = await reader.readline()
-                command = data.decode()
-                command = command.strip()
+                command = data.decode().strip()
 
                 if not command:
                     continue
 
-                logging.debug(f"Connection #{connection_id}: received '{command}'")
+                logging.debug(f"{conn!r}: received '{command}'")
                 response = dict()
 
-
                 try:
-                    if command:
-                        data = json.loads(command)
-                        logging.debug(f"JSON decoded correctly: {data}")
-                        response = self.process_command(data, connection_id)
-                    else:
-                        response = dict(ok=False, err="Empty")
+                    data = json.loads(command)
+                    logging.debug(f"JSON decoded correctly: {data}")
+                    response = self.process_command(data, conn)
 
                 except json.decoder.JSONDecodeError as e:
                     response = dict(ok=False, err=repr(e))
-                    logging.error(f"connection #{connection_id}: JSON decoding error: {e!r}")
+                    logging.error(f"{conn}: JSON decoding error: {e!r}")
 
                 str_response = json.dumps(response, separators=(',',':')) + "\n"
                 writer.write(str_response.encode("utf-8"))
@@ -248,19 +233,18 @@ class BBSD:
             logging.error("input: Reached buffer size limit while looking for a separator")
     
         except ConnectionResetError as e:
-            # import traceback
-            # print(traceback.format_exc())
-            logging.info(f"Connection id #{connection_id} ended")
-            pass
+            logging.debug(f"{conn!r} reset")
 
         finally:
-            logging.info(f"Connection #{connection_id} ended")
+            logging.info(f"{conn!r} ended")
+
             # Remove this connection ID from all subscriptions.
             for sub in self.subscriptions.values():
-                sub = sub.remove(set([connection_id]))
-            # Remove its message queue
-            del self.queues[connection_id]
-            del queue
+                sub = sub.remove(connection_id)
+
+            # Destoy the connection and cancel its tasks
+            conn.dequeuer.cancel()
+            del conn
 
 
     def run(self):
@@ -271,7 +255,6 @@ class BBSD:
             loop.add_signal_handler(
                 s, lambda s=s: asyncio.create_task(shutdown(loop, signal=s)))
         loop.set_exception_handler(self.handle_exception)
-        self.queues = dict()
     
         try:
             # loop.create_task(publish(queue))
@@ -286,7 +269,7 @@ class BBSD:
             logging.info("Done.")
 
 
-    def process_command(self, data, connection_id):
+    def process_command(self, data, conn):
         try:
             op = data['op']
         except KeyError:
@@ -296,24 +279,49 @@ class BBSD:
         if op == 'ping':
             return dict(ok=True)
 
+        # Hello: associate connection with channel/PID.
+        if op == 'hello':
+            return self.hello(data, conn)
+
         # Subscriptions
         if op == 'sub':
-            return self.subscribe(data, connection_id)
+            return self.subscribe(data, conn)
 
         # Subscriptions
         if op == 'subs':
-            return self.get_subscriptions(connection_id)
+            return self.get_subscriptions(conn)
 
         if op == 'cancel':
-            return self.unsubscribe(data, connection_id)
+            return self.unsubscribe(data, conn)
 
         if op == 'pub':
-            return self.publish(data, connection_id)
+            return self.publish(data, conn)
 
         return dict(ok=False, err=f"Unhandled op {op}")
 
 
-    def subscribe(self, data, connection_id):
+    def hello(self, data, connection):
+        connection_id = connection.connection_id
+        try:
+            tty = data['tty']
+        except KeyError:
+            return dict(ok=False, err="Missing tty")
+
+        try:
+            pid = data['pid']
+        except KeyError:
+            return dict(ok=False, err="Missing pid")
+
+        connection.channel = tty
+        connection.pid = pid
+        connection.username = data.get('u')
+        logging.info(f"Well hello there, {connection!r}")
+
+        return dict(ok=True)
+            
+
+    def subscribe(self, data, connection):
+        connection_id = connection.connection_id
         try:
             topic = data['t']
         except KeyError:
@@ -321,19 +329,19 @@ class BBSD:
 
         # Add the topic and connection ID.
         self.subscriptions.setdefault(topic, set([])).add(connection_id)
-        pprint.pprint(self.subscriptions)
-                                       
         return dict(ok=True)
 
 
-    def get_subscriptions(self, connection_id):
+    def get_subscriptions(self, connection):
+        connection_id = connection.connection_id
         subscriptions = [ topic
                           for topic, subscribers in self.subscriptions.items()
                           if connection_id in subscribers ]
         return dict(ok=True, subs=subscriptions)
 
         
-    def unsubscribe(self, data, connection_id):
+    def unsubscribe(self, data, connection):
+        connection_id = connection.connection_id
         try:
             topic = data['t']
         except KeyError:
@@ -348,18 +356,18 @@ class BBSD:
                 del self.subscriptions[topic]
 
         except (AssertionError, KeyError):
-            logging.error(f"Connection #connection_id was never subscribed to topic {topic}")
+            logging.error(f"{conn} was never subscribed to topic {topic}")
             return dict(ok=False, err="Not subscribed")
 
         except Exception as e:
-            logging.exception(f"Failed to unsubscribe #connection_id from topic {topic}: {e}")
+            logging.exception(f"Failed to unsubscribe {conn} from topic {topic}: {e}")
             return dict(ok=False, err="Error:" + str(e))
 
-        pprint.pprint(self.subscriptions)
         return dict(ok=True)
 
 
-    def publish(self, data, connection_id):
+    def publish(self, data, connection):
+        connection_id = connection.connection_id
         try:
             topic = data['t']
         except KeyError:
@@ -373,7 +381,7 @@ class BBSD:
         # Create the message.
         u = str(uuid.uuid4())
         message = dict(p=connection_id, t=topic, u=u, ts=time.time(), d=payload)
-        str_message = json.dumps(message, separators=(',',':'))
+        str_message = json.dumps(message, separators=(',',':')) + "\n"
         logging.debug(f"Publishing {str_message}")
 
         for pattern, conn_ids in self.subscriptions.items():
@@ -382,12 +390,12 @@ class BBSD:
             if fnmatch.fnmatch(topic, pattern):
                 # It does. Queue the message to all subscribed connections.
                 for conn_id in conn_ids:
-                    if conn_id not in self.queues:
-                        self.error(f"Connection #{conn_id} still subscribed " +
-                                   f"to topic #{topic}, but its queue is gone")
-                        continue
-                    logging.debug(f"Publishing to connection #{conn_id}")
-                    asyncio.create_task(self.queues[conn_id].put(str_message))
+                    try:
+                        other_connection = self.connections[conn_id]
+                        logging.debug(f"Publishing to {other_connection!r}")
+                        other_connection.publish(str_message)
+                    except KeyError:
+                        pass
 
         return dict(ok=True, u=u)
 
