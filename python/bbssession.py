@@ -39,8 +39,10 @@ class BBSSession(MegistosProgram):
         self.parse_command_line()
 
         # Read the configuration, keep only the bbsd section.
-        c = config.read_config(self.args.config, config.BBSD_CONFIG_SCHEMA)
-        self.config = c['bbsd']
+        self.config = config.read_config(self.args.config, config.BBSD_CONFIG_SCHEMA)
+        # import pprint
+        # pprint.pprint(self.config, width=200)
+        # sys.exit(0)
 
         self.pub_queue = asyncio.Queue()
         self.response_queue = asyncio.Queue()
@@ -50,10 +52,13 @@ class BBSSession(MegistosProgram):
     def parse_command_line(self):
         parser = self.create_command_line_parser(description=self.DESCRIPTION)
 
-        parser.add_argument("-n", "--channel", metavar="CHANNEL",
-                            type=str, default=None,
-                            help="""Specify the channel name (or number) to connect as.
-                            (default: generate a name automatically""")
+        parser.add_argument("-d", "--dev", metavar="DEVICE-PATH",
+                            type=str, default=os.ttyname(sys.stdin.fileno()),
+                            help="""Override the device path (with or without the
+                            "/dev/" component) this session is running on. This
+                            will determine the channel type and name/number and
+                            set various defaults. (default: the name of this
+                            TTY, %(default)s)""")
 
         self.args = parser.parse_args()
 
@@ -104,9 +109,13 @@ class BBSSession(MegistosProgram):
 
     def run(self):
         # Get the channel name.
-        self.channel_name = self.args.channel
-        if self.channel_name is None:
-            self.channel_name = os.ttyname(sys.stdin.fileno())
+        # self.tty_name = self.args.dev
+        # if self.tty_name is None:
+        #     self.tty_name = os.ttyname(sys.stdin.fileno())
+
+        chan = megistos.channels.Channels(config=self.config)
+        logging.info(chan.dev_path_to_channel(self.args.dev))
+        sys.exit(0)
 
         logging.info(f"Started session on {self.channel_name}")
 
@@ -166,7 +175,7 @@ class BBSSession(MegistosProgram):
         # TODO: allow re-establishing dropped connections
         try:
             # TODO: Implement TCP too.
-            socket_path = self.config['socket']
+            socket_path = self.config['bbsd']['socket']
             reader, writer = await asyncio.open_unix_connection(socket_path)
             logging.debug(f"Using bbsd socket {socket_path}")
             self.bbsd_connection = (reader, writer)
@@ -182,7 +191,7 @@ class BBSSession(MegistosProgram):
         except Exception as e:
             logging.exception(f"Failed to connect to bbsd.")
             sys.exit(1)
-    
+
 
     async def handle_bbsd_connection(self):
         reader, writer = self.bbsd_connection

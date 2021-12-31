@@ -137,18 +137,18 @@ modem_types:
 # regular expressions.
 
 channels:
-  modems:
-      match_re: '/dev/tty(S|USB|ACM)(.+)'
-      name_re: 'S\2'
-      format: '{>:02}'
+  - modems:
+      match_re: '/dev/tty([SUC])(|SB|CM)(.+)'
+      name: '{0}{2:>03}'
       modem_type: zyxel_u1496e
         
-  pseudottys:
+  - pseudottys:
       match_re: '/dev/pts/(.+)'
-      name_re: 'P\1'
+      name: 'P{:>03x}'
       baud: 0
 
-  everything_else:
+  - everything_else:
       match_re: '^.*/(.*)'
-      name_re: '\1'
+      name: '{}'
       baud: 0
+ 

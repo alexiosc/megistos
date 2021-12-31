@@ -67,14 +67,17 @@ BBSD_CONFIG_SCHEMA = {
     },
 
     'channels': {
-        'type': 'dict',
-        'valueschema': {
-            'schema': {
-                'match_re': dict(type='string'),
-                'name_re': dict(type='string'),
-                'format': dict(type='string'),
-                'modem_type': dict(type='string'),
-                'baud': dict(type='integer'),
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'valueschema': {
+                'schema': {
+                    'match_re': dict(type='string'),
+                    'name': dict(type='string'),
+                    'format': dict(type='string'),
+                    'modem_type': dict(type='string'),
+                    'baud': dict(type='integer'),
+                }
             }
         },
     }
