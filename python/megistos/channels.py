@@ -40,7 +40,10 @@ class Channels(object):
             regex = re.compile(channel_group['match_re'])
             m = regex.match(path)
             if m:
-                channel_name = channel_group['name'].format(*m.groups())
+                try:
+                    channel_name = channel_group['name'].format(*m.groups())
+                except Exception as e:
+                    raise ValueError(f"String format error in '{channel_group['name']}' (match_re groups: {m.groups()}): {e}")
                 print("NAME=",channel_name)
                 return channel_name, channel_group_name, channel_group
                 
