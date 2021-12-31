@@ -4,16 +4,151 @@ bbsd:
   tcp_port: 8889
   tick: 5
 
+
+###############################################################################
+#
+# MODEM TYPES
+#
+###############################################################################
+
+# Keys:
+#
+# hangup_on_startup: if True, set the baud rate of the TTY to 0 on
+#   initialisation. This causes the kernel to hang up the line. Hopefully. If
+#   False, the modem is just initialised. The default is True, and it can't
+#   hurt on most smart modems.
+#
+# bps_lock: if True, the serial port speed won't be changed to match the modem
+#   connection speed. This is used for MNP 5 (data-compressing) modems where
+#   the computer-to-modem speed must be higher than the modem-to-remote-modem
+#   speed to take advantage of compression. The default is True because you
+#   probably aren't using a pre-MNP 5 device.
+#
+# initial: a list of TERMIOS options to set prior to initialisation. Prepend a
+#   - to clear.
+#
+# final: a list of TERMIOS options to set once the connection is
+#   established. If left out, no changes are made. Speed specifications (B38400
+#   etc) will only be honoured if bps_lock is True or if the the speed could
+#   not be discovered from the incoming_call_script. Note that once this is
+#   done, the BBS session will put the terminal in raw mode, potentially
+#   changing some of these options.
+#
+# init_script: a list of key-value singletons specifying a modem initialisation
+#   script. The following keys and values are available:
+#
+#   - wait: SECONDS  -- wait this many seconds. Decimal numbers can be used.
+#
+#   - send: STRING -- send this string. Use \r\n to end lines for safety.
+#
+#   - expect: REGEXP -- the modem's response must match this regular
+#                       expression.  If the regular expression doesn't match,
+#                       initialisation has failed and will be re-attempted.
+#
+#   - timeout: SECONDS -- set the timeout in seconds for subsequent expect
+#                         instructions. The script is considered a failure on
+#                         timeout.
+#
+# incoming_call_script: similar to init_script, after initialisation this
+#   script is executed to detect incoming calls. The script MUST start with an
+#   ‘expect’ instruction. Any ‘send’ instructions before the first ‘expect’
+#   instruction will be ignored. Regular expressions in this script may
+#   contains named capture groups with the following names:
+#
+#   - caller_id -- to capture the number of the caller.
+#
+#   - speed -- to capture the speed of the connection.  This is required if
+#     bps_lock is False, otherwise the serial port speed won't change to match
+#     the modem connection speed.
+
+modem_types:
+  maxan2400:
+    hangup_on_startup: True
+    bps_lock: True
+    initial:
+      - B9600
+      - CS8
+      - HUPCL
+      - -ISTRIP
+    # final:
+    #   - B9600
+    #   - CS8
+    #   - HUPCL
+    #   - -ISTRIP
+    init_script:
+      - wait: 1
+      - send: '+++'
+      - expect: '^OK'
+      - send: 'ATZ\r\n'
+      - expect: '^OK'
+      - send: 'ATE0\r\n'
+      - expect: '^OK'
+      - send: 'ATS0=0 L3 M3\r\n'
+      - expect: '^OK'
+    incoming_call_script:
+      - expect: '^RING(;(?P<caller_id>.+))?$'
+      - send: 'ATA\r\n'
+      - expect: 'CONNECT(\s+(?P<speed>.+))?'
+      - wait: 1
+
+  zyxel_u1496e:
+    hangup_on_startup: True
+    bps_lock: True
+    initial:
+      - B38400
+      - CS8
+      - HUPCL
+      - -ISTRIP
+    init_script:
+      - timeout: 5
+      - wait: 1
+      - send: '+++'
+      - expect: '^OK'
+      - send: 'ATZ\r\n'
+      - expect: '^OK'
+      - send: 'ATE0\r\n'
+      - expect: '^OK'
+      - send: 'ATE0S2=255 M0&N0X7 S0=0\r\n'
+      - expect: '^OK'
+    incoming_call_script:
+      - expect: '^RING(;(?P<caller_id>.+))?$'
+      - send: 'ATA\r\n'
+      - expect: 'CONNECT(\s+(?P<speed>.+))?'
+      - wait: 2
+
+###############################################################################
+#
+# DEFINE BBS ‘CHANNELS’
+#
+###############################################################################
+
+# Each channel can fit one user. A channel can be a modeo, serial port, or a
+# pseudo-TTY representing a connection from the Internet. As such, channels are
+# now dynamic and configured using regular expressions.
+#
+# Megistos allowed up to 256 channels using two-digit hexadecimal numbers. The
+# format is superficially identical to the 00-63 channels of The Major BBS
+# 5.xx.
+#
+# These channels are freeform strings, but we like to keep them short. (1-4
+# characters, haven't decided yet).
+#
+# For modem and hardware serial lines, we can use static strings instead of
+# regular expressions.
+
 channels:
-  - modems:
+  modems:
       match_re: '/dev/tty(S|USB|ACM)(.+)'
-      name_re: 'S\1'
+      name_re: 'S\2'
       format: '{>:02}'
-  - pseudottys:
+      modem_type: zyxel_u1496e
+        
+  pseudottys:
       match_re: '/dev/pts/(.+)'
       name_re: 'P\1'
       baud: 0
-  - everything_else:
+
+  everything_else:
       match_re: '^.*/(.*)'
       name_re: '\1'
       baud: 0
