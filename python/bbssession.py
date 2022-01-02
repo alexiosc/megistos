@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import tty
-import ctypes
-import pty
-import json
 import asyncio
-import signal
-import logging
-import termios
-import struct
+import ctypes
 import fcntl
+import json
+import logging
+import os
+import pty
+import re
+import signal
+import struct
+import sys
+import termios
+import tty
 
 
 from megistos import MegistosProgram
@@ -24,7 +25,7 @@ import megistos.validation
 class BBSSession(MegistosProgram):
     """
     This program replaces a lot of the older functionality of a channel handler:
-    
+
     * bbsgetty
     * bbslogin
     * emud
@@ -66,7 +67,7 @@ class BBSSession(MegistosProgram):
         if not os.isatty(sys.stdin.fileno()) or \
            not os.isatty(sys.stdout.fileno()):
             parser.error("Standard input and output must both be TTYs.")
-        
+
         return self.args
 
 
@@ -101,10 +102,237 @@ class BBSSession(MegistosProgram):
             cols, rows = os.get_terminal_size()
             if cols > 0 and rows > 0:
                 winsize = struct.pack("HHHH", rows, cols, 0, 0)
-                logging.debug(f"\r\n\033[0;7mResizing terminal to {cols}×{rows}\033[0m\r\n")
+                #logging.debug(f"\r\n\033[0;7mResizing terminal to {cols}×{rows}\033[0m\r\n")
                 fcntl.ioctl(self.pty_fd, termios.TIOCSWINSZ, winsize)
         except Exception as e:
             logging.debug(f"Failed to updated terminal window size: {e}")
+
+
+    def init_channels(self):
+        """Load the channel definitions, and find out what our own channel is."""
+        self.channels = megistos.channels.Channels(config=self.config)
+        self.channel = self.channels.dev_path_to_channel(self.args.dev)
+        if self.channel is None:
+            logging.critical(f"No channel matched device '{self.args.dev}'")
+            sys.exit(1)
+
+
+    ###############################################################################
+    #
+    # BBSGETTY FUNCTIONALITY
+    #
+    ###############################################################################
+
+    def bbsgetty_hangup_tty(self, fd):
+        """Use termios to hang up a TTY."""
+        t = termios.tcgetattr(fd)
+        # Set the line speed to 0 to hangup. Use OS bitfields.
+        t[2] &= ~termios.CBAUD # Clear the speed flags in cflags
+        t[2] |= termios.B0     # Set the B0 value in cflags
+        t[4] = termios.B0      # Also in ispeed (for good measure)
+        t[5] = termios.B0      # And ospeed
+        termios.tcsetattr(fd, termios.TCSANOW, t)
+
+        # Verify it was done.
+        t1 = termios.tcgetattr(fd)
+        try:
+            assert t1[2] & termios.CBAUD == termios.B0
+            assert t1[4] == termios.B0
+            assert t1[5] == termios.B0
+        except:
+            logging.error("Line hangup failed; ignoring and hoping for the best.")
+
+
+    def bbsgetty_config_tty(self, fd, specs):
+        """Use termios to configure a TTY."""
+
+        # No specs, no work.
+        if not specs:
+            return
+        
+        iflags = re.compile(r'^-?(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR|ICRNL|IUCLC|IXON|IXANY|IXOFF|IMAXBEL|IUTF8)$')
+        oflags = re.compile(r'^-?(OPOST|OLCUC|ONLCR|OCRNL|ONOCR|ONLRET|OFILL|OFDEL)$')
+        cflags = re.compile(r'^-?(CSTOPB|CREAD|PARENB|PARODD|HUPCL|CLOCAL|LOBLK|CMSPAR|CRTSCTS)$')
+        lflags = re.compile(r'^-?(ISIG|ICANON|XCASE|ECHO(|E|K|NL|CTL|PRT|KE)|DEFECHO|NOFLSH|TOSTOP|PENDIN|IEXTEN)$')
+
+        cbaud = ["B50", "B75", "B110", "B134", "B150", "B200", "B300", "B600",
+                 "B1200", "B1800", "B2400", "B4800", "B9600", "B19200",
+                 "B38400", "B57600", "B115200", "B230400", "B460800",
+                 "B500000", "B576000", "B921600", "B1000000", "B1152000",
+                 "B1500000", "B2000000", "B2500000", "B3000000", "B3500000",
+                 "B4000000"]
+
+        cbits = ["CS5", "CS6", "CS7", "CS8"]
+
+        # These are bit field values (like cbaud) with associated bitmasks.
+        ofields = re.compile(r'^(NL[01]|CR[0-3]|TAB[0-3]|BS[01]|VT[01]|FF[01])')
+        omasks = dict(
+            NL=[ termios.NLDLY ],
+            CR=[ termios.CRDLY ],
+            TA=[ termios.TABDLY ],
+            BS=[ termios.BSDLY ],
+            VT=[ termios.VTDLY ],
+            FF=[ termios.FFDLY ],
+        )
+
+        def lookup(name):
+            try:
+                x = termios.__dict__[name.upper()]
+                assert type(x) == int
+                return x
+            except:
+                logging.critical(f"'{name}' is not a termios flag known to this OS. Check man page termios(3)!")
+                sys.exit(1)
+
+
+        def process_flag(bitfield, spec):
+            clear, name = False, spec
+            if spec[0] == '-':
+                clear, name = True, spec[1:]
+
+            value = lookup(name)
+
+            if clear:
+                return bitfield & ~value
+            else:
+                return bitfield | value
+
+
+        def process_masked_value(bitfield, spec):
+            name = spec.upper()
+            value = lookup(name)
+
+            try:
+                mask = omasks[name[:2]]
+            except KeyError:
+                logging.critical(f"Don't know how to handle flag '{name}'.")
+                sys.exit(1)
+
+            return (bitfield & ~mask) | value
+
+
+        # Start with our existing flags. Let specs turn them on or off (or modify them).
+        t = termios.tcgetattr(fd)
+
+        # Also disable line buffering and go to non-canonical mode.
+        t[3] &= termios.ICANON
+        t[6][termios.VMIN] = 1
+        t[6][termios.VTIME] = 0
+
+        for spec in specs:
+            logging.debug(f"Processing spec {spec}")
+
+            if iflags.match(spec):
+                logging.debug(f"iflags: {t[0]:>032b}")
+                t[0] = process_flag(t[0], spec)
+                logging.debug(f"iflags: {t[0]:>032b} {spec}")
+                    
+            if oflags.match(spec):
+                logging.debug(f"oflags: {t[1]:>032b}")
+                t[1] = process_flag(t[1], spec)
+                logging.debug(f"oflags: {t[1]:>032b} {spec}")
+                    
+            if cflags.match(spec):
+                logging.debug(f"cflags: {t[2]:>032b}")
+                t[2] = process_flag(t[2], spec)
+                logging.debug(f"cflags: {t[2]:>032b} {spec}")
+                    
+            if lflags.match(spec):
+                logging.debug(f"lflags: {t[3]:>032b}")
+                t[3] = process_flag(t[3], spec)
+                logging.debug(f"lflags: {t[3]:>032b} {spec}")
+
+            # Handle speed specs
+            if spec in cbaud:
+                logging.debug(f"cflags: {t[2]:>032b}")
+                t[2] &= ~termios.CBAUD
+                x = lookup(spec)
+                t[2] |= x
+                t[4] = x
+                t[5] = x
+                logging.debug(f"cflags: {t[2]:>032b} {spec}")
+
+            # Handle bit specs
+            if spec in cbits:
+                logging.debug(f"cflags: {t[2]:>032b}")
+                t[2] &= ~termios.CSIZE
+                t[2] |= lookup(spec)
+                logging.debug(f"cflags: {t[2]:>032b} {spec}")
+
+            # Handle oflag delay specifications
+            if ofields.match(spec):
+                logging.debug(f"oflags: {t[1]:>032b}")
+                t[1] = process_masked_value(t[2], spec)
+                logging.debug(f"oflags: {t[1]:>032b} {spec}")
+
+        termios.tcsetattr(fd, termios.TCSANOW, t)
+
+
+    async def bbsgetty_run_script(self, script):
+        pass
+
+
+    async def bbsgetty_init_modem(self, script):
+        if not script:
+            logging.info("This modem has no initialisation script, skipping init.")
+            return
+
+        logging.info("Initialising modem.")
+        await self.bbsgetty_run_script(script)
+
+
+    async def bbsgetty_answer_call(self):
+        pass
+
+
+    async def bbsgetty(self):
+        """Initialise the channel and wait for an incoming call. On channels without
+                   modems, this method returns immediately."""
+
+        # No modem definition; no hassle.
+        if self.channel.modem_def is None:
+            return
+
+        mdef = self.channel.modem_def
+
+        logging.info(f"bbsgetty starting, device {self.channel.dev}, type {self.channel.modem_type}.")
+
+        # Hangup on startup?
+        if mdef.get("hangup_on_startup", True):
+            self.bbsgetty_hangup_tty(0)
+
+        # Initialise the line.
+        self.bbsgetty_config_tty(0, mdef.get("initial"))
+
+        # Initialise the modem.
+        await self.bbsgetty_init_modem(mdef.get("init_script"))
+        logging.info(f"Modem initialised, waiting for calls.")
+        #run_script(mdef.get("init_script", []))
+
+        # Wait for a ring, answer, and connect
+        await self.bbsgetty_answer_call()
+        logging.info(f"Connected.")
+
+        # Add the session loop now.
+        self._mainloop.create_task(self.session())
+
+
+    ###############################################################################
+    #
+    # MAIN CODE
+    #
+    ###############################################################################
+
+
+    def init_mainloop(self):
+        loop = asyncio.get_event_loop()
+        signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
+        for s in signals:
+            loop.add_signal_handler(
+                s, lambda s=s: asyncio.create_task(self.shutdown(loop, signal=s)))
+        loop.set_exception_handler(self.handle_exception)
+        return loop
+        
 
 
     def run(self):
@@ -113,26 +341,24 @@ class BBSSession(MegistosProgram):
         # if self.tty_name is None:
         #     self.tty_name = os.ttyname(sys.stdin.fileno())
 
-        chan = megistos.channels.Channels(config=self.config)
-        logging.info(chan.dev_path_to_channel(self.args.dev))
-        sys.exit(0)
+        # Initialise the main loop
+        self._mainloop = loop = self.init_mainloop()
 
-        logging.info(f"Started session on {self.channel_name}")
+        # Initialise other stuff
+        self.init_channels()
 
-        self._mainloop = loop = asyncio.get_event_loop()
-        signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
-        for s in signals:
-            loop.add_signal_handler(
-                s, lambda s=s: asyncio.create_task(self.shutdown(loop, signal=s)))
         loop.add_signal_handler(signal.SIGWINCH, self.terminal_resized)
-        loop.set_exception_handler(self.handle_exception)
 
         try:
             # loop.create_task(self.handle_bbsd_connection())
             # loop.create_task(self.receive_bbsd_messages())
+
             loop.create_task(self.ticks())
+            loop.create_task(self.bbsgetty())
+
             loop.create_task(self.session())
             loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
+
             #loop.add_writer(sys.stdout.fileno(), self.handle_fd_write, sys.stdout.fileno())
             #loop.run_until_complete(self.session())
             loop.run_forever()
@@ -152,10 +378,10 @@ class BBSSession(MegistosProgram):
 
     async def bbsd_command(self, op, **kwargs):
         reader, writer = self.bbsd_connection
-    
+
         command = dict(op=op)
         command.update(kwargs)
-        
+
         command_str = json.dumps(command, separators=(',',':')) + "\n"
 
         writer.write(command_str.encode("utf-8"))
@@ -167,7 +393,7 @@ class BBSSession(MegistosProgram):
 
         response = await self.response_queue.get()
         logging.debug(f"Got response: {response}")
-        
+
         return response
 
 
@@ -197,11 +423,11 @@ class BBSSession(MegistosProgram):
         reader, writer = self.bbsd_connection
 
         # Be nice, say hello upon connecting.
-        hello = dict(op="hello", tty=self.channel_name, pid=os.getpid())
+        hello = dict(op="hello", tty=self.channel.name, pid=os.getpid())
         writer.write((json.dumps(hello) + "\n").encode("utf-8"))
         await writer.drain()
         logging.debug("Said hello: {hello}")
-        
+
         try:
             while not reader.at_eof():
                 line = await reader.readline()
@@ -239,8 +465,8 @@ class BBSSession(MegistosProgram):
 
         except Exception as e:
             logging.exception(f"bbsd command {command} failed to execute")
-        
-        
+
+
     async def receive_bbsd_messages(self):
         try:
             while True:
@@ -272,7 +498,7 @@ class BBSSession(MegistosProgram):
 
 
     async def session(self):
-        logging.info("Session started")
+        logging.info(f"Started session on {self.channel.name} ({self.channel.group_name})")
 
         await self.connect_to_bbsd()
         # ..
@@ -302,7 +528,7 @@ class BBSSession(MegistosProgram):
 
         except Exception as e:
             logging.debug(f"Failed to get pts name: {e}")
-                
+
         self.pty_fd = fd
 
         logging.debug(f"({pid},{fd})")
@@ -313,7 +539,7 @@ class BBSSession(MegistosProgram):
                 fcntl.ioctl(0, termios.TIOCSWINSZ, winsize)
             except Exception as e:
                 print(e)
-            sys.stdout.flush()
+
             sys.stderr.flush()
             os.execvp("/bin/bash", ["bash", "--login"])
             # The child process never gets to this line.

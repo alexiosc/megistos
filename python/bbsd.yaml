@@ -66,7 +66,7 @@ bbsd:
 #   If incoming_call_script is left out, the BBS login screen is shown
 #   immediately.
 
-channel_types:
+modems:
   serial_115200:
     initial:
       - B115200
@@ -152,33 +152,33 @@ channels:
   - line1:
       match_re: '/dev/ttyS0'
       name: '01'
-      type: zyxel_u1496e
+      modem: zyxel_u1496e
 
   - line2:
       match_re: '/dev/ttyS1'
       name: '02'
-      type: zyxel_u1496e
+      modem: zyxel_u1496e
 
   - line3:
       match_re: '/dev/ttyS1'
       name: '03'
-      type: zyxel_u1496e
+      modem: zyxel_u1496e
 
   - serial:
       match_re: '/dev/ttyS2'
       name: '10'
-      type: serial_115200
+      modem: serial_115200
 
   - modems:
       match_re: '/dev/tty([SUC])(|SB|CM)(.+)'
       name: '{0}{2:>03}'
-      type: zyxel_u1496e
+      modem: zyxel_u1496e
         
   - pseudottys:
       match_re: '/dev/pts/(.+)'
       name: 'P{:>03}'
 
-  - everything_else:
-      match_re: '^.*/(.*)'
-      name: '{}'
+  # - everything_else:
+  #     match_re: '^.*/(.*)'
+  #     name: '{}'
  

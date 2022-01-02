@@ -4,8 +4,20 @@ import re
 import os
 import logging
 
+from attr import define, field
+
 
 from . import config as megistos_config
+
+
+@define(kw_only=True)
+class Channel(object):
+    name: str        = field()
+    group_name: str  = field()
+    dev: str         = field()
+    config: dict     = field(repr=False)
+    modem_type: str  = field()
+    modem_def: dict  = field(repr=False)
 
 
 class Channels(object):
@@ -17,7 +29,7 @@ class Channels(object):
                 config = megistos_config.read_config(config_fname, megistos_config.BBSD_CONFIG_SCHEMA)
 
         try:
-            self.config = config['channels']
+            self.config = config
         except Exception as e:
             raise KeyError("parsed configuration is missing the 'channels' key")
 
@@ -31,11 +43,10 @@ class Channels(object):
         # If name starts with a /, this will do the right thing.
         path = os.path.join("/dev", name)
 
-        for group in self.config:
+        for group in self.config['channels']:
             # The YAML parser returns a dict with a single key.
             assert len(group) == 1
             channel_group_name, channel_group = list(group.items())[0]
-            print(channel_group_name, channel_group)
 
             regex = re.compile(channel_group['match_re'])
             m = regex.match(path)
@@ -44,8 +55,12 @@ class Channels(object):
                     channel_name = channel_group['name'].format(*m.groups())
                 except Exception as e:
                     raise ValueError(f"String format error in '{channel_group['name']}' (match_re groups: {m.groups()}): {e}")
-                print("NAME=",channel_name)
-                return channel_name, channel_group_name, channel_group
-                
-        
+
+                retval = Channel(dev=path, name=channel_name, group_name=channel_group_name, config=channel_group,
+                                 modem_type=channel_group.get('modem'),
+                                 modem_def = self.config.get('modems',dict()).get(channel_group.get('modem')))
+
+                return retval
+
+
 # End of file.
