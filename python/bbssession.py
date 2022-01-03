@@ -47,6 +47,7 @@ class BBSSession(MegistosProgram):
 
         self.pub_queue = asyncio.Queue()
         self.response_queue = asyncio.Queue()
+        self.modem_queue = False # This is used by the bbsgetty to chat with the modem.
         #self.bbsd_keepalive = None
 
 
@@ -122,6 +123,33 @@ class BBSSession(MegistosProgram):
     # BBSGETTY FUNCTIONALITY
     #
     ###############################################################################
+
+    def _bbsgetty_compile_script(self, script):
+        newscript = []
+        for i, instr in enumerate(script, 1):
+            opcode, arg = list(instr.items())[0]
+            if opcode == "expect":
+                try:
+                    arg = re.compile(arg)
+                except re.error as e:
+                    # The caller will make this more meaningful.
+                   raise re.error(f"script line {i} (\"{arg}\"): {e}")
+            # Note: we change from a singleton dict to a tuple. Much n icer.
+            newscript.append((opcode, arg))
+        return newscript
+
+
+    def bbsgetty_compile_scripts(self):
+        """Compile (and sanity-check) the init and answer scripts."""
+        for key in ["init_script", "incoming_call_script"]:
+            if key in self.channel.modem_def:
+                old_script = self.channel.modem_def[key]
+                try:
+                    self.channel.modem_def[key] = self._bbsgetty_compile_script(old_script)
+                except Exception as e:
+                    logging.critical(f"While parsing {key}: {e}")
+                    sys.exit(1)
+
 
     def bbsgetty_hangup_tty(self, fd):
         """Use termios to hang up a TTY."""
@@ -219,6 +247,18 @@ class BBSSession(MegistosProgram):
         t[6][termios.VMIN] = 1
         t[6][termios.VTIME] = 0
 
+        # And set some more sane defaults. These are mostly for when the TTY is
+        # cooked during our session, which won't be often.
+        t[6][termios.VINTR] = termios.CINTR
+        t[6][termios.VQUIT] = termios.CQUIT
+        t[6][termios.VERASE] = termios.CERASE
+        t[6][termios.VWERASE] = termios.CWERASE
+        t[6][termios.VKILL] = termios.CKILL
+        t[6][termios.VEOF] = termios.CEOF
+        t[6][termios.VSTOP] = termios.CSTOP
+        t[6][termios.VSTART] = termios.CSTART
+        t[6][termios.VSUSP] = termios.CSUSP
+
         for spec in specs:
             logging.debug(f"Processing spec {spec}")
 
@@ -268,26 +308,166 @@ class BBSSession(MegistosProgram):
         termios.tcsetattr(fd, termios.TCSANOW, t)
 
 
-    async def bbsgetty_run_script(self, script):
-        pass
+    async def bbsgetty_run_script(self, script, timeout=5):
+        self.modem_queue = asyncio.Queue()
+        self.bbsgetty_data = dict()
+
+        linebreaker = re.compile(b"^(.*)[\r\n]+(.*)")
+
+        for opcode, arg in script:
+            if opcode == "expect":
+                str_arg = arg.pattern # The argument is a regexp.
+            else:
+                str_arg = str(arg)
+            logging.debug("Executing script instruction: {} {}".format(opcode, str_arg))
+            if opcode == "timeout":
+                timeout = int(arg)
+            elif opcode == "wait":
+                await asyncio.sleep(arg)
+            elif opcode == "send":
+                process_arg = arg.encode("utf-8").decode("unicode_escape")
+                os.write(1, process_arg.encode("utf-8"))
+            elif opcode == "expect":
+                try:
+                    text = b''
+                    while True:
+                        # Wait for text, allow for timeouts.
+                        recv_chars = await asyncio.wait_for(self.modem_queue.get(), timeout=timeout)
+                        logging.debug(f"modem said: {recv_chars}")
+                        text += recv_chars
+                        # TODO: remove this
+                        if b'\003' in text:
+                            os.system("stty sane")
+                            sys.exit(0)
+
+                        # Process line by line
+                        if b'\n' not in text and b'\r' not in text:
+                            continue
+
+                        while True:
+                            m = linebreaker.match(text)
+                            if not m: # Sanity
+                                break
+
+                            line, text = m.groups()
+                            logging.debug(f"Match. Groups: {line}, {text}")
+
+                            # Attempt to match the pattern.
+                            m = arg.search(line.decode("utf-8"))
+                            if m:
+                                g = m.groupdict()
+                                self.bbsgetty_data.update(g)
+                                logging.debug(f"Found! Regexp groups: {json.dumps(g)}")
+                                logging.debug(self.bbsgetty_data)
+                                assert False, "Go to next isntruction"
+                                sys.exit(0)
+
+                except AssertionError:
+                    # Abused to break to next script instruction.
+                    continue
+
+                except asyncio.TimeoutError:
+                    logging.error(f"Timed out after {timeout}s. Script failed.")
+                    return False
+
+                except asyncio.CancelledError:
+                    raise
+        
+                except Exception as e:
+                    logging.exception(f"bbsgetty_run_script(): {e}")
+                    raise
+
+        return True
 
 
     async def bbsgetty_init_modem(self, script):
         if not script:
-            logging.info("This modem has no initialisation script, skipping init.")
+            logging.debug("This modem definition has no initialisation script, skipping init.")
             return
 
         logging.info("Initialising modem.")
-        await self.bbsgetty_run_script(script)
+        res = await self.bbsgetty_run_script(script)
+        if res:
+            logging.info("Modem initialised.")
+        else:
+            logging.critical("Failed to initialise modem, bailing out.")
+            sys.exit(1)
 
 
-    async def bbsgetty_answer_call(self):
-        pass
+    async def bbsgetty_wait_for_call(self, script):
+        if not script:
+            logging.debug("This modem definition has no answer script, won't wait.")
+            return
 
+        # Wait for a call. Time out (and re-initialise modem) after two minutes.
+        logging.info("Waiting for incoming call...")
+        res = await self.bbsgetty_run_script(script, timeout=120)
+        if res:
+            logging.info("Call connected!")
+            return True
+        else:
+            return False
+
+
+    def bbsgetty_update_baud(self, fd):
+        """Update the baud rate of the TTY based on any speed hints we got from the
+        modem CONNECT xxxx string (or otherwise, depending on answer
+        script. Reconfigure the TTY accordingly. On failure, log this as an
+        error but proceed anyway.
+        """
+
+        # What's the current TTY speed? Introspect termios to find out.
+        t = termios.tcgetattr(fd)
+        ospeed = t[5]
+        bps = None
+        for sym in dir(termios):
+            if sym[0] != "B":
+                continue
+            try:
+                bps = int(sym[1:])
+            except:
+                continue
+            if termios.__dict__.get(sym) == ospeed:
+                break
+        if bps is None:
+            logging.warning(f"Internal error: failed to get the current output speed of this line (ospeed was {ospeed}).")
+        else:
+            logging.debug(f"Current speed is {bps} bps (symbol termios.{sym})")
+
+        speed_bps = self.bbsgetty_data.get('speed_bps')
+        if speed_bps is None or speed_bps == 0:
+            logging.error("bps_lock is False, but incoming_call_script didn't detect the connection speed for us to set! Leaving it as-is.")
+            return
+        else:
+            try:
+                bps = int(speed_bps)
+                sym = "B" + str(bps)
+                # All pre MNP modems that require setting the bps rate here
+                # will report a standard modem speed. And anyway, if the OS
+                # doesn't know this speed, we can't really set it here.
+                if sym not in termios.__dict__:
+                    logging.critical(f"Speed {bps} is not supported. There is no symbol termios.{sym}!")
+                    sys.exit(1)
+
+                val = termios.__dict__[sym]
+
+                t[2] &= ~termios.CBAUD # c_flags
+                t[2] |= val
+                t[4] = val             # ispeed
+                t[5] = val             # ospeed
+
+                termios.tcsetattr(fd, termios.TCSANOW, t)
+                logging.info(f"Setting connection speed to {bps} (symbol termios.{sym} = {val})")
+
+            except Exception as e:
+                logging.critical(f"Failed to set speed!")
+                raise
+        
 
     async def bbsgetty(self):
         """Initialise the channel and wait for an incoming call. On channels without
-                   modems, this method returns immediately."""
+        modems, this method returns immediately.
+        """
 
         # No modem definition; no hassle.
         if self.channel.modem_def is None:
@@ -297,12 +477,16 @@ class BBSSession(MegistosProgram):
 
         logging.info(f"bbsgetty starting, device {self.channel.dev}, type {self.channel.modem_type}.")
 
+        # Verify the regular expressions in the scripts, and error out now, while it's still early.
+        self.bbsgetty_compile_scripts()
+
         # Hangup on startup?
         if mdef.get("hangup_on_startup", True):
             self.bbsgetty_hangup_tty(0)
 
         # Initialise the line.
-        self.bbsgetty_config_tty(0, mdef.get("initial"))
+        tty.setraw(0, when=termios.TCSANOW) # Start off with a raw TTY.
+        self.bbsgetty_config_tty(0, mdef.get("initial_tty_config"))
 
         # Initialise the modem.
         await self.bbsgetty_init_modem(mdef.get("init_script"))
@@ -310,8 +494,29 @@ class BBSSession(MegistosProgram):
         #run_script(mdef.get("init_script", []))
 
         # Wait for a ring, answer, and connect
-        await self.bbsgetty_answer_call()
-        logging.info(f"Connected.")
+        num_tries = 3
+        for i in range(num_tries):
+            res = await self.bbsgetty_wait_for_call(mdef.get("incoming_call_script"))
+            if res:
+                break
+            else:
+                if i + 1 < num_tries:
+                    logging.critical("Answer script failed. Trying again...")
+                else:
+                    logging.critical("Answer script failed for the last time. Bailing out.")
+                    sys.exit(1)
+
+        # Deallocate the bbsgetty input queue, and let the session handle input
+        # from now on.
+        del self.modem_queue
+        self.modem_queue = False
+
+        # Do we need to update the bps?
+        if not mdef.get("bps_lock", True):
+            self.bbsgetty_update_baud(0)
+
+        # Reconfigure the TTY with the final settings.
+        self.bbsgetty_config_tty(0, mdef.get("final_tty_config"))
 
         # Add the session loop now.
         self._mainloop.create_task(self.session())
@@ -353,11 +558,12 @@ class BBSSession(MegistosProgram):
             # loop.create_task(self.handle_bbsd_connection())
             # loop.create_task(self.receive_bbsd_messages())
 
+            loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
+
             loop.create_task(self.ticks())
             loop.create_task(self.bbsgetty())
 
-            loop.create_task(self.session())
-            loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
+            #loop.create_task(self.session())
 
             #loop.add_writer(sys.stdout.fileno(), self.handle_fd_write, sys.stdout.fileno())
             #loop.run_until_complete(self.session())
@@ -446,9 +652,9 @@ class BBSSession(MegistosProgram):
 
                     # What type of message is it?
                     if 'ok' in data:
-                        asyncio.create_task(self.response_queue.put(data))
+                        await self.response_queue.put(data)
                     elif 'ts' in data:
-                        asyncio.create_task(self.pub_queue.put(data))
+                        await self.pub_queue.put(data)
 
                 except json.decoder.JSONDecodeError as e:
                     response = dict(ok=False, err=repr(e))
@@ -483,9 +689,16 @@ class BBSSession(MegistosProgram):
 
 
     def handle_fd_read(self, fd):
-        data = os.read(fd, 8192)
+        data = os.read(fd, 40)
         if fd == 0:
-            os.write(self.pty_fd, data)
+
+            # A line initialisation script is running.
+            if self.modem_queue:
+                asyncio.create_task(self.modem_queue.put(data))
+
+            else:
+                os.write(self.pty_fd, data)
+
         if fd == 7:
             sys.stdout.write(data.decode("utf-8"))
             sys.stdout.flush()
@@ -493,8 +706,8 @@ class BBSSession(MegistosProgram):
         #     logging.debug(f"INPUT AVAILABLE: fd={fd}, data=\"{data}\"")
 
 
-    def handle_fd_write(self, fd):
-        pass
+    # def handle_fd_write(self, fd):
+    #     pass
 
 
     async def session(self):

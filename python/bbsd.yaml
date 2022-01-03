@@ -24,15 +24,16 @@ bbsd:
 #   speed to take advantage of compression. The default is True because you
 #   probably aren't using a pre-MNP 5 device.
 #
-# initial: a list of TERMIOS options to set prior to initialisation. Prepend a
-#   - to clear.
+# initial_tty_config: a list of TERMIOS options to set prior to
+#   initialisation. Prepend a - to clear.
 #
-# final: a list of TERMIOS options to set once the connection is
-#   established. If left out, no changes are made. Speed specifications (B38400
-#   etc) will only be honoured if bps_lock is True or if the the speed could
-#   not be discovered from the incoming_call_script. Note that once this is
-#   done, the BBS session will put the terminal in raw mode, potentially
-#   changing some of these options.
+# final_tty_config: a list of TERMIOS options to set once the
+#   connection is established. If left out, no changes are made. Speed
+#   specifications (B38400 etc) will only be honoured if bps_lock is
+#   True or if the the speed could not be discovered from the
+#   incoming_call_script. Note that once this is done, the BBS session
+#   will put the terminal in raw mode, potentially changing some of
+#   these options.
 #
 # init_script: a list of key-value singletons specifying a modem initialisation
 #   script. The following keys and values are available:
@@ -59,16 +60,19 @@ bbsd:
 #
 #   - caller_id -- to capture the number of the caller.
 #
-#   - speed -- to capture the speed of the connection.  This is required if
+#   - speed_bps -- to capture the speed of the connection.  This is required if
 #     bps_lock is False, otherwise the serial port speed won't change to match
 #     the modem connection speed.
+#
+#   - Any other named capture group will be used to update the
+#     bbsgetty_data structure that's made available to the session. 
 #
 #   If incoming_call_script is left out, the BBS login screen is shown
 #   immediately.
 
 modems:
   serial_115200:
-    initial:
+    initial_tty_config:
       - B115200
       - HUPCL
       - -ISTRIP
@@ -76,12 +80,12 @@ modems:
   maxan2400:
     hangup_on_startup: True
     bps_lock: True
-    initial:
+    initial_tty_config:
       - B9600
       - CS8
       - HUPCL
       - -ISTRIP
-    # final:
+    # final_tty_config:
     #   - B9600
     #   - CS8
     #   - HUPCL
@@ -99,17 +103,18 @@ modems:
     incoming_call_script:
       - expect: '^RING(;(?P<caller_id>.+))?$'
       - send: 'ATA\r\n'
-      - expect: 'CONNECT(\s+(?P<speed>.+))?'
+      - expect: 'CONNECT(\s+(?P<speed_bps>.+))?'
       - wait: 1
 
   zyxel_u1496e:
     hangup_on_startup: True
-    bps_lock: True
-    initial:
+    bps_lock: False
+    initial_tty_config:
       - B38400
       - CS8
       - HUPCL
       - -ISTRIP
+      - OPOST
     init_script:
       - timeout: 5
       - wait: 1
@@ -124,7 +129,7 @@ modems:
     incoming_call_script:
       - expect: '^RING(;(?P<caller_id>.+))?$'
       - send: 'ATA\r\n'
-      - expect: 'CONNECT(\s+(?P<speed>.+))?'
+      - expect: 'CONNECT(\s+(?P<speed_bps>.+))?'
       - wait: 2
 
 

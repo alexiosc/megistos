@@ -33,7 +33,7 @@ TERMIOS_SCHEMA = {
 
 INIT_SCRIPT_SCHEMA = {
     'schema': {
-        'wait': dict(type='integer'),
+        'wait': dict(type='float'),
         'send': dict(type='string'),
         'expect': dict(type='string'),
         'timeout': dict(type='integer', min=0.00001),
@@ -58,8 +58,8 @@ BBSD_CONFIG_SCHEMA = {
             'schema': {
                 'bps_lock':             dict(type='boolean', default=True),
                 'hangup_on_startup':    dict(type='boolean', default=True),
-                'initial':              dict(type='list', schema=TERMIOS_SCHEMA),
-                'final':                dict(type='list', schema=TERMIOS_SCHEMA),
+                'initial_tty_config':   dict(type='list', schema=TERMIOS_SCHEMA),
+                'final_tty_config':     dict(type='list', schema=TERMIOS_SCHEMA),
                 'init_script':          dict(type='list', schema=INIT_SCRIPT_SCHEMA),
                 'incoming_call_script': dict(type='list', schema=INIT_SCRIPT_SCHEMA),
             }
