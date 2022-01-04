@@ -21,7 +21,7 @@ from . import channels
 class BBSGetty(object):
     """The BBSGetty is a module that replaces the original C-based bbsgetty
     program, itself a fork of the venerable but modem-oriented uugetty.
-    
+
     It's responsible for initialising a modem and waiting for a connection.
     """
 
@@ -99,7 +99,7 @@ class BBSGetty(object):
         # No specs, no work.
         if not specs:
             return
-        
+
         iflags = re.compile(r'^-?(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR|ICRNL|IUCLC|IXON|IXANY|IXOFF|IMAXBEL|IUTF8)$')
         oflags = re.compile(r'^-?(OPOST|OLCUC|ONLCR|OCRNL|ONOCR|ONLRET|OFILL|OFDEL)$')
         cflags = re.compile(r'^-?(CSTOPB|CREAD|PARENB|PARODD|HUPCL|CLOCAL|LOBLK|CMSPAR|CRTSCTS)$')
@@ -188,17 +188,17 @@ class BBSGetty(object):
                 logging.debug(f"iflags: {t[0]:>032b}")
                 t[0] = process_flag(t[0], spec)
                 logging.debug(f"iflags: {t[0]:>032b} {spec}")
-                    
+
             if oflags.match(spec):
                 logging.debug(f"oflags: {t[1]:>032b}")
                 t[1] = process_flag(t[1], spec)
                 logging.debug(f"oflags: {t[1]:>032b} {spec}")
-                    
+
             if cflags.match(spec):
                 logging.debug(f"cflags: {t[2]:>032b}")
                 t[2] = process_flag(t[2], spec)
                 logging.debug(f"cflags: {t[2]:>032b} {spec}")
-                    
+
             if lflags.match(spec):
                 logging.debug(f"lflags: {t[3]:>032b}")
                 t[3] = process_flag(t[3], spec)
@@ -269,15 +269,15 @@ class BBSGetty(object):
                                 break
 
                             line, text = m.groups()
-                            logging.debug(f"Match. Groups: {line}, {text}")
+                            logging.debug("Match. Groups: %s, %s", line, text)
 
                             # Attempt to match the pattern.
                             m = arg.search(line.decode("utf-8"))
                             if m:
                                 g = m.groupdict()
                                 self.data.update(g)
-                                logging.debug(f"Found! Regexp groups: {json.dumps(g)}")
-                                logging.debug(f"Data gathered so far: {json.dumps(self.data)}")
+                                logging.debug("Found! Regexp groups: %s", json.dumps(g))
+                                logging.debug("Data gathered so far: %s", json.dumps(self.data))
                                 assert False, "Go to next isntruction"
                                 sys.exit(0)
 
@@ -286,14 +286,14 @@ class BBSGetty(object):
                     continue
 
                 except asyncio.TimeoutError:
-                    logging.error(f"Timed out after {timeout}s. Script failed.")
+                    logging.error("Timed out after %.2fs. Script failed.", timeout)
                     return False
 
                 except asyncio.CancelledError:
                     raise
-        
+
                 except Exception as e:
-                    logging.exception(f"bbsgetty.run_script(): {e}")
+                    logging.exception("bbsgetty.run_script(): %s", e)
                     raise
 
         return True
@@ -381,7 +381,7 @@ class BBSGetty(object):
             except Exception as e:
                 logging.critical(f"Failed to set speed!")
                 raise
-        
+
 
     async def run(self):
         """Initialise the channel and wait for an incoming call. On channels without
@@ -432,7 +432,7 @@ class BBSGetty(object):
                 sys.exit(1)
 
         await self.bbsd.set_channel_state(channels.CARRIER)
-        
+
         # Deallocate the bbsgetty input queue, and let the session handle input
         # from now on.
         del self.input

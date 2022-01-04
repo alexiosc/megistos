@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
 import asyncio
-import ctypes
 import fcntl
-import json
 import logging
 import os
-import pty
-import re
 import signal
 import struct
 import sys
@@ -54,6 +50,7 @@ class BBSSession(MegistosProgram):
         # sys.exit(0)
 
         self.old_termios = termios.tcgetattr(0)
+        self._mainloop = None
 
 
     def parse_command_line(self):
@@ -77,7 +74,8 @@ class BBSSession(MegistosProgram):
         return self.args
 
 
-    def handle_exception(self, loop, context):
+    # TODO: decide what dto do with this. (task_logger makes it somewhat obsolete)
+    def handle_exception(self, context):
         msg = context.get("exception", context["message"])
         # if 'exception' in context:
         #     import pprint
@@ -94,8 +92,11 @@ class BBSSession(MegistosProgram):
         self._mainloop.stop()
 
 
-    async def shutdown(self, signal=None, failure_msg=None):
+    async def shutdown(self, signal=None, failure_msg:str=None):
         """Cleanup tasks tied to the service's shutdown."""
+
+        if failure_msg:
+            logging.info("%s. Shutting down.", failure_msg)
 
         self.done = True
 
@@ -165,7 +166,7 @@ class BBSSession(MegistosProgram):
                 s, lambda s=s: create_task(self.shutdown(signal=s)))
         #loop.set_exception_handler(self.handle_exception)
         return loop
-        
+
 
     def run(self):
         # Get the channel name.
@@ -222,13 +223,13 @@ class BBSSession(MegistosProgram):
                 # Restore original termios settings
                 termios.tcsetattr(0, termios.TCSAFLUSH, self.old_termios)
 
-                logging.info(f"Session ended (server side).")
+                logging.info("Session ended (server side).")
                 create_task(self.shutdown(failure_msg="End of session"))
                 return
-            
+
         if fd == 0:
             # If BBSGetty is still running, send all line traffic to it.
-            if self.bbsgetty is not None and self.bbsgetty.done == False:
+            if self.bbsgetty is not None and not self.bbsgetty.done:
                 create_task(self.bbsgetty.input.put(data))
             else:
                 os.write(self.pty_fd, data)
@@ -270,7 +271,7 @@ class BBSSession(MegistosProgram):
         try:
             cols, rows = os.get_terminal_size()
             assert cols > 0 and rows > 0
-        except:
+        except Exception as e:
             cols, rows = 80, 24 # Sane defaults if this didn't work.
 
         pid, fd = os.forkpty()
@@ -285,7 +286,7 @@ class BBSSession(MegistosProgram):
             #logging.debug(f"ptsname({fd}) = {ptsname(fd)}")
 
         except Exception as e:
-            logging.debug(f"Failed to get pts name: {e}")
+            logging.debug("Failed to get pts name: %s", e)
 
         self.pty_fd = fd
 
@@ -304,8 +305,8 @@ class BBSSession(MegistosProgram):
             env = os.environ
             env["PROMPT_SUBSHELL_LEVEL"] = "2"
             env["MEG_CHANNEL"] = self.channel.name
-            env["MEG_SPEED_BPS"] = self.bbsgetty.data.get("speed_bps", "")
-            env["MEG_CALLER_ID"] = self.bbsgetty.data.get("caller_id", "")
+            env["MEG_SPEED_BPS"] = self.bbsgetty.data.get("speed_bps", "") or ""
+            env["MEG_CALLER_ID"] = self.bbsgetty.data.get("caller_id", "") or ""
             env["BAUD"] = env["MEG_SPEED_BPS"] # This is for legacy compatibility
             os.execvpe("/bin/bash", ["bash", "--login"], env)
             # The child process never gets to this line.
