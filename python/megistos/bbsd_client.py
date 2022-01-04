@@ -15,14 +15,16 @@ import termios
 import tty
 
 
+from .task_logger import create_task
+
+
 class BBSDClient(object):
     """Functionality used to talk to the bbsd.
     """
 
-    def __init__(self, config, channel, loop):
+    def __init__(self, config, channel):
         self.config = config
         self.channel = channel
-        self.loop = loop
         self.connection = None
         self.pub_queue = asyncio.Queue()
         self.response_queue = asyncio.Queue()
@@ -46,11 +48,11 @@ class BBSDClient(object):
             self.connection = (reader, writer)
 
             # This task parses incoming text from the connection.
-            self.loop.create_task(self.handle_bbsd_connection())
+            create_task(self.handle_bbsd_connection())
 
             # A separate task handles messages received from bbsd. (this is
             # under review for merging with the previous task)
-            self.loop.create_task(self.receive_bbsd_messages())
+            create_task(self.receive_bbsd_messages())
 
             return reader, writer
 
@@ -110,6 +112,8 @@ class BBSDClient(object):
 
 
     async def receive_bbsd_messages(self):
+        reader, writer = self.connection
+        
         # TODO: make this do some actual work. Somehow.
         try:
             while True:

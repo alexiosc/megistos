@@ -131,7 +131,7 @@ modems:
       - expect: '^RING(;(?P<caller_id>.+))?$'
       - send: 'ATA\r\n'
       - expect: 'CONNECT(\s+(?P<speed_bps>.+))?'
-      - wait: 2                   # For debugging
+      - wait: 1                   # For debugging
 
 
 ###############################################################################

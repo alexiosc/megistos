@@ -252,7 +252,7 @@ class BBSGetty(object):
                     while True:
                         # Wait for text, allow for timeouts.
                         recv_chars = await asyncio.wait_for(self.input.get(), timeout=timeout)
-                        logging.debug(f"modem said: {recv_chars}")
+                        #logging.debug(f"modem said: {recv_chars}")
                         text += recv_chars
                         # TODO: remove this
                         if b'\003' in text:
@@ -277,7 +277,7 @@ class BBSGetty(object):
                                 g = m.groupdict()
                                 self.data.update(g)
                                 logging.debug(f"Found! Regexp groups: {json.dumps(g)}")
-                                logging.debug(self.data)
+                                logging.debug(f"Data gathered so far: {json.dumps(self.data)}")
                                 assert False, "Go to next isntruction"
                                 sys.exit(0)
 
@@ -392,6 +392,7 @@ class BBSGetty(object):
 
         # No modem definition; no hassle.
         if self.channel.modem_def is None:
+            self.done = True
             return
 
         mdef = self.channel.modem_def

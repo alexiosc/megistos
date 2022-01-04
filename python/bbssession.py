@@ -22,7 +22,7 @@ from megistos import MegistosProgram
 from megistos import config
 from megistos.bbsgetty import BBSGetty
 from megistos.bbsd_client import BBSDClient
-
+from megistos.task_logger import create_task
 
 class BBSSession(MegistosProgram):
     """
@@ -41,6 +41,9 @@ class BBSSession(MegistosProgram):
 
         self.bbsd = None
         self.channel = None
+        self.bbsgetty = None
+        self.pty_fd = None
+        self.done = False
 
         self.parse_command_line()
 
@@ -50,8 +53,6 @@ class BBSSession(MegistosProgram):
         # pprint.pprint(self.config, width=200)
         # sys.exit(0)
 
-        # No BBSGetty for now. We'll initialise one if needed.
-        self.bbsgetty = None
 
 
     def parse_command_line(self):
@@ -77,18 +78,25 @@ class BBSSession(MegistosProgram):
 
     def handle_exception(self, loop, context):
         msg = context.get("exception", context["message"])
-        if 'exception' in context:
-            print(type(context['exception']))
-            import traceback
-            print(traceback.format_exc(context['exception']))
+        # if 'exception' in context:
+        #     import pprint
+        #     pprint.pprint(context['exception'])
+        #     import traceback
+        #     print(traceback.format_exception(context['exception'], None, True))
 
         logging.critical(f"Caught exception: {msg}")
         logging.info("Shutting down...")
-        asyncio.create_task(self.shutdown(loop, failure_msg=msg))
+        create_task(self.shutdown(failure_msg=msg))
 
 
-    async def shutdown(self, loop, signal=None, failure_msg=None):
+    async def _shutdown(self):
+        self._mainloop.stop()
+
+
+    async def shutdown(self, signal=None, failure_msg=None):
         """Cleanup tasks tied to the service's shutdown."""
+
+        self.done = True
 
         # Try to update the channel status. Ignore all exceptions at this point.
         # if self.bbsd is not None and self.channel is not None:
@@ -101,22 +109,28 @@ class BBSSession(MegistosProgram):
         #         await asyncio.gather(task)
         #     except:
         #         pass
-        
+
         if signal:
             logging.info(f"Received exit signal {signal.name}...")
 
         tasks = [t for t in asyncio.all_tasks() if t is not
                  asyncio.current_task()]
 
-        #await asyncio.gather(*tasks, return_exceptions=True)
+        for task in tasks:
+            task.cancel()
+
+        #await asyncio.gather(*tasks)
         #logging.info(f"Flushing metrics")
-        loop.stop()
+        asyncio.ensure_future(self._shutdown())
 
 
     def terminal_resized(self):
         """Handle the WINCH signal, issued when the terminal emulator window
         has changed size.  Pass this onto the session.
         """
+        if self.pty_fd is None:
+            return
+
         try:
             cols, rows = os.get_terminal_size()
             if cols > 0 and rows > 0:
@@ -147,8 +161,8 @@ class BBSSession(MegistosProgram):
         signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
         for s in signals:
             loop.add_signal_handler(
-                s, lambda s=s: asyncio.create_task(self.shutdown(loop, signal=s)))
-        loop.set_exception_handler(self.handle_exception)
+                s, lambda s=s: create_task(self.shutdown(signal=s)))
+        #loop.set_exception_handler(self.handle_exception)
         return loop
         
 
@@ -169,8 +183,8 @@ class BBSSession(MegistosProgram):
         try:
             loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
 
-            loop.create_task(self.ticks())
-            loop.create_task(self.session())
+            create_task(self.ticks(), loop=loop)
+            create_task(self.session(), loop=loop)
 
             #loop.add_writer(sys.stdout.fileno(), self.handle_fd_write, sys.stdout.fileno())
             #loop.run_until_complete(self.session())
@@ -183,22 +197,39 @@ class BBSSession(MegistosProgram):
 
     async def ticks(self):
         while True:
-            await asyncio.sleep(3)
-            logging.debug("Tick!")
+            await asyncio.sleep(5)
+            #logging.debug("Tick!")
             # for x in asyncio.all_tasks():
             #     logging.debug(f"  running task: {x.cancelled():<5} {x.get_coro()}")
 
 
     def handle_fd_read(self, fd):
-        data = os.read(fd, 40)
-        if fd == 0:
+        if self.done:
+            return
 
+        try:
+            data = os.read(fd, 8192)
+
+        except OSError as e:
+            if e.args[0] == 5:
+                # Attempt to hangup. The OS will also hang up modem lines via
+                # modem control signalling when we quit. This does nothing on
+                # terminal emulators.
+                if self.bbsgetty:
+                    self.bbsgetty.hangup(0)
+                os.system("stty sane")
+                logging.info(f"Session ended (server side).")
+                create_task(self.shutdown(failure_msg="End of session"))
+                return
+            
+        if fd == 0:
             # If BBSGetty is still running, send all line traffic to it.
             if self.bbsgetty is not None and self.bbsgetty.done == False:
-                asyncio.create_task(self.bbsgetty.input.put(data))
+                create_task(self.bbsgetty.input.put(data))
             else:
                 os.write(self.pty_fd, data)
 
+        # TODO: FIX THIS.
         if fd == 7:
             sys.stdout.write(data.decode("utf-8"))
             sys.stdout.flush()
@@ -212,7 +243,7 @@ class BBSSession(MegistosProgram):
 
     async def session(self):
         # Connect to BBSD.
-        self.bbsd = BBSDClient(self.config, self.channel, self._mainloop)
+        self.bbsd = BBSDClient(self.config, self.channel)
         await self.bbsd.connect()
 
         # We'll need a BBSGetty. Let it decide if it needs to do
@@ -264,7 +295,15 @@ class BBSSession(MegistosProgram):
                 logging.warning(f"Failed to set pseudoterminal size to {cols}x{rows}: {e}")
 
             sys.stderr.flush()
-            os.execvp("/bin/bash", ["bash", "--login"])
+
+            # Set up the environment
+            env = os.environ
+            env["PROMPT_SUBSHELL_LEVEL"] = "2"
+            env["MEG_CHANNEL"] = self.channel.name
+            env["MEG_SPEED_BPS"] = self.bbsgetty.data.get("speed_bps", "")
+            env["MEG_CALLER_ID"] = self.bbsgetty.data.get("caller_id", "")
+            env["BAUD"] = env["MEG_SPEED_BPS"] # This is for legacy compatibility
+            os.execvpe("/bin/bash", ["bash", "--login"], env)
             # The child process never gets to this line.
 
         else:

@@ -3,6 +3,7 @@
 import argparse
 
 from . import logging
+from .task_logger import create_task
 
 class MegistosProgram:
     def __init__(self):
