@@ -52,11 +52,13 @@ bbsd:
 #
 #   If init_script is left out, no initialisation is performed.
 #
-# incoming_call_script: similar to init_script, after initialisation this
-#   script is executed to detect incoming calls. The script MUST start with an
-#   ‘expect’ instruction. Any ‘send’ instructions before the first ‘expect’
-#   instruction will be ignored. Regular expressions in this script may
-#   contains named capture groups with the following names:
+# answer_script: similar to init_script. After initialisation, the
+#   answer_script is executed to detect incoming calls. The script should
+#   succeed when a connection has been established. On Hayes style modems set
+#   to not auto-answer, it should wait for RING, send ATA, then expect
+#   CARRIER. With auto-answer, CARRIER is enough. If you have caller ID, you
+#   can also expect that pattern and store it using the magic regular
+#   expcession capture groups:
 #
 #   - caller_id -- to capture the number of the caller.
 #
@@ -67,8 +69,7 @@ bbsd:
 #   - Any other named capture group will be used to update the
 #     bbsgetty_data structure that's made available to the session. 
 #
-#   If incoming_call_script is left out, the BBS login screen is shown
-#   immediately.
+#   If the ring_script is left out, the BBS login screen is shown immediately.
 
 modems:
   serial_115200:
@@ -100,7 +101,7 @@ modems:
       - expect: '^OK'
       - send: 'ATS0=0 L3 M3\r\n'
       - expect: '^OK'
-    incoming_call_script:
+    answer_script:
       - expect: '^RING(;(?P<caller_id>.+))?$'
       - send: 'ATA\r\n'
       - expect: 'CONNECT(\s+(?P<speed_bps>.+))?'
@@ -108,13 +109,13 @@ modems:
 
   zyxel_u1496e:
     hangup_on_startup: True
-    bps_lock: False
+    bps_lock: True
     initial_tty_config:
       - B38400
       - CS8
       - HUPCL
       - -ISTRIP
-      - OPOST
+      - OPOST                   # For debugging
     init_script:
       - timeout: 5
       - wait: 1
@@ -126,11 +127,11 @@ modems:
       - expect: '^OK'
       - send: 'ATE0S2=255 M0&N0X7 S0=0\r\n'
       - expect: '^OK'
-    incoming_call_script:
+    answer_script:
       - expect: '^RING(;(?P<caller_id>.+))?$'
       - send: 'ATA\r\n'
       - expect: 'CONNECT(\s+(?P<speed_bps>.+))?'
-      - wait: 2
+      - wait: 2                   # For debugging
 
 
 ###############################################################################

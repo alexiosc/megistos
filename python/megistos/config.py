@@ -33,14 +33,14 @@ TERMIOS_SCHEMA = {
 
 INIT_SCRIPT_SCHEMA = {
     'schema': {
-        'wait': dict(type='float'),
-        'send': dict(type='string'),
-        'expect': dict(type='string'),
+        'wait':    dict(type='float'),
+        'send':    dict(type='string'),
+        'expect':  dict(type='string'),
         'timeout': dict(type='integer', min=0.00001),
     }
 }
 
-BBSD_CONFIG_SCHEMA = {
+CONFIG_SCHEMA = {
     'bbsd': {
         'type': 'dict',
         'schema': {
@@ -61,7 +61,7 @@ BBSD_CONFIG_SCHEMA = {
                 'initial_tty_config':   dict(type='list', schema=TERMIOS_SCHEMA),
                 'final_tty_config':     dict(type='list', schema=TERMIOS_SCHEMA),
                 'init_script':          dict(type='list', schema=INIT_SCRIPT_SCHEMA),
-                'incoming_call_script': dict(type='list', schema=INIT_SCRIPT_SCHEMA),
+                'answer_script':        dict(type='list', schema=INIT_SCRIPT_SCHEMA),
             }
         }
     },

@@ -10,6 +10,15 @@ from attr import define, field
 from . import config as megistos_config
 
 
+STARTED = "started"             # Session manager started
+INIT    = "init"                # Initialising modem
+READY   = "ready"               # Ready and waiting for call
+ANSWER  = "answer"              # Incoming call being answered (ATA)
+CARRIER = "carrier"             # Call connected (CONNECT)
+LOGIN   = "login"               # Session started, now at bbslogin.
+FAILED  = "fail"                # Failed to start session
+
+
 @define(kw_only=True)
 class Channel(object):
     name: str        = field()

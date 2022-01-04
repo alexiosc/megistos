@@ -49,7 +49,6 @@ class Connection:
 
 
     def __del__(self):
-        print("******")
         self.dequeuer.cancel()  # Probably not necessary
         del self.queue
         
@@ -118,7 +117,7 @@ class BBSD(MegistosProgram):
         self.parse_command_line()
 
         # Read the configuration, keep only the bbsd section.
-        c = config.read_config(self.args.config, config.BBSD_CONFIG_SCHEMA)
+        c = config.read_config(self.args.config, config.CONFIG_SCHEMA)
         self.config = c['bbsd']
 
         self.connection_id = 0
