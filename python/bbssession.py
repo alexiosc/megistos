@@ -53,6 +53,7 @@ class BBSSession(MegistosProgram):
         # pprint.pprint(self.config, width=200)
         # sys.exit(0)
 
+        self.old_termios = termios.tcgetattr(0)
 
 
     def parse_command_line(self):
@@ -217,7 +218,10 @@ class BBSSession(MegistosProgram):
                 # terminal emulators.
                 if self.bbsgetty:
                     self.bbsgetty.hangup(0)
-                os.system("stty sane")
+
+                # Restore original termios settings
+                termios.tcsetattr(0, termios.TCSAFLUSH, self.old_termios)
+
                 logging.info(f"Session ended (server side).")
                 create_task(self.shutdown(failure_msg="End of session"))
                 return
