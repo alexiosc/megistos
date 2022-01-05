@@ -23,6 +23,7 @@ import cerberus
 from megistos import MegistosProgram
 from megistos import config
 import megistos.validation
+import megistos.channels
 
 
 """
@@ -59,7 +60,7 @@ class Connection:
 
     def __repr__(self):
         return f"Connection #{self.connection_id} " + \
-            f"(TTY {self.channel}, PID {self.pid}, User {self.username})"
+            f"(Chan {self.channel}, PID {self.pid}, User {self.username})"
 
 
     async def dequeuer(self, connection_id, reader, writer):
@@ -236,6 +237,13 @@ class BBSD(MegistosProgram):
 
         finally:
             logging.info(f"{conn!r} ended")
+
+            # Let everyone know this channel is cleared.
+            if conn.channel:
+                self.publish({"op":"pub",
+                              "t":"channel/" + str(conn.channel) + "/state",
+                              "d":{"state":megistos.channels.CLEARED}},
+                             conn)
 
             # Remove this connection ID from all subscriptions.
             for sub in self.subscriptions.values():

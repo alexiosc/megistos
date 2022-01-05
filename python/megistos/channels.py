@@ -17,6 +17,7 @@ ANSWER  = "answer"              # Incoming call being answered (ATA)
 CARRIER = "carrier"             # Call connected (CONNECT)
 LOGIN   = "login"               # Session started, now at bbslogin.
 FAILED  = "fail"                # Failed to start session
+CLEARED = "cleared"             # Connection cleared (session ended)
 
 
 @define(kw_only=True)
