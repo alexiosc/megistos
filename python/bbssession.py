@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import asyncio
 import fcntl
 import logging
@@ -40,6 +41,7 @@ class BBSSession(MegistosProgram):
         self.bbsgetty = None
         self.pty_fd = None
         self.done = False
+        self._exitcode = 0
 
         self.parse_command_line()
 
@@ -74,8 +76,7 @@ class BBSSession(MegistosProgram):
         return self.args
 
 
-    # TODO: decide what dto do with this. (task_logger makes it somewhat obsolete)
-    def handle_exception(self, context):
+    def handle_exception(self, loop, context):
         msg = context.get("exception", context["message"])
         # if 'exception' in context:
         #     import pprint
@@ -83,16 +84,24 @@ class BBSSession(MegistosProgram):
         #     import traceback
         #     print(traceback.format_exception(context['exception'], None, True))
 
-        logging.critical(f"Caught exception: {msg}")
+        logging.critical(f"Exception was never caught: {msg}")
         logging.info("Shutting down...")
-        create_task(self.shutdown(failure_msg=msg))
+        #create_task(self.shutdown(failure_msg=msg))
+
+
+    def fail(self, exitcode=1):
+        self._exitcode = exitcode
+        if self._mainloop is not None:
+            self._mainloop.create_task(self.shutdown())
+        else:
+            sys.exit(self._exitcode)
 
 
     async def _shutdown(self):
         self._mainloop.stop()
 
 
-    async def shutdown(self, signal=None, failure_msg:str=None):
+    async def shutdown(self, signal=None, failure_msg: str=None):
         """Cleanup tasks tied to the service's shutdown."""
 
         if failure_msg:
@@ -149,7 +158,7 @@ class BBSSession(MegistosProgram):
         self.channel = self.channels.dev_path_to_channel(self.args.dev)
         if self.channel is None:
             logging.critical(f"No channel matched device '{self.args.dev}'")
-            sys.exit(1)
+            self.fail()
 
 
     ###############################################################################
@@ -164,25 +173,20 @@ class BBSSession(MegistosProgram):
         for s in signals:
             loop.add_signal_handler(
                 s, lambda s=s: create_task(self.shutdown(signal=s)))
-        #loop.set_exception_handler(self.handle_exception)
+        loop.set_exception_handler(self.handle_exception)
         return loop
 
 
     def run(self):
-        # Get the channel name.
-        # self.tty_name = self.args.dev
-        # if self.tty_name is None:
-        #     self.tty_name = os.ttyname(sys.stdin.fileno())
-
-        # Initialise the main loop
-        self._mainloop = loop = self.init_mainloop()
-
-        # Initialise other stuff
-        self.init_channels()
-
-        loop.add_signal_handler(signal.SIGWINCH, self.terminal_resized)
-
         try:
+            # Initialise the main loop
+            self._mainloop = loop = self.init_mainloop()
+
+            # Initialise other stuff
+            self.init_channels()
+
+            loop.add_signal_handler(signal.SIGWINCH, self.terminal_resized)
+
             loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
 
             create_task(self.ticks(), loop=loop)
@@ -192,9 +196,17 @@ class BBSSession(MegistosProgram):
             #loop.run_until_complete(self.session())
             loop.run_forever()
 
+        except SystemExit as e:
+            if self._mainloop is not None:
+                loop.close()
+            raise
+
         finally:
-            loop.close()
-            logging.info("Done.")
+            if self._mainloop is not None:
+                loop.close()
+            if self._exitcode == 0:
+                logging.info("Done.")
+            sys.exit(self._exitcode)
 
 
     async def ticks(self):
@@ -248,17 +260,23 @@ class BBSSession(MegistosProgram):
 
     async def session(self):
         # Connect to BBSD.
-        self.bbsd = BBSDClient(self.config, self.channel)
-        await self.bbsd.connect()
+        try:
+            self.bbsd = BBSDClient(self.config, self.channel)
+            await self.bbsd.connect()
 
-        # We'll need a BBSGetty. Let it decide if it needs to do
-        # anything for this channel.
-        self.bbsgetty = BBSGetty(self.config, self.bbsd, self.channel)
-        await self.bbsgetty.run()
+            # We'll need a BBSGetty. Let it decide if it needs to do
+            # anything for this channel.
 
-        # Session started
-        logging.info(f"Started session on {self.channel.name} ({self.channel.group_name})")
-        await self.bbsd.set_channel_state(megistos.channels.LOGIN, data=self.bbsgetty.data)
+            self.bbsgetty = BBSGetty(self.config, self.bbsd, self.channel)
+            await self.bbsgetty.run()
+
+            # Session started
+            logging.info(f"Started session on {self.channel.name} ({self.channel.group_name})")
+            await self.bbsd.set_channel_state(megistos.channels.LOGIN, data=self.bbsgetty.data)
+
+        except SystemExit as e:
+            self.fail()
+            return
 
         # ..
 

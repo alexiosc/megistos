@@ -55,7 +55,7 @@ class BBSGetty(object):
                     arg = re.compile(arg)
                 except re.error as e:
                     # The caller will make this more meaningful.
-                   raise re.error(f"script line {i} (\"{arg}\"): {e}")
+                    raise re.error(f"script line {i} (\"{arg}\"): {e}")
             # Note: we change from a singleton dict to a tuple. Much n icer.
             newscript.append((opcode, arg))
         return newscript
@@ -305,8 +305,8 @@ class BBSGetty(object):
             return
 
         logging.info("Initialising modem.")
-        res = await self.run_script(script)
-        if res:
+        success = await self.run_script(script)
+        if success:
             logging.info("Modem initialised.")
         else:
             logging.critical("Failed to initialise modem, bailing out.")
@@ -320,12 +320,11 @@ class BBSGetty(object):
 
         # Wait for a call. Time out (and re-initialise modem) after two minutes.
         logging.info("Waiting for incoming call...")
-        res = await self.run_script(script, timeout=120)
-        if res:
+        success = await self.run_script(script, timeout=120)
+        if success:
             logging.info("Call connected!")
             return True
-        else:
-            return False
+        return False
 
 
     def update_baud(self, fd):
@@ -422,11 +421,11 @@ class BBSGetty(object):
         for i in range(num_tries):
             # Execute the answer_script to wait for an incoming call and answer it
             script = mdef.get("answer_script")
-            res = await self.wait_for_call(script)
-            if res:
+            success = await self.wait_for_call(script)
+            if success:
                 break
-            elif i + 1 < num_tries:
-                logging.critical("Answer script failed. Trying again...")
+            if i + 1 < num_tries:
+                logging.error("Answer script failed. Trying again...")
             else:
                 logging.critical("Answer script failed for the last time. Bailing out.")
                 sys.exit(1)
