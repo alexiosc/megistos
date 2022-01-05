@@ -377,8 +377,10 @@ class BBSD(MegistosProgram):
         except KeyError:
             return dict(ok=False, err="Missing d")
 
+        # If no UUID was supplied, create one now.
+        u = data.get('u', str(uuid.uuid4()))
+
         # Create the message.
-        u = str(uuid.uuid4())
         message = dict(p=connection_id, t=topic, u=u, ts=time.time(), d=payload)
         str_message = json.dumps(message, separators=(',',':')) + "\n"
         logging.debug(f"Publishing {str_message}")

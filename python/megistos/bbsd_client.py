@@ -14,7 +14,6 @@ import sys
 import termios
 import tty
 
-
 from .task_logger import create_task
 
 
