@@ -107,21 +107,20 @@ static const char rcsinfo[] =
     "$Id: input.c,v 2.0 2004/09/13 19:44:34 alexios Exp $";
 
 
-#define WANT_STDLIB_H 1
-#define WANT_STDIO_H 1
-#define WANT_UNISTD_H 1
-#define WANT_STRING_H 1
-#define WANT_CTYPE_H 1
-#define WANT_SYS_TYPES_H 1
-#define WANT_TERMIOS_H 1
-#define WANT_FCNTL_H 1
-#define WANT_SYS_STAT_H 1
-#define WANT_SYS_IPC_H 1
-#define WANT_SYS_SHM_H 1
-#define WANT_SYS_MSG_H 1
-#define WANT_ERRNO_H 1
-#define WANT_SEND_OUT 1
-#include <megistos/bbsinclude.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdint.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/msg.h>
+#include <sys/time.h>
+// #include <megistos/bbsinclude.h>
 
 #include <megistos/config.h>
 #include <megistos/errors.h>
@@ -171,19 +170,26 @@ initmonitor ()
 {
 	FILE   *fp;
 	int     shmid;
+	char  * fname = mkfname (MONITORFILE);
 
 	strcpy (montty, getenv ("CHANNEL"));
-
-	if ((fp = fopen (mkfname (MONITORFILE), "r")) == NULL) {
-		error_fatalsys ("Unable to open %s", mkfname (MONITORFILE));
+	if ((fp = fopen (fname, "r")) == NULL) {
+		error_fatalsys ("Unable to open %s", fname);
 	}
 
-	fscanf (fp, "%d", &shmid);
-	fclose (fp);
+	if (fscanf (fp, "%d", &shmid) != 1) {
+		error_fatalsys ("Unable to read shared memory ID from %s, (errno=%d, %s).",
+				fname, errno, strerror(errno));
+	}
+
+	if (fclose (fp) != 0) {
+		error_fatalsys ("Unable to close shared memory ID file %s, (errno=%d, %s).",
+				fname, errno, strerror(errno));
+	}
 
 	if ((monitor = (struct monitor *) shmat (shmid, NULL, 0)) == NULL) {
-		error_fatalsys ("Unable to attach to shm block (errno=%d).",
-				errno);
+		error_fatalsys ("Unable to attach to shm block (errno=%d, %s).",
+				errno, strerror(errno));
 	}
 }
 
@@ -267,32 +273,28 @@ inp_acceptinjoth ()
 
 			{
 				onlinerec_t onl;
-
+				
 				if (usr_loadonlrec
 				    (buf->m.withack.sender, &onl)) {
 					char   *ack =
-					    &(buf->m.withack.
-					      msg[buf->m.withack.ackofs]);
+						&(buf->m.withack.
+						  msg[buf->m.withack.ackofs]);
 					int     qid = onl.injothqueue;
-
+					
 					if (strlen (ack)) {
 						buf->mtype = INJ_MESSAGE;
 						strcpy (buf->m.simple, ack);
-
+						
 						/* We don't really care if this goes through or not */
-						msgsnd (qid, buf,
-							strlen (buf->m.
-								simple) + 1,
-							IPC_NOWAIT);
+						msgsnd (qid, buf, strlen (buf->m.simple) + 1, IPC_NOWAIT);
 					}
 				}
 			}
 
 			break;
-
+			
 		default:
-			error_log ("Invalid injoth message type %d received",
-				   buf->mtype);
+			error_log ("Invalid injoth message type %d received", buf->mtype);
 		}
 	}
 
