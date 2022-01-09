@@ -157,5 +157,4 @@ class BBSDClient(object):
         payload.update(**kwargs)
         return await self.send("pub", t=topic, d=payload)
 
-
 # End of file.

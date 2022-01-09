@@ -326,7 +326,9 @@ class BBSSession(MegistosProgram):
             env["MEG_SPEED_BPS"] = self.bbsgetty.data.get("speed_bps", "") or ""
             env["MEG_CALLER_ID"] = self.bbsgetty.data.get("caller_id", "") or ""
             env["BAUD"] = env["MEG_SPEED_BPS"] # This is for legacy compatibility
-            os.execvpe("/bin/bash", ["bash", "--login"], env)
+            env["PATH"] = "."                  # TODO: Make this a config value
+            
+            os.execvpe("bbslogin.py", ["bbslogin"], env)
             # The child process never gets to this line.
 
         else:
