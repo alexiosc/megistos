@@ -184,15 +184,17 @@ class BBSSession(MegistosProgram):
 
             # Initialise other stuff
             self.init_channels()
-
+            self.init_module()
+            self.bbsd = BBSDClient(self.config, self.channel)
+ 
             loop.add_signal_handler(signal.SIGWINCH, self.terminal_resized)
 
             loop.add_reader(sys.stdin.fileno(), self.handle_fd_read, sys.stdin.fileno())
+            #loop.add_writer(sys.stdout.fileno(), self.handle_fd_write, sys.stdout.fileno())
 
             create_task(self.ticks(), loop=loop)
             create_task(self.session(), loop=loop)
 
-            #loop.add_writer(sys.stdout.fileno(), self.handle_fd_write, sys.stdout.fileno())
             #loop.run_until_complete(self.session())
             loop.run_forever()
 
@@ -255,13 +257,13 @@ class BBSSession(MegistosProgram):
 
 
     # def handle_fd_write(self, fd):
+    #     os.write ( self.output.get()
     #     pass
 
 
     async def session(self):
         # Connect to BBSD.
         try:
-            self.bbsd = BBSDClient(self.config, self.channel)
             await self.bbsd.connect()
 
             # We'll need a BBSGetty. Let it decide if it needs to do
@@ -322,13 +324,15 @@ class BBSSession(MegistosProgram):
             # Set up the environment
             env = os.environ
             env["PROMPT_SUBSHELL_LEVEL"] = "2"
+            env["MEG_DEV"] = self.args.dev
             env["MEG_CHANNEL"] = self.channel.name
             env["MEG_SPEED_BPS"] = self.bbsgetty.data.get("speed_bps", "") or ""
             env["MEG_CALLER_ID"] = self.bbsgetty.data.get("caller_id", "") or ""
             env["BAUD"] = env["MEG_SPEED_BPS"] # This is for legacy compatibility
-            env["PATH"] = "."                  # TODO: Make this a config value
+            #env["PATH"] = "."                  # TODO: Make this a config value
             
-            os.execvpe("bbslogin.py", ["bbslogin"], env)
+            os.execvpe(os.path.join(self.BINDIR, "bbslogin.py"), ["bbslogin"], env)
+            #os.execvpe("/bin/bash", ["/bin/bash"], env)
             # The child process never gets to this line.
 
         else:
