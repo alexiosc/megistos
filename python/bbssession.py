@@ -21,6 +21,7 @@ from megistos import config
 from megistos.bbsgetty import BBSGetty
 from megistos.bbsd_client import BBSDClient
 from megistos.task_logger import create_task
+from megistos.output import BBSS_SET_ENCODING, BBSS_TEXT, BBSS_BINARY
 
 class BBSSession(MegistosProgram):
     """
@@ -271,9 +272,9 @@ class BBSSession(MegistosProgram):
         with \033\001, and end with \001."""
 
         opcode, data = seq[2], seq[3:-1]
-        if opcode == 1:
-            # Set user encoding.
-
+        if opcode == BBSS_SET_ENCODING:
+            # Set user encoding and enable text mode.
+            self.binary = False
             enc = data.decode("us-ascii")
             if enc in ["utf-8", "utf8"]:
                 self.encoder = None
@@ -288,6 +289,13 @@ class BBSSession(MegistosProgram):
                     logging.error("Failed to find encoding '%s', disabling transcoding.", enc)
             return True
 
+        elif opcode == BBSS_TEXT:
+            self.binary = False
+            logging.debug("Setting text mode")
+
+        elif opcode == BBSS_BINARY:
+            self.binary = True
+            logging.debug("Setting binary mode")
 
 
     def handle_output_from_system(self, fd):

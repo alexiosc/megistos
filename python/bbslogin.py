@@ -147,7 +147,7 @@ class BBSLogin(MegistosProgram):
             # Initialise other stuff
             self.init_channels()
 
-            self.out.set_encoding("utf-8")
+            self.out.set_encoding("cp1253")
 
             self.bbsd = BBSDClient(self.config, self.channel)
 
