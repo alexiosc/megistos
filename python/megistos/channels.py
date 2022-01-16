@@ -38,10 +38,7 @@ class Channels(object):
             else:
                 config = megistos_config.read_config(config_fname, megistos_config.BBSD_CONFIG_SCHEMA)
 
-        try:
-            self.config = config
-        except Exception as e:
-            raise KeyError("parsed configuration is missing the 'channels' key")
+        self.config = config
 
 
     def dev_path_to_channel(self, name):

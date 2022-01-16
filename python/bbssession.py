@@ -10,6 +10,7 @@ import struct
 import sys
 import termios
 import tty
+import codecs
 
 
 import megistos.logging
@@ -42,6 +43,13 @@ class BBSSession(MegistosProgram):
         self.pty_fd = None
         self.done = False
         self._exitcode = 0
+
+        # Emulation state.
+        self.utf8_decoder = codecs.getincrementaldecoder("utf-8")()
+        self.encoder = None
+        self.binary = False
+        self.chatting = False
+        self.muted = False
 
         self.parse_command_line()
 
@@ -223,6 +231,7 @@ class BBSSession(MegistosProgram):
         if self.done:
             return
 
+        logging.debug(f"INPUT AVAILABLE: fd={fd}")
         try:
             data = os.read(fd, 8192)
 
@@ -248,12 +257,78 @@ class BBSSession(MegistosProgram):
             else:
                 os.write(self.pty_fd, data)
 
-        # TODO: FIX THIS.
-        if fd == 7:
-            sys.stdout.write(data.decode("utf-8"))
-            sys.stdout.flush()
-        # else:
-        #     logging.debug(f"INPUT AVAILABLE: fd={fd}, data=\"{data}\"")
+        # # TODO: FIX THIS.
+        # elif fd == 7:
+        #     sys.stdout.write(data.decode("utf-8"))
+        #     sys.stdout.flush()
+
+        else:
+            logging.debug(f"INPUT AVAILABLE: fd={fd}, data=\"{data}\"")
+
+
+    def handle_emu_control_sequence(self, seq):
+        """Handle an emud control sequence. The ``seq`` argument will start
+        with \033\001, and end with \001."""
+
+        opcode, data = seq[2], seq[3:-1]
+        if opcode == 1:
+            # Set user encoding.
+
+            enc = data.decode("us-ascii")
+            if enc in ["utf-8", "utf8"]:
+                self.encoder = None
+                logging.debug("Setting encoding to UTF-8 (i.e. no transcoding)")
+            else:
+                try:
+                    self.encoder = codecs.getencoder(enc)
+                    logging.debug("Setting encoding to %s", enc)
+                except LookupError:
+                    # Fall back to no transcoding
+                    self.encoder = None
+                    logging.error("Failed to find encoding '%s', disabling transcoding.", enc)
+            return True
+
+
+
+    def handle_output_from_system(self, fd):
+
+        """This reads output from the system (the server side of the session)
+        and transmits it to the user (the client side) and any
+        emulating (output-watching) sessions.
+        """
+
+        
+        if self.done: return
+        try:
+            data = os.read(fd, 8192)
+
+        except OSError as e:
+            if e.args[0] == 5:
+
+                # Restore original termios settings
+                termios.tcsetattr(0, termios.TCSAFLUSH, self.old_termios)
+
+                logging.info("Session ended (server side).")
+                create_task(self.shutdown(failure_msg="End of session"))
+                return
+
+        if data[0] == 27 and data[1] == 1 and data[-1] == 1:
+            if self.handle_emu_control_sequence(data):
+                return
+                # Maybe we got confused. This could be part of a
+                # binary exchange, so fall through here and allow it
+                # to be output.
+
+        if self.binary or self.encoder is None:
+            os.write(1, data)
+        else:
+            # The back-end always sends data in UTF-8.
+            chars = self.utf8_decoder.decode(data)
+            if chars:
+                # This is an incremental decoder, so wait till we have at least
+                # one fully decoded character.
+                data_out, num_bytes = self.encoder(chars, "replace")
+                os.write(1, data_out)
 
 
     # def handle_fd_write(self, fd):
@@ -340,7 +415,7 @@ class BBSSession(MegistosProgram):
 
         logging.debug(f"Child PID is {pid}, PTY FD is {fd}")
 
-        self._mainloop.add_reader(fd, self.handle_fd_read, fd)
+        self._mainloop.add_reader(fd, self.handle_output_from_system, fd)
         #self._mainloop.add_writer(fd, self.handle_fd_write, fd)
 
 
