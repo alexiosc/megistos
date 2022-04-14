@@ -15,7 +15,7 @@ class MegistosProgram:
     
     def __init__(self):
         self.PROGNAME = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-        logging.init(self.PROGNAME)
+        self.log = logging.init(self.PROGNAME)
 
 
     def init_module(self):
