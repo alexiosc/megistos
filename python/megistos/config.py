@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 import cerberus
-import logging
+import copy
+import glob
+import os
 import sys
 import yaml
+import logging
 
 
 BBSD_PORT = 8889
@@ -41,6 +44,13 @@ INIT_SCRIPT_SCHEMA = {
 }
 
 CONFIG_SCHEMA = {
+    'megistos': {
+        'type': 'dict',
+        'schema': {
+            'log_dir':      dict(type='string', default='.'),
+            'template_dir': dict(type='string', default='templates')
+        }
+    },
     'bbsd': {
         'type': 'dict',
         'schema': {
@@ -82,11 +92,45 @@ CONFIG_SCHEMA = {
 }
 
 
+# Loader found here:
+# https://stackoverflow.com/questions/528281/how-can-i-include-a-yaml-file-inside-another
+
+
+class CircularInheritanceError(Exception):
+    """Raised when a config item inheritance is circular."""
+    pass
+
+
+
+class ParentNotFoundError(Exception):
+    """Raised when a config item inherits from an unknown item."""
+    pass
+
+
+
+class LoaderWithInclude(yaml.SafeLoader):
+    """Loader with !include capability."""
+    def __init__(self, stream):
+        self._root = os.path.split(stream.name)[0]
+        super(LoaderWithInclude, self).__init__(stream)
+
+
+    def include(self, node):
+        """Process an !include directive."""
+        pattern = os.path.join(self._root, self.construct_scalar(node))
+
+        with open(filename) as f:
+            return yaml.load(f, LoaderWithInclude)
+
+
+LoaderWithInclude.add_constructor('!include', LoaderWithInclude.include)
+
+
 def read_config(filename, schema):
     logging.info(f"Reading configuration from {filename}")
     try:
         with open(filename, encoding="utf-8") as f:
-            config = yaml.safe_load(f)
+            config = yaml.load(f, LoaderWithInclude)
             v = cerberus.Validator(schema)
             if not v.validate(config):
                 logging.critical(f"YAML Configuration is invalid. Parser reports:")
@@ -106,6 +150,86 @@ def read_config(filename, schema):
         logging.critical(msg, exc_info=e)
         logging.exception(f"Failed to read config file {filename}", exc_info=e)
         raise
+
+
+
+def process_config_inheritance(name, collection: dict, inherit_key="inherit", seen=None):
+    """Process inheritance in configuration values. Modifies ``collection`` by
+    adding inherited keys and deleting the ``inherit_name`` key.
+
+    Raises KeyError if ``name`` is not found in ``collection``.
+
+    Raises CircularInheritanceError if circular inheritance is detected.
+
+    Raises ParentNotFoundError if the parent item could not be found.
+
+    >>> col = {}
+    >>> col["a"] = {"one": 1, "two": 2}
+    >>> col["b"] = {"inherit": "a", "three": 3}
+    >>> col["c"] = {"inherit": "a", "four": 4}
+    >>> col["d"] = {"inherit": "c", "five": 5}
+    >>> col["e"] = {"inherit": "e", "five": 5}
+    >>> col["f"] = {"inherit": "z", "six": 6}
+
+    >>> process_config_inheritance("a", col)
+    {'one': 1, 'two': 2}
+
+    >>> process_config_inheritance("b", col)
+    {'one': 1, 'two': 2, 'three': 3}
+
+    >>> process_config_inheritance("c", col)
+    {'one': 1, 'two': 2, 'four': 4}
+
+    >>> process_config_inheritance("d", col)
+    {'one': 1, 'two': 2, 'four': 4, 'five': 5}
+
+    >>> col["b"]
+    {'one': 1, 'two': 2, 'three': 3}
+
+    >>> col["c"]
+    {'one': 1, 'two': 2, 'four': 4}
+
+    >>> process_config_inheritance("e", col)
+    Traceback (most recent call last):
+    ...
+    config.CircularInheritanceError: ('e', ['e'])
+
+    >>> process_config_inheritance("f", col)
+    Traceback (most recent call last):
+    ...
+    config.ParentNotFoundError: z
+
+    >>> process_config_inheritance("spam", col)
+    Traceback (most recent call last):
+    ...
+    KeyError: 'spam'
+    """
+
+    item = collection[name]     # Raise KeyError if not found.
+
+    # Terminating condition, no inheritance.
+    if inherit_key not in item:
+        return item
+
+    if seen is None:
+        seen = []
+
+    parent_name = item[inherit_key]
+    if parent_name not in collection:
+        raise ParentNotFoundError(parent_name)
+
+    if parent_name in seen:
+        raise CircularInheritanceError(parent_name, seen)
+
+    inherited_item = process_config_inheritance(parent_name, collection,
+                                                inherit_key=inherit_key,
+                                                seen=seen + [ name ])
+    new_item = copy.deepcopy(inherited_item)
+    new_item.update(item)
+    del new_item[inherit_key]
+    collection[name] = new_item
+
+    return new_item
 
 
 # End of file.
