@@ -307,12 +307,14 @@ class Terminal:
     y: int                 = field(default=0, repr=False, init=False)
     is_nonstop: bool       = field(default=False, repr=False, init=False)
 
-    # Horizontal formatting, alignment, etc. state.
+    # Formatting, alignment, etc. state.
     align: int             = field(default=ALIGN_LEFT, repr=False, init=False)
     block_mode: bool       = field(default=False, repr=False, init=False)
     max_width: int         = field(default=0xffffffff, repr=False, init=False)
     margin_left: int       = field(default=0, repr=False, init=False)
     margin_right: int      = field(default=0, repr=False, init=False)
+    margin_top: int        = field(default=0, repr=False, init=False)
+    margin_bottom: int     = field(default=0, repr=False, init=False)
     indent: int            = field(default=0, repr=False, init=False)
     wrapper                = field(default=None, repr=False, init=False)
     content_width: int     = field(default=79, repr=False, init=False)
@@ -565,8 +567,9 @@ class Terminal:
     ###############################################################################
 
     def start_block_formatting(self, align=None, min_width=None, max_width=None,
-                               margin_left=None,
-                               margin_right=None, indent=None):
+                               margin_left=None, margin_right=None,
+                               margin_top=None, margin_bottom=None,
+                               indent=None):
         """Start block-level formatting.
 
 
@@ -588,6 +591,12 @@ class Terminal:
         screen. 0 means characters can reach the last column (minus
         one, to avoid terminals and terminal emulators with broken
         last-column wrapping).
+
+        ``margin-top``: the number of blank lines before the
+        paragraph.
+
+        ``margin-bottom``: the number of blank lines after the
+        paragraph.
 
         The usable space is then the width of the terminal minus
         ``margin-left`` and ``margin-right``.
@@ -623,6 +632,10 @@ class Terminal:
             self.margin_left = margin_left
         if margin_right is not None:
             self.margin_right = margin_right
+        if margin_top is not None:
+            self.margin_top = margin_top
+        if margin_bottom is not None:
+            self.margin_bottom = margin_bottom
         # if border_left is not None:
         #     self.border_left = border_right
         # if border_right is not None:
@@ -673,6 +686,13 @@ class Terminal:
         if not wrapped_para:
             return
 
+        # Print the top margin.
+        blank_line = None
+        if self.margin_top >= 1:
+            blank_line = self.output_block_line([[0, ""]], last_line=True)
+            for n in range(self.margin_top - 1):
+                self.output_line(blank_line)
+
         # Single line paragraph.
         if len(wrapped_para) == 1:
             self.output_block_line(*wrapped_para[0], first_line=True, last_line=True)
@@ -684,11 +704,23 @@ class Terminal:
             self.output_block_line(length, line)
         self.output_block_line(*wrapped_para[-1], last_line=True)
 
+        # Print the bottom margin
+        if self.margin_bottom >= 1:
+            if blank_line is None:
+                blank_line = self.output_block_line(0, "", last_line=True)
+            for n in range(self.margin_bottom - 1):
+                self.output_line(blank_line)
+
         # Start a new paragraph.
         self.wrapper.start_paragraph()
 
         # TODO: This is here for testing only. Remove it.
         #print("***<inter-paragraph>")
+
+
+    def output_line(self, s):
+        sys.stdout.write(s + "\n\r")
+        return s
 
 
     def output_block_line(self, line_len, line, first_line=False, last_line=False):
@@ -735,7 +767,7 @@ class Terminal:
         #print("\033[0;7mSHIPOUT\033[0m", line, "\033[0m")
         # TODO: Make this write to the correct file descriptor
         # TODO: Handle page pausing here.
-        sys.stdout.write(output + "\n\r")
+        return self.output_line(output)
 
 
 

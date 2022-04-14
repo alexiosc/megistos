@@ -474,7 +474,8 @@ class FormatterEngine(HTMLParser):
         # Start formatting
         # args = filter_keys(attrs, "align", "maxwidth", "margin-left", "margin-right", "indent")
 
-        int_args = ["min_width", "max_width", "margin_left", "margin_right", "indent"]
+        int_args = ["min_width", "max_width", "margin_left", "margin_right", "indent",
+                    "margin_top", "margin_bottom"]
         #kwargs = attrs2kwargs(attrs, "align", *int_args, "border-left", "border-right")
         kwargs = attrs2kwargs(attrs, "align", *int_args)
 
