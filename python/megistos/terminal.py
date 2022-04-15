@@ -217,6 +217,7 @@ class TerminalInfo:
     can_turn_off_attrs: bool    = field(default=True)
 
     has_colour: bool            = field(default=None, init=False)
+
     has_ansi_colours: bool      = field(default=True)
     has_16_colours: bool        = field(default=False) # Actual 16 colours, not CGA style.
     has_256_colours: bool       = field(default=False)
@@ -244,6 +245,9 @@ class TerminalInfo:
                 continue
             if attr in config:
                 setattr(ti, attr, config[attr])
+
+        if ti.has_256_colours:
+            ti.palette = colour.XTERM256COLOUR_PALETTE
 
         if ti.palette is not None:
             ti.palette = [ colour.parse_colour(x) for x in ti.palette ]
@@ -470,6 +474,7 @@ class Terminal:
             newbg = self.handle_colour(bg, fg=False)
             if newbg != self.attrs['bg']:
                 sgr += newbg + ";"
+            self.attrs['bg'] = newbg
 
         if fg is not None:
             newfg = self.handle_colour(fg, fg=True)
