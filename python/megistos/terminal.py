@@ -26,7 +26,7 @@ BBSS_TEXT = 2
 BBSS_BINARY = 3
 
 
-@define(kw_only=True)
+@define(kw_only=True, slots=True)
 class Wrapper:
     """Wrap text incrementally, handle invisible characters and non-breaking
     strings, and provide lists of lines meant to be used by the box model
@@ -205,8 +205,9 @@ class Wrapper:
 
 
 
-@define(kw_only=True)
+@define(kw_only=True, slots=True)
 class TerminalInfo:
+
     """This is a tiny, naïve, specialised subset of terminfo, but a lot more
     readable."""
     cols: int                   = field(default=80)
@@ -262,25 +263,47 @@ class TerminalInfo:
         return ti
 
 
-@define(kw_only=True)
+@define(kw_only=True, slots=True)
 class Terminal:
     """This class represents the capabilities and state of the user's terminal. By
     keeping track of this information we can optimise control sequences, know
     when to pause at the end of the page, provide text wrapping, etc.
     """
 
-    DEFAULT_ATTRS = {
-        "fg": "37",             # Encoded as SGR fragments
-        "bg": "40",
-        "bold": False,
-        "dim": False,
-        "italic": False,
-        "underline": False,
-        "blink": False,
-        "inverse": False,
-        "invisible": False,
-        "strikethrough": False,
-    }
+    BOLD = 1
+    DIM = 2
+    ITALIC = 4
+    UNDERLINE = 8
+    BLINK = 16
+    INVERSE = 32
+    INVISIBLE = 64
+    STRIKETHROUGH = 128
+
+    # Attributes are stored as a compact 7-byte array:
+    #
+    # Index    Meaning
+    #     0    Foreground red (0..255)
+    #     1    Foreground green (0..255)
+    #     2    Foreground blue (0..255)
+    #     3    Background red (0..255)
+    #     4    Background green (0..255)
+    #     5    Background blue (0..255)
+    #     6    Attribute bitmap
+
+    DEFAULT_ATTRS = bytearray((0xaa, 0xaa, 0xaa, 0, 0, 0, 0))
+
+    # DEFAULT_ATTRS = {
+    #     "fg": "37",             # Encoded as SGR fragments
+    #     "bg": "40",
+    #     "bold": False,
+    #     "dim": False,
+    #     "italic": False,
+    #     "underline": False,
+    #     "blink": False,
+    #     "inverse": False,
+    #     "invisible": False,
+    #     "strikethrough": False,
+    # }
 
     ATTR_VALUES = {
         "bold":          [ 1, 22 ],
@@ -303,8 +326,10 @@ class Terminal:
     terminfo: TerminalInfo = field(repr=False)
 
     # Terminal attribtues and colours, style stack
-    attrs: dict            = field(default=copy(DEFAULT_ATTRS), repr=False, init=False)
+    #attrs: dict            = field(default=copy(DEFAULT_ATTRS), repr=False, init=False)
+    attrs: bytearray       = field(default=copy(DEFAULT_ATTRS), repr=False, init=False)
     stack: list            = field(default=[], repr=False, init=False)
+    attrmask: int          = field(default=0, repr=False, init=False)
 
     # Cursor position
     x: int                 = field(default=0, repr=False, init=False)
@@ -329,18 +354,26 @@ class Terminal:
     def from_config(cls, name, config):
         """Create a terminal definition from a config file entry."""
         terminfo = TerminalInfo.from_config(config)
-        return cls(name=name, terminfo=terminfo)
+        self = cls(name=name, terminfo=terminfo)
+        return self
 
 
+    ###############################################################################
+    #
+    # COLOUR AND ATTRIBUTES
+    #
+    ###############################################################################
+
+    # TODO: reinstate this.
     #@functools.cache
-    def handle_colour(self, colspec, fg=False):
+    def rgb2sgr(self, colspec, fg=False):
         """Convert an (r,g,b) triplet to a terminal-native colour code, suitable for
         using in an SGR sequence."""
         if colspec == "":
             return ""
 
-        # Is the colspec already cooked? It is, if it's either a
-        # single integer (in a string), or a series of integers.
+        # Is the colspec already cooked? It is, if it's either a single integer
+        # (in a string), or a series of integers.
         try:
             if type(colspec) == str and int(colspec) >= 0:
                 return colspec
@@ -358,7 +391,7 @@ class Terminal:
         # Look for the closest colour in our palette.
         index, rgb = colour.rgb_quantise(colspec, self.terminfo.palette)
 
-        # 256-colour terminals
+        # 256-colour terminals.
         if self.terminfo.has_256_colours and index < 256:
             if fg:
                 return "38;5;" + str(index)
@@ -387,9 +420,7 @@ class Terminal:
 
     def reset_attrs(self):
         """Reset attributes to their default."""
-        self.attrs['fg'] = ""            # Light grey text, default on ANSI.
-        self.attrs['bg'] = ""            # Light grey text, default on ANSI.
-        self.attrs = copy(self.DEFAULT_ATTRS)
+        self.attrs[0:7] = self.DEFAULT_ATTRS
 
 
     def full_sgr(self):
@@ -410,16 +441,24 @@ class Terminal:
         self.stack.append(copy(self.attrs))
 
 
-    def pop_attr_state(self):
+    def pop_attr_state(self, reset=False):
         """Set the attribute state using a value retrieved from save_attr_state()"""
         try:
-            attrs = self.stack.pop()
-            return self.update_attrs(push=False, **attrs)
+            old_attrs = self.attrs
+            self.attrs = self.stack.pop()
+
+            sgr = self.get_sgr(reset, old_attrs, self.attrs)
+            return self.write_escape_sequence(sgr)
+
         except IndexError:
             pass
 
 
-    def update_attrs(self, push=True, reset=False, fg=None, bg=None, **kwargs):
+    def update_attrs(self, push=True, output=True, reset=False, fg=None,
+                     bg=None, bold=None, dim=None, italic=None, underline=None,
+                     blink=None, inverse=None, invisible=None,
+                     strikethrough=None):
+
         """Update terminal attributes based on what has been requested here. Arguments
         fg and bg should be provided as RGB triplets (0-255) per channel. These
         are quantised and converted to terminal-native colours. Features not
@@ -428,81 +467,160 @@ class Terminal:
         """
         # Nothing to do
         if not self.terminfo.has_escape_sequences:
-            return
+            return ""
 
         if push:
             self.push_attr_state()
 
         # If reset is set, reset all attributes to their defaults, update them
-        # from our keyword argument, and enable any specified here (leaving an
-        # attribute out means ‘off’).
+        # from our keyword arguments, and enable any specified here (leaving an
+        # attribute out means ‘off’ or ‘default’ for colours).
         if reset:
             self.reset_attrs()
-            if fg is not None and fg != "":
-                self.attrs['fg'] = self.handle_colour(fg, fg=True)
-            if bg is not None and bg != "":
-                self.attrs['bg'] = self.handle_colour(bg, fg=False)
-            for key in self.attrs:
-                attrs[key] = kwargs.get(key, False)
-            return self.full_sgr()
+            bold = bool(bold)
+            dim = bool(dim)
+            italic = bool(italic)
+            underline = bool(underline)
+            blink = bool(blink)
+            inverse = bool(inverse)
+            invisibile = bool(invisible)
+            strikethrough = bool(strikethrough)
 
-        sgr = "\033["
-        need_reset = False
+        old_attrs = self.attrs
+        ti = self.terminfo
 
-        # Update attributes from supplied keyword arguments, but only if we
-        # need to.
-        for key in self.attrs:
-            # Ignore missing features
-            if not getattr(self.terminfo, "has_" + key):
-                continue
-            flag = kwargs.get(key, None)
+        if fg is not None and ti.has_fg:
+            if type(fg) == tuple and len(fg) == 3:
+                self.attrs[0:3] = fg
+            else:
+                raise ValueError("(r,g,b) tuple expected for fg, got {} instead".format(fg))
 
-            if flag is True and not self.attrs[key]:
-                self.attrs[key] = True
-                sgr += str(self.ATTR_VALUES[key][0]) + ";"
+        if bg is not None and ti.has_bg:
+            if type(bg) == tuple and len(bg) == 3:
+                self.attrs[3:6] = bg
+            else:
+                raise ValueError("(r,g,b) tuple expected for bg, got {} instead".format(bg))
 
-            elif flag is False and self.attrs[key]:
-                self.attrs[key] = False
-                if self.terminfo.can_turn_off_attrs:
-                    sgr += str(self.ATTR_VALUES[key][1]) + ";"
+        def sgr_helper(flag, can_do, byte, bit):
+            if not can_do:
+                return
+            elif flag is True:
+                self.attrs[byte] |= bit
+            elif flag is False:
+                self.attrs[byte] &= (0xff ^ bit)
+
+        sgr_helper(bold,          ti.has_bold,          6, self.BOLD)
+        sgr_helper(dim,           ti.has_dim,           6, self.DIM)
+        sgr_helper(italic,        ti.has_italic,        6, self.ITALIC)
+        sgr_helper(underline,     ti.has_underline,     6, self.UNDERLINE)
+        sgr_helper(blink,         ti.has_blink,         6, self.BLINK)
+        sgr_helper(inverse,       ti.has_inverse,       6, self.INVERSE)
+        sgr_helper(invisible,     ti.has_invisible,     6, self.INVISIBLE)
+        sgr_helper(strikethrough, ti.has_strikethrough, 6, self.STRIKETHROUGH)
+
+        # So that's the attributes updated. Now, generate the SGR.
+        sgr = self.get_sgr(reset, old_attrs, self.attrs)
+        if sgr and output:
+            self.write_escape_sequence(sgr)
+        return sgr
+
+
+    def get_sgr(self, reset, old_attrs, attrs):
+        """Calculate and return an SGR to change the terminal state from old_attrs to
+        attrs using the minimum-length control string. If ``reset=True`` is
+        specified, the terminal state is reset first, and then all bits and
+        colours are set. This results in a longer SGR string, but guaranteed to
+        leave the terminal in the desired state.
+        """
+        ti = self.terminfo      # For convenience
+        sgr = ""
+
+        # Are we turning off an attribute on a terminal that can't do this? If
+        # so we need to force a full reset. To test if the old bitfield
+        # represents a superset of the new bitfield, we need to perform a
+        # binary OR. If the result is equal to the new value, not bits have
+        # been turned off. Example:
+        #
+        #
+        # old 0011011               0011011
+        # new 0011111               0011000
+        # OR  -------               -------
+        #     0011111 == new        0011011 != new
+        if (old_attrs[6] | attrs[6]) != attrs[6] and not ti.can_turn_off_attrs:
+            reset = True
+        
+        if reset:
+            old_attrs = self.DEFAULT_ATTRS
+            sgr += "0;"
+
+        else:
+            if old_attrs == attrs:
+                # No changes! Nice and easy, we don't even neen an SGR string!
+                return ""
+
+        # Get the foreground first. Changing foregrounds on ANSI.SYS terminals
+        # might require a forced full reset.
+        if old_attrs[0:3] != attrs[0:3]:
+            sgr_oldfg = self.rgb2sgr(old_attrs[0:3], fg=True)
+            sgr_newfg = self.rgb2sgr(attrs[0:3], fg=True)
+
+            # If the foreground SGR starts with 1;, it's for an ANSI-like
+            # terminal that can only access bright colours through
+            # bold. This also means that it can't reset attributes, so if
+            # we're going from a dark to a bright colour or vice vesa, a
+            # full reset is required.
+            if self.terminfo.has_ansi_colours and \
+               ((sgr_newfg[:2] == "1;" and sgr_oldfg[:2] != "1;") or \
+                (sgr_newfg[:2] != "1;" and sgr_oldfg[:2] == "1;")):
+                old_attrs = self.DEFAULT_ATTRS
+                if not sgr.startswith("0;"):
+                    sgr += "0;"
+            sgr += sgr_newfg + ";"
+
+        # Next, the background.
+        if old_attrs[3:6] != attrs[3:6]:
+            sgr += self.rgb2sgr(attrs[3:6], fg=False) + ";"
+
+        # Have any attributes changed?
+        if old_attrs[6] != attrs[6]:
+            def sgr_helper(byte, bit, sgr_on, sgr_off):
+                if old_attrs[byte] & bit == attrs[byte] & bit:
+                    # No change
+                    return ""
+                elif attrs[byte] & bit:
+                    # Turn it on
+                    return sgr_on + ";"
                 else:
-                    need_reset = True
+                    # Turn it off (we already know this terminal can do this)
+                    return sgr_off + ";"
 
-        # Get the colours first. Changing foregrounds on ANSI might require a
-        # full reset of all the colours.
-        if bg is not None and bg != "":
-            newbg = self.handle_colour(bg, fg=False)
-            if newbg != self.attrs['bg']:
-                sgr += newbg + ";"
-            self.attrs['bg'] = newbg
+            # Note, BOLD and DIM are mutually exclusive, so they're both turned
+            # off by the same code. (22 being ‘normal intensity’). Also, we
+            # don't add the code for bold if it's already been added (because,
+            # e.g. this is an ANSI terminal and we've selected a bright
+            # foreground colour).
+            bold_sgr = sgr_helper(6, self.BOLD, "1", "22")
+            if bold_sgr == "1;" and not (";1;" in sgr or sgr[:2] == "1;"):
+                sgr += bold_sgr
 
-        if fg is not None:
-            newfg = self.handle_colour(fg, fg=True)
+            # Similarly for code 22, to turn off sgr. Don't bother if we've
+            # already issued it above.
+            dim_sgr = sgr_helper(6, self.DIM, "2", "22")
+            if dim_sgr == "22;" and bold_sgr != "22;":
+                sgr += dim_sgr
+                
+            sgr += sgr_helper(6, self.ITALIC, "3", "23")
+            sgr += sgr_helper(6, self.UNDERLINE, "4", "24")
+            sgr += sgr_helper(6, self.BLINK, "5", "25")
+            sgr += sgr_helper(6, self.INVERSE, "7", "27")
+            sgr += sgr_helper(6, self.INVISIBLE, "8", "28")
+            sgr += sgr_helper(6, self.STRIKETHROUGH, "9", "29")
 
-            if newfg != self.attrs['fg']:
-                # If the foreground SGR starts with 1;, it's for an ANSI-like
-                # terminal that can only access bright colours through
-                # bold. This also means that it can't reset attributes, so if
-                # we're going from a dark to a bright colour or vice vesa, a
-                # full reset is required.
-                if (newfg[:2] == "1;" and self.attrs['fg'][:2] != "1;") or \
-                   (newfg[:2] != "1;" and self.attrs['fg'][:2] == "1;"):
-                    need_reset = True
-                else:
-                    sgr += newfg + ";"
+        if not sgr:
+            return ""
 
-            self.attrs['fg'] = newfg
-
-        # At this point, if need_reset is specified, we can just output all the
-        # attributes at once.
-        if need_reset:
-            self.full_sgr()
-            return
-
-        # If not, we can return the incremental SGR we constructed: but only if
-        # it's not empty.
-        if sgr[-1] != "[":
-            self.write_escape_sequence(sgr.strip(";") + "m")
+        # The last character of sgr will be ";", so strip it.
+        return "\033[" + sgr[:-1] + "m"
 
 
     def write_escape_sequence(self, s):

@@ -4,6 +4,9 @@ cerberus
 setuptools
 jinja2
 pyyaml
+babel
+scikit-image
+colormath
 
 # toml
 # beautifulsoup4>4.0.0

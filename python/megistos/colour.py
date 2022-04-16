@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+from colormath.color_conversions import convert_color
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_diff import delta_e_cie2000
+
+
 # The web-safe colours
 NAMED_COLOURS = {
     "aliceblue":             (240, 248, 255),
@@ -279,6 +284,12 @@ def parse_colour(col):
     >>> parse_colour("#336699")
     (51, 102, 153)
 
+    >>> parse_colour((51, 102, 153))
+    (51, 102, 153)
+
+    >>> parse_colour([51, 102, 153])
+    (51, 102, 153)
+
     """
     # Easy.
     if type(col) in (list, tuple) and len(col) == 3:
@@ -307,7 +318,40 @@ def parse_colour(col):
     raise ValueError("Failed to parse color '{}'".format(col))
 
 
+_lab_palette = []
+def set_palette(palette):
+    global _lab_palette
+    _lab_palette = [ convert_color(sRGBColor(r, g, b, is_upscaled=True), LabColor)
+                     for r, g, b in palette ]
+
+
 def rgb_quantise(col, palette):
+    """Find the closest matching colour in a palette.
+
+    This version uses colormath to get the distance of colours in LAB
+    space for a considerably more accurate quantisation.
+
+    """
+    global _lab_palette
+    if len(_lab_palette) != len(palette):
+        set_palette(palette)
+    
+    try:
+        colour = convert_color(sRGBColor(*col, is_upscaled=True), LabColor)
+    except ValueError as e:
+        raise RuntimeError("Invalid colour triplet '{}'".format(col)) from e
+
+    bestcol = None
+    mindist = 1e100
+    for i, palette_colour in enumerate(_lab_palette):
+        dist = delta_e_cie2000(colour, palette_colour)
+        if dist < mindist:
+            mindist = dist
+            bestcol = i, palette[i]
+    return bestcol
+
+
+def naive_rgb_quantise(col, palette):
     """Find the closest matching colour in a palette.
 
     This is not the most accurate way of doing this, but given we're not even

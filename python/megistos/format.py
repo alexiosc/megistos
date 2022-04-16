@@ -295,10 +295,9 @@ class FormatterEngine(HTMLParser):
     GLOBAL_BOOL_ATTRS = [ "reset", "bold", "dim", "italic", "underline",
                           "blink", "inverse", "invisible", "strikethrough" ]
     
-    def __init__(self, output_engine):
+    def __init__(self):
         HTMLParser.__init__(self)
         self.terminal = None
-        self.output_engine = output_engine
         self.tag_stack, self.style_stack = [], []
 
 
