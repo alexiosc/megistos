@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import functools
 from colormath.color_conversions import convert_color
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_diff import delta_e_cie2000
@@ -318,24 +319,23 @@ def parse_colour(col):
     raise ValueError("Failed to parse color '{}'".format(col))
 
 
+_rgb_palette = []
 _lab_palette = []
 def set_palette(palette):
+    global _rgb_palette
     global _lab_palette
+    _rgb_palette = palette
     _lab_palette = [ convert_color(sRGBColor(r, g, b, is_upscaled=True), LabColor)
                      for r, g, b in palette ]
 
-
-def rgb_quantise(col, palette):
+@functools.cache
+def rgb_quantise(col):
     """Find the closest matching colour in a palette.
 
     This version uses colormath to get the distance of colours in LAB
     space for a considerably more accurate quantisation.
 
     """
-    global _lab_palette
-    if len(_lab_palette) != len(palette):
-        set_palette(palette)
-    
     try:
         colour = convert_color(sRGBColor(*col, is_upscaled=True), LabColor)
     except ValueError as e:
@@ -347,7 +347,7 @@ def rgb_quantise(col, palette):
         dist = delta_e_cie2000(colour, palette_colour)
         if dist < mindist:
             mindist = dist
-            bestcol = i, palette[i]
+            bestcol = i, _rgb_palette[i]
     return bestcol
 
 

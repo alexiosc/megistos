@@ -253,6 +253,8 @@ class TerminalInfo:
         if ti.palette is not None:
             ti.palette = [ colour.parse_colour(x) for x in ti.palette ]
 
+        colour.set_palette(ti.palette)
+
         ti.has_colour = ti.has_ansi_colours or ti.has_16_colours or \
             ti.has_256_colours or ti.has_truecolour
 
@@ -389,7 +391,7 @@ class Terminal:
                 return "48;2;{};{};{}".format(*colspec)
 
         # Look for the closest colour in our palette.
-        index, rgb = colour.rgb_quantise(colspec, self.terminfo.palette)
+        index, rgb = colour.rgb_quantise(tuple(colspec))
 
         # 256-colour terminals.
         if self.terminfo.has_256_colours and index < 256:
@@ -486,7 +488,7 @@ class Terminal:
             invisibile = bool(invisible)
             strikethrough = bool(strikethrough)
 
-        old_attrs = self.attrs
+        old_attrs = copy(self.attrs)
         ti = self.terminfo
 
         if fg is not None and ti.has_fg:

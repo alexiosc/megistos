@@ -49,7 +49,9 @@ print("\n\nTesting Terminal class.\n")
 fe = megistos.format.FormatterEngine()
 #fe.load_config()
 
-fe.set_term("ansi")
+#fe.set_term("ansi")
+fe.set_term("256color")
+#fe.set_term("truecolor")
 fe.load_style("styles.yaml")
 term = fe.terminal
 
@@ -79,6 +81,7 @@ def attr_test(what, **kwargs):
 attr_test("Just Reset", reset=True)
 attr_test("Reset & bold", reset=True, bold=True)
 attr_test("Bold Red", bold=True, fg=(255,0,0))
+attr_test("Just Reset", reset=True)
 
 
 print("Testing inline styles.\n")
