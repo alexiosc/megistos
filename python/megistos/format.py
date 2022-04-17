@@ -316,7 +316,10 @@ class FormatterEngine(HTMLParser):
         except config.ParentNotFoundError as e:
             raise RuntimeError("Terminal '{}' (in an 'inherit' referece) not defined".format(e.args[0])) from e
 
-        self.terminal = Terminal.from_config(terminal_name, terminal)
+        try:
+            self.terminal = Terminal.from_config(terminal_name, terminal)
+        except Exception as e:
+            raise RuntimeError("Failed to configure terminal '{}': {}".format(terminal_name, e)) from e
     
     
     def error(self, msg):
