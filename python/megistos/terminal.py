@@ -219,21 +219,19 @@ class TerminalInfo:
 
     has_colour: bool            = field(default=None, init=False)
 
-    has_ansi_colours: bool      = field(default=True)
+    has_ansi_colours: bool      = field(default=True)  # CGA-style colours (8, bold=bright)
     has_16_colours: bool        = field(default=False) # Actual 16 colours, not CGA style.
     has_256_colours: bool       = field(default=False)
     has_truecolour: bool        = field(default=False)
     palette: list               = field(default=colour.CGA_PALETTE)
 
-    has_fg: bool                = field(default=True)
-    has_bg: bool                = field(default=True)
-    has_bold: bool              = field(default=True)
-    has_dim: bool               = field(default=True)
+    has_bold: bool              = field(default=False)
+    has_dim: bool               = field(default=False)
     has_italic: bool            = field(default=False)
-    has_underline: bool         = field(default=True)
-    has_blink: bool             = field(default=True)
-    has_inverse: bool           = field(default=True)
-    has_invisible: bool         = field(default=True)
+    has_underline: bool         = field(default=False)
+    has_blink: bool             = field(default=False)
+    has_inverse: bool           = field(default=False)
+    has_invisible: bool         = field(default=False)
     has_strikethrough: bool     = field(default=False)
 
 
@@ -247,20 +245,17 @@ class TerminalInfo:
             if attr in config:
                 setattr(ti, attr, config[attr])
 
-        if ti.has_256_colours:
-            ti.palette = colour.XTERM256COLOUR_PALETTE
-
         if ti.palette is not None:
-            ti.palette = [ colour.parse_colour(x) for x in ti.palette ]
-
-        colour.set_palette(ti.palette)
+            colour.set_palette(ti.palette)
+        else:
+            # Guess default palette based on other attributes
+            if ti.has_256_colours:
+                colour.set_palette(colour.XTERM256COLOUR_PALETTE)
+            elif ti.has_ansi_colours:
+                colour.set_palette(colour.CGA_PALETTE)
 
         ti.has_colour = ti.has_ansi_colours or ti.has_16_colours or \
             ti.has_256_colours or ti.has_truecolour
-
-        # These make looping through attributes easier
-        ti.has_fg = ti.has_colour
-        ti.has_bg = ti.has_colour
 
         return ti
 
@@ -355,7 +350,10 @@ class Terminal:
     @classmethod
     def from_config(cls, name, config):
         """Create a terminal definition from a config file entry."""
-        terminfo = TerminalInfo.from_config(config)
+        if name not in config:
+            raise ValueError("Undefined terminal '{}' (available terminals: {}).".format(
+                name, ", ".join(config.keys)))
+        terminfo = TerminalInfo.from_config(config[name])
         self = cls(name=name, terminfo=terminfo)
         return self
 
@@ -404,14 +402,16 @@ class Terminal:
         elif self.terminfo.has_16_colours and index < 16:
             base = [40, 30][fg]
             if index >= 8 and index < 16:
-                base += 60
+                # Bright colours start at 90 for fg, and 100 for bg, minus 8
+                # for the starting index.
+                return str(base + 52 + (index & 7))
             return str(base + index)
 
         # ANSI-style terminals (8 colours, bold makes foreground brighter)
         elif self.terminfo.has_ansi_colours and index < 16:
             base = [40, 30][fg]
             if fg and index > 7:
-                return "1;" + str(base + index)
+                return "1;" + str(base + (index & 7))
             # Silently convert bright backgrounds to their dark
             # equivalents. The colours might not match perfectly, but this is
             # what ANSI does anyway.
@@ -423,19 +423,6 @@ class Terminal:
     def reset_attrs(self):
         """Reset attributes to their default."""
         self.attrs[0:7] = self.DEFAULT_ATTRS
-
-
-    def full_sgr(self):
-        """Return an SGR for the whole attribute state. Include an attribute reset.
-        """
-        ti = self.terminfo
-        sgr = "\033["
-        for key in self.attrs:
-            if self.attrs.key and getattr(ti, "has_" + key):
-                sgr += str(self.ATTR_VALUES[key][0]) + ";"
-
-        # Strip off the trailing semicolon and add the 'm' (SGR sequence).
-        self.write_escape_sequence(sgr.rstrip(";") + "m")
 
 
     def push_attr_state(self):
@@ -491,13 +478,13 @@ class Terminal:
         old_attrs = copy(self.attrs)
         ti = self.terminfo
 
-        if fg is not None and ti.has_fg:
+        if fg is not None and ti.has_colour:
             if type(fg) == tuple and len(fg) == 3:
                 self.attrs[0:3] = fg
             else:
                 raise ValueError("(r,g,b) tuple expected for fg, got {} instead".format(fg))
 
-        if bg is not None and ti.has_bg:
+        if bg is not None and ti.has_colour:
             if type(bg) == tuple and len(bg) == 3:
                 self.attrs[3:6] = bg
             else:
@@ -537,6 +524,10 @@ class Terminal:
         ti = self.terminfo      # For convenience
         sgr = ""
 
+        # Is this terminal super-dumb?
+        if not ti.has_escape_sequences:
+            return ""
+
         # Are we turning off an attribute on a terminal that can't do this? If
         # so we need to force a full reset. To test if the old bitfield
         # represents a superset of the new bitfield, we need to perform a
@@ -562,31 +553,33 @@ class Terminal:
 
         # Get the foreground first. Changing foregrounds on ANSI.SYS terminals
         # might require a forced full reset.
-        if old_attrs[0:3] != attrs[0:3]:
-            sgr_oldfg = self.rgb2sgr(old_attrs[0:3], fg=True)
-            sgr_newfg = self.rgb2sgr(attrs[0:3], fg=True)
+        if ti.has_colour:
+            if old_attrs[0:3] != attrs[0:3]:
+                sgr_oldfg = self.rgb2sgr(old_attrs[0:3], fg=True)
+                sgr_newfg = self.rgb2sgr(attrs[0:3], fg=True)
 
-            # If the foreground SGR starts with 1;, it's for an ANSI-like
-            # terminal that can only access bright colours through
-            # bold. This also means that it can't reset attributes, so if
-            # we're going from a dark to a bright colour or vice vesa, a
-            # full reset is required.
-            if self.terminfo.has_ansi_colours and \
-               ((sgr_newfg[:2] == "1;" and sgr_oldfg[:2] != "1;") or \
-                (sgr_newfg[:2] != "1;" and sgr_oldfg[:2] == "1;")):
-                old_attrs = self.DEFAULT_ATTRS
-                if not sgr.startswith("0;"):
-                    sgr += "0;"
-            sgr += sgr_newfg + ";"
+                # If the foreground SGR starts with 1;, it's for an ANSI-like
+                # terminal that can only access bright colours through
+                # bold. This also means that it can't reset attributes, so if
+                # we're going from a bright colour to a dark one, a full reset
+                # is required.
+                if self.terminfo.has_ansi_colours and \
+                   sgr_newfg[:2] != "1;" and sgr_oldfg[:2] == "1;":
+                    old_attrs = self.DEFAULT_ATTRS
+                    if not sgr.startswith("0;"):
+                        sgr += "0;"
+                sgr += sgr_newfg + ";"
 
-        # Next, the background.
-        if old_attrs[3:6] != attrs[3:6]:
-            sgr += self.rgb2sgr(attrs[3:6], fg=False) + ";"
+            # Next, the background.
+            if old_attrs[3:6] != attrs[3:6]:
+                sgr += self.rgb2sgr(attrs[3:6], fg=False) + ";"
 
         # Have any attributes changed?
         if old_attrs[6] != attrs[6]:
-            def sgr_helper(byte, bit, sgr_on, sgr_off):
-                if old_attrs[byte] & bit == attrs[byte] & bit:
+            def sgr_helper(byte, bit, can_do, sgr_on, sgr_off):
+                if not can_do:
+                    return ""
+                elif old_attrs[byte] & bit == attrs[byte] & bit:
                     # No change
                     return ""
                 elif attrs[byte] & bit:
@@ -601,22 +594,22 @@ class Terminal:
             # don't add the code for bold if it's already been added (because,
             # e.g. this is an ANSI terminal and we've selected a bright
             # foreground colour).
-            bold_sgr = sgr_helper(6, self.BOLD, "1", "22")
+            bold_sgr = sgr_helper(6, self.BOLD, ti.has_bold, "1", "22")
             if bold_sgr == "1;" and not (";1;" in sgr or sgr[:2] == "1;"):
                 sgr += bold_sgr
 
             # Similarly for code 22, to turn off sgr. Don't bother if we've
             # already issued it above.
-            dim_sgr = sgr_helper(6, self.DIM, "2", "22")
+            dim_sgr = sgr_helper(6, self.DIM, ti.has_dim, "2", "22")
             if dim_sgr == "22;" and bold_sgr != "22;":
                 sgr += dim_sgr
                 
-            sgr += sgr_helper(6, self.ITALIC, "3", "23")
-            sgr += sgr_helper(6, self.UNDERLINE, "4", "24")
-            sgr += sgr_helper(6, self.BLINK, "5", "25")
-            sgr += sgr_helper(6, self.INVERSE, "7", "27")
-            sgr += sgr_helper(6, self.INVISIBLE, "8", "28")
-            sgr += sgr_helper(6, self.STRIKETHROUGH, "9", "29")
+            sgr += sgr_helper(6, self.ITALIC, ti.has_italic, "3", "23")
+            sgr += sgr_helper(6, self.UNDERLINE, ti.has_underline, "4", "24")
+            sgr += sgr_helper(6, self.BLINK, ti.has_blink, "5", "25")
+            sgr += sgr_helper(6, self.INVERSE, ti.has_inverse, "7", "27")
+            sgr += sgr_helper(6, self.INVISIBLE, ti.has_invisible, "8", "28")
+            sgr += sgr_helper(6, self.STRIKETHROUGH, ti.has_strikethrough, "9", "29")
 
         if not sgr:
             return ""
