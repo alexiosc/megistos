@@ -179,23 +179,43 @@ NAMED_COLOURS = {
 }
 
 
+# CGA_PALETTE = [
+#     (  0,   0,   0), # Black
+#     (170,   0,   0), # Red
+#     (  0, 170,   0), # Green
+#     (170,  85,   0), # Brown
+#     (  0,   0, 170), # Blue
+#     (170,   0, 170), # Magenta
+#     (  0, 170, 170), # Cyan
+#     (170, 170, 170), # Light Grey
+#     ( 85,  85,  85), # Dark Grey
+#     (255,  85,  85), # Bright red
+#     ( 85, 255,  85), # Bright Green
+#     (255, 255,  85), # Yellow
+#     ( 85,  85, 255), # Bright Blue
+#     (255,  85, 255), # Bright Magenta
+#     ( 85, 255, 255), # Bright Cyan
+#     (255, 255, 255), # White
+# ]
+
+
 CGA_PALETTE = [
-    (  0,   0,   0), # Black
-    (170,   0,   0), # Red
-    (  0, 170,   0), # Green
-    (170,  85,   0), # Brown
-    (  0,   0, 170), # Blue
-    (170,   0, 170), # Magenta
-    (  0, 170, 170), # Cyan
-    (170, 170, 170), # Light Grey
-    ( 85,  85,  85), # Dark Grey
-    (255,  85,  85), # Bright red
-    ( 85, 255,  85), # Bright Green
-    (255, 255,  85), # Yellow
-    ( 85,  85, 255), # Bright Blue
-    (255,  85, 255), # Bright Magenta
-    ( 85, 255, 255), # Bright Cyan
-    (255, 255, 255), # White
+    [ (  0,   0,   0) ],                   # Black
+    [ (170,   0,   0),  (32, 0, 0) ],      # Red
+    [ (  0, 170,   0),  (0, 32, 0) ],      # Green
+    [ (170,  85,   0),  (32, 32, 0) ],     # Brown
+    [ (  0,   0, 170),  (0, 0, 32) ],      # Blue
+    [ (170,   0, 170),  (32, 0, 32) ],     # Magenta
+    [ (  0, 170, 170),  (0, 32, 32) ],     # Cyan
+    [ (170, 170, 170),  (128, 128, 128) ], # Light Grey
+    [ ( 85,  85,  85),  (32, 32, 32) ],    # Dark Grey
+    [ (255,  85,  85),  (255, 0, 0 ) ],    # Bright Red
+    [ ( 85, 255,  85),  (0, 255, 0) ],     # Bright Green
+    [ (255, 255,  85),  (255, 255, 0) ],   # Yellow
+    [ ( 85,  85, 255),  (0, 0, 255 ) ],    # Bright Blue
+    [ (255,  85, 255),  (255, 0, 255 ) ],  # Bright Magenta
+    [ ( 85, 255, 255),  (0, 255, 255 ) ],  # Bright Cyan
+    [ (255, 255, 255) ],                   # White
 ]
 
 
@@ -268,26 +288,32 @@ XTERM256COLOUR_PALETTE = [
 
 
 def parse_colour(col):
-    """
-    
+    """Parse a colour designation in various formats, and return an ``(r,
+    g, b)`` triplet with values in the range 0–255.
+
+    Raise ``ValueError`` on parse errors or sanity checks.
+
+    You can use named colours registered in :meth:``NAMED_COLOURS``::
+
     >>> parse_colour("black")
     (0, 0, 0)
-
     >>> parse_colour("white")
     (255, 255, 255)
-
     >>> parse_colour("ltyellow")
     (255, 255, 85)
 
+    You can also use 12 and 24-bit X11-style triplets::
+
     >>> parse_colour("#369")
     (51, 102, 153)
-
     >>> parse_colour("#336699")
     (51, 102, 153)
 
+    And you can also use RGB triplets like the ones returned by this
+    function::
+
     >>> parse_colour((51, 102, 153))
     (51, 102, 153)
-
     >>> parse_colour([51, 102, 153])
     (51, 102, 153)
 
@@ -299,22 +325,23 @@ def parse_colour(col):
     # Try a named colour
     try:
         return NAMED_COLOURS[col.lower()]
+    except AttributeError:
+        raise ValueError("Failed to parse color '{}'".format(col))
     except KeyError:
         # No match. Let's try parsing an RGB triplet.
         pass
 
     # Parse an X11-style triplet
-    if col[0] == '#':
-        if len(col) == 7:
-            # Parse #RRGGBB
-            return (int(col[1:3], 16),
-                    int(col[3:5], 16),
-                    int(col[5:7], 16))
-        elif len(col) == 4:
-            # Parse #RGB
-            return (int(col[1], 16) * 17,
-                    int(col[2], 16) * 17,
-                    int(col[3], 16) * 17)
+    if len(col) == 7 and col[0] == '#':
+        # Parse #RRGGBB
+        return (int(col[1:3], 16),
+                int(col[3:5], 16),
+                int(col[5:7], 16))
+    elif len(col) == 4 and col[0] == '#':
+        # Parse #RGB
+        return (int(col[1], 16) * 17,
+                int(col[2], 16) * 17,
+                int(col[3], 16) * 17)
 
     raise ValueError("Failed to parse color '{}'".format(col))
 
@@ -324,9 +351,23 @@ _lab_palette = []
 def set_palette(palette):
     global _rgb_palette
     global _lab_palette
-    _rgb_palette = palette
-    _lab_palette = [ convert_color(sRGBColor(r, g, b, is_upscaled=True), LabColor)
-                     for r, g, b in palette ]
+
+    for index, colspec in enumerate(palette):
+        if type(colspec) in (tuple, list) and type(colspec[0]) in (tuple, list, str):
+            _rgb_palette.append(colspec[0])
+            for col in colspec:
+                _lab_palette.append((index, parse_colour(colspec[0]),
+                                     convert_color(sRGBColor(*col, is_upscaled=True), LabColor)))
+        elif type(colspec) in (tuple, list) and type(colspec[0]) == int:
+            _rgb_palette.append(colspec)
+            _lab_palette.append((index, parse_colour(colspec),
+                                 convert_color(sRGBColor(*colspec, is_upscaled=True), LabColor)))
+        else:
+            raise ValueError("Unable to parse palette")
+
+    # import pprint
+    # pprint.pprint(_lab_palette, width=200)
+
 
 @functools.cache
 def rgb_quantise(col):
@@ -343,35 +384,19 @@ def rgb_quantise(col):
 
     bestcol = None
     mindist = 1e100
-    for i, palette_colour in enumerate(_lab_palette):
-        dist = delta_e_cie2000(colour, palette_colour)
-        if dist < mindist:
-            mindist = dist
-            bestcol = i, _rgb_palette[i]
-    return bestcol
+    l, a, b = colour.lab_l, colour.lab_a, colour.lab_b
+    for i, rgbcol, palette_colour in _lab_palette:
+        # This is a LOT slower, and doesn't give perfect results anyway.
+        #dist = delta_e_cie2000(colour, palette_colour)
+        dist = (l - palette_colour.lab_l) ** 2 + \
+            (a - palette_colour.lab_a) ** 2 + \
+            (b - palette_colour.lab_b) ** 2
 
-
-def naive_rgb_quantise(col, palette):
-    """Find the closest matching colour in a palette.
-
-    This is not the most accurate way of doing this, but given we're not even
-    bothering with the square root, it's VERY fast.
-    """
-    try:
-        r, g, b = col
-    except ValueError as e:
-        raise RuntimeError("Invalid colour triplet '{}'".format(col)) from e
-    bestcol = None
-    mindist = 200000            # > (3×255²)x
-    for i, (rp, gp, bp) in enumerate(palette):
-        dist = (r - rp) ** 2 + (g - gp) ** 2 + (b - bp) ** 2
-        # Given the limited palettes we're using, it's not impossiblye to find
-        # an exact match, and then we can end the search early.
         if dist == 0:
-            return i, (rp, gp, bp)
+            return i, rgbcol
         if dist < mindist:
             mindist = dist
-            bestcol = i, (rp, gp, bp)
+            bestcol = i, rgbcol
     return bestcol
 
 
