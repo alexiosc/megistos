@@ -350,10 +350,7 @@ class Terminal:
     @classmethod
     def from_config(cls, name, config):
         """Create a terminal definition from a config file entry."""
-        if name not in config:
-            raise ValueError("Undefined terminal '{}' (available terminals: {}).".format(
-                name, ", ".join(config.keys)))
-        terminfo = TerminalInfo.from_config(config[name])
+        terminfo = TerminalInfo.from_config(config)
         self = cls(name=name, terminfo=terminfo)
         return self
 

@@ -70,7 +70,7 @@ config = {
 def test_terminfo_init(capsys, tmpdir):
     """Test that terminfo structures are initialised correctly."""
     for term_name, term_config in config.items():
-        t = terminal.Terminal.from_config(term_name, config)
+        t = terminal.Terminal.from_config(term_name, config[term_name])
         for key, value in term_config.items():
             assert getattr(t.terminfo, key) == term_config[key], \
                 "Terminfo key {} not initiliased correctly!".format(key)
@@ -82,7 +82,7 @@ def test_sgr_really_dumb(capsys, tmpdir):
     strings no matter what we request.
     """
     
-    t = terminal.Terminal.from_config("really_dumb", config)
+    t = terminal.Terminal.from_config("really_dumb", config["really_dumb"])
     assert t.terminfo.has_escape_sequences == False
     t.reset_attrs()
     for reset in (True, False):
@@ -102,7 +102,7 @@ def test_sgr_dumb(capsys, tmpdir):
     strings no matter what we request.
     """
     
-    t = terminal.Terminal.from_config("dumb", config)
+    t = terminal.Terminal.from_config("dumb", config["dumb"])
     assert t.terminfo.has_escape_sequences == True
     assert t.terminfo.has_colour == False
     assert t.terminfo.has_bold == False
@@ -126,7 +126,7 @@ def test_cga(capsys, tmpdir):
     strings no matter what we request.
     """
     
-    t = terminal.Terminal.from_config("cga", config)
+    t = terminal.Terminal.from_config("cga", config["cga"])
     assert t.terminfo.has_escape_sequences == True
     assert t.terminfo.has_ansi_colours == True
     assert t.terminfo.has_colour == True
@@ -184,6 +184,13 @@ def test_cga(capsys, tmpdir):
     assert sgr(reset=False, fg=(0,255,255)) == "\033[1;36m"
     assert sgr(reset=False, fg=(0,192,192)) == "\033[36m"
     assert sgr(reset=False, fg=(0,128,128)) == "\033[36m"
+
+    assert sgr(reset=True, bold=True) == "\033[0;1m"
+    assert sgr(reset=True, dim=True) == "\033[0m" # CGA can't do dim!
+    assert sgr(reset=True, italic=True) == "\033[0m" # ...or italic
+    assert sgr(reset=True, underline=True) == "\033[0m" # (there's not much it CAN do, really)
+    assert sgr(reset=True, blink=True) == "\033[0;5m"   # But it can blink!
+    assert sgr(reset=True, inverse=True) == "\033[0;7m"   # And do reverse video.
 
 
 
