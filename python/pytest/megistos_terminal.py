@@ -185,6 +185,33 @@ def test_cga(capsys, tmpdir):
     assert sgr(reset=False, fg=(0,192,192)) == "\033[36m"
     assert sgr(reset=False, fg=(0,128,128)) == "\033[36m"
 
+
+
+text = """The licenses for most software and other practical works are
+designed to take away your freedom to share and change the works. By
+contrast, the GNU General Public License is intended to guarantee your
+freedom to share and change all versions of a program--to make sure it
+remains free software for all its users."""
+
+
+def test_wrapper(capsys, tmpdir):
+
+    for width in range(20, 200, 5):
+        w = terminal.Wrapper(indent=0, width=width)
+        w.start_paragraph()
+        w.write(text)
+        res = w.end_paragraph()
+
+        import pprint
+        pprint.pprint(res, width=200)
+        for linelen, line in res:
+            assert type(linelen) == int
+            assert linelen <= width
+
+        # Reconstruct the text and make sure it's still intacct
+        assert " ".join(x[1] for x in res) == text.replace("\n", " "), \
+            "Reconstructed text was not broken properly."
+
 if __name__ == "__main__":
     print("Run this with pytest!")
 
