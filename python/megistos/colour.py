@@ -354,14 +354,17 @@ def set_palette(palette):
 
     for index, colspec in enumerate(palette):
         if type(colspec) in (tuple, list) and type(colspec[0]) in (tuple, list, str):
-            _rgb_palette.append(colspec[0])
+            rgb = parse_colour(colspec[0])
+            _rgb_palette.append(rgb)
             for col in colspec:
-                _lab_palette.append((index, parse_colour(colspec[0]),
-                                     convert_color(sRGBColor(*col, is_upscaled=True), LabColor)))
-        elif type(colspec) in (tuple, list) and type(colspec[0]) == int:
-            _rgb_palette.append(colspec)
-            _lab_palette.append((index, parse_colour(colspec),
-                                 convert_color(sRGBColor(*colspec, is_upscaled=True), LabColor)))
+                col_rgb = parse_colour(col)
+                _lab_palette.append((index, rgb,
+                                     convert_color(sRGBColor(*col_rgb, is_upscaled=True), LabColor)))
+        elif type(colspec) in (tuple, list, str):
+            rgb = parse_colour(colspec)
+            _rgb_palette.append(rgb)
+            _lab_palette.append((index, rgb,
+                                 convert_color(sRGBColor(*rgb, is_upscaled=True), LabColor)))
         else:
             raise ValueError("Unable to parse palette")
 
