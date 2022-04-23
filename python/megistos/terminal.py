@@ -223,7 +223,7 @@ class TerminalInfo:
     has_16_colours: bool        = field(default=False) # Actual 16 colours, not CGA style.
     has_256_colours: bool       = field(default=False)
     has_truecolour: bool        = field(default=False)
-    palette: list               = field(default=colour.CGA_PALETTE)
+    palette: colour.Palette     = field(default=None)
 
     has_bold: bool              = field(default=False)
     has_dim: bool               = field(default=False)
@@ -246,13 +246,13 @@ class TerminalInfo:
                 setattr(ti, attr, config[attr])
 
         if ti.palette is not None:
-            colour.set_palette(ti.palette)
+            ti.palette = colour.Palette.from_list(ti.palette)
         else:
             # Guess default palette based on other attributes
             if ti.has_256_colours:
-                colour.set_palette(colour.XTERM256COLOUR_PALETTE)
-            elif ti.has_ansi_colours:
-                colour.set_palette(colour.CGA_PALETTE)
+                ti.palette = colour.Palette.from_list(colour.XTERM256COLOUR_PALETTE)
+            elif ti.has_ansi_colours or ti.has_16_colours:
+                ti.palette = colour.Palette.from_list(colour.CGA_PALETTE)
 
         ti.has_colour = ti.has_ansi_colours or ti.has_16_colours or \
             ti.has_256_colours or ti.has_truecolour
@@ -386,7 +386,7 @@ class Terminal:
                 return "48;2;{};{};{}".format(*colspec)
 
         # Look for the closest colour in our palette.
-        index, rgb = colour.rgb_quantise(tuple(colspec))
+        index, rgb = self.terminfo.palette.rgb_quantise(tuple(colspec))
 
         # 256-colour terminals.
         if self.terminfo.has_256_colours and index < 256:
@@ -401,7 +401,7 @@ class Terminal:
             if index >= 8 and index < 16:
                 # Bright colours start at 90 for fg, and 100 for bg, minus 8
                 # for the starting index.
-                return str(base + 52 + (index & 7))
+                return str(base + 60 + (index & 7))
             return str(base + index)
 
         # ANSI-style terminals (8 colours, bold makes foreground brighter)

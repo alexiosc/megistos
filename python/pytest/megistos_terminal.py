@@ -2,6 +2,7 @@
 
 import pytest
 import megistos.terminal as terminal
+import megistos.colour as colour
 
 # Simulate a standard CGA/EGA/VGA text mode
 config = {
@@ -25,6 +26,51 @@ config = {
         "has_bold": True, # not really, but it'sconvention to call it bold
         "has_blink": True,
         "has_inverse": True,
+    },
+    "vt220": {
+        "cols": 80, "rows": 25,
+        "has_escape_sequences": True,
+        "has_16_colours": True, 
+        "can_reposition_cursor": True,
+        "can_turn_off_attrs": True,
+        "has_bold": True, # not really, but it'sconvention to call it bold
+        "has_blink": True,
+        "has_italic": True,
+        "has_underline": True,
+        "has_blink": True,
+        "has_inverse": True,
+        "has_invisible": True,
+        "has_strikethrough": True,
+    },
+    "256colour": {
+        "cols": 80, "rows": 25,
+        "has_escape_sequences": True,
+        "has_256_colours": True, 
+        "can_reposition_cursor": True,
+        "can_turn_off_attrs": True,
+        "has_bold": True, # not really, but it'sconvention to call it bold
+        "has_blink": True,
+        "has_italic": True,
+        "has_underline": True,
+        "has_blink": True,
+        "has_inverse": True,
+        "has_invisible": True,
+        "has_strikethrough": True,
+    },
+    "truecolour": {
+        "cols": 80, "rows": 25,
+        "has_escape_sequences": True,
+        "has_truecolour": True, 
+        "can_reposition_cursor": True,
+        "can_turn_off_attrs": False,
+        "has_bold": True, # not really, but it'sconvention to call it bold
+        "has_blink": True,
+        "has_italic": True,
+        "has_underline": True,
+        "has_blink": True,
+        "has_inverse": True,
+        "has_invisible": True,
+        "has_strikethrough": True,
     },
     # This terminal sets everything to non-default values, so we can
     # check initialisation is happening on all properties.
@@ -65,6 +111,148 @@ config = {
         "has_strikethrough": False,
     }
 }
+
+
+def test_rgb2sgr_cga(capsys, tmpdir):
+    """Provide good coverage of rgb2sgr."""
+    t = terminal.Terminal.from_config("cga", config["cga"])
+    assert t.rgb2sgr("") == ""
+    assert t.rgb2sgr("\033[0;1;32m") == "\033[0;1;32m"
+    assert t.rgb2sgr("10") == "10"
+
+    assert t.rgb2sgr((0,0,0), fg=False) == "40"
+    assert t.rgb2sgr((255,0,0), fg=False) == "41"
+    assert t.rgb2sgr((0,255,0), fg=False) == "42"
+    assert t.rgb2sgr((255,255,0), fg=False) == "43"
+    assert t.rgb2sgr((0,0,255), fg=False) == "44"
+    assert t.rgb2sgr((255,0,255), fg=False) == "45"
+    assert t.rgb2sgr((0,255,255), fg=False) == "46"
+    assert t.rgb2sgr((255,255,255), fg=False) == "47"
+
+    assert t.rgb2sgr((0,0,0), fg=True) == "30"
+    assert t.rgb2sgr((255,0,0), fg=True) == "1;31"
+    assert t.rgb2sgr((0,255,0), fg=True) == "1;32"
+    assert t.rgb2sgr((255,255,0), fg=True) == "1;33"
+    assert t.rgb2sgr((0,0,255), fg=True) == "1;34"
+    assert t.rgb2sgr((255,0,255), fg=True) == "1;35"
+    assert t.rgb2sgr((0,255,255), fg=True) == "1;36"
+    assert t.rgb2sgr((255,255,255), fg=True) == "1;37"
+
+
+def test_rgb2sgr_vt220(capsys, tmpdir):
+    """Provide good coverage of rgb2sgr."""
+    colour._rgb_palette = []
+    colour._lab_palette = []
+    t = terminal.Terminal.from_config("vt220", config["vt220"])
+    assert len(t.terminfo.palette.rgb_palette) == 16
+
+    assert t.rgb2sgr("") == ""
+    assert t.rgb2sgr("\033[0;1;32m") == "\033[0;1;32m"
+    assert t.rgb2sgr("10") == "10"
+
+    assert t.rgb2sgr((0,0,0), fg=True) == "30"
+    assert t.rgb2sgr((128,0,0), fg=True) == "31"
+    assert t.rgb2sgr((0,128,0), fg=True) == "32"
+    assert t.rgb2sgr((128,128,0), fg=True) == "33"
+    assert t.rgb2sgr((0,0,128), fg=True) == "34"
+    assert t.rgb2sgr((128,0,128), fg=True) == "35"
+    assert t.rgb2sgr((0,128,128), fg=True) == "36"
+    assert t.rgb2sgr((128,128,128), fg=True) == "37"
+
+    assert t.rgb2sgr((0,0,0), fg=False) == "40"
+    assert t.rgb2sgr((128,0,0), fg=False) == "41"
+    assert t.rgb2sgr((0,128,0), fg=False) == "42"
+    assert t.rgb2sgr((128,128,0), fg=False) == "43"
+    assert t.rgb2sgr((0,0,128), fg=False) == "44"
+    assert t.rgb2sgr((128,0,128), fg=False) == "45"
+    assert t.rgb2sgr((0,128,128), fg=False) == "46"
+    assert t.rgb2sgr((128,128,128), fg=False) == "47"
+
+    assert t.rgb2sgr((85,85,85), fg=False) == "100"
+    assert t.rgb2sgr((255,0,0), fg=False) == "101"
+    assert t.rgb2sgr((0,255,0), fg=False) == "102"
+    assert t.rgb2sgr((255,255,0), fg=False) == "103"
+    assert t.rgb2sgr((0,0,255), fg=False) == "104"
+    assert t.rgb2sgr((255,0,255), fg=False) == "105"
+    assert t.rgb2sgr((0,255,255), fg=False) == "106"
+    assert t.rgb2sgr((255,255,255), fg=False) == "107"
+
+    assert t.rgb2sgr((85,85,85), fg=True) == "90"
+    assert t.rgb2sgr((255,0,0), fg=True) == "91"
+    assert t.rgb2sgr((0,255,0), fg=True) == "92"
+    assert t.rgb2sgr((255,255,0), fg=True) == "93"
+    assert t.rgb2sgr((0,0,255), fg=True) == "94"
+    assert t.rgb2sgr((255,0,255), fg=True) == "95"
+    assert t.rgb2sgr((0,255,255), fg=True) == "96"
+    assert t.rgb2sgr((255,255,255), fg=True) == "97"
+
+
+def test_rgb2sgr_256colour(capsys, tmpdir):
+    """Provide good coverage of rgb2sgr."""
+    t = terminal.Terminal.from_config("256colour", config["256colour"])
+    assert len(t.terminfo.palette.rgb_palette) == 256
+    
+    assert t.rgb2sgr("") == ""
+    assert t.rgb2sgr("\033[0;1;32m") == "\033[0;1;32m"
+    assert t.rgb2sgr("10") == "10"
+
+    assert t.rgb2sgr((0,0,0), fg=True) == "38;5;0"
+    assert t.rgb2sgr((128,0,0), fg=True) == "38;5;1"
+    assert t.rgb2sgr((0,128,0), fg=True) == "38;5;2"
+    assert t.rgb2sgr((128,128,0), fg=True) == "38;5;3"
+    assert t.rgb2sgr((0,0,128), fg=True) == "38;5;4"
+    assert t.rgb2sgr((128,0,128), fg=True) == "38;5;5"
+    assert t.rgb2sgr((0,128,128), fg=True) == "38;5;6"
+    assert t.rgb2sgr((0xc0, 0xc0, 0xc0), fg=True) == "38;5;7"
+
+    assert t.rgb2sgr((0,0,0), fg=False) == "48;5;0"
+    assert t.rgb2sgr((128,0,0), fg=False) == "48;5;1"
+    assert t.rgb2sgr((0,128,0), fg=False) == "48;5;2"
+    assert t.rgb2sgr((128,128,0), fg=False) == "48;5;3"
+    assert t.rgb2sgr((0,0,128), fg=False) == "48;5;4"
+    assert t.rgb2sgr((128,0,128), fg=False) == "48;5;5"
+    assert t.rgb2sgr((0,128,128), fg=False) == "48;5;6"
+    assert t.rgb2sgr((192,192,192), fg=False) == "48;5;7"
+
+    assert t.rgb2sgr((128,128,128), fg=False) == "48;5;8"
+    assert t.rgb2sgr((255,0,0), fg=False) == "48;5;9"
+    assert t.rgb2sgr((0,255,0), fg=False) == "48;5;10"
+    assert t.rgb2sgr((255,255,0), fg=False) == "48;5;11"
+    assert t.rgb2sgr((0,0,255), fg=False) == "48;5;12"
+    assert t.rgb2sgr((255,0,255), fg=False) == "48;5;13"
+    assert t.rgb2sgr((0,255,255), fg=False) == "48;5;14"
+    assert t.rgb2sgr((255,255,255), fg=False) == "48;5;15"
+
+    assert t.rgb2sgr((128,128,128), fg=True) == "38;5;8"
+    assert t.rgb2sgr((255,0,0), fg=True) == "38;5;9"
+    assert t.rgb2sgr((0,255,0), fg=True) == "38;5;10"
+    assert t.rgb2sgr((255,255,0), fg=True) == "38;5;11"
+    assert t.rgb2sgr((0,0,255), fg=True) == "38;5;12"
+    assert t.rgb2sgr((255,0,255), fg=True) == "38;5;13"
+    assert t.rgb2sgr((0,255,255), fg=True) == "38;5;14"
+    assert t.rgb2sgr((255,255,255), fg=True) == "38;5;15"
+
+    # Spot-test a few of the extra colours
+    assert t.rgb2sgr((0, 0x5f, 0), fg=True) == "38;5;22"
+    assert t.rgb2sgr((0, 0x87, 0xff), fg=True) == "38;5;33"
+    assert t.rgb2sgr((0xdf, 0xdf, 0), fg=True) == "38;5;184"
+    assert t.rgb2sgr((0xd7, 0, 0), fg=True) == "38;5;160"
+    assert t.rgb2sgr((0x87, 0xaf, 0xff), fg=True) == "38;5;111"
+    assert t.rgb2sgr((0x5f, 0xd7, 0x87), fg=True) == "38;5;78"
+
+
+def test_rgb2sgr_truecolour(capsys, tmpdir):
+    """Provide good coverage of rgb2sgr."""
+    t = terminal.Terminal.from_config("cga", config["cga"])
+    # Test true-colour support. soup
+
+    t = terminal.Terminal.from_config("truecolour", config["truecolour"])
+    assert t.rgb2sgr("") == ""
+    assert t.rgb2sgr("\033[0;1;32m") == "\033[0;1;32m"
+    assert t.rgb2sgr("10") == "10"
+    assert t.rgb2sgr((11,22,33), fg=True) == "38;2;11;22;33"
+    assert t.rgb2sgr((11,22,33), fg=False) == "48;2;11;22;33"
+    
 
 
 def test_terminfo_init(capsys, tmpdir):
@@ -137,6 +325,8 @@ def test_cga(capsys, tmpdir):
         t.reset_attrs()
         retval = t.update_attrs(push=False, output=False, **kwargs)
         return retval
+
+    assert sgr() == ""
 
     assert sgr(reset=True, fg=(170,170,170)) in ("\033[0;37m", "\033[0m")
     assert sgr(reset=True, fg=(255,0,0)) == "\033[0;1;31m"
