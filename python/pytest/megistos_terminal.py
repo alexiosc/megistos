@@ -450,17 +450,35 @@ def test_wrapper_invis(capsys, tmpdir):
 
 
 def test_wrapper_nobr(capsys, tmpdir):
-    # Control: a word exactly the width of the terminal.
-    w = terminal.Wrapper(indent=0, width=20)
+    for width in range(20, 45):
+        w = terminal.Wrapper(indent=0, width=width)
+        w.start_paragraph()
+        #        12345678901234567890
+        w.write("This is a test. ")
+        test = "No breaks here!"
+        w.write_nobr(test)
+        w.write(" End of test.")
+        res = w.end_paragraph()
+        wrapped = "/".join(x[1] for x in res)
+        assert "/" in wrapped
+        assert test in wrapped
+
+    # Non-break wrapping is best-effort. An unusually long no-break string will STILL be broken.
+    w = terminal.Wrapper(indent=0, width=10)
     w.start_paragraph()
-    #        12345678901234567890
-    w.write("This is a test. ")
-    test = "No breaks here!"
     w.write_nobr(test)
-    w.write(" End of test.")
     res = w.end_paragraph()
-    print(res)
-    assert "".join(x[1] for x in res) == "1234567890" * 3
+    wrapped = "/".join(x[1] for x in res)
+    assert wrapped == "No breaks/here!"
+
+    # But the breaking is as if this is a single word: there are no
+    # guarantees breaks will happen at word boundaries.
+    w = terminal.Wrapper(indent=0, width=8)
+    w.start_paragraph()
+    w.write_nobr(test)
+    res = w.end_paragraph()
+    wrapped = "/".join(x[1] for x in res)
+    assert wrapped == "No break/s here!"
 
 
 def test_wrapper_get_line_so_far(capsys, tmpdir):
@@ -510,6 +528,15 @@ def test_wrapper_internals(capsys, tmpdir):
     w.start_paragraph()
     w.write("This    is a test.")
     print(w.get_line_so_far_prefix(1000))
+
+    w.end_paragraph()
+
+    w.start_paragraph()
+    assert w.end_paragraph() == []
+
+    w.start_paragraph()
+    w.write(" " * 80)
+    assert w.end_paragraph() == []
     
 
 if __name__ == "__main__":

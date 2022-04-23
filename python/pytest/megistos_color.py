@@ -144,6 +144,10 @@ def test_set_palette(capsys, tmpdir):
     pal = colour.Palette.from_list(colour.CGA_PALETTE)
     assert pal.rgb_palette == cga_palette
 
+    # Check that the size of the palette is in repr(), just to
+    # increase test coverage. ;)
+    assert str(len(pal.rgb_palette)) in repr(pal)
+
     # These should fail.
     with pytest.raises(ValueError):
         colour.Palette.from_list(bad_palette1)
