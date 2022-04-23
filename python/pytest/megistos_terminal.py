@@ -537,7 +537,24 @@ def test_wrapper_internals(capsys, tmpdir):
     w.start_paragraph()
     w.write(" " * 80)
     assert w.end_paragraph() == []
+
+
+def test_terminal_writes(capsys, tmpdir):
+    t = terminal.Terminal.from_config("cga", config["cga"])
+    t.set_size(30, 25)
+    assert not t.should_pause()
+
+    # Try writes in line mode.
+    t.write("This is a test.")
+    assert capsys.readouterr().out == "This is a test."
+
+    t.write_escape_sequence("\033[1m")
+    t.write("This is another test.\n\n")
+    assert capsys.readouterr().out == "\033[1mThis is another test.\n\n"
+    assert t.x == 0
+    assert t.y == 3
     
+
 
 if __name__ == "__main__":
     print("Run this with pytest!")
