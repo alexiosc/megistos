@@ -392,15 +392,12 @@ remains free software for all its users."""
 
 
 def test_wrapper(capsys, tmpdir):
-
     for width in range(20, 200, 5):
         w = terminal.Wrapper(indent=0, width=width)
         w.start_paragraph()
         w.write(text)
         res = w.end_paragraph()
 
-        import pprint
-        pprint.pprint(res, width=200)
         for linelen, line in res:
             assert type(linelen) == int
             assert linelen <= width
@@ -408,6 +405,112 @@ def test_wrapper(capsys, tmpdir):
         # Reconstruct the text and make sure it's still intacct
         assert " ".join(x[1] for x in res) == text.replace("\n", " "), \
             "Reconstructed text was not broken properly."
+
+
+def test_wrapper_indent(capsys, tmpdir):
+    # Note, usage of indent here does NOT actually indent the string,
+    # it just accounts for the indent in the line breaks. The indent
+    # itself is added by the Terminal class when it prints the
+    # paragraph.
+    for indent in range(1, 10):
+        indent_str = " " * indent
+        for width in range(20, 200, 5):
+            w = terminal.Wrapper(width=width, indent=4)
+            w.start_paragraph()
+            w.write(text)
+            res = w.end_paragraph()
+    
+            for linelen, line in res:
+                assert type(linelen) == int
+                assert linelen <= width
+    
+            # Reconstruct the text and make sure it's still intacct
+            assert " ".join(x[1] for x in res) == text.replace("\n", " "), \
+                "Reconstructed text was not broken properly for indent={indent}, width={width}.".format(**locals())
+
+
+def test_wrapper_invis(capsys, tmpdir):
+    lines = text.split("\n")
+
+    for width in range(20, 200, 5):
+        w = terminal.Wrapper(indent=0, width=width)
+        w.start_paragraph()
+        for line in lines:
+            w.write(line)
+            w.write_escape_sequence("(invis)")
+        expected = "".join("{}(invis)".format(x) for x in lines)
+        res = w.end_paragraph()
+        for linelen, line in res:
+            assert type(linelen) == int
+            assert linelen <= width
+
+        # Reconstruct the text and make sure it's still intacct
+        assert " ".join(x[1] for x in res) == expected, \
+            "Reconstructed text was not broken properly for term width {}".format(width)
+
+
+def test_wrapper_nobr(capsys, tmpdir):
+    # Control: a word exactly the width of the terminal.
+    w = terminal.Wrapper(indent=0, width=20)
+    w.start_paragraph()
+    #        12345678901234567890
+    w.write("This is a test. ")
+    test = "No breaks here!"
+    w.write_nobr(test)
+    w.write(" End of test.")
+    res = w.end_paragraph()
+    print(res)
+    assert "".join(x[1] for x in res) == "1234567890" * 3
+
+
+def test_wrapper_get_line_so_far(capsys, tmpdir):
+    w = terminal.Wrapper(indent=0, width=80)
+    w.start_paragraph()
+    w.write("12345")
+    w.write("67890")
+    assert w.get_line_so_far() == "1234567890"
+    assert w.get_line_so_far_prefix(100) == 10
+    assert w.get_line_so_far_prefix(12) == 10
+    assert w.get_line_so_far_prefix(10) == 10
+    assert w.get_line_so_far_prefix(9) == 9
+    assert w.get_line_so_far_prefix(5) == 5
+    assert w.get_line_so_far_prefix(1) == 1
+    with pytest.raises(ValueError):
+        w.get_line_so_far_prefix(0)
+    with pytest.raises(ValueError):
+        w.get_line_so_far_prefix(-1)
+    with pytest.raises(TypeError):
+        w.get_line_so_far_prefix("foo")
+
+    w.start_paragraph()
+    w.write("12345")
+    w.write_escape_sequence("(foobar)")
+    w.write("67890")
+    assert w.get_line_so_far() == "12345(foobar)67890"
+    for x in range(18, 40):
+        assert w.get_line_so_far_prefix(x) == 18
+    # These only get the first visible string (12345)
+    for x in range(1, 6):
+        assert w.get_line_so_far_prefix(x) == x
+    # These get the first visible string, the invisible 8-char string,
+    # plus parts of the second string.
+    for x in range(7, 10):
+        assert w.get_line_so_far_prefix(x) == x + 8
+
+    with pytest.raises(ValueError):
+        w.get_line_so_far_prefix(0)
+    with pytest.raises(ValueError):
+        w.get_line_so_far_prefix(-1)
+    with pytest.raises(TypeError):
+        w.get_line_so_far_prefix("foo")
+
+
+def test_wrapper_internals(capsys, tmpdir):
+    w = terminal.Wrapper(indent=0, width=20)
+    w.start_paragraph()
+    w.write("This    is a test.")
+    print(w.get_line_so_far_prefix(1000))
+    
 
 if __name__ == "__main__":
     print("Run this with pytest!")

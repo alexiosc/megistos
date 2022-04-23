@@ -85,6 +85,9 @@ class Wrapper:
         """Return the number of elements of line_so_far that make up at most numchars.
         """
         prefix = 0
+        num_elems = 0
+        if numchars < 1:
+            raise ValueError("numchars must be a positive integer, got {} instead".format(numchars))
         for num_elems, x in enumerate(self.line_so_far, 1):
             if x[0]:
                 prefix += 1
@@ -105,6 +108,8 @@ class Wrapper:
 
         len0 = len(complete_line)
         complete_line = complete_line.rstrip()
+        # write_nobr() adds U+00A0 NO-BREAK SPACE. Turn those back to spaces.
+        complete_line = complete_line.translate({0xa0: " "})
         charlen -= len0 - len(complete_line)
 
         self.lines.append((charlen, complete_line))
@@ -171,7 +176,7 @@ class Wrapper:
 
 
     def write_nobr(self, s):
-        self._write(self._munge_whitespace(s).translate({" ": "\xa0"}))
+        self._write(self._munge_whitespace(s).translate({32: "\xa0"}))
 
 
     def write_escape_sequence(self, s):
