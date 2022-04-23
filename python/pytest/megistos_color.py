@@ -8,6 +8,9 @@ def test_colours(capsys, tmpdir):
     """
     Test colour utilities
     """
+    # p = colour.Palette.from_list(colour.CGA_PALETTE)
+    # assert len(p.rgb_palette) == 16
+
     # Test basic named colours
     assert colour.parse_colour("white") == (255, 255, 255)
     assert colour.parse_colour("WHITE") == (255, 255, 255)
@@ -49,16 +52,18 @@ def test_quantisation(capsys, tmpdir):
     Test colours are quantised as we expect.
     """
 
-    colour.set_palette(colour.CGA_PALETTE)
-    assert colour.rgb_quantise((0,0,0))       == (0, (0, 0, 0))
-    assert colour.rgb_quantise((96,0,0))      == (1, (170, 0, 0))
-    assert colour.rgb_quantise((180,85,85))   == (9, (255, 85, 85))
-    assert colour.rgb_quantise((255,32,32))   == (9, (255, 85, 85))
+    pal = colour.Palette.from_list(colour.CGA_PALETTE)
+    assert len(pal.rgb_palette) == 16
 
-    assert colour.rgb_quantise((64,64,64))    == (8, (85, 85, 85))
-    assert colour.rgb_quantise((128,128,128)) == (7, (170, 170, 170))
-    assert colour.rgb_quantise((255,255,255)) == (15, (255, 255, 255))
-    assert colour.rgb_quantise((255,255,0))   == (11, (255, 255, 85))
+    assert pal.rgb_quantise((0,0,0))       == (0, (0, 0, 0))
+    assert pal.rgb_quantise((96,0,0))      == (1, (170, 0, 0))
+    assert pal.rgb_quantise((180,85,85))   == (9, (255, 85, 85))
+    assert pal.rgb_quantise((255,32,32))   == (9, (255, 85, 85))
+
+    assert pal.rgb_quantise((64,64,64))    == (8, (85, 85, 85))
+    assert pal.rgb_quantise((128,128,128)) == (7, (170, 170, 170))
+    assert pal.rgb_quantise((255,255,255)) == (15, (255, 255, 255))
+    assert pal.rgb_quantise((255,255,0))   == (11, (255, 255, 85))
 
     # Test common approximations, likely to be used in stylesheets.
     approx = [
@@ -103,8 +108,60 @@ def test_quantisation(capsys, tmpdir):
     ]
 
     for colspec, name, retval in approx:
-        assert colour.rgb_quantise(colspec) == retval, \
+        assert pal.rgb_quantise(colspec) == retval, \
         "Should have used {} for {}".format(name, colspec)
+
+    with pytest.raises(ValueError):
+        pal.rgb_quantise(-1)
+
+
+
+def test_set_palette(capsys, tmpdir):
+    cga_palette = [
+        (  0,   0,   0), # Black
+        (170,   0,   0), # Red
+        (  0, 170,   0), # Green
+        (170,  85,   0), # Brown
+        (  0,   0, 170), # Blue
+        (170,   0, 170), # Magenta
+        (  0, 170, 170), # Cyan
+        (170, 170, 170), # Light Grey
+        ( 85,  85,  85), # Dark Grey
+        (255,  85,  85), # Bright red
+        ( 85, 255,  85), # Bright Green
+        (255, 255,  85), # Yellow
+        ( 85,  85, 255), # Bright Blue
+        (255,  85, 255), # Bright Magenta
+        ( 85, 255, 255), # Bright Cyan
+        (255, 255, 255), # White
+    ]
+
+    bad_palette1 = ["foo"]
+    bad_palette2 = [ [0,0,0], "foo" ]
+    bad_palette3 = [ (0, 0, 0), (0, 0, "foo" ) ]
+
+    # This should succeed.
+    pal = colour.Palette.from_list(colour.CGA_PALETTE)
+    assert pal.rgb_palette == cga_palette
+
+    # These should fail.
+    with pytest.raises(ValueError):
+        colour.Palette.from_list(bad_palette1)
+
+    with pytest.raises(ValueError):
+        colour.Palette.from_list(bad_palette2)
+
+    with pytest.raises(ValueError):
+        colour.Palette.from_list(bad_palette3)
+
+    with pytest.raises(ValueError):
+        colour.Palette.from_list("foo")
+
+    with pytest.raises(ValueError):
+        colour.Palette.from_list(None)
+
+    with pytest.raises(ValueError):
+        colour.Palette.from_list([1.5])
 
 
 if __name__ == "__main__":

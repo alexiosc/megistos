@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-import functools
 from colormath.color_conversions import convert_color
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_diff import delta_e_cie2000
+from attr import define, field
 
 
 # The web-safe colours
@@ -179,26 +179,6 @@ NAMED_COLOURS = {
 }
 
 
-# CGA_PALETTE = [
-#     (  0,   0,   0), # Black
-#     (170,   0,   0), # Red
-#     (  0, 170,   0), # Green
-#     (170,  85,   0), # Brown
-#     (  0,   0, 170), # Blue
-#     (170,   0, 170), # Magenta
-#     (  0, 170, 170), # Cyan
-#     (170, 170, 170), # Light Grey
-#     ( 85,  85,  85), # Dark Grey
-#     (255,  85,  85), # Bright red
-#     ( 85, 255,  85), # Bright Green
-#     (255, 255,  85), # Yellow
-#     ( 85,  85, 255), # Bright Blue
-#     (255,  85, 255), # Bright Magenta
-#     ( 85, 255, 255), # Bright Cyan
-#     (255, 255, 255), # White
-# ]
-
-
 CGA_PALETTE = [
     [ (  0,   0,   0) ],                   # Black
     [ (170,   0,   0),  (32, 0, 0) ],      # Red
@@ -346,61 +326,87 @@ def parse_colour(col):
     raise ValueError("Failed to parse color '{}'".format(col))
 
 
-_rgb_palette = []
-_lab_palette = []
-def set_palette(palette):
-    global _rgb_palette
-    global _lab_palette
+@define(kw_only=True, slots=True)
+class Palette:
+    rgb_palette: list = field(default=None, repr=False)
+    lab_palette: list = field(default=None, repr=False)
+    _cache: dict = field(default=None, repr=False)
 
-    for index, colspec in enumerate(palette):
-        if type(colspec) in (tuple, list) and type(colspec[0]) in (tuple, list, str):
-            rgb = parse_colour(colspec[0])
-            _rgb_palette.append(rgb)
-            for col in colspec:
-                col_rgb = parse_colour(col)
-                _lab_palette.append((index, rgb,
-                                     convert_color(sRGBColor(*col_rgb, is_upscaled=True), LabColor)))
-        elif type(colspec) in (tuple, list, str):
-            rgb = parse_colour(colspec)
-            _rgb_palette.append(rgb)
-            _lab_palette.append((index, rgb,
-                                 convert_color(sRGBColor(*rgb, is_upscaled=True), LabColor)))
-        else:
-            raise ValueError("Unable to parse palette")
+    @classmethod
+    def from_list(cls, palette):
+        pal = cls()
+        pal.rgb_palette = []
+        pal.lab_palette = []
+        pal._cache = {}
+        
+        try:
+            for index, colspec in enumerate(palette):
+                # A palette list with quantisation ‘aliases’
+                if type(colspec) in (tuple, list) and type(colspec[0]) in (tuple, list, str):
+                    rgb = parse_colour(colspec[0])
+                    pal.rgb_palette.append(rgb)
+                    for col in colspec:
+                        col_rgb = parse_colour(col)
+                        lab = convert_color(sRGBColor(*col_rgb, is_upscaled=True), LabColor)
+                        pal.lab_palette.append((index, rgb, lab))
+                elif type(colspec) in (tuple, list, str):
+                    rgb = parse_colour(colspec)
+                    lab = convert_color(sRGBColor(*rgb, is_upscaled=True), LabColor)
+                    pal.rgb_palette.append(rgb)
+                    pal.lab_palette.append((index, rgb, lab))
+                else:
+                    raise TypeError
+    
+        except (ValueError, TypeError):
+            raise ValueError("unable to parse palette")
+    
+        # import pprint
+        # pprint.pprint(_lab_palette, width=200)
 
-    # import pprint
-    # pprint.pprint(_lab_palette, width=200)
+        return pal
 
 
-@functools.cache
-def rgb_quantise(col):
-    """Find the closest matching colour in a palette.
+    def __repr__(self):
+        return "Palette({} entries)".format(len(self.rgb_palette))
 
-    This version uses colormath to get the distance of colours in LAB
-    space for a considerably more accurate quantisation.
 
-    """
-    try:
-        colour = convert_color(sRGBColor(*col, is_upscaled=True), LabColor)
-    except ValueError as e:
-        raise RuntimeError("Invalid colour triplet '{}'".format(col)) from e
+    def rgb_quantise(self, col):
+        """Find the closest matching colour in a palette.
+    
+        This version uses colormath to get the distance of colours in LAB
+        space for a considerably more accurate quantisation.
+    
+        """
 
-    bestcol = None
-    mindist = 1e100
-    l, a, b = colour.lab_l, colour.lab_a, colour.lab_b
-    for i, rgbcol, palette_colour in _lab_palette:
-        # This is a LOT slower, and doesn't give perfect results anyway.
-        #dist = delta_e_cie2000(colour, palette_colour)
-        dist = (l - palette_colour.lab_l) ** 2 + \
-            (a - palette_colour.lab_a) ** 2 + \
-            (b - palette_colour.lab_b) ** 2
+        # Try a cached version first.
+        try:
+            return self._cache[col]
+        except KeyError:
+            pass
+        
+        try:
+            colour = convert_color(sRGBColor(*col, is_upscaled=True), LabColor)
+        except (TypeError, ValueError) as e:
+            raise ValueError("Invalid colour triplet '{}'".format(col)) from e
+    
+        bestcol = None
+        mindist = 1e100
+        l, a, b = colour.lab_l, colour.lab_a, colour.lab_b
+        for i, rgbcol, palette_colour in self.lab_palette:
+            # This is a LOT slower, and doesn't give perfect results anyway.
+            #dist = delta_e_cie2000(colour, palette_colour)
+            dist = (l - palette_colour.lab_l) ** 2 + \
+                (a - palette_colour.lab_a) ** 2 + \
+                (b - palette_colour.lab_b) ** 2
+    
+            if dist == 0:
+                return i, rgbcol
+            if dist < mindist:
+                mindist = dist
+                bestcol = i, rgbcol
 
-        if dist == 0:
-            return i, rgbcol
-        if dist < mindist:
-            mindist = dist
-            bestcol = i, rgbcol
-    return bestcol
+        self._cache[col] = bestcol
+        return bestcol
 
 
 # End of file.
