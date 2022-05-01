@@ -39,6 +39,9 @@ def justify(s, s_len, width):
     >>> justify(s, len(s), 35)
     'Lorem   ipsum   dolor   sit   amet.'
 
+    >>> justify(s, len(s), 31)
+    'Lorem  ipsum  dolor  sit  amet.'
+
     >>> justify(s, len(s), 30)
     'Lorem  ipsum dolor  sit  amet.'
 
@@ -50,9 +53,12 @@ def justify(s, s_len, width):
 
     >>> justify(s, len(s), 27)
     'Lorem ipsum dolor sit amet.'
-
+ 
     >>> justify(s, len(s), 1)
     'Lorem ipsum dolor sit amet.'
+
+    >>> justify("Spam", 4, 80)
+    'Spam'
 
     """
     parts = _justify_re.findall(s)

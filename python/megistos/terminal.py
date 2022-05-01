@@ -152,7 +152,7 @@ class Wrapper:
             self.line_so_far.append((True, c))
             self.pos += 1
 
-            if self.pos >= self.width:
+            if self.pos > self.width:
                 if self.last_space_pos > 0:
                     lsi = self.last_space_i
                     self.split_line_so_far(self.last_space_i, True)
@@ -342,6 +342,7 @@ class Terminal:
     align: int             = field(default=ALIGN_LEFT, repr=False, init=False)
     block_mode: bool       = field(default=False, repr=False, init=False)
     max_width: int         = field(default=0xffffffff, repr=False, init=False)
+    min_width: int         = field(default=20, repr=False, init=False)
     margin_left: int       = field(default=0, repr=False, init=False)
     margin_right: int      = field(default=0, repr=False, init=False)
     margin_top: int        = field(default=0, repr=False, init=False)
@@ -350,6 +351,7 @@ class Terminal:
     wrapper                = field(default=None, repr=False, init=False)
     content_width: int     = field(default=79, repr=False, init=False)
     centre_point: int      = field(default=38, repr=False, init=False)
+    right_point: int       = field(default=79, repr=False, init=False)
 
 
     @classmethod
@@ -419,7 +421,7 @@ class Terminal:
             # what ANSI does anyway.
             return str(base + (index & 7))
 
-        raise RuntimeError("Don't know how to handle colour {} on this terminal".format(index))
+        raise RuntimeError("Invalid colour {} (for this terminal)".format(index)) # pragma: no cover
 
 
     def reset_attrs(self):
@@ -778,13 +780,17 @@ class Terminal:
 
         # Cap to the max_width
         self.centre_point = min(self.content_width, self.terminfo.cols - 1)
+
+        # Calculate the right alignment point. Avoid the last column
+        # of the terminal.
+        self.right_point = min(self.terminfo.cols - 1,
+                               self.terminfo.cols - self.margin_right)
         self.content_width = min(self.content_width, self.max_width)
 
         # Make sure we don't use the full width of the terminal. This
         # is to avoid automatic wrap-arounds on terminals that don't
         # do it like the VT-100 did and modern terminal emulators do.
         self.content_width = min(self.content_width, self.terminfo.cols - 1)
-
 
     def stop_block_formatting(self):
         self.paragraph()
@@ -862,7 +868,7 @@ class Terminal:
             output = ml + parindent + line
 
         elif self.align == self.ALIGN_RIGHT:
-            pad = ' ' * (self.content_width - line_len)
+            pad = ' ' * (self.right_point - line_len)
             output = ml + pad + parindent + line
 
         elif self.align == self.ALIGN_CENTRE:
@@ -882,7 +888,7 @@ class Terminal:
 
         else:
             # Catch-all case, same as ALIGN_LEFT
-            output = ml + parindent + line
+            output = ml + parindent + line # pragma: no cover
 
         #print("\033[0;7mSHIPOUT\033[0m", line, "\033[0m")
         # TODO: Make this write to the correct file descriptor

@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+import sys
 import pytest
 import megistos.terminal as terminal
 import megistos.colour as colour
+import textwrap
 
 # Simulate a standard CGA/EGA/VGA text mode
 config = {
@@ -26,6 +28,28 @@ config = {
         "has_bold": True, # not really, but it'sconvention to call it bold
         "has_blink": True,
         "has_inverse": True,
+    },
+    "cga40": {
+        "cols": 40, "rows": 25,
+        "has_escape_sequences": True,
+        "has_ansi_colours": True,
+        "can_reposition_cursor": True,
+        "can_turn_off_attrs": False,
+        "has_bold": True, # not really, but it'sconvention to call it bold
+        "has_blink": True,
+        "has_inverse": True,
+    },
+    "custom_palette": {
+        "cols": 80, "rows": 25,
+        "has_escape_sequences": True,
+        "has_ansi_colours": True,
+        "can_reposition_cursor": True,
+        "can_turn_off_attrs": False,
+        "has_bold": True, # not really, but it'sconvention to call it bold
+        "has_blink": True,
+        "has_inverse": True,
+        "palette": [ "#000", "#f00", "#0f0", "#ff0", "#00f", "#f0f", "#0ff", "#fff" ]
+            
     },
     "vt220": {
         "cols": 80, "rows": 25,
@@ -244,7 +268,7 @@ def test_rgb2sgr_256colour(capsys, tmpdir):
 def test_rgb2sgr_truecolour(capsys, tmpdir):
     """Provide good coverage of rgb2sgr."""
     t = terminal.Terminal.from_config("cga", config["cga"])
-    # Test true-colour support. soup
+    # Test true-colour support.
 
     t = terminal.Terminal.from_config("truecolour", config["truecolour"])
     assert t.rgb2sgr("") == ""
@@ -260,9 +284,26 @@ def test_terminfo_init(capsys, tmpdir):
     for term_name, term_config in config.items():
         t = terminal.Terminal.from_config(term_name, config[term_name])
         for key, value in term_config.items():
+            if key in ["palette"]:
+                continue
             assert getattr(t.terminfo, key) == term_config[key], \
                 "Terminfo key {} not initiliased correctly!".format(key)
         
+
+def test_custom_palette(capsys, tmpdir):
+    """Test that custom palettes are handled properly."""
+    t = terminal.Terminal.from_config("custom_palette", config["custom_palette"])
+    assert len(t.terminfo.palette) == 8
+    assert t.terminfo.palette.rgb_palette[0] == (0,0,0)
+    assert t.terminfo.palette.rgb_palette[1] == (255,0,0)
+    assert t.terminfo.palette.rgb_palette[2] == (0,255,0)
+    assert t.terminfo.palette.rgb_palette[3] == (255,255,0)
+    assert t.terminfo.palette.rgb_palette[4] == (0,0,255)
+    assert t.terminfo.palette.rgb_palette[5] == (255,0,255)
+    assert t.terminfo.palette.rgb_palette[6] == (0,255,255)
+    assert t.terminfo.palette.rgb_palette[7] == (255,255,255)
+        
+
 
 def test_sgr_really_dumb(capsys, tmpdir):
     """Test attributes on REALLY dumb terminals. This terminal type has
@@ -359,6 +400,7 @@ def test_cga(capsys, tmpdir):
     assert sgr(reset=False, fg=(0,192,0)) == "\033[32m"
     assert sgr(reset=False, fg=(0,128,0)) == "\033[32m"
 
+
     assert sgr(reset=False, fg=(255,255,0)) == "\033[1;33m"
     assert sgr(reset=False, fg=(192,192,0)) == "\033[1;33m" # There's no dark yellow!
     assert sgr(reset=False, fg=(128,128,0)) == "\033[33m"
@@ -387,7 +429,7 @@ def test_cga(capsys, tmpdir):
 text = """The licenses for most software and other practical works are
 designed to take away your freedom to share and change the works. By
 contrast, the GNU General Public License is intended to guarantee your
-freedom to share and change all versions of a program--to make sure it
+freedom to share and change all versions of a program, to make sure it
 remains free software for all its users."""
 
 
@@ -449,8 +491,8 @@ def test_wrapper_invis(capsys, tmpdir):
             "Reconstructed text was not broken properly for term width {}".format(width)
 
 
-def test_wrapper_nobr(capsys, tmpdir):
-    for width in range(20, 45):
+def test_wrapper_nobr():
+    for width in range(15, 44):
         w = terminal.Wrapper(indent=0, width=width)
         w.start_paragraph()
         #        12345678901234567890
@@ -460,6 +502,8 @@ def test_wrapper_nobr(capsys, tmpdir):
         w.write(" End of test.")
         res = w.end_paragraph()
         wrapped = "/".join(x[1] for x in res)
+        # print(wrapped)
+        # sys.stdout.flush()
         assert "/" in wrapped
         assert test in wrapped
 
@@ -539,7 +583,7 @@ def test_wrapper_internals(capsys, tmpdir):
     assert w.end_paragraph() == []
 
 
-def test_terminal_writes(capsys, tmpdir):
+def test_terminal_character_writes(capsys, tmpdir):
     t = terminal.Terminal.from_config("cga", config["cga"])
     t.set_size(30, 25)
     assert not t.should_pause()
@@ -551,9 +595,209 @@ def test_terminal_writes(capsys, tmpdir):
     t.write_escape_sequence("\033[1m")
     t.write("This is another test.\n\n")
     assert capsys.readouterr().out == "\033[1mThis is another test.\n\n"
-    assert t.x == 0
-    assert t.y == 3
+    # TODO: Implement this
+    # assert t.x == 0
+    # assert t.y == 3
     
+
+def test_terminal_block_writes(capsys, tmpdir):
+    t = terminal.Terminal.from_config("cga", config["cga"])
+    assert not t.should_pause()
+
+    # The output should be nearly identical to the output of the
+    # textwrap module. One exception is that the Megistos wrapper
+    # doesn't use the last column of the screen to avoid broken comms
+    # software wrapping around. This is essentially *all* software for
+    # retro computers.
+    
+    expected = "".join(x + "\n\r" for x in textwrap.wrap(text, width=30))
+    t.start_block_formatting(align=t.ALIGN_LEFT, min_width=10, max_width=30)
+    t.write(text)
+    t.stop_block_formatting()
+    assert capsys.readouterr().out == expected
+    
+    
+def test_terminal_left_margin(capsys, tmpdir):
+    """Test varying the left margin."""
+    t = terminal.Terminal.from_config("cga", config["cga"])
+
+    for margin in range(2, 50):
+
+        # The terminal has a width of 80 characters, so the wrapping
+        # will be at max_width for margins < 30.
+        lines = textwrap.wrap(text, min(50, 80 - margin))
+
+        expected = "".join((" " * margin) + x + "\n\r" for x in lines)
+        
+        t.start_block_formatting(align=t.ALIGN_LEFT, min_width=10,
+                                 max_width=50,
+                                 margin_left=margin)
+        t.write(text)
+        t.stop_block_formatting()
+        assert capsys.readouterr().out == expected
+    
+
+def test_terminal_right_margin(capsys, tmpdir):
+    """Test varying the right margin."""
+    t = terminal.Terminal.from_config("cga", config["cga"])
+
+    for margin in range(2, 50):
+
+        # The terminal has a width of 80 characters, so the wrapping
+        # will be at max_width for margins < 30.
+        lines = textwrap.wrap(text, min(50, 80 - margin))
+
+        expected = "".join(x + "\n\r" for x in lines)
+        
+        t.start_block_formatting(align=t.ALIGN_LEFT, min_width=10,
+                                 max_width=50,
+                                 margin_right=margin)
+        t.write(text)
+        t.stop_block_formatting()
+        assert capsys.readouterr().out == expected
+    
+    
+def test_terminal_right_alignment(capsys, tmpdir):
+    """Test right alignment.
+
+    TERMINAL
+    
+    1                                      40
+    +--------------------------------------+
+         The licenses for most software and|
+      other practical works are designed to|
+        take away your freedom to share and|
+     change the works. By contrast, the GNU|
+      General Public License is intended to|
+        guarantee your freedom to share and|
+       change all versions of a program, to|
+     make sure it remains free software for|
+                             all its users.|
+                                           | ← 40th column not used!
+                                               (last column of terminal)
+
+    With max-width 30:
+
+    1        |<-----------30-------------->|40
+    +--------+-----------------------------|←40
+             The licenses for most software|
+              and other practical works are|
+                 designed to take away your|
+                freedom to share and change|
+                the works. By contrast, the|
+              GNU General Public License is|
+                 intended to guarantee your|
+                freedom to share and change|
+              all versions of a program, to|
+                  make sure it remains free|
+                software for all its users.|
+
+    """
+    t = terminal.Terminal.from_config("cga40", config["cga40"])
+    assert not t.should_pause()
+
+    expected = "".join(x.rjust(39) + "\n\r" for x in textwrap.wrap(text, width=39))
+    t.start_block_formatting(align=t.ALIGN_RIGHT, min_width=10, max_width=999)
+    t.write(text)
+    t.stop_block_formatting()
+    got = capsys.readouterr().out
+    # print("." * 40)
+    # print(got)
+    assert got == expected
+
+    expected = "".join(x.rjust(39) + "\n\r" for x in textwrap.wrap(text, width=30))
+    t.start_block_formatting(align=t.ALIGN_RIGHT, min_width=10, max_width=30)
+    t.write(text)
+    t.stop_block_formatting()
+    got = capsys.readouterr().out
+    print("." * 40)
+    print(("=" * 30).rjust(39))
+    print(expected)
+    sys.stdout.flush()
+    print(got)
+    assert got == expected
+
+    
+def test_terminal_centre_alignment(capsys, tmpdir):
+    """Test right alignment.
+
+    TERMINAL
+    
+    1                                      40
+    +--------------------------------------+
+         The licenses for most software and|
+      other practical works are designed to|
+        take away your freedom to share and|
+     change the works. By contrast, the GNU|
+      General Public License is intended to|
+        guarantee your freedom to share and|
+       change all versions of a program, to|
+     make sure it remains free software for|
+                             all its users.|
+                                           | ← 40th column not used!
+                                               (last column of terminal)
+
+    With max-width 30:
+
+    1        |<-----------30-------------->|40
+    +--------+-----------------------------|←40
+             The licenses for most software|
+              and other practical works are|
+                 designed to take away your|
+                freedom to share and change|
+                the works. By contrast, the|
+              GNU General Public License is|
+                 intended to guarantee your|
+                freedom to share and change|
+              all versions of a program, to|
+                  make sure it remains free|
+                software for all its users.|
+
+    """
+    t = terminal.Terminal.from_config("cga40", config["cga40"])
+    assert not t.should_pause()
+
+    expected = "".join(" " * ((t.terminfo.cols - len(x)) // 2) + x + "\n\r"
+                       for x in textwrap.wrap(text, width=30))
+    t.start_block_formatting(align=t.ALIGN_CENTRE, min_width=10, max_width=30)
+    t.write(text)
+    t.stop_block_formatting()
+    got = capsys.readouterr().out
+    print("." * 40)
+    print(got)
+    assert got == expected
+
+
+
+justified = \
+    "The  licenses  for  most  software  and\n\r" + \
+    "other practical  works are  designed to\n\r" + \
+    "take  away your  freedom  to share  and\n\r" + \
+    "change the works. By  contrast, the GNU\n\r" + \
+    "General Public  License is  intended to\n\r" + \
+    "guarantee  your  freedom to  share  and\n\r" + \
+    "change all  versions of  a program,  to\n\r" + \
+    "make sure it remains  free software for\n\r" + \
+    "all its users.\n\r"
+
+
+def test_terminal_justify_alignment(capsys, tmpdir):
+    """Test justification.
+
+    """
+    t = terminal.Terminal.from_config("cga40", config["cga40"])
+    assert not t.should_pause()
+
+    t.start_block_formatting(align=t.ALIGN_JUSTIFY, min_width=10, max_width=999)
+    t.write(text)
+    t.stop_block_formatting()
+    got = capsys.readouterr().out
+    print("." * 40)
+    print(got)
+    print("." * 40)
+    print(justified)
+    
+    assert got == justified
 
 
 if __name__ == "__main__":

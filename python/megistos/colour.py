@@ -370,6 +370,10 @@ class Palette:
         return "Palette({} entries)".format(len(self.rgb_palette))
 
 
+    def __len__(self):
+        return len(self.rgb_palette)
+
+
     def rgb_quantise(self, col):
         """Find the closest matching colour in a palette.
     

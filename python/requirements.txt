@@ -7,6 +7,8 @@ pyyaml
 babel
 scikit-image
 colormath
+pytest
+pytest-cov
 
 # toml
 # beautifulsoup4>4.0.0
